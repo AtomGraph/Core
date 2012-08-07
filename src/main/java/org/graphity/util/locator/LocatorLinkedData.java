@@ -71,14 +71,13 @@ public class LocatorLinkedData implements Locator
 	typeMap.put(WebContent.contentTypeN3Alt1, 0.9);
 	typeMap.put(WebContent.contentTypeN3Alt2, 0.9);	
 
-
-	typeMap.put(WebContent.contentTypeTriG, 0.9);
-	typeMap.put(WebContent.contentTypeNQuads, 0.9);
-	typeMap.put(WebContent.contentTypeTriGAlt, 0.9);
-	typeMap.put(WebContent.contentTypeNQuadsAlt, 0.9);
+	// these should temporarily have lower priority - current Jena dependency does not include readers
+	typeMap.put(WebContent.contentTypeTriG, 0.8);
+	typeMap.put(WebContent.contentTypeTriGAlt, 0.8);
+	typeMap.put(WebContent.contentTypeNQuads, 0.8);
+	typeMap.put(WebContent.contentTypeNQuadsAlt, 0.8);
 	
 	//typeMap.put(WebContent.contentTypeTextPlain, 0.7);
-	
 	//typeMap.put(WebContent.contentTypeXML, 0.5);
 	
 	QUALIFIED_TYPES = Collections.unmodifiableMap(typeMap);

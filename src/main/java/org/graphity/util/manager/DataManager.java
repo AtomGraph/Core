@@ -80,6 +80,7 @@ public class DataManager extends FileManager implements URIResolver
         return s_instance;
     }
 
+   // important: needs to match LocatorLinkedData.QUALIFIED_TYPES
    public static final Map<String, String> LANGS = new HashMap<String, String>() ;
     static
     {
@@ -88,7 +89,14 @@ public class DataManager extends FileManager implements URIResolver
         LANGS.put(WebContent.contentTypeTurtle2, WebContent.langTurtle);
         LANGS.put(WebContent.contentTypeTurtle3, WebContent.langTurtle);
         LANGS.put(WebContent.contentTypeNTriples, WebContent.langNTriple); // text/plain
-        LANGS.put(WebContent.contentTypeNTriplesAlt, WebContent.langNTriple) ;
+        LANGS.put(WebContent.contentTypeNTriplesAlt, WebContent.langNTriple);
+	LANGS.put(WebContent.contentTypeN3, WebContent.langN3);
+	LANGS.put(WebContent.contentTypeN3Alt1, WebContent.langN3);
+	LANGS.put(WebContent.contentTypeN3Alt2, WebContent.langN3);
+	LANGS.put(WebContent.contentTypeTriG, WebContent.langTriG);
+	LANGS.put(WebContent.contentTypeTriGAlt, WebContent.langTriG);
+	LANGS.put(WebContent.contentTypeNQuads, WebContent.langNQuads);
+	LANGS.put(WebContent.contentTypeNQuadsAlt, WebContent.langNQuads);
     }
     
     public static final List<String> IGNORED_EXT = new ArrayList<String>();
