@@ -16,6 +16,7 @@
  */
 package org.graphity.ldp.model.impl;
 
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
 import org.graphity.ldp.model.ContainerResource;
 
@@ -30,10 +31,10 @@ abstract public class ContainerResourceBase extends ResourceBase implements Cont
     private String orderBy = null;
     private Boolean desc = true;
     
-    public ContainerResourceBase(UriInfo uriInfo,
+    public ContainerResourceBase(UriInfo uriInfo, Request req,
 	Long limit, Long offset, String orderBy, Boolean desc)
     {
-	super(uriInfo);
+	super(uriInfo, req);
 	this.limit = limit;
 	this.offset = offset;
 	this.orderBy = orderBy;

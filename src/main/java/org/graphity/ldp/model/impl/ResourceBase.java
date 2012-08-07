@@ -17,6 +17,7 @@
 package org.graphity.ldp.model.impl;
 
 import javax.ws.rs.core.EntityTag;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.graphity.ldp.model.Resource;
@@ -29,10 +30,12 @@ import org.graphity.util.ModelUtils;
 abstract public class ResourceBase implements Resource
 {
     private UriInfo uriInfo = null;
+    private Request req = null;
 
-    public ResourceBase(UriInfo uriInfo)
+    public ResourceBase(UriInfo uriInfo, Request req)
     {
 	this.uriInfo = uriInfo;
+	this.req = req;
     }
     
     @Override
@@ -44,6 +47,10 @@ abstract public class ResourceBase implements Resource
     @Override
     public Response getResponse()
     {
+	// check if resource was modified and return 304 Not Modified if not
+	Response.ResponseBuilder rb = req.evaluatePreconditions(getEntityTag());
+	if (rb != null) return rb.build();
+
 	return Response.ok(getModel()).tag(getEntityTag()).build(); // uses ModelProvider
     }
 

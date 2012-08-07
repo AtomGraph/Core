@@ -19,6 +19,7 @@ package org.graphity.ldp.model.impl;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.Model;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
 import org.graphity.model.QueriedResource;
 import org.graphity.model.ResourceFactory;
@@ -37,23 +38,23 @@ abstract public class QueriedContainerResourceBase extends ContainerResourceBase
     private Query query = null;
     private Model model = null;
 
-    public QueriedContainerResourceBase(UriInfo uriInfo, String endpointUri, Query query,
+    public QueriedContainerResourceBase(UriInfo uriInfo, Request req, String endpointUri, Query query,
 	Long limit, Long offset, String orderBy, Boolean desc)
     {
-	super(uriInfo, limit, offset, orderBy, desc);
+	super(uriInfo, req, limit, offset, orderBy, desc);
 	this.endpointUri = endpointUri;
 	this.query = query;
 	log.debug("Endpoint URI: {} Query: {}", endpointUri, query);
     }
 
-    public QueriedContainerResourceBase(UriInfo uriInfo, String endpointUri, Query query)
+    public QueriedContainerResourceBase(UriInfo uriInfo, Request req, String endpointUri, Query query)
     {
-	this(uriInfo, endpointUri, query, null, null, null, null);
+	this(uriInfo, req, endpointUri, query, null, null, null, null);
     }
 
-    public QueriedContainerResourceBase(UriInfo uriInfo, String endpointUri, String uri)
+    public QueriedContainerResourceBase(UriInfo uriInfo, Request req, String endpointUri, String uri)
     {
-	this(uriInfo, endpointUri, QueryFactory.create("DESCRIBE <" + uri + ">"));
+	this(uriInfo, req, endpointUri, QueryFactory.create("DESCRIBE <" + uri + ">"));
     }
 
     @Override
