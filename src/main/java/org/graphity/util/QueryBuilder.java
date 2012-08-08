@@ -80,6 +80,11 @@ public class QueryBuilder
 	return newInstance().query(resource);
     }
 
+    public static QueryBuilder fromDescribe()
+    {
+	return newInstance().describe();
+    }
+
     protected QueryBuilder query(Resource resource)
     {
 	spinQuery = SPINFactory.asQuery(resource);
@@ -101,6 +106,11 @@ public class QueryBuilder
 	return this;
     }
 
+    public QueryBuilder describe()
+    {
+	return query(ModelFactory.createDefaultModel().createResource(SP.Describe));
+    }
+    
     public QueryBuilder construct(TripleTemplate template)
     {
 	Resource queryRes = ModelFactory.createDefaultModel().createResource(SP.Construct);
