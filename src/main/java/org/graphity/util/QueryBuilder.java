@@ -80,6 +80,16 @@ public class QueryBuilder
 	return newInstance().query(resource);
     }
 
+    public static QueryBuilder fromDescribe(Resource resultNode)
+    {
+	return newInstance().describe(resultNode);
+    }
+
+    public static QueryBuilder fromDescribe(RDFList resultNodes)
+    {
+	return newInstance().describe(resultNodes);
+    }
+
     public static QueryBuilder fromDescribe()
     {
 	return newInstance().describe();
@@ -106,6 +116,20 @@ public class QueryBuilder
 	return this;
     }
 
+    public QueryBuilder describe(Resource resultNode)
+    {
+	if (resultNode.canAs(RDFList.class))
+	    return describe(resultNode.as(RDFList.class));
+	else
+	    return describe(resultNode.getModel().createList(new RDFNode[]{resultNode}));
+    }
+
+    public QueryBuilder describe(RDFList resultNodes)
+    {
+	return query(ModelFactory.createDefaultModel().createResource(SP.Describe).
+		addProperty(SP.resultNodes, resultNodes));
+    }
+    
     public QueryBuilder describe()
     {
 	return query(ModelFactory.createDefaultModel().createResource(SP.Describe));
@@ -168,7 +192,6 @@ public class QueryBuilder
     }
 
     public QueryBuilder subQuery(Select select)
-    //public QueryBuilder subQuery(org.topbraid.spin.model.Query select)
     {
 	SubQuery subQuery = SPINFactory.createSubQuery(spinQuery.getModel(), select);
 	log.trace("SubQuery: {}", subQuery);
