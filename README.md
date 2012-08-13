@@ -26,8 +26,8 @@ It contains JAX-RS-compatible convenience classes for handling Linked Data reque
 * [`org.graphity.ldp`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp)
     * [`org.graphity.ldp.Application`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/Application.java): Base class for all LDP applications -- use for subclassing
     * [`org.graphity.ldp.model`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/model): LDP interfaces
-        * [`org.graphity.ldp.model.ContainerResource`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/model/ContainerResource): Base interface for Linked Data container resources
-        * [`org.graphity.ldp.model.Resource`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/model/Resource): Base interface for all Linked Data-serving JAX-RS resources
+        * [`org.graphity.ldp.model.ContainerResource`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/model/ContainerResource.java): Base interface for Linked Data container resources
+        * [`org.graphity.ldp.model.Resource`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/model/Resource.java): Base interface for all Linked Data-serving JAX-RS resources
         * [`org.graphity.ldp.model.impl`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/model/impl): Abstract LDP interface implementing base classes -- use for subclassing
     * [`org.graphity.ldp.provider`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/provider): Generic `Provider` classes for reading request/writing `Response`
         * [`org.graphity.ldp.provider.ModelProvider`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/provider/ModelProvider.java): Reads `Model` from request body/writes `Model` to `Response` body
@@ -45,7 +45,8 @@ They contain Jena- and JAX-RS-compatible convenience classes for reading Linked 
 * [`org.graphity`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity): Classes shared by all Graphity applications
     * [`org.graphity.adapter`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/adapter): [`DatasetAdapter`](http://jena.apache.org/documentation/javadoc/fuseki/org/apache/jena/fuseki/http/DatasetAdapter.html)-related wrappers for Model caching via Graph store protocol
     * [`org.graphity.model`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/model): Graphity model interfaces
-        * [`org.graphity.model.LinkedDataResource`](https://github.com/Graphity/graphity-browser/blob/master/src/main/java/org/graphity/model/LinkedDataResource.java): Prototypical RDF Resource interface
+        * [`org.graphity.model.LinkedDataResource`](https://github.com/Graphity/graphity-browser/blob/master/src/main/java/org/graphity/model/LinkedDataResource.java): Prototypical Linked Data Resource interface
+        * [`org.graphity.model.ResourceFactory`](https://github.com/Graphity/graphity-browser/blob/master/src/main/java/org/graphity/model/ResourceFactory.java): Factory creating client resource instances for remote Linked Data or SPARQL resources
         * [`org.graphity.model.impl`](https://github.com/Graphity/graphity-browser/blob/master/src/main/java/org/graphity/model/impl): Implementations of Graphity model interfaces
             * [`org.graphity.model.impl.LinkedDataResourceImpl`](https://github.com/Graphity/graphity-browser/blob/master/src/main/java/org/graphity/model/impl/LinkedDataResourceImpl.java): Base class implementation of `LinkedDataResource`
     * [`org.graphity.util`](https://github.com/Graphity/graphity-browser/blob/master/src/main/java/org/graphity/util): Utility classes
