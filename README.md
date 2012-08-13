@@ -18,12 +18,17 @@ You have the following options to install Graphity:
 Java code
 =========
 
-Linked Data platform
+Linked Data Platform
 --------------------
 
 It contains JAX-RS-compatible convenience classes for handling Linked Data requests; writing out Linked Data and SPARQL responses either raw or via XSLT; and more.
 
-* [`org.graphity.ldp`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp): 
+* [`org.graphity.ldp`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp)
+    * [`org.graphity.ldp.Application`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/Application.java): Base class for all LDP applications -- use for subclassing
+    * [`org.graphity.ldp.model`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/model): LDP interfaces
+        * [`org.graphity.ldp.model.ContainerResource`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/model/ContainerResource): Base interface for Linked Data container resources
+        * [`org.graphity.ldp.model.Resource`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/model/Resource): Base interface for all Linked Data-serving JAX-RS resources
+        * [`org.graphity.ldp.model.impl`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/model/impl): Abstract LDP interface implementing base classes -- use for subclassing
     * [`org.graphity.ldp.provider`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/provider): Generic `Provider` classes for reading request/writing `Response`
         * [`org.graphity.ldp.provider.ModelProvider`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/provider/ModelProvider.java): Reads `Model` from request body/writes `Model` to `Response` body
         * [`org.graphity.provider.ldp.RDFPostReader`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/provider/RDFPostReader.java): Reads `Model` from [RDF/POST](http://www.lsrn.org/semweb/rdfpost.html) requests
