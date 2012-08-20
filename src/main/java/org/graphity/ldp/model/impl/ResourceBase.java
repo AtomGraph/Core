@@ -37,6 +37,16 @@ abstract public class ResourceBase implements Resource
 	this.uriInfo = uriInfo;
 	this.req = req;
     }
+
+    public Request getRequest()
+    {
+	return req;
+    }
+
+    public UriInfo getUriInfo()
+    {
+	return uriInfo;
+    }
     
     @Override
     public final String getURI()

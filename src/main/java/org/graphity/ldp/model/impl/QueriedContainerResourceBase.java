@@ -60,7 +60,7 @@ abstract public class QueriedContainerResourceBase extends ContainerResourceBase
     @Override
     public Model getModel()
     {
-	if (model == null) model = ResourceFactory.getResource(endpointUri, query).getModel();
+	if (model == null) model = ResourceFactory.getResource(endpointUri, getQuery()).getModel();
 
 	return model;
     }

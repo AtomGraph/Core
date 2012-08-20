@@ -252,17 +252,7 @@ public class QueryBuilder
     
     public QueryBuilder orderBy(Variable var, boolean desc)
     {
-	log.debug("SPIN Query hasProperty(SP.orderBy): {}", spinQuery.hasProperty(SP.orderBy));
-	log.debug("SPIN Query Model size(): {}", spinQuery.getModel().size());
-	log.debug("spinQuery.getRequiredProperty(SP.orderBy): {}", spinQuery.getRequiredProperty(SP.orderBy));
-
 	spinQuery.removeAll(SP.orderBy); // does not have effect??
-	//spinQuery.getRequiredProperty(SP.orderBy).remove();
-	//spinQuery.getModel().removeAll(spinQuery, SP.orderBy, null);
-	
-	log.debug("SPIN Query hasProperty(SP.orderBy): {}", spinQuery.hasProperty(SP.orderBy));
-	log.debug("SPIN Query Model size(): {}", spinQuery.getModel().size());
-	log.debug("spinQuery.getRequiredProperty(SP.orderBy): {}", spinQuery.getRequiredProperty(SP.orderBy));
 		
 	Resource bnode = spinQuery.getModel().createResource().addProperty(SP.expression, var);
 	spinQuery.addProperty(SP.orderBy, spinQuery.getModel().createList(new RDFNode[]{bnode}));
@@ -277,22 +267,27 @@ public class QueryBuilder
 	return this;
     }
 
-    public QueryBuilder bind(String name, String value)
+    public QueryBuilder replaceVar(String name, String uri)
     {
 	//if (value.isURIResource())
 	{
-	    Resource var = getVariableByName(name);
+	    Resource var = getVarByName(name);
 	    if (var != null)
 	    {
 		var.removeAll(SP.varName);
-		ResourceUtils.renameResource(var, value);
+		ResourceUtils.renameResource(var, uri);
 	    }
 	}
 	
 	return this;
     }
     
-    protected Resource getVariableByName(String name)
+    public QueryBuilder replaceVar(String name, Resource resource)
+    {
+	return replaceVar(name, resource.getURI());
+    }
+
+    protected Resource getVarByName(String name)
     {
 	ResIterator it = spinQuery.getModel().listResourcesWithProperty(SP.varName, name);
 	if (it.hasNext()) return it.nextResource();

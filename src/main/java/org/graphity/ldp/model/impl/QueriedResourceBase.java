@@ -71,8 +71,8 @@ abstract public class QueriedResourceBase extends ResourceBase implements Querie
     {
 	if (model == null)
 	{
-	    if (queryModel != null) model = ResourceFactory.getResource(queryModel, query).getModel();
-	    else model = ResourceFactory.getResource(endpointUri, query).getModel();
+	    if (queryModel != null) model = ResourceFactory.getResource(queryModel, getQuery()).getModel();
+	    else model = ResourceFactory.getResource(endpointUri, getQuery()).getModel();
 	}
 
 	return model;
@@ -82,11 +82,6 @@ abstract public class QueriedResourceBase extends ResourceBase implements Querie
     public Query getQuery()
     {
 	return query;
-    }
-    
-    protected void setQuery(Query query)
-    {
-	this.query = query;
     }
 
 }

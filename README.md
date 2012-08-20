@@ -36,9 +36,9 @@ It contains JAX-RS-compatible convenience classes for handling Linked Data reque
         * [`org.graphity.ldp.provider.xslt`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/provider/xslt): Abstract base classes for XSLT transformation-based `Response` writers
 
 Core package
--------------
+------------
 
-They contain Jena- and JAX-RS-compatible convenience classes for reading Linked Data resources from URIs, SPARQL endpoints, and HTML forms; writing out Linked Data and SPARQL responses either raw or via XSLT; building SPARQL queries and XSLT transformations, and more.
+They contain Jena-compatible convenience classes for reading Linked Data resources from URIs, SPARQL endpoints, and HTML forms; writing out Linked Data and SPARQL responses either raw or via XSLT; building SPARQL queries and XSLT transformations, and more.
 
 *Basic version of Graphity core is also available in a [PHP version](https://github.com/Graphity/graphity-core).*
 
