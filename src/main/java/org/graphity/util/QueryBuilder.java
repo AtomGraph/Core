@@ -80,6 +80,11 @@ public class QueryBuilder
 	return newInstance().query(resource);
     }
 
+    public static QueryBuilder fromDescribe(String uri)
+    {
+	return newInstance().describe(uri);
+    }
+
     public static QueryBuilder fromDescribe(Resource resultNode)
     {
 	return newInstance().describe(resultNode);
@@ -116,6 +121,11 @@ public class QueryBuilder
 	return this;
     }
 
+    public QueryBuilder describe(String uri)
+    {
+	return describe(ModelFactory.createDefaultModel().createResource(uri));
+    }
+
     public QueryBuilder describe(Resource resultNode)
     {
 	if (resultNode.canAs(RDFList.class))
@@ -126,7 +136,7 @@ public class QueryBuilder
 
     public QueryBuilder describe(RDFList resultNodes)
     {
-	return query(ModelFactory.createDefaultModel().createResource(SP.Describe).
+	return query(resultNodes.getModel().createResource(SP.Describe).
 		addProperty(SP.resultNodes, resultNodes));
     }
     
