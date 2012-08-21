@@ -6,6 +6,17 @@ It can be used for publishing and analysis of open data, as well as import and i
 
 The platform supports standard RDF access methods such as Linked Data and SPARQL endpoints, and includes plugin mechanisms for importing file formats and APIs as RDF.
 
+Features
+--------
+
+* interfaces and base classes for rapid building of Linked Data webapps
+* high- and low-level access to remote Linked Data resources and SPARQL endpoints
+* providers for input and output of RDF data, either raw or via XSLT transformations
+* behind-the-scenes access of non-Linked Data resources via GRDDL
+* mapping and resolution of URIs to known schemas/ontologies
+* HTTP authentication
+* easy XSLT transformation and SPARQL query building
+
 Installation
 ============
 
@@ -85,11 +96,19 @@ GRDDL
     * [`atom-grddl.xsl`](https://github.com/Graphity/graphity-ldp/blob/master/src/main/resources/org/graphity/util/locator/grddl/atom-grddl.xsl): Atom to RDF transformation (_unfinished_)
     * [`twitter-grddl.xsl`](https://github.com/Graphity/graphity-ldp/blob/master/src/main/resources/org/graphity/util/locator/grddl/twitter-grddl.xsl): Twitter API to RDF transformation (_unfinished_)
 
+Papers & presentations
+======================
+
+* [Linked Data Success Stories](http://www.slideshare.net/graphity/linked-data-success-stories)
+* [European Data Forum 2012 poster](http://semantic-web.dk/posters/Graphity%20EDF2012.pdf)
+
+W3C ["Linked Enterprise Data Patterns" workshop](http://www.w3.org/2011/09/LinkedData/)
+
+* [Graphity position paper](http://www.w3.org/2011/09/LinkedData/ledp2011_submission_1.pdf)
+* [Graphity presentation](http://semantic-web.dk/presentations/LEDP2011.pdf)
+
 Tools
 =====
-
-Validators
-----------
 
 * [RDF/XML and Turtle validator](http://www.rdfabout.com/demo/validator/)
 * [SPARQL query validator](http://sparql.org/query-validator.html)
