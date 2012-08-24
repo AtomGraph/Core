@@ -23,6 +23,7 @@ import com.hp.hpl.jena.rdf.model.*;
 import com.hp.hpl.jena.sparql.syntax.ElementOptional;
 import com.hp.hpl.jena.util.ResourceUtils;
 import com.hp.hpl.jena.vocabulary.RDF;
+import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.topbraid.spin.arq.ARQ2SPIN;
@@ -184,10 +185,8 @@ public class QueryBuilder
 	//spinQuery.getWhereElements().add(element);
 	//spinQuery.getWhere().add(element);
 
-	RDFList where = spinQuery.getModel().createList(new RDFNode[]{element});
-
 	if (!spinQuery.hasProperty(SP.where))
-	    spinQuery.addProperty(SP.where, where);
+	    spinQuery.addProperty(SP.where, spinQuery.getModel().createList(new RDFNode[]{element}));
 	else
 	    spinQuery.getPropertyResourceValue(SP.where).
 		    as(RDFList.class).
@@ -229,30 +228,65 @@ public class QueryBuilder
 	return optional(SPINFactory.createOptional(spinQuery.getModel(), arq2spin.createElementList(optional)));
     }
 
-    public QueryBuilder limit(long limit)
+    public QueryBuilder filter(Filter filter)
     {
+	return where(filter);
+    }
+	
+    public QueryBuilder filter(Variable var, Locale lang)
+    {
+	log.trace("Setting FILTER param: LANG({})", lang.toLanguageTag());
+	
+	Resource langExpr = spinQuery.getModel().createResource().
+		addProperty(RDF.type, SP.getArgProperty("lang")).
+		addProperty(SP.getArgProperty(1), var);
+	
+	Resource eqExpr = spinQuery.getModel().createResource().
+		addProperty(RDF.type, SP.eq).addProperty(SP.getArgProperty(1), langExpr).
+		addLiteral(SP.getArgProperty(2), lang.toLanguageTag());
+
+	return filter(SPINFactory.createFilter(spinQuery.getModel(), eqExpr));
+    }
+
+    public QueryBuilder filter(String varName, Locale lang)
+    {
+	if (varName != null)
+	    return filter(SPINFactory.createVariable(spinQuery.getModel(), varName), lang);
+	
+	return this; // no way to add FILTER if varName is null
+    }
+    
+    public QueryBuilder limit(Long limit)
+    {
+	log.trace("Setting LIMIT param: {}", limit);
 	spinQuery.removeAll(SP.limit);
-	spinQuery.addLiteral(SP.limit, limit);
+	
+	if (limit != null) spinQuery.addLiteral(SP.limit, limit);
 	
 	return this;
     }
 
-    public QueryBuilder offset(long offset)
+    public QueryBuilder offset(Long offset)
     {
+	log.trace("Setting OFFSET param: {}", offset);
 	spinQuery.removeAll(SP.offset);
-	spinQuery.addLiteral(SP.offset, offset);
+	
+	if (offset != null) spinQuery.addLiteral(SP.offset, offset);
 	
 	return this;
     }
 
     public QueryBuilder orderBy(String varName)
     {	
-	return orderBy(SPINFactory.createVariable(spinQuery.getModel(), varName));
+	return orderBy(varName, false);
     }
 
-    public QueryBuilder orderBy(String varName, boolean desc)
-    {	
-	return orderBy(SPINFactory.createVariable(spinQuery.getModel(), varName), desc);
+    public QueryBuilder orderBy(String varName, Boolean desc)
+    {
+	if (varName != null)
+	    return orderBy(SPINFactory.createVariable(spinQuery.getModel(), varName), desc);
+	else    
+	    return orderBy((Variable)null, desc);
     }
 
     public QueryBuilder orderBy(Variable var)
@@ -260,17 +294,21 @@ public class QueryBuilder
 	return orderBy(var, false);
     }
     
-    public QueryBuilder orderBy(Variable var, boolean desc)
+    public QueryBuilder orderBy(Variable var, Boolean desc)
     {
-	spinQuery.removeAll(SP.orderBy); // does not have effect??
-		
-	Resource bnode = spinQuery.getModel().createResource().addProperty(SP.expression, var);
-	spinQuery.addProperty(SP.orderBy, spinQuery.getModel().createList(new RDFNode[]{bnode}));
-	
-	if (desc)
-	    bnode.addProperty(RDF.type, SP.Desc);
-	else
-	    bnode.addProperty(RDF.type, SP.Asc);
+	log.trace("Setting ORDER BY variable: {}", var);
+	spinQuery.removeAll(SP.orderBy);
+
+	if (var != null)
+	{
+	    Resource bnode = spinQuery.getModel().createResource().addProperty(SP.expression, var);
+	    spinQuery.addProperty(SP.orderBy, spinQuery.getModel().createList(new RDFNode[]{bnode}));
+
+	    if (desc)
+		bnode.addProperty(RDF.type, SP.Desc);
+	    else
+		bnode.addProperty(RDF.type, SP.Asc);
+	}
 	
 	log.debug("SPIN Query Model size(): {}", spinQuery.getModel().size());
 	
