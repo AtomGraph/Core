@@ -20,7 +20,6 @@ package org.graphity.util;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.*;
-import com.hp.hpl.jena.sparql.syntax.ElementOptional;
 import com.hp.hpl.jena.util.ResourceUtils;
 import com.hp.hpl.jena.vocabulary.RDF;
 import java.util.Locale;
@@ -62,11 +61,6 @@ public class QueryBuilder
     }
 
     public static QueryBuilder fromConstructTemplate(Resource subject, Resource predicate, RDFNode object)
-    {
-	return newInstance().construct(subject, predicate, object);
-    }
-
-    public static QueryBuilder fromConstructTemplate(String subject, String predicate, String object)
     {
 	return newInstance().construct(subject, predicate, object);
     }
@@ -155,13 +149,6 @@ public class QueryBuilder
 	return query(queryRes);
     }
     
-    public QueryBuilder construct(String subject, String predicate, String object)
-    {
-	return construct(spinQuery.getModel().createResource().addProperty(SP.varName, subject),
-		spinQuery.getModel().createResource().addProperty(SP.varName, predicate),
-		spinQuery.getModel().createResource().addProperty(SP.varName, object));
-    }
-    
     public QueryBuilder construct(Resource subject, Resource predicate, RDFNode object)
     {
 	Resource queryRes = ModelFactory.createDefaultModel().createResource(SP.Construct);
@@ -222,10 +209,16 @@ public class QueryBuilder
     {
 	return where(optional);
     }
-    
-    public QueryBuilder optional(ElementOptional optional)
+
+    public QueryBuilder optional(TriplePattern triplePattern)
     {
-	return optional(SPINFactory.createOptional(spinQuery.getModel(), arq2spin.createElementList(optional)));
+	return where(SPINFactory.createOptional(spinQuery.getModel(),
+		SPINFactory.createElementList(spinQuery.getModel(), new Element[]{triplePattern})));
+    }
+
+    public QueryBuilder optional(Resource subject, Resource predicate, RDFNode object)
+    {
+	return optional(SPINFactory.createTriplePattern(spinQuery.getModel(), subject, predicate, object));
     }
 
     public QueryBuilder filter(Filter filter)
@@ -243,7 +236,7 @@ public class QueryBuilder
 	
 	Resource eqExpr = spinQuery.getModel().createResource().
 		addProperty(RDF.type, SP.eq).addProperty(SP.getArgProperty(1), langExpr).
-		addLiteral(SP.getArgProperty(2), lang.toLanguageTag());
+		addLiteral(SP.getArgProperty(2), spinQuery.getModel().createLiteral(lang.toLanguageTag()));
 
 	return filter(SPINFactory.createFilter(spinQuery.getModel(), eqExpr));
     }
@@ -287,6 +280,16 @@ public class QueryBuilder
 	    return orderBy(SPINFactory.createVariable(spinQuery.getModel(), varName), desc);
 	else    
 	    return orderBy((Variable)null, desc);
+    }
+
+    public QueryBuilder orderBy(Resource var)
+    {
+	return orderBy(SPINFactory.asVariable(var), false);
+    }
+
+    public QueryBuilder orderBy(Resource var, Boolean desc)
+    {
+	return orderBy(SPINFactory.asVariable(var), desc);
     }
 
     public QueryBuilder orderBy(Variable var)
