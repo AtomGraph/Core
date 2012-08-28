@@ -439,66 +439,74 @@ public class DataManager extends FileManager implements URIResolver
     @Override
     public Source resolve(String href, String base) throws TransformerException
     {
-	log.debug("Resolving URI: {} against base URI: {}", href, base);
-	String uri = URI.create(base).resolve(href).toString();
-
-	if (isIgnored(uri))
+	if (!href.equals(""))
 	{
-	    log.debug("URI ignored by file extension: {}", uri);
-	    return getDefaultSource();
-	}
+	    log.debug("Resolving URI: {} against base URI: {}", href, base);
+	    String uri = URI.create(base).resolve(href).toString();
 
-	Model model = getFromCache(uri);
-	if (model == null) // URI not cached, 
-	{
-	    log.debug("No cached Model for URI: {}", uri);
-	    log.debug("isSPARQLService({}): {}", uri, isSPARQLService(uri));
-	    log.debug("isMapped({}): {}", uri, isMapped(uri));
+	    if (isIgnored(uri))
+	    {
+		log.debug("URI ignored by file extension: {}", uri);
+		return getDefaultSource();
+	    }
 
-	    if (resolvingUncached ||
-		    (resolvingSPARQL && isSPARQLService(uri)) ||
-		    (resolvingMapped && isMapped(uri)))
-		try
-		{
-		    Query query = parseQuery(uri);
-		    if (query != null)
+	    Model model = getFromCache(uri);
+	    if (model == null) // URI not cached, 
+	    {
+		log.debug("No cached Model for URI: {}", uri);
+		log.debug("isSPARQLService({}): {}", uri, isSPARQLService(uri));
+		log.debug("isMapped({}): {}", uri, isMapped(uri));
+
+		if (resolvingUncached ||
+			(resolvingSPARQL && isSPARQLService(uri)) ||
+			(resolvingMapped && isMapped(uri)))
+		    try
 		    {
-			if (query.isSelectType() || query.isAskType())
+			Query query = parseQuery(uri);
+			if (query != null)
 			{
-			    log.trace("Loading ResultSet for URI: {} using Query: {}", uri, query);
-			    return getSource(loadResultSet(UriBuilder.fromUri(uri).
-				    replaceQuery(null).
-				    build().toString(),
-				query, parseParamMap(uri)));
+			    if (query.isSelectType() || query.isAskType())
+			    {
+				log.trace("Loading ResultSet for URI: {} using Query: {}", uri, query);
+				return getSource(loadResultSet(UriBuilder.fromUri(uri).
+					replaceQuery(null).
+					build().toString(),
+				    query, parseParamMap(uri)));
+			    }
+			    if (query.isConstructType() || query.isDescribeType())
+			    {
+				log.trace("Loading Model for URI: {} using Query: {}", uri, query);
+				return getSource(loadModel(UriBuilder.fromUri(uri).
+					replaceQuery(null).
+					build().toString(),
+				    query, parseParamMap(uri)));
+			    }
 			}
-			if (query.isConstructType() || query.isDescribeType())
-			{
-			    log.trace("Loading Model for URI: {} using Query: {}", uri, query);
-			    return getSource(loadModel(UriBuilder.fromUri(uri).
-				    replaceQuery(null).
-				    build().toString(),
-				query, parseParamMap(uri)));
-			}
-		    }
 
-		    log.trace("Loading Model for URI: {}", uri);
-		    return getSource(loadModel(uri));
-		}
-		catch (Exception ex)
+			log.trace("Loading Model for URI: {}", uri);
+			return getSource(loadModel(uri));
+		    }
+		    catch (Exception ex)
+		    {
+			log.warn("Could not read Model or ResultSet from URI (not found or syntax error)", ex);
+			return getDefaultSource(); // return empty Model
+		    }
+		else
 		{
-		    log.warn("Could not read Model or ResultSet from URI (not found or syntax error)", ex);
+		    log.debug("Defaulting to empty Model for URI: {}", uri);
 		    return getDefaultSource(); // return empty Model
 		}
+	    }
 	    else
 	    {
-		log.debug("Defaulting to empty Model for URI: {}", uri);
-		return getDefaultSource(); // return empty Model
+		log.debug("Cached Model for URI: {}", uri);
+		return getSource(model);
 	    }
 	}
 	else
 	{
-	    log.debug("Cached Model for URI: {}", uri);
-	    return getSource(model);
+	    log.debug("Stylesheet self-referencing its doc - let the processor handle resolving");
+	    return null;
 	}
     }
 
