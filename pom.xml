@@ -1,0 +1,152 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.graphity</groupId>
+    <artifactId>ldp</artifactId>
+    <version>1.0.2-SNAPSHOT</version>
+
+    <name>Graphity Linked Data platform</name>
+    <description>Generic Linked Data platform</description>
+
+    <developers>
+	<developer>
+		<id>martynas</id>
+		<email>martynas@graphity.org</email>
+		<roles>
+			<role>Developer</role>
+			<role>Founder</role>
+		</roles>
+		<organization>Graphity</organization>
+		<organizationUrl>http://graphity.org</organizationUrl>
+	</developer>
+    </developers>
+    
+    <licenses>
+	<license>
+	    <name>GPL 3</name>
+	    <url>http://www.gnu.org/licenses/gpl-3.0.txt</url>
+	    <distribution>repo</distribution>
+	</license>
+    </licenses>
+    
+    <properties>
+        <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	<netbeans.hint.license>gpl30</netbeans.hint.license>
+        <netbeans.hint.deploy.server>Tomcat</netbeans.hint.deploy.server>
+    </properties>
+
+ <repositories>
+   <repository>
+     <id>jena-repo</id>
+     <url>http://openjena.org/repo</url>
+   </repository>
+   <repository>
+     <id>jena-repo-dev</id>
+     <url>http://openjena.org/repo-dev</url>
+   </repository>   
+ </repositories>
+ 
+<scm>
+    <url>https://github.com/Graphity/graphity-ldp</url>
+    <connection>scm:git:git://github.com/Graphity/graphity-ldp.git</connection>
+    <developerConnection>scm:git:git@github.com:pumba-lt/graphity-ldp.git</developerConnection>
+</scm>
+  
+    <dependencies>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.8.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-server</artifactId>
+            <version>1.9</version>
+        </dependency>
+	<!--
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-servlet</artifactId>
+            <version>1.10</version>
+        </dependency>
+	-->
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>1.9</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hp.hpl.jena</groupId>
+            <artifactId>arq</artifactId>
+            <version>2.8.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.topbraid</groupId>
+            <artifactId>spin</artifactId>
+            <version>1.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey.oauth</groupId>
+            <artifactId>oauth-signature</artifactId>
+            <version>1.1.1-ea</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey.oauth</groupId>
+            <artifactId>oauth-client</artifactId>
+            <version>1.1.1-ea</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjena</groupId>
+            <artifactId>fuseki</artifactId>
+            <version>0.2.0</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>tdb</artifactId>
+                    <groupId>com.hp.hpl.jena</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+	<!--
+        <dependency>
+            <groupId>net.sourceforge.saxon</groupId>
+            <artifactId>saxon</artifactId>
+            <version>9.1.0.8</version>
+        </dependency>
+	-->
+    </dependencies>
+
+    <build>
+        <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+	<version>2.1</version>
+      </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                    <compilerArguments>
+                        <endorseddirs>${endorsed.dir}</endorseddirs>
+                    </compilerArguments>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.1.1</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <packaging>jar</packaging>
+</project>
