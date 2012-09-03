@@ -35,24 +35,13 @@
 	<netbeans.hint.license>gpl30</netbeans.hint.license>
         <netbeans.hint.deploy.server>Tomcat</netbeans.hint.deploy.server>
     </properties>
-
- <repositories>
-   <repository>
-     <id>jena-repo</id>
-     <url>http://openjena.org/repo</url>
-   </repository>
-   <repository>
-     <id>jena-repo-dev</id>
-     <url>http://openjena.org/repo-dev</url>
-   </repository>   
- </repositories>
  
 <scm>
     <url>https://github.com/Graphity/graphity-ldp</url>
     <connection>scm:git:git://github.com/Graphity/graphity-ldp.git</connection>
     <developerConnection>scm:git:git@github.com:pumba-lt/graphity-ldp.git</developerConnection>
 </scm>
-  
+
     <dependencies>
 
         <dependency>
@@ -99,6 +88,11 @@
             <version>1.1.1-ea</version>
         </dependency>
         <dependency>
+            <groupId>com.hp.hpl.jena</groupId>
+            <artifactId>jena</artifactId>
+            <version>2.6.4</version>
+        </dependency>
+        <dependency>
             <groupId>org.openjena</groupId>
             <artifactId>fuseki</artifactId>
             <version>0.2.0</version>
@@ -109,13 +103,16 @@
                 </exclusion>
             </exclusions>
         </dependency>
-	<!--
         <dependency>
-            <groupId>net.sourceforge.saxon</groupId>
-            <artifactId>saxon</artifactId>
-            <version>9.1.0.8</version>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.1</version>
         </dependency>
-	-->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.1.1</version>
+        </dependency>
     </dependencies>
 
     <build>

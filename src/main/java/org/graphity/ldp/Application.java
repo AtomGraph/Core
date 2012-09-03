@@ -26,8 +26,6 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.PostConstruct;
-import javax.servlet.ServletContext;
-import javax.ws.rs.core.Context;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.stream.StreamSource;
@@ -53,12 +51,11 @@ public class Application extends javax.ws.rs.core.Application
     private static final Logger log = LoggerFactory.getLogger(Application.class);
     
     private Set<Object> singletons = new HashSet<Object>();
-    @Context private ServletContext context = null;
     
     @PostConstruct
     public void init()
     {
-	log.debug("Application.init() ServletContext: {}", context);
+	log.debug("Application.init()");
 
 	// initialize locally cached ontology mapping
 	LocationMapper mapper = new PrefixMapper("location-mapping.ttl");
