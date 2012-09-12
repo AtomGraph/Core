@@ -169,7 +169,7 @@ public class PrefixMapper extends LocationMapper
                     if (log.isDebugEnabled()) log.debug("Mapping: "+name+" => "+altName) ;
                 } catch (JenaException ex)
                 {
-                    log.warn("Error processing name mapping: "+ex.getMessage()) ;
+                    if (log.isWarnEnabled()) log.warn("Error processing name mapping: "+ex.getMessage()) ;
                     return ;
                 }
                 
@@ -199,7 +199,7 @@ public class PrefixMapper extends LocationMapper
 		    }
                 } catch (JenaException ex)
                 {
-                    log.warn("Error processing prefix mapping: "+ex.getMessage()) ;
+                    if (log.isWarnEnabled()) log.warn("Error processing prefix mapping: "+ex.getMessage()) ;
                     return ;
                 }
             }
@@ -210,7 +210,7 @@ public class PrefixMapper extends LocationMapper
     {
         if ( configPath == null || configPath.length() == 0 )
         {
-            log.warn("Null configuration") ;
+            if (log.isWarnEnabled()) log.warn("Null configuration") ;
             return ;
         }
         

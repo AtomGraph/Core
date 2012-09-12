@@ -490,7 +490,7 @@ public class DataManager extends FileManager implements URIResolver
 		    }
 		    catch (Exception ex)
 		    {
-			log.warn("Could not read Model or ResultSet from URI (not found or syntax error)", ex);
+			if (log.isWarnEnabled()) log.warn("Could not read Model or ResultSet from URI (not found or syntax error)", ex);
 			return getDefaultSource(); // return empty Model
 		    }
 		else
@@ -582,7 +582,7 @@ public class DataManager extends FileManager implements URIResolver
 	    }
 	    catch (UnsupportedEncodingException ex)
 	    {
-		log.warn("Could not URL-decode query string component", ex);
+		if (log.isWarnEnabled()) log.warn("Could not URL-decode query string component", ex);
 	    }
 	}
 

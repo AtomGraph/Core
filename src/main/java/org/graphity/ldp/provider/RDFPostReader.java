@@ -74,7 +74,7 @@ public class RDFPostReader implements MessageBodyReader<Model>
 		if (array.length > 1) value = URLDecoder.decode(array[1], charsetName);
 	    } catch (UnsupportedEncodingException ex)
 	    {
-		log.warn("Unsupported encoding", ex);
+		if (log.isWarnEnabled()) log.warn("Unsupported encoding", ex);
 	    }
 
             if (value != null) // && key != null

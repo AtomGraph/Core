@@ -80,7 +80,7 @@ public class UpdateProcessRemote implements UpdateProcessor
 		wr.header("Authorization", "Basic "+y);
 	    } catch (UnsupportedEncodingException ex)
 	    {
-		log.warn("Unsupported encoding", ex);
+		if (log.isWarnEnabled()) log.warn("Unsupported encoding", ex);
 	    }
 	*/
 	

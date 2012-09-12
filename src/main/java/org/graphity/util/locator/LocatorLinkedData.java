@@ -132,7 +132,7 @@ public class LocatorLinkedData implements Locator
         }
         catch (MalformedURLException ex)
         {
-            log.warn("Malformed URL: {}", filenameOrURI);
+            if (log.isWarnEnabled()) log.warn("Malformed URL: {}", filenameOrURI);
             return null;
         }
         // IOExceptions that occur sometimes.
@@ -158,7 +158,7 @@ public class LocatorLinkedData implements Locator
         // And IOExceptions we don't expect
         catch (IOException ex)
         {
-            log.warn("I/O Exception opening URL: " + filenameOrURI+"  "+ex.getMessage(), ex);
+            if (log.isWarnEnabled()) log.warn("I/O Exception opening URL: " + filenameOrURI+"  "+ex.getMessage(), ex);
             return null;
         }
     }

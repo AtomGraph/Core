@@ -257,7 +257,7 @@ public class DatasetGraphAccessorHTTP implements DatasetGraphAccessor
             
             if ( responseCode != HttpSC.OK_200 )
             {
-                Log.warn(this, "Unexpected status code") ;
+                if (log.isWarnEnabled()) Log.warn(this, "Unexpected status code") ;
                 throw FusekiRequestException.create(responseCode, responseMessage) ;
             }
             
@@ -310,7 +310,7 @@ public class DatasetGraphAccessorHTTP implements DatasetGraphAccessor
         }
 	catch (AuthenticationException ex)
         {
-	    log.warn("Not authenticated", ex);
+	    if (log.isWarnEnabled()) log.warn("Not authenticated", ex);
 
             httpRequest.abort() ;
             return null ;
