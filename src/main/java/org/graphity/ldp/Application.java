@@ -55,21 +55,27 @@ public class Application extends javax.ws.rs.core.Application
     @PostConstruct
     public void init()
     {
-	log.debug("Application.init()");
+	if (log.isDebugEnabled()) log.debug("Application.init()");
 
 	// initialize locally cached ontology mapping
 	LocationMapper mapper = new PrefixMapper("location-mapping.ttl");
 	LocationMapper.setGlobalLocationMapper(mapper);
-	log.debug("LocationMapper.get(): {}", LocationMapper.get());
-	log.debug("FileManager.get().getLocationMapper(): {}", FileManager.get().getLocationMapper());
+	if (log.isDebugEnabled())
+	{
+	    log.debug("LocationMapper.get(): {}", LocationMapper.get());
+	    log.debug("FileManager.get().getLocationMapper(): {}", FileManager.get().getLocationMapper());
+	}
 	
 	DataManager.get().setLocationMapper(mapper);
 	DataManager.get().setModelCaching(false);
-	log.debug("FileManager.get(): {} DataManager.get(): {}", FileManager.get(), DataManager.get());
-	log.debug("DataManager.get().getLocationMapper(): {}", DataManager.get().getLocationMapper());
+	if (log.isDebugEnabled())
+	{
+	    log.debug("FileManager.get(): {} DataManager.get(): {}", FileManager.get(), DataManager.get());
+	    log.debug("DataManager.get().getLocationMapper(): {}", DataManager.get().getLocationMapper());
+	}
 	
 	OntDocumentManager.getInstance().setFileManager(DataManager.get());
-	log.debug("OntDocumentManager.getInstance(): {} OntDocumentManager.getInstance().getFileManager(): {}", OntDocumentManager.getInstance(), OntDocumentManager.getInstance().getFileManager());
+	if (log.isDebugEnabled()) log.debug("OntDocumentManager.getInstance(): {} OntDocumentManager.getInstance().getFileManager(): {}", OntDocumentManager.getInstance(), OntDocumentManager.getInstance().getFileManager());
 
 	SysRIOT.wireIntoJena(); // enable RIOT parser
 	SPINModuleRegistry.get().init(); // needs to be called before any SPIN-related code
@@ -107,10 +113,10 @@ public class Application extends javax.ws.rs.core.Application
     public Source getStylesheet(String filename) throws FileNotFoundException, URISyntaxException
     {
 	// using getResource() because getResourceAsStream() does not retain systemId
-	URL xsltUrl = this.getClass().getClassLoader().getResource(filename);
+	URL xsltUrl = getClass().getClassLoader().getResource(filename);
 	if (xsltUrl == null) throw new FileNotFoundException();
 	String xsltUri = xsltUrl.toURI().toString();
-	log.debug("XSLT stylesheet URI: {}", xsltUri);
+	if (log.isDebugEnabled()) log.debug("XSLT stylesheet URI: {}", xsltUri);
 	return new StreamSource(xsltUri);
     }
 

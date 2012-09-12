@@ -75,7 +75,7 @@ public class DataManager extends FileManager implements URIResolver
     public static DataManager get() {
         if (s_instance == null) {
             s_instance = new DataManager(FileManager.get());
-	    log.debug("new DataManager({}): {}", FileManager.get(), s_instance);
+	    if (log.isDebugEnabled()) log.debug("new DataManager({}): {}", FileManager.get(), s_instance);
         }
         return s_instance;
     }
@@ -121,7 +121,7 @@ public class DataManager extends FileManager implements URIResolver
     @Override
     public Model loadModel(String filenameOrURI)
     {
-	log.debug("loadModel({})", filenameOrURI);
+	if (log.isDebugEnabled()) log.debug("loadModel({})", filenameOrURI);
 	filenameOrURI = UriBuilder.fromUri(filenameOrURI).fragment(null).build().toString(); // remove document fragments
 	
         if (hasCachedModel(filenameOrURI)) return getFromCache(filenameOrURI) ;  
@@ -130,13 +130,13 @@ public class DataManager extends FileManager implements URIResolver
 	if (isSPARQLService(filenameOrURI))
 	{
 	    SPARQLService service = findSPARQLService(filenameOrURI);
-	    log.debug("URI {} is a SPARQL service, executing Query on SparqlService: {}", service.getEndpointURI());
+	    if (log.isDebugEnabled()) log.debug("URI {} is a SPARQL service, executing Query on SparqlService: {}", service.getEndpointURI());
 	    
 	    m = loadModel(service, parseQuery(filenameOrURI));
 	}
 	else
 	{
-	    log.debug("URI {} is *not* a SPARQL service, reading Model from TypedStream", filenameOrURI);
+	    if (log.isDebugEnabled()) log.debug("URI {} is *not* a SPARQL service, reading Model from TypedStream", filenameOrURI);
 
 	    m = ModelFactory.createDefaultModel();
 	    readModel(m, filenameOrURI);
@@ -149,7 +149,7 @@ public class DataManager extends FileManager implements URIResolver
 
     public Model loadModel(String endpointURI, Query query, MultivaluedMap<String, String> params)
     {
-	log.debug("Remote service {} Query: {} ", endpointURI, query);
+	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, query);
 	
 	if (!(query.isConstructType() || query.isDescribeType()))
 	    throw new QueryExecException("Query to load Model must be CONSTRUCT or DESCRIBE"); // return null;
@@ -164,7 +164,7 @@ public class DataManager extends FileManager implements URIResolver
 		    if (!entry.getKey().equals("query")) // query param is handled separately
 			for (String value : entry.getValue())
 			{
-			    log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
+			    if (log.isTraceEnabled()) log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
 			    request.addParam(entry.getKey(), value);
 			}
 	    if (query.isConstructType()) return request.execConstruct();
@@ -181,7 +181,7 @@ public class DataManager extends FileManager implements URIResolver
 	
     public Model loadModel(SPARQLService service, Query query)
     {
-	log.debug("Remote service {} Query: {} ", service.getEndpointURI(), query);
+	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", service.getEndpointURI(), query);
 	
 	if (!(query.isConstructType() || query.isDescribeType()))
 	    throw new QueryExecException("Query to load Model must be CONSTRUCT or DESCRIBE"); // return null;
@@ -190,12 +190,12 @@ public class DataManager extends FileManager implements URIResolver
 
 	if (service.getUser() != null && service.getPassword() != null)
 	{
-	    log.debug("HTTP Basic authentication with username: {}", service.getUser());
+	    if (log.isDebugEnabled()) log.debug("HTTP Basic authentication with username: {}", service.getUser());
 	    request.setBasicAuthentication(service.getUser(), service.getPassword());
 	}
 	if (service.getApiKey() != null)
 	{
-	    log.debug("Authentication with API key: {}", service.getApiKey());
+	    if (log.isDebugEnabled()) log.debug("Authentication with API key: {}", service.getApiKey());
 	    request.addParam("apikey", service.getApiKey());
 	}
 	
@@ -207,7 +207,7 @@ public class DataManager extends FileManager implements URIResolver
     
     public Model loadModel(Model model, Query query)
     {
-	log.debug("Local Model Query: {}", query);
+	if (log.isDebugEnabled()) log.debug("Local Model Query: {}", query);
 	
 	if (!(query.isConstructType() || query.isDescribeType()))
 	    throw new QueryExecException("Query to load Model must be CONSTRUCT or DESCRIBE"); // return null;
@@ -247,7 +247,7 @@ public class DataManager extends FileManager implements URIResolver
     
     public void addSPARQLService(SPARQLService service)
     {
-	log.debug("Adding SPARQLService: {}", service.getName());
+	if (log.isDebugEnabled()) log.debug("Adding SPARQLService: {}", service.getName());
 	services.add(service);
     }
 
@@ -272,14 +272,14 @@ public class DataManager extends FileManager implements URIResolver
 	String mappedURI = mapURI(filenameOrURI);
 	if (!mappedURI.equals(filenameOrURI) && !mappedURI.startsWith("http:")) // if URI is mapped and local
 	{
-	    log.debug("URI {} is mapped to {}, letting FileManager.readModel() handle it", filenameOrURI, mappedURI);
+	    if (log.isDebugEnabled()) log.debug("URI {} is mapped to {}, letting FileManager.readModel() handle it", filenameOrURI, mappedURI);
 
 	    String baseURI;
 	    if (getLocationMapper() instanceof PrefixMapper)
 		baseURI = ((PrefixMapper)getLocationMapper()).getPrefix(filenameOrURI);
 	    else
 		baseURI = filenameOrURI;
-	    log.debug("FileManager.readModel() URI: {} Base URI: {}", filenameOrURI, baseURI);
+	    if (log.isDebugEnabled()) log.debug("FileManager.readModel() URI: {} Base URI: {}", filenameOrURI, baseURI);
 
 	    return super.readModel(model, mappedURI, baseURI, null); // let FileManager handle
 	}
@@ -287,24 +287,23 @@ public class DataManager extends FileManager implements URIResolver
 	TypedStream in = openNoMapOrNull(filenameOrURI);
 	if (in != null)
 	{
-	    log.debug("Opened filename or URI {} with TypedStream {}", filenameOrURI, in);
+	    if (log.isDebugEnabled()) log.debug("Opened filename or URI {} with TypedStream {}", filenameOrURI, in);
 
 	    String syntax = langFromContentType(in.getMimeType());
 
 	    if (syntax != null) // do not read if MimeType/syntax are not known
 	    {
-		log.debug("URI {} syntax is {}, reading it", filenameOrURI, syntax);
+		if (log.isDebugEnabled()) log.debug("URI {} syntax is {}, reading it", filenameOrURI, syntax);
 
 		model.read(in.getInput(), filenameOrURI, syntax) ;
 		try { in.getInput().close(); } catch (IOException ex) {}
 	    }
 	    else
-		log.debug("Syntax for URI {} unknown, ignoring", filenameOrURI);
+		if (log.isDebugEnabled()) log.debug("Syntax for URI {} unknown, ignoring", filenameOrURI);
 	}
 	else
 	{
-	    if ( log.isDebugEnabled() )
-		log.debug("Failed to locate '"+filenameOrURI+"'") ;
+	    if (log.isDebugEnabled()) log.debug("Failed to locate '"+filenameOrURI+"'") ;
 	    throw new NotFoundException("Not found: "+filenameOrURI) ;
 	}
 
@@ -330,7 +329,7 @@ public class DataManager extends FileManager implements URIResolver
 	// remove() needs to be called outside the iterator
 	if (locURL != null)
 	{
-	    log.debug("Removing Locator: {}", locURL);
+	    if (log.isDebugEnabled()) log.debug("Removing Locator: {}", locURL);
 	    remove(locURL);
 	}
     }
@@ -349,7 +348,7 @@ public class DataManager extends FileManager implements URIResolver
 	    return loadResultSet(findSPARQLService(endpointURI), query);
 	else
 	{
-	    log.debug("Remote service {} Query execution: {} ", endpointURI, query);
+	    if (log.isDebugEnabled()) log.debug("Remote service {} Query execution: {} ", endpointURI, query);
 
 	    if (!query.isSelectType())
 		throw new QueryExecException("Query to load ResultSet must be SELECT or ASK"); // return null
@@ -360,7 +359,7 @@ public class DataManager extends FileManager implements URIResolver
 		    if (!entry.getKey().equals("query")) // query param is handled separately
 			for (String value : entry.getValue())
 			{
-			    log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
+			    if (log.isTraceEnabled()) log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
 			    request.addParam(entry.getKey(), value);
 			}
 	    return request.execSelect();
@@ -374,7 +373,7 @@ public class DataManager extends FileManager implements URIResolver
 
     public ResultSet loadResultSet(SPARQLService service, Query query)
     {
-	log.debug("Remote service {} Query execution: {} ", service.getEndpointURI(), query);
+	if (log.isDebugEnabled()) log.debug("Remote service {} Query execution: {} ", service.getEndpointURI(), query);
 
 	if (!query.isSelectType())
 	    throw new QueryExecException("Query to load ResultSet must be SELECT or ASK"); // return null
@@ -382,12 +381,12 @@ public class DataManager extends FileManager implements URIResolver
 	QueryEngineHTTP request = QueryExecutionFactory.createServiceRequest(service.getEndpointURI(), query);
 	if (service.getUser() != null && service.getPassword() != null)
 	{
-	    log.debug("HTTP Basic authentication with username: {}", service.getUser());
+	    if (log.isDebugEnabled()) log.debug("HTTP Basic authentication with username: {}", service.getUser());
 	    request.setBasicAuthentication(service.getUser(), service.getPassword());
 	}
 	if (service.getApiKey() != null)
 	{
-	    log.debug("Authentication with API key param: {}", service.getApiKey());
+	    if (log.isDebugEnabled()) log.debug("Authentication with API key param: {}", service.getApiKey());
 	    request.addParam("apikey", service.getApiKey());
 	}
 
@@ -396,7 +395,7 @@ public class DataManager extends FileManager implements URIResolver
     
     public ResultSet loadResultSet(Model model, Query query)
     {
-	log.debug("Local Model Query: {}", query);
+	if (log.isDebugEnabled()) log.debug("Local Model Query: {}", query);
 
 	if (!query.isSelectType())
 	    throw new QueryExecException("Query to load ResultSet must be SELECT or ASK"); // return null
@@ -409,7 +408,7 @@ public class DataManager extends FileManager implements URIResolver
     // uses graph store protocol - expects /sparql service!
     public void putModel(String endpointURI, String graphURI, Model model)
     {
-	log.debug("PUTting Model to service {} with GRAPH URI {}", endpointURI, graphURI);
+	if (log.isDebugEnabled()) log.debug("PUTting Model to service {} with GRAPH URI {}", endpointURI, graphURI);
 	
 	DatasetGraphAccessorHTTP http;
 		
@@ -417,13 +416,13 @@ public class DataManager extends FileManager implements URIResolver
 	{
 	    SPARQLService service = findSPARQLService(endpointURI);
 	    endpointURI = endpointURI.replace("/sparql", "/service"); // TO-DO: better to avoid this and make generic
-	    log.debug("URI {} is a SPARQL service, sending PUT with credentials: {}", endpointURI, service.getUser());
+	    if (log.isDebugEnabled()) log.debug("URI {} is a SPARQL service, sending PUT with credentials: {}", endpointURI, service.getUser());
 	    http = new DatasetGraphAccessorHTTP(endpointURI, service.getUser(), service.getPassword());
 	}
 	else // no credentials
 	{
 	    endpointURI.replace("/sparql", "/service");
-	    log.debug("URI {} is *not* a SPARQL service, sending PUT without credentials", endpointURI);
+	    if (log.isDebugEnabled()) log.debug("URI {} is *not* a SPARQL service, sending PUT without credentials", endpointURI);
 	    http = new DatasetGraphAccessorHTTP(endpointURI);
 	}
 	
@@ -441,21 +440,24 @@ public class DataManager extends FileManager implements URIResolver
     {
 	if (!href.equals(""))
 	{
-	    log.debug("Resolving URI: {} against base URI: {}", href, base);
+	    if (log.isDebugEnabled()) log.debug("Resolving URI: {} against base URI: {}", href, base);
 	    String uri = URI.create(base).resolve(href).toString();
 
 	    if (isIgnored(uri))
 	    {
-		log.debug("URI ignored by file extension: {}", uri);
+		if (log.isDebugEnabled()) log.debug("URI ignored by file extension: {}", uri);
 		return getDefaultSource();
 	    }
 
 	    Model model = getFromCache(uri);
 	    if (model == null) // URI not cached, 
 	    {
-		log.debug("No cached Model for URI: {}", uri);
-		log.debug("isSPARQLService({}): {}", uri, isSPARQLService(uri));
-		log.debug("isMapped({}): {}", uri, isMapped(uri));
+		if (log.isDebugEnabled())
+		{
+		    log.debug("No cached Model for URI: {}", uri);
+		    log.debug("isSPARQLService({}): {}", uri, isSPARQLService(uri));
+		    log.debug("isMapped({}): {}", uri, isMapped(uri));
+		}
 
 		if (resolvingUncached ||
 			(resolvingSPARQL && isSPARQLService(uri)) ||
@@ -467,7 +469,7 @@ public class DataManager extends FileManager implements URIResolver
 			{
 			    if (query.isSelectType() || query.isAskType())
 			    {
-				log.trace("Loading ResultSet for URI: {} using Query: {}", uri, query);
+				if (log.isTraceEnabled()) log.trace("Loading ResultSet for URI: {} using Query: {}", uri, query);
 				return getSource(loadResultSet(UriBuilder.fromUri(uri).
 					replaceQuery(null).
 					build().toString(),
@@ -475,7 +477,7 @@ public class DataManager extends FileManager implements URIResolver
 			    }
 			    if (query.isConstructType() || query.isDescribeType())
 			    {
-				log.trace("Loading Model for URI: {} using Query: {}", uri, query);
+				if (log.isTraceEnabled()) log.trace("Loading Model for URI: {} using Query: {}", uri, query);
 				return getSource(loadModel(UriBuilder.fromUri(uri).
 					replaceQuery(null).
 					build().toString(),
@@ -483,7 +485,7 @@ public class DataManager extends FileManager implements URIResolver
 			    }
 			}
 
-			log.trace("Loading Model for URI: {}", uri);
+			if (log.isTraceEnabled()) log.trace("Loading Model for URI: {}", uri);
 			return getSource(loadModel(uri));
 		    }
 		    catch (Exception ex)
@@ -493,19 +495,19 @@ public class DataManager extends FileManager implements URIResolver
 		    }
 		else
 		{
-		    log.debug("Defaulting to empty Model for URI: {}", uri);
+		    if (log.isDebugEnabled()) log.debug("Defaulting to empty Model for URI: {}", uri);
 		    return getDefaultSource(); // return empty Model
 		}
 	    }
 	    else
 	    {
-		log.debug("Cached Model for URI: {}", uri);
+		if (log.isDebugEnabled()) log.debug("Cached Model for URI: {}", uri);
 		return getSource(model);
 	    }
 	}
 	else
 	{
-	    log.debug("Stylesheet self-referencing its doc - let the processor handle resolving");
+	    if (log.isDebugEnabled()) log.debug("Stylesheet self-referencing its doc - let the processor handle resolving");
 	    return null;
 	}
     }
@@ -517,24 +519,24 @@ public class DataManager extends FileManager implements URIResolver
     
     protected Source getSource(Model model)
     {
-	log.debug("Number of Model stmts read: {}", model.size());
+	if (log.isDebugEnabled()) log.debug("Number of Model stmts read: {}", model.size());
 	
 	ByteArrayOutputStream stream = new ByteArrayOutputStream();
 	model.write(stream);
 
-	log.debug("RDF/XML bytes written: {}", stream.toByteArray().length);
+	if (log.isDebugEnabled()) log.debug("RDF/XML bytes written: {}", stream.toByteArray().length);
 
 	return new StreamSource(new ByteArrayInputStream(stream.toByteArray()));	
     }
 
     protected Source getSource(ResultSet results)
     {
-	log.debug("ResultVars: {}", results.getResultVars());
+	if (log.isDebugEnabled()) log.debug("ResultVars: {}", results.getResultVars());
 	
 	ByteArrayOutputStream stream = new ByteArrayOutputStream();
 	ResultSetFormatter.outputAsXML(stream, results);
 	
-	log.debug("SPARQL XML result bytes written: {}", stream.toByteArray().length);
+	if (log.isDebugEnabled()) log.debug("SPARQL XML result bytes written: {}", stream.toByteArray().length);
 	
 	return new StreamSource(new ByteArrayInputStream(stream.toByteArray()));
     }
@@ -597,7 +599,7 @@ public class DataManager extends FileManager implements URIResolver
 	    if (paramMap.containsKey("query"))
 	    {
 		String sparqlString = paramMap.getFirst("query");
-		log.debug("Query string: {} from URI: {}", sparqlString, uri);
+		if (log.isDebugEnabled()) log.debug("Query string: {} from URI: {}", sparqlString, uri);
 
 		return QueryFactory.create(sparqlString);
 	    }

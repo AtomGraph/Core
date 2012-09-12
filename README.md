@@ -26,6 +26,11 @@ You have the following options to install Graphity:
 * checkout the source code from the Git repository and build it as a Maven webapp
 * [download](https://github.com/Graphity/graphity-ldp/downloads) the project as a `.jar` library and include it in your Java project (Maven repository is not available yet)
 
+Maven dependencies are discovered automatically from `pom.xml`, others (such as SPIN API) are included as `.jar` files in the `/lib` folder (and can be "installed locally" using Maven).
+
+mvn install:install-file -Dfile={path_to_project}/graphity-ldp/lib/spin-1.2.0.jar -DgroupId=org.topbraid -DartifactId=spin -Dversion=1.2.0 -Dpackaging=jar
+mvn install:install-file -Dfile={path_to_project}/graphity-ldp/lib/fuseki-0.2.0.jar -DgroupId=org.openjena -DartifactId=fuseki -Dversion=0.2.0 -Dpackaging=jar
+
 Java code
 =========
 
@@ -83,8 +88,6 @@ Used libraries
 * [TopBraid SPIN API](http://topbraid.org/spin/api/)
 * [Jersey](http://jersey.java.net)
 * [SL4J](http://www.slf4j.org)
-
-Maven dependencies are discovered automatically from `pom.xml`, others (such as SPIN API) are included as `.jar` files in the `/lib` folder (and can be "installed locally" using Maven).
 
 XSLT stylesheets
 ================

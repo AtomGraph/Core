@@ -190,7 +190,7 @@ public class QueryBuilder
     public QueryBuilder subQuery(Select select)
     {
 	SubQuery subQuery = SPINFactory.createSubQuery(spinQuery.getModel(), select);
-	log.trace("SubQuery: {}", subQuery);
+	if (log.isTraceEnabled()) log.trace("SubQuery: {}", subQuery);
 	return where(subQuery);
     }
 
@@ -228,7 +228,7 @@ public class QueryBuilder
 	
     public QueryBuilder filter(Variable var, Locale lang)
     {
-	log.trace("Setting FILTER param: LANG({})", lang.toLanguageTag());
+	if (log.isTraceEnabled()) log.trace("Setting FILTER param: LANG({})", lang.toLanguageTag());
 	
 	Resource langExpr = spinQuery.getModel().createResource().
 		addProperty(RDF.type, SP.getArgProperty("lang")).
@@ -251,7 +251,7 @@ public class QueryBuilder
     
     public QueryBuilder limit(Long limit)
     {
-	log.trace("Setting LIMIT param: {}", limit);
+	if (log.isTraceEnabled()) log.trace("Setting LIMIT param: {}", limit);
 	spinQuery.removeAll(SP.limit);
 	
 	if (limit != null) spinQuery.addLiteral(SP.limit, limit);
@@ -261,7 +261,7 @@ public class QueryBuilder
 
     public QueryBuilder offset(Long offset)
     {
-	log.trace("Setting OFFSET param: {}", offset);
+	if (log.isTraceEnabled()) log.trace("Setting OFFSET param: {}", offset);
 	spinQuery.removeAll(SP.offset);
 	
 	if (offset != null) spinQuery.addLiteral(SP.offset, offset);
@@ -299,7 +299,7 @@ public class QueryBuilder
     
     public QueryBuilder orderBy(Variable var, Boolean desc)
     {
-	log.trace("Setting ORDER BY variable: {}", var);
+	if (log.isTraceEnabled()) log.trace("Setting ORDER BY variable: {}", var);
 	spinQuery.removeAll(SP.orderBy);
 
 	if (var != null)
@@ -313,7 +313,7 @@ public class QueryBuilder
 		bnode.addProperty(RDF.type, SP.Asc);
 	}
 	
-	log.debug("SPIN Query Model size(): {}", spinQuery.getModel().size());
+	if (log.isDebugEnabled()) log.debug("SPIN Query Model size(): {}", spinQuery.getModel().size());
 	
 	return this;
     }
@@ -347,14 +347,14 @@ public class QueryBuilder
 
     public Query build()
     {
-	log.trace("Querystring generated from SPIN Model: {}", buildSPIN().toString());
+	if (log.isTraceEnabled()) log.trace("Querystring generated from SPIN Model: {}", buildSPIN().toString());
 
 	return ARQFactory.get().createQuery(buildSPIN());
     }
 
     public org.topbraid.spin.model.Query buildSPIN()
     {
-	log.trace("Querystring generated from SPIN Model: {}", spinQuery.toString()); // no PREFIXes
+	if (log.isTraceEnabled()) log.trace("Querystring generated from SPIN Model: {}", spinQuery.toString()); // no PREFIXes
 
 	// generate SPARQL query string
 	StringBuilder sb = new StringBuilder();

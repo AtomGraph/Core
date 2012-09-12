@@ -227,13 +227,13 @@ public class DatasetGraphAccessorHTTP implements DatasetGraphAccessor
         try {
 	    if (getUser() != null && getPassword() != null)
 	    {
-		log.debug("HTTP Basic authentication with username: {}", getUser());
+		if (log.isDebugEnabled()) log.debug("HTTP Basic authentication with username: {}", getUser());
 		UsernamePasswordCredentials creds = new UsernamePasswordCredentials(getUser(), new String(getPassword()));
 		httpRequest.addHeader(new BasicScheme().authenticate(creds, httpRequest));
 	    }
 	    if (getApiKey() != null)
 	    {
-		log.debug("Authentication with API key param: {}", getApiKey());
+		if (log.isDebugEnabled()) log.debug("Authentication with API key param: {}", getApiKey());
 		//httpclient.getParams().setParameter("apikey", getApiKey()); // Kasabi-specific
 		httpRequest.getParams().setParameter("auth_token", getApiKey()); // Dydra-specific
 	    }

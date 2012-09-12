@@ -44,7 +44,7 @@ abstract public class QueriedContainerResourceBase extends ContainerResourceBase
 	super(uriInfo, req, limit, offset, orderBy, desc);
 	this.endpointUri = endpointUri;
 	this.query = query;
-	log.debug("Endpoint URI: {} Query: {}", endpointUri, query);
+	if (log.isDebugEnabled()) log.debug("Endpoint URI: {} Query: {}", endpointUri, query);
     }
 
     public QueriedContainerResourceBase(UriInfo uriInfo, Request req, String endpointUri, Query query)

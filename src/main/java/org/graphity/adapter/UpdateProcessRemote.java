@@ -76,7 +76,7 @@ public class UpdateProcessRemote implements UpdateProcessor
 		byte b[] = x.append(user).append(":").append(password).toString().getBytes("UTF-8") ;
 		String y = Base64.encodeBytes(b) ;
 		
-		log.debug("Authorization: Basic {}", y);
+		if (log.isDebugEnabled()) log.debug("Authorization: Basic {}", y);
 		wr.header("Authorization", "Basic "+y);
 	    } catch (UnsupportedEncodingException ex)
 	    {
@@ -86,13 +86,13 @@ public class UpdateProcessRemote implements UpdateProcessor
 	
 	String reqStr = request.toString().replaceFirst("CREATE <", "CREATE GRAPH <"); // Jena bug fixed in 2.7.0
 
-	log.debug("Sending SPARQL request {} to endpoint {}", reqStr, endpoint);
+	if (log.isDebugEnabled()) log.debug("Sending SPARQL request {} to endpoint {}", reqStr, endpoint);
 	ClientResponse response =
 	wr.type(WebContent.contentTypeSPARQLUpdate).
 	accept(WebContent.contentTypeResultsXML).
 	post(ClientResponse.class, reqStr);
 	
-	log.debug("SPARQL endpoint response: {}", response);
+	if (log.isDebugEnabled()) log.debug("SPARQL endpoint response: {}", response);
     }
 
     public void setBasicAuthentication(String user, char[] password)

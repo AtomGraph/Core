@@ -38,7 +38,7 @@ public class LinkedDataResourceImpl implements LinkedDataResource
     {
 	if (uri == null) throw new IllegalArgumentException("Linked Data URI must be not null");
 	this.uri = uri;
-	log.debug("URI: {}", uri);
+	if (log.isDebugEnabled()) log.debug("URI: {}", uri);
     }
 
     @Override
@@ -46,10 +46,10 @@ public class LinkedDataResourceImpl implements LinkedDataResource
     {
 	if (model == null)
 	{
-	    log.debug("Loading Model from URI: {}", getURI());
+	    if (log.isDebugEnabled()) log.debug("Loading Model from URI: {}", getURI());
 	    model = DataManager.get().loadModel(getURI());
 
-	    log.debug("Number of Model stmts read: {}", model.size());
+	    if (log.isDebugEnabled()) log.debug("Number of Model stmts read: {}", model.size());
 	}
 
 	return model;

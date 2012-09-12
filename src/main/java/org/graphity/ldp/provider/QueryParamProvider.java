@@ -57,7 +57,7 @@ public class QueryParamProvider extends PerRequestTypeInjectableProvider<QueryPa
 		String value = hc.getUriInfo().getQueryParameters().getFirst(paramName);
 		if (value == null || value.isEmpty()) return null;
 		    
-		log.trace("Providing Injectable<Query> with @QueryParam({}) and value: {}", paramName, value);
+		if (log.isTraceEnabled()) log.trace("Providing Injectable<Query> with @QueryParam({}) and value: {}", paramName, value);
 		return QueryFactory.create(value);
 	    }
 	};

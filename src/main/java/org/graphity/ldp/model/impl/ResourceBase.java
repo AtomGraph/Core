@@ -49,16 +49,16 @@ abstract public class ResourceBase implements Resource
     }
     
     @Override
-    public final String getURI()
+    public String getURI()
     {
-	return uriInfo.getAbsolutePath().toString();
+	return getUriInfo().getAbsolutePath().toString();
     }
 
     @Override
     public Response getResponse()
     {
 	// check if resource was modified and return 304 Not Modified if not
-	Response.ResponseBuilder rb = req.evaluatePreconditions(getEntityTag());
+	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(getEntityTag());
 	if (rb != null) return rb.build();
 
 	return Response.ok(getModel()).tag(getEntityTag()).build(); // uses ModelProvider

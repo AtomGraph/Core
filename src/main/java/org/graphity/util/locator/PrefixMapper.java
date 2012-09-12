@@ -43,7 +43,7 @@ public class PrefixMapper extends LocationMapper
 
     public PrefixMapper()
     {
-	log.debug("PrefixMapper()");
+	if (log.isDebugEnabled()) log.debug("PrefixMapper()");
     }
 
     public PrefixMapper(String config)
@@ -64,7 +64,7 @@ public class PrefixMapper extends LocationMapper
     
     public void addAltPrefixEntry(String uriPrefix, String alt)
     {
-	log.debug("PrefixMapper.addAltPrefixEntry({}, {})", uriPrefix, alt);
+	if (log.isDebugEnabled()) log.debug("PrefixMapper.addAltPrefixEntry({}, {})", uriPrefix, alt);
         altPrefixLocations.put(uriPrefix, alt);
     }
 
@@ -94,7 +94,7 @@ public class PrefixMapper extends LocationMapper
     @Override
     public String altMapping(String uri, String otherwise)
     {
-	log.debug("PrefixMapper.altMapping({}, {})", uri, otherwise);
+	if (log.isDebugEnabled()) log.debug("PrefixMapper.altMapping({}, {})", uri, otherwise);
 
         if (getAltEntry(uri) != null) 
             return getAltEntry(uri) ;
@@ -166,7 +166,7 @@ public class PrefixMapper extends LocationMapper
                     String altName = mapping.getRequiredProperty(LocationMappingVocab.altName)
                                         .getString() ;
                     addAltEntry(name, altName) ;
-                    log.debug("Mapping: "+name+" => "+altName) ;
+                    if (log.isDebugEnabled()) log.debug("Mapping: "+name+" => "+altName) ;
                 } catch (JenaException ex)
                 {
                     log.warn("Error processing name mapping: "+ex.getMessage()) ;
@@ -187,7 +187,7 @@ public class PrefixMapper extends LocationMapper
 			String altPrefix = mapping.getRequiredProperty(LocationMappingVocab.altPrefix)
 					    .getString() ;
 			addAltPrefix(prefix, altPrefix) ;
-			log.debug("Prefix mapping: "+prefix+" => "+altPrefix) ;
+			if (log.isDebugEnabled()) log.debug("Prefix mapping: "+prefix+" => "+altPrefix) ;
 		    }
 		    
 		    if (mapping.hasProperty(LocationMappingVocab.altName))
@@ -240,7 +240,7 @@ public class PrefixMapper extends LocationMapper
             if ( in == null )
             {
                 if ( ! configMustExist )
-                    log.debug("Failed to find configuration: "+configPath) ;
+                    if (log.isDebugEnabled()) log.debug("Failed to find configuration: "+configPath) ;
                 return ;
             }
             String syntax = FileUtils.guessLang(uriConfig) ;

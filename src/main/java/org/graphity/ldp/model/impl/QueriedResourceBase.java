@@ -44,7 +44,7 @@ abstract public class QueriedResourceBase extends ResourceBase implements Querie
 	if (endpointUri == null || query == null || !(query.isConstructType() || query.isDescribeType())) throw new IllegalArgumentException("Endpoint URI and Query must be not null; Query must be CONSTRUCT or DESCRIBE");
 	this.endpointUri = endpointUri;
 	this.query = query;
-	log.debug("Endpoint URI: {} Query: {}", endpointUri, query);
+	if (log.isDebugEnabled()) log.debug("Endpoint URI: {} Query: {}", endpointUri, query);
     }
 
     public QueriedResourceBase(UriInfo uriInfo, Request req, String endpointUri, String uri)
@@ -58,7 +58,7 @@ abstract public class QueriedResourceBase extends ResourceBase implements Querie
 	if (queryModel == null || query == null || !(query.isConstructType() || query.isDescribeType())) throw new IllegalArgumentException("Endpoint URI and query Model must be not null; Query must be CONSTRUCT or DESCRIBE");
 	this.queryModel = queryModel;
 	this.query = query;
-	log.debug("Model: {} Query: {}", queryModel, query);
+	if (log.isDebugEnabled()) log.debug("Model: {} Query: {}", queryModel, query);
     }
 
     public QueriedResourceBase(UriInfo uriInfo, Request req, Model queryModel, String uri)

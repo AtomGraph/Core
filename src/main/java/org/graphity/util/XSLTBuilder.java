@@ -96,7 +96,7 @@ public class XSLTBuilder
 
     public XSLTBuilder document(Source doc)
     {
-	log.trace("Loading document Source with system ID: {}", doc.getSystemId());
+	if (log.isTraceEnabled()) log.trace("Loading document Source with system ID: {}", doc.getSystemId());
 	this.doc = doc;
 	return this;
     }
@@ -151,7 +151,7 @@ public class XSLTBuilder
 
     public XSLTBuilder stylesheet(Source stylesheet) throws TransformerConfigurationException
     {
-	log.trace("Loading stylesheet Source with system ID: {}", stylesheet.getSystemId());
+	if (log.isTraceEnabled()) log.trace("Loading stylesheet Source with system ID: {}", stylesheet.getSystemId());
 	handler = factory.newTransformerHandler(stylesheet);
 	transformer = handler.getTransformer();
 	return this;
@@ -159,7 +159,7 @@ public class XSLTBuilder
 
     public XSLTBuilder parameter(String name, Object value)
     {
-	log.trace("Setting transformer parameter {} with value {}", name, value);
+	if (log.isTraceEnabled()) log.trace("Setting transformer parameter {} with value {}", name, value);
 	transformer.setParameter(name, value);
 	//handler.getTransformer().setParameter(name, value);
 	return this;
@@ -167,7 +167,7 @@ public class XSLTBuilder
     
     public XSLTBuilder resolver(URIResolver resolver)
     {
-	log.trace("Setting URIResolver: {}", resolver);
+	if (log.isTraceEnabled()) log.trace("Setting URIResolver: {}", resolver);
 	transformer.setURIResolver(resolver);
 	//handler.getTransformer().setURIResolver(resolver);
 	return this;
@@ -175,7 +175,7 @@ public class XSLTBuilder
 
     public XSLTBuilder outputProperty(String name, String value)
     {
-	log.trace("Setting transformer OutputProperty {} with value {}", name, value);
+	if (log.isTraceEnabled()) log.trace("Setting transformer OutputProperty {} with value {}", name, value);
 	transformer.setOutputProperty(name, value);
 	//handler.getTransformer().setOutputProperty(name, value);
 	return this;
@@ -183,11 +183,14 @@ public class XSLTBuilder
     
     public void transform() throws TransformerException
     {
-	log.trace("TransformerHandler: {}", handler);
-	log.trace("Transformer: {}", transformer);
-	log.trace("Transformer: {}", handler.getTransformer());
-	log.trace("Document: {}", doc);
-	log.trace("Result: {}", result);
+	if (log.isTraceEnabled())
+	{
+	    log.trace("TransformerHandler: {}", handler);
+	    log.trace("Transformer: {}", transformer);
+	    log.trace("Transformer: {}", handler.getTransformer());
+	    log.trace("Document: {}", doc);
+	    log.trace("Result: {}", result);
+	}
 	transformer.transform(doc, result);
 	//handler.getTransformer().transform(doc, result);
     }

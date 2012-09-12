@@ -42,7 +42,7 @@ public class QueriedResourceImpl implements QueriedResource
 	if (endpointUri == null || query == null || !(query.isConstructType() || query.isDescribeType())) throw new IllegalArgumentException("Endpoint URI and Query must be not null; Query must be CONSTRUCT or DESCRIBE");
 	this.endpointUri = endpointUri;
 	this.query = query;
-	log.debug("Endpoint URI: {} Query: {}", endpointUri, query);
+	if (log.isDebugEnabled()) log.debug("Endpoint URI: {} Query: {}", endpointUri, query);
     }
 
     public QueriedResourceImpl(String endpointUri, String uri)
@@ -56,7 +56,7 @@ public class QueriedResourceImpl implements QueriedResource
 	if (query == null || !(query.isConstructType() || query.isDescribeType())) throw new IllegalArgumentException("Query must be not null and CONSTRUCT or DESCRIBE");
 	this.queryModel = queryModel;
 	this.query = query;
-	log.debug("Endpoint URI: {} Query: {}", queryModel, query);
+	if (log.isDebugEnabled()) log.debug("Endpoint URI: {} Query: {}", queryModel, query);
     }
 
     public QueriedResourceImpl(Model queryModel, String uri)
@@ -71,16 +71,16 @@ public class QueriedResourceImpl implements QueriedResource
 	{
 	    if (queryModel != null)
 	    {
-		log.debug("Querying Model: {} with Query: {}", queryModel, getQuery());
+		if (log.isDebugEnabled()) log.debug("Querying Model: {} with Query: {}", queryModel, getQuery());
 		model = DataManager.get().loadModel(queryModel, getQuery());		
 	    }
 	    else
 	    {
-		log.debug("Querying remote service: {} with Query: {}", endpointUri, getQuery());
+		if (log.isDebugEnabled()) log.debug("Querying remote service: {} with Query: {}", endpointUri, getQuery());
 		model = DataManager.get().loadModel(endpointUri, getQuery());
 	    }
 	    
-	    log.debug("Number of Model stmts read: {}", model.size());
+	    if (log.isDebugEnabled()) log.debug("Number of Model stmts read: {}", model.size());
 	}
 
 	return model;

@@ -94,7 +94,7 @@ public class LocatorLinkedData implements Locator
             return null;
         }
         */
-	log.trace("Request Accept header: {}", getAcceptHeader());
+	if (log.isTraceEnabled()) log.trace("Request Accept header: {}", getAcceptHeader());
 
         try
         {
@@ -117,7 +117,7 @@ public class LocatorLinkedData implements Locator
 
 	    if (!getQualifiedTypes().containsKey(contentType))
 	    {
-		log.debug("Returned content type {} is not acceptable - TypedStream will not be read", contentType);
+		if (log.isDebugEnabled()) log.debug("Returned content type {} is not acceptable - TypedStream will not be read", contentType);
 		return null;
 	    }
 		

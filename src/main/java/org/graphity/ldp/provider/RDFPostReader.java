@@ -62,7 +62,7 @@ public class RDFPostReader implements MessageBodyReader<Model>
 
 	for (String param : params)
 	{
-	    log.trace("Parameter: {}", param);
+	    if (log.isTraceEnabled()) log.trace("Parameter: {}", param);
 	    
 	    String[] array = param.split("=");
 	    String key = null;

@@ -54,7 +54,7 @@ public class LocatorGRDDL extends LocatorLinkedData
     @Override
     public TypedStream open(String filenameOrURI)
     {
-	log.debug("Opening URI {} via GRDDL: {}", filenameOrURI, stylesheet.getSystemId());
+	if (log.isDebugEnabled()) log.debug("Opening URI {} via GRDDL: {}", filenameOrURI, stylesheet.getSystemId());
 
 	TypedStream ts = super.open(filenameOrURI);
 	if (ts == null) return null; // don't transform if there's no stream
@@ -68,7 +68,7 @@ public class LocatorGRDDL extends LocatorLinkedData
 	    parameter("uri", UriBuilder.fromUri(filenameOrURI).build()).
 	    transform();
 	    
-	    log.trace("GRDDL RDF/XML output: {}", bos.toString());
+	    if (log.isTraceEnabled()) log.trace("GRDDL RDF/XML output: {}", bos.toString());
 
 	    return new TypedStream(new BufferedInputStream(new ByteArrayInputStream(bos.toByteArray())),
 		    WebContent.contentTypeRDFXML,

@@ -69,15 +69,14 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     @Override
     public Model readFrom(Class<Model> type, Type genericType, Annotation[] annotations, javax.ws.rs.core.MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException, WebApplicationException
     {
-	log.trace("Reading model with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
-	//log.debug("Request URI: {}", uriInfo.getRequestUri());
+	if (log.isTraceEnabled()) log.trace("Reading model with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
 	
 	Model model = ModelFactory.createDefaultModel();
 	
 	String syntax = null;
 	Lang lang = langFromMediaType(mediaType);
 	if (lang != null) syntax = lang.getName();
-	log.debug("Syntax used to read Model: {}", syntax);
+	if (log.isDebugEnabled()) log.debug("Syntax used to read Model: {}", syntax);
 
 	// extract base URI from httpHeaders?
 	return model.read(entityStream, null, syntax);
@@ -86,7 +85,7 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     public static Lang langFromMediaType(javax.ws.rs.core.MediaType mediaType)
     { 
         if (mediaType == null) return null;
-	log.trace("langFromMediaType({}): {}", mediaType.getType() + "/" + mediaType.getSubtype(), LANGS.get(mediaType.getType() + "/" + mediaType.getSubtype()));
+	if (log.isTraceEnabled()) log.trace("langFromMediaType({}): {}", mediaType.getType() + "/" + mediaType.getSubtype(), LANGS.get(mediaType.getType() + "/" + mediaType.getSubtype()));
         return LANGS.get(mediaType.getType() + "/" + mediaType.getSubtype());
     }
 
@@ -107,11 +106,11 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     @Override
     public void writeTo(Model model, Class<?> type, Type genericType, Annotation[] annotations, javax.ws.rs.core.MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException
     {
-	log.trace("Writing Model with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
+	if (log.isTraceEnabled()) log.trace("Writing Model with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
 	String syntax = null;
 	Lang lang = langFromMediaType(mediaType);
 	if (lang != null) syntax = lang.getName();
-	log.debug("Syntax used to load Model: {}", syntax);
+	if (log.isDebugEnabled()) log.debug("Syntax used to load Model: {}", syntax);
 
 	model.write(entityStream, syntax);
     }
