@@ -40,7 +40,7 @@ From Java
 
 Graphity LDP is meant to be used as a library for Linked Data Web applications. Follow these simple steps to get started:
 * create a new Maven Web application
-* Add Graphity LDP as dependency
+* add Graphity LDP as dependency
 * extend one of the `Resource` base class implementations, for example [`ResourceBase`](https://github.com/Graphity/graphity-ldp/blob/master/src/main/java/org/graphity/ldp/model/impl/ResourceBase.java) - it will serve as the root JAX-RS resource
 * extend `Application` class if necessary
 * register the `Application` class (either your own or from LDP) in your project's `web.xml` like this:
@@ -50,7 +50,7 @@ Graphity LDP is meant to be used as a library for Linked Data Web applications. 
         <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
         <init-param>
             <param-name>javax.ws.rs.Application</param-name>
-            <param-value>org.graphity.browser.Application</param-value>
+            <param-value>org.graphity.ldp.Application</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
@@ -103,7 +103,7 @@ They contain Jena-compatible convenience classes for reading Linked Data resourc
             * [`org.graphity.util.locator.LocatorGRDDL`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/util/locator/LocatorGRDDL.java): Generic base class for GRDDL XSLT transformation-based `Locator`s. Also see stylesheets [`here`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/resources/org/graphity/util/locator/grddl).
             * [`org.graphity.util.locator.LocatorLinkedData`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/util/locator/LocatorLinkedData.java): General-purpose class for loading RDF from Linked Data URIs using content negotiation
             * [`org.graphity.util.locator.LocatorLinkedDataOAuth2`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/util/locator/LocatorLinkedDataOAuth2.java): General-purpose class for loading RDF from Linked Data URIs using content negotiation and [OAuth2](http://oauth.net/2/) authentication (_unfinished_)
-            * [`org.graphity.util.locator.PrefixMapper`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/util/locator/PrefixMapper.java): Subclass of [`LocationMapper`](http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/util/LocationMapper.html) for mapping resource (class, property etc.) URIs into local copies of known ontologies. Also see [`resources/location-mapping.ttl`](https://github.com/Graphity/graphity-ldp/blob/master/src/main/resources/location-mapping.ttl); ontologies are cached [`here`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/resources/org/graphity/browser/vocabulary).
+            * [`org.graphity.util.locator.PrefixMapper`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/util/locator/PrefixMapper.java): Subclass of [`LocationMapper`](http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/util/LocationMapper.html) for mapping resource (class, property etc.) URIs into local copies of known ontologies. Also see [`resources/location-mapping.ttl`](https://github.com/Graphity/graphity-ldp/blob/master/src/main/resources/location-mapping.ttl); ontologies are cached under [`vocabulary`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/resources/org/graphity/vocabulary).
         * [`org.graphity.util.manager`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/util/manager): RDF data management classes
             * [`org.graphity.util.manager.DataManager`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/util/manager/DataManager.java): Subclass of Jena's [`FileManager`](http://jena.sourceforge.net/how-to/filemanager.html) for loading `Model`s and `ResultSet`s from the Web. All code making requests for RDF data or SPARQL endpoints should use this class. Implements [`URIResolver`](http://docs.oracle.com/javase/6/docs/api/javax/xml/transform/URIResolver.html) and resolves URIs when [`document()`](http://www.w3.org/TR/xslt20/#function-document) function is called in XSLT.
             * [`org.graphity.util.manager.SPARQLService`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/util/manager/SPARQLService.java): Represent individual SPARQL endpoints, should only be used in case authentication or other custom features are needed. Need to be added to `DataManager` to take effect.
@@ -128,7 +128,7 @@ Utility stylesheets
 * [`resources/org/graphity/ldp/provider/xslt`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/resources/org/graphity/ldp/provider/xslt)
     * [`functions.xsl`](https://github.com/Graphity/graphity-ldp/blob/master/src/main/resources/org/graphity/ldp/provider/xslt/functions.xsl): Graphity utility functions
     * [`group-sort-triples.xsl`](https://github.com/Graphity/graphity-ldp/blob/master/src/main/resources/org/graphity/ldp/provider/xslt/group-sort-triples.xsl): Groups and sorts RDF/XML statements
-    * [`rdfxml2google-wire.xsl`](https://github.com/Graphity/graphity-ldp/blob/master/src/main/resources/org/graphity/ldp/provider/xslt/rdf2xml2google-wire.xsl): Generic RDF/XML to Google [DataTable](https://developers.google.com/chart/interactive/docs/reference#DataTable) transformation
+    * [`rdfxml2google-wire.xsl`](https://github.com/Graphity/graphity-ldp/blob/master/src/main/resources/org/graphity/ldp/provider/xslt/rdfxml2google-wire.xsl): Generic RDF/XML to Google [DataTable](https://developers.google.com/chart/interactive/docs/reference#DataTable) transformation
     * [`sparql2google-wire.xsl`](https://github.com/Graphity/graphity-ldp/blob/master/src/main/resources/org/graphity/ldp/provider/xslt/sparql2google-wire.xsl): Generic RDF/XML to Google DataTable transformation
 
 GRDDL stylesheets
@@ -142,13 +142,13 @@ GRDDL stylesheets
 Ontologies
 ----------
 
-* [`resources/org/graphity/browser/vocabulary`](https://github.com/Graphity/graphity-browser/tree/master/src/main/resources/org/graphity/browser/vocabulary): Contains cached local copies of popular ontologies
-    * [`graphity.ttl`](https://github.com/Graphity/graphity-browser/tree/master/src/main/resources/org/graphity/browser/vocabulary/graphity.ttl): Ontology reused by all Graphity applications
+* [`resources/org/graphity/vocabulary`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/resources/org/graphity/vocabulary): Contains cached local copies of popular ontologies
+    * [`graphity.ttl`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/resources/org/graphity/vocabulary/graphity.ttl): Ontology reused by all Graphity applications
 
 Mappings
 --------
 
-* [`resources/location-mapping.ttl`](https://github.com/Graphity/graphity-browser/tree/master/src/main/resources/location-mapping.ttl): Jena's [`LocationMapper`](http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/util/LocationMapper.html) [configuration file](http://jena.sourceforge.net/how-to/filemanager.html) mapping the locally cached ontologies
+* [`resources/location-mapping.ttl`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/resources/location-mapping.ttl): Jena's [`LocationMapper`](http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/util/LocationMapper.html) [configuration file](http://jena.sourceforge.net/how-to/filemanager.html) mapping the locally cached ontologies
 
 Using resources in your project
 -------------------------------
