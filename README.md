@@ -119,15 +119,63 @@ Used libraries
 * [Jersey](http://jersey.java.net)
 * [SL4J](http://www.slf4j.org)
 
-XSLT stylesheets
-================
+Resources
+=========
 
-GRDDL
------
+Utility stylesheets
+-------------------
+
+* [`resources/org/graphity/ldp/provider/xslt`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/resources/org/graphity/ldp/provider/xslt)
+    * [`functions.xsl`](https://github.com/Graphity/graphity-ldp/blob/master/src/main/resources/org/graphity/ldp/provider/xslt/functions.xsl): Graphity utility functions
+    * [`group-sort-triples.xsl`](https://github.com/Graphity/graphity-ldp/blob/master/src/main/resources/org/graphity/ldp/provider/xslt/group-sort-triples.xsl): Groups and sorts RDF/XML statements
+    * [`rdfxml2google-wire.xsl`](https://github.com/Graphity/graphity-ldp/blob/master/src/main/resources/org/graphity/ldp/provider/xslt/rdf2xml2google-wire.xsl): Generic RDF/XML to Google [DataTable](https://developers.google.com/chart/interactive/docs/reference#DataTable) transformation
+    * [`sparql2google-wire.xsl`](https://github.com/Graphity/graphity-ldp/blob/master/src/main/resources/org/graphity/ldp/provider/xslt/sparql2google-wire.xsl): Generic RDF/XML to Google DataTable transformation
+
+GRDDL stylesheets
+-----------------
 
 * [`resources/org/graphity/util/locator/grddl`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/resources/org/graphity/util/locator/grddl): XSLT stylesheets for use with `LocatorGRDDL` and its subclasses
     * [`atom-grddl.xsl`](https://github.com/Graphity/graphity-ldp/blob/master/src/main/resources/org/graphity/util/locator/grddl/atom-grddl.xsl): Atom to RDF transformation (_unfinished_)
     * [`twitter-grddl.xsl`](https://github.com/Graphity/graphity-ldp/blob/master/src/main/resources/org/graphity/util/locator/grddl/twitter-grddl.xsl): Twitter API to RDF transformation (_unfinished_)
+
+
+Ontologies
+----------
+
+* [`resources/org/graphity/browser/vocabulary`](https://github.com/Graphity/graphity-browser/tree/master/src/main/resources/org/graphity/browser/vocabulary): Contains cached local copies of popular ontologies
+    * [`graphity.ttl`](https://github.com/Graphity/graphity-browser/tree/master/src/main/resources/org/graphity/browser/vocabulary/graphity.ttl): Ontology reused by all Graphity applications
+
+Mappings
+--------
+
+* [`resources/location-mapping.ttl`](https://github.com/Graphity/graphity-browser/tree/master/src/main/resources/location-mapping.ttl): Jena's [`LocationMapper`](http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/util/LocationMapper.html) [configuration file](http://jena.sourceforge.net/how-to/filemanager.html) mapping the locally cached ontologies
+
+Using resources in your project
+-------------------------------
+
+In order to include the above resources into your own Maven project, you can add the following execution for `maven-dependency-plugin` to your `pom.xml`:
+
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-dependency-plugin</artifactId>
+      <version>2.1</version>
+      <executions>
+        <execution>
+          <id>resource-dependencies</id>
+          <phase>generate-resources</phase>
+          <goals>
+            <goal>unpack-dependencies</goal>
+          </goals>
+          <configuration>
+            <includeGroupIds>org.graphity</includeGroupIds>
+            <includes>**\/*.xsl,**\/*.ttl,**\/*.rdf,**\/*.owl</includes>
+            <outputDirectory>${project.build.directory}/classes</outputDirectory>
+          </configuration>
+        </execution>
+      </executions>
+    </plugin>
+
+This will copy all reusable `.xsl`, `.ttl`, `.rdf`, and `.owl` files from LDP's `resource` folder.
 
 Papers & presentations
 ======================
