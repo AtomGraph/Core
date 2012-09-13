@@ -56,7 +56,7 @@ public class QueriedResourceImpl implements QueriedResource
 	if (query == null || !(query.isConstructType() || query.isDescribeType())) throw new IllegalArgumentException("Query must be not null and CONSTRUCT or DESCRIBE");
 	this.queryModel = queryModel;
 	this.query = query;
-	if (log.isDebugEnabled()) log.debug("Endpoint URI: {} Query: {}", queryModel, query);
+	if (log.isDebugEnabled()) log.debug("Query Model: {} Query: {}", queryModel, query);
     }
 
     public QueriedResourceImpl(Model queryModel, String uri)

@@ -17,8 +17,11 @@ Features
 * HTTP caching & authentication
 * easy XSLT transformation and SPARQL query building
 
+Usage
+=====
+
 Installation
-============
+------------
 
 Graphity LDP is a [Maven Web application](http://maven.apache.org/guides/mini/guide-webapp.html).
 
@@ -26,10 +29,37 @@ You have the following options to install Graphity:
 * checkout the source code from the Git repository and build it as a Maven webapp
 * [download](https://github.com/Graphity/graphity-ldp/downloads) the project as a `.jar` library and include it in your Java project (Maven repository is not available yet)
 
-Maven dependencies are discovered automatically from `pom.xml`, others (such as SPIN API) are included as `.jar` files in the `/lib` folder (and can be "installed locally" using Maven).
+Maven dependencies are discovered automatically from `pom.xml`, others (such as SPIN API and pre-Apache version of Fuseki) are included as `.jar` files in the `/lib` folder.
+They can be "installed locally" using Maven from command line like this:
 
-mvn install:install-file -Dfile={path_to_project}/graphity-ldp/lib/spin-1.2.0.jar -DgroupId=org.topbraid -DartifactId=spin -Dversion=1.2.0 -Dpackaging=jar
-mvn install:install-file -Dfile={path_to_project}/graphity-ldp/lib/fuseki-0.2.0.jar -DgroupId=org.openjena -DartifactId=fuseki -Dversion=0.2.0 -Dpackaging=jar
+    mvn install:install-file -Dfile=${basedir}/lib/spin-1.2.0.jar -DgroupId=org.topbraid -DartifactId=spin -Dversion=1.2.0 -Dpackaging=jar
+    mvn install:install-file -Dfile=${basedir}/lib/fuseki-0.2.0.jar -DgroupId=org.openjena -DartifactId=fuseki -Dversion=0.2.0 -Dpackaging=jar
+
+From Java
+---------
+
+Graphity LDP is meant to be used as a library for Linked Data Web applications. Follow these simple steps to get started:
+* create a new Maven Web application
+* Add Graphity LDP as dependency
+* extend one of the `Resource` base class implementations, for example [`ResourceBase`](https://github.com/Graphity/graphity-ldp/blob/master/src/main/java/org/graphity/ldp/model/impl/ResourceBase.java) - it will serve as the root JAX-RS resource
+* extend `Application` class if necessary
+* register the `Application` class (either your own or from LDP) in your project's `web.xml` like this:
+
+    <servlet>
+        <servlet-name>index</servlet-name>
+        <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+        <init-param>
+            <param-name>javax.ws.rs.Application</param-name>
+            <param-value>org.graphity.browser.Application</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>index</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+
+For a complete example of a Web application built on Graphity LDP, take a look at [Graphity Browser](https://github.com/Graphity/graphity-browser).
 
 Java code
 =========
