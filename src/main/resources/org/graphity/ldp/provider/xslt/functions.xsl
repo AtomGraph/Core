@@ -292,15 +292,6 @@ exclude-result-prefixes="xhtml xs g url rdf rdfs xsd sparql dc dct foaf skos gr 
 	<xsl:param name="accept" as="xs:string?"/>
 
 	<xsl:variable name="query-string" select="concat('query=', encode-for-uri($query))" as="xs:string"/>
-	    <!--
-	    <xsl:text>query=</xsl:text>
-	    <xsl:value-of select="encode-for-uri($query)"/>
-	    <xsl:if test="$accept">
-		<xsl:text>&amp;accept=</xsl:text>
-		<xsl:value-of select="encode-for-uri($accept)"/>
-	    </xsl:if>
-	</xsl:variable>
-	-->
 	
 	<xsl:sequence select="document(concat($endpoint-uri, '?', $query-string))"/>
     </xsl:function>
