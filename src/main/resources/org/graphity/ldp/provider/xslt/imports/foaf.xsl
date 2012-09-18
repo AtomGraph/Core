@@ -49,10 +49,23 @@ exclude-result-prefixes="g rdf rdfs foaf">
 	</a>
     </xsl:template>
 
-    <xsl:template match="foaf:Image/@rdf:about | *[rdf:type/@rdf:resource = '&foaf;Image']/@rdf:about | foaf:img/@rdf:resource | foaf:depiction/@rdf:resource | foaf:thumbnail/@rdf:resource | foaf:logo/@rdf:resource">
-	<a href="{$base-uri}?uri={encode-for-uri(.)}{if ($endpoint-uri) then (concat('&amp;endpoint-uri=', encode-for-uri($endpoint-uri))) else ()}">
+    <!--
+    <xsl:template match="foaf:Image/@rdf:about | *[rdf:type/@rdf:resource = '&foaf;Image']/@rdf:about">
+	<a href="{.}">
 	    <img src="{.}" alt="{g:label(., /, $lang)}"/>
 	</a>
+    </xsl:template>
+    -->
+    
+    <xsl:template match="foaf:img/@rdf:resource | foaf:depiction/@rdf:resource | foaf:thumbnail/@rdf:resource | foaf:logo/@rdf:resource">
+	<xsl:if test="../../@rdf:about">
+	    <a href="{.}"> <!-- {$base-uri}{g:query-string($lang)} -->
+		<img src="{.}" alt="{g:label(../../@rdf:about, /, $lang)}" />
+	    </a>
+	</xsl:if>
+	<xsl:if test="../../@rdf:nodeID">
+	    <img src="{.}" alt="{g:label(../../@rdf:nodeID, /, $lang)}" />
+	</xsl:if>	    
     </xsl:template>
 
     <xsl:template match="foaf:img/@rdf:resource | foaf:depiction/@rdf:resource | foaf:thumbnail/@rdf:resource | foaf:logo/@rdf:resource" mode="g:EditMode">

@@ -19,7 +19,8 @@
 : a owl:Ontology ;
     dct:title "Graphity ontology" ;
     rdfs:label "Graphity ontology" ;
-    dct:modified "2012-02-09T20:54:00+01:00"^^xsd:dateTime ;
+    dct:created "2012-02-09T20:54:00+01:00"^^xsd:dateTime ;
+    dct:modified "2012-09-17T22:46:00+01:00"^^xsd:dateTime ;
     vann:preferredNamespaceUri "http://graphity.org/ontology/" ;
     vann:preferredNamespacePrefix "g";
     foaf:homepage <http://graphity.org> ;

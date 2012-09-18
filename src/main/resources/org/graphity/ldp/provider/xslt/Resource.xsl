@@ -115,27 +115,49 @@ exclude-result-prefixes="xsl xhtml xs g rdf rdfs owl sparql geo dbpedia-owl dc d
 			<xsl:if test="$mode = '&g;ListMode'">
 			    <xsl:attribute name="class">active</xsl:attribute>
 			</xsl:if>
+			
+			<a href="{$absolute-path}{g:query-string($offset, $limit, $order-by, $desc, $lang, '&g;ListMode')}">
+			    <xsl:value-of select="g:label(xs:anyURI('&g;ListMode'), /, $lang)"/>
+			</a>
+
+			<!--
 			<xsl:choose>
 			    <xsl:when test="$uri != $absolute-path">
-				<a href="{$absolute-path}{g:query-string($uri, $endpoint-uri, $offset, $limit, $order-by, $desc, $lang, '&g;ListMode')}">List</a>
+				<a href="{$absolute-path}{g:query-string($uri, $endpoint-uri, $offset, $limit, $order-by, $desc, $lang, '&g;ListMode')}">
+				    <xsl:value-of select="g:label(xs:anyURI('&g;ListMode'), /, $lang)"/>
+				</a>
 			    </xsl:when>
 			    <xsl:otherwise>
-				<a href="{$absolute-path}{g:query-string($offset, $limit, $order-by, $desc, $lang, '&g;ListMode')}">List</a>
+				<a href="{$absolute-path}{g:query-string($offset, $limit, $order-by, $desc, $lang, '&g;ListMode')}">
+				    <xsl:value-of select="g:label(xs:anyURI('&g;ListMode'), /, $lang)"/>
+				</a>
 			    </xsl:otherwise>
 			</xsl:choose>
+			-->
 		    </li>
 		    <li>
 			<xsl:if test="$mode = '&g;TableMode'">
 			    <xsl:attribute name="class">active</xsl:attribute>
 			</xsl:if>
+			
+			<a href="{$absolute-path}{g:query-string($offset, $limit, $order-by, $desc, $lang, '&g;TableMode')}">
+			    <xsl:value-of select="g:label(xs:anyURI('&g;TableMode'), /, $lang)"/>
+			</a>
+
+			<!--
 			<xsl:choose>
 			    <xsl:when test="$uri != $absolute-path">
-				<a href="{$absolute-path}{g:query-string($uri, $endpoint-uri, $offset, $limit, $order-by, $desc, $lang, '&g;TableMode')}">Table</a>
+				<a href="{$absolute-path}{g:query-string($uri, $endpoint-uri, $offset, $limit, $order-by, $desc, $lang, '&g;TableMode')}">
+				    <xsl:value-of select="g:label(xs:anyURI('&g;TableMode'), /, $lang)"/>
+				</a>
 			    </xsl:when>
 			    <xsl:otherwise>
-				<a href="{$absolute-path}{g:query-string($offset, $limit, $order-by, $desc, $lang, '&g;TableMode')}">Table</a>
+				<a href="{$absolute-path}{g:query-string($offset, $limit, $order-by, $desc, $lang, '&g;TableMode')}">
+				    <xsl:value-of select="g:label(xs:anyURI('&g;TableMode'), /, $lang)"/>
+				</a>
 			    </xsl:otherwise>
 			</xsl:choose>
+			-->
 		    </li>
 		</ul>
 
@@ -158,7 +180,6 @@ exclude-result-prefixes="xsl xhtml xs g rdf rdfs owl sparql geo dbpedia-owl dc d
 	    </xsl:if>
 	    
 	    <xsl:if test="$mode = '&g;TableMode'">
-		<!-- <xsl:variable name="predicate-uris" select="distinct-values(*/*/xs:anyURI(concat(namespace-uri(.), local-name(.))))" as="xs:anyURI*"/> -->
 		<xsl:variable name="predicates" as="element()*">
 		    <xsl:for-each-group select="*/*" group-by="concat(namespace-uri(.), local-name(.))">
 			<xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(.), local-name(.))), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
@@ -242,7 +263,7 @@ exclude-result-prefixes="xsl xhtml xs g rdf rdfs owl sparql geo dbpedia-owl dc d
     </xsl:template>    
 
     <xsl:template match="rdf:type/@rdf:resource">
-	<span title="{.}" class="btn">
+	<span class="btn">
 	    <xsl:apply-imports/>
 	</span>
     </xsl:template>
@@ -252,25 +273,9 @@ exclude-result-prefixes="xsl xhtml xs g rdf rdfs owl sparql geo dbpedia-owl dc d
     <xsl:template match="*[*][@rdf:about] | *[*][@rdf:nodeID]" mode="g:HeaderMode">
 	<!-- <xsl:if test="@rdf:about or foaf:depiction/@rdf:resource or foaf:logo/@rdf:resource or rdf:type/@rdf:resource or rdfs:comment[lang($lang) or not(@xml:lang)] or dc:description[lang($lang) or not(@xml:lang)] or dct:description[lang($lang) or not(@xml:lang)] or dbpedia-owl:abstract[lang($lang) or not(@xml:lang)]"> -->
 	<div class="well well-large">
-	    <xsl:if test="self::foaf:Image or rdf:type/@rdf:resource = '&foaf;Image' or foaf:img/@rdf:resource or foaf:depiction/@rdf:resource or foaf:logo/@rdf:resource">
-		<p style="margin: auto;">
-		    <xsl:choose>
-			<xsl:when test="self::foaf:Image or rdf:type/@rdf:resource = '&foaf;Image'">
-			    <xsl:apply-templates select="@rdf:about"/>
-			</xsl:when>
-			<xsl:when test="foaf:img/@rdf:resource">
-			    <xsl:apply-templates select="foaf:img[1]/@rdf:resource"/>
-			</xsl:when>
-			<xsl:when test="foaf:depiction/@rdf:resource">
-			    <xsl:apply-templates select="foaf:depiction[1]/@rdf:resource"/>
-			</xsl:when>
-			<xsl:when test="foaf:logo/@rdf:resource">
-			    <xsl:apply-templates select="foaf:logo[1]/@rdf:resource"/>
-			</xsl:when>
-		    </xsl:choose>
-		</p>
-	    </xsl:if>
-
+	    <!-- self::foaf:Image or rdf:type/@rdf:resource = '&foaf;Image' -->
+	    <xsl:apply-templates mode="g:HeaderImageMode"/>
+	    
 	    <xsl:if test="@rdf:about">
 		<div class="btn-group pull-right">
 		    <xsl:choose>
@@ -311,10 +316,10 @@ exclude-result-prefixes="xsl xhtml xs g rdf rdfs owl sparql geo dbpedia-owl dc d
 		</p>
 	    </xsl:if>
 
-	    <xsl:if test="rdf:type/@rdf:resource">
+	    <xsl:if test="rdf:type">
 		<ul class="inline">
-		    <xsl:apply-templates select="rdf:type/@rdf:resource" mode="g:HeaderMode">
-			<xsl:sort select="g:label(., /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
+		    <xsl:apply-templates select="rdf:type" mode="g:HeaderMode">
+			<xsl:sort select="g:label(@rdf:resource | @rdf:nodeID, /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
 		    </xsl:apply-templates>
 		</ul>
 	    </xsl:if>
@@ -333,10 +338,21 @@ exclude-result-prefixes="xsl xhtml xs g rdf rdfs owl sparql geo dbpedia-owl dc d
 	</h2>
     </xsl:template>
 
-    <xsl:template match="rdf:type/@rdf:resource" mode="g:HeaderMode">
+    <xsl:template match="rdf:type" mode="g:HeaderMode">
 	<li>
-	    <xsl:apply-templates select="."/>
+	    <xsl:apply-templates select="@rdf:resource | @rdf:nodeID"/>
 	</li>
+    </xsl:template>
+
+    <!-- HEADER IMAGE MODE -->
+
+    <!-- ignore all other properties -->
+    <xsl:template match="*" mode="g:HeaderImageMode"/>
+	
+    <xsl:template match="foaf:img | foaf:depiction | foaf:thumbnail | foaf:logo" mode="g:HeaderImageMode" priority="1">
+	<p>
+	    <xsl:apply-templates select="@rdf:resource"/>
+	</p>
     </xsl:template>
 
     <!-- PROPERTY LIST MODE -->
@@ -381,11 +397,11 @@ exclude-result-prefixes="xsl xhtml xs g rdf rdfs owl sparql geo dbpedia-owl dc d
 	    </dt>
 	</xsl:if>
 
-	<xsl:if test="lang($lang) or not(../*[concat(namespace-uri(.), local-name(.)) = $this][lang($lang)])">
+	<!-- <xsl:if test="lang($lang) or not(../*[concat(namespace-uri(.), local-name(.)) = $this][lang($lang)])"> -->
 	    <xsl:apply-templates select="node() | @rdf:resource" mode="g:PropertyListMode"/>
 
 	    <xsl:apply-templates select="@rdf:nodeID" mode="g:PropertyListMode"/>
-	</xsl:if>
+	<!-- </xsl:if> -->
     </xsl:template>
 
     <xsl:template match="node() | @rdf:resource" mode="g:PropertyListMode">
@@ -431,7 +447,8 @@ exclude-result-prefixes="xsl xhtml xs g rdf rdfs owl sparql geo dbpedia-owl dc d
 	
 	<div class="well sidebar-nav">
 	    <h2 class="nav-header">
-		<a href="{$base-uri}{g:query-string($this, $endpoint-uri, (), (), (), (), $lang, ())}" title="{$this}">
+		<a href="{$base-uri}{g:query-string($lang)}" title="{$this}">
+		<!-- <a href="{$base-uri}{g:query-string($this, $endpoint-uri, (), (), (), (), $lang, ())}" title="{$this}"> -->
 		    <xsl:value-of select="g:label($this, /, $lang)"/>
 		</a>
 	    </h2>
@@ -504,41 +521,35 @@ exclude-result-prefixes="xsl xhtml xs g rdf rdfs owl sparql geo dbpedia-owl dc d
 
     <!-- LIST MODE -->
 
+    <xsl:template match="@rdf:about | @rdf:nodeID" mode="g:ListMode">
+	<h1>
+	    <xsl:apply-templates select="."/>
+	</h1>
+    </xsl:template>
+
+    <!-- ignore all other properties -->
+    <xsl:template match="*" mode="g:ListImageMode"/>
+	
+    <xsl:template match="foaf:img | foaf:depiction | foaf:thumbnail | foaf:logo" mode="g:ListImageMode" priority="1">
+	<p>
+	    <xsl:apply-templates select="@rdf:resource"/>
+	</p>
+    </xsl:template>
+
     <xsl:template match="*[*][@rdf:about] | *[*][@rdf:nodeID]" mode="g:ListMode">
 	<div class="well">
-	    <xsl:if test="self::foaf:Image or rdf:type/@rdf:resource = '&foaf;Image' or foaf:img/@rdf:resource or foaf:depiction/@rdf:resource or foaf:logo/@rdf:resource">
-		<div>
-		    <xsl:choose>
-			<xsl:when test="self::foaf:Image or rdf:type/@rdf:resource = '&foaf;Image'">
-			    <xsl:apply-templates select="@rdf:about"/>
-			</xsl:when>
-			<xsl:when test="foaf:img/@rdf:resource">
-			    <xsl:apply-templates select="foaf:img[1]/@rdf:resource"/>
-			</xsl:when>
-			<xsl:when test="foaf:depiction/@rdf:resource">
-			    <xsl:apply-templates select="foaf:depiction[1]/@rdf:resource"/>
-			</xsl:when>
-			<xsl:when test="foaf:logo/@rdf:resource">
-			    <xsl:apply-templates select="foaf:logo[1]/@rdf:resource"/>
-			</xsl:when>
-		    </xsl:choose>
-		</div>
-	    </xsl:if>
+	    <xsl:apply-templates mode="g:ListImageMode"/>
 
-	    <xsl:if test="(@rdf:about or @rdf:nodeID) and not(self::foaf:Image or rdf:type/@rdf:resource = '&foaf;Image')">
-		<h1>
-		    <xsl:apply-templates select="@rdf:about | @rdf:nodeID"/>
-		</h1>
-	    </xsl:if>
-	    <xsl:if test="rdf:type/@rdf:resource">
+	    <xsl:apply-templates select="@rdf:about | @rdf:nodeID" mode="g:ListMode"/>
+	    
+	    <xsl:if test="rdf:type">
 		<ul class="inline">
-		    <xsl:for-each select="rdf:type/@rdf:resource">
-			<li>
-			    <xsl:apply-templates select="."/>
-			</li>
-		    </xsl:for-each>
+		    <xsl:apply-templates select="rdf:type" mode="g:HeaderMode">
+			<xsl:sort select="g:label(@rdf:resource | @rdf:nodeID, /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
+		    </xsl:apply-templates>
 		</ul>
 	    </xsl:if>
+	    
 	    <xsl:if test="rdfs:comment[lang($lang) or not(@xml:lang)] or dc:description[lang($lang) or not(@xml:lang)] or dct:description[lang($lang) or not(@xml:lang)] or dbpedia-owl:abstract[lang($lang) or not(@xml:lang)] or sioc:content[lang($lang) or not(@xml:lang)]">
 		<p>
 		    <xsl:choose>

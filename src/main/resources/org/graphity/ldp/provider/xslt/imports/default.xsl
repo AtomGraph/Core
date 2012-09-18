@@ -55,13 +55,13 @@ exclude-result-prefixes="xhtml xs g url rdf rdfs xsd sparql dc dct foaf skos lis
 
     <!-- subject/object resource -->
     <xsl:template match="@rdf:about | @rdf:resource | sparql:uri">
-	<a href="{g:document-uri(.)}{g:query-string($lang)}{if (g:fragment-id(.)) then concat('#', g:fragment-id(.)) else ()}" title="{.}">
+	<a href="{.}" title="{.}">
 	    <xsl:value-of select="g:label(., /, $lang)"/>
 	</a>
     </xsl:template>
 
     <xsl:template match="@rdf:about[starts-with(., $base-uri)] | @rdf:resource[starts-with(., $base-uri)] | sparql:uri[starts-with(., $base-uri)]">
-	<a href="{.}{g:query-string((), (), (), (), (), (), $lang, ())}" title="{.}">
+	<a href="{.}{g:query-string($lang)}" title="{.}">
 	    <xsl:value-of select="g:label(., /, $lang)"/>
 	</a>
     </xsl:template>
@@ -116,9 +116,7 @@ exclude-result-prefixes="xhtml xs g url rdf rdfs xsd sparql dc dct foaf skos lis
     </xsl:template>
 
     <xsl:template match="@rdf:about | @rdf:resource" mode="g:TypeMode">
-	<a href="{$base-uri}{g:query-string(., $endpoint-uri, (), (), (), (), $lang, ())}">
-	    <xsl:value-of select="g:label(., /, $lang)"/>
-	</a>
+	<xsl:apply-templates select="."/>
     </xsl:template>
-	
+
 </xsl:stylesheet>
