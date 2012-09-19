@@ -24,6 +24,7 @@ Installation
 ------------
 
 Graphity LDP is a [Maven Web application](http://maven.apache.org/guides/mini/guide-webapp.html).
+It requires [Java 1.7](http://www.oracle.com/technetwork/java/javase/downloads/index.html) (due to the improvements in the [Locale](http://docs.oracle.com/javase/7/docs/api/java/util/Locale.html) class).
 
 You have the following options to install Graphity:
 * checkout the source code from the Git repository and build it as a Maven webapp

@@ -176,35 +176,11 @@ exclude-result-prefixes="xsl xhtml xs g rdf rdfs owl sparql geo dbpedia-owl dc d
 	    <xsl:apply-templates select="." mode="g:PaginationMode"/>
 
 	    <xsl:if test="$mode = '&g;ListMode'">
-		<xsl:apply-templates mode="g:ListMode"/>
+		<xsl:apply-templates select="." mode="g:ListMode"/>
 	    </xsl:if>
 	    
-	    <xsl:if test="$mode = '&g;TableMode'">
-		<xsl:variable name="predicates" as="element()*">
-		    <xsl:for-each-group select="*/*" group-by="concat(namespace-uri(.), local-name(.))">
-			<xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(.), local-name(.))), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
-			<xsl:sequence select="current-group()[1]"/>
-		    </xsl:for-each-group>
-		</xsl:variable>
-	    
-		<table class="table table-bordered table-striped">
-		    <thead>
-			<tr>
-			    <th>
-				<a href="{$absolute-path}{g:query-string($offset, $limit, (), $desc, $lang, $mode)}">
-				    <xsl:value-of select="g:label(xs:anyURI('&rdf;Resource'), /, $lang)"/>
-				</a>
-			    </th>
-
-			    <xsl:apply-templates select="$predicates" mode="g:TableHeaderMode"/>
-			</tr>
-		    </thead>
-		    <tbody>
-			<xsl:apply-templates mode="g:TableMode">
-			    <xsl:with-param name="predicates" select="$predicates"/>
-			</xsl:apply-templates>
-		    </tbody>
-		</table>
+	    <xsl:if test="$mode = '&g;TableMode'">	    
+		<xsl:apply-templates select="." mode="g:TableMode"/>
 	    </xsl:if>
 	    
 	    <xsl:apply-templates select="." mode="g:PaginationMode"/>
@@ -217,7 +193,7 @@ exclude-result-prefixes="xsl xhtml xs g rdf rdfs owl sparql geo dbpedia-owl dc d
 	    </xsl:for-each-group>
 	</div>
     </xsl:template>
-
+    
     <!-- matches if the RDF/XML document includes resource description where @rdf:about = $uri -->
     <xsl:template match="rdf:RDF[key('resources', $uri) or count(*) = 1]">
 	<div class="span8">
@@ -521,19 +497,8 @@ exclude-result-prefixes="xsl xhtml xs g rdf rdfs owl sparql geo dbpedia-owl dc d
 
     <!-- LIST MODE -->
 
-    <xsl:template match="@rdf:about | @rdf:nodeID" mode="g:ListMode">
-	<h1>
-	    <xsl:apply-templates select="."/>
-	</h1>
-    </xsl:template>
-
-    <!-- ignore all other properties -->
-    <xsl:template match="*" mode="g:ListImageMode"/>
-	
-    <xsl:template match="foaf:img | foaf:depiction | foaf:thumbnail | foaf:logo" mode="g:ListImageMode" priority="1">
-	<p>
-	    <xsl:apply-templates select="@rdf:resource"/>
-	</p>
+    <xsl:template match="rdf:RDF" mode="g:ListMode">
+	<xsl:apply-templates mode="g:ListMode"/>
     </xsl:template>
 
     <xsl:template match="*[*][@rdf:about] | *[*][@rdf:nodeID]" mode="g:ListMode">
@@ -574,6 +539,21 @@ exclude-result-prefixes="xsl xhtml xs g rdf rdfs owl sparql geo dbpedia-owl dc d
 	</div>
     </xsl:template>
 
+    <xsl:template match="@rdf:about | @rdf:nodeID" mode="g:ListMode">
+	<h1>
+	    <xsl:apply-templates select="."/>
+	</h1>
+    </xsl:template>
+
+    <!-- ignore all other properties -->
+    <xsl:template match="*" mode="g:ListImageMode"/>
+	
+    <xsl:template match="foaf:img | foaf:depiction | foaf:thumbnail | foaf:logo" mode="g:ListImageMode" priority="1">
+	<p>
+	    <xsl:apply-templates select="@rdf:resource"/>
+	</p>
+    </xsl:template>
+
     <!-- TABLE HEADER MODE -->
 
     <xsl:template match="*[@rdf:about or @rdf:nodeID]/*" mode="g:TableHeaderMode">
@@ -587,19 +567,44 @@ exclude-result-prefixes="xsl xhtml xs g rdf rdfs owl sparql geo dbpedia-owl dc d
     </xsl:template>
 
     <!-- TABLE MODE -->
-    
+
+    <xsl:template match="rdf:RDF" mode="g:TableMode">
+	<xsl:variable name="predicates" as="element()*">
+	    <xsl:for-each-group select="*/*" group-by="concat(namespace-uri(.), local-name(.))">
+		<xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(.), local-name(.))), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
+		<xsl:sequence select="current-group()[1]"/>
+	    </xsl:for-each-group>
+	</xsl:variable>
+
+	<table class="table table-bordered table-striped">
+	    <thead>
+		<tr>
+		    <th>
+			<a href="{$absolute-path}{g:query-string($offset, $limit, (), $desc, $lang, $mode)}">
+			    <xsl:value-of select="g:label(xs:anyURI('&rdf;Resource'), /, $lang)"/>
+			</a>
+		    </th>
+
+		    <xsl:apply-templates select="$predicates" mode="g:TableHeaderMode"/>
+		</tr>
+	    </thead>
+	    <tbody>
+		<xsl:apply-templates mode="g:TableMode"/>
+		    <!-- <xsl:with-param name="predicates" select="$predicates"/> -->
+	    </tbody>
+	</table>
+    </xsl:template>
+
     <xsl:template match="*[*][@rdf:about] | *[*][@rdf:nodeID]" mode="g:TableMode">
-	<xsl:param name="predicates" as="element()*">
+	<xsl:variable name="predicates" as="element()*">
 	    <xsl:for-each-group select="../*/*" group-by="concat(namespace-uri(.), local-name(.))">
 		<xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(.), local-name(.))), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
 		<xsl:sequence select="current-group()[1]"/>
 	    </xsl:for-each-group>
-	</xsl:param>
+	</xsl:variable>
 	
 	<tr>
-	    <td>
-		<xsl:apply-templates select="@rdf:about | @rdf:nodeID"/>
-	    </td>
+	    <xsl:apply-templates select="@rdf:about | @rdf:nodeID" mode="g:TableMode"/>
 
 	    <xsl:variable name="subject" select="."/>
 	    <xsl:for-each select="$predicates">
@@ -615,6 +620,12 @@ exclude-result-prefixes="xsl xhtml xs g rdf rdfs owl sparql geo dbpedia-owl dc d
 		</xsl:choose>
 	    </xsl:for-each>
 	</tr>
+    </xsl:template>
+
+    <xsl:template match="@rdf:about | @rdf:nodeID" mode="g:TableMode">
+	<td>
+	    <xsl:apply-templates select="."/>
+	</td>
     </xsl:template>
 
     <xsl:template match="*[@rdf:about or @rdf:nodeID]/*" mode="g:TableMode"/>
