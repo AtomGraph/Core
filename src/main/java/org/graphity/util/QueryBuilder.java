@@ -235,7 +235,8 @@ public class QueryBuilder
 		addProperty(SP.getArgProperty(1), var);
 	
 	Resource eqExpr = spinQuery.getModel().createResource().
-		addProperty(RDF.type, SP.eq).addProperty(SP.getArgProperty(1), langExpr).
+		addProperty(RDF.type, SP.eq).
+		addProperty(SP.getArgProperty(1), langExpr).
 		addLiteral(SP.getArgProperty(2), spinQuery.getModel().createLiteral(lang.toLanguageTag()));
 
 	return filter(SPINFactory.createFilter(spinQuery.getModel(), eqExpr));
@@ -248,7 +249,43 @@ public class QueryBuilder
 	
 	return this; // no way to add FILTER if varName is null
     }
+
+    public QueryBuilder filter(Variable var, RDFList resources)
+    {
+	if (log.isTraceEnabled()) log.trace("Setting FILTER param: {}", resources);
+	
+	return filter(SPINFactory.createFilter(spinQuery.getModel(), getFilterExpression(var, resources)));
+    }
+
+    protected Resource getFilterExpression(Variable var, RDFList resources)
+    {
+	Resource eqExpr = spinQuery.getModel().createResource().
+		addProperty(RDF.type, SP.eq).
+		addProperty(SP.getArgProperty(1), var).
+		addProperty(SP.getArgProperty(2), resources.getHead());
+
+	if (resources.getTail().isEmpty()) // no more resources in list
+	    return eqExpr;
+	else
+	{
+	    // more resources follow - join recursively with current value using || (or)
+	    Resource orExpr = spinQuery.getModel().createResource().
+		addProperty(RDF.type, SP.getArgProperty("or")).
+		addProperty(SP.getArgProperty(1), eqExpr).
+		addProperty(SP.getArgProperty(2), getFilterExpression(var, resources.getTail()));
+
+	    return orExpr;
+	}
+    }
     
+    public QueryBuilder filter(String varName, RDFList resources)
+    {
+	if (varName != null)
+	    return filter(SPINFactory.createVariable(spinQuery.getModel(), varName), resources);
+	
+	return this; // no way to add FILTER if varName is null
+    }
+
     public QueryBuilder limit(Long limit)
     {
 	if (log.isTraceEnabled()) log.trace("Setting LIMIT param: {}", limit);
