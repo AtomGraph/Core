@@ -73,7 +73,7 @@ exclude-result-prefixes="xhtml xs g url rdf rdfs xsd sparql dc dct foaf skos lis
     </xsl:template>
 
     <!-- property -->
-    <xsl:template match="*[@rdf:about or @rdf:nodeID]/* | *[@rdf:resource]">
+    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*">
 	<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(.), local-name(.)))" as="xs:anyURI"/>
 	<span title="{$this}">
 	    <xsl:value-of select="g:label($this, /, $lang)"/>

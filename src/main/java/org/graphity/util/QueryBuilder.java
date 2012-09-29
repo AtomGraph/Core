@@ -22,6 +22,7 @@ import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.*;
 import com.hp.hpl.jena.util.ResourceUtils;
 import com.hp.hpl.jena.vocabulary.RDF;
+import java.util.Iterator;
 import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,6 +98,8 @@ public class QueryBuilder
 
     protected QueryBuilder query(Resource resource)
     {
+	if (resource == null) throw new IllegalArgumentException("Query resource cannot be null");
+
 	spinQuery = SPINFactory.asQuery(resource);
 	arq2spin = new ARQ2SPIN(spinQuery.getModel());
 	
@@ -110,6 +113,8 @@ public class QueryBuilder
     
     protected QueryBuilder query(Query query, String uri)
     {
+	if (query == null) throw new IllegalArgumentException("Query cannot be null");
+	
 	arq2spin = new ARQ2SPIN(ModelFactory.createDefaultModel());
 	spinQuery = arq2spin.createQuery(query, uri);
 
@@ -118,11 +123,15 @@ public class QueryBuilder
 
     public QueryBuilder describe(String uri)
     {
+	if (uri == null) throw new IllegalArgumentException("DESCRIBE URI cannot be null");
+	
 	return describe(ModelFactory.createDefaultModel().createResource(uri));
     }
 
     public QueryBuilder describe(Resource resultNode)
     {
+	if (resultNode == null) throw new IllegalArgumentException("DESCRIBE resource cannot be null");
+	
 	if (resultNode.canAs(RDFList.class))
 	    return describe(resultNode.as(RDFList.class));
 	else
@@ -131,6 +140,8 @@ public class QueryBuilder
 
     public QueryBuilder describe(RDFList resultNodes)
     {
+	if (resultNodes == null) throw new IllegalArgumentException("DESCRIBE resource list cannot be null");
+
 	return query(resultNodes.getModel().createResource(SP.Describe).
 		addProperty(SP.resultNodes, resultNodes));
     }
@@ -142,6 +153,8 @@ public class QueryBuilder
     
     public QueryBuilder construct(TripleTemplate template)
     {
+	if (template == null) throw new IllegalArgumentException("CONSTRUCT template cannot be null");
+
 	Resource queryRes = ModelFactory.createDefaultModel().createResource(SP.Construct);
 		
 	((Construct)queryRes).getTemplates().add(template);
@@ -151,6 +164,10 @@ public class QueryBuilder
     
     public QueryBuilder construct(Resource subject, Resource predicate, RDFNode object)
     {
+	if (subject == null) throw new IllegalArgumentException("CONSTRUCT subject cannot be null");
+	if (predicate == null) throw new IllegalArgumentException("CONSTRUCT predicate cannot be null");
+	if (object == null) throw new IllegalArgumentException("CONSTRUCT object cannot be null");
+
 	Resource queryRes = ModelFactory.createDefaultModel().createResource(SP.Construct);
 	
 	queryRes.addProperty(SP.templates, queryRes.getModel().createList(new RDFNode[]{queryRes.
@@ -164,13 +181,15 @@ public class QueryBuilder
 
     public QueryBuilder where(Resource element)
     {
+	if (element == null) throw new IllegalArgumentException("WHERE element cannot be null");
+
 	return where(SPINFactory.asElement(element));
     }
     
     public QueryBuilder where(Element element)
     {
-	//spinQuery.getWhereElements().add(element);
-	//spinQuery.getWhere().add(element);
+	if (element == null) throw new IllegalArgumentException("WHERE element cannot be null");
+	//spinQuery.getWhereElements().add(element); // doesn't work?
 
 	if (!spinQuery.hasProperty(SP.where))
 	    spinQuery.addProperty(SP.where, spinQuery.getModel().createList(new RDFNode[]{element}));
@@ -189,6 +208,8 @@ public class QueryBuilder
 
     public QueryBuilder subQuery(Select select)
     {
+	if (select == null) throw new IllegalArgumentException("SELECT sub-query cannot be null");
+	
 	SubQuery subQuery = SPINFactory.createSubQuery(spinQuery.getModel(), select);
 	if (log.isTraceEnabled()) log.trace("SubQuery: {}", subQuery);
 	return where(subQuery);
@@ -196,6 +217,8 @@ public class QueryBuilder
 
     public QueryBuilder subQuery(Resource query)
     {
+	if (query == null) throw new IllegalArgumentException("Sub-query resource cannot be null");
+	
 	spinQuery.getModel().add(query.getModel());
 	return subQuery((Select)SPINFactory.asQuery(query));  // exception if not SELECT ?
     }
@@ -210,25 +233,36 @@ public class QueryBuilder
 	return where(optional);
     }
 
-    public QueryBuilder optional(TriplePattern triplePattern)
+    public QueryBuilder optional(TriplePattern pattern)
     {
+	if (pattern == null) throw new IllegalArgumentException("OPTIONAL pattern cannot be null");
+
 	return where(SPINFactory.createOptional(spinQuery.getModel(),
-		SPINFactory.createElementList(spinQuery.getModel(), new Element[]{triplePattern})));
+		SPINFactory.createElementList(spinQuery.getModel(), new Element[]{pattern})));
     }
 
     public QueryBuilder optional(Resource subject, Resource predicate, RDFNode object)
     {
+	if (subject == null) throw new IllegalArgumentException("OPTIONAL subject cannot be null");
+	if (predicate == null) throw new IllegalArgumentException("OPTIONAL predicate cannot be null");
+	if (object == null) throw new IllegalArgumentException("OPTIONAL object cannot be null");
+
 	return optional(SPINFactory.createTriplePattern(spinQuery.getModel(), subject, predicate, object));
     }
 
     public QueryBuilder filter(Filter filter)
     {
+	if (filter == null) throw new IllegalArgumentException("FILTER cannot be null");
+	
 	return where(filter);
     }
 	
-    public QueryBuilder filter(Variable var, Locale lang)
+    public QueryBuilder filter(Variable var, Locale locale)
     {
-	if (log.isTraceEnabled()) log.trace("Setting FILTER param: LANG({})", lang.toLanguageTag());
+	if (var == null) throw new IllegalArgumentException("FILTER variable name cannot be null");
+	if (locale == null) throw new IllegalArgumentException("Locale cannot be null");
+	
+	if (log.isTraceEnabled()) log.trace("Setting FILTER (LANG({}) = \"{}\")", var, locale.toLanguageTag());
 	
 	Resource langExpr = spinQuery.getModel().createResource().
 		addProperty(RDF.type, SP.getArgProperty("lang")).
@@ -237,27 +271,30 @@ public class QueryBuilder
 	Resource eqExpr = spinQuery.getModel().createResource().
 		addProperty(RDF.type, SP.eq).
 		addProperty(SP.getArgProperty(1), langExpr).
-		addLiteral(SP.getArgProperty(2), spinQuery.getModel().createLiteral(lang.toLanguageTag()));
+		addLiteral(SP.getArgProperty(2), spinQuery.getModel().createLiteral(locale.toLanguageTag()));
 
 	return filter(SPINFactory.createFilter(spinQuery.getModel(), eqExpr));
     }
 
-    public QueryBuilder filter(String varName, Locale lang)
+    public QueryBuilder filter(String varName, Locale locale)
     {
-	if (varName != null)
-	    return filter(SPINFactory.createVariable(spinQuery.getModel(), varName), lang);
+	if (varName == null) throw new IllegalArgumentException("FILTER variable name cannot be null");
+	if (locale == null) throw new IllegalArgumentException("Locale cannot be null");
 	
-	return this; // no way to add FILTER if varName is null
+	return filter(SPINFactory.createVariable(spinQuery.getModel(), varName), locale);
     }
 
     public QueryBuilder filter(Variable var, RDFList resources)
     {
-	if (log.isTraceEnabled()) log.trace("Setting FILTER param: {}", resources);
+	if (var == null) throw new IllegalArgumentException("FILTER variable cannot be null");
+	if (resources == null) throw new IllegalArgumentException("FILTER resource list cannot be null");
+
+	if (log.isTraceEnabled()) log.trace("Setting FILTER param: {}", resources.getModel());
 	
 	return filter(SPINFactory.createFilter(spinQuery.getModel(), getFilterExpression(var, resources)));
     }
 
-    protected Resource getFilterExpression(Variable var, RDFList resources)
+    private Resource getFilterExpression(Variable var, RDFList resources)
     {
 	Resource eqExpr = spinQuery.getModel().createResource().
 		addProperty(RDF.type, SP.eq).
@@ -267,41 +304,69 @@ public class QueryBuilder
 	if (resources.getTail().isEmpty()) // no more resources in list
 	    return eqExpr;
 	else
-	{
 	    // more resources follow - join recursively with current value using || (or)
-	    Resource orExpr = spinQuery.getModel().createResource().
+	    return spinQuery.getModel().createResource().
 		addProperty(RDF.type, SP.getArgProperty("or")).
 		addProperty(SP.getArgProperty(1), eqExpr).
 		addProperty(SP.getArgProperty(2), getFilterExpression(var, resources.getTail()));
-
-	    return orExpr;
-	}
     }
     
     public QueryBuilder filter(String varName, RDFList resources)
     {
-	if (varName != null)
-	    return filter(SPINFactory.createVariable(spinQuery.getModel(), varName), resources);
+	if (varName == null) throw new IllegalArgumentException("FILTER variable name cannot be null");
 	
-	return this; // no way to add FILTER if varName is null
+	return filter(SPINFactory.createVariable(spinQuery.getModel(), varName), resources);
     }
 
+    public QueryBuilder replaceFilter(String varName, RDFList resources)
+    {
+	if (log.isTraceEnabled()) log.trace("Replacing FILTER");
+
+	while (findFilter(spinQuery.getWhere()) != null) // iterator.remove() doesn't work
+	{
+	    RDFNode filter = findFilter(spinQuery.getWhere());
+	    if (log.isTraceEnabled()) log.trace("Removing FILTER: {}", filter);
+	    spinQuery.getWhere().remove(filter);
+	}
+	
+	return filter(varName, resources);
+    }
+
+    private RDFNode findFilter(ElementList list)
+    {
+	Iterator<RDFNode> it = list.iterator();
+
+	while (it.hasNext())
+	{
+	    RDFNode node = it.next();
+	    // if (SPINFactory.asExpression(node) instanceof Filter)
+	    if (node.isResource() && node.asResource().hasProperty(RDF.type, SP.Filter))
+		return node;
+	}
+	
+	return null;
+    }
+    
     public QueryBuilder limit(Long limit)
     {
+	if (limit == null) throw new IllegalArgumentException("LIMIT cannot be null");
+
 	if (log.isTraceEnabled()) log.trace("Setting LIMIT param: {}", limit);
-	spinQuery.removeAll(SP.limit);
 	
-	if (limit != null) spinQuery.addLiteral(SP.limit, limit);
+	spinQuery.removeAll(SP.limit).
+		addLiteral(SP.limit, limit);
 	
 	return this;
     }
 
     public QueryBuilder offset(Long offset)
     {
-	if (log.isTraceEnabled()) log.trace("Setting OFFSET param: {}", offset);
-	spinQuery.removeAll(SP.offset);
+	if (offset == null) throw new IllegalArgumentException("OFFSET cannot be null");
 	
-	if (offset != null) spinQuery.addLiteral(SP.offset, offset);
+	if (log.isTraceEnabled()) log.trace("Setting OFFSET param: {}", offset);
+	
+	spinQuery.removeAll(SP.offset)
+		.addLiteral(SP.offset, offset);
 	
 	return this;
     }
@@ -321,11 +386,15 @@ public class QueryBuilder
 
     public QueryBuilder orderBy(Resource var)
     {
+	if (var == null) throw new IllegalArgumentException("ORDER BY resource cannot be null");
+
 	return orderBy(SPINFactory.asVariable(var), false);
     }
 
     public QueryBuilder orderBy(Resource var, Boolean desc)
     {
+	if (var == null) throw new IllegalArgumentException("ORDER BY resource cannot be null");
+
 	return orderBy(SPINFactory.asVariable(var), desc);
     }
 
@@ -336,43 +405,40 @@ public class QueryBuilder
     
     public QueryBuilder orderBy(Variable var, Boolean desc)
     {
+	if (var == null) throw new IllegalArgumentException("ORDER BY variable cannot be null");
+	if (desc == null) throw new IllegalArgumentException("DESC cannot be null");
+	
 	if (log.isTraceEnabled()) log.trace("Setting ORDER BY variable: {}", var);
 	spinQuery.removeAll(SP.orderBy);
 
-	if (var != null)
-	{
-	    Resource bnode = spinQuery.getModel().createResource().addProperty(SP.expression, var);
-	    spinQuery.addProperty(SP.orderBy, spinQuery.getModel().createList(new RDFNode[]{bnode}));
+	Resource bnode = spinQuery.getModel().createResource().addProperty(SP.expression, var);
+	spinQuery.addProperty(SP.orderBy, spinQuery.getModel().createList(new RDFNode[]{bnode}));
 
-	    if (desc)
-		bnode.addProperty(RDF.type, SP.Desc);
-	    else
-		bnode.addProperty(RDF.type, SP.Asc);
-	}
-	
-	if (log.isDebugEnabled()) log.debug("SPIN Query Model size(): {}", spinQuery.getModel().size());
+	if (desc)
+	    bnode.addProperty(RDF.type, SP.Desc);
+	else
+	    bnode.addProperty(RDF.type, SP.Asc);
 	
 	return this;
     }
 
-    public QueryBuilder replaceVar(String name, String uri)
+    public QueryBuilder replaceVar(String varName, String uri)
     {
-	//if (value.isURIResource())
-	{
-	    Resource var = getVarByName(name);
-	    if (var != null)
-	    {
-		var.removeAll(SP.varName);
-		ResourceUtils.renameResource(var, uri);
-	    }
-	}
+	if (varName == null) throw new IllegalArgumentException("Variable name cannot be null");
+	if (uri == null) throw new IllegalArgumentException("URI value cannot be null");
 	
+	Resource var = getVarByName(varName);
+	var.removeAll(SP.varName);
+	ResourceUtils.renameResource(var, uri);
+
 	return this;
     }
     
-    public QueryBuilder replaceVar(String name, Resource resource)
+    public QueryBuilder replaceVar(String varName, Resource resource)
     {
-	return replaceVar(name, resource.getURI());
+	if (resource == null) throw new IllegalArgumentException("Resource cannot be null");
+	
+	return replaceVar(varName, resource.getURI());
     }
 
     protected Resource getVarByName(String name)
