@@ -590,7 +590,7 @@ exclude-result-prefixes="xsl xhtml xs g rdf rdfs owl sparql geo dbpedia-owl dc d
 	    </thead>
 	    <tbody>
 		<xsl:apply-templates mode="g:TableMode"/>
-		    <!-- <xsl:with-param name="predicates" select="$predicates"/> -->
+		<!-- <xsl:with-param name="predicates" select="$predicates"/> -->
 	    </tbody>
 	</table>
     </xsl:template>

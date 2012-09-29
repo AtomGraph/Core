@@ -354,7 +354,7 @@ public class QueryBuilder
 	if (log.isTraceEnabled()) log.trace("Setting LIMIT param: {}", limit);
 	
 	spinQuery.removeAll(SP.limit).
-		addLiteral(SP.limit, limit);
+	    addLiteral(SP.limit, limit);
 	
 	return this;
     }
@@ -366,7 +366,7 @@ public class QueryBuilder
 	if (log.isTraceEnabled()) log.trace("Setting OFFSET param: {}", offset);
 	
 	spinQuery.removeAll(SP.offset)
-		.addLiteral(SP.offset, offset);
+	    .addLiteral(SP.offset, offset);
 	
 	return this;
     }
@@ -450,14 +450,13 @@ public class QueryBuilder
 
     public Query build()
     {
-	if (log.isTraceEnabled()) log.trace("Querystring generated from SPIN Model: {}", buildSPIN().toString());
-
+	// ARQFactory.get().setUseCaches(false) to avoid caching
 	return ARQFactory.get().createQuery(buildSPIN());
     }
 
     public org.topbraid.spin.model.Query buildSPIN()
     {
-	if (log.isTraceEnabled()) log.trace("Querystring generated from SPIN Model: {}", spinQuery.toString()); // no PREFIXes
+	if (log.isTraceEnabled()) log.trace("Generated SPIN Query: {}", spinQuery.toString()); // no PREFIXes
 
 	// generate SPARQL query string
 	StringBuilder sb = new StringBuilder();
@@ -465,8 +464,8 @@ public class QueryBuilder
 	pc.setPrintPrefixes(true);
 	spinQuery.print(pc);
 
-	spinQuery.removeAll(SP.text);
-	spinQuery.addLiteral(SP.text, spinQuery.getModel().createTypedLiteral(sb.toString()));
+	spinQuery.removeAll(SP.text)
+	    .addLiteral(SP.text, spinQuery.getModel().createTypedLiteral(sb.toString()));
 
 	return spinQuery;
     }
