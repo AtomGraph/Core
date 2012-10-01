@@ -52,17 +52,13 @@ xmlns:sioc="&sioc;"
 xmlns:sp="&sp;"
 xmlns:sd="&sd;"
 xmlns:list="&list;"
-exclude-result-prefixes="xsl xhtml xs g rdf rdfs owl sparql geo dbpedia-owl dc dct foaf sioc sp sd list">
+exclude-result-prefixes="#all">
 
     <xsl:import href="imports/default.xsl"/>
-    <xsl:import href="imports/foaf.xsl"/>
-    <xsl:import href="imports/doap.xsl"/>
-    <xsl:import href="imports/void.xsl"/>
-    <xsl:import href="imports/sd.xsl"/>
-    <xsl:import href="imports/dbpedia-owl.xsl"/>
-    <xsl:import href="imports/facebook.xsl"/>
-
-    <xsl:import href="functions.xsl"/>
+    
+    <xsl:include href="imports/foaf.xsl"/>
+    <xsl:include href="imports/dbpedia-owl.xsl"/>
+    <xsl:include href="functions.xsl"/>
 
     <xsl:output method="xhtml" encoding="UTF-8" indent="yes" omit-xml-declaration="yes" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" media-type="application/xhtml+xml"/>
     
@@ -239,7 +235,7 @@ exclude-result-prefixes="xsl xhtml xs g rdf rdfs owl sparql geo dbpedia-owl dc d
     </xsl:template>    
 
     <xsl:template match="rdf:type/@rdf:resource">
-	<span class="btn">
+	<span title="{.}" class="btn">
 	    <xsl:apply-imports/>
 	</span>
     </xsl:template>
@@ -333,14 +329,16 @@ exclude-result-prefixes="xsl xhtml xs g rdf rdfs owl sparql geo dbpedia-owl dc d
 
     <!-- PROPERTY LIST MODE -->
 
-    <xsl:template match="*[*][@rdf:about] | *[*][@rdf:nodeID]" mode="g:PropertyListMode">
+    <xsl:template match="*[*][@rdf:about] | *[*][@rdf:nodeID]" mode="g:PropertyListMode"/>
+
+    <!-- only show property list for resources that have properties not already displayed in HeaderMode -->
+    <xsl:template match="*[@rdf:about or @rdf:nodeID][* except (rdf:type, foaf:img, foaf:depiction, foaf:logo, owl:sameAs, rdfs:label, rdfs:comment, rdfs:seeAlso, dc:title, dct:title, dc:description, dct:description, dct:subject, dbpedia-owl:abstract, sioc:content)]" mode="g:PropertyListMode" priority="1">
 	<div class="row-fluid">
 	    <xsl:variable name="no-domain-properties" select="*[not(rdfs:domain(xs:anyURI(concat(namespace-uri(.), local-name(.)))) = current()/rdf:type/@rdf:resource)]"/>
 	    <xsl:variable name="domain-types" select="rdf:type/@rdf:resource[../../*/xs:anyURI(concat(namespace-uri(.), local-name(.))) = g:inDomainOf(.)]"/>
 
 	    <xsl:if test="$no-domain-properties">
-		<!-- expand if description contains blank nodes and no type/domain property groups -->
-		<div class="span{if (not($domain-types) and $no-domain-properties/@rdf:nodeID) then 12 else 6} well well-small">
+		<div class="span6 well well-small">
 		    <dl>
 			<xsl:apply-templates select="$no-domain-properties" mode="g:PropertyListMode">
 			    <xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(.), local-name(.))), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
@@ -360,46 +358,40 @@ exclude-result-prefixes="xsl xhtml xs g rdf rdfs owl sparql geo dbpedia-owl dc d
 	</div>
     </xsl:template>
 
+    <!-- has to match the previous template pattern - can this be made smarter? -->
     <xsl:template match="rdf:type | foaf:img | foaf:depiction | foaf:logo | owl:sameAs | rdfs:label | rdfs:comment | rdfs:seeAlso | dc:title | dct:title | dc:description | dct:description | dct:subject | dbpedia-owl:abstract | sioc:content" mode="g:PropertyListMode" priority="1"/>
 
     <!-- property -->
     <xsl:template match="*[@rdf:about or @rdf:nodeID]/*" mode="g:PropertyListMode">
-	<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(.), local-name(.)))" as="xs:anyURI"/>
-
-	<!-- show <dt> only on the first occurence of property (in a group) -->
-	<xsl:if test="not(preceding-sibling::*[concat(namespace-uri(.), local-name(.)) = $this])">
-	    <dt>
-		<xsl:apply-templates select="."/>
-	    </dt>
-	</xsl:if>
-
-	<!-- <xsl:if test="lang($lang) or not(../*[concat(namespace-uri(.), local-name(.)) = $this][lang($lang)])"> -->
-	    <xsl:apply-templates select="node() | @rdf:resource" mode="g:PropertyListMode"/>
-
-	    <xsl:apply-templates select="@rdf:nodeID" mode="g:PropertyListMode"/>
-	<!-- </xsl:if> -->
+	<dt>
+	    <xsl:apply-templates select="."/>
+	</dt>
+	<dd>
+	    <xsl:apply-templates select="node() | @rdf:resource | @rdf:nodeID" mode="g:PropertyListMode"/>
+	</dd>
     </xsl:template>
 
     <xsl:template match="node() | @rdf:resource" mode="g:PropertyListMode">
-	<dd>
-	    <xsl:apply-templates select="."/>
-	</dd>
+	<xsl:apply-templates select="."/>
     </xsl:template>
 
     <xsl:template match="@rdf:nodeID" mode="g:PropertyListMode">
-	<dd>
-	    <xsl:apply-templates select="key('resources', .)"/>
-	</dd>
+	<xsl:apply-templates select="key('resources', .)"/>
     </xsl:template>
 
     <!-- TYPE MODE -->
 
+    <xsl:template match="@rdf:about | @rdf:resource" mode="g:TypeMode">
+	<xsl:apply-templates select="."/>
+    </xsl:template>
+
     <xsl:template match="rdf:type/@rdf:resource" mode="g:TypeMode">
-	<xsl:variable name="in-domain-properties" select="../../*[xs:anyURI(concat(namespace-uri(.), local-name(.))) = g:inDomainOf(current()) or rdfs:domain(xs:anyURI(concat(namespace-uri(.), local-name(.)))) = xs:anyURI(current())][not(@xml:lang) or lang($lang)]"/>
+	<xsl:variable name="in-domain-properties" select="../../*[xs:anyURI(concat(namespace-uri(.), local-name(.))) = g:inDomainOf(current()) or rdfs:domain(xs:anyURI(concat(namespace-uri(.), local-name(.)))) = xs:anyURI(current())]"/>
 
 	<div class="well well-small">
 	    <h2>
-		<xsl:apply-imports/>
+		<!-- <xsl:apply-imports/> -->
+		<xsl:apply-templates select="."/>
 	    </h2>
 	    <dl class="well-small">
 		<xsl:apply-templates select="$in-domain-properties" mode="g:PropertyListMode">
@@ -590,7 +582,6 @@ exclude-result-prefixes="xsl xhtml xs g rdf rdfs owl sparql geo dbpedia-owl dc d
 	    </thead>
 	    <tbody>
 		<xsl:apply-templates mode="g:TableMode"/>
-		<!-- <xsl:with-param name="predicates" select="$predicates"/> -->
 	    </tbody>
 	</table>
     </xsl:template>

@@ -46,11 +46,10 @@ xmlns:foaf="&foaf;"
 xmlns:skos="&skos;"
 xmlns:gr="&gr;"
 xmlns:list="&list;"
-exclude-result-prefixes="xhtml xs g url rdf rdfs xsd sparql dc dct foaf skos gr list">
+exclude-result-prefixes="#all">
 
     <!-- http://xml.apache.org/xalan-j/extensions_xsltc.html#java_ext -->
 
-    <xsl:key name="resources-by-type" match="*[@rdf:about] | *[@rdf:nodeID]" use="rdf:type/@rdf:resource"/> <!-- concat(namespace-uri(.), local-name(.)) -->
     <xsl:key name="resources-by-subclass" match="*[@rdf:about] | *[@rdf:nodeID]" use="rdfs:subClassOf/@rdf:resource"/>
     <xsl:key name="resources-by-domain" match="*[@rdf:about] | *[@rdf:nodeID]" use="rdfs:domain/@rdf:resource"/>
     <xsl:key name="resources-by-range" match="*[@rdf:about] | *[@rdf:nodeID]" use="rdfs:range/@rdf:resource"/>

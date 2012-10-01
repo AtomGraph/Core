@@ -22,36 +22,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#">
     <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#">
     <!ENTITY sparql "http://www.w3.org/2005/sparql-results#">
-    <!ENTITY dc "http://purl.org/dc/elements/1.1/">
-    <!ENTITY dct "http://purl.org/dc/terms/">
-    <!ENTITY foaf "http://xmlns.com/foaf/0.1/">
-    <!ENTITY skos "http://www.w3.org/2004/02/skos/core#">
-    <!ENTITY list "http://jena.hpl.hp.com/ARQ/list#">
 ]>
 <xsl:stylesheet version="2.0"
 xmlns="http://www.w3.org/1999/xhtml"
 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 xmlns:xhtml="http://www.w3.org/1999/xhtml"
 xmlns:xs="http://www.w3.org/2001/XMLSchema"
-xmlns:url="&java;java.net.URLDecoder"
 xmlns:g="&g;"
 xmlns:rdf="&rdf;"
 xmlns:rdfs="&rdfs;"
 xmlns:xsd="&xsd;"
 xmlns:sparql="&sparql;"
-xmlns:dc="&dc;"
-xmlns:dct="&dct;"
-xmlns:foaf="&foaf;"
-xmlns:skos="&skos;"
-xmlns:list="&list;"
-exclude-result-prefixes="xhtml xs g url rdf rdfs xsd sparql dc dct foaf skos list">
-
-    <!-- http://xml.apache.org/xalan-j/extensions_xsltc.html#java_ext -->
-
-    <xsl:key name="resources-by-type" match="*[@rdf:about] | *[@rdf:nodeID]" use="rdf:type/@rdf:resource"/> <!-- concat(namespace-uri(.), local-name(.)) -->
-    <xsl:key name="resources-by-subclass" match="*[@rdf:about] | *[@rdf:nodeID]" use="rdfs:subClassOf/@rdf:resource"/>
-    <xsl:key name="resources-by-domain" match="*[@rdf:about] | *[@rdf:nodeID]" use="rdfs:domain/@rdf:resource"/>
-    <xsl:key name="resources-by-range" match="*[@rdf:about] | *[@rdf:nodeID]" use="rdfs:range/@rdf:resource"/>
+exclude-result-prefixes="#all">
 
     <!-- subject/object resource -->
     <xsl:template match="@rdf:about | @rdf:resource | sparql:uri">
@@ -114,10 +96,6 @@ exclude-result-prefixes="xhtml xs g url rdf rdfs xsd sparql dc dct foaf skos lis
 	<span title="{../@rdf:datatype}">
 	    <xsl:value-of select="format-dateTime(., '[D] [MNn] [Y] [H01]:[m01]', $lang, (), ())"/>
 	</span>
-    </xsl:template>
-
-    <xsl:template match="@rdf:about | @rdf:resource" mode="g:TypeMode">
-	<xsl:apply-templates select="."/>
     </xsl:template>
 
 </xsl:stylesheet>
