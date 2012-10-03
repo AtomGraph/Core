@@ -101,6 +101,8 @@ public class QueryBuilder
 	if (resource == null) throw new IllegalArgumentException("Query resource cannot be null");
 
 	spinQuery = SPINFactory.asQuery(resource);
+	if (spinQuery == null) throw new IllegalArgumentException("Resource is not a SPIN query");
+	
 	arq2spin = new ARQ2SPIN(spinQuery.getModel());
 	
 	return this;

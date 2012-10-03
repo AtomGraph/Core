@@ -44,7 +44,7 @@ Graphity LDP is meant to be used as a library for Linked Data Web applications. 
 * add Graphity LDP as dependency
 * extend one of the `Resource` base class implementations, for example [`ResourceBase`](https://github.com/Graphity/graphity-ldp/blob/master/src/main/java/org/graphity/ldp/model/impl/ResourceBase.java) - it will serve as the root JAX-RS resource
 * extend `Application` class if necessary
-* register the `Application` class (either your own or from LDP) in your project's `web.xml` like this:
+* register the `Application` class (either your own or from LDP) in your project's `webapp/WEB-INF/web.xml` like this:
 
     <servlet>
         <servlet-name>index</servlet-name>
