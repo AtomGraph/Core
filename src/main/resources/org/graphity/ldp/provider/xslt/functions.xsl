@@ -282,7 +282,14 @@ exclude-result-prefixes="#all">
     <xsl:function name="g:query-string" as="xs:string?">
 	<xsl:param name="lang" as="xs:string?"/>
 	
-	<xsl:sequence select="g:query-string((), (), (), (), $lang, ())"/>
+	<xsl:sequence select="g:query-string($lang, ())"/>
+    </xsl:function>
+
+    <xsl:function name="g:query-string" as="xs:string?">
+	<xsl:param name="lang" as="xs:string?"/>
+	<xsl:param name="mode" as="xs:string?"/>
+	
+	<xsl:sequence select="g:query-string((), (), (), (), $lang, $mode)"/>
     </xsl:function>
 
     <xsl:function name="g:query-string" as="xs:string?">

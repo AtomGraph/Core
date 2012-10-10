@@ -33,7 +33,7 @@ import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamResult;
-import org.graphity.ldp.model.Resource;
+import org.graphity.ldp.model.ContainerResource;
 import org.graphity.util.XSLTBuilder;
 import org.openjena.riot.WebContent;
 import org.slf4j.Logger;
@@ -46,20 +46,20 @@ import org.slf4j.LoggerFactory;
 @Provider
 @Singleton
 @Produces({MediaType.APPLICATION_XHTML_XML})
-public class ResourceXSLTWriter implements MessageBodyWriter<Resource>
+public class ContainerResourceXSLTWriter implements MessageBodyWriter<ContainerResource>
 {
-    private static final Logger log = LoggerFactory.getLogger(ResourceXSLTWriter.class);
+    private static final Logger log = LoggerFactory.getLogger(ContainerResourceXSLTWriter.class);
 
     private XSLTBuilder builder = null;
 	
     @Context private UriInfo uriInfo;
 
-    public ResourceXSLTWriter(XSLTBuilder builder) throws TransformerConfigurationException
+    public ContainerResourceXSLTWriter(XSLTBuilder builder) throws TransformerConfigurationException
     {
 	this.builder = builder;
     }
 
-    public ResourceXSLTWriter(Source stylesheet, URIResolver resolver) throws TransformerConfigurationException
+    public ContainerResourceXSLTWriter(Source stylesheet, URIResolver resolver) throws TransformerConfigurationException
     {
 	this(XSLTBuilder.fromStylesheet(stylesheet).resolver(resolver));
     }
@@ -67,17 +67,17 @@ public class ResourceXSLTWriter implements MessageBodyWriter<Resource>
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-	return Resource.class.isAssignableFrom(type);
+	return ContainerResource.class.isAssignableFrom(type);
     }
 
     @Override
-    public long getSize(Resource resource, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
+    public long getSize(ContainerResource resource, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
 	return -1;
     }
 
     @Override
-    public void writeTo(Resource resource, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException
+    public void writeTo(ContainerResource resource, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException
     {
 	if (log.isTraceEnabled()) log.trace("Writing Resource with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
 
@@ -95,6 +95,11 @@ public class ResourceXSLTWriter implements MessageBodyWriter<Resource>
 		parameter("http-headers", httpHeaders.toString()).
 		result(new StreamResult(entityStream));
 	    
+	    if (resource.getOffset() != null) builder.parameter("offset", resource.getOffset());
+	    if (resource.getLimit() != null) builder.parameter("limit", resource.getLimit());
+	    if (resource.getOrderBy() != null) builder.parameter("order-by", resource.getOrderBy());
+	    if (resource.getDesc() != null) builder.parameter("desc", resource.getDesc());
+
 	    if (uriInfo.getQueryParameters().getFirst("lang") != null)
 		builder.parameter("lang", uriInfo.getQueryParameters().getFirst("lang"));
 	    if (uriInfo.getQueryParameters().getFirst("mode") != null)

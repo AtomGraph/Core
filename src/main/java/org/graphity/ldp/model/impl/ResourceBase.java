@@ -16,33 +16,58 @@
  */
 package org.graphity.ldp.model.impl;
 
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.ontology.OntResource;
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.rdf.model.Model;
+import javax.ws.rs.GET;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.*;
 import org.graphity.ldp.model.Resource;
+import org.graphity.model.QueriedResource;
 import org.graphity.util.ModelUtils;
+import org.graphity.util.QueryBuilder;
+import org.graphity.vocabulary.Graphity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-abstract public class ResourceBase implements Resource
+//@Path("/")
+public class ResourceBase implements Resource, QueriedResource
 {
+    private static final Logger log = LoggerFactory.getLogger(ResourceBase.class);
+
+    private OntModel ontology = null;
     private UriInfo uriInfo = null;
     private Request req = null;
+    //private com.hp.hpl.jena.rdf.model.Resource resource = null, query = null;
+    //private Model model = null;
+    private Query query = null;
 
-    public ResourceBase(UriInfo uriInfo, Request req)
+    public ResourceBase(OntModel ontology, UriInfo uriInfo, Request req)
     {
+	this.ontology = ontology;
 	this.uriInfo = uriInfo;
 	this.req = req;
     }
-
+    
+    @Override
+    public OntModel getOntology()
+    {
+	return ontology;
+    }
+    
+    @Override
     public Request getRequest()
     {
 	return req;
     }
 
+    @Override
     public UriInfo getUriInfo()
     {
 	return uriInfo;
@@ -52,6 +77,50 @@ abstract public class ResourceBase implements Resource
     public String getURI()
     {
 	return getUriInfo().getAbsolutePath().toString();
+    }
+
+    public QueryBuilder getQueryBuilder()
+    {
+	if (getQueryResource() != null) return QueryBuilder.fromResource(getQueryResource()); // CONSTRUCT
+	
+	return QueryBuilder.fromDescribe(getURI()); // default DESCRIBE
+    }
+    
+    @Override
+    public Model getModel()
+    {
+	Model model = null;
+	
+	if (getService() != null)
+	{
+	    String endpointUri = getService().
+		getPropertyResourceValue(com.hp.hpl.jena.rdf.model.ResourceFactory.
+		    createProperty("http://www.w3.org/ns/sparql-service-description#endpoint")).getURI();
+	
+	    if (endpointUri != null)
+		model = org.graphity.model.ResourceFactory.getResource(endpointUri, getQuery()).getModel();
+	}
+	else
+	    model = org.graphity.model.ResourceFactory.getResource(getOntology(), getQuery()).getModel();
+	
+	if (model.isEmpty())
+	{
+	    if (log.isTraceEnabled()) log.trace("Loaded Model is empty");
+	    throw new WebApplicationException(Response.Status.NOT_FOUND);
+	}
+
+	return model;
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_XHTML_XML + ";qs=2;charset=UTF-8")
+    //@Override
+    public Response getXHTMLResponse()
+    {
+	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(getEntityTag());
+	if (rb != null) return rb.build();
+	
+	return Response.ok(this).tag(getEntityTag()).build(); // uses ResourceXHTMLWriter
     }
 
     @Override
@@ -68,6 +137,54 @@ abstract public class ResourceBase implements Resource
     public EntityTag getEntityTag()
     {
 	return new EntityTag(Long.toHexString(ModelUtils.hashModel(getModel())));
+    }
+
+    public com.hp.hpl.jena.rdf.model.Resource getService()
+    {
+	if (getOntResource() != null)
+	    return getOntResource().getPropertyResourceValue(Graphity.service);
+	
+	return null;
+    }
+
+    @Override
+    public OntResource getOntResource()
+    {
+	return getOntology().getOntResource(getURI());
+    }
+
+    public com.hp.hpl.jena.rdf.model.Resource getQueryResource()
+    {
+	if (getOntResource() != null)
+	    return getOntResource().getPropertyResourceValue(Graphity.query);
+	
+	return null;
+    }
+
+    @Override
+    public Query getQuery()
+    {
+	if (query == null) query = getQueryBuilder().build();
+	
+	return query;
+    }
+
+    @Override
+    public Response post(Model model)
+    {
+	throw new WebApplicationException(405); // method not allowed
+    }
+
+    @Override
+    public Response put(Model model)
+    {
+	throw new WebApplicationException(405); // method not allowed
+    }
+
+    @Override
+    public Response delete()
+    {
+	throw new WebApplicationException(405); // method not allowed
     }
 
 }

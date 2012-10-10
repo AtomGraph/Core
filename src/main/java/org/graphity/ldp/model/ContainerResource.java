@@ -28,6 +28,6 @@ public interface ContainerResource extends Resource
     
     public String getOrderBy();
     
-    public boolean getDesc();
+    public Boolean getDesc();
 
 }

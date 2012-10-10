@@ -16,10 +16,14 @@
  */
 package org.graphity.ldp.model;
 
+import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.rdf.model.Model;
 import javax.ws.rs.*;
 import javax.ws.rs.core.EntityTag;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import org.graphity.MediaType;
 import org.graphity.model.LinkedDataResource;
 
@@ -39,6 +43,14 @@ public interface Resource extends LinkedDataResource
     
     @DELETE Response delete();
     
+    OntModel getOntology();
+    
+    OntResource getOntResource();
+
+    Request getRequest();
+
+    UriInfo getUriInfo();
+
     EntityTag getEntityTag();
     
 }

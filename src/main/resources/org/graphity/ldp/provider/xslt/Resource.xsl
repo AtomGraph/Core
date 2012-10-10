@@ -88,7 +88,6 @@ exclude-result-prefixes="#all">
     <xsl:variable name="resource" select="key('resources', $uri, $ont-model)" as="element()?"/>
     <xsl:variable name="ont-uri" select="resolve-uri('ontology/', $base-uri)" as="xs:anyURI"/>
     <xsl:variable name="ont-model" select="document($ont-uri)" as="document-node()"/>
-    <xsl:variable name="graphity-ont-model" select="document('&g;')" as="document-node()"/>
     <xsl:variable name="select-query" select="if ($query-uri) then key('resources', $query-uri, $query-model) else ()" as="element()?"/>
 	
     <xsl:key name="resources" match="*[*][@rdf:about] | *[*][@rdf:nodeID]" use="@rdf:about | @rdf:nodeID"/>
