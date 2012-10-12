@@ -164,9 +164,11 @@ public class ResourceBase implements Resource, QueriedResource
     @Override
     public Query getQuery()
     {
-	if (query == null) query = getQueryBuilder().build();
+	//if (query == null) query = getQueryBuilder().build();
 	
-	return query;
+	return getQueryBuilder().build();
+	
+	//return query;
     }
 
     @Override

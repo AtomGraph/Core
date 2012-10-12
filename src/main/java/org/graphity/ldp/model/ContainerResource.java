@@ -30,4 +30,8 @@ public interface ContainerResource extends Resource
     
     public Boolean getDesc();
 
+    com.hp.hpl.jena.rdf.model.Resource getPreviousResource();
+    
+    com.hp.hpl.jena.rdf.model.Resource getNextResource();
+
 }

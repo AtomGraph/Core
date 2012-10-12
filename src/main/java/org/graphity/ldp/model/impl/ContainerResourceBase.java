@@ -17,11 +17,14 @@
 package org.graphity.ldp.model.impl;
 
 import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.rdf.model.Model;
 import javax.ws.rs.core.Request;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import org.graphity.ldp.model.ContainerResource;
 import org.graphity.ldp.model.Resource;
 import org.graphity.util.QueryBuilder;
+import org.graphity.vocabulary.XHV;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.topbraid.spin.model.SPINFactory;
@@ -91,6 +94,18 @@ public class ContainerResourceBase extends ResourceBase implements ContainerReso
     }
 
     @Override
+    public Model getModel()
+    {
+	Model model = super.getModel();
+	
+	// http://code.google.com/p/linked-data-api/wiki/API_Viewing_Resources#Page_Description
+	if (getPreviousResource() != null) model.add(getOntResource(), XHV.prev, getPreviousResource());
+	if (getNextResource() != null) model.add(getOntResource(), XHV.prev, getNextResource());
+
+	return model;
+    }
+
+    @Override
     public Long getLimit()
     {
 	return this.limit;
@@ -114,4 +129,31 @@ public class ContainerResourceBase extends ResourceBase implements ContainerReso
 	return this.desc;
     }
 
+    @Override
+    public com.hp.hpl.jena.rdf.model.Resource getPreviousResource()
+    {
+	if (getOffset() >= getLimit())
+	    return getOntology().getResource(UriBuilder.fromUri(getURI()).
+		queryParam("limit", limit).
+		queryParam("offset", offset - limit).
+		queryParam("order-by", orderBy).
+		queryParam("desc", desc).
+		build().toString());
+	else
+	    return null;
+    }
+    
+    @Override
+    public com.hp.hpl.jena.rdf.model.Resource getNextResource()
+    {
+	if (getModel().size() < getLimit())
+	    return null;
+	else
+	    return getOntology().getResource(UriBuilder.fromUri(getURI()).
+		queryParam("limit", limit).
+		queryParam("offset", offset - limit).
+		queryParam("order-by", orderBy).
+		queryParam("desc", desc).
+		build().toString());
+    }
 }
