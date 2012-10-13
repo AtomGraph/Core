@@ -21,7 +21,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
-import org.graphity.ldp.model.ContainerResource;
+import org.graphity.ldp.model.PageResource;
 import org.graphity.ldp.model.Resource;
 import org.graphity.util.QueryBuilder;
 import org.graphity.vocabulary.XHV;
@@ -35,16 +35,16 @@ import org.topbraid.spin.vocabulary.SP;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class ContainerResourceBase extends ResourceBase implements ContainerResource
+public class PageResourceBase extends ResourceBase implements PageResource
 {
-    private static final Logger log = LoggerFactory.getLogger(ContainerResourceBase.class);
+    private static final Logger log = LoggerFactory.getLogger(PageResourceBase.class);
     
     private Long limit = null;
     private Long offset = null;
     private String orderBy = null;
     private Boolean desc = true;
     
-    public ContainerResourceBase(OntModel ontology, UriInfo uriInfo, Request req,
+    public PageResourceBase(OntModel ontology, UriInfo uriInfo, Request req,
 	Long limit, Long offset, String orderBy, Boolean desc)
     {
 	super(ontology, uriInfo, req);
@@ -57,7 +57,7 @@ public class ContainerResourceBase extends ResourceBase implements ContainerReso
 	    throw new IllegalArgumentException("ContainerResource must have a SELECT query");
     }
 
-    public ContainerResourceBase(Resource resource,
+    public PageResourceBase(Resource resource,
 	    Long limit, Long offset, String orderBy, Boolean desc)
     {
 	this(resource.getOntology(), resource.getUriInfo(), resource.getRequest(),
@@ -93,6 +93,7 @@ public class ContainerResourceBase extends ResourceBase implements ContainerReso
 	    return QueryBuilder.fromDescribe().subQuery(getSelectBuilder());	    
     }
 
+    /*
     @Override
     public Model getModel()
     {
@@ -104,7 +105,8 @@ public class ContainerResourceBase extends ResourceBase implements ContainerReso
 
 	return model;
     }
-
+    */
+    
     @Override
     public Long getLimit()
     {

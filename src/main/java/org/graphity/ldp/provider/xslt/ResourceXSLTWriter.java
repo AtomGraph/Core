@@ -99,6 +99,8 @@ public class ResourceXSLTWriter implements MessageBodyWriter<Resource>
 		builder.parameter("lang", uriInfo.getQueryParameters().getFirst("lang"));
 	    if (uriInfo.getQueryParameters().getFirst("mode") != null)
 		builder.parameter("mode", UriBuilder.fromUri(uriInfo.getQueryParameters().getFirst("mode")).build());
+	    if (uriInfo.getQueryParameters().getFirst("query") != null)
+		builder.parameter("query", uriInfo.getQueryParameters().getFirst("query"));
 
 	    builder.transform();
 	    baos.close();

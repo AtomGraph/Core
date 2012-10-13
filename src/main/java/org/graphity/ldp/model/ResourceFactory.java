@@ -19,7 +19,7 @@ package org.graphity.ldp.model;
 import com.hp.hpl.jena.ontology.OntModel;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
-import org.graphity.ldp.model.impl.ContainerResourceBase;
+import org.graphity.ldp.model.impl.PageResourceBase;
 import org.graphity.ldp.model.impl.ResourceBase;
 import org.graphity.vocabulary.SIOC;
 import org.slf4j.Logger;
@@ -48,7 +48,7 @@ public class ResourceFactory extends org.graphity.model.ResourceFactory
 	if (resource.getOntResource() != null && resource.getOntResource().hasRDFType(SIOC.CONTAINER))
 	{
 	    log.debug("Creating ContainerResource");
-	    return new ContainerResourceBase(resource, limit, offset, orderBy, desc);
+	    return new PageResourceBase(resource, limit, offset, orderBy, desc);
 	}
 	
 	return resource;

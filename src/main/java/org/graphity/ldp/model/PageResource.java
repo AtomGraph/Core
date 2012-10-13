@@ -20,7 +20,7 @@ package org.graphity.ldp.model;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public interface ContainerResource extends Resource
+public interface PageResource extends Resource
 {
     public Long getLimit();
     
