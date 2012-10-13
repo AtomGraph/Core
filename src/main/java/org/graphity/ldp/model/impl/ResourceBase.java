@@ -89,8 +89,6 @@ public class ResourceBase implements Resource, QueriedResource
     @Override
     public Model getModel()
     {
-	Model model = null;
-	
 	if (getService() != null)
 	{
 	    String endpointUri = getService().
@@ -98,18 +96,10 @@ public class ResourceBase implements Resource, QueriedResource
 		    createProperty("http://www.w3.org/ns/sparql-service-description#endpoint")).getURI();
 	
 	    if (endpointUri != null)
-		model = org.graphity.model.ResourceFactory.getResource(endpointUri, getQuery()).getModel();
+		return org.graphity.model.ResourceFactory.getResource(endpointUri, getQuery()).getModel();
 	}
-	else
-	    model = org.graphity.model.ResourceFactory.getResource(getOntology(), getQuery()).getModel();
 	
-	if (model.isEmpty())
-	{
-	    if (log.isTraceEnabled()) log.trace("Loaded Model is empty");
-	    throw new WebApplicationException(Response.Status.NOT_FOUND);
-	}
-
-	return model;
+	return org.graphity.model.ResourceFactory.getResource(getOntology(), getQuery()).getModel();
     }
 
     @GET
@@ -119,8 +109,15 @@ public class ResourceBase implements Resource, QueriedResource
     {
 	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(getEntityTag());
 	if (rb != null) return rb.build();
-	
-	return Response.ok(this).tag(getEntityTag()).build(); // uses ResourceXHTMLWriter
+
+	Model model = getModel();
+	if (model.isEmpty())
+	{
+	    if (log.isTraceEnabled()) log.trace("Loaded Model is empty");
+	    throw new WebApplicationException(Response.Status.NOT_FOUND);
+	}
+	else
+	    return Response.ok(this).tag(getEntityTag()).build(); // uses ResourceXHTMLWriter
     }
 
     @Override
@@ -130,7 +127,14 @@ public class ResourceBase implements Resource, QueriedResource
 	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(getEntityTag());
 	if (rb != null) return rb.build();
 
-	return Response.ok(getModel()).tag(getEntityTag()).build(); // uses ModelProvider
+	Model model = getModel();
+	if (model.isEmpty())
+	{
+	    if (log.isTraceEnabled()) log.trace("Loaded Model is empty");
+	    throw new WebApplicationException(Response.Status.NOT_FOUND);
+	}
+	else
+	    return Response.ok(getModel()).tag(getEntityTag()).build(); // uses ModelProvider
     }
 
     @Override
