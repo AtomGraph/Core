@@ -16,23 +16,28 @@
  */
 package org.graphity.ldp.model;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.Request;
+import com.hp.hpl.jena.rdf.model.Model;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import org.graphity.MediaType;
+import org.graphity.model.LinkedDataResource;
 
 /**
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public interface Resource
+@Consumes({MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", MediaType.TEXT_TURTLE + "; charset=UTF-8"})
+@Produces({MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", MediaType.TEXT_TURTLE + "; charset=UTF-8"})
+public interface LDPResource extends LinkedDataResource, Resource
 {
-    @GET Response getResponse();
+    // @GET Response getResponse();
+    
+    @POST Response post(Model model);
 
-    Request getRequest();
+    @PUT Response put(Model model);
+    
+    @DELETE Response delete();
 
-    UriInfo getUriInfo();
-
-    EntityTag getEntityTag();
+    boolean isContainer();
+    
 }

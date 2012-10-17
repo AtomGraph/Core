@@ -23,11 +23,7 @@ import com.hp.hpl.jena.query.Query;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public interface QueriedResource extends Resource
+public interface QueriedResource
 {
-
-    //public String getEndpointURI();
-    
-    public Query getQuery();
-    
+    public Query getQuery();   
 }

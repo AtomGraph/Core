@@ -23,9 +23,7 @@ import com.hp.hpl.jena.rdf.model.Model;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public interface Resource
+public interface ModelResource
 {
-
     public Model getModel();
-
 }

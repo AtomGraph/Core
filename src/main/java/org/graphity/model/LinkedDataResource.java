@@ -21,9 +21,7 @@ package org.graphity.model;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public interface LinkedDataResource extends Resource
+public interface LinkedDataResource extends ModelResource
 {
-
     public String getURI();
-    
 }

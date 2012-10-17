@@ -29,26 +29,27 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class ResourceFactory extends org.graphity.model.ResourceFactory
+public class ResourceFactory extends org.graphity.model.ModelResourceFactory
 {
     private static final Logger log = LoggerFactory.getLogger(ResourceFactory.class);
     
-    public static Resource getResource(OntModel ontology, UriInfo uriInfo, Request req)
+    public static LDPResource getResource(OntModel ontology, UriInfo uriInfo, Request req)
     {
 	log.debug("Creating Resource");
 	    
 	return new ResourceBase(ontology, uriInfo, req);
     }
  
-    public static Resource getResource(OntModel ontology, UriInfo uriInfo, Request req,
+    public static LDPResource getResource(OntModel ontology, UriInfo uriInfo, Request req,
 	Long limit, Long offset, String orderBy, Boolean desc)
     {
-	Resource resource = getResource(ontology, uriInfo, req);
+	LDPResource resource = getResource(ontology, uriInfo, req);
 
-	if (resource.getOntResource() != null && resource.getOntResource().hasRDFType(SIOC.CONTAINER))
+	if (resource.isContainer())
 	{
 	    log.debug("Creating ContainerResource");
-	    return new PageResourceBase(resource, limit, offset, orderBy, desc);
+	    //return new PageResourceBase(resource, limit, offset, orderBy, desc);
+	    return new PageResourceBase(ontology, uriInfo, req, limit, offset, orderBy, desc);
 	}
 	
 	return resource;

@@ -14,25 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.graphity.ldp.model;
+package org.graphity.model.query;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import org.graphity.model.QueriedResource;
 
 /**
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public interface Resource
+public interface EndpointResource extends QueriedResource
 {
-    @GET Response getResponse();
-
-    Request getRequest();
-
-    UriInfo getUriInfo();
-
-    EntityTag getEntityTag();
+    public String getEndpointURI();
+    
+    //public Resource getEndpoint();
 }

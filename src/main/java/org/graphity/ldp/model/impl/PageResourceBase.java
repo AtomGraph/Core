@@ -22,7 +22,7 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import org.graphity.ldp.model.PageResource;
-import org.graphity.ldp.model.Resource;
+import org.graphity.ldp.model.LDPResource;
 import org.graphity.util.QueryBuilder;
 import org.graphity.vocabulary.XHV;
 import org.slf4j.Logger;
@@ -57,13 +57,15 @@ public class PageResourceBase extends ResourceBase implements PageResource
 	    throw new IllegalArgumentException("ContainerResource must have a SELECT query");
     }
 
+    /*
     public PageResourceBase(Resource resource,
 	    Long limit, Long offset, String orderBy, Boolean desc)
     {
 	this(resource.getOntology(), resource.getUriInfo(), resource.getRequest(),
 		limit, offset, orderBy, desc);
     }
-
+    */
+    
     public QueryBuilder getSelectBuilder()
     {
 	QueryBuilder sb = QueryBuilder.fromResource(getQueryResource()).

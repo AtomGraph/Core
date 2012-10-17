@@ -21,14 +21,17 @@ import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.rdf.model.Model;
 import javax.ws.rs.GET;
+import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.*;
-import org.graphity.ldp.model.Resource;
+import org.graphity.ldp.model.LDPResource;
+import org.graphity.model.ModelResource;
 import org.graphity.model.QueriedResource;
 import org.graphity.util.ModelUtils;
 import org.graphity.util.QueryBuilder;
 import org.graphity.vocabulary.Graphity;
+import org.graphity.vocabulary.SIOC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,8 +39,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-//@Path("/")
-public class ResourceBase implements Resource, QueriedResource
+@Path("{path: .*}")
+public class ResourceBase implements LDPResource, ModelResource, QueriedResource
 {
     private static final Logger log = LoggerFactory.getLogger(ResourceBase.class);
 
@@ -55,7 +58,6 @@ public class ResourceBase implements Resource, QueriedResource
 	this.req = req;
     }
     
-    @Override
     public OntModel getOntology()
     {
 	return ontology;
@@ -96,10 +98,10 @@ public class ResourceBase implements Resource, QueriedResource
 		    createProperty("http://www.w3.org/ns/sparql-service-description#endpoint")).getURI();
 	
 	    if (endpointUri != null)
-		return org.graphity.model.ResourceFactory.getResource(endpointUri, getQuery()).getModel();
+		return org.graphity.model.ModelResourceFactory.getResource(endpointUri, getQuery()).getModel();
 	}
 	
-	return org.graphity.model.ResourceFactory.getResource(getOntology(), getQuery()).getModel();
+	return org.graphity.model.ModelResourceFactory.getResource(getOntology(), getQuery()).getModel();
     }
 
     @GET
@@ -151,7 +153,6 @@ public class ResourceBase implements Resource, QueriedResource
 	return null;
     }
 
-    @Override
     public OntResource getOntResource()
     {
 	return getOntology().getOntResource(getURI());
@@ -173,6 +174,12 @@ public class ResourceBase implements Resource, QueriedResource
 	return getQueryBuilder().build();
 	
 	//return query;
+    }
+
+    @Override
+    public boolean isContainer()
+    {
+	return getOntResource() != null && getOntResource().hasRDFType(SIOC.CONTAINER);
     }
 
     @Override

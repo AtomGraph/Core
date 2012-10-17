@@ -19,38 +19,39 @@ package org.graphity.model;
 
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.rdf.model.Model;
+import org.graphity.model.impl.EndpointModelResourceImpl;
 import org.graphity.model.impl.LinkedDataResourceImpl;
-import org.graphity.model.impl.QueriedResourceImpl;
+import org.graphity.model.impl.QueryModelModelResourceImpl;
 
 /**
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class ResourceFactory
+public class ModelResourceFactory
 {
-    public static Resource getResource(String uri)
+    public static ModelResource getResource(String uri)
     {
 	return new LinkedDataResourceImpl(uri);
     }
     
-    public static Resource getResource(String endpointUri, Query query)
+    public static ModelResource getResource(String endpointUri, Query query)
     {
-	return new QueriedResourceImpl(endpointUri, query);
+	return new EndpointModelResourceImpl(endpointUri, query);
     }
 
-    public static Resource getResource(String endpointUri, String uri)
+    public static ModelResource getResource(String endpointUri, String uri)
     {
-	return new QueriedResourceImpl(endpointUri, uri);
+	return new EndpointModelResourceImpl(endpointUri, uri);
     }
 
-    public static Resource getResource(Model model, Query query)
+    public static ModelResource getResource(Model model, Query query)
     {
-	return new QueriedResourceImpl(model, query);
+	return new QueryModelModelResourceImpl(model, query);
     }
 
-    public static Resource getResource(Model model, String uri)
+    public static ModelResource getResource(Model model, String uri)
     {
-	return new QueriedResourceImpl(model, uri);
+	return new QueryModelModelResourceImpl(model, uri);
     }
 
 }
