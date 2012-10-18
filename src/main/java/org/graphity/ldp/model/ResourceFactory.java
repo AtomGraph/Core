@@ -17,11 +17,12 @@
 package org.graphity.ldp.model;
 
 import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.rdf.model.Model;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
-import org.graphity.ldp.model.impl.PageResourceBase;
-import org.graphity.ldp.model.impl.ResourceBase;
-import org.graphity.vocabulary.SIOC;
+import org.graphity.ldp.model.impl.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +54,26 @@ public class ResourceFactory extends org.graphity.model.ModelResourceFactory
 	}
 	
 	return resource;
+    }
+
+    public static Resource getResource(String endpointUri, Query query,
+	    UriInfo uriInfo, Request req,
+	    MediaType mediaType)
+    {
+	if (query.isDescribeType() || query.isConstructType()) return new EndpointModelResourceImpl(endpointUri, query, uriInfo, req, mediaType);
+	if (query.isSelectType()) return new EndpointResultSetResourceImpl(endpointUri, query, uriInfo, req, mediaType);
+
+	return null;
+    }
+    
+    public static Resource getResource(Model queryModel, Query query,
+	    UriInfo uriInfo, Request req,
+	    MediaType mediaType)
+    {
+	if (query.isDescribeType() || query.isConstructType()) return new QueryModelModelResourceImpl(queryModel, query, uriInfo, req, mediaType);
+	if (query.isSelectType()) return new QueryModelResultSetResourceImpl(queryModel, query, uriInfo, req, mediaType);
+
+	return null;
     }
 
 }

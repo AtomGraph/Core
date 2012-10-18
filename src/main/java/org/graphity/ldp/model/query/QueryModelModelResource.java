@@ -14,20 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.graphity.ldp.model;
+package org.graphity.ldp.model.query;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
 import org.graphity.MediaType;
-
+import org.graphity.ldp.model.Resource;
 
 /**
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 @Produces({MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", MediaType.TEXT_TURTLE + "; charset=UTF-8"})
-public interface EndpointModelResource extends Resource, org.graphity.model.query.EndpointModelResource
+public interface QueryModelModelResource  extends Resource, org.graphity.model.query.QueryModelModelResource
 {
     @GET @Override Model getModel();
 }

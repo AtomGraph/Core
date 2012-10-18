@@ -17,14 +17,11 @@
 package org.graphity.ldp.model.impl;
 
 import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.rdf.model.Model;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import org.graphity.ldp.model.PageResource;
-import org.graphity.ldp.model.LDPResource;
 import org.graphity.util.QueryBuilder;
-import org.graphity.vocabulary.XHV;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.topbraid.spin.model.SPINFactory;

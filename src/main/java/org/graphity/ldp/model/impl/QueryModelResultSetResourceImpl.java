@@ -17,8 +17,9 @@
 package org.graphity.ldp.model.impl;
 
 import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.rdf.model.Model;
 import javax.ws.rs.core.*;
-import org.graphity.ldp.model.query.EndpointModelResource;
+import org.graphity.ldp.model.query.QueryModelResultSetResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,19 +27,19 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class EndpointModelResourceImpl extends org.graphity.model.impl.EndpointModelResourceImpl implements EndpointModelResource
+public class QueryModelResultSetResourceImpl extends org.graphity.model.impl.QueryModelResultSetResourceImpl implements QueryModelResultSetResource
 {
-    private static final Logger log = LoggerFactory.getLogger(EndpointModelResourceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(QueryModelResultSetResourceImpl.class);
 
     private Request req = null;
     private UriInfo uriInfo = null;
-    private MediaType mediaType = org.graphity.MediaType.APPLICATION_RDF_XML_TYPE;
+    private MediaType mediaType = org.graphity.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE;
 
-    public EndpointModelResourceImpl(String endpointUri, Query query, 
-	UriInfo uriInfo, Request req,
-	MediaType mediaType)
+    public QueryModelResultSetResourceImpl(Model queryModel, Query query,
+	    UriInfo uriInfo, Request req,
+	    MediaType mediaType)
     {
-	super(endpointUri, query);
+	super(queryModel, query);
 	this.req = req;
 	this.uriInfo = uriInfo;
 	if (mediaType != null) this.mediaType = mediaType;
@@ -61,9 +62,10 @@ public class EndpointModelResourceImpl extends org.graphity.model.impl.EndpointM
     {
 	if (log.isDebugEnabled()) log.debug("Accept param: {}, writing SPARQL results (XML or JSON)", getMediaType());
 
-	return Response.ok(getModel(), getMediaType()).build();
+	// uses ResultSetWriter
+	return Response.ok(getResultSet(), getMediaType()).build();
     }
-    
+
     public MediaType getMediaType()
     {
 	return mediaType;

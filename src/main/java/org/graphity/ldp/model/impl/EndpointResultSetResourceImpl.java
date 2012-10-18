@@ -5,10 +5,8 @@
 package org.graphity.ldp.model.impl;
 
 import com.hp.hpl.jena.query.Query;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.*;
-import org.graphity.ldp.model.EndpointResultSetResource;
+import org.graphity.ldp.model.query.EndpointResultSetResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,21 +20,16 @@ public class EndpointResultSetResourceImpl extends org.graphity.model.impl.Endpo
 
     private Request req = null;
     private UriInfo uriInfo = null;
-    private MediaType acceptType = org.graphity.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE;
+    private MediaType mediaType = org.graphity.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE;
 
-    public EndpointResultSetResourceImpl(String endpointUri,
-	@Context UriInfo uriInfo, @Context Request req,
-	@QueryParam("accept") MediaType acceptType,
-	@QueryParam("limit") @DefaultValue("20") long limit,
-	@QueryParam("offset") @DefaultValue("0") long offset,
-	@QueryParam("order-by") String orderBy,
-	@QueryParam("desc") @DefaultValue("true") boolean desc,
-	@QueryParam("query") Query query)
+    public EndpointResultSetResourceImpl(String endpointUri, Query query,
+	    UriInfo uriInfo, Request req,
+	    MediaType mediaType)
     {
 	super(endpointUri, query);
 	this.req = req;
 	this.uriInfo = uriInfo;
-	if (acceptType != null) this.acceptType = acceptType;
+	if (mediaType != null) this.mediaType = mediaType;
     }
 
     @Override
@@ -54,15 +47,15 @@ public class EndpointResultSetResourceImpl extends org.graphity.model.impl.Endpo
     @Override
     public Response getResponse()
     {
-	if (log.isDebugEnabled()) log.debug("Accept param: {}, writing SPARQL results (XML or JSON)", getAcceptType());
+	if (log.isDebugEnabled()) log.debug("Accept param: {}, writing SPARQL results (XML or JSON)", getMediaType());
 
 	// uses ResultSetWriter
-	return Response.ok(getResultSet(), getAcceptType()).build();
+	return Response.ok(getResultSet(), getMediaType()).build();
     }
 
-    public MediaType getAcceptType()
+    public MediaType getMediaType()
     {
-	return acceptType;
+	return mediaType;
     }
 
     @Override

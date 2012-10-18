@@ -90,8 +90,8 @@ public class ResourceXSLTWriter implements MessageBodyWriter<LDPResource>
 
 	    builder.document(new ByteArrayInputStream(baos.toByteArray())).
 		parameter("uri", UriBuilder.fromUri(resource.getURI()).build()).
-		parameter("base-uri", uriInfo.getBaseUri()).
-		parameter("absolute-path", uriInfo.getAbsolutePath()).
+		parameter("base-uri", resource.getUriInfo().getBaseUri()).
+		parameter("absolute-path", resource.getUriInfo().getAbsolutePath()).
 		parameter("http-headers", httpHeaders.toString()).
 		result(new StreamResult(entityStream));
 	    

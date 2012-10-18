@@ -14,16 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.graphity.model.query;
+package org.graphity.ldp.model.query;
 
-import com.hp.hpl.jena.rdf.model.Model;
-import org.graphity.model.QueriedResource;
+import com.hp.hpl.jena.query.ResultSet;
+import javax.ws.rs.GET;
+import javax.ws.rs.Produces;
+import org.graphity.ldp.model.Resource;
 
 /**
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public interface QueryModelResource extends QueriedResource
+@Produces({org.graphity.MediaType.APPLICATION_SPARQL_RESULTS_XML + "; charset=UTF-8", org.graphity.MediaType.APPLICATION_SPARQL_RESULTS_JSON + "; charset=UTF-8"})
+public interface EndpointResultSetResource extends Resource, org.graphity.model.query.EndpointResultSetResource
 {
-    public Model getQueryModel();
+    @GET @Override ResultSet getResultSet();
 }

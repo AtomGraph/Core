@@ -47,9 +47,6 @@ public class ResourceBase implements LDPResource, ModelResource, QueriedResource
     private OntModel ontology = null;
     private UriInfo uriInfo = null;
     private Request req = null;
-    //private com.hp.hpl.jena.rdf.model.Resource resource = null, query = null;
-    //private Model model = null;
-    private Query query = null;
 
     public ResourceBase(OntModel ontology, UriInfo uriInfo, Request req)
     {
@@ -91,15 +88,8 @@ public class ResourceBase implements LDPResource, ModelResource, QueriedResource
     @Override
     public Model getModel()
     {
-	if (getService() != null)
-	{
-	    String endpointUri = getService().
-		getPropertyResourceValue(com.hp.hpl.jena.rdf.model.ResourceFactory.
-		    createProperty("http://www.w3.org/ns/sparql-service-description#endpoint")).getURI();
-	
-	    if (endpointUri != null)
-		return org.graphity.model.ModelResourceFactory.getResource(endpointUri, getQuery()).getModel();
-	}
+	if (getEndpointURI() != null)
+	    return org.graphity.model.ModelResourceFactory.getResource(getEndpointURI(), getQuery()).getModel();
 	
 	return org.graphity.model.ModelResourceFactory.getResource(getOntology(), getQuery()).getModel();
     }
@@ -149,6 +139,15 @@ public class ResourceBase implements LDPResource, ModelResource, QueriedResource
     {
 	if (getOntResource() != null)
 	    return getOntResource().getPropertyResourceValue(Graphity.service);
+	
+	return null;
+    }
+
+    public String getEndpointURI()
+    {
+	if (getService() != null)
+	    return getService().getPropertyResourceValue(com.hp.hpl.jena.rdf.model.ResourceFactory.
+		createProperty("http://www.w3.org/ns/sparql-service-description#endpoint")).getURI();
 	
 	return null;
     }

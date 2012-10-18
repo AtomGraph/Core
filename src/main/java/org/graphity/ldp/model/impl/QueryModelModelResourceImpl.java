@@ -17,8 +17,10 @@
 package org.graphity.ldp.model.impl;
 
 import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.rdf.model.Model;
 import javax.ws.rs.core.*;
-import org.graphity.ldp.model.query.EndpointModelResource;
+import org.graphity.ldp.model.query.QueryModelModelResource;
+import org.graphity.util.ModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,19 +28,19 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class EndpointModelResourceImpl extends org.graphity.model.impl.EndpointModelResourceImpl implements EndpointModelResource
+public class QueryModelModelResourceImpl  extends org.graphity.model.impl.QueryModelModelResourceImpl implements QueryModelModelResource
 {
-    private static final Logger log = LoggerFactory.getLogger(EndpointModelResourceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(QueryModelModelResourceImpl.class);
 
     private Request req = null;
     private UriInfo uriInfo = null;
     private MediaType mediaType = org.graphity.MediaType.APPLICATION_RDF_XML_TYPE;
 
-    public EndpointModelResourceImpl(String endpointUri, Query query, 
+    public QueryModelModelResourceImpl(Model queryModel, Query query, 
 	UriInfo uriInfo, Request req,
 	MediaType mediaType)
     {
-	super(endpointUri, query);
+	super(queryModel, query);
 	this.req = req;
 	this.uriInfo = uriInfo;
 	if (mediaType != null) this.mediaType = mediaType;
@@ -72,8 +74,7 @@ public class EndpointModelResourceImpl extends org.graphity.model.impl.EndpointM
     @Override
     public EntityTag getEntityTag()
     {
-	//return super.getEntityTag();
-	return null;
+	return new EntityTag(Long.toHexString(ModelUtils.hashModel(getModel())));
     }
 
 }
