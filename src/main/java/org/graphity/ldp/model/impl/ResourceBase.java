@@ -26,10 +26,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.*;
 import org.graphity.ldp.model.LDPResource;
-import org.graphity.model.ModelResource;
-import org.graphity.model.QueriedResource;
+import org.graphity.model.query.ModelResource;
+import org.graphity.model.query.QueriedResource;
 import org.graphity.util.ModelUtils;
 import org.graphity.util.QueryBuilder;
+import org.graphity.util.manager.DataManager;
 import org.graphity.vocabulary.Graphity;
 import org.graphity.vocabulary.SIOC;
 import org.slf4j.Logger;
@@ -89,9 +90,11 @@ public class ResourceBase implements LDPResource, ModelResource, QueriedResource
     public Model getModel()
     {
 	if (getEndpointURI() != null)
-	    return org.graphity.model.ModelResourceFactory.getResource(getEndpointURI(), getQuery()).getModel();
+	    return DataManager.get().loadModel(getEndpointURI(), getQuery());
+	    //return ModelResourceFactory.getResource(getEndpointURI(), getQuery()).getModel();
 	
-	return org.graphity.model.ModelResourceFactory.getResource(getOntology(), getQuery()).getModel();
+	return DataManager.get().loadModel(getOntology(), getQuery());
+	//return ModelResourceFactory.getResource(getOntology(), getQuery()).getModel();
     }
 
     @GET

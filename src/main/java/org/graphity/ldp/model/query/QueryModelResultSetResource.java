@@ -20,13 +20,15 @@ import com.hp.hpl.jena.query.ResultSet;
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
 import org.graphity.ldp.model.Resource;
+import org.graphity.model.query.ResultSetResource;
+import org.graphity.model.query.QueryModelResource;
 
 /**
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 @Produces({org.graphity.MediaType.APPLICATION_SPARQL_RESULTS_XML + "; charset=UTF-8", org.graphity.MediaType.APPLICATION_SPARQL_RESULTS_JSON + "; charset=UTF-8"})
-public interface QueryModelResultSetResource extends Resource, org.graphity.model.query.QueryModelResultSetResource
+public interface QueryModelResultSetResource extends Resource, QueryModelResource, ResultSetResource
 {
     @GET @Override ResultSet getResultSet();
 }

@@ -21,13 +21,15 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
 import org.graphity.MediaType;
 import org.graphity.ldp.model.Resource;
+import org.graphity.model.query.ModelResource;
+import org.graphity.model.query.QueryModelResource;
 
 /**
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 @Produces({MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", MediaType.TEXT_TURTLE + "; charset=UTF-8"})
-public interface QueryModelModelResource  extends Resource, org.graphity.model.query.QueryModelModelResource
+public interface QueryModelModelResource  extends Resource, ModelResource, QueryModelResource
 {
     @GET @Override Model getModel();
 }

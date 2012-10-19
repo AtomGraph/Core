@@ -16,12 +16,13 @@
  */
 package org.graphity.model.query;
 
-import org.graphity.model.ResultSetResource;
+import com.hp.hpl.jena.query.ResultSet;
 
 /**
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public interface QueryModelResultSetResource extends QueryModelResource, ResultSetResource
+public interface ResultSetResource
 {
+    public ResultSet getResultSet();
 }

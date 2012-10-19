@@ -14,13 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.graphity.ldp.model.impl;
+package org.graphity.ldp.model.query.impl;
 
 import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import javax.ws.rs.core.*;
 import org.graphity.ldp.model.query.QueryModelModelResource;
 import org.graphity.util.ModelUtils;
+import org.graphity.util.manager.DataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,10 +30,12 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class QueryModelModelResourceImpl  extends org.graphity.model.impl.QueryModelModelResourceImpl implements QueryModelModelResource
+public class QueryModelModelResourceImpl implements QueryModelModelResource
 {
     private static final Logger log = LoggerFactory.getLogger(QueryModelModelResourceImpl.class);
 
+    private Query query = null;
+    private Model queryModel, model = null;
     private Request req = null;
     private UriInfo uriInfo = null;
     private MediaType mediaType = org.graphity.MediaType.APPLICATION_RDF_XML_TYPE;
@@ -40,10 +44,48 @@ public class QueryModelModelResourceImpl  extends org.graphity.model.impl.QueryM
 	UriInfo uriInfo, Request req,
 	MediaType mediaType)
     {
-	super(queryModel, query);
+	if (queryModel == null) throw new IllegalArgumentException("Query Model must be not null");
+	if (query == null) throw new IllegalArgumentException("Query must be not null");
+	this.queryModel = queryModel;
+	this.query = query;
 	this.req = req;
 	this.uriInfo = uriInfo;
 	if (mediaType != null) this.mediaType = mediaType;
+	
+	if (log.isDebugEnabled()) log.debug("Query Model: {} Query: {}", queryModel, query);
+    }
+
+    public QueryModelModelResourceImpl(Model queryModel, String uri,
+	UriInfo uriInfo, Request req,
+	MediaType mediaType)
+    {
+	this(queryModel, QueryFactory.create("DESCRIBE <" + uri + ">"), uriInfo, req, mediaType);
+    }
+
+    @Override
+    public Model getModel()
+    {
+	if (model == null)
+	{
+	    if (log.isDebugEnabled()) log.debug("Querying Model: {} with Query: {}", getQueryModel(), getQuery());
+	    model = DataManager.get().loadModel(getQueryModel(), getQuery());
+	    
+	    if (log.isDebugEnabled()) log.debug("Number of Model stmts read: {}", model.size());
+	}
+
+	return model;
+    }
+
+    @Override
+    public Query getQuery()
+    {
+	return query;
+    }
+
+    @Override
+    public Model getQueryModel()
+    {
+	return queryModel;
     }
 
     @Override

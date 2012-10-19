@@ -21,6 +21,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
 import org.graphity.MediaType;
 import org.graphity.ldp.model.Resource;
+import org.graphity.model.query.ModelResource;
+import org.graphity.model.query.EndpointResource;
 
 
 /**
@@ -28,7 +30,7 @@ import org.graphity.ldp.model.Resource;
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 @Produces({MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", MediaType.TEXT_TURTLE + "; charset=UTF-8"})
-public interface EndpointModelResource extends Resource, org.graphity.model.query.EndpointModelResource
+public interface EndpointModelResource extends Resource, ModelResource, EndpointResource
 {
     @GET @Override Model getModel();
 }

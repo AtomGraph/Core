@@ -17,7 +17,6 @@
 package org.graphity.model.query;
 
 import com.hp.hpl.jena.rdf.model.Model;
-import org.graphity.model.QueriedResource;
 
 /**
  *

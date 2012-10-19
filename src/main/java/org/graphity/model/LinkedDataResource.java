@@ -17,6 +17,8 @@
 
 package org.graphity.model;
 
+import org.graphity.model.query.ModelResource;
+
 /**
  *
  * @author Martynas Jusevičius <martynas@graphity.org>

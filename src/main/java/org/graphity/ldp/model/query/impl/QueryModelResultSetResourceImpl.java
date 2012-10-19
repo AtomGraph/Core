@@ -14,12 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.graphity.ldp.model.impl;
+package org.graphity.ldp.model.query.impl;
 
 import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 import javax.ws.rs.core.*;
 import org.graphity.ldp.model.query.QueryModelResultSetResource;
+import org.graphity.util.manager.DataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,10 +29,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class QueryModelResultSetResourceImpl extends org.graphity.model.impl.QueryModelResultSetResourceImpl implements QueryModelResultSetResource
+public class QueryModelResultSetResourceImpl implements QueryModelResultSetResource
 {
     private static final Logger log = LoggerFactory.getLogger(QueryModelResultSetResourceImpl.class);
 
+    private Model queryModel = null;
+    private Query query = null;
+    private ResultSet resultSet = null;
     private Request req = null;
     private UriInfo uriInfo = null;
     private MediaType mediaType = org.graphity.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE;
@@ -39,10 +44,39 @@ public class QueryModelResultSetResourceImpl extends org.graphity.model.impl.Que
 	    UriInfo uriInfo, Request req,
 	    MediaType mediaType)
     {
-	super(queryModel, query);
+	if (queryModel == null) throw new IllegalArgumentException("Query Model must be not null");
+	if (query == null) throw new IllegalArgumentException("Query must be not null");
+	this.queryModel = queryModel;
+	this.query = query;
 	this.req = req;
 	this.uriInfo = uriInfo;
 	if (mediaType != null) this.mediaType = mediaType;
+	
+	if (log.isDebugEnabled()) log.debug("Query Model: {} Query: {}", queryModel, query);
+    }
+
+    @Override
+    public ResultSet getResultSet()
+    {
+	if (resultSet == null)
+	{
+	    if (log.isDebugEnabled()) log.debug("Querying Model: {} with Query: {}", getQueryModel(), getQuery());
+	    resultSet = DataManager.get().loadResultSet(getQueryModel(), getQuery());
+	}
+
+	return resultSet;
+    }
+
+    @Override
+    public Query getQuery()
+    {
+	return query;
+    }
+
+    @Override
+    public Model getQueryModel()
+    {
+	return queryModel;
     }
 
     @Override

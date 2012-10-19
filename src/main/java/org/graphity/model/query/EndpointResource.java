@@ -16,8 +16,6 @@
  */
 package org.graphity.model.query;
 
-import org.graphity.model.QueriedResource;
-
 /**
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
@@ -25,6 +23,4 @@ import org.graphity.model.QueriedResource;
 public interface EndpointResource extends QueriedResource
 {
     public String getEndpointURI();
-    
-    //public Resource getEndpoint();
 }

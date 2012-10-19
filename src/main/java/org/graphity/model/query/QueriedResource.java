@@ -15,15 +15,15 @@
  *
  */
 
-package org.graphity.model;
+package org.graphity.model.query;
 
-import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.query.Query;
 
 /**
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public interface ModelResource
+public interface QueriedResource
 {
-    public Model getModel();
+    public Query getQuery();   
 }

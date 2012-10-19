@@ -16,6 +16,10 @@
  */
 package org.graphity.ldp.model;
 
+import org.graphity.ldp.model.query.impl.QueryModelResultSetResourceImpl;
+import org.graphity.ldp.model.query.impl.EndpointModelResourceImpl;
+import org.graphity.ldp.model.query.impl.QueryModelModelResourceImpl;
+import org.graphity.ldp.model.query.impl.EndpointResultSetResourceImpl;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -30,7 +34,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class ResourceFactory extends org.graphity.model.ModelResourceFactory
+public class ResourceFactory
 {
     private static final Logger log = LoggerFactory.getLogger(ResourceFactory.class);
     

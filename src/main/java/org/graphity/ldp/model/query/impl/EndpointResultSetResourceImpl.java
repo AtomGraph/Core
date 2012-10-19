@@ -2,11 +2,13 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.graphity.ldp.model.impl;
+package org.graphity.ldp.model.query.impl;
 
 import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.ResultSet;
 import javax.ws.rs.core.*;
 import org.graphity.ldp.model.query.EndpointResultSetResource;
+import org.graphity.util.manager.DataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,10 +16,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class EndpointResultSetResourceImpl extends org.graphity.model.impl.EndpointResultSetResourceImpl implements EndpointResultSetResource
+public class EndpointResultSetResourceImpl implements EndpointResultSetResource
 {
     private static final Logger log = LoggerFactory.getLogger(EndpointResultSetResourceImpl.class);
 
+    private String endpointUri = null;
+    private Query query = null;
+    private ResultSet resultSet = null;
     private Request req = null;
     private UriInfo uriInfo = null;
     private MediaType mediaType = org.graphity.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE;
@@ -26,10 +31,39 @@ public class EndpointResultSetResourceImpl extends org.graphity.model.impl.Endpo
 	    UriInfo uriInfo, Request req,
 	    MediaType mediaType)
     {
-	super(endpointUri, query);
+	if (endpointUri == null) throw new IllegalArgumentException("Endpoint URI must be not null");
+	if (query == null) throw new IllegalArgumentException("Query must be not null");
+	this.endpointUri = endpointUri;
+	this.query = query;
 	this.req = req;
 	this.uriInfo = uriInfo;
 	if (mediaType != null) this.mediaType = mediaType;
+	
+	if (log.isDebugEnabled()) log.debug("Endpoint URI: {} Query: {}", endpointUri, query);
+    }
+
+    @Override
+    public ResultSet getResultSet()
+    {
+	if (resultSet == null)
+	{
+	    if (log.isDebugEnabled()) log.debug("Querying remote service: {} with Query: {}", getEndpointURI(), getQuery());
+	    resultSet = DataManager.get().loadResultSet(getEndpointURI(), getQuery());
+	}
+
+	return resultSet;
+    }
+
+    @Override
+    public String getEndpointURI()
+    {
+	return endpointUri;
+    }
+
+    @Override
+    public Query getQuery()
+    {
+	return query;
     }
 
     @Override
