@@ -40,11 +40,12 @@ public class PageResourceBase extends ResourceBase implements PageResource
     private Long offset = null;
     private String orderBy = null;
     private Boolean desc = true;
+    private QueryBuilder selectBuilder, queryBuilder = null;
     
-    public PageResourceBase(OntModel ontology, UriInfo uriInfo, Request req,
+    public PageResourceBase(OntModel ontology, UriInfo uriInfo, Request request,
 	Long limit, Long offset, String orderBy, Boolean desc)
     {
-	super(ontology, uriInfo, req);
+	super(ontology, uriInfo, request);
 	this.limit = limit;
 	this.offset = offset;
 	this.orderBy = orderBy;
@@ -52,6 +53,25 @@ public class PageResourceBase extends ResourceBase implements PageResource
 	
 	if (getQueryResource() == null || !(SPINFactory.asQuery(getQueryResource()) instanceof Select))
 	    throw new IllegalArgumentException("ContainerResource must have a SELECT query");
+	
+	selectBuilder = QueryBuilder.fromResource(getQueryResource()).
+	    limit(limit).offset(offset);
+	/*
+	if (orderBy != null)
+	{
+	    com.hp.hpl.jena.rdf.model.Resource modelVar = getOntology().createResource().addLiteral(SP.varName, "model");
+	    Property orderProperty = ResourceFactory.createProperty(orderBy);
+	    com.hp.hpl.jena.rdf.model.Resource orderVar = getOntology().createResource().addLiteral(SP.varName, orderProperty.getLocalName());
+
+	    sb.orderBy(orderVar, desc).optional(modelVar, orderProperty, orderVar);
+	}
+	*/
+
+	if (getQueryResource().getPropertyResourceValue(SP.resultVariables) != null)
+	    queryBuilder = QueryBuilder.fromDescribe(getQueryResource().getPropertyResourceValue(SP.resultVariables)).
+		subQuery(selectBuilder);
+	else
+	    queryBuilder = QueryBuilder.fromDescribe().subQuery(selectBuilder);
     }
 
     /*
@@ -65,31 +85,13 @@ public class PageResourceBase extends ResourceBase implements PageResource
     
     public QueryBuilder getSelectBuilder()
     {
-	QueryBuilder sb = QueryBuilder.fromResource(getQueryResource()).
-	    limit(limit).offset(offset);
-
-	/*
-	if (orderBy != null)
-	{
-	    com.hp.hpl.jena.rdf.model.Resource modelVar = getOntology().createResource().addLiteral(SP.varName, "model");
-	    Property orderProperty = ResourceFactory.createProperty(orderBy);
-	    com.hp.hpl.jena.rdf.model.Resource orderVar = getOntology().createResource().addLiteral(SP.varName, orderProperty.getLocalName());
-
-	    sb.orderBy(orderVar, desc).optional(modelVar, orderProperty, orderVar);
-	}
-	*/
-
-	return sb;
+	return selectBuilder;
     }
 
     @Override
     public QueryBuilder getQueryBuilder()
     {
-	if (getQueryResource().getPropertyResourceValue(SP.resultVariables) != null)
-	    return QueryBuilder.fromDescribe(getQueryResource().getPropertyResourceValue(SP.resultVariables)).
-		subQuery(getSelectBuilder());
-	else
-	    return QueryBuilder.fromDescribe().subQuery(getSelectBuilder());	    
+	return queryBuilder;
     }
 
     /*
@@ -109,25 +111,25 @@ public class PageResourceBase extends ResourceBase implements PageResource
     @Override
     public Long getLimit()
     {
-	return this.limit;
+	return limit;
     }
 
     @Override
     public Long getOffset()
     {
-	return this.offset;
+	return offset;
     }
 
     @Override
     public String getOrderBy()
     {
-	return this.orderBy;
+	return orderBy;
     }
 
     @Override
     public Boolean getDesc()
     {
-	return this.desc;
+	return desc;
     }
 
     @Override
@@ -135,10 +137,10 @@ public class PageResourceBase extends ResourceBase implements PageResource
     {
 	if (getOffset() >= getLimit())
 	    return getOntology().getResource(UriBuilder.fromUri(getURI()).
-		queryParam("limit", limit).
-		queryParam("offset", offset - limit).
-		queryParam("order-by", orderBy).
-		queryParam("desc", desc).
+		queryParam("limit", getLimit()).
+		queryParam("offset", getOffset() - getLimit()).
+		queryParam("order-by", getOrderBy()).
+		queryParam("desc", getDesc()).
 		build().toString());
 	else
 	    return null;
@@ -151,10 +153,10 @@ public class PageResourceBase extends ResourceBase implements PageResource
 	    return null;
 	else
 	    return getOntology().getResource(UriBuilder.fromUri(getURI()).
-		queryParam("limit", limit).
-		queryParam("offset", offset - limit).
-		queryParam("order-by", orderBy).
-		queryParam("desc", desc).
+		queryParam("limit", getLimit()).
+		queryParam("offset", getOffset() + getLimit()).
+		queryParam("order-by", getOrderBy()).
+		queryParam("desc", getDesc()).
 		build().toString());
     }
 }

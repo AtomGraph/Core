@@ -20,12 +20,14 @@ import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.rdf.model.Model;
-import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.EntityTag;
+import javax.ws.rs.core.Request;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import org.graphity.ldp.model.LDPResource;
+import org.graphity.ldp.model.XHTMLResource;
 import org.graphity.model.query.ModelResource;
 import org.graphity.model.query.QueriedResource;
 import org.graphity.util.ModelUtils;
@@ -41,19 +43,56 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 @Path("{path: .*}")
-public class ResourceBase implements LDPResource, ModelResource, QueriedResource
+public class ResourceBase implements LDPResource, ModelResource, QueriedResource, XHTMLResource
 {
     private static final Logger log = LoggerFactory.getLogger(ResourceBase.class);
 
     private OntModel ontology = null;
     private UriInfo uriInfo = null;
-    private Request req = null;
+    private Request request = null;
+    private String uri = null;
+    private OntResource ontResource = null;
+    private com.hp.hpl.jena.rdf.model.Resource queryResource, service = null;
+    private QueryBuilder queryBuilder = null;
+    private Query query = null;
+    private String endpointUri = null;
+    private Model model = null;
+    private EntityTag entityTag = null;
+    private boolean isContainer = false;
 
-    public ResourceBase(OntModel ontology, UriInfo uriInfo, Request req)
+    public ResourceBase(OntModel ontology, UriInfo uriInfo, Request request)
     {
 	this.ontology = ontology;
 	this.uriInfo = uriInfo;
-	this.req = req;
+	this.request = request;
+
+	uri = uriInfo.getAbsolutePath().toString();
+	ontResource = ontology.getOntResource(uri);
+	
+	if (ontResource != null)
+	{
+	    queryResource = ontResource.getPropertyResourceValue(Graphity.query);
+	    service = ontResource.getPropertyResourceValue(Graphity.service);
+	    isContainer = ontResource.hasRDFType(SIOC.CONTAINER);
+	}
+	
+	if (queryResource != null) queryBuilder = QueryBuilder.fromResource(queryResource); // CONSTRUCT
+	else queryBuilder = QueryBuilder.fromDescribe(uri); // default DESCRIBE	
+	query = queryBuilder.build();	
+
+	if (service != null)
+	    endpointUri = service.getPropertyResourceValue(com.hp.hpl.jena.rdf.model.ResourceFactory.
+		createProperty("http://www.w3.org/ns/sparql-service-description#endpoint")).getURI();
+
+	if (endpointUri != null) model = DataManager.get().loadModel(endpointUri, query);
+	else model = DataManager.get().loadModel(ontology, query);
+	if (model.isEmpty())
+	{
+	    if (log.isTraceEnabled()) log.trace("Loaded Model is empty");
+	    throw new WebApplicationException(Response.Status.NOT_FOUND);
+	}
+
+	entityTag = new EntityTag(Long.toHexString(ModelUtils.hashModel(model)));
     }
     
     public OntModel getOntology()
@@ -64,7 +103,7 @@ public class ResourceBase implements LDPResource, ModelResource, QueriedResource
     @Override
     public Request getRequest()
     {
-	return req;
+	return request;
     }
 
     @Override
@@ -76,43 +115,38 @@ public class ResourceBase implements LDPResource, ModelResource, QueriedResource
     @Override
     public String getURI()
     {
-	return getUriInfo().getAbsolutePath().toString();
+	return uri;
+    }
+
+    public OntResource getOntResource()
+    {
+	return ontResource;
+    }
+
+    public com.hp.hpl.jena.rdf.model.Resource getQueryResource()
+    {
+	return queryResource;
     }
 
     public QueryBuilder getQueryBuilder()
     {
-	if (getQueryResource() != null) return QueryBuilder.fromResource(getQueryResource()); // CONSTRUCT
-	
-	return QueryBuilder.fromDescribe(getURI()); // default DESCRIBE
+	return queryBuilder;
     }
     
     @Override
     public Model getModel()
     {
-	if (getEndpointURI() != null)
-	    return DataManager.get().loadModel(getEndpointURI(), getQuery());
-	    //return ModelResourceFactory.getResource(getEndpointURI(), getQuery()).getModel();
-	
-	return DataManager.get().loadModel(getOntology(), getQuery());
-	//return ModelResourceFactory.getResource(getOntology(), getQuery()).getModel();
+	return model;
     }
 
-    @GET
-    @Produces(MediaType.APPLICATION_XHTML_XML + ";qs=2;charset=UTF-8")
-    //@Override
+    @Override
     public Response getXHTMLResponse()
     {
+	// check if resource was modified and return 304 Not Modified if not
 	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(getEntityTag());
 	if (rb != null) return rb.build();
-
-	Model model = getModel();
-	if (model.isEmpty())
-	{
-	    if (log.isTraceEnabled()) log.trace("Loaded Model is empty");
-	    throw new WebApplicationException(Response.Status.NOT_FOUND);
-	}
-	else
-	    return Response.ok(this).tag(getEntityTag()).build(); // uses ResourceXHTMLWriter
+	
+	return Response.ok(this).tag(getEntityTag()).build(); // uses ResourceXHTMLWriter
     }
 
     @Override
@@ -121,67 +155,36 @@ public class ResourceBase implements LDPResource, ModelResource, QueriedResource
 	// check if resource was modified and return 304 Not Modified if not
 	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(getEntityTag());
 	if (rb != null) return rb.build();
-
-	Model model = getModel();
-	if (model.isEmpty())
-	{
-	    if (log.isTraceEnabled()) log.trace("Loaded Model is empty");
-	    throw new WebApplicationException(Response.Status.NOT_FOUND);
-	}
-	else
-	    return Response.ok(getModel()).tag(getEntityTag()).build(); // uses ModelProvider
+	
+	return Response.ok(getModel()).tag(getEntityTag()).build(); // uses ResourceXHTMLWriter
     }
 
     @Override
     public EntityTag getEntityTag()
     {
-	return new EntityTag(Long.toHexString(ModelUtils.hashModel(getModel())));
+	return entityTag;
     }
 
     public com.hp.hpl.jena.rdf.model.Resource getService()
-    {
-	if (getOntResource() != null)
-	    return getOntResource().getPropertyResourceValue(Graphity.service);
-	
-	return null;
+    {	
+	return service;
     }
 
     public String getEndpointURI()
     {
-	if (getService() != null)
-	    return getService().getPropertyResourceValue(com.hp.hpl.jena.rdf.model.ResourceFactory.
-		createProperty("http://www.w3.org/ns/sparql-service-description#endpoint")).getURI();
-	
-	return null;
-    }
-
-    public OntResource getOntResource()
-    {
-	return getOntology().getOntResource(getURI());
-    }
-
-    public com.hp.hpl.jena.rdf.model.Resource getQueryResource()
-    {
-	if (getOntResource() != null)
-	    return getOntResource().getPropertyResourceValue(Graphity.query);
-	
-	return null;
+	return endpointUri;
     }
 
     @Override
     public Query getQuery()
     {
-	//if (query == null) query = getQueryBuilder().build();
-	
-	return getQueryBuilder().build();
-	
-	//return query;
+	return query;
     }
 
     @Override
     public boolean isContainer()
     {
-	return getOntResource() != null && getOntResource().hasRDFType(SIOC.CONTAINER);
+	return isContainer;
     }
 
     @Override
