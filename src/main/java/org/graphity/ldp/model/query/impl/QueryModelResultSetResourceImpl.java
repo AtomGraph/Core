@@ -39,6 +39,7 @@ public class QueryModelResultSetResourceImpl implements QueryModelResultSetResou
     private Request req = null;
     private UriInfo uriInfo = null;
     private MediaType mediaType = org.graphity.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE;
+    private Response response = null;
 
     public QueryModelResultSetResourceImpl(Model queryModel, Query query,
 	    UriInfo uriInfo, Request req,
@@ -52,18 +53,13 @@ public class QueryModelResultSetResourceImpl implements QueryModelResultSetResou
 	this.uriInfo = uriInfo;
 	if (mediaType != null) this.mediaType = mediaType;
 	
-	if (log.isDebugEnabled()) log.debug("Query Model: {} Query: {}", queryModel, query);
+	if (log.isDebugEnabled()) log.debug("Querying Model: {} with Query: {}", queryModel, query);
+	resultSet = DataManager.get().loadResultSet(queryModel, query);
     }
 
     @Override
     public ResultSet getResultSet()
     {
-	if (resultSet == null)
-	{
-	    if (log.isDebugEnabled()) log.debug("Querying Model: {} with Query: {}", getQueryModel(), getQuery());
-	    resultSet = DataManager.get().loadResultSet(getQueryModel(), getQuery());
-	}
-
 	return resultSet;
     }
 

@@ -20,7 +20,9 @@ import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import javax.ws.rs.core.*;
+import org.graphity.ldp.model.LinkedDataResource;
 import org.graphity.ldp.model.query.EndpointModelResource;
+import org.graphity.util.ModelUtils;
 import org.graphity.util.manager.DataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +31,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class EndpointModelResourceImpl implements EndpointModelResource
+public class EndpointModelResourceImpl implements LinkedDataResource, EndpointModelResource
 {
     private static final Logger log = LoggerFactory.getLogger(EndpointModelResourceImpl.class);
 
@@ -39,6 +41,7 @@ public class EndpointModelResourceImpl implements EndpointModelResource
     private Request req = null;
     private UriInfo uriInfo = null;
     private MediaType mediaType = org.graphity.MediaType.APPLICATION_RDF_XML_TYPE;
+    private EntityTag entityTag = null;
 
     public EndpointModelResourceImpl(String endpointUri, Query query, 
 	UriInfo uriInfo, Request req,
@@ -52,7 +55,11 @@ public class EndpointModelResourceImpl implements EndpointModelResource
 	this.uriInfo = uriInfo;
 	if (mediaType != null) this.mediaType = mediaType;
 	
-	if (log.isDebugEnabled()) log.debug("Endpoint URI: {} Query: {}", endpointUri, query);
+	if (log.isDebugEnabled()) log.debug("Querying remote service: {} with Query: {}", endpointUri, query);
+	model = DataManager.get().loadModel(endpointUri, query);
+
+	if (log.isDebugEnabled()) log.debug("Number of Model stmts read: {}", model.size());
+	entityTag = new EntityTag(Long.toHexString(ModelUtils.hashModel(model)));
     }
 
     public EndpointModelResourceImpl(String endpointUri, String uri,
@@ -65,14 +72,6 @@ public class EndpointModelResourceImpl implements EndpointModelResource
     @Override
     public Model getModel()
     {
-	if (model == null)
-	{
-	    if (log.isDebugEnabled()) log.debug("Querying remote service: {} with Query: {}", getEndpointURI(), getQuery());
-	    model = DataManager.get().loadModel(getEndpointURI(), getQuery());
-	    
-	    if (log.isDebugEnabled()) log.debug("Number of Model stmts read: {}", model.size());
-	}
-
 	return model;
     }
 
@@ -103,9 +102,12 @@ public class EndpointModelResourceImpl implements EndpointModelResource
     @Override
     public Response getResponse()
     {
-	if (log.isDebugEnabled()) log.debug("Accept param: {}, writing SPARQL results (XML or JSON)", getMediaType());
-
-	return Response.ok(getModel(), getMediaType()).build();
+	if (log.isTraceEnabled()) log.trace("Returning RDF Response");
+	    
+	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(getEntityTag());
+	if (rb != null) return rb.build();
+	
+	return Response.ok(getModel(), getMediaType()).tag(getEntityTag()).build(); // uses ModelWriter
     }
     
     public MediaType getMediaType()
@@ -116,8 +118,13 @@ public class EndpointModelResourceImpl implements EndpointModelResource
     @Override
     public EntityTag getEntityTag()
     {
-	//return super.getEntityTag();
-	return null;
+	return entityTag;
+    }
+
+    @Override
+    public String getURI()
+    {
+	return getUriInfo().getAbsolutePath().toString();
     }
 
 }

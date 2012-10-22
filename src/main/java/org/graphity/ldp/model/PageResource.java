@@ -20,7 +20,7 @@ package org.graphity.ldp.model;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public interface PageResource extends LDPResource
+public interface PageResource extends LinkedDataResource
 {
     Long getLimit();
     
@@ -30,8 +30,8 @@ public interface PageResource extends LDPResource
     
     Boolean getDesc();
 
-    com.hp.hpl.jena.rdf.model.Resource getPreviousResource();
+    com.hp.hpl.jena.rdf.model.Resource getPrevious();
     
-    com.hp.hpl.jena.rdf.model.Resource getNextResource();
+    com.hp.hpl.jena.rdf.model.Resource getNext();
 
 }

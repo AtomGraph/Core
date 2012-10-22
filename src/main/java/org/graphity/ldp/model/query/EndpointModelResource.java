@@ -21,8 +21,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
 import org.graphity.MediaType;
 import org.graphity.ldp.model.Resource;
-import org.graphity.model.query.ModelResource;
 import org.graphity.model.query.EndpointResource;
+import org.graphity.model.query.ModelResource;
 
 
 /**

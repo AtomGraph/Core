@@ -23,34 +23,30 @@ public class EndpointResultSetResourceImpl implements EndpointResultSetResource
     private String endpointUri = null;
     private Query query = null;
     private ResultSet resultSet = null;
-    private Request req = null;
+    private Request request = null;
     private UriInfo uriInfo = null;
     private MediaType mediaType = org.graphity.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE;
 
     public EndpointResultSetResourceImpl(String endpointUri, Query query,
-	    UriInfo uriInfo, Request req,
+	    UriInfo uriInfo, Request request,
 	    MediaType mediaType)
     {
 	if (endpointUri == null) throw new IllegalArgumentException("Endpoint URI must be not null");
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
 	this.endpointUri = endpointUri;
 	this.query = query;
-	this.req = req;
+	this.request = request;
 	this.uriInfo = uriInfo;
 	if (mediaType != null) this.mediaType = mediaType;
 	
 	if (log.isDebugEnabled()) log.debug("Endpoint URI: {} Query: {}", endpointUri, query);
+	if (log.isDebugEnabled()) log.debug("Querying remote service: {} with Query: {}", endpointUri, query);
+	resultSet = DataManager.get().loadResultSet(endpointUri, query);
     }
 
     @Override
     public ResultSet getResultSet()
     {
-	if (resultSet == null)
-	{
-	    if (log.isDebugEnabled()) log.debug("Querying remote service: {} with Query: {}", getEndpointURI(), getQuery());
-	    resultSet = DataManager.get().loadResultSet(getEndpointURI(), getQuery());
-	}
-
 	return resultSet;
     }
 
@@ -75,7 +71,7 @@ public class EndpointResultSetResourceImpl implements EndpointResultSetResource
     @Override
     public Request getRequest()
     {
-	return req;
+	return request;
     }
     
     @Override

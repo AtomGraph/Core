@@ -20,8 +20,8 @@ import com.hp.hpl.jena.query.ResultSet;
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
 import org.graphity.ldp.model.Resource;
-import org.graphity.model.query.ResultSetResource;
 import org.graphity.model.query.EndpointResource;
+import org.graphity.model.query.ResultSetResource;
 
 /**
  *
