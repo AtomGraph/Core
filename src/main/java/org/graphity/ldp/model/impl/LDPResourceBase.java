@@ -5,6 +5,7 @@
 package org.graphity.ldp.model.impl;
 
 import com.hp.hpl.jena.ontology.OntResource;
+import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.rdf.model.Model;
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
@@ -13,8 +14,14 @@ import javax.ws.rs.core.*;
 import org.graphity.ldp.model.LDPResource;
 import org.graphity.ldp.model.LinkedDataResource;
 import org.graphity.ldp.model.ResourceFactory;
+import org.graphity.util.QueryBuilder;
+import org.graphity.vocabulary.Graphity;
+import org.graphity.vocabulary.SIOC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.topbraid.spin.model.SPINFactory;
+import org.topbraid.spin.model.Select;
+import org.topbraid.spin.vocabulary.SP;
 
 /**
  *
@@ -26,16 +33,81 @@ public class LDPResourceBase implements LDPResource
 
     private LinkedDataResource resource = null;
 
-    public LDPResourceBase(OntResource ontResource, UriInfo uriInfo, Request request,
+    public final QueryBuilder getQueryBuilder(OntResource ontResource,
 	Long limit, Long offset, String orderBy, Boolean desc)
     {
-	resource = ResourceFactory.getLinkedDataResource(ontResource, uriInfo, request, null, limit, offset, orderBy, desc);
+	if (ontResource == null) throw new IllegalArgumentException("Resource cannot be null");
+	com.hp.hpl.jena.rdf.model.Resource queryResource = ontResource.getPropertyResourceValue(Graphity.query);
+
+	QueryBuilder queryBuilder = null;
+	if (ontResource.hasRDFType(SIOC.CONTAINER))
+	{
+	    if (queryResource == null || !(SPINFactory.asQuery(queryResource) instanceof Select))
+		throw new IllegalArgumentException("PageResource must have a SELECT query");
+
+	    QueryBuilder selectBuilder = QueryBuilder.fromResource(queryResource).
+		limit(limit).offset(offset);
+	    /*
+	    if (orderBy != null)
+	    {
+		com.hp.hpl.jena.rdf.model.Resource modelVar = getOntology().createResource().addLiteral(SP.varName, "model");
+		Property orderProperty = ResourceFactory.createProperty(orderBy);
+		com.hp.hpl.jena.rdf.model.Resource orderVar = getOntology().createResource().addLiteral(SP.varName, orderProperty.getLocalName());
+
+		sb.orderBy(orderVar, desc).optional(modelVar, orderProperty, orderVar);
+	    }
+	    */
+
+	    if (queryResource.getPropertyResourceValue(SP.resultVariables) != null)
+		queryBuilder = QueryBuilder.fromDescribe(queryResource.getPropertyResourceValue(SP.resultVariables)).
+		    subQuery(selectBuilder);
+	    else
+		queryBuilder = QueryBuilder.fromDescribe().subQuery(selectBuilder);
+	}
+	else
+	{
+	    if (queryResource != null) queryBuilder = QueryBuilder.fromResource(queryResource); // CONSTRUCT
+	    else queryBuilder = QueryBuilder.fromDescribe(getURI()); // default DESCRIBE
+	}
 	
+	return queryBuilder;
+    }
+
+    public final LinkedDataResource getLinkedDataResource(OntResource ontResource,
+	UriInfo uriInfo, Request request, MediaType mediaType,
+	Long limit, Long offset, String orderBy, Boolean desc)
+    {
+	Query query = getQueryBuilder(ontResource, limit, offset, orderBy, desc).build();
+	com.hp.hpl.jena.rdf.model.Resource service = ontResource.getPropertyResourceValue(Graphity.service);
+
+	if (service != null)
+	{
+	    String endpointUri = service.getPropertyResourceValue(com.hp.hpl.jena.rdf.model.ResourceFactory.
+		createProperty("http://www.w3.org/ns/sparql-service-description#endpoint")).getURI();
+		return ResourceFactory.getLinkedDataResource(endpointUri, query, uriInfo, request, mediaType,
+			limit, offset, orderBy, desc);
+	}
+	else
+	    return ResourceFactory.getLinkedDataResource(ontResource.getModel(), query, uriInfo, request, mediaType,
+		    limit, offset, orderBy, desc);
+    }
+    
+    public LDPResourceBase(LinkedDataResource resource)
+    {	
 	if (resource.getModel().isEmpty())
 	{
 	    if (log.isTraceEnabled()) log.trace("Loaded Model is empty");
 	    throw new WebApplicationException(Response.Status.NOT_FOUND);
 	}
+	
+	this.resource = resource;
+    }
+
+    public LDPResourceBase(OntResource ontResource, UriInfo uriInfo, Request request,
+	Long limit, Long offset, String orderBy, Boolean desc)
+    {
+	//this(getLinkedDataResource(ontResource, uriInfo, request, null, limit, offset, orderBy, desc));
+	this.resource = getLinkedDataResource(ontResource, uriInfo, request, null, limit, offset, orderBy, desc);
     }
 
     @GET
@@ -47,7 +119,6 @@ public class LDPResourceBase implements LDPResource
 	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(getEntityTag());
 	if (rb != null) return rb.build();
 	
-	//GenericEntity<LinkedDataResource> entity = new GenericEntity<LinkedDataResource>(getResource()) { };
 	return Response.ok(getResource()).tag(getEntityTag()).build(); // uses ResourceXHTMLWriter
     }
 

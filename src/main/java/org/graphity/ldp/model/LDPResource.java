@@ -18,10 +18,8 @@ package org.graphity.ldp.model;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import javax.ws.rs.*;
-import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Response;
 import org.graphity.MediaType;
-import org.graphity.model.LinkedDataResource;
 
 /**
  *
@@ -29,7 +27,7 @@ import org.graphity.model.LinkedDataResource;
  */
 @Consumes({MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", MediaType.TEXT_TURTLE + "; charset=UTF-8"})
 @Produces({MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", MediaType.TEXT_TURTLE + "; charset=UTF-8"})
-public interface LDPResource extends LinkedDataResource, Resource
+public interface LDPResource extends LinkedDataResource
 {
     //@GET Response getResponse();
     
