@@ -19,7 +19,6 @@ import org.graphity.vocabulary.Graphity;
 import org.graphity.vocabulary.SIOC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.topbraid.spin.model.SPINFactory;
 import org.topbraid.spin.model.Select;
 import org.topbraid.spin.vocabulary.SP;
 
@@ -32,18 +31,29 @@ public class LDPResourceBase implements LDPResource
     private static final Logger log = LoggerFactory.getLogger(LDPResourceBase.class);
 
     private LinkedDataResource resource = null;
-
-    public final QueryBuilder getQueryBuilder(OntResource ontResource,
+    
+    public static QueryBuilder getQueryBuilder(OntResource ontResource,
 	Long limit, Long offset, String orderBy, Boolean desc)
     {
-	if (ontResource == null) throw new IllegalArgumentException("Resource cannot be null");
-	com.hp.hpl.jena.rdf.model.Resource queryResource = ontResource.getPropertyResourceValue(Graphity.query);
-
-	QueryBuilder queryBuilder = null;
+	if (ontResource == null) throw new IllegalArgumentException("OntResource cannot be null");
+	
+	com.hp.hpl.jena.rdf.model.Resource queryResource = null;
+	if (ontResource.hasProperty(Graphity.query))
+	{
+	    queryResource = ontResource.getPropertyResourceValue(Graphity.query);
+	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} has explicit Query Resource {}", ontResource.getURI(), queryResource);
+	}
+	else
+	{
+	    queryResource = QueryBuilder.fromDescribe(ontResource.getURI()).buildSPIN();
+	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} gets implicit Query Resource {}", ontResource.getURI(), queryResource);
+	}
+	
 	if (ontResource.hasRDFType(SIOC.CONTAINER))
 	{
-	    if (queryResource == null || !(SPINFactory.asQuery(queryResource) instanceof Select))
-		throw new IllegalArgumentException("PageResource must have a SELECT query");
+	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} is a Container, building Query from SELECT", ontResource.getURI());
+	    if (!(queryResource instanceof Select))
+		throw new IllegalArgumentException("Container QueryBuilder must get a SELECT query");
 
 	    QueryBuilder selectBuilder = QueryBuilder.fromResource(queryResource).
 		limit(limit).offset(offset);
@@ -59,37 +69,51 @@ public class LDPResourceBase implements LDPResource
 	    */
 
 	    if (queryResource.getPropertyResourceValue(SP.resultVariables) != null)
-		queryBuilder = QueryBuilder.fromDescribe(queryResource.getPropertyResourceValue(SP.resultVariables)).
+	    {
+		if (log.isDebugEnabled()) log.debug("Query Resource {} has result variables: {}", queryResource, queryResource.getPropertyResourceValue(SP.resultVariables));
+		return QueryBuilder.fromDescribe(queryResource.getPropertyResourceValue(SP.resultVariables)).
 		    subQuery(selectBuilder);
+	    }
 	    else
-		queryBuilder = QueryBuilder.fromDescribe().subQuery(selectBuilder);
+	    {
+		if (log.isDebugEnabled()) log.debug("Query Resource {} does not have result variables, using all variables (*)", queryResource);
+		return QueryBuilder.fromDescribe().subQuery(selectBuilder);
+	    }
 	}
 	else
 	{
-	    if (queryResource != null) queryBuilder = QueryBuilder.fromResource(queryResource); // CONSTRUCT
-	    else queryBuilder = QueryBuilder.fromDescribe(getURI()); // default DESCRIBE
+	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} is a not a Container, building Query from DESCRIBE/CONSTRUCT", ontResource.getURI());
+	    return QueryBuilder.fromResource(queryResource);
 	}
-	
-	return queryBuilder;
     }
-
-    public final LinkedDataResource getLinkedDataResource(OntResource ontResource,
+    
+    public static LinkedDataResource getLinkedDataResource(OntResource ontResource, Query query,
 	UriInfo uriInfo, Request request, MediaType mediaType,
 	Long limit, Long offset, String orderBy, Boolean desc)
     {
-	Query query = getQueryBuilder(ontResource, limit, offset, orderBy, desc).build();
-	com.hp.hpl.jena.rdf.model.Resource service = ontResource.getPropertyResourceValue(Graphity.service);
-
-	if (service != null)
+	if (ontResource == null) throw new IllegalArgumentException("OntResource cannot be null");
+	if (query == null) throw new IllegalArgumentException("Query cannot be null");
+	
+	if (log.isDebugEnabled()) log.debug("Creating LinkedDataResource from OntResource with URI: {}", ontResource.getURI());
+	
+	if (ontResource.hasProperty(Graphity.service))
 	{
-	    String endpointUri = service.getPropertyResourceValue(com.hp.hpl.jena.rdf.model.ResourceFactory.
-		createProperty("http://www.w3.org/ns/sparql-service-description#endpoint")).getURI();
-		return ResourceFactory.getLinkedDataResource(endpointUri, query, uriInfo, request, mediaType,
+	    com.hp.hpl.jena.rdf.model.Resource endpoint = ontResource.getPropertyResourceValue(Graphity.service).getPropertyResourceValue(com.hp.hpl.jena.rdf.model.ResourceFactory.
+		createProperty("http://www.w3.org/ns/sparql-service-description#endpoint"));
+	    if (endpoint.getURI() == null) throw new IllegalArgumentException("SPARQL Service endpoint URI cannot be null (Resource {} cannot be blank node)");
+	    
+	    if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has explicit SPARQL endpoint: {}", ontResource.getURI(), endpoint.getURI());
+	
+	    return ResourceFactory.getLinkedDataResource(endpoint.getURI(), query, uriInfo, request, mediaType,
 			limit, offset, orderBy, desc);
 	}
 	else
+	{
+	    if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has no explicit SPARQL endpoint, querying its Model", ontResource.getURI());
+
 	    return ResourceFactory.getLinkedDataResource(ontResource.getModel(), query, uriInfo, request, mediaType,
 		    limit, offset, orderBy, desc);
+	}
     }
     
     public LDPResourceBase(LinkedDataResource resource)
@@ -106,8 +130,9 @@ public class LDPResourceBase implements LDPResource
     public LDPResourceBase(OntResource ontResource, UriInfo uriInfo, Request request,
 	Long limit, Long offset, String orderBy, Boolean desc)
     {
-	//this(getLinkedDataResource(ontResource, uriInfo, request, null, limit, offset, orderBy, desc));
-	this.resource = getLinkedDataResource(ontResource, uriInfo, request, null, limit, offset, orderBy, desc);
+	this(getLinkedDataResource(ontResource,
+		getQueryBuilder(ontResource, limit, offset, orderBy, desc).build(),
+		uriInfo, request, MediaType.WILDCARD_TYPE, limit, offset, orderBy, desc));
     }
 
     @GET
@@ -167,7 +192,8 @@ public class LDPResourceBase implements LDPResource
     @Override
     public String getURI()
     {
-	return getResource().getURI();
+	//return getResource().getURI();
+	return getUriInfo().getAbsolutePath().toString();
     }
 
     @Override

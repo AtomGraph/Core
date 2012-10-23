@@ -74,21 +74,20 @@ exclude-result-prefixes="#all">
     <xsl:param name="action" select="false()"/>
     <xsl:param name="lang" select="'en'" as="xs:string"/>
 
-    <xsl:param name="query-model" select="document($query-uri)" as="document-node()?"/>
-    <xsl:param name="offset" select="$select-query/sp:offset" as="xs:integer?"/>
-    <xsl:param name="limit" select="$select-query/sp:limit" as="xs:integer?"/>
+    <xsl:param name="query-model" select="$ont-model" as="document-node()?"/> <!-- document($query-uri) -->
+    <xsl:param name="offset" select="$query-res/sp:offset" as="xs:integer?"/>
+    <xsl:param name="limit" select="$query-res/sp:limit" as="xs:integer?"/>
     <xsl:param name="order-by" select="key('resources', $orderBy/sp:expression/@rdf:resource, $query-model)/sp:varName" as="xs:string?"/>
     <xsl:param name="desc" select="$orderBy[1]/rdf:type/@rdf:resource = '&sp;Desc'" as="xs:boolean"/>
 
-    <xsl:param name="query-uri" select="$resource/g:query/@rdf:resource" as="xs:anyURI?"/>
-    <xsl:param name="query" select="$select-query/sp:text" as="xs:string?"/>
-    <xsl:param name="where" select="list:member(key('resources', $select-query/sp:where/@rdf:nodeID, $query-model), $query-model)"/>
-    <xsl:param name="orderBy" select="if ($select-query/sp:orderBy) then list:member(key('resources', $select-query/sp:orderBy/@rdf:nodeID, $query-model), $query-model) else ()"/>
+    <xsl:param name="query" select="$query-res/sp:text" as="xs:string?"/>
+    <xsl:param name="where" select="list:member(key('resources', $query-res/sp:where/@rdf:nodeID, $query-model), $query-model)"/>
+    <xsl:param name="orderBy" select="if ($query-res/sp:orderBy) then list:member(key('resources', $query-res/sp:orderBy/@rdf:nodeID, $query-model), $query-model) else ()"/>
 
     <xsl:variable name="resource" select="key('resources', $uri, $ont-model)" as="element()?"/>
     <xsl:variable name="ont-uri" select="resolve-uri('ontology/', $base-uri)" as="xs:anyURI"/>
     <xsl:variable name="ont-model" select="document($ont-uri)" as="document-node()"/>
-    <xsl:variable name="select-query" select="if ($query-uri) then key('resources', $query-uri, $query-model) else ()" as="element()?"/>
+    <xsl:variable name="query-res" select="key('resources', $resource/g:query/@rdf:resource | $resource/g:query/@rdf:nodeID, $query-model)" as="element()?"/>
 	
     <xsl:key name="resources" match="*[*][@rdf:about] | *[*][@rdf:nodeID]" use="@rdf:about | @rdf:nodeID"/>
     <xsl:key name="predicates" match="*[@rdf:about]/* | *[@rdf:nodeID]/*" use="concat(namespace-uri(.), local-name(.))"/>
