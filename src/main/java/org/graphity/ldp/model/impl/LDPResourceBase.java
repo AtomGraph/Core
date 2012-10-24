@@ -19,6 +19,7 @@ import org.graphity.vocabulary.Graphity;
 import org.graphity.vocabulary.SIOC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.topbraid.spin.model.SPINFactory;
 import org.topbraid.spin.model.Select;
 import org.topbraid.spin.vocabulary.SP;
 
@@ -52,7 +53,7 @@ public class LDPResourceBase implements LDPResource
 	if (ontResource.hasRDFType(SIOC.CONTAINER))
 	{
 	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} is a Container, building Query from SELECT", ontResource.getURI());
-	    if (!(queryResource instanceof Select))
+	    if (!(SPINFactory.asQuery(queryResource) instanceof Select))
 		throw new IllegalArgumentException("Container QueryBuilder must get a SELECT query");
 
 	    QueryBuilder selectBuilder = QueryBuilder.fromResource(queryResource).
@@ -98,9 +99,12 @@ public class LDPResourceBase implements LDPResource
 	
 	if (ontResource.hasProperty(Graphity.service))
 	{
-	    com.hp.hpl.jena.rdf.model.Resource endpoint = ontResource.getPropertyResourceValue(Graphity.service).getPropertyResourceValue(com.hp.hpl.jena.rdf.model.ResourceFactory.
+	    com.hp.hpl.jena.rdf.model.Resource service = ontResource.getPropertyResourceValue(Graphity.service);
+	    if (service == null) throw new IllegalArgumentException("SPARQL Service must be a Resource");
+	    
+	    com.hp.hpl.jena.rdf.model.Resource endpoint = service.getPropertyResourceValue(com.hp.hpl.jena.rdf.model.ResourceFactory.
 		createProperty("http://www.w3.org/ns/sparql-service-description#endpoint"));
-	    if (endpoint.getURI() == null) throw new IllegalArgumentException("SPARQL Service endpoint URI cannot be null (Resource {} cannot be blank node)");
+	    if (endpoint == null || endpoint.getURI() == null) throw new IllegalArgumentException("SPARQL Service endpoint must be URI Resource");
 	    
 	    if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has explicit SPARQL endpoint: {}", ontResource.getURI(), endpoint.getURI());
 	
