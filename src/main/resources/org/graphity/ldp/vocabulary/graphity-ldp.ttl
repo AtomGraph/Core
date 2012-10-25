@@ -1,0 +1,155 @@
+# @base <http://ldp.graphity.org/> .
+
+@prefix : <ontology/> .
+@prefix g: <http://graphity.org/ontology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix sioc: <http://rdfs.org/sioc/ns#> .
+@prefix sp: <http://spinrdf.org/sp#> .
+@prefix void: <http://rdfs.org/ns/void#> .
+@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
+@prefix lda: <http://purl.org/linked-data/api/vocab#> .
+@prefix vann: <http://purl.org/vocab/vann/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix dbpedia: <http://dbpedia.org/resource/> .
+
+: a owl:Ontology ;
+    owl:imports <http://graphity.org/ontology/> ;
+    dct:title "Graphity LDP ontology" ;
+    rdfs:label "Graphity LDP ontology" ;
+    dct:created "2012-10-26T01:04:00+03:00"^^xsd:dateTime ;
+    vann:preferredNamespaceUri "http://ldp.graphity.org/ontology/" ;
+    vann:preferredNamespacePrefix "gldp";
+    foaf:homepage <http://ldp.graphity.org> ;
+    dct:license <http://www.opendatacommons.org/licenses/pddl/1.0/> ;
+    dct:creator <http://semantic-web.dk#martynas> ;
+    rdfs:seeAlso <sparql> .
+
+_:dataset a void:Dataset ;
+    dct:title "The dataset of this application" ;
+    foaf:homepage <> ;
+    rdfs:isDefinedBy : ;
+    void:sparqlEndpoint <sparql> .
+
+_:sparql a sd:Service ;
+    dct:title "Local SPARQL service" ;
+    sd:endpoint <sparql> ;
+    sd:supportedLanguage sd:SPARQL11Query .
+
+_:dydra a sd:Service ;
+    dct:title "Dydra cloud SPARQL service" ;
+    foaf:homepage <http://dydra.com> ;
+    sd:endpoint <http://dydra.com/graphity/ldp/sparql> .
+
+<http://graphity.org#browser> a doap:Project ;
+    dct:title "Graphity Browser" ;
+    doap:repository <https://github.com/Graphity/graphity-browser.git> ;
+    doap:browse <https://github.com/Graphity/graphity-browser> ;
+    doap:bug-database <https://github.com/Graphity/graphity-browser/issues> ;
+    doap:maintainer <http://semantic-web.dk#martynas> ;
+    doap:programming-language dbpedia:XSLT,
+	<http://dbpedia.org/resource/Java_%28programming_language%29> .
+
+# RESOURCES
+
+<ontologies> a sioc:Container, lda:ListEndpoint ;
+    sioc:has_host <> ;
+    dct:title "Ontologies" ;
+    g:selectQuery g:SelectOntologies ;
+    # g:service _:dydra ;
+    rdfs:isDefinedBy : ;
+    void:inDataset _:dataset ;
+    g:service _:service .
+
+<classes> a sioc:Container, lda:ListEndpoint ;
+    sioc:has_host <> ;
+    dct:title "Classes" ;
+    g:selectQuery :SelectClasses ;
+    # g:service _:dydra ;
+    rdfs:isDefinedBy : ;
+    void:inDataset _:dataset .
+
+<services> a sioc:Container, lda:ListEndpoint ;
+    sioc:has_host <> ;
+    dct:title "Services" ;
+    g:selectQuery :SelectServices ;
+    # g:service _:dydra ;
+    rdfs:isDefinedBy : ;
+    void:inDataset _:dataset .
+
+<queries> a sioc:Container, lda:ListEndpoint ;
+    sioc:has_host <> ;
+    dct:title "Services" ;
+    g:selectQuery :SelectQueries ;
+    # g:service _:dydra ;
+    rdfs:isDefinedBy : ;
+    void:inDataset _:dataset .
+
+
+# QUERIES
+
+:SelectOntologies    a       sp:Select ;
+      sp:resultVariables (:SubjectVar) ;
+      sp:where (:UnionDefaultNamed
+		[ a       sp:Filter ;
+                  sp:expression
+                          [ a       sp:eq ;
+                            sp:arg1 :PredicateVar ;
+                            sp:arg2 rdf:type
+                          ]
+                ] [ a       sp:Filter ;
+                  sp:expression
+			[ a       sp:eq ;
+				    sp:arg1 :ObjectVar ;
+				    sp:arg2 owl:Ontology
+			]
+                ]) .
+
+# =============================
+
+:SelectClasses    a       sp:Select ;
+      sp:resultVariables (:SubjectVar) ;
+      sp:where (:UnionDefaultNamed
+		[ a       sp:Filter ;
+                  sp:expression
+                          [ a       sp:eq ;
+                            sp:arg1 :PredicateVar ;
+                            sp:arg2 rdf:type
+                          ]
+                ] [ a       sp:Filter ;
+                  sp:expression
+			[ a       sp:or ;
+				    sp:arg1 [ a	    sp:eq ;
+						sp:arg1 :ObjectVar ;
+						sp:arg2 owl:Class
+					    ] ;
+				    sp:arg2 [ a	    sp:eq ;
+						sp:arg1 :ObjectVar ;
+						sp:arg2 rdfs:Class
+					    ]
+			]
+		]) .
+
+# =================
+
+:SelectQueries    a       sp:Select ;
+      sp:resultVariables (:SubjectVar) ;
+      sp:where (:UnionDefaultNamed
+		[ a       sp:Filter ;
+                  sp:expression
+                          [ a       sp:eq ;
+                            sp:arg1 :PredicateVar ;
+                            sp:arg2 rdf:type
+                          ]
+                ] [ a       sp:Filter ;
+                  sp:expression
+			[ a       sp:eq ;
+				    sp:arg1 :ObjectVar ;
+				    sp:arg2 sp:Query
+			]
+                ]) .
