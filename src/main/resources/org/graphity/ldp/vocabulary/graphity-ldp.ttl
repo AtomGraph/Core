@@ -1,4 +1,4 @@
-# @base <http://ldp.graphity.org/> .
+@base <http://ldp.graphity.org/> .
 
 @prefix : <ontology/> .
 @prefix g: <http://graphity.org/ontology/> .
@@ -20,8 +20,8 @@
 
 : a owl:Ontology ;
     owl:imports <http://graphity.org/ontology/> ;
-    dct:title "Graphity LDP ontology" ;
-    rdfs:label "Graphity LDP ontology" ;
+    dct:title "Graphity Linked Data Platform ontology" ;
+    rdfs:label "Graphity Linked Data Platform ontology" ;
     dct:created "2012-10-26T01:04:00+03:00"^^xsd:dateTime ;
     vann:preferredNamespaceUri "http://ldp.graphity.org/ontology/" ;
     vann:preferredNamespacePrefix "gldp";
@@ -47,10 +47,10 @@ _:dydra a sd:Service ;
     sd:endpoint <http://dydra.com/graphity/ldp/sparql> .
 
 <http://graphity.org#browser> a doap:Project ;
-    dct:title "Graphity Browser" ;
-    doap:repository <https://github.com/Graphity/graphity-browser.git> ;
-    doap:browse <https://github.com/Graphity/graphity-browser> ;
-    doap:bug-database <https://github.com/Graphity/graphity-browser/issues> ;
+    dct:title "Graphity Linked Data Platform" ;
+    doap:repository <https://github.com/Graphity/graphity-ldp.git> ;
+    doap:browse <https://github.com/Graphity/graphity-ldp> ;
+    doap:bug-database <https://github.com/Graphity/graphity-ldp/issues> ;
     doap:maintainer <http://semantic-web.dk#martynas> ;
     doap:programming-language dbpedia:XSLT,
 	<http://dbpedia.org/resource/Java_%28programming_language%29> .
