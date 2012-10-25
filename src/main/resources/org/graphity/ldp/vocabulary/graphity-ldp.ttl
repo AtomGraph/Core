@@ -46,7 +46,7 @@ _:dydra a sd:Service ;
     foaf:homepage <http://dydra.com> ;
     sd:endpoint <http://dydra.com/graphity/ldp/sparql> .
 
-<http://graphity.org#browser> a doap:Project ;
+<http://graphity.org#ldp> a doap:Project ;
     dct:title "Graphity Linked Data Platform" ;
     doap:repository <https://github.com/Graphity/graphity-ldp.git> ;
     doap:browse <https://github.com/Graphity/graphity-ldp> ;
