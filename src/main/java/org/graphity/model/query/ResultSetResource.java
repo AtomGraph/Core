@@ -24,5 +24,5 @@ import com.hp.hpl.jena.query.ResultSet;
  */
 public interface ResultSetResource
 {
-    public ResultSet getResultSet();
+    ResultSet getResultSet();
 }

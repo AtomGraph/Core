@@ -25,5 +25,5 @@ import com.hp.hpl.jena.query.Query;
  */
 public interface QueriedResource
 {
-    public Query getQuery();   
+    Query getQuery();   
 }

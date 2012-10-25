@@ -14,6 +14,7 @@ import javax.ws.rs.core.*;
 import org.graphity.ldp.model.LDPResource;
 import org.graphity.ldp.model.LinkedDataResource;
 import org.graphity.ldp.model.ResourceFactory;
+import org.graphity.ldp.model.XHTMLResource;
 import org.graphity.util.QueryBuilder;
 import org.graphity.vocabulary.Graphity;
 import org.graphity.vocabulary.SIOC;
@@ -27,7 +28,7 @@ import org.topbraid.spin.vocabulary.SP;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class LDPResourceBase implements LDPResource
+public class LDPResourceBase implements LDPResource, XHTMLResource
 {
     private static final Logger log = LoggerFactory.getLogger(LDPResourceBase.class);
 
@@ -38,23 +39,15 @@ public class LDPResourceBase implements LDPResource
     {
 	if (ontResource == null) throw new IllegalArgumentException("OntResource cannot be null");
 	
-	com.hp.hpl.jena.rdf.model.Resource queryResource = null;
-	if (ontResource.hasProperty(Graphity.query))
-	{
-	    queryResource = ontResource.getPropertyResourceValue(Graphity.query);
-	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} has explicit Query Resource {}", ontResource.getURI(), queryResource);
-	}
-	else
-	{
-	    queryResource = QueryBuilder.fromDescribe(ontResource.getURI()).buildSPIN();
-	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} gets implicit Query Resource {}", ontResource.getURI(), queryResource);
-	}
-	
 	if (ontResource.hasRDFType(SIOC.CONTAINER))
 	{
-	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} is a Container, building Query from SELECT", ontResource.getURI());
+	    if (!ontResource.hasProperty(Graphity.selectQuery)) throw new IllegalArgumentException("Container Resource must have a SELECT query");
+	    
+	    com.hp.hpl.jena.rdf.model.Resource queryResource = ontResource.getPropertyResourceValue(Graphity.selectQuery);
+	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} is Container with explicit SELECT Query Resource {}", ontResource.getURI(), queryResource);
+
 	    if (!(SPINFactory.asQuery(queryResource) instanceof Select))
-		throw new IllegalArgumentException("Container QueryBuilder must get a SELECT query");
+		throw new IllegalArgumentException("Container Query Resource must be SPIN SELECT Query");
 
 	    QueryBuilder selectBuilder = QueryBuilder.fromResource(queryResource).
 		limit(limit).offset(offset);
@@ -83,7 +76,20 @@ public class LDPResourceBase implements LDPResource
 	}
 	else
 	{
-	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} is a not a Container, building Query from DESCRIBE/CONSTRUCT", ontResource.getURI());
+	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} is a not a Container, building DESCRIBE/CONSTRUCT Query", ontResource.getURI());
+	    
+	    com.hp.hpl.jena.rdf.model.Resource queryResource = null;
+	    if (ontResource.hasProperty(Graphity.query))
+	    {
+		queryResource = ontResource.getPropertyResourceValue(Graphity.query);
+		if (log.isDebugEnabled()) log.debug("OntResource with URI {} has explicit Query Resource {}", ontResource.getURI(), queryResource);
+	    }
+	    else
+	    {
+		queryResource = QueryBuilder.fromDescribe(ontResource.getURI()).buildSPIN();
+		if (log.isDebugEnabled()) log.debug("OntResource with URI {} gets implicit Query Resource {}", ontResource.getURI(), queryResource);
+	    }
+
 	    return QueryBuilder.fromResource(queryResource);
 	}
     }
@@ -115,7 +121,7 @@ public class LDPResourceBase implements LDPResource
 	{
 	    if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has no explicit SPARQL endpoint, querying its Model", ontResource.getURI());
 
-	    return ResourceFactory.getLinkedDataResource(ontResource.getModel(), query, uriInfo, request, mediaType,
+	    return ResourceFactory.getResource(ontResource.getModel(), query, uriInfo, request, mediaType,
 		    limit, offset, orderBy, desc);
 	}
     }
@@ -141,14 +147,20 @@ public class LDPResourceBase implements LDPResource
 
     @GET
     @Produces(MediaType.APPLICATION_XHTML_XML + ";qs=2;charset=UTF-8")
+    @Override
     public Response getXHTMLResponse()
-    {
-	if (log.isTraceEnabled()) log.trace("Returning XHTML Response");
-	    
+    {	    
 	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(getEntityTag());
-	if (rb != null) return rb.build();
-	
-	return Response.ok(getResource()).tag(getEntityTag()).build(); // uses ResourceXHTMLWriter
+	if (rb != null)
+	{
+	    if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
+	    return rb.build();
+	}
+	else
+	{
+	    if (log.isTraceEnabled()) log.trace("Generating XHTML Response");
+	    return Response.ok(getResource()).tag(getEntityTag()).build(); // uses ResourceXHTMLWriter
+	}
     }
 
     @Override

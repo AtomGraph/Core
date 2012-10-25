@@ -24,5 +24,5 @@ import com.hp.hpl.jena.rdf.model.Model;
  */
 public interface QueryModelResource extends QueriedResource
 {
-    public Model getQueryModel();
+    Model getQueryModel();
 }

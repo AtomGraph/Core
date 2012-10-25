@@ -46,6 +46,8 @@ public class Graphity
     
     public static final Property query = m_model.createProperty( NS + "query" );
     
+    public static final Property selectQuery = m_model.createProperty( NS + "selectQuery" );
+    
     public static final Property service = m_model.createProperty( NS + "service" );
     
     public static final Property mode = m_model.createProperty( NS + "mode" );

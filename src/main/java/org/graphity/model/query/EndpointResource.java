@@ -22,5 +22,5 @@ package org.graphity.model.query;
  */
 public interface EndpointResource extends QueriedResource
 {
-    public String getEndpointURI();
+    String getEndpointURI();
 }

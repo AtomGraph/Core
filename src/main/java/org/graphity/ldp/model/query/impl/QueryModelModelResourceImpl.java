@@ -21,9 +21,7 @@ import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import javax.ws.rs.core.*;
 import org.graphity.ldp.model.LinkedDataResource;
-import org.graphity.ldp.model.query.QueryModelModelResource;
 import org.graphity.util.ModelUtils;
-import org.graphity.util.manager.DataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,12 +29,10 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class QueryModelModelResourceImpl implements LinkedDataResource, QueryModelModelResource
+public class QueryModelModelResourceImpl extends org.graphity.model.query.impl.QueryModelModelResourceImpl implements LinkedDataResource
 {
     private static final Logger log = LoggerFactory.getLogger(QueryModelModelResourceImpl.class);
 
-    private Query query = null;
-    private Model queryModel, model = null;
     private Request req = null;
     private UriInfo uriInfo = null;
     private MediaType mediaType = org.graphity.MediaType.APPLICATION_RDF_XML_TYPE;
@@ -46,19 +42,12 @@ public class QueryModelModelResourceImpl implements LinkedDataResource, QueryMod
 	UriInfo uriInfo, Request req,
 	MediaType mediaType)
     {
-	if (queryModel == null) throw new IllegalArgumentException("Query Model must be not null");
-	if (query == null) throw new IllegalArgumentException("Query must be not null");
-	this.queryModel = queryModel;
-	this.query = query;
+	super(queryModel, query);
 	this.req = req;
 	this.uriInfo = uriInfo;
 	if (mediaType != null) this.mediaType = mediaType;
 	
-	if (log.isDebugEnabled()) log.debug("Querying Model: {} with Query: {}", queryModel, query);
-	model = DataManager.get().loadModel(queryModel, query);
-
-	if (log.isDebugEnabled()) log.debug("Number of Model stmts read: {}", model.size());
-	entityTag = new EntityTag(Long.toHexString(ModelUtils.hashModel(model)));
+	entityTag = new EntityTag(Long.toHexString(ModelUtils.hashModel(getModel())));
     }
 
     public QueryModelModelResourceImpl(Model queryModel, String uri,
@@ -66,24 +55,6 @@ public class QueryModelModelResourceImpl implements LinkedDataResource, QueryMod
 	MediaType mediaType)
     {
 	this(queryModel, QueryFactory.create("DESCRIBE <" + uri + ">"), uriInfo, req, mediaType);
-    }
-
-    @Override
-    public Model getModel()
-    {
-	return model;
-    }
-
-    @Override
-    public Query getQuery()
-    {
-	return query;
-    }
-
-    @Override
-    public Model getQueryModel()
-    {
-	return queryModel;
     }
 
     @Override
@@ -101,12 +72,17 @@ public class QueryModelModelResourceImpl implements LinkedDataResource, QueryMod
     @Override
     public Response getResponse()
     {
-	if (log.isTraceEnabled()) log.trace("Returning RDF Response");
-	    
 	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(getEntityTag());
-	if (rb != null) return rb.build();
-	
-	return Response.ok(getModel(), getMediaType()).tag(getEntityTag()).build(); // uses ModelWriter
+	if (rb != null)
+	{
+	    if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
+	    return rb.build();
+	}
+	else
+	{
+	    if (log.isTraceEnabled()) log.trace("Generating RDF Response");
+	    return Response.ok(getModel(), getMediaType()).tag(getEntityTag()).build(); // uses ModelWriter
+	}
     }
     
     public MediaType getMediaType()

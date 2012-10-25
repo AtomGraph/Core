@@ -23,7 +23,6 @@ import org.graphity.model.query.ModelResource;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public interface LinkedDataResource extends ModelResource
+public interface LinkedDataResource extends ModelResource, Resource
 {
-    public String getURI();
 }
