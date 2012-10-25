@@ -61,7 +61,7 @@ _:dydra a sd:Service ;
     sioc:has_host <> ;
     dct:title "Ontologies" ;
     g:selectQuery g:SelectOntologies ;
-    # g:service _:dydra ;
+    g:service _:sparql ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset ;
     g:service _:service .
@@ -70,7 +70,7 @@ _:dydra a sd:Service ;
     sioc:has_host <> ;
     dct:title "Classes" ;
     g:selectQuery :SelectClasses ;
-    # g:service _:dydra ;
+    g:service _:sparql ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
@@ -78,7 +78,7 @@ _:dydra a sd:Service ;
     sioc:has_host <> ;
     dct:title "Services" ;
     g:selectQuery :SelectServices ;
-    # g:service _:dydra ;
+    g:service _:sparql ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
@@ -86,7 +86,7 @@ _:dydra a sd:Service ;
     sioc:has_host <> ;
     dct:title "Services" ;
     g:selectQuery :SelectQueries ;
-    # g:service _:dydra ;
+    g:service _:sparql ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
