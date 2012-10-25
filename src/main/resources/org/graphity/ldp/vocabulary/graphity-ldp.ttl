@@ -69,6 +69,14 @@ gfb-app:type rdfs:label "Facebook application" ;
 
 # RESOURCES
 
+<instances> a sioc:Container, lda:ListEndpoint ;
+    sioc:has_host <> ;
+    dct:title "Instances" ;
+    g:selectQuery :SelectInstances ;
+    g:service _:sparql ;
+    rdfs:isDefinedBy : ;
+    void:inDataset _:dataset .
+
 <ontologies> a sioc:Container, lda:ListEndpoint ;
     sioc:has_host <> ;
     dct:title "Ontologies" ;
@@ -82,6 +90,14 @@ gfb-app:type rdfs:label "Facebook application" ;
     sioc:has_host <> ;
     dct:title "Classes" ;
     g:selectQuery :SelectClasses ;
+    g:service _:sparql ;
+    rdfs:isDefinedBy : ;
+    void:inDataset _:dataset .
+
+<properties> a sioc:Container, lda:ListEndpoint ;
+    sioc:has_host <> ;
+    dct:title "Properties" ;
+    g:selectQuery :SelectProperties ;
     g:service _:sparql ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
