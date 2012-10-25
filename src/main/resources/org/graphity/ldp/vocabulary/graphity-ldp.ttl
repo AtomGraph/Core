@@ -17,6 +17,8 @@
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix doap: <http://usefulinc.com/ns/doap#> .
 @prefix dbpedia: <http://dbpedia.org/resource/> .
+@prefix gfb-app: <http://graph.facebook.com/schema/application#> .
+
 
 : a owl:Ontology ;
     owl:imports <http://graphity.org/ontology/> ;
@@ -25,7 +27,7 @@
     dct:created "2012-10-26T01:04:00+03:00"^^xsd:dateTime ;
     vann:preferredNamespaceUri "http://ldp.graphity.org/ontology/" ;
     vann:preferredNamespacePrefix "gldp";
-    foaf:homepage <http://ldp.graphity.org> ;
+    foaf:homepage : ;
     dct:license <http://www.opendatacommons.org/licenses/pddl/1.0/> ;
     dct:creator <http://semantic-web.dk#martynas> ;
     rdfs:seeAlso <sparql> .
@@ -54,6 +56,16 @@ _:dydra a sd:Service ;
     doap:maintainer <http://semantic-web.dk#martynas> ;
     doap:programming-language dbpedia:XSLT,
 	<http://dbpedia.org/resource/Java_%28programming_language%29> .
+
+# PROPERTIES
+
+:facebookApp a owl:ObjectProperty ;
+    rdfs:label "has Facebook app" ;
+    rdfs:isDefinedBy : ;
+    rdfs:range gfb-app:type .
+
+gfb-app:type rdfs:label "Facebook application" ;
+    rdfs:isDefinedBy gfb-app: .
 
 # RESOURCES
 
@@ -84,12 +96,26 @@ _:dydra a sd:Service ;
 
 <queries> a sioc:Container, lda:ListEndpoint ;
     sioc:has_host <> ;
-    dct:title "Services" ;
+    dct:title "Queries" ;
     g:selectQuery :SelectQueries ;
     g:service _:sparql ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
+# MODES
+
+:ListMode a g:XSLTMode ;
+    dct:title "List" ;
+    rdfs:isDefinedBy : ;
+    void:inDataset _:dataset .
+:EditMode a g:XSLTMode ;
+    dct:title "Edit" ;
+    rdfs:isDefinedBy : ;
+    void:inDataset _:dataset .
+:TableMode a g:XSLTMode ;
+    dct:title "Table" ;
+    rdfs:isDefinedBy : ;
+    void:inDataset _:dataset .
 
 # QUERIES
 
