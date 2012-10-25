@@ -20,22 +20,24 @@
     dct:title "Graphity ontology" ;
     rdfs:label "Graphity ontology" ;
     dct:created "2012-02-09T20:54:00+01:00"^^xsd:dateTime ;
-    dct:modified "2012-09-17T22:46:00+01:00"^^xsd:dateTime ;
+    dct:modified "2012-10-25T13:42:00+03:00"^^xsd:dateTime ;
     vann:preferredNamespaceUri "http://graphity.org/ontology/" ;
     vann:preferredNamespacePrefix "g";
     foaf:homepage <http://graphity.org> ;
     dct:license <http://www.opendatacommons.org/licenses/pddl/1.0/> ;
     dct:creator <http://semantic-web.dk#martynas> .
-<http://semantic-web.dk#martynas> a foaf:Person ;
-    foaf:mbox <mailto:martynas@graphity.org> ;
-    foaf:name "Martynas Jusevičius" ;
-    foaf:nick "pumba_lt" ;
-    foaf:based_near <http://dbpedia.org/resource/Copenhagen> .
 
 :query a owl:ObjectProperty ;
     rdfs:label "has SPIN query" ;
     rdfs:isDefinedBy : ;
-    rdfs:range sp:Query .
+    rdfs:range sp:Query . # should actually be a owl:unionOf (sp:Describe, sp:Construct)
+
+:selectQuery a owl:ObjectProperty ;
+    rdfs:subPropertyOf :query ;
+    rdfs:label "has SPIN SELECT query" ;
+    rdfs:isDefinedBy : ;
+    rdfs:domain sioc:Container ;
+    rdfs:range sp:Select .
 
 :service a owl:ObjectProperty ;
     rdfs:label "uses SPARQL service" ;

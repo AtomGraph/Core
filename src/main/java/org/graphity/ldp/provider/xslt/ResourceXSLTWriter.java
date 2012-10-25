@@ -33,7 +33,7 @@ import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamResult;
-import org.graphity.ldp.model.Resource;
+import org.graphity.ldp.model.LinkedDataResource;
 import org.graphity.util.XSLTBuilder;
 import org.openjena.riot.WebContent;
 import org.slf4j.Logger;
@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 @Provider
 @Singleton
 @Produces({MediaType.APPLICATION_XHTML_XML})
-public class ResourceXSLTWriter implements MessageBodyWriter<Resource>
+public class ResourceXSLTWriter implements MessageBodyWriter<LinkedDataResource>
 {
     private static final Logger log = LoggerFactory.getLogger(ResourceXSLTWriter.class);
 
@@ -67,17 +67,17 @@ public class ResourceXSLTWriter implements MessageBodyWriter<Resource>
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-	return Resource.class.isAssignableFrom(type);
+	return LinkedDataResource.class.isAssignableFrom(type);
     }
 
     @Override
-    public long getSize(Resource resource, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
+    public long getSize(LinkedDataResource resource, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
 	return -1;
     }
 
     @Override
-    public void writeTo(Resource resource, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException
+    public void writeTo(LinkedDataResource resource, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException
     {
 	if (log.isTraceEnabled()) log.trace("Writing Resource with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
 
@@ -99,6 +99,8 @@ public class ResourceXSLTWriter implements MessageBodyWriter<Resource>
 		builder.parameter("lang", uriInfo.getQueryParameters().getFirst("lang"));
 	    if (uriInfo.getQueryParameters().getFirst("mode") != null)
 		builder.parameter("mode", UriBuilder.fromUri(uriInfo.getQueryParameters().getFirst("mode")).build());
+	    if (uriInfo.getQueryParameters().getFirst("query") != null)
+		builder.parameter("query", uriInfo.getQueryParameters().getFirst("query"));
 
 	    builder.transform();
 	    baos.close();

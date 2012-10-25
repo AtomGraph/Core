@@ -15,14 +15,15 @@
  *
  */
 
-package org.graphity.model;
+package org.graphity.model.query;
 
-import org.graphity.model.query.ModelResource;
+import com.hp.hpl.jena.rdf.model.Model;
 
 /**
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public interface LinkedDataResource extends ModelResource, Resource
+public interface ModelResource
 {
+    Model getModel();
 }

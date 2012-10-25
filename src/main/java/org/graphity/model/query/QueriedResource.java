@@ -15,7 +15,7 @@
  *
  */
 
-package org.graphity.model;
+package org.graphity.model.query;
 
 import com.hp.hpl.jena.query.Query;
 
@@ -23,11 +23,7 @@ import com.hp.hpl.jena.query.Query;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public interface QueriedResource extends Resource
+public interface QueriedResource
 {
-
-    //public String getEndpointURI();
-    
-    public Query getQuery();
-    
+    Query getQuery();   
 }

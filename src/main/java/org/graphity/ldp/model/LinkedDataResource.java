@@ -16,23 +16,11 @@
  */
 package org.graphity.ldp.model;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-
 /**
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public interface Resource
+public interface LinkedDataResource extends org.graphity.model.LinkedDataResource, Resource
 {
-    @GET Response getResponse();
-
-    Request getRequest();
-
-    UriInfo getUriInfo();
-
-    EntityTag getEntityTag();
+    
 }

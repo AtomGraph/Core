@@ -17,22 +17,16 @@
 package org.graphity.ldp.model;
 
 import javax.ws.rs.GET;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.Request;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 
 /**
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public interface Resource
+@Produces(MediaType.APPLICATION_XHTML_XML + ";qs=2;charset=UTF-8")
+public interface XHTMLResource
 {
-    @GET Response getResponse();
-
-    Request getRequest();
-
-    UriInfo getUriInfo();
-
-    EntityTag getEntityTag();
+    @GET Response getXHTMLResponse();
 }

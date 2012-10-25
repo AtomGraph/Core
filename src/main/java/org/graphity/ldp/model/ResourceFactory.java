@@ -16,12 +16,16 @@
  */
 package org.graphity.ldp.model;
 
-import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.rdf.model.Model;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
-import org.graphity.ldp.model.impl.ContainerResourceBase;
-import org.graphity.ldp.model.impl.ResourceBase;
-import org.graphity.vocabulary.SIOC;
+import org.graphity.ldp.model.impl.EndpointPageResourceImpl;
+import org.graphity.ldp.model.impl.LDPResourceBase;
+import org.graphity.ldp.model.impl.QueryModelPageResourceImpl;
+import org.graphity.ldp.model.query.impl.EndpointModelResourceImpl;
+import org.graphity.ldp.model.query.impl.QueryModelModelResourceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,26 +36,47 @@ import org.slf4j.LoggerFactory;
 public class ResourceFactory extends org.graphity.model.ResourceFactory
 {
     private static final Logger log = LoggerFactory.getLogger(ResourceFactory.class);
-    
-    public static Resource getResource(OntModel ontology, UriInfo uriInfo, Request req)
-    {
-	log.debug("Creating Resource");
-	    
-	return new ResourceBase(ontology, uriInfo, req);
-    }
- 
-    public static Resource getResource(OntModel ontology, UriInfo uriInfo, Request req,
-	Long limit, Long offset, String orderBy, Boolean desc)
-    {
-	Resource resource = getResource(ontology, uriInfo, req);
 
-	if (resource.getOntResource() != null && resource.getOntResource().hasRDFType(SIOC.CONTAINER))
-	{
-	    log.debug("Creating ContainerResource");
-	    return new ContainerResourceBase(resource, limit, offset, orderBy, desc);
-	}
-	
-	return resource;
+    public static LinkedDataResource getResource(String endpointUri, Query query,
+	    UriInfo uriInfo, Request req,
+	    MediaType mediaType)
+    {
+	return new EndpointModelResourceImpl(endpointUri, query, uriInfo, req, mediaType);
+    }
+    
+    public static LinkedDataResource getResource(Model queryModel, Query query,
+	    UriInfo uriInfo, Request req,
+	    MediaType mediaType)
+    {
+	return new QueryModelModelResourceImpl(queryModel, query, uriInfo, req, mediaType);
+    }
+
+    public static LinkedDataResource getResource(Model queryModel, String uri,
+	    UriInfo uriInfo, Request req,
+	    MediaType mediaType)
+    {
+	return new QueryModelModelResourceImpl(queryModel, uri, uriInfo, req, mediaType);
+    }
+
+    public static LinkedDataResource getResource(Model queryModel, Query query,
+	    UriInfo uriInfo, Request request, MediaType mediaType,
+	    Long limit, Long offset, String orderBy, Boolean desc)
+    {
+	return new QueryModelPageResourceImpl(queryModel, query, uriInfo, request, mediaType,
+		limit, offset, orderBy, desc);
+    }
+
+    public static LinkedDataResource getLinkedDataResource(String endpointUri, Query query,
+	    UriInfo uriInfo, Request request, MediaType mediaType,
+	    Long limit, Long offset, String orderBy, Boolean desc)
+    {
+	return new EndpointPageResourceImpl(endpointUri, query, uriInfo, request, mediaType,
+		limit, offset, orderBy, desc);
+    }
+
+    public static LDPResource getResource(LinkedDataResource resource)
+    {
+	return new LDPResourceBase(resource);
     }
 
 }
