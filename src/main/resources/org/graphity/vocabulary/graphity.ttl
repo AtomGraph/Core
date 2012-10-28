@@ -32,7 +32,7 @@
     rdfs:range sp:Query . # should actually be a owl:unionOf (sp:Describe, sp:Construct)
 
 :selectQuery a owl:ObjectProperty ;
-    rdfs:subPropertyOf :query ;
+    # rdfs:subPropertyOf :query ; # cannot be subproperty - SELECT becomes illegal g:query value
     rdfs:label "has SPIN SELECT query" ;
     rdfs:isDefinedBy : ;
     rdfs:domain sioc:Container ;

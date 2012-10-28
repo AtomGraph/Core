@@ -18,8 +18,12 @@ package org.graphity.ldp.model.query.impl;
 
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
-import javax.ws.rs.core.*;
-import org.graphity.ldp.model.LinkedDataResource;
+import javax.ws.rs.core.EntityTag;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
+import javax.ws.rs.core.Response;
+import org.graphity.ldp.model.Resource;
+import org.graphity.ldp.model.query.ModelResource;
 import org.graphity.util.ModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,38 +32,41 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class EndpointModelResourceImpl extends org.graphity.model.query.impl.EndpointModelResourceImpl implements LinkedDataResource
+public class EndpointModelResourceImpl extends org.graphity.model.query.impl.EndpointModelResourceImpl implements ModelResource
 {
     private static final Logger log = LoggerFactory.getLogger(EndpointModelResourceImpl.class);
 
     private Request request = null;
-    private UriInfo uriInfo = null;
-    private MediaType mediaType = org.graphity.MediaType.APPLICATION_RDF_XML_TYPE;
+    private MediaType mediaType = org.graphity.ldp.MediaType.APPLICATION_RDF_XML_TYPE;
     private EntityTag entityTag = null;
+    private Response response = null;
 
     public EndpointModelResourceImpl(String endpointUri, Query query, 
-	UriInfo uriInfo, Request request,
-	MediaType mediaType)
+	Request request, MediaType mediaType)
     {
 	super(endpointUri, query);
 	this.request = request;
-	this.uriInfo = uriInfo;
 	if (mediaType != null) this.mediaType = mediaType;
 	
 	entityTag = new EntityTag(Long.toHexString(ModelUtils.hashModel(getModel())));
+
+	Response.ResponseBuilder rb = request.evaluatePreconditions(entityTag);
+	if (rb != null)
+	{
+	    if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
+	    response = rb.build();
+	}
+	else
+	{
+	    if (log.isTraceEnabled()) log.trace("Generating RDF Response with MediaType: {} and EntityTag: {}", mediaType, entityTag);
+	    response = Response.ok(getModel(), mediaType).tag(entityTag).build(); // uses ModelWriter
+	}
     }
 
     public EndpointModelResourceImpl(String endpointUri, String uri,
-	UriInfo uriInfo, Request req,
-	MediaType mediaType)
+	Request request, MediaType mediaType)
     {
-	this(endpointUri, QueryFactory.create("DESCRIBE <" + uri + ">"), uriInfo, req, mediaType);
-    }
-
-    @Override
-    public UriInfo getUriInfo()
-    {
-	return uriInfo;
+	this(endpointUri, QueryFactory.create("DESCRIBE <" + uri + ">"), request, mediaType);
     }
 
     @Override
@@ -70,18 +77,8 @@ public class EndpointModelResourceImpl extends org.graphity.model.query.impl.End
     
     @Override
     public Response getResponse()
-    {	    
-	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(getEntityTag());
-	if (rb != null)
-	{
-	    if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
-	    return rb.build();
-	}
-	else
-	{
-	    if (log.isTraceEnabled()) log.trace("Generating RDF Response");
-	    return Response.ok(getModel(), getMediaType()).tag(getEntityTag()).build(); // uses ModelWriter
-	}
+    {
+	return response;
     }
     
     public MediaType getMediaType()
@@ -93,12 +90,6 @@ public class EndpointModelResourceImpl extends org.graphity.model.query.impl.End
     public EntityTag getEntityTag()
     {
 	return entityTag;
-    }
-
-    @Override
-    public String getURI()
-    {
-	return getUriInfo().getAbsolutePath().toString();
     }
 
 }

@@ -16,8 +16,6 @@
  */
 package org.graphity.ldp.model.query;
 
-import com.hp.hpl.jena.query.ResultSet;
-import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
 import org.graphity.ldp.model.Resource;
 
@@ -25,8 +23,8 @@ import org.graphity.ldp.model.Resource;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-@Produces({org.graphity.MediaType.APPLICATION_SPARQL_RESULTS_XML + "; charset=UTF-8", org.graphity.MediaType.APPLICATION_SPARQL_RESULTS_JSON + "; charset=UTF-8"})
-public interface ResultSetResource extends Resource, org.graphity.model.query.ResultSetResource
+@Produces({org.graphity.ldp.MediaType.APPLICATION_SPARQL_RESULTS_XML + "; charset=UTF-8", org.graphity.ldp.MediaType.APPLICATION_SPARQL_RESULTS_JSON + "; charset=UTF-8"})
+public interface ResultSetResource extends org.graphity.model.query.ResultSetResource, Resource
 {
-    @GET @Override ResultSet getResultSet();
+    //@GET @Override ResultSet getResultSet();
 }

@@ -19,10 +19,8 @@ package org.graphity.ldp.model.impl;
 import com.hp.hpl.jena.query.Query;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
-import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import org.graphity.ldp.model.PageResource;
-import org.graphity.ldp.model.query.impl.EndpointModelResourceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,10 +28,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class EndpointPageResourceImpl extends EndpointModelResourceImpl implements PageResource
+public class EndpointPageResourceImpl extends org.graphity.ldp.model.query.impl.EndpointModelResourceImpl implements PageResource
 {
     private static final Logger log = LoggerFactory.getLogger(EndpointPageResourceImpl.class);
     
+    private UriInfo uriInfo = null;
     private Long limit = null;
     private Long offset = null;
     private String orderBy = null;
@@ -43,35 +42,13 @@ public class EndpointPageResourceImpl extends EndpointModelResourceImpl implemen
 	UriInfo uriInfo, Request request, MediaType mediaType,
 	Long limit, Long offset, String orderBy, Boolean desc)
     {
-	super(endpointUri, query, uriInfo, request, mediaType);
+	super(endpointUri, query, request, mediaType);
+	this.uriInfo = uriInfo;
 	this.limit = limit;
 	this.offset = offset;
 	this.orderBy = orderBy;
 	this.desc = desc;
     }
-
-    /*
-    public PageResourceBase(Resource resource,
-	    Long limit, Long offset, String orderBy, Boolean desc)
-    {
-	this(resource.getOntology(), resource.getUriInfo(), resource.getRequest(),
-		limit, offset, orderBy, desc);
-    }
-    */
-    
-    /*
-    @Override
-    public Model getModel()
-    {
-	Model model = super.getModel();
-	
-	// http://code.google.com/p/linked-data-api/wiki/API_Viewing_Resources#Page_Description
-	if (getPreviousResource() != null) model.add(getOntResource(), XHV.prev, getPreviousResource());
-	if (getNextResource() != null) model.add(getOntResource(), XHV.prev, getNextResource());
-
-	return model;
-    }
-    */
     
     @Override
     public Long getLimit()
@@ -98,31 +75,41 @@ public class EndpointPageResourceImpl extends EndpointModelResourceImpl implemen
     }
 
     @Override
-    public com.hp.hpl.jena.rdf.model.Resource getPrevious()
+    public String getURI()
     {
-	if (getOffset() >= getLimit())
-	    return getModel().getResource(UriBuilder.fromUri(getURI()).
+	return getUriInfo().getAbsolutePathBuilder().
 		queryParam("limit", getLimit()).
 		queryParam("offset", getOffset() - getLimit()).
 		queryParam("order-by", getOrderBy()).
 		queryParam("desc", getDesc()).
-		build().toString());
-	else
-	    return null;
+		build().toString();
     }
-    
+
+    public UriInfo getUriInfo()
+    {
+	return uriInfo;
+    }
+
     @Override
-    public com.hp.hpl.jena.rdf.model.Resource getNext()
+    public PageResource getPrevious()
     {
 	if (getModel().size() < getLimit())
 	    return null;
 	else
-	    return getModel().getResource(UriBuilder.fromUri(getURI()).
-		queryParam("limit", getLimit()).
-		queryParam("offset", getOffset() + getLimit()).
-		queryParam("order-by", getOrderBy()).
-		queryParam("desc", getDesc()).
-		build().toString());
+	    return new EndpointPageResourceImpl(getEndpointURI(), getQuery(),
+	getUriInfo(), getRequest(), getMediaType(),
+	getLimit(), getOffset() - getLimit(), getOrderBy(), getDesc());
+    }
+    
+    @Override
+    public PageResource getNext()
+    {
+	if (getModel().size() < getLimit())
+	    return null;
+	else
+	    return new EndpointPageResourceImpl(getEndpointURI(), getQuery(),
+	getUriInfo(), getRequest(), getMediaType(),
+	getLimit(), getOffset() + getLimit(), getOrderBy(), getDesc());
     }
 
 }

@@ -19,7 +19,7 @@ package org.graphity.ldp.model;
 import com.hp.hpl.jena.rdf.model.Model;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-import org.graphity.MediaType;
+import org.graphity.ldp.MediaType;
 
 /**
  *

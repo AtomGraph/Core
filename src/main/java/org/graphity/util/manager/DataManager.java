@@ -159,18 +159,25 @@ public class DataManager extends FileManager implements URIResolver
 	else
 	{
 	    QueryEngineHTTP request = QueryExecutionFactory.createServiceRequest(endpointURI, query);
-	    if (params != null)
-		for (Entry<String, List<String>> entry : params.entrySet())
-		    if (!entry.getKey().equals("query")) // query param is handled separately
-			for (String value : entry.getValue())
-			{
-			    if (log.isTraceEnabled()) log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
-			    request.addParam(entry.getKey(), value);
-			}
-	    if (query.isConstructType()) return request.execConstruct();
-	    if (query.isDescribeType()) return request.execDescribe();
+	    try
+	    {
+		if (params != null)
+		    for (Entry<String, List<String>> entry : params.entrySet())
+			if (!entry.getKey().equals("query")) // query param is handled separately
+			    for (String value : entry.getValue())
+			    {
+				if (log.isTraceEnabled()) log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
+				request.addParam(entry.getKey(), value);
+			    }
+		if (query.isConstructType()) return request.execConstruct();
+		if (query.isDescribeType()) return request.execDescribe();
 
-	    return null;
+		return null;
+	    }
+	    finally
+	    {
+		request.close();
+	    }
 	}
     }
     
@@ -187,22 +194,28 @@ public class DataManager extends FileManager implements URIResolver
 	    throw new QueryExecException("Query to load Model must be CONSTRUCT or DESCRIBE"); // return null;
 		
 	QueryEngineHTTP request = QueryExecutionFactory.createServiceRequest(service.getEndpointURI(), query);
+	try
+	{
+	    if (service.getUser() != null && service.getPassword() != null)
+	    {
+		if (log.isDebugEnabled()) log.debug("HTTP Basic authentication with username: {}", service.getUser());
+		request.setBasicAuthentication(service.getUser(), service.getPassword());
+	    }
+	    if (service.getApiKey() != null)
+	    {
+		if (log.isDebugEnabled()) log.debug("Authentication with API key: {}", service.getApiKey());
+		request.addParam("apikey", service.getApiKey());
+	    }
 
-	if (service.getUser() != null && service.getPassword() != null)
-	{
-	    if (log.isDebugEnabled()) log.debug("HTTP Basic authentication with username: {}", service.getUser());
-	    request.setBasicAuthentication(service.getUser(), service.getPassword());
+	    if (query.isConstructType()) return request.execConstruct();
+	    if (query.isDescribeType()) return request.execDescribe();
+
+	    return null;
 	}
-	if (service.getApiKey() != null)
+	finally
 	{
-	    if (log.isDebugEnabled()) log.debug("Authentication with API key: {}", service.getApiKey());
-	    request.addParam("apikey", service.getApiKey());
+	    request.close();
 	}
-	
-	if (query.isConstructType()) return request.execConstruct();
-	if (query.isDescribeType()) return request.execDescribe();
-	
-	return null;
     }
     
     public Model loadModel(Model model, Query query)
@@ -213,11 +226,17 @@ public class DataManager extends FileManager implements URIResolver
 	    throw new QueryExecException("Query to load Model must be CONSTRUCT or DESCRIBE"); // return null;
 		
 	QueryExecution qex = QueryExecutionFactory.create(query, model);
-
-	if (query.isConstructType()) return qex.execConstruct();
-	if (query.isDescribeType()) return qex.execDescribe();
+	try
+	{	
+	    if (query.isConstructType()) return qex.execConstruct();
+	    if (query.isDescribeType()) return qex.execDescribe();
 	
-	return null;
+	    return null;
+	}
+	finally
+	{
+	    qex.close();
+	}
     }
     
     public boolean isMapped(String filenameOrURI)
@@ -354,15 +373,22 @@ public class DataManager extends FileManager implements URIResolver
 		throw new QueryExecException("Query to load ResultSet must be SELECT or ASK"); // return null
 
 	    QueryEngineHTTP request = QueryExecutionFactory.createServiceRequest(endpointURI, query);
-	    if (params != null)
-		for (Entry<String, List<String>> entry : params.entrySet())
-		    if (!entry.getKey().equals("query")) // query param is handled separately
-			for (String value : entry.getValue())
-			{
-			    if (log.isTraceEnabled()) log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
-			    request.addParam(entry.getKey(), value);
-			}
-	    return request.execSelect();
+	    try
+	    {
+		if (params != null)
+		    for (Entry<String, List<String>> entry : params.entrySet())
+			if (!entry.getKey().equals("query")) // query param is handled separately
+			    for (String value : entry.getValue())
+			    {
+				if (log.isTraceEnabled()) log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
+				request.addParam(entry.getKey(), value);
+			    }
+		return request.execSelect();
+	    }
+	    finally
+	    {
+		request.close();
+	    }
 	}	
     }
     
@@ -379,18 +405,25 @@ public class DataManager extends FileManager implements URIResolver
 	    throw new QueryExecException("Query to load ResultSet must be SELECT or ASK"); // return null
 	
 	QueryEngineHTTP request = QueryExecutionFactory.createServiceRequest(service.getEndpointURI(), query);
-	if (service.getUser() != null && service.getPassword() != null)
+	try
 	{
-	    if (log.isDebugEnabled()) log.debug("HTTP Basic authentication with username: {}", service.getUser());
-	    request.setBasicAuthentication(service.getUser(), service.getPassword());
-	}
-	if (service.getApiKey() != null)
-	{
-	    if (log.isDebugEnabled()) log.debug("Authentication with API key param: {}", service.getApiKey());
-	    request.addParam("apikey", service.getApiKey());
-	}
+	    if (service.getUser() != null && service.getPassword() != null)
+	    {
+		if (log.isDebugEnabled()) log.debug("HTTP Basic authentication with username: {}", service.getUser());
+		request.setBasicAuthentication(service.getUser(), service.getPassword());
+	    }
+	    if (service.getApiKey() != null)
+	    {
+		if (log.isDebugEnabled()) log.debug("Authentication with API key param: {}", service.getApiKey());
+		request.addParam("apikey", service.getApiKey());
+	    }
 
-	return request.execSelect();
+	    return request.execSelect();
+	}
+	finally
+	{
+	    request.close();
+	}
     }
     
     public ResultSet loadResultSet(Model model, Query query)
@@ -401,8 +434,14 @@ public class DataManager extends FileManager implements URIResolver
 	    throw new QueryExecException("Query to load ResultSet must be SELECT or ASK"); // return null
 	
 	QueryExecution qex = QueryExecutionFactory.create(query, model);
-	
-	return qex.execSelect();
+	try
+	{
+	    return qex.execSelect();
+	}
+	finally
+	{
+	    qex.close();
+	}
     }
 
     // uses graph store protocol - expects /sparql service!

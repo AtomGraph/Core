@@ -19,8 +19,11 @@ package org.graphity.ldp.model.query.impl;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.Model;
-import javax.ws.rs.core.*;
-import org.graphity.ldp.model.LinkedDataResource;
+import javax.ws.rs.core.EntityTag;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
+import javax.ws.rs.core.Response;
+import org.graphity.ldp.model.query.ModelResource;
 import org.graphity.util.ModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,60 +32,53 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class QueryModelModelResourceImpl extends org.graphity.model.query.impl.QueryModelModelResourceImpl implements LinkedDataResource
+public class QueryModelModelResourceImpl extends org.graphity.model.query.impl.QueryModelModelResourceImpl implements ModelResource
 {
     private static final Logger log = LoggerFactory.getLogger(QueryModelModelResourceImpl.class);
 
-    private Request req = null;
-    private UriInfo uriInfo = null;
-    private MediaType mediaType = org.graphity.MediaType.APPLICATION_RDF_XML_TYPE;
+    private Request request = null;
+    private MediaType mediaType = org.graphity.ldp.MediaType.APPLICATION_RDF_XML_TYPE;
     private EntityTag entityTag = null;
+    private Response response = null;
 
     public QueryModelModelResourceImpl(Model queryModel, Query query, 
-	UriInfo uriInfo, Request req,
-	MediaType mediaType)
+	Request request, MediaType mediaType)
     {
 	super(queryModel, query);
-	this.req = req;
-	this.uriInfo = uriInfo;
+	this.request = request;
 	if (mediaType != null) this.mediaType = mediaType;
 	
 	entityTag = new EntityTag(Long.toHexString(ModelUtils.hashModel(getModel())));
+
+	Response.ResponseBuilder rb = request.evaluatePreconditions(entityTag);
+	if (rb != null)
+	{
+	    if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
+	    response = rb.build();
+	}
+	else
+	{
+	    if (log.isTraceEnabled()) log.trace("Generating RDF Response with MediaType: {} and EntityTag: {}", mediaType, entityTag);
+	    response = Response.ok(getModel(), mediaType).tag(entityTag).build(); // uses ModelWriter
+	}
     }
 
     public QueryModelModelResourceImpl(Model queryModel, String uri,
-	UriInfo uriInfo, Request req,
-	MediaType mediaType)
+	    Request request, MediaType mediaType)
     {
-	this(queryModel, QueryFactory.create("DESCRIBE <" + uri + ">"), uriInfo, req, mediaType);
-    }
-
-    @Override
-    public UriInfo getUriInfo()
-    {
-	return uriInfo;
+	this(queryModel, QueryFactory.create("DESCRIBE <" + uri + ">"), request, mediaType);
     }
 
     @Override
     public Request getRequest()
     {
-	return req;
+	return request;
     }
     
     @Override
     public Response getResponse()
     {
-	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(getEntityTag());
-	if (rb != null)
-	{
-	    if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
-	    return rb.build();
-	}
-	else
-	{
-	    if (log.isTraceEnabled()) log.trace("Generating RDF Response");
-	    return Response.ok(getModel(), getMediaType()).tag(getEntityTag()).build(); // uses ModelWriter
-	}
+	return response;
     }
     
     public MediaType getMediaType()
@@ -94,12 +90,6 @@ public class QueryModelModelResourceImpl extends org.graphity.model.query.impl.Q
     public EntityTag getEntityTag()
     {
 	return entityTag;
-    }
-
-    @Override
-    public String getURI()
-    {
-	return getUriInfo().getAbsolutePath().toString();
     }
 
 }

@@ -33,7 +33,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
-import org.graphity.MediaType;
+import org.graphity.ldp.MediaType;
 import org.openjena.riot.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -17,8 +17,14 @@
 package org.graphity.ldp.model.query.impl;
 
 import com.hp.hpl.jena.query.Query;
-import javax.ws.rs.core.*;
-import org.graphity.ldp.model.Resource;
+import com.hp.hpl.jena.query.ResultSetFactory;
+import com.hp.hpl.jena.query.ResultSetRewindable;
+import javax.ws.rs.core.EntityTag;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
+import javax.ws.rs.core.Response;
+import org.graphity.ldp.model.query.ResultSetResource;
+import org.graphity.util.ResultSetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,28 +32,37 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class EndpointResultSetResourceImpl extends org.graphity.model.query.impl.EndpointResultSetResourceImpl implements Resource
+public class EndpointResultSetResourceImpl extends org.graphity.model.query.impl.EndpointResultSetResourceImpl implements ResultSetResource
 {
     private static final Logger log = LoggerFactory.getLogger(EndpointResultSetResourceImpl.class);
 
     private Request request = null;
-    private UriInfo uriInfo = null;
-    private MediaType mediaType = org.graphity.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE;
-
+    private MediaType mediaType = org.graphity.ldp.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE;
+    private EntityTag entityTag = null;
+    private Response response = null;
+    
     public EndpointResultSetResourceImpl(String endpointUri, Query query,
-	    UriInfo uriInfo, Request request,
-	    MediaType mediaType)
+	    Request request, MediaType mediaType)
     {
 	super(endpointUri, query);
+	
 	this.request = request;
-	this.uriInfo = uriInfo;
 	if (mediaType != null) this.mediaType = mediaType;
-    }
-
-    @Override
-    public UriInfo getUriInfo()
-    {
-	return uriInfo;
+	
+	ResultSetRewindable rewindable = ResultSetFactory.makeRewindable(getResultSet());
+	entityTag = new EntityTag(Long.toHexString(ResultSetUtils.hashResultSet(rewindable)));
+	
+	Response.ResponseBuilder rb = request.evaluatePreconditions(entityTag);
+	if (rb != null)
+	{
+	    if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
+	    response = rb.build();
+	}
+	else
+	{
+	    if (log.isTraceEnabled()) log.trace("Generating SPARQL results Response with MediaType: {} and EntityTag: {}", mediaType, entityTag);
+	    response = Response.ok(getResultSet(), mediaType).tag(entityTag).build(); // uses ResultSetWriter
+	}
     }
 
     @Override
@@ -55,14 +70,11 @@ public class EndpointResultSetResourceImpl extends org.graphity.model.query.impl
     {
 	return request;
     }
-    
+
     @Override
     public Response getResponse()
     {
-	if (log.isDebugEnabled()) log.debug("Accept param: {}, writing SPARQL results (XML or JSON)", getMediaType());
-
-	// uses ResultSetWriter
-	return Response.ok(getResultSet(), getMediaType()).build();
+	return response;
     }
 
     public MediaType getMediaType()
@@ -73,8 +85,7 @@ public class EndpointResultSetResourceImpl extends org.graphity.model.query.impl
     @Override
     public EntityTag getEntityTag()
     {
-	//return super.getEntityTag();
-	return null;
+	return entityTag;
     }
 
 }

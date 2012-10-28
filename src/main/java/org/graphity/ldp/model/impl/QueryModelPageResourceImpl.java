@@ -20,7 +20,6 @@ import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.rdf.model.Model;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
-import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import org.graphity.ldp.model.PageResource;
 import org.graphity.ldp.model.query.impl.QueryModelModelResourceImpl;
@@ -35,6 +34,7 @@ public class QueryModelPageResourceImpl extends QueryModelModelResourceImpl impl
 {
     private static final Logger log = LoggerFactory.getLogger(QueryModelPageResourceImpl.class);
     
+    private UriInfo uriInfo = null;
     private Long limit = null;
     private Long offset = null;
     private String orderBy = null;
@@ -44,35 +44,13 @@ public class QueryModelPageResourceImpl extends QueryModelModelResourceImpl impl
 	UriInfo uriInfo, Request request, MediaType mediaType,
 	Long limit, Long offset, String orderBy, Boolean desc)
     {
-	super(queryModel, query, uriInfo, request, mediaType);
+	super(queryModel, query, request, mediaType);
+	this.uriInfo = uriInfo;
 	this.limit = limit;
 	this.offset = offset;
 	this.orderBy = orderBy;
 	this.desc = desc;
     }
-
-    /*
-    public PageResourceBase(Resource resource,
-	    Long limit, Long offset, String orderBy, Boolean desc)
-    {
-	this(resource.getOntology(), resource.getUriInfo(), resource.getRequest(),
-		limit, offset, orderBy, desc);
-    }
-    */
-    
-    /*
-    @Override
-    public Model getModel()
-    {
-	Model model = super.getModel();
-	
-	// http://code.google.com/p/linked-data-api/wiki/API_Viewing_Resources#Page_Description
-	if (getPreviousResource() != null) model.add(getOntResource(), XHV.prev, getPreviousResource());
-	if (getNextResource() != null) model.add(getOntResource(), XHV.prev, getNextResource());
-
-	return model;
-    }
-    */
     
     @Override
     public Long getLimit()
@@ -99,31 +77,41 @@ public class QueryModelPageResourceImpl extends QueryModelModelResourceImpl impl
     }
 
     @Override
-    public com.hp.hpl.jena.rdf.model.Resource getPrevious()
+    public String getURI()
     {
-	if (getOffset() >= getLimit())
-	    return getModel().getResource(UriBuilder.fromUri(getURI()).
+	return getUriInfo().getAbsolutePathBuilder().
 		queryParam("limit", getLimit()).
 		queryParam("offset", getOffset() - getLimit()).
 		queryParam("order-by", getOrderBy()).
 		queryParam("desc", getDesc()).
-		build().toString());
-	else
-	    return null;
+		build().toString();
     }
-    
+
+    public UriInfo getUriInfo()
+    {
+	return uriInfo;
+    }
+
     @Override
-    public com.hp.hpl.jena.rdf.model.Resource getNext()
+    public PageResource getPrevious()
     {
 	if (getModel().size() < getLimit())
 	    return null;
 	else
-	    return getModel().getResource(UriBuilder.fromUri(getURI()).
-		queryParam("limit", getLimit()).
-		queryParam("offset", getOffset() + getLimit()).
-		queryParam("order-by", getOrderBy()).
-		queryParam("desc", getDesc()).
-		build().toString());
+	    return new QueryModelPageResourceImpl(getQueryModel(), getQuery(),
+	getUriInfo(), getRequest(), getMediaType(),
+	getLimit(), getOffset() - getLimit(), getOrderBy(), getDesc());
+    }
+    
+    @Override
+    public PageResource getNext()
+    {
+	if (getModel().size() < getLimit())
+	    return null;
+	else
+	    return new QueryModelPageResourceImpl(getQueryModel(), getQuery(),
+	getUriInfo(), getRequest(), getMediaType(),
+	getLimit(), getOffset() + getLimit(), getOrderBy(), getDesc());
     }
 
 }

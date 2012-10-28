@@ -16,11 +16,13 @@
  */
 package org.graphity.ldp.model;
 
+import org.graphity.ldp.model.query.ModelResource;
+
 /**
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public interface LinkedDataResource extends org.graphity.model.LinkedDataResource, Resource
+public interface LinkedDataResource extends org.graphity.model.LinkedDataResource, ModelResource
 {
     
 }

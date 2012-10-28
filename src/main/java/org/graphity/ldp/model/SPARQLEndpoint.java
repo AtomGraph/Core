@@ -14,19 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.graphity.ldp.model.query;
+package org.graphity.ldp.model;
 
+import com.hp.hpl.jena.query.Query;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import org.graphity.ldp.MediaType;
-import org.graphity.ldp.model.Resource;
-
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
 
 /**
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-@Produces({MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", MediaType.TEXT_TURTLE + "; charset=UTF-8"})
-public interface ModelResource extends org.graphity.model.query.ModelResource, Resource
+@Path("/sparql")
+@Produces({org.graphity.ldp.MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", org.graphity.ldp.MediaType.TEXT_TURTLE + "; charset=UTF-8", org.graphity.ldp.MediaType.APPLICATION_SPARQL_RESULTS_XML + "; charset=UTF-8", org.graphity.ldp.MediaType.APPLICATION_SPARQL_RESULTS_JSON + "; charset=UTF-8"})
+public interface SPARQLEndpoint
 {
-    //@GET @Override Model getModel();
+    @GET Response query(@QueryParam("query") Query query);
 }

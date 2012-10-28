@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <!DOCTYPE xsl:stylesheet [
     <!ENTITY java "http://xml.apache.org/xalan/java/">
     <!ENTITY g "http://graphity.org/ontology/">
+    <!ENTITY gldp "http://ldp.graphity.org/ontology/">
     <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#">
     <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#">
     <!ENTITY owl "http://www.w3.org/2002/07/owl#">
@@ -39,6 +40,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 xmlns:xhtml="http://www.w3.org/1999/xhtml"
 xmlns:xs="http://www.w3.org/2001/XMLSchema"
 xmlns:g="&g;"
+xmlns:gldp="&gldp;"
 xmlns:rdf="&rdf;"
 xmlns:rdfs="&rdfs;"
 xmlns:owl="&owl;"
@@ -70,25 +72,26 @@ exclude-result-prefixes="#all">
 
     <xsl:param name="uri" select="$absolute-path" as="xs:anyURI"/>
     <xsl:param name="endpoint-uri" select="$resource/g:service/@rdf:resource" as="xs:anyURI?"/> <!-- select="xs:anyURI(concat($base-uri, 'sparql'))"  -->
-    <xsl:param name="mode" select="if ($resource/g:mode/@rdf:resource) then $resource/g:mode/@rdf:resource else xs:anyURI('&g;ListMode')" as="xs:anyURI"/>
+    <xsl:param name="mode" select="if ($resource/g:mode/@rdf:resource) then $resource/g:mode/@rdf:resource else xs:anyURI('&gldp;ListMode')" as="xs:anyURI"/>
     <xsl:param name="action" select="false()"/>
     <xsl:param name="lang" select="'en'" as="xs:string"/>
 
-    <xsl:param name="query-model" select="$ont-model" as="document-node()?"/> <!-- document($query-uri) -->
-    <xsl:param name="offset" select="$query-res/sp:offset" as="xs:integer?"/>
-    <xsl:param name="limit" select="$query-res/sp:limit" as="xs:integer?"/>
+    <xsl:param name="query-model" select="$ont-model" as="document-node()?"/>
+    <xsl:param name="offset" select="$select-res/sp:offset" as="xs:integer?"/>
+    <xsl:param name="limit" select="$select-res/sp:limit" as="xs:integer?"/>
     <xsl:param name="order-by" select="key('resources', $orderBy/sp:expression/@rdf:resource, $query-model)/sp:varName" as="xs:string?"/>
     <xsl:param name="desc" select="$orderBy[1]/rdf:type/@rdf:resource = '&sp;Desc'" as="xs:boolean"/>
 
     <xsl:param name="query" select="$query-res/sp:text" as="xs:string?"/>
-    <xsl:param name="where" select="list:member(key('resources', $query-res/sp:where/@rdf:nodeID, $query-model), $query-model)"/>
-    <xsl:param name="orderBy" select="if ($query-res/sp:orderBy) then list:member(key('resources', $query-res/sp:orderBy/@rdf:nodeID, $query-model), $query-model) else ()"/>
+    <xsl:param name="where" select="list:member(key('resources', $select-res/sp:where/@rdf:nodeID, $query-model), $query-model)"/>
+    <xsl:param name="orderBy" select="if ($select-res/sp:orderBy) then list:member(key('resources', $select-res/sp:orderBy/@rdf:nodeID, $query-model), $query-model) else ()"/>
 
     <xsl:variable name="resource" select="key('resources', $uri, $ont-model)" as="element()?"/>
     <xsl:variable name="ont-uri" select="resolve-uri('ontology/', $base-uri)" as="xs:anyURI"/>
     <xsl:variable name="ont-model" select="document($ont-uri)" as="document-node()"/>
     <xsl:variable name="query-res" select="key('resources', $resource/g:query/@rdf:resource | $resource/g:query/@rdf:nodeID, $query-model)" as="element()?"/>
-	
+    <xsl:variable name="select-res" select="key('resources', $resource/g:selectQuery/@rdf:resource | $resource/g:selectQuery/@rdf:nodeID, $query-model)" as="element()?"/>
+    
     <xsl:key name="resources" match="*[*][@rdf:about] | *[*][@rdf:nodeID]" use="@rdf:about | @rdf:nodeID"/>
     <xsl:key name="predicates" match="*[@rdf:about]/* | *[@rdf:nodeID]/*" use="concat(namespace-uri(.), local-name(.))"/>
     <xsl:key name="resources-by-host" match="*[@rdf:about]" use="sioc:has_host/@rdf:resource"/>
@@ -106,48 +109,48 @@ exclude-result-prefixes="#all">
 	    <div class="nav row-fluid">
 		<ul class="nav nav-tabs pull-right">
 		    <li>
-			<xsl:if test="$mode = '&g;ListMode'">
+			<xsl:if test="$mode = '&gldp;ListMode'">
 			    <xsl:attribute name="class">active</xsl:attribute>
 			</xsl:if>
 			
-			<a href="{$absolute-path}{g:query-string($offset, $limit, $order-by, $desc, $lang, '&g;ListMode')}">
-			    <xsl:value-of select="g:label(xs:anyURI('&g;ListMode'), /, $lang)"/>
+			<a href="{$absolute-path}{g:query-string($offset, $limit, $order-by, $desc, $lang, '&gldp;ListMode')}">
+			    <xsl:value-of select="g:label(xs:anyURI('&gldp;ListMode'), /, $lang)"/>
 			</a>
 
 			<!--
 			<xsl:choose>
 			    <xsl:when test="$uri != $absolute-path">
-				<a href="{$absolute-path}{g:query-string($uri, $endpoint-uri, $offset, $limit, $order-by, $desc, $lang, '&g;ListMode')}">
-				    <xsl:value-of select="g:label(xs:anyURI('&g;ListMode'), /, $lang)"/>
+				<a href="{$absolute-path}{g:query-string($uri, $endpoint-uri, $offset, $limit, $order-by, $desc, $lang, '&gldp;ListMode')}">
+				    <xsl:value-of select="g:label(xs:anyURI('&gldp;ListMode'), /, $lang)"/>
 				</a>
 			    </xsl:when>
 			    <xsl:otherwise>
-				<a href="{$absolute-path}{g:query-string($offset, $limit, $order-by, $desc, $lang, '&g;ListMode')}">
-				    <xsl:value-of select="g:label(xs:anyURI('&g;ListMode'), /, $lang)"/>
+				<a href="{$absolute-path}{g:query-string($offset, $limit, $order-by, $desc, $lang, '&gldp;ListMode')}">
+				    <xsl:value-of select="g:label(xs:anyURI('&gldp;ListMode'), /, $lang)"/>
 				</a>
 			    </xsl:otherwise>
 			</xsl:choose>
 			-->
 		    </li>
 		    <li>
-			<xsl:if test="$mode = '&g;TableMode'">
+			<xsl:if test="$mode = '&gldp;TableMode'">
 			    <xsl:attribute name="class">active</xsl:attribute>
 			</xsl:if>
 			
-			<a href="{$absolute-path}{g:query-string($offset, $limit, $order-by, $desc, $lang, '&g;TableMode')}">
-			    <xsl:value-of select="g:label(xs:anyURI('&g;TableMode'), /, $lang)"/>
+			<a href="{$absolute-path}{g:query-string($offset, $limit, $order-by, $desc, $lang, '&gldp;TableMode')}">
+			    <xsl:value-of select="g:label(xs:anyURI('&gldp;TableMode'), /, $lang)"/>
 			</a>
 
 			<!--
 			<xsl:choose>
 			    <xsl:when test="$uri != $absolute-path">
-				<a href="{$absolute-path}{g:query-string($uri, $endpoint-uri, $offset, $limit, $order-by, $desc, $lang, '&g;TableMode')}">
-				    <xsl:value-of select="g:label(xs:anyURI('&g;TableMode'), /, $lang)"/>
+				<a href="{$absolute-path}{g:query-string($uri, $endpoint-uri, $offset, $limit, $order-by, $desc, $lang, '&gldp;TableMode')}">
+				    <xsl:value-of select="g:label(xs:anyURI('&gldp;TableMode'), /, $lang)"/>
 				</a>
 			    </xsl:when>
 			    <xsl:otherwise>
-				<a href="{$absolute-path}{g:query-string($offset, $limit, $order-by, $desc, $lang, '&g;TableMode')}">
-				    <xsl:value-of select="g:label(xs:anyURI('&g;TableMode'), /, $lang)"/>
+				<a href="{$absolute-path}{g:query-string($offset, $limit, $order-by, $desc, $lang, '&gldp;TableMode')}">
+				    <xsl:value-of select="g:label(xs:anyURI('&gldp;TableMode'), /, $lang)"/>
 				</a>
 			    </xsl:otherwise>
 			</xsl:choose>
@@ -167,23 +170,23 @@ exclude-result-prefixes="#all">
 		</div>
 	    </div>
 
-	    <xsl:apply-templates select="." mode="g:PaginationMode"/>
+	    <xsl:apply-templates select="." mode="gldp:PaginationMode"/>
 
-	    <xsl:if test="$mode = '&g;ListMode'">
-		<xsl:apply-templates select="." mode="g:ListMode"/>
+	    <xsl:if test="$mode = '&gldp;ListMode'">
+		<xsl:apply-templates select="." mode="gldp:ListMode"/>
 	    </xsl:if>
 	    
-	    <xsl:if test="$mode = '&g;TableMode'">	    
-		<xsl:apply-templates select="." mode="g:TableMode"/>
+	    <xsl:if test="$mode = '&gldp;TableMode'">	    
+		<xsl:apply-templates select="." mode="gldp:TableMode"/>
 	    </xsl:if>
 	    
-	    <xsl:apply-templates select="." mode="g:PaginationMode"/>
+	    <xsl:apply-templates select="." mode="gldp:PaginationMode"/>
 	</div>
 
 	<div class="span4">
 	    <xsl:for-each-group select="*/*" group-by="concat(namespace-uri(.), local-name(.))">
 		<xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(.), local-name(.))), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
-		<xsl:apply-templates select="current-group()[1]" mode="g:SidebarNavMode"/>
+		<xsl:apply-templates select="current-group()[1]" mode="gldp:SidebarNavMode"/>
 	    </xsl:for-each-group>
 	</div>
     </xsl:template>
@@ -202,7 +205,7 @@ exclude-result-prefixes="#all">
 	    </xsl:choose>
 	    
 	    <!-- secondary resources (except the main one and blank nodes) that came with the response -->
-	    <!-- <xsl:apply-templates select="*[@rdf:about] except key('resources', $uri)" mode="g:ListMode"/> -->
+	    <!-- <xsl:apply-templates select="*[@rdf:about] except key('resources', $uri)" mode="gldp:ListMode"/> -->
 	</div>
 
 	<div class="span4">
@@ -210,13 +213,13 @@ exclude-result-prefixes="#all">
 		<xsl:when test="key('resources', $uri)">
 		    <xsl:for-each-group select="key('resources', $uri)/*" group-by="concat(namespace-uri(.), local-name(.))">
 			<xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(.), local-name(.))), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
-			<xsl:apply-templates select="current-group()[1]" mode="g:SidebarNavMode"/>
+			<xsl:apply-templates select="current-group()[1]" mode="gldp:SidebarNavMode"/>
 		    </xsl:for-each-group>
 		</xsl:when>
 		<xsl:otherwise>
 		    <xsl:for-each-group select="*/*" group-by="concat(namespace-uri(.), local-name(.))">
 			<xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(.), local-name(.))), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
-			<xsl:apply-templates select="current-group()[1]" mode="g:SidebarNavMode"/>
+			<xsl:apply-templates select="current-group()[1]" mode="gldp:SidebarNavMode"/>
 		    </xsl:for-each-group>
 		</xsl:otherwise>
 	    </xsl:choose>
@@ -226,9 +229,9 @@ exclude-result-prefixes="#all">
     <!-- subject -->
     <xsl:template match="*[*][@rdf:about] | *[*][@rdf:nodeID]">
 	<div>
-	    <xsl:apply-templates select="." mode="g:HeaderMode"/>
+	    <xsl:apply-templates select="." mode="gldp:HeaderMode"/>
 	    
-	    <xsl:apply-templates select="." mode="g:PropertyListMode"/>
+	    <xsl:apply-templates select="." mode="gldp:PropertyListMode"/>
 	</div>
     </xsl:template>    
 
@@ -240,11 +243,11 @@ exclude-result-prefixes="#all">
 
     <!-- HEADER MODE -->
 
-    <xsl:template match="*[*][@rdf:about] | *[*][@rdf:nodeID]" mode="g:HeaderMode">
+    <xsl:template match="*[*][@rdf:about] | *[*][@rdf:nodeID]" mode="gldp:HeaderMode">
 	<!-- <xsl:if test="@rdf:about or foaf:depiction/@rdf:resource or foaf:logo/@rdf:resource or rdf:type/@rdf:resource or rdfs:comment[lang($lang) or not(@xml:lang)] or dc:description[lang($lang) or not(@xml:lang)] or dct:description[lang($lang) or not(@xml:lang)] or dbpedia-owl:abstract[lang($lang) or not(@xml:lang)]"> -->
 	<div class="well well-large">
 	    <!-- self::foaf:Image or rdf:type/@rdf:resource = '&foaf;Image' -->
-	    <xsl:apply-templates mode="g:HeaderImageMode"/>
+	    <xsl:apply-templates mode="gldp:HeaderImageMode"/>
 	    
 	    <xsl:if test="@rdf:about">
 		<div class="btn-group pull-right">
@@ -262,7 +265,7 @@ exclude-result-prefixes="#all">
 		</div>
 	    </xsl:if>
 
-	    <xsl:apply-templates select="@rdf:about | @rdf:nodeID" mode="g:HeaderMode"/>
+	    <xsl:apply-templates select="@rdf:about | @rdf:nodeID" mode="gldp:HeaderMode"/>
 
 	    <xsl:if test="rdfs:comment[lang($lang) or not(@xml:lang)] or dc:description[lang($lang) or not(@xml:lang)] or dct:description[lang($lang) or not(@xml:lang)] or dbpedia-owl:abstract[lang($lang) or not(@xml:lang)] or sioc:content[lang($lang) or not(@xml:lang)]">
 		<p>
@@ -288,7 +291,7 @@ exclude-result-prefixes="#all">
 
 	    <xsl:if test="rdf:type">
 		<ul class="inline">
-		    <xsl:apply-templates select="rdf:type" mode="g:HeaderMode">
+		    <xsl:apply-templates select="rdf:type" mode="gldp:HeaderMode">
 			<xsl:sort select="g:label(@rdf:resource | @rdf:nodeID, /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
 		    </xsl:apply-templates>
 		</ul>
@@ -296,19 +299,19 @@ exclude-result-prefixes="#all">
 	</div>
     </xsl:template>
 
-    <xsl:template match="@rdf:about" mode="g:HeaderMode">
+    <xsl:template match="@rdf:about" mode="gldp:HeaderMode">
 	<h1 class="page-header">
 	    <xsl:apply-templates select="."/>
 	</h1>
     </xsl:template>
 
-    <xsl:template match="@rdf:nodeID" mode="g:HeaderMode">
+    <xsl:template match="@rdf:nodeID" mode="gldp:HeaderMode">
 	<h2>
 	    <xsl:apply-templates select="."/>
 	</h2>
     </xsl:template>
 
-    <xsl:template match="rdf:type" mode="g:HeaderMode">
+    <xsl:template match="rdf:type" mode="gldp:HeaderMode">
 	<li>
 	    <xsl:apply-templates select="@rdf:resource | @rdf:nodeID"/>
 	</li>
@@ -317,9 +320,9 @@ exclude-result-prefixes="#all">
     <!-- HEADER IMAGE MODE -->
 
     <!-- ignore all other properties -->
-    <xsl:template match="*" mode="g:HeaderImageMode"/>
+    <xsl:template match="*" mode="gldp:HeaderImageMode"/>
 	
-    <xsl:template match="foaf:img | foaf:depiction | foaf:thumbnail | foaf:logo" mode="g:HeaderImageMode" priority="1">
+    <xsl:template match="foaf:img | foaf:depiction | foaf:thumbnail | foaf:logo" mode="gldp:HeaderImageMode" priority="1">
 	<p>
 	    <xsl:apply-templates select="@rdf:resource"/>
 	</p>
@@ -327,10 +330,10 @@ exclude-result-prefixes="#all">
 
     <!-- PROPERTY LIST MODE -->
 
-    <xsl:template match="*[*][@rdf:about] | *[*][@rdf:nodeID]" mode="g:PropertyListMode"/>
+    <xsl:template match="*[*][@rdf:about] | *[*][@rdf:nodeID]" mode="gldp:PropertyListMode"/>
 
     <!-- only show property list for resources that have properties not already displayed in HeaderMode -->
-    <xsl:template match="*[@rdf:about or @rdf:nodeID][* except (rdf:type, foaf:img, foaf:depiction, foaf:logo, owl:sameAs, rdfs:label, rdfs:comment, rdfs:seeAlso, dc:title, dct:title, dc:description, dct:description, dct:subject, dbpedia-owl:abstract, sioc:content)]" mode="g:PropertyListMode" priority="1">
+    <xsl:template match="*[@rdf:about or @rdf:nodeID][* except (rdf:type, foaf:img, foaf:depiction, foaf:logo, owl:sameAs, rdfs:label, rdfs:comment, rdfs:seeAlso, dc:title, dct:title, dc:description, dct:description, dct:subject, dbpedia-owl:abstract, sioc:content)]" mode="gldp:PropertyListMode" priority="1">
 	<div class="row-fluid">
 	    <xsl:variable name="no-domain-properties" select="*[not(rdfs:domain(xs:anyURI(concat(namespace-uri(.), local-name(.)))) = current()/rdf:type/@rdf:resource)]"/>
 	    <xsl:variable name="domain-types" select="rdf:type/@rdf:resource[../../*/xs:anyURI(concat(namespace-uri(.), local-name(.))) = g:inDomainOf(.)]"/>
@@ -338,7 +341,7 @@ exclude-result-prefixes="#all">
 	    <xsl:if test="$no-domain-properties">
 		<div class="span6 well well-small">
 		    <dl>
-			<xsl:apply-templates select="$no-domain-properties" mode="g:PropertyListMode">
+			<xsl:apply-templates select="$no-domain-properties" mode="gldp:PropertyListMode">
 			    <xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(.), local-name(.))), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
 			    <xsl:sort select="if (@rdf:resource) then (g:label(@rdf:resource, /, $lang)) else text()" data-type="text" order="ascending" lang="{$lang}"/> <!-- g:label(@rdf:nodeID, /, $lang) -->
 			</xsl:apply-templates>
@@ -348,7 +351,7 @@ exclude-result-prefixes="#all">
 
 	    <xsl:if test="$domain-types">
 		<div class="span6">
-		    <xsl:apply-templates select="$domain-types" mode="g:TypeMode">
+		    <xsl:apply-templates select="$domain-types" mode="gldp:TypeMode">
 			<xsl:sort select="g:label(., /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
 		    </xsl:apply-templates>
 		</div>
@@ -357,33 +360,33 @@ exclude-result-prefixes="#all">
     </xsl:template>
 
     <!-- has to match the previous template pattern - can this be made smarter? -->
-    <xsl:template match="rdf:type | foaf:img | foaf:depiction | foaf:logo | owl:sameAs | rdfs:label | rdfs:comment | rdfs:seeAlso | dc:title | dct:title | dc:description | dct:description | dct:subject | dbpedia-owl:abstract | sioc:content" mode="g:PropertyListMode" priority="1"/>
+    <xsl:template match="rdf:type | foaf:img | foaf:depiction | foaf:logo | owl:sameAs | rdfs:label | rdfs:comment | rdfs:seeAlso | dc:title | dct:title | dc:description | dct:description | dct:subject | dbpedia-owl:abstract | sioc:content" mode="gldp:PropertyListMode" priority="1"/>
 
     <!-- property -->
-    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*" mode="g:PropertyListMode">
+    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*" mode="gldp:PropertyListMode">
 	<dt>
 	    <xsl:apply-templates select="."/>
 	</dt>
 	<dd>
-	    <xsl:apply-templates select="node() | @rdf:resource | @rdf:nodeID" mode="g:PropertyListMode"/>
+	    <xsl:apply-templates select="node() | @rdf:resource | @rdf:nodeID" mode="gldp:PropertyListMode"/>
 	</dd>
     </xsl:template>
 
-    <xsl:template match="node() | @rdf:resource" mode="g:PropertyListMode">
+    <xsl:template match="node() | @rdf:resource" mode="gldp:PropertyListMode">
 	<xsl:apply-templates select="."/>
     </xsl:template>
 
-    <xsl:template match="@rdf:nodeID" mode="g:PropertyListMode">
+    <xsl:template match="@rdf:nodeID" mode="gldp:PropertyListMode">
 	<xsl:apply-templates select="key('resources', .)"/>
     </xsl:template>
 
     <!-- TYPE MODE -->
 
-    <xsl:template match="@rdf:about | @rdf:resource" mode="g:TypeMode">
+    <xsl:template match="@rdf:about | @rdf:resource" mode="gldp:TypeMode">
 	<xsl:apply-templates select="."/>
     </xsl:template>
 
-    <xsl:template match="rdf:type/@rdf:resource" mode="g:TypeMode">
+    <xsl:template match="rdf:type/@rdf:resource" mode="gldp:TypeMode">
 	<xsl:variable name="in-domain-properties" select="../../*[xs:anyURI(concat(namespace-uri(.), local-name(.))) = g:inDomainOf(current()) or rdfs:domain(xs:anyURI(concat(namespace-uri(.), local-name(.)))) = xs:anyURI(current())]"/>
 
 	<div class="well well-small">
@@ -392,7 +395,7 @@ exclude-result-prefixes="#all">
 		<xsl:apply-templates select="."/>
 	    </h2>
 	    <dl class="well-small">
-		<xsl:apply-templates select="$in-domain-properties" mode="g:PropertyListMode">
+		<xsl:apply-templates select="$in-domain-properties" mode="gldp:PropertyListMode">
 		    <xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(.), local-name(.))), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
 		    <xsl:sort select="if (@rdf:resource) then (g:label(@rdf:resource, /, $lang)) else text()" data-type="text" order="ascending" lang="{$lang}"/> <!-- g:label(@rdf:nodeID, /, $lang) -->
 		</xsl:apply-templates>
@@ -402,13 +405,13 @@ exclude-result-prefixes="#all">
 
     <!-- SIDEBAR NAV MODE -->
     
-    <xsl:template match="*[@rdf:about]" mode="g:SidebarNavMode">
-	<xsl:apply-templates mode="g:SidebarNavMode">
+    <xsl:template match="*[@rdf:about]" mode="gldp:SidebarNavMode">
+	<xsl:apply-templates mode="gldp:SidebarNavMode">
 	    <xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(.), local-name(.))), /, $lang)" data-type="text" order="ascending"/>
 	</xsl:apply-templates>
     </xsl:template>
     
-    <xsl:template match="rdfs:seeAlso | owl:sameAs | dc:subject | dct:subject" mode="g:SidebarNavMode" priority="1">
+    <xsl:template match="rdfs:seeAlso | owl:sameAs | dc:subject | dct:subject" mode="gldp:SidebarNavMode" priority="1">
 	<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(.), local-name(.)))" as="xs:anyURI"/>
 	
 	<div class="well sidebar-nav">
@@ -423,16 +426,16 @@ exclude-result-prefixes="#all">
 	    <ul class="nav nav-pills nav-stacked">
 		<xsl:for-each-group select="key('predicates', $this)" group-by="@rdf:resource">
 		    <xsl:sort select="g:label(@rdf:resource, /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
-		    <xsl:apply-templates select="current-group()[1]/@rdf:resource" mode="g:SidebarNavMode"/>
+		    <xsl:apply-templates select="current-group()[1]/@rdf:resource" mode="gldp:SidebarNavMode"/>
 		</xsl:for-each-group>
 	    </ul>
 	</div>
     </xsl:template>
 
     <!-- ignore all other properties -->
-    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*" mode="g:SidebarNavMode"/>
+    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*" mode="gldp:SidebarNavMode"/>
 
-    <xsl:template match="rdfs:seeAlso/@rdf:resource | owl:sameAs/@rdf:resource | dc:subject/@rdf:resource | dct:subject/@rdf:resource" mode="g:SidebarNavMode">
+    <xsl:template match="rdfs:seeAlso/@rdf:resource | owl:sameAs/@rdf:resource | dc:subject/@rdf:resource | dct:subject/@rdf:resource" mode="gldp:SidebarNavMode">
 	<li>
 	    <xsl:apply-templates select="."/>
 	</li>
@@ -440,7 +443,7 @@ exclude-result-prefixes="#all">
 
     <!-- PAGINATION MODE -->
 
-    <xsl:template match="rdf:RDF" mode="g:PaginationMode">
+    <xsl:template match="rdf:RDF" mode="gldp:PaginationMode">
 	<xsl:if test="count(*) &gt; 0">
 	    <ul class="pager">
 		<li class="previous">
@@ -487,19 +490,19 @@ exclude-result-prefixes="#all">
 
     <!-- LIST MODE -->
 
-    <xsl:template match="rdf:RDF" mode="g:ListMode">
-	<xsl:apply-templates mode="g:ListMode"/>
+    <xsl:template match="rdf:RDF" mode="gldp:ListMode">
+	<xsl:apply-templates mode="gldp:ListMode"/>
     </xsl:template>
 
-    <xsl:template match="*[*][@rdf:about] | *[*][@rdf:nodeID]" mode="g:ListMode">
+    <xsl:template match="*[*][@rdf:about] | *[*][@rdf:nodeID]" mode="gldp:ListMode">
 	<div class="well">
-	    <xsl:apply-templates mode="g:ListImageMode"/>
+	    <xsl:apply-templates mode="gldp:ListImageMode"/>
 
-	    <xsl:apply-templates select="@rdf:about | @rdf:nodeID" mode="g:ListMode"/>
+	    <xsl:apply-templates select="@rdf:about | @rdf:nodeID" mode="gldp:ListMode"/>
 	    
 	    <xsl:if test="rdf:type">
 		<ul class="inline">
-		    <xsl:apply-templates select="rdf:type" mode="g:HeaderMode">
+		    <xsl:apply-templates select="rdf:type" mode="gldp:HeaderMode">
 			<xsl:sort select="g:label(@rdf:resource | @rdf:nodeID, /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
 		    </xsl:apply-templates>
 		</ul>
@@ -529,16 +532,16 @@ exclude-result-prefixes="#all">
 	</div>
     </xsl:template>
 
-    <xsl:template match="@rdf:about | @rdf:nodeID" mode="g:ListMode">
+    <xsl:template match="@rdf:about | @rdf:nodeID" mode="gldp:ListMode">
 	<h1>
 	    <xsl:apply-templates select="."/>
 	</h1>
     </xsl:template>
 
     <!-- ignore all other properties -->
-    <xsl:template match="*" mode="g:ListImageMode"/>
+    <xsl:template match="*" mode="gldp:ListImageMode"/>
 	
-    <xsl:template match="foaf:img | foaf:depiction | foaf:thumbnail | foaf:logo" mode="g:ListImageMode" priority="1">
+    <xsl:template match="foaf:img | foaf:depiction | foaf:thumbnail | foaf:logo" mode="gldp:ListImageMode" priority="1">
 	<p>
 	    <xsl:apply-templates select="@rdf:resource"/>
 	</p>
@@ -546,7 +549,7 @@ exclude-result-prefixes="#all">
 
     <!-- TABLE HEADER MODE -->
 
-    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*" mode="g:TableHeaderMode">
+    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*" mode="gldp:TableHeaderMode">
 	<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(.), local-name(.)))" as="xs:anyURI"/>
 
 	<th>
@@ -558,7 +561,7 @@ exclude-result-prefixes="#all">
 
     <!-- TABLE MODE -->
 
-    <xsl:template match="rdf:RDF" mode="g:TableMode">
+    <xsl:template match="rdf:RDF" mode="gldp:TableMode">
 	<xsl:variable name="predicates" as="element()*">
 	    <xsl:for-each-group select="*/*" group-by="concat(namespace-uri(.), local-name(.))">
 		<xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(.), local-name(.))), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
@@ -575,16 +578,16 @@ exclude-result-prefixes="#all">
 			</a>
 		    </th>
 
-		    <xsl:apply-templates select="$predicates" mode="g:TableHeaderMode"/>
+		    <xsl:apply-templates select="$predicates" mode="gldp:TableHeaderMode"/>
 		</tr>
 	    </thead>
 	    <tbody>
-		<xsl:apply-templates mode="g:TableMode"/>
+		<xsl:apply-templates mode="gldp:TableMode"/>
 	    </tbody>
 	</table>
     </xsl:template>
 
-    <xsl:template match="*[*][@rdf:about] | *[*][@rdf:nodeID]" mode="g:TableMode">
+    <xsl:template match="*[*][@rdf:about] | *[*][@rdf:nodeID]" mode="gldp:TableMode">
 	<xsl:variable name="predicates" as="element()*">
 	    <xsl:for-each-group select="../*/*" group-by="concat(namespace-uri(.), local-name(.))">
 		<xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(.), local-name(.))), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
@@ -593,7 +596,7 @@ exclude-result-prefixes="#all">
 	</xsl:variable>
 	
 	<tr>
-	    <xsl:apply-templates select="@rdf:about | @rdf:nodeID" mode="g:TableMode"/>
+	    <xsl:apply-templates select="@rdf:about | @rdf:nodeID" mode="gldp:TableMode"/>
 
 	    <xsl:variable name="subject" select="."/>
 	    <xsl:for-each select="$predicates">
@@ -601,7 +604,7 @@ exclude-result-prefixes="#all">
 		<xsl:variable name="predicate" select="$subject/*[concat(namespace-uri(.), local-name(.)) = $this]"/>
 		<xsl:choose>
 		    <xsl:when test="$predicate">
-			<xsl:apply-templates select="$predicate" mode="g:TableMode"/>
+			<xsl:apply-templates select="$predicate" mode="gldp:TableMode"/>
 		    </xsl:when>
 		    <xsl:otherwise>
 			<td></td>
@@ -611,23 +614,23 @@ exclude-result-prefixes="#all">
 	</tr>
     </xsl:template>
 
-    <xsl:template match="@rdf:about | @rdf:nodeID" mode="g:TableMode">
+    <xsl:template match="@rdf:about | @rdf:nodeID" mode="gldp:TableMode">
 	<td>
 	    <xsl:apply-templates select="."/>
 	</td>
     </xsl:template>
 
-    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*" mode="g:TableMode"/>
+    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*" mode="gldp:TableMode"/>
 
     <!-- apply properties that match lang() -->
-    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*[lang($lang)]" mode="g:TableMode" priority="1">
+    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*[lang($lang)]" mode="gldp:TableMode" priority="1">
 	<td>
 	    <xsl:apply-templates select="node() | @rdf:resource | @rdf:nodeID"/>
 	</td>
     </xsl:template>
     
     <!-- apply the first one in the group if there's no lang() match -->
-    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*[not(../*[concat(namespace-uri(.), local-name(.)) = concat(namespace-uri(current()), local-name(current()))][lang($lang)])][not(preceding-sibling::*[concat(namespace-uri(.), local-name(.)) = concat(namespace-uri(current()), local-name(current()))])]" mode="g:TableMode" priority="1">
+    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*[not(../*[concat(namespace-uri(.), local-name(.)) = concat(namespace-uri(current()), local-name(current()))][lang($lang)])][not(preceding-sibling::*[concat(namespace-uri(.), local-name(.)) = concat(namespace-uri(current()), local-name(current()))])]" mode="gldp:TableMode" priority="1">
 	<td>
 	    <xsl:apply-templates select="node() | @rdf:resource | @rdf:nodeID"/>
 	</td>

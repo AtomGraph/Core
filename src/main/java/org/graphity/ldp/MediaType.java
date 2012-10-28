@@ -15,7 +15,7 @@
  *
  */
 
-package org.graphity;
+package org.graphity.ldp;
 
 import java.util.Map;
 

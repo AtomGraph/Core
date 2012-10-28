@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 @Provider
-@Produces({org.graphity.MediaType.APPLICATION_SPARQL_RESULTS_XML, org.graphity.MediaType.APPLICATION_SPARQL_RESULTS_JSON})
+@Produces({org.graphity.ldp.MediaType.APPLICATION_SPARQL_RESULTS_XML, org.graphity.ldp.MediaType.APPLICATION_SPARQL_RESULTS_JSON})
 public class ResultSetWriter implements MessageBodyWriter<ResultSet>
 {
     private static final Logger log = LoggerFactory.getLogger(ResultSetWriter.class);
@@ -56,7 +56,7 @@ public class ResultSetWriter implements MessageBodyWriter<ResultSet>
     @Override
     public void writeTo(ResultSet results, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException
     {
-	if (mediaType.equals(org.graphity.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
+	if (mediaType.equals(org.graphity.ldp.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
 	    ResultSetFormatter.outputAsJSON(entityStream, results);
 	else
 	    ResultSetFormatter.outputAsXML(entityStream, results);

@@ -20,7 +20,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 
 /**
  *
@@ -30,9 +29,9 @@ public interface Resource
 {
     @GET Response getResponse();
 
-    Request getRequest();
+    Request getRequest(); // Request can be injected
 
-    UriInfo getUriInfo();
+    //UriInfo getUriInfo(); // Request can be injected
 
     EntityTag getEntityTag();
 }
