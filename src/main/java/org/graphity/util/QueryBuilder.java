@@ -33,6 +33,7 @@ import org.topbraid.spin.arq.ARQ2SPIN;
 import org.topbraid.spin.arq.ARQFactory;
 import org.topbraid.spin.model.*;
 import org.topbraid.spin.model.print.PrintContext;
+import org.topbraid.spin.model.print.StringPrintContext;
 import org.topbraid.spin.system.SPINModuleRegistry;
 import org.topbraid.spin.vocabulary.SP;
 
@@ -316,16 +317,6 @@ public class QueryBuilder implements org.topbraid.spin.model.Query
 
     public Query build()
     {
-	// ARQFactory.get().setUseCaches(false) to avoid caching
-	return ARQFactory.get().createQuery(getQuery());
-    }
-
-
-/*    
-    public org.topbraid.spin.model.Query buildSPIN()
-    {
-	if (log.isTraceEnabled()) log.trace("Generated SPIN Query: {}", toString()); // no PREFIXes
-
 	// generate SPARQL query string
 	StringBuilder sb = new StringBuilder();
 	PrintContext pc = new StringPrintContext(sb);
@@ -335,9 +326,9 @@ public class QueryBuilder implements org.topbraid.spin.model.Query
 	removeAll(SP.text)
 	    .addLiteral(SP.text, getModel().createTypedLiteral(sb.toString()));
 
-	return spinQuery;
+	// ARQFactory.get().setUseCaches(false) to avoid caching
+	return ARQFactory.get().createQuery(getQuery());
     }
-*/
 
     @Override
     public List<String> getFrom()

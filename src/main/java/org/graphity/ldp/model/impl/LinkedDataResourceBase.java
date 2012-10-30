@@ -54,51 +54,54 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     {
 	QueryBuilder queryBuilder;
 	
-	if (!ontResource.hasProperty(Graphity.query))
+	if (ontResource.hasRDFType(SIOC.CONTAINER))
 	{
-	    if (ontResource.hasRDFType(SIOC.CONTAINER))
+	    if (!ontResource.hasProperty(Graphity.selectQuery)) throw new IllegalArgumentException("Container Resource must have a SELECT query");
+
+	    SelectBuilder selectBuilder = SelectBuilder.fromResource(ontResource.getPropertyResourceValue(Graphity.selectQuery)).
+		limit(limit).offset(offset);
+	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} is Container gets explicit SELECT Query Resource {}", ontResource.getURI(), selectBuilder);
+	    ontResource.setPropertyValue(Graphity.selectQuery, selectBuilder);
+
+	    /*
+	    if (orderBy != null)
 	    {
-		if (!ontResource.hasProperty(Graphity.selectQuery)) throw new IllegalArgumentException("Container Resource must have a SELECT query");
+		com.hp.hpl.jena.rdf.model.Resource modelVar = getOntology().createResource().addLiteral(SP.varName, "model");
+		Property orderProperty = ResourceFactory.createProperty(orderBy);
+		com.hp.hpl.jena.rdf.model.Resource orderVar = getOntology().createResource().addLiteral(SP.varName, orderProperty.getLocalName());
 
-		SelectBuilder selectBuilder = SelectBuilder.fromResource(ontResource.getPropertyResourceValue(Graphity.selectQuery)).
-		    limit(limit).offset(offset);
-		if (log.isDebugEnabled()) log.debug("OntResource with URI {} is Container with explicit SELECT Query Resource {}", ontResource.getURI(), selectBuilder);
-
-		/*
-		if (orderBy != null)
-		{
-		    com.hp.hpl.jena.rdf.model.Resource modelVar = getOntology().createResource().addLiteral(SP.varName, "model");
-		    Property orderProperty = ResourceFactory.createProperty(orderBy);
-		    com.hp.hpl.jena.rdf.model.Resource orderVar = getOntology().createResource().addLiteral(SP.varName, orderProperty.getLocalName());
-
-		    selectBuilder.orderBy(orderVar, desc).optional(modelVar, orderProperty, orderVar);
-		}
-		*/
-
-		if (selectBuilder.getPropertyResourceValue(SP.resultVariables) != null)
-		{
-		    if (log.isDebugEnabled()) log.debug("Query Resource {} has result variables: {}", selectBuilder, selectBuilder.getPropertyResourceValue(SP.resultVariables));
-		    queryBuilder = QueryBuilder.fromDescribe(selectBuilder.getPropertyResourceValue(SP.resultVariables)).
-			subQuery(selectBuilder);
-		}
-		else
-		{
-		    if (log.isDebugEnabled()) log.debug("Query Resource {} does not have result variables, using all variables (*)", selectBuilder);
-		    queryBuilder = QueryBuilder.fromDescribe(ontResource.getModel()).subQuery(selectBuilder);
-		}
+		selectBuilder.orderBy(orderVar, desc).optional(modelVar, orderProperty, orderVar);
+	    }
+	    */
+	    if (selectBuilder.getPropertyResourceValue(SP.resultVariables) != null)
+	    {
+		if (log.isDebugEnabled()) log.debug("Query Resource {} has result variables: {}", selectBuilder, selectBuilder.getPropertyResourceValue(SP.resultVariables));
+		queryBuilder = QueryBuilder.fromDescribe(selectBuilder.getPropertyResourceValue(SP.resultVariables)).
+		    subQuery(selectBuilder);
 	    }
 	    else
 	    {
-		if (log.isDebugEnabled()) log.debug("OntResource with URI {} is a not a Container, building DESCRIBE/CONSTRUCT Query", ontResource.getURI());
-		queryBuilder = QueryBuilder.fromDescribe(ontResource.getURI(), ontResource.getModel());
+		if (log.isDebugEnabled()) log.debug("Query Resource {} does not have result variables, using wildcard", selectBuilder);
+		queryBuilder = QueryBuilder.fromDescribe(ontResource.getModel()).subQuery(selectBuilder);
 	    }
-	    
-	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} gets implicit Query Resource {}", ontResource.getURI(), queryBuilder);
-	    ontResource.addProperty(Graphity.query, queryBuilder);
 	}
-    
-	if (log.isDebugEnabled()) log.debug("OntResource with URI {} has Query Resource {}", ontResource.getURI(), ontResource.getPropertyResourceValue(Graphity.query));
-	return QueryBuilder.fromResource(ontResource.getPropertyResourceValue(Graphity.query));
+	else
+	{
+	    if (ontResource.hasProperty(Graphity.query))
+	    {
+		queryBuilder = QueryBuilder.fromResource(ontResource.getPropertyResourceValue(Graphity.query));
+		if (log.isDebugEnabled()) log.debug("OntResource with URI {} has Query Resource {}", ontResource.getURI(), ontResource.getPropertyResourceValue(Graphity.query));
+	    }
+	    else
+	    {
+		queryBuilder = QueryBuilder.fromDescribe(ontResource.getURI(), ontResource.getModel());
+		if (log.isDebugEnabled()) log.debug("OntResource with URI {} gets explicit Query Resource {}", ontResource.getURI(), queryBuilder);
+	    }
+	}
+	
+	ontResource.setPropertyValue(Graphity.query, queryBuilder); // Resource alway get a g:query value
+
+	return queryBuilder;
     }
 
     public LinkedDataResourceBase(OntResource ontResource,
@@ -163,7 +166,6 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	    throw new WebApplicationException(Response.Status.NOT_FOUND);
 	}
     }
-
     
     public ModelResource getResource()
     {

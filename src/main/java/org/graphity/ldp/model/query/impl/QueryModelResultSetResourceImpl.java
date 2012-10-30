@@ -49,8 +49,8 @@ public class QueryModelResultSetResourceImpl extends org.graphity.model.query.im
 	this.request = request;
 	if (mediaType != null) this.mediaType = mediaType;
 	
-	ResultSetRewindable rewindable = ResultSetFactory.makeRewindable(getResultSet());
-	entityTag = new EntityTag(Long.toHexString(ResultSetUtils.hashResultSet(rewindable)));
+	//ResultSetRewindable rewindable = ResultSetFactory.makeRewindable(getResultSet());
+	//entityTag = new EntityTag(Long.toHexString(ResultSetUtils.hashResultSet(rewindable)));
 	
 	Response.ResponseBuilder rb = request.evaluatePreconditions(entityTag);
 	if (rb != null)

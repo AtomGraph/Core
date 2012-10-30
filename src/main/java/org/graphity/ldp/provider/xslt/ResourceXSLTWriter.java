@@ -50,18 +50,24 @@ public class ResourceXSLTWriter implements MessageBodyWriter<LinkedDataResource>
 {
     private static final Logger log = LoggerFactory.getLogger(ResourceXSLTWriter.class);
 
-    private XSLTBuilder builder = null;
+    //private XSLTBuilder builder = null;
+    private Source stylesheet = null;
+    private URIResolver resolver = null;
 	
     @Context private UriInfo uriInfo;
 
+    /*
     public ResourceXSLTWriter(XSLTBuilder builder) throws TransformerConfigurationException
     {
 	this.builder = builder;
     }
-
+    */
+    
     public ResourceXSLTWriter(Source stylesheet, URIResolver resolver) throws TransformerConfigurationException
     {
-	this(XSLTBuilder.fromStylesheet(stylesheet).resolver(resolver));
+	//this(XSLTBuilder.fromStylesheet(stylesheet).resolver(resolver));
+	this.stylesheet = stylesheet;
+	this.resolver = resolver;
     }
 
     @Override
@@ -86,7 +92,9 @@ public class ResourceXSLTWriter implements MessageBodyWriter<LinkedDataResource>
 	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	    resource.getModel().write(baos, WebContent.langRDFXML);
 
-	    builder.getTransformer().clearParameters(); // remove previously set param values
+	    // create XSLTBuilder per request output to avoid document() caching
+	    XSLTBuilder builder = XSLTBuilder.fromStylesheet(stylesheet).resolver(resolver);
+	    //builder.getTransformer().clearParameters(); // remove previously set param values
 
 	    builder.document(new ByteArrayInputStream(baos.toByteArray())).
 		parameter("uri", UriBuilder.fromUri(resource.getURI()).build()).

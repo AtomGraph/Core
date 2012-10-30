@@ -117,10 +117,48 @@ public class DataManager extends FileManager implements URIResolver
 	addLocatorLinkedData();
 	removeLocatorURL();
     }
+
+    @Override
+    public void addCacheModel(String uri, Model m)
+    {
+	if (log.isTraceEnabled()) log.trace("Adding Model to cache with URI: ({})", uri);
+	super.addCacheModel(uri, m);
+    }
+
+    @Override
+    public boolean hasCachedModel(String filenameOrURI)
+    {
+	boolean cached = super.hasCachedModel(filenameOrURI);
+	if (log.isTraceEnabled()) log.trace("Is Model with URI {} cached: {}", filenameOrURI, cached);
+	return cached;
+    }
+
+    public boolean isPrefixMapped(String filenameOrURI)
+    {
+	return !getPrefix(filenameOrURI).equals(filenameOrURI);
+    }
+
+    public String getPrefix(String filenameOrURI)
+    {
+	if (getLocationMapper() instanceof PrefixMapper)
+	{
+	    String baseURI = ((PrefixMapper)getLocationMapper()).getPrefix(filenameOrURI);
+	    if (baseURI != null) return baseURI;
+	}
+	
+	return filenameOrURI;
+    }
     
     @Override
     public Model loadModel(String filenameOrURI)
     {
+	if (isPrefixMapped(filenameOrURI))
+	{
+	    String prefix = getPrefix(filenameOrURI);
+	    if (log.isDebugEnabled()) log.debug("URI {} is prefix mapped, loading prefix URI: {}", filenameOrURI, prefix);
+	    return loadModel(prefix);
+	}
+	
 	if (log.isDebugEnabled()) log.debug("loadModel({})", filenameOrURI);
 	filenameOrURI = UriBuilder.fromUri(filenameOrURI).fragment(null).build().toString(); // remove document fragments
 	
@@ -292,15 +330,9 @@ public class DataManager extends FileManager implements URIResolver
 	if (!mappedURI.equals(filenameOrURI) && !mappedURI.startsWith("http:")) // if URI is mapped and local
 	{
 	    if (log.isDebugEnabled()) log.debug("URI {} is mapped to {}, letting FileManager.readModel() handle it", filenameOrURI, mappedURI);
+	    if (log.isDebugEnabled()) log.debug("FileManager.readModel() URI: {} Base URI: {}", filenameOrURI, filenameOrURI);
 
-	    String baseURI;
-	    if (getLocationMapper() instanceof PrefixMapper)
-		baseURI = ((PrefixMapper)getLocationMapper()).getPrefix(filenameOrURI);
-	    else
-		baseURI = filenameOrURI;
-	    if (log.isDebugEnabled()) log.debug("FileManager.readModel() URI: {} Base URI: {}", filenameOrURI, baseURI);
-
-	    return super.readModel(model, mappedURI, baseURI, null); // let FileManager handle
+	    return super.readModel(model, mappedURI, filenameOrURI, null); // let FileManager handle
 	}
 
 	TypedStream in = openNoMapOrNull(filenameOrURI);
@@ -383,7 +415,7 @@ public class DataManager extends FileManager implements URIResolver
 				if (log.isTraceEnabled()) log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
 				request.addParam(entry.getKey(), value);
 			    }
-		return request.execSelect();
+		return ResultSetFactory.makeRewindable(request.execSelect());
 	    }
 	    finally
 	    {
@@ -487,7 +519,7 @@ public class DataManager extends FileManager implements URIResolver
 		if (log.isDebugEnabled()) log.debug("URI ignored by file extension: {}", uri);
 		return getDefaultSource();
 	    }
-
+	    
 	    Model model = getFromCache(uri);
 	    if (model == null) // URI not cached, 
 	    {

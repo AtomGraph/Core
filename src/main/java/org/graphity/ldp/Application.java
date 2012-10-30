@@ -67,7 +67,7 @@ public class Application extends javax.ws.rs.core.Application
 	}
 	
 	DataManager.get().setLocationMapper(mapper);
-	DataManager.get().setModelCaching(false);
+	DataManager.get().setModelCaching(true);
 	if (log.isDebugEnabled())
 	{
 	    log.debug("FileManager.get(): {} DataManager.get(): {}", FileManager.get(), DataManager.get());

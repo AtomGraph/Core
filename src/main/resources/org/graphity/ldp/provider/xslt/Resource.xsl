@@ -71,7 +71,6 @@ exclude-result-prefixes="#all">
     <xsl:param name="http-headers" as="xs:string"/>
 
     <xsl:param name="uri" select="$absolute-path" as="xs:anyURI"/>
-    <xsl:param name="endpoint-uri" select="$resource/g:service/@rdf:resource" as="xs:anyURI?"/> <!-- select="xs:anyURI(concat($base-uri, 'sparql'))"  -->
     <xsl:param name="mode" select="if ($resource/g:mode/@rdf:resource) then $resource/g:mode/@rdf:resource else xs:anyURI('&gldp;ListMode')" as="xs:anyURI"/>
     <xsl:param name="action" select="false()"/>
     <xsl:param name="lang" select="'en'" as="xs:string"/>
@@ -88,7 +87,7 @@ exclude-result-prefixes="#all">
 
     <xsl:variable name="resource" select="key('resources', $uri, $ont-model)" as="element()?"/>
     <xsl:variable name="ont-uri" select="resolve-uri('ontology/', $base-uri)" as="xs:anyURI"/>
-    <xsl:variable name="ont-model" select="document($ont-uri)" as="document-node()"/>
+    <xsl:variable name="ont-model" select="document($base-uri)" as="document-node()"/>
     <xsl:variable name="query-res" select="key('resources', $resource/g:query/@rdf:resource | $resource/g:query/@rdf:nodeID, $query-model)" as="element()?"/>
     <xsl:variable name="select-res" select="key('resources', $resource/g:selectQuery/@rdf:resource | $resource/g:selectQuery/@rdf:nodeID, $query-model)" as="element()?"/>
     
@@ -163,10 +162,10 @@ exclude-result-prefixes="#all">
 			<a href="{$uri}" class="btn">Source</a>
 		    </xsl:if>
 		    <xsl:if test="$query">
-			<a href="{resolve-uri('sparql', $base-uri)}?query={encode-for-uri($query)}{if ($endpoint-uri) then (concat('&amp;endpoint-uri=', encode-for-uri($endpoint-uri))) else ()}" class="btn">SPARQL</a>
+			<a href="{resolve-uri('sparql', $base-uri)}?query={encode-for-uri($query)}" class="btn">SPARQL</a>
 		    </xsl:if>
-		    <a href="?uri={encode-for-uri($uri)}&amp;accept={encode-for-uri('application/rdf+xml')}" class="btn">RDF/XML</a>
-		    <a href="?uri={encode-for-uri($uri)}&amp;accept={encode-for-uri('text/turtle')}" class="btn">Turtle</a>
+		    <a href="{@rdf:about}&amp;accept={encode-for-uri('application/rdf+xml')}" class="btn">RDF/XML</a>
+		    <a href="{@rdf:about}&amp;accept={encode-for-uri('text/turtle')}" class="btn">Turtle</a>
 		</div>
 	    </div>
 
@@ -251,17 +250,14 @@ exclude-result-prefixes="#all">
 	    
 	    <xsl:if test="@rdf:about">
 		<div class="btn-group pull-right">
-		    <xsl:choose>
-			<xsl:when test="@rdf:about != $absolute-path">
-			    <a href="{@rdf:about}" class="btn">Source</a>
-			    <a href="?uri={encode-for-uri(@rdf:about)}&amp;accept={encode-for-uri('application/rdf+xml')}" class="btn">RDF/XML</a>
-			    <a href="?uri={encode-for-uri(@rdf:about)}&amp;accept={encode-for-uri('text/turtle')}" class="btn">Turtle</a>
-			</xsl:when>
-			<xsl:otherwise>
-			    <a href="{@rdf:about}?accept={encode-for-uri('application/rdf+xml')}" class="btn">RDF/XML</a>
-			    <a href="{@rdf:about}?accept={encode-for-uri('text/turtle')}" class="btn">Turtle</a>
-			</xsl:otherwise>
-		    </xsl:choose>
+		    <xsl:if test="$uri != $absolute-path">
+			<a href="{$uri}" class="btn">Source</a>
+		    </xsl:if>
+		    <xsl:if test="$query">
+			<a href="{resolve-uri('sparql', $base-uri)}?query={encode-for-uri($query)}" class="btn">SPARQL</a>
+		    </xsl:if>
+		    <a href="{@rdf:about}&amp;accept={encode-for-uri('application/rdf+xml')}" class="btn">RDF/XML</a>
+		    <a href="{@rdf:about}&amp;accept={encode-for-uri('text/turtle')}" class="btn">Turtle</a>
 		</div>
 	    </xsl:if>
 
@@ -417,7 +413,6 @@ exclude-result-prefixes="#all">
 	<div class="well sidebar-nav">
 	    <h2 class="nav-header">
 		<a href="{$base-uri}{g:query-string($lang)}" title="{$this}">
-		<!-- <a href="{$base-uri}{g:query-string($this, $endpoint-uri, (), (), (), (), $lang, ())}" title="{$this}"> -->
 		    <xsl:value-of select="g:label($this, /, $lang)"/>
 		</a>
 	    </h2>
