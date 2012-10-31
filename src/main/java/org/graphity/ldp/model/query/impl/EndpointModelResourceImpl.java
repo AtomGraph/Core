@@ -22,7 +22,6 @@ import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import org.graphity.ldp.model.Resource;
 import org.graphity.ldp.model.query.ModelResource;
 import org.graphity.util.ModelUtils;
 import org.slf4j.Logger;
@@ -48,13 +47,16 @@ public class EndpointModelResourceImpl extends org.graphity.model.query.impl.End
 	this.request = request;
 	if (mediaType != null) this.mediaType = mediaType;
 	
-	entityTag = new EntityTag(Long.toHexString(ModelUtils.hashModel(getModel())));
-
-	Response.ResponseBuilder rb = request.evaluatePreconditions(entityTag);
-	if (rb != null)
+	if (!getModel().isEmpty())
 	{
-	    if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
-	    response = rb.build();
+	    entityTag = new EntityTag(Long.toHexString(ModelUtils.hashModel(getModel())));
+
+	    Response.ResponseBuilder rb = request.evaluatePreconditions(entityTag);
+	    if (rb != null)
+	    {
+		if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
+		response = rb.build();
+	    }
 	}
 	else
 	{

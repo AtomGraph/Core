@@ -47,13 +47,16 @@ public class EndpointResultSetResourceImpl extends org.graphity.model.query.impl
 	this.request = request;
 	if (mediaType != null) this.mediaType = mediaType;
 	
-	entityTag = new EntityTag(Long.toHexString(ResultSetUtils.hashResultSet(getResultSet())));
-	
-	Response.ResponseBuilder rb = request.evaluatePreconditions(entityTag);
-	if (rb != null)
+	if (getResultSet().size() > 0)
 	{
-	    if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
-	    response = rb.build();
+	    entityTag = new EntityTag(Long.toHexString(ResultSetUtils.hashResultSet(getResultSet())));
+	
+	    Response.ResponseBuilder rb = request.evaluatePreconditions(entityTag);
+	    if (rb != null)
+	    {
+		if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
+		response = rb.build();
+	    }
 	}
 	else
 	{

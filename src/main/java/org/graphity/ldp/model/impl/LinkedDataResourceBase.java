@@ -19,7 +19,10 @@ package org.graphity.ldp.model.impl;
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.ResIterator;
 import javax.ws.rs.GET;
+import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.*;
@@ -167,6 +170,33 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	}
     }
     
+    public static com.hp.hpl.jena.rdf.model.Resource matchEndpoint(Class<?> cls, Model model)
+    {
+	if (log.isDebugEnabled()) log.debug("Matching @Path annotation {} of Class {}", cls.getAnnotation(Path.class).value(), cls);
+	return matchEndpoint(cls.getAnnotation(Path.class).value(), model);
+    }
+    
+    public static com.hp.hpl.jena.rdf.model.Resource matchEndpoint(String uriTemplate, Model model)
+    {
+	if (uriTemplate == null) throw new IllegalArgumentException("Item endpoint class must have a @Path annotation");
+	
+	if (log.isDebugEnabled()) log.debug("Matching URI template template {} against Model {}", uriTemplate, model);	
+	Property utProp = model.createProperty("http://purl.org/linked-data/api/vocab#uriTemplate");
+	ResIterator it = model.listResourcesWithProperty(utProp, uriTemplate);
+	
+	if (it.hasNext())
+	{
+	    com.hp.hpl.jena.rdf.model.Resource match = it.next();
+	    if (log.isDebugEnabled()) log.debug("URI template {} matched endpoint Resource {}", uriTemplate, match);	
+	    return match;
+	}
+	else
+	{
+	    if (log.isDebugEnabled()) log.debug("URI template {} has no endpoint match in Model {}", uriTemplate, model);	
+	    return null;   
+	}
+    }
+
     public ModelResource getResource()
     {
 	return resource;

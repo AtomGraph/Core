@@ -50,7 +50,7 @@ public class EndpointResultSetResourceImpl implements EndpointResource, ResultSe
     }
 
     @Override
-    public ResultSet getResultSet()
+    public ResultSetRewindable getResultSet()
     {
 	resultSet.reset();
 	return resultSet;
