@@ -17,8 +17,6 @@
 package org.graphity.ldp.model.query.impl;
 
 import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.ResultSetFactory;
-import com.hp.hpl.jena.query.ResultSetRewindable;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
@@ -49,8 +47,7 @@ public class EndpointResultSetResourceImpl extends org.graphity.model.query.impl
 	this.request = request;
 	if (mediaType != null) this.mediaType = mediaType;
 	
-	//ResultSetRewindable rewindable = ResultSetFactory.makeRewindable(getResultSet());
-	//entityTag = new EntityTag(Long.toHexString(ResultSetUtils.hashResultSet(rewindable)));
+	entityTag = new EntityTag(Long.toHexString(ResultSetUtils.hashResultSet(getResultSet())));
 	
 	Response.ResponseBuilder rb = request.evaluatePreconditions(entityTag);
 	if (rb != null)

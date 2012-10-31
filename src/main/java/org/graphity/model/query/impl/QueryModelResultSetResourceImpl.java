@@ -19,6 +19,7 @@ package org.graphity.model.query.impl;
 
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.rdf.model.Model;
 import org.graphity.model.query.QueryModelResource;
 import org.graphity.model.query.ResultSetResource;
@@ -36,7 +37,7 @@ public class QueryModelResultSetResourceImpl implements QueryModelResource, Resu
 
     private Model queryModel = null;
     private Query query = null;
-    private ResultSet resultSet = null;
+    private ResultSetRewindable resultSet = null;
 
     public QueryModelResultSetResourceImpl(Model queryModel, Query query)
     {
@@ -52,6 +53,7 @@ public class QueryModelResultSetResourceImpl implements QueryModelResource, Resu
     @Override
     public ResultSet getResultSet()
     {
+	resultSet.reset();
 	return resultSet;
     }
 

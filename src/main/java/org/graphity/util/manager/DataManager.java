@@ -393,7 +393,7 @@ public class DataManager extends FileManager implements URIResolver
         return LANGS.get(mimeType.toLowerCase()) ;
     }
 
-    public ResultSet loadResultSet(String endpointURI, Query query, MultivaluedMap<String, String> params)
+    public ResultSetRewindable loadResultSet(String endpointURI, Query query, MultivaluedMap<String, String> params)
     {
 	if (isSPARQLService(endpointURI))
 	    return loadResultSet(findSPARQLService(endpointURI), query);
@@ -415,7 +415,7 @@ public class DataManager extends FileManager implements URIResolver
 				if (log.isTraceEnabled()) log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
 				request.addParam(entry.getKey(), value);
 			    }
-		return ResultSetFactory.makeRewindable(request.execSelect());
+		return ResultSetFactory.copyResults(request.execSelect());
 	    }
 	    finally
 	    {
@@ -424,12 +424,12 @@ public class DataManager extends FileManager implements URIResolver
 	}	
     }
     
-    public ResultSet loadResultSet(String endpointURI, Query query)
+    public ResultSetRewindable loadResultSet(String endpointURI, Query query)
     {
 	return loadResultSet(endpointURI, query, null);
     }
 
-    public ResultSet loadResultSet(SPARQLService service, Query query)
+    public ResultSetRewindable loadResultSet(SPARQLService service, Query query)
     {
 	if (log.isDebugEnabled()) log.debug("Remote service {} Query execution: {} ", service.getEndpointURI(), query);
 
@@ -450,7 +450,8 @@ public class DataManager extends FileManager implements URIResolver
 		request.addParam("apikey", service.getApiKey());
 	    }
 
-	    return request.execSelect();
+	    if (log.isDebugEnabled()) log.debug("Making ResultSet Rewindable");
+	    return ResultSetFactory.copyResults(request.execSelect());
 	}
 	finally
 	{
@@ -458,7 +459,7 @@ public class DataManager extends FileManager implements URIResolver
 	}
     }
     
-    public ResultSet loadResultSet(Model model, Query query)
+    public ResultSetRewindable loadResultSet(Model model, Query query)
     {
 	if (log.isDebugEnabled()) log.debug("Local Model Query: {}", query);
 
@@ -468,7 +469,7 @@ public class DataManager extends FileManager implements URIResolver
 	QueryExecution qex = QueryExecutionFactory.create(query, model);
 	try
 	{
-	    return qex.execSelect();
+	    return ResultSetFactory.copyResults(qex.execSelect());
 	}
 	finally
 	{

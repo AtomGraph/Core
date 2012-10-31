@@ -19,6 +19,7 @@ package org.graphity.model.query.impl;
 
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.query.ResultSetRewindable;
 import org.graphity.model.query.EndpointResource;
 import org.graphity.model.query.ResultSetResource;
 import org.graphity.util.manager.DataManager;
@@ -35,7 +36,7 @@ public class EndpointResultSetResourceImpl implements EndpointResource, ResultSe
 
     private String endpointUri = null;
     private Query query = null;
-    private ResultSet resultSet = null;
+    private ResultSetRewindable resultSet = null;
 
     public EndpointResultSetResourceImpl(String endpointUri, Query query)
     {
@@ -51,6 +52,7 @@ public class EndpointResultSetResourceImpl implements EndpointResource, ResultSe
     @Override
     public ResultSet getResultSet()
     {
+	resultSet.reset();
 	return resultSet;
     }
 
