@@ -164,8 +164,8 @@ exclude-result-prefixes="#all">
 		    <xsl:if test="$query">
 			<a href="{resolve-uri('sparql', $base-uri)}?query={encode-for-uri($query)}" class="btn">SPARQL</a>
 		    </xsl:if>
-		    <a href="{@rdf:about}&amp;accept={encode-for-uri('application/rdf+xml')}" class="btn">RDF/XML</a>
-		    <a href="{@rdf:about}&amp;accept={encode-for-uri('text/turtle')}" class="btn">Turtle</a>
+		    <a href="{$absolute-path}?accept={encode-for-uri('application/rdf+xml')}" class="btn">RDF/XML</a>
+		    <a href="{$absolute-path}?accept={encode-for-uri('text/turtle')}" class="btn">Turtle</a>
 		</div>
 	    </div>
 
@@ -256,8 +256,8 @@ exclude-result-prefixes="#all">
 		    <xsl:if test="$query">
 			<a href="{resolve-uri('sparql', $base-uri)}?query={encode-for-uri($query)}" class="btn">SPARQL</a>
 		    </xsl:if>
-		    <a href="{@rdf:about}&amp;accept={encode-for-uri('application/rdf+xml')}" class="btn">RDF/XML</a>
-		    <a href="{@rdf:about}&amp;accept={encode-for-uri('text/turtle')}" class="btn">Turtle</a>
+		    <a href="{@rdf:about}?accept={encode-for-uri('application/rdf+xml')}" class="btn">RDF/XML</a>
+		    <a href="{@rdf:about}?accept={encode-for-uri('text/turtle')}" class="btn">Turtle</a>
 		</div>
 	    </xsl:if>
 

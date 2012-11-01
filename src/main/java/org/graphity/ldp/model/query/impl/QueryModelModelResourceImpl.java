@@ -45,19 +45,22 @@ public class QueryModelModelResourceImpl extends org.graphity.model.query.impl.Q
 	Request request, MediaType mediaType)
     {
 	super(queryModel, query);
+	if (request == null) throw new IllegalArgumentException("Request must be not null");
+	//if (mediaType == null) throw new IllegalArgumentException("MediaType must be not null");
 	this.request = request;
 	if (mediaType != null) this.mediaType = mediaType;
-	
+
+	Response.ResponseBuilder rb = null;
 	if (!getModel().isEmpty())
 	{
 	    entityTag = new EntityTag(Long.toHexString(ModelUtils.hashModel(getModel())));
+	    rb = request.evaluatePreconditions(entityTag);
+	}
 
-	    Response.ResponseBuilder rb = request.evaluatePreconditions(entityTag);
-	    if (rb != null)
-	    {
-		if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
-		response = rb.build();
-	    }
+	if (rb != null)
+	{
+	    if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
+	    response = rb.build();
 	}
 	else
 	{

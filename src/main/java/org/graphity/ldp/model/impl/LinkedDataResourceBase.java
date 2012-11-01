@@ -48,9 +48,9 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 {
     private static final Logger log = LoggerFactory.getLogger(LinkedDataResourceBase.class);
 
-    private OntResource ontResource = null;
     private UriInfo uriInfo = null;
-    //private Model model = null;
+    private MediaType mediaType = null;
+    private OntResource ontResource = null;
     private ModelResource resource = null;
 	
     public final QueryBuilder getQueryBuilder(Long limit, Long offset, String orderBy, Boolean desc)
@@ -108,15 +108,15 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     }
 
     public LinkedDataResourceBase(OntResource ontResource,
-	UriInfo uriInfo, Request request, MediaType mediaType,
-	Long limit, Long offset, String orderBy, Boolean desc)
+	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, MediaType mediaType,
+	    Long limit, Long offset, String orderBy, Boolean desc)
     {
 	if (ontResource == null) throw new IllegalArgumentException("OntResource cannot be null");
-
-	this.uriInfo = uriInfo;
 	this.ontResource = ontResource;
-
 	if (log.isDebugEnabled()) log.debug("Creating LinkedDataResource from OntResource with URI: {}", ontResource.getURI());
+	
+	this.uriInfo = uriInfo;
+	this.mediaType = mediaType;
 
 	Query query = getQueryBuilder(limit, offset, orderBy, desc).build();	
 
@@ -207,6 +207,11 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	return uriInfo;
     }
 
+    public MediaType getMediaType()
+    {
+	return mediaType;
+    }
+
     @Override
     public String getURI()
     {
@@ -219,6 +224,8 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	return getResource().getEntityTag();
     }
 
+    @GET
+    @Produces({org.graphity.ldp.MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", org.graphity.ldp.MediaType.TEXT_TURTLE + "; charset=UTF-8"})
     @Override
     public Response getResponse()
     {
@@ -241,7 +248,9 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     @Produces(MediaType.APPLICATION_XHTML_XML + ";qs=2;charset=UTF-8")
     @Override
     public Response getXHTMLResponse()
-    {	    
+    {
+	if (getMediaType() != null) return getResponse(); // handles &accept= query parameter
+
 	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(getEntityTag());
 	if (rb != null)
 	{

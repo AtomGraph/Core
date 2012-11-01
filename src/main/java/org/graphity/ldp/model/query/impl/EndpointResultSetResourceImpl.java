@@ -43,20 +43,22 @@ public class EndpointResultSetResourceImpl extends org.graphity.model.query.impl
 	    Request request, MediaType mediaType)
     {
 	super(endpointUri, query);
-	
+	if (request == null) throw new IllegalArgumentException("Request must be not null");
+	//if (mediaType == null) throw new IllegalArgumentException("MediaType must be not null");
 	this.request = request;
 	if (mediaType != null) this.mediaType = mediaType;
 	
+	Response.ResponseBuilder rb = null;
 	if (getResultSet().size() > 0)
 	{
 	    entityTag = new EntityTag(Long.toHexString(ResultSetUtils.hashResultSet(getResultSet())));
-	
-	    Response.ResponseBuilder rb = request.evaluatePreconditions(entityTag);
-	    if (rb != null)
-	    {
-		if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
-		response = rb.build();
-	    }
+	    rb = request.evaluatePreconditions(entityTag);
+	}
+
+	if (rb != null)
+	{
+	    if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
+	    response = rb.build();
 	}
 	else
 	{

@@ -31,9 +31,11 @@ public class LDPResourceBase extends LinkedDataResourceBase implements org.graph
 {
     private static final Logger log = LoggerFactory.getLogger(LDPResourceBase.class);
 
-    public LDPResourceBase(OntResource ontResource, UriInfo uriInfo, Request request, MediaType mediaType, Long limit, Long offset, String orderBy, Boolean desc)
+    public LDPResourceBase(OntResource ontResource,
+	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders,MediaType mediaType,
+	    Long limit, Long offset, String orderBy, Boolean desc)
     {
-	super(ontResource, uriInfo, request, mediaType, limit, offset, orderBy, desc);
+	super(ontResource, uriInfo, request, httpHeaders, mediaType, limit, offset, orderBy, desc);
     }
     
     @Override

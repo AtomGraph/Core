@@ -30,8 +30,8 @@ public interface PageResource extends LinkedDataResource
     
     Boolean getDesc();
 
-    PageResource getPrevious();
+    com.hp.hpl.jena.rdf.model.Resource getPrevious();
     
-    PageResource getNext();
+    com.hp.hpl.jena.rdf.model.Resource getNext();
 
 }

@@ -21,6 +21,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
 import org.graphity.ldp.model.PageResource;
+import org.graphity.vocabulary.XHV;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,33 +44,42 @@ public class EndpointPageResourceImpl extends org.graphity.ldp.model.query.impl.
 	Long limit, Long offset, String orderBy, Boolean desc)
     {
 	super(endpointUri, query, request, mediaType);
+	if (uriInfo == null) throw new IllegalArgumentException("UriInfo must be not null");
+	if (limit == null) throw new IllegalArgumentException("LIMIT must be not null");
+	if (offset == null) throw new IllegalArgumentException("OFFSET must be not null");
+	if (orderBy == null) throw new IllegalArgumentException("ORDER BY must be not null");
+	if (desc == null) throw new IllegalArgumentException("DESC must be not null");
 	this.uriInfo = uriInfo;
 	this.limit = limit;
 	this.offset = offset;
 	this.orderBy = orderBy;
 	this.desc = desc;
+	
+	// add links to previous/next page (HATEOS)
+	if (getOffset() >= getLimit()) getCurrent().addProperty(XHV.prev, getPrevious());
+	if (getModel().size() >= getLimit()) getCurrent().addProperty(XHV.next, getNext());
     }
     
     @Override
-    public Long getLimit()
+    public final Long getLimit()
     {
 	return limit;
     }
 
     @Override
-    public Long getOffset()
+    public final Long getOffset()
     {
 	return offset;
     }
 
     @Override
-    public String getOrderBy()
+    public final String getOrderBy()
     {
 	return orderBy;
     }
 
     @Override
-    public Boolean getDesc()
+    public final Boolean getDesc()
     {
 	return desc;
     }
@@ -77,39 +87,51 @@ public class EndpointPageResourceImpl extends org.graphity.ldp.model.query.impl.
     @Override
     public String getURI()
     {
+	if (getOffset() == 0) return getUriInfo().getAbsolutePath().toString(); // hack
+
 	return getUriInfo().getAbsolutePathBuilder().
 		queryParam("limit", getLimit()).
-		queryParam("offset", getOffset() - getLimit()).
+		queryParam("offset", getOffset()).
 		queryParam("order-by", getOrderBy()).
 		queryParam("desc", getDesc()).
 		build().toString();
     }
 
-    public UriInfo getUriInfo()
+    public final com.hp.hpl.jena.rdf.model.Resource getCurrent()
     {
-	return uriInfo;
+	return getModel().createResource(getUriInfo().getAbsolutePathBuilder().
+		queryParam("limit", getLimit()).
+		queryParam("offset", getOffset()).
+		queryParam("order-by", getOrderBy()).
+		queryParam("desc", getDesc()).
+		build().toString());	
     }
 
     @Override
-    public PageResource getPrevious()
+    public final com.hp.hpl.jena.rdf.model.Resource getPrevious()
     {
-	if (getModel().size() < getLimit())
-	    return null;
-	else
-	    return new EndpointPageResourceImpl(getEndpointURI(), getQuery(),
-	getUriInfo(), getRequest(), getMediaType(),
-	getLimit(), getOffset() - getLimit(), getOrderBy(), getDesc());
+	return getModel().createResource(getUriInfo().getAbsolutePathBuilder().
+		queryParam("limit", getLimit()).
+		queryParam("offset", getOffset() - getLimit()).
+		queryParam("order-by", getOrderBy()).
+		queryParam("desc", getDesc()).
+		build().toString());
     }
-    
+
     @Override
-    public PageResource getNext()
+    public final com.hp.hpl.jena.rdf.model.Resource getNext()
     {
-	if (getModel().size() < getLimit())
-	    return null;
-	else
-	    return new EndpointPageResourceImpl(getEndpointURI(), getQuery(),
-	getUriInfo(), getRequest(), getMediaType(),
-	getLimit(), getOffset() + getLimit(), getOrderBy(), getDesc());
+	return getModel().createResource(getUriInfo().getAbsolutePathBuilder().
+		queryParam("limit", getLimit()).
+		queryParam("offset", getOffset() + getLimit()).
+		queryParam("order-by", getOrderBy()).
+		queryParam("desc", getDesc()).
+		build().toString());
+    }
+
+    public UriInfo getUriInfo()
+    {
+	return uriInfo;
     }
 
 }
