@@ -27,6 +27,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.topbraid.spin.arq.ARQ2SPIN;
@@ -198,7 +199,42 @@ public class QueryBuilder implements org.topbraid.spin.model.Query
 	
 	return where(filter);
     }
+
+    public QueryBuilder filter(String varName, Pattern pattern)
+    {
+	return filter(SPINFactory.createVariable(getModel(), varName), pattern, "i");
+    }
+
+    public QueryBuilder filter(Variable var, Pattern pattern)
+    {
+	return filter(var, pattern, "i");
+    }
+
+    public QueryBuilder filter(String varName, Pattern pattern, String flags)
+    {
+	return filter(SPINFactory.createVariable(getModel(), varName), pattern, flags);
+    }
+
+    public QueryBuilder filter(Variable var, Pattern pattern, String flags)
+    {
+	if (var == null) throw new IllegalArgumentException("FILTER variable name cannot be null");
+	if (pattern == null) throw new IllegalArgumentException("regex() match string cannot be null");
 	
+	if (log.isTraceEnabled()) log.trace("Setting FILTER regex(str({}), \"{}\")", var, pattern); // flags?
+	
+	Resource strExpr = getModel().createResource().
+		addProperty(RDF.type, SP.getArgProperty("str")).
+		addProperty(SP.getArgProperty(1), var);
+	
+	Resource regexExpr = getModel().createResource().
+		addProperty(RDF.type, SP.regex).
+		addProperty(SP.getArgProperty(1), strExpr).
+		addLiteral(SP.getArgProperty(2), getModel().createLiteral(pattern.toString())).
+		addLiteral(SP.getArgProperty(3), getModel().createLiteral(flags));
+
+	return filter(SPINFactory.createFilter(getModel(), regexExpr));
+    }
+
     public QueryBuilder filter(Variable var, Locale locale)
     {
 	if (var == null) throw new IllegalArgumentException("FILTER variable name cannot be null");
