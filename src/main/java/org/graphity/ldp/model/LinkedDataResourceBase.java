@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.graphity.ldp.model.impl;
+package org.graphity.ldp.model;
 
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.query.Query;
@@ -24,8 +24,8 @@ import com.hp.hpl.jena.rdf.model.ResIterator;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import org.graphity.ldp.Application;
-import org.graphity.ldp.model.LinkedDataResource;
-import org.graphity.ldp.model.XHTMLResource;
+import org.graphity.ldp.model.impl.EndpointPageResourceImpl;
+import org.graphity.ldp.model.impl.QueryModelPageResourceImpl;
 import org.graphity.ldp.model.query.ModelResource;
 import org.graphity.ldp.model.query.impl.EndpointModelResourceImpl;
 import org.graphity.ldp.model.query.impl.QueryModelModelResourceImpl;
@@ -103,7 +103,7 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	    }
 	    else
 	    {
-		queryBuilder = QueryBuilder.fromDescribe(getOntResource().getURI(), getOntResource().getModel());
+		queryBuilder = QueryBuilder.fromDescribe(getURI(), getOntResource().getModel());
 		if (log.isDebugEnabled()) log.debug("OntResource with URI {} gets explicit Query Resource {}", getOntResource().getURI(), queryBuilder);
 	    }
 	}
@@ -261,7 +261,8 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     @Override
     public String getURI()
     {
-	return getUriInfo().getAbsolutePath().toString();
+	//return getUriInfo().getAbsolutePath().toString();
+	return getOntResource().getURI();
     }
 
     @Override
