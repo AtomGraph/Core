@@ -17,6 +17,9 @@
 package org.graphity.ldp;
 
 import com.hp.hpl.jena.ontology.OntDocumentManager;
+import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.ontology.OntModelSpec;
+import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.util.LocationMapper;
@@ -26,6 +29,7 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.PostConstruct;
+import javax.ws.rs.core.UriInfo;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.stream.StreamSource;
@@ -118,6 +122,30 @@ public class Application extends javax.ws.rs.core.Application
 	String xsltUri = xsltUrl.toURI().toString();
 	if (log.isDebugEnabled()) log.debug("XSLT stylesheet URI: {}", xsltUri);
 	return new StreamSource(xsltUri);
+    }
+
+    public static OntModel getOntology(UriInfo uriInfo)
+    {
+	return getOntology(uriInfo.getBaseUri().toString(), "org/graphity/ldp/vocabulary/graphity-ldp.ttl");
+    }
+    
+    public static OntModel getOntology(String baseUri, String ontologyPath)
+    {
+	if (log.isDebugEnabled()) log.debug("Adding prefix mapping prefix: {} altName: {} ", baseUri, ontologyPath);
+	
+	LocationMapper mapper = OntDocumentManager.getInstance().getFileManager().getLocationMapper();
+	mapper.addAltEntry(baseUri, ontologyPath);
+	((PrefixMapper)mapper).addAltPrefixEntry(baseUri, ontologyPath);
+	if (log.isDebugEnabled()) log.debug("DataManager.get().getLocationMapper(): {}", DataManager.get().getLocationMapper());
+	
+	OntModel ontModel = OntDocumentManager.getInstance().getOntology(baseUri, OntModelSpec.OWL_MEM_RDFS_INF);
+	if (log.isDebugEnabled()) log.debug("Ontology size: {}", ontModel.size());
+	return ontModel;
+    }
+
+    public static OntResource getOntResource(UriInfo uriInfo)
+    {
+	return getOntology(uriInfo).createOntResource(uriInfo.getAbsolutePath().toString());
     }
 
 }

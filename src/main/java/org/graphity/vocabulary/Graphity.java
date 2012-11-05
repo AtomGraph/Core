@@ -54,18 +54,4 @@ public class Graphity
     
     public static final Property apiKey = m_model.createProperty( NS + "apiKey" );
     
-    //public static final Property defaultQuery = m_model.createProperty( NS + "defaultQuery" );
-    
-    //public static final Resource ConstructItem = m_model.createResource( NS + "ConstructItem" );
-    
-    public static final Resource SelectServices = m_model.createResource( NS + "SelectServices" );
-    
-    public static final Resource SPOOptional = m_model.createResource( NS + "SPOOptional" );
-    
-    public static final Resource SubjectVar = m_model.createResource( NS + "SubjectVar" );
-    
-    public static final Resource PredicateVar = m_model.createResource( NS + "PredicateVar" );
-    
-    public static final Resource ObjectVar = m_model.createResource( NS + "ObjectVar" );
-    
 }

@@ -120,15 +120,15 @@ gfb-app:type rdfs:label "Facebook application" ;
 
 # MODES
 
-:ListMode a g:XSLTMode ;
-    dct:title "List" ;
-    rdfs:isDefinedBy : ;
-    void:inDataset _:dataset .
 :EditMode a g:XSLTMode ;
     dct:title "Edit" ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
-:TableMode a g:XSLTMode ;
+:ListMode a g:XSLTPageMode ;
+    dct:title "List" ;
+    rdfs:isDefinedBy : ;
+    void:inDataset _:dataset .
+:TableMode a g:XSLTPageMode ;
     dct:title "Table" ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .

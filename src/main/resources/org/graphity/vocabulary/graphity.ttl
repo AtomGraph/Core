@@ -57,3 +57,7 @@
 
 :XSLTMode a owl:Class ;
     rdfs:label "XSLT template mode" .
+
+:XSLTPageMode a owl:Class ;
+    rdfs:subClassOf :XSLTMode ;
+    rdfs:label "XSLT page template mode" .

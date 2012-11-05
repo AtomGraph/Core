@@ -329,7 +329,9 @@ public class QueryBuilder implements org.topbraid.spin.model.Query
     {
 	if (varName == null) throw new IllegalArgumentException("Variable name cannot be null");
 	if (uri == null) throw new IllegalArgumentException("URI value cannot be null");
-	
+
+	if (log.isTraceEnabled()) log.trace("Replacing variable ?{} with URI: {}", varName, uri);
+	    
 	Resource var = getVarByName(varName);
 	var.removeAll(SP.varName);
 	ResourceUtils.renameResource(var, uri);

@@ -1,627 +1,507 @@
 <?xml version="1.0"?>
 <rdf:RDF
-    xmlns:sp="http://spinrdf.org/sp#"
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns:spin="http://spinrdf.org/spin#"
+    xmlns:sp="http://spinrdf.org/sp#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:arg="http://spinrdf.org/arg#"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-    xmlns:owl="http://www.w3.org/2002/07/owl#"
     xmlns:spl="http://spinrdf.org/spl#"
-  xml:base="http://spinrdf.org/sp">
+  xml:base="http://spinrdf.org/spin">
   <owl:Ontology rdf:about="">
     <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >An RDF Schema to syntactically represent SPARQL queries (including SPARQL UPDATE) as RDF triples.</rdfs:comment>
-    <rdfs:label>SPIN SPARQL Syntax</rdfs:label>
+    >An RDF Schema that can be used to attach constraints and rules to RDFS classes, and to encapsulate reusable SPARQL queries into functions and templates.</rdfs:comment>
+    <rdfs:label>SPIN Inferencing Vocabulary</rdfs:label>
+    <owl:imports rdf:resource="http://spinrdf.org/sp"/>
     <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >1.3.0</owl:versionInfo>
+    >1.2.0</owl:versionInfo>
   </owl:Ontology>
-  <rdfs:Class rdf:ID="Let">
-    <rdfs:subClassOf>
-      <rdfs:Class rdf:ID="Element"/>
-    </rdfs:subClassOf>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Let</rdfs:label>
-    <rdfs:comment>A variable assignment (LET (?&lt;varName&gt; := &lt;expression&gt;)). Not part of the SPARQL 1.0 standard, but (for example) ARQ.</rdfs:comment>
-  </rdfs:Class>
-  <rdfs:Class rdf:ID="TripleTemplate">
-    <rdfs:subClassOf>
-      <rdfs:Class rdf:ID="Triple"/>
-    </rdfs:subClassOf>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Triple template</rdfs:label>
-    <rdfs:comment>A prototypical triple used as template in the head of a Construct query. May contain variables.</rdfs:comment>
-  </rdfs:Class>
-  <rdfs:Class rdf:ID="ModPath">
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Mod path</rdfs:label>
-    <rdfs:subClassOf>
-      <rdfs:Class rdf:ID="Path"/>
-    </rdfs:subClassOf>
-    <rdfs:comment>A modified path such as rdfs:subClassOf*.</rdfs:comment>
-  </rdfs:Class>
-  <rdfs:Class rdf:ID="Aggregation">
-    <rdfs:subClassOf>
-      <rdfs:Class rdf:ID="SystemClass"/>
-    </rdfs:subClassOf>
-    <rdfs:comment>Base class of aggregation types (not part of the SPARQL 1.0 standard but supported by ARQ and other engines).</rdfs:comment>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Aggregation</rdfs:label>
-  </rdfs:Class>
-  <rdfs:Class rdf:ID="TriplePath">
-    <rdfs:subClassOf>
-      <rdfs:Class rdf:ID="Tuple"/>
-    </rdfs:subClassOf>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Triple path</rdfs:label>
-    <rdfs:subClassOf>
-      <rdfs:Class rdf:about="#Element"/>
-    </rdfs:subClassOf>
-    <rdfs:comment>Similar to a TriplePattern, but with a path expression as its predicate. For example, this can be used to express transitive sub-class relationships (?subClass rdfs:subClassOf* ?superClass).</rdfs:comment>
-  </rdfs:Class>
-  <rdfs:Class rdf:ID="Union">
-    <rdfs:comment>A UNION group.</rdfs:comment>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Union</rdfs:label>
-    <rdfs:subClassOf>
-      <rdfs:Class rdf:ID="ElementGroup"/>
-    </rdfs:subClassOf>
-  </rdfs:Class>
-  <rdfs:Class rdf:about="#Tuple">
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Tuple</rdfs:label>
-    <rdfs:subClassOf>
-      <rdfs:Class rdf:about="#SystemClass"/>
-    </rdfs:subClassOf>
-    <rdfs:comment>Abstract base class for things that have subject and object.</rdfs:comment>
-  </rdfs:Class>
-  <rdfs:Class rdf:ID="Describe">
-    <rdfs:comment>A DESCRIBE-type Query.</rdfs:comment>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Describe</rdfs:label>
-    <rdfs:subClassOf>
-      <rdfs:Class rdf:ID="Query"/>
-    </rdfs:subClassOf>
-  </rdfs:Class>
-  <rdfs:Class rdf:ID="SubQuery">
+  <rdfs:Class rdf:ID="Function">
     <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >A nested SELECT query inside of an element list. The query is stored in sp:query.</rdfs:comment>
+    >Metaclass for functions that can be used in SPARQL expressions (e.g. FILTER or BIND). The function themselves are classes that are instances of this metaclass. Function calls are instances of the function classes, with property values for the arguments.</rdfs:comment>
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Sub query</rdfs:label>
+    >Function</rdfs:label>
     <rdfs:subClassOf>
-      <rdfs:Class rdf:about="#Element"/>
+      <rdfs:Class rdf:ID="Module"/>
     </rdfs:subClassOf>
+    <spin:constraint>
+      <spl:Attribute>
+        <spl:maxCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer"
+        >1</spl:maxCount>
+        <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >the body of the function</rdfs:comment>
+        <spl:predicate>
+          <rdf:Property rdf:ID="body"/>
+        </spl:predicate>
+        <spl:minCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer"
+        >0</spl:minCount>
+      </spl:Attribute>
+    </spin:constraint>
   </rdfs:Class>
-  <rdfs:Class rdf:about="#SystemClass">
+  <rdfs:Class rdf:ID="ConstructTemplate">
+    <rdfs:subClassOf>
+      <rdfs:Class rdf:ID="Template"/>
+    </rdfs:subClassOf>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Construct template</rdfs:label>
+    <spin:constraint>
+      <spl:Attribute>
+        <spl:predicate>
+          <rdf:Property rdf:about="#body"/>
+        </spl:predicate>
+        <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >The CONSTRUCT query wrapped by this template.</rdfs:comment>
+        <spl:maxCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer"
+        >1</spl:maxCount>
+        <spl:valueType>
+          <rdf:Description rdf:about="http://spinrdf.org/sp#Construct">
+            <rdfs:subClassOf>
+              <rdfs:Class rdf:ID="Rule"/>
+            </rdfs:subClassOf>
+          </rdf:Description>
+        </spl:valueType>
+        <spl:minCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer"
+        >0</spl:minCount>
+      </spl:Attribute>
+    </spin:constraint>
+  </rdfs:Class>
+  <rdfs:Class rdf:about="#Rule">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Groups together the kinds of SPARQL commands that can appear as SPIN rules and constructors: CONSTRUCT, DELETE WHERE and DELETE/INSERT. This class is never to be instantiated directly.</rdfs:comment>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Rule</rdfs:label>
+    <rdfs:subClassOf rdf:resource="http://spinrdf.org/sp#Command"/>
+  </rdfs:Class>
+  <rdfs:Class rdf:about="#Module">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >An abstract building block of a SPARQL system. A Module can take Arguments as input and applies them on an input RDF Graph. The Arguments should be declared as spin:constraints.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Module</rdfs:label>
+  </rdfs:Class>
+  <rdfs:Class rdf:ID="AskTemplate">
+    <rdfs:subClassOf>
+      <rdfs:Class rdf:about="#Template"/>
+    </rdfs:subClassOf>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Ask template</rdfs:label>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >A SPIN template that wraps an ASK query.</rdfs:comment>
+    <spin:constraint>
+      <spl:Attribute>
+        <spl:predicate>
+          <rdf:Property rdf:about="#body"/>
+        </spl:predicate>
+        <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >The ASK query wrapped by this template.</rdfs:comment>
+        <spl:maxCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer"
+        >1</spl:maxCount>
+        <spl:valueType rdf:resource="http://spinrdf.org/sp#Ask"/>
+        <spl:minCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer"
+        >0</spl:minCount>
+      </spl:Attribute>
+    </spin:constraint>
+  </rdfs:Class>
+  <rdfs:Class rdf:ID="RuleProperty">
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Rule property</rdfs:label>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >The metaclass of spin:rule and its subproperties. spin:RuleProperties can have additional metadata attached to them.</rdfs:comment>
+  </rdfs:Class>
+  <rdfs:Class rdf:ID="UpdateTemplate">
+    <rdfs:subClassOf>
+      <rdfs:Class rdf:about="#Template"/>
+    </rdfs:subClassOf>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Update template</rdfs:label>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >A SPIN template that has an UPDATE command as its body.</rdfs:comment>
+    <spin:constraint>
+      <spl:Attribute>
+        <spl:predicate>
+          <rdf:Property rdf:about="#body"/>
+        </spl:predicate>
+        <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >The UPDATE command wrapped by this template.</rdfs:comment>
+        <spl:valueType rdf:resource="http://spinrdf.org/sp#Update"/>
+        <spl:maxCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer"
+        >1</spl:maxCount>
+        <spl:minCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer"
+        >0</spl:minCount>
+      </spl:Attribute>
+    </spin:constraint>
+  </rdfs:Class>
+  <rdfs:Class rdf:ID="Modules">
     <rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
-    <rdfs:comment>An "artificial" root class that groups all SP classes. This makes them look much less overwhelming in UI tools. Typical end users don't need to see those classes anyway.</rdfs:comment>
+    <rdfs:comment>An "artificial" parent class for all Functions and Templates.</rdfs:comment>
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >SP System class</rdfs:label>
+    >Modules</rdfs:label>
+    <spin:constructor>
+      <spl:ConstructDefaultValues/>
+    </spin:constructor>
   </rdfs:Class>
-  <rdfs:Class rdf:ID="Count">
-    <rdfs:subClassOf rdf:resource="#Aggregation"/>
+  <rdfs:Class rdf:ID="ConstraintViolation">
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+    <rdfs:comment>An object that can be created by spin:constraints to provide information about a constraint violation.</rdfs:comment>
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Count</rdfs:label>
-    <rdfs:comment>Counts the number of times a variable is used. The variable is stored in the variable property. This might be left blank to indicate COUNT(*).</rdfs:comment>
+    >Constraint violation</rdfs:label>
   </rdfs:Class>
-  <rdfs:Class rdf:ID="SeqPath">
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Seq path</rdfs:label>
+  <rdfs:Class rdf:ID="SelectTemplate">
     <rdfs:subClassOf>
-      <rdfs:Class rdf:about="#Path"/>
-    </rdfs:subClassOf>
-    <rdfs:comment>A sequence of multiple paths.</rdfs:comment>
-  </rdfs:Class>
-  <rdfs:Class rdf:ID="ElementList">
-    <rdfs:subClassOf rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Element list</rdfs:label>
-    <rdfs:comment>A list of Elements. This class is never instantiated directly as SPIN will use plain rdf:Lists to store element lists.</rdfs:comment>
-    <rdfs:subClassOf>
-      <rdfs:Class rdf:about="#ElementGroup"/>
-    </rdfs:subClassOf>
-  </rdfs:Class>
-  <rdfs:Class rdf:about="#Element">
-    <rdfs:subClassOf rdf:resource="#SystemClass"/>
-    <rdfs:comment>An abstract base class for all pattern elements.</rdfs:comment>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Element</rdfs:label>
-  </rdfs:Class>
-  <rdfs:Class rdf:ID="Filter">
-    <rdfs:subClassOf rdf:resource="#Element"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Filter</rdfs:label>
-    <rdfs:comment>A constraint element that evaluates a given expression to true or false.</rdfs:comment>
-  </rdfs:Class>
-  <rdfs:Class rdf:ID="Optional">
-    <rdfs:subClassOf>
-      <rdfs:Class rdf:about="#ElementGroup"/>
-    </rdfs:subClassOf>
-    <rdfs:comment>An optional element in a query.</rdfs:comment>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Optional</rdfs:label>
-  </rdfs:Class>
-  <rdfs:Class rdf:ID="AltPath">
-    <rdfs:comment>An alternative path with the union of sp:path1 and sp:path2.</rdfs:comment>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Alt path</rdfs:label>
-    <rdfs:subClassOf>
-      <rdfs:Class rdf:about="#Path"/>
-    </rdfs:subClassOf>
-  </rdfs:Class>
-  <rdfs:Class rdf:ID="Ask">
-    <rdfs:subClassOf>
-      <rdfs:Class rdf:about="#Query"/>
+      <rdfs:Class rdf:about="#Template"/>
     </rdfs:subClassOf>
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Ask</rdfs:label>
-    <rdfs:comment>An ASK query that returns true if the condition in the body is met by at least one result set.</rdfs:comment>
-  </rdfs:Class>
-  <rdfs:Class rdf:ID="Desc">
-    <rdfs:subClassOf>
-      <rdfs:Class rdf:ID="OrderByCondition"/>
-    </rdfs:subClassOf>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Desc</rdfs:label>
-    <rdfs:comment>Marker to indicate descending order.</rdfs:comment>
-  </rdfs:Class>
-  <rdfs:Class rdf:about="#Triple">
-    <rdfs:subClassOf rdf:resource="#Tuple"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Triple</rdfs:label>
-    <rdfs:comment>An abstract base class for TriplePattern and TripleTemplate. This basically specifies that subject, predicate and object must be present.</rdfs:comment>
-  </rdfs:Class>
-  <rdfs:Class rdf:ID="Update">
-    <rdfs:subClassOf>
-      <rdfs:Class rdf:ID="Command"/>
-    </rdfs:subClassOf>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Update</rdfs:label>
+    >Select template</rdfs:label>
     <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Abstract base class to group the various SPARQL UPDATE commands.</rdfs:comment>
+    >A SPIN template that wraps a SELECT query.</rdfs:comment>
+    <spin:constraint>
+      <spl:Attribute>
+        <spl:predicate>
+          <rdf:Property rdf:about="#body"/>
+        </spl:predicate>
+        <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >The SELECT query wrapped by this template.</rdfs:comment>
+        <spl:maxCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer"
+        >1</spl:maxCount>
+        <spl:valueType rdf:resource="http://spinrdf.org/sp#Select"/>
+        <spl:minCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer"
+        >0</spl:minCount>
+      </spl:Attribute>
+    </spin:constraint>
   </rdfs:Class>
-  <rdfs:Class rdf:ID="TriplePattern">
-    <rdfs:subClassOf rdf:resource="#Triple"/>
+  <rdfs:Class rdf:ID="LibraryOntology">
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Triple pattern</rdfs:label>
-    <rdfs:comment>A triple pattern used in the body of a query.</rdfs:comment>
-    <rdfs:subClassOf rdf:resource="#Element"/>
+    >Library ontology</rdfs:label>
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Ontology"/>
+    <rdfs:comment>A marker class that can be attached to base URIs (ontologies) to instruct SPIN engines that this ontology only contains a library of SPIN declarations. Library Ontologies should be ignored by SPIN inference engines even if they have been imported by a domain model. For example, a SPIN version of OWL RL may contain all the OWL RL axioms, attached to owl:Thing, but nothing else. However, when executed, these axioms should not be executed over themselves, because we don't want the system to reason about the SPIN triples to speed up things.</rdfs:comment>
   </rdfs:Class>
-  <rdfs:Class rdf:ID="Select">
+  <rdfs:Class rdf:ID="MagicProperty">
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+    <rdfs:subClassOf rdf:resource="#Function"/>
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Select query</rdfs:label>
-    <rdfs:comment>A SELECT-type query that returns variable bindings as its result.</rdfs:comment>
-    <rdfs:subClassOf>
-      <rdfs:Class rdf:about="#Query"/>
-    </rdfs:subClassOf>
+    >Magic property</rdfs:label>
   </rdfs:Class>
-  <rdfs:Class rdf:about="#OrderByCondition">
-    <rdfs:subClassOf rdf:resource="#SystemClass"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Order by condition</rdfs:label>
-    <rdfs:comment>An abstract base class for ascending or descending order conditions. Instances of this class (typically bnodes) must have a value for expression to point to the actual values.</rdfs:comment>
-  </rdfs:Class>
-  <rdfs:Class rdf:ID="NotExists">
+  <rdfs:Class rdf:about="#Template">
     <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >A NOT EXISTS element group.</rdfs:comment>
+    >The metaclass of SPIN templates. Templates are classes that are instances of this class. A template represents a reusable SPARQL query or update request that can be parameterized with arguments. Templates can be instantiated in places where normally a SPARQL query or update request is used, in particular as spin:rules and spin:constraints.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="#Module"/>
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Not exists</rdfs:label>
-    <rdfs:subClassOf>
-      <rdfs:Class rdf:about="#ElementGroup"/>
-    </rdfs:subClassOf>
+    >Template</rdfs:label>
+    <spin:constraint>
+      <spl:Attribute>
+        <spl:maxCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer"
+        >1</spl:maxCount>
+        <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >the body of the Template</rdfs:comment>
+        <spl:predicate>
+          <rdf:Property rdf:about="#body"/>
+        </spl:predicate>
+        <spl:minCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer"
+        >0</spl:minCount>
+      </spl:Attribute>
+    </spin:constraint>
   </rdfs:Class>
-  <rdfs:Class rdf:about="#Query">
-    <rdfs:subClassOf>
-      <rdfs:Class rdf:about="#Command"/>
-    </rdfs:subClassOf>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Query</rdfs:label>
-    <rdfs:comment>Abstract base class of the various types of supported queries. Common to all types of queries is that they can have a body ("WHERE clause").</rdfs:comment>
-  </rdfs:Class>
-  <rdfs:Class rdf:about="#ElementGroup">
-    <rdfs:comment>Abstract base class of group patterns.</rdfs:comment>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Element group</rdfs:label>
-    <rdfs:subClassOf rdf:resource="#Element"/>
-  </rdfs:Class>
-  <rdfs:Class rdf:about="#Command">
+  <rdf:Property rdf:ID="update">
     <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >A shared superclass for sp:Query and sp:Update that can be used to specify that the range of property can be either one.</rdfs:comment>
+    >Can be used to point from any resource to an Update.</rdfs:comment>
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Command</rdfs:label>
-    <rdfs:subClassOf rdf:resource="#SystemClass"/>
-  </rdfs:Class>
-  <rdfs:Class rdf:about="#Path">
-    <rdfs:subClassOf rdf:resource="#SystemClass"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Path</rdfs:label>
-    <rdfs:comment>The base class of SPARQL property path expressions. Paths are used by sp:TriplePath triple paths.</rdfs:comment>
-  </rdfs:Class>
-  <rdfs:Class rdf:ID="Construct">
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Construct</rdfs:label>
-    <rdfs:comment>A CONSTRUCT-type query that can be used to construct new triples from template triples (head) that use variable bindings from the match patterns (body).</rdfs:comment>
-    <rdfs:subClassOf rdf:resource="#Query"/>
-  </rdfs:Class>
-  <rdfs:Class rdf:ID="Asc">
-    <rdfs:subClassOf rdf:resource="#OrderByCondition"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Asc</rdfs:label>
-    <rdfs:comment>Marker to indicate ascending order.</rdfs:comment>
-  </rdfs:Class>
-  <rdfs:Class rdf:ID="Modify">
-    <rdfs:subClassOf rdf:resource="#Update"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Modify</rdfs:label>
-    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Represents a MODIFY (part of SPARQL UPDATE language). The graph IRIs are stored in sp:graphIRI. The template patterns are stored in sp:deletePattern and sp:insertPattern. The WHERE clause is represented using sp:where.</rdfs:comment>
-  </rdfs:Class>
-  <rdfs:Class rdf:ID="Delete">
-    <rdfs:subClassOf rdf:resource="#Update"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Delete</rdfs:label>
-    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Represents a DELETE FROM (part of SPARQL UPDATE language). The graph IRIs are stored in sp:graphIRI. The template patterns to delete are stored in sp:deletePattern. The WHERE clause is represented using sp:where.</rdfs:comment>
-  </rdfs:Class>
-  <rdfs:Class rdf:ID="Insert">
-    <rdfs:subClassOf rdf:resource="#Update"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Insert</rdfs:label>
-    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Represents a INSERT INTO (part of SPARQL UPDATE language). The graph IRIs are stored in sp:graphIRI. The template patterns to delete are stored in sp:insertPattern. The WHERE clause is represented using sp:where.</rdfs:comment>
-  </rdfs:Class>
-  <rdfs:Class rdf:ID="ReversePath">
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Reverse path</rdfs:label>
-    <rdfs:subClassOf rdf:resource="#Path"/>
-    <rdfs:comment>A path with reversed direction.</rdfs:comment>
-  </rdfs:Class>
-  <rdfs:Class rdf:ID="Variable">
-    <rdfs:subClassOf rdf:resource="#SystemClass"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Variable</rdfs:label>
-    <rdfs:comment>A variable mentioned in a Triple or expression. Variables are often blank nodes with the variable name stored in ts:name. Variables can also be supplied with a URI in which case the system will attempt to reuse the same variable instance across multiple query definitions.</rdfs:comment>
-  </rdfs:Class>
-  <rdfs:Class rdf:ID="NamedGraph">
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Named graph</rdfs:label>
-    <rdfs:comment>A named Graph element such as GRAPH &lt;uri&gt; {...}.</rdfs:comment>
-    <rdfs:subClassOf rdf:resource="#ElementGroup"/>
-  </rdfs:Class>
-  <rdfs:Class rdf:ID="Sum">
-    <rdfs:comment>Represents sum aggregations, e.g. SELECT SUM(?varName)...</rdfs:comment>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Sum</rdfs:label>
-    <rdfs:subClassOf rdf:resource="#Aggregation"/>
-  </rdfs:Class>
-  <rdfs:Class rdf:ID="Service">
-    <rdfs:subClassOf rdf:resource="#ElementGroup"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Service</rdfs:label>
-    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >A SERVICE call that matches a nested sub-pattern against a SPARQL end point specified by a URI.</rdfs:comment>
-  </rdfs:Class>
-  <rdf:Property rdf:ID="arg1">
+    >update</rdfs:label>
     <rdfs:subPropertyOf>
-      <rdf:Property rdf:ID="arg"/>
+      <rdf:Property rdf:ID="command"/>
     </rdfs:subPropertyOf>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >arg1</rdfs:label>
-    <rdfs:comment>The first argument of a function call.</rdfs:comment>
+    <rdfs:range rdf:resource="http://spinrdf.org/sp#Update"/>
   </rdf:Property>
-  <rdf:Property rdf:ID="serviceURI">
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >service URI</rdfs:label>
+  <rdf:Property rdf:ID="returnType">
     <rdfs:subPropertyOf>
       <rdf:Property rdf:ID="systemProperty"/>
     </rdfs:subPropertyOf>
-    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Used by sp:Service to specify the URI of the SPARQL end point to invoke. Must point to a URI node.</rdfs:comment>
-    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
-    <rdfs:domain rdf:resource="#Service"/>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >return type</rdfs:label>
+    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+    <rdfs:comment>The return type of a Function, e.g. xsd:string.</rdfs:comment>
+    <rdfs:domain rdf:resource="#Function"/>
   </rdf:Property>
-  <rdf:Property rdf:ID="from">
+  <rdf:Property rdf:ID="symbol">
     <rdfs:subPropertyOf>
       <rdf:Property rdf:about="#systemProperty"/>
     </rdfs:subPropertyOf>
-    <rdfs:domain rdf:resource="#Query"/>
-    <rdfs:comment>Specifies an RDF Dataset used by a Query (FROM syntax in SPARQL). Values of this property must be URI resources.</rdfs:comment>
-    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >from</rdfs:label>
-  </rdf:Property>
-  <rdf:Property rdf:ID="varName">
-    <rdfs:subPropertyOf>
-      <rdf:Property rdf:about="#systemProperty"/>
-    </rdfs:subPropertyOf>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >varName</rdfs:label>
-    <rdfs:comment>The name of a Variable.</rdfs:comment>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
-    <rdfs:domain rdf:resource="#Variable"/>
-  </rdf:Property>
-  <rdf:Property rdf:ID="arg4">
+    <rdfs:comment>The symbol of a function, e.g. "=" for the eq function.</rdfs:comment>
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >arg4</rdfs:label>
-    <rdfs:subPropertyOf>
-      <rdf:Property rdf:about="#arg"/>
-    </rdfs:subPropertyOf>
-    <rdfs:comment>The forth argument of a function call.</rdfs:comment>
+    >symbol</rdfs:label>
+    <rdfs:domain rdf:resource="#Function"/>
   </rdf:Property>
-  <rdf:Property rdf:ID="reduced">
-    <rdfs:subPropertyOf>
-      <rdf:Property rdf:about="#systemProperty"/>
-    </rdfs:subPropertyOf>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+  <rdf:Property rdf:about="#body">
+    <rdfs:range rdf:resource="http://spinrdf.org/sp#Command"/>
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >reduced</rdfs:label>
-    <rdfs:comment>A property with true to indicate that a Select query has a REDUCED flag.</rdfs:comment>
-    <rdfs:domain rdf:resource="#Select"/>
-  </rdf:Property>
-  <rdf:Property rdf:ID="as">
+    >body</rdfs:label>
+    <rdfs:comment>The body of a Function or Template. This points to a Query instance. For Functions, this is limited to either ASK or SELECT type queries. If the body is the ASK function then the return value is xsd:boolean. Otherwise, the SELECT query must have a single return variable. The first binding of this SELECT query will be returned as result of the function call.</rdfs:comment>
     <rdfs:subPropertyOf>
       <rdf:Property rdf:about="#systemProperty"/>
     </rdfs:subPropertyOf>
-    <rdfs:range rdf:resource="#Variable"/>
-    <rdfs:comment>Points to a Variable used in an AS statement such as COUNT aggregates.</rdfs:comment>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >as</rdfs:label>
   </rdf:Property>
-  <rdf:Property rdf:ID="arg3">
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >arg3</rdfs:label>
-    <rdfs:subPropertyOf>
-      <rdf:Property rdf:about="#arg"/>
-    </rdfs:subPropertyOf>
-    <rdfs:comment>The third argument of a function call.</rdfs:comment>
-  </rdf:Property>
-  <rdf:Property rdf:ID="query">
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >query</rdfs:label>
+  <rdf:Property rdf:ID="violationRoot">
     <rdfs:subPropertyOf>
       <rdf:Property rdf:about="#systemProperty"/>
     </rdfs:subPropertyOf>
-    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Links a SubQuery resource with the nested Query.</rdfs:comment>
-    <rdfs:domain rdf:resource="#SubQuery"/>
-    <rdfs:range rdf:resource="#Query"/>
-  </rdf:Property>
-  <rdf:Property rdf:ID="deletePattern">
+    <rdfs:comment>The root resource of the violation (often ?this in the constraint body).</rdfs:comment>
+    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+    <rdfs:domain rdf:resource="#ConstraintViolation"/>
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >delete pattern</rdfs:label>
-    <rdfs:subPropertyOf>
-      <rdf:Property rdf:about="#systemProperty"/>
-    </rdfs:subPropertyOf>
-    <rdfs:range rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-    <rdfs:domain rdf:resource="#Update"/>
-    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Points to a list of sp:TripleTemplates in a MODIFY or DELETE FROM command.</rdfs:comment>
-  </rdf:Property>
-  <rdf:Property rdf:ID="text">
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
-    <rdfs:comment>Can be attached to sp:Queries to store a textual representation of the query. This can be useful for tools that do not have a complete SPIN Syntax parser available.</rdfs:comment>
-    <rdfs:subPropertyOf>
-      <rdf:Property rdf:about="#systemProperty"/>
-    </rdfs:subPropertyOf>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >text</rdfs:label>
-  </rdf:Property>
-  <rdf:Property rdf:ID="distinct">
-    <rdfs:subPropertyOf>
-      <rdf:Property rdf:about="#systemProperty"/>
-    </rdfs:subPropertyOf>
-    <rdfs:domain rdf:resource="#Select"/>
-    <rdfs:comment>A marker property to indicate that a Select query is of type SELECT DISTINCT.</rdfs:comment>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >distinct</rdfs:label>
-  </rdf:Property>
-  <rdf:Property rdf:ID="arg5">
-    <rdfs:subPropertyOf>
-      <rdf:Property rdf:about="#arg"/>
-    </rdfs:subPropertyOf>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >arg5</rdfs:label>
-    <rdfs:comment>The fifth argument of a function call. Further arguments are not common in SPARQL, therefore no sp:arg6, etc are defined here. However, they can be created if needed.</rdfs:comment>
+    >violation root</rdfs:label>
   </rdf:Property>
   <rdf:Property rdf:about="#systemProperty">
-    <rdfs:comment>An abstract base proprerty that groups together the SP system properties. Users typically don't need to see them anyway.</rdfs:comment>
+    <rdfs:comment>An "abstract" base property that groups together those system properties that the user will hardly ever need to see in property trees. This property may be dropped in future versions of this ontology - right now it's mainly here for convenience.</rdfs:comment>
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >SP system property</rdfs:label>
+    >system property</rdfs:label>
   </rdf:Property>
-  <rdf:Property rdf:ID="path1">
-    <rdfs:range rdf:resource="#Path"/>
-    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
+  <rdf:Property rdf:ID="private">
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >path1</rdfs:label>
-    <rdfs:comment>The first child path of a property path. Used by sp:AltPath and sp:SeqPath.</rdfs:comment>
-  </rdf:Property>
-  <rdf:Property rdf:ID="insertPattern">
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >insert pattern</rdfs:label>
+    >private</rdfs:label>
     <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
-    <rdfs:domain rdf:resource="#Modify"/>
-    <rdfs:range rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
     <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Points to a list of sp:TripleTemplates in a MODIFY or INSERT INTO command.</rdfs:comment>
+    >Can be set to true to indicate that a SPIN function is only meant to be used as a helper of other functions, but not directly. Among others, this allows user interfaces to filter out private functions. Furthermore, it tells potential users of this function that they should avoid using this function, as it may not be stable.</rdfs:comment>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    <rdfs:domain rdf:resource="#Function"/>
   </rdf:Property>
-  <rdf:Property rdf:ID="resultVariables">
+  <rdf:Property rdf:ID="nextRuleProperty">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >next rule property</rdfs:label>
     <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
-    <rdfs:domain rdf:resource="#Select"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >result variables</rdfs:label>
-    <rdfs:comment>An rdf:List of variables that are returned by a Select query.</rdfs:comment>
-    <rdfs:range rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-  </rdf:Property>
-  <rdf:Property rdf:ID="subPath">
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >sub path</rdfs:label>
-    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
-    <rdfs:comment>The child path of a property path expression. This is used by ReversePath and ModPath.</rdfs:comment>
-  </rdf:Property>
-  <rdf:Property rdf:about="#arg">
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >arg</rdfs:label>
-    <rdfs:comment>Abstract superproperty for the enumerated arg1, arg2 etc.</rdfs:comment>
-  </rdf:Property>
-  <rdf:Property rdf:ID="templates">
-    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
-    <rdfs:range rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-    <rdfs:comment>Points to a list of TripleTemplates that form the head of a Construct query.</rdfs:comment>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >templates</rdfs:label>
-    <rdfs:domain rdf:resource="#Construct"/>
-  </rdf:Property>
-  <rdf:Property rdf:ID="graphNameNode">
-    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
-    <rdfs:domain rdf:resource="#NamedGraph"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >graph name node</rdfs:label>
-    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
-    <rdfs:comment>The name (URI or Variable) of a NamedGraph.</rdfs:comment>
-  </rdf:Property>
-  <rdf:Property rdf:ID="path">
-    <rdfs:domain rdf:resource="#TriplePath"/>
-    <rdfs:comment>Points from a TriplePath to its path.</rdfs:comment>
-    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
-    <rdfs:range rdf:resource="#Path"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >path</rdfs:label>
-  </rdf:Property>
-  <rdf:Property rdf:ID="graphIRI">
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >graph IRI</rdfs:label>
-    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+    <rdfs:domain rdf:resource="#RuleProperty"/>
     <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Points to zero or more graph names in sp:Update commands.</rdfs:comment>
-    <rdfs:domain rdf:resource="#Update"/>
+    >Can be used to link two sub-properties of spin:rule (or spin:rule itself) to instruct the SPIN engine to execute one set of rules before another one. The values of the subject property will be executed before those of the object property.</rdfs:comment>
+    <rdfs:range rdf:resource="#RuleProperty"/>
   </rdf:Property>
-  <rdf:Property rdf:ID="modMax">
+  <rdf:Property rdf:ID="labelTemplate">
+    <rdfs:domain rdf:resource="#Template"/>
+    <rdfs:comment>A template string for displaying instantiations of a module in human-readable form. The template may contain the argument variable names in curly braces to support substitution. For example, "The number of values of the {?arg1} property."</rdfs:comment>
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >mod max</rdfs:label>
+    >label template</rdfs:label>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
+  </rdf:Property>
+  <rdf:Property rdf:ID="constructor">
+    <rdfs:subPropertyOf>
+      <rdf:Property rdf:about="#command"/>
+    </rdfs:subPropertyOf>
+    <rdfs:range rdf:resource="#Rule"/>
+    <rdfs:domain rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >constructor</rdfs:label>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Can be used to attach a "constructor" to a class. A constructor is a SPARQL CONSTRUCT query or INSERT/DELETE Update operation that can add initial values to the current instance. At execution time, the variable ?this is bound to the current instance. Tools can call constructors of a class and its superclasses when an instance of a class has been created. Constructors will also be used to initialize resources that have received a new rdf:type triple as a result of spin:rules firing.</rdfs:comment>
+  </rdf:Property>
+  <rdf:Property rdf:ID="violationPath">
+    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
+    <rdfs:comment>An optional attribute of ConstraintViolations to provide a path expression from the root resource to the value that is invalid. If this is a URI then the path represents the predicate of a subject/predicate combination. Otherwise it should be a blank node of type sp:Path.</rdfs:comment>
+    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+    <rdfs:domain rdf:resource="#ConstraintViolation"/>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >violation path</rdfs:label>
+  </rdf:Property>
+  <rdf:Property rdf:ID="abstract">
+    <rdfs:comment>Can be set to true to indicate that this module shall not be instantiated. Abstract modules are only there to organize other modules into hierarchies.</rdfs:comment>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >abstract</rdfs:label>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    <rdfs:domain rdf:resource="#Module"/>
+    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
+  </rdf:Property>
+  <rdf:Property rdf:ID="constraint">
+    <rdfs:domain rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+    <rdfs:subPropertyOf>
+      <rdf:Property rdf:ID="query"/>
+    </rdfs:subPropertyOf>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >constraint</rdfs:label>
+    <rdfs:comment>Links a class with constraints on its instances. The values of this property are "axioms" expressed as CONSTRUCT or ASK queries where the variable ?this refers to the instances of the surrounding class. ASK queries must evaluate to false for each member of this class - returning true means that the instance ?this violates the constraint. CONSTRUCT queries must create instances of spin:ConstraintViolation to provide details on the reason for the violation.</rdfs:comment>
+  </rdf:Property>
+  <rdf:Property rdf:ID="fix">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Can be used to link a ConstraintViolation with one or more UPDATE Templates that would help fix the violation.</rdfs:comment>
+    <rdfs:domain rdf:resource="#ConstraintViolation"/>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >fix</rdfs:label>
+    <rdfs:range rdf:resource="#UpdateTemplate"/>
+    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
+  </rdf:Property>
+  <rdf:Property rdf:ID="violationSource">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Can be used to link a spin:ConstraintViolation with the query or template call that caused it. This property is typically filled in automatically by the constraint checking engine and does not need to be set manually. However, it can be useful to learn more about the origin of a violation.</rdfs:comment>
+    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >violation source</rdfs:label>
+    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
+    <rdfs:domain rdf:resource="#ConstraintViolation"/>
+  </rdf:Property>
+  <rdf:Property rdf:about="#query">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >query</rdfs:label>
+    <rdfs:comment>Can be used to point from any resource to a Query.</rdfs:comment>
+    <rdfs:range rdf:resource="http://spinrdf.org/sp#Query"/>
+    <rdfs:subPropertyOf>
+      <rdf:Property rdf:about="#command"/>
+    </rdfs:subPropertyOf>
+  </rdf:Property>
+  <rdf:Property rdf:ID="thisUnbound">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >this unbound</rdfs:label>
+    <rdfs:domain rdf:resource="http://spinrdf.org/sp#Construct"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Can be set to true for SPIN rules and constraints that do not require pre-binding the variable ?this with all members of the associated class. This flag should only be set to true if the WHERE clause is sufficiently strong to only bind instances of the associated class, or its subclasses. In those cases, the engine can greatly improve performance of query execution, because it does not need to add clauses to narrow down the WHERE clause.</rdfs:comment>
+  </rdf:Property>
+  <rdf:Property rdf:about="#command">
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Can be used to link a resource with a SPARQL query or update request (sp:Command).</rdfs:comment>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >command</rdfs:label>
+    <rdfs:range rdf:resource="http://spinrdf.org/sp#Command"/>
+  </rdf:Property>
+  <rdf:Property rdf:ID="rulePropertyMaxIterationCount">
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >rule property max iteration count</rdfs:label>
+    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Can be attached to spin:rule (or subclasses thereof) to instruct a SPIN rules engine that it shall only execute the rules max times. If no value is specified, then the rules will be executed with no specific limit.</rdfs:comment>
+    <rdfs:domain rdf:resource="#RuleProperty"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+  </rdf:Property>
+  <owl:OntologyProperty rdf:ID="imports">
     <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
-    <rdfs:domain rdf:resource="#ModPath"/>
-  </rdf:Property>
-  <rdf:Property rdf:ID="path2">
-    <rdfs:range rdf:resource="#Path"/>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Can be used to link an RDF graph (usually the instance of owl:Ontology) with a SPIN library to define constraints. SPIN-aware tools should include the definitions from those libraries for constraint checking. Using such libraries is a simpler alternative than explicitly importing them using owl:imports, because it does not force all the SPIN triples into the RDF model.</rdfs:comment>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >imports</rdfs:label>
+    <rdfs:domain rdf:resource="http://www.w3.org/2002/07/owl#Ontology"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2002/07/owl#Ontology"/>
+  </owl:OntologyProperty>
+  <sp:Variable rdf:ID="_arg4">
+    <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >arg4</sp:varName>
+  </sp:Variable>
+  <spin:ConstructTemplate rdf:ID="ConstructTemplates">
+    <spin:abstract rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >true</spin:abstract>
+    <rdfs:subClassOf>
+      <spin:Template rdf:ID="Templates">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Templates</rdfs:label>
+        <spin:abstract rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+        >true</spin:abstract>
+        <rdfs:subClassOf rdf:resource="#Modules"/>
+        <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Suggested abstract base class for all Templates.</rdfs:comment>
+      </spin:Template>
+    </rdfs:subClassOf>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Construct templates</rdfs:label>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Suggested abstract base class for all ConstructTemplates.</rdfs:comment>
+  </spin:ConstructTemplate>
+  <rdf:Description rdf:about="http://spinrdf.org/sp#Modify">
+    <rdfs:subClassOf rdf:resource="#Rule"/>
+  </rdf:Description>
+  <spin:Function rdf:ID="eval">
+    <rdfs:subClassOf>
+      <spin:Function rdf:ID="Functions">
+        <rdfs:subClassOf rdf:resource="#Modules"/>
+        <rdfs:comment>An abstract base class for all defined functions. This class mainly serves as a shared root so that the various instances of the Function metaclass are grouped together.</rdfs:comment>
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Functions</rdfs:label>
+        <spin:abstract rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+        >true</spin:abstract>
+      </spin:Function>
+    </rdfs:subClassOf>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >eval</rdfs:label>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Evaluates a given SPIN expression or SELECT or ASK query, and returns its result. The first argument must be the expression in SPIN RDF syntax. All other arguments must come in pairs: first a property name, and then a value. These name/value pairs will be pre-bound variables for the execution of the expression.</rdfs:comment>
+  </spin:Function>
+  <sp:Variable rdf:ID="_arg5">
+    <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >arg5</sp:varName>
+  </sp:Variable>
+  <sp:Variable rdf:ID="_arg1">
+    <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >arg1</sp:varName>
+  </sp:Variable>
+  <rdf:Description>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >The first operand to compare.</rdfs:comment>
+  </rdf:Description>
+  <spin:AskTemplate rdf:ID="AskTemplates">
+    <spin:abstract rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >true</spin:abstract>
+    <rdfs:subClassOf rdf:resource="#Templates"/>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Ask templates</rdfs:label>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Suggested abstract base class for all AskTemplates.</rdfs:comment>
+  </spin:AskTemplate>
+  <rdf:Description>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >The (boolean) operand to negate.</rdfs:comment>
+  </rdf:Description>
+  <spin:SelectTemplate rdf:ID="SelectTemplates">
+    <spin:abstract rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >true</spin:abstract>
+    <rdfs:subClassOf rdf:resource="#Templates"/>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Select templates</rdfs:label>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Suggested abstract base class for all SelectTemplates.</rdfs:comment>
+  </spin:SelectTemplate>
+  <spin:MagicProperty rdf:ID="MagicProperties">
+    <spin:abstract rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >true</spin:abstract>
+    <rdfs:subClassOf rdf:resource="#Functions"/>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Magic properties</rdfs:label>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >An abstract superclass that can be used to group all spin:MagicProperty instances under a single parent class.</rdfs:comment>
     <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
+  </spin:MagicProperty>
+  <sp:Variable rdf:ID="_arg2">
+    <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >arg2</sp:varName>
+  </sp:Variable>
+  <sp:Variable rdf:ID="_this">
+    <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >this</sp:varName>
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >path2</rdfs:label>
-    <rdfs:comment>The second child path of a property path. Used by sp:AltPath and sp:SeqPath.</rdfs:comment>
-  </rdf:Property>
-  <rdf:Property rdf:ID="orderBy">
-    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
-    <rdfs:comment>Links a query with an ORDER BY clause where the values are rdf:List containing OrderByConditions or expressions. While the domain of this property is sp:Query, only Describe and Select queries can have values of it.</rdfs:comment>
-    <rdfs:domain rdf:resource="#Query"/>
-    <rdfs:range rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+    >_this</rdfs:label>
+    <rdfs:comment>A system variable representing the current context instance in a rule or constraint.</rdfs:comment>
+  </sp:Variable>
+  <rdf:Description rdf:about="http://spinrdf.org/sp#DeleteWhere">
+    <rdfs:subClassOf rdf:resource="#Rule"/>
+  </rdf:Description>
+  <spin:UpdateTemplate rdf:ID="UpdateTemplates">
+    <spin:abstract rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >true</spin:abstract>
+    <rdfs:subClassOf rdf:resource="#Templates"/>
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >order by</rdfs:label>
-  </rdf:Property>
-  <rdf:Property rdf:ID="offset">
-    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#long"/>
+    >Update templates</rdfs:label>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Suggested abstract base class for all UpdateTemplates.</rdfs:comment>
+  </spin:UpdateTemplate>
+  <spin:RuleProperty rdf:ID="rule">
+    <rdfs:subPropertyOf rdf:resource="#command"/>
     <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >offset</rdfs:label>
-    <rdfs:comment>The OFFSET solution modifier of a Query.</rdfs:comment>
-    <rdfs:domain rdf:resource="#Query"/>
-  </rdf:Property>
-  <rdf:Property rdf:ID="groupBy">
-    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >group by</rdfs:label>
-    <rdfs:comment>Points from a Query to the list of GROUP BY expressions.</rdfs:comment>
-    <rdfs:range rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-    <rdfs:domain rdf:resource="#Select"/>
-  </rdf:Property>
-  <rdf:Property rdf:ID="variable">
-    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
-    <rdfs:comment>The variable of a Let element.</rdfs:comment>
-    <rdfs:domain rdf:resource="#Let"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >variable</rdfs:label>
-    <rdfs:range rdf:resource="#Variable"/>
-  </rdf:Property>
-  <rdf:Property rdf:ID="fromNamed">
-    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >from named</rdfs:label>
-    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
-    <rdfs:comment>Specifies a named RDF Dataset used by a Query (FROM NAMED syntax in SPARQL). Values of this property must be URI resources.</rdfs:comment>
-    <rdfs:domain rdf:resource="#Query"/>
-  </rdf:Property>
-  <rdf:Property rdf:ID="subject">
-    <rdfs:domain rdf:resource="#Tuple"/>
-    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >subject</rdfs:label>
-    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
-    <rdfs:comment>A resource or Variable describing the subject of a triple.</rdfs:comment>
-  </rdf:Property>
-  <rdf:Property rdf:ID="modMin">
-    <rdfs:domain rdf:resource="#ModPath"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
-    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >mod min</rdfs:label>
-  </rdf:Property>
-  <rdf:Property rdf:ID="predicate">
-    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >predicate</rdfs:label>
-    <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
-    <rdfs:comment>A resource or Variable describing the predicate of a triple.</rdfs:comment>
-    <rdfs:domain rdf:resource="#Triple"/>
-  </rdf:Property>
-  <rdf:Property rdf:ID="object">
-    <rdfs:domain rdf:resource="#Tuple"/>
-    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >object</rdfs:label>
-    <rdfs:comment>An RDF Node or Variable describing the object of a triple.</rdfs:comment>
-  </rdf:Property>
-  <rdf:Property rdf:ID="limit">
-    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
-    <rdfs:domain rdf:resource="#Query"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#long"/>
-    <rdfs:comment>The LIMIT solution modifier of a Query.</rdfs:comment>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >limit</rdfs:label>
-  </rdf:Property>
-  <rdf:Property rdf:ID="where">
-    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
-    <rdfs:comment>The WHERE clause of a Query.</rdfs:comment>
-    <rdfs:range rdf:resource="#ElementList"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >where</rdfs:label>
-  </rdf:Property>
-  <rdf:Property rdf:ID="elements">
-    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
-    <rdfs:range rdf:resource="#ElementList"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >elements</rdfs:label>
-    <rdfs:comment>Points to an ElementList, for example in an Optional element.</rdfs:comment>
-  </rdf:Property>
-  <rdf:Property rdf:ID="expression">
-    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >expression</rdfs:label>
-    <rdfs:comment>Points to an expression, for example in a Filter or Assignment.</rdfs:comment>
-  </rdf:Property>
-  <rdf:Property rdf:ID="arg2">
-    <rdfs:subPropertyOf rdf:resource="#arg"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >arg2</rdfs:label>
-    <rdfs:comment>The second argument of a function call.</rdfs:comment>
-  </rdf:Property>
-  <rdf:Property rdf:ID="resultNodes">
-    <rdfs:subPropertyOf rdf:resource="#systemProperty"/>
-    <rdfs:domain rdf:resource="#Describe"/>
-    <rdfs:comment>Contains the result nodes (URI resources or Variables) of a Describe query.</rdfs:comment>
-    <rdfs:range rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >result nodes</rdfs:label>
-  </rdf:Property>
+    >rule</rdfs:label>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >An inferencing rule attached to a class. Rules are expressed as CONSTRUCT queries or INSERT/DELETE operations where the variable ?this will be bound to the current instance of the class. These inferences can be used to derive new values from existing values at the instance.</rdfs:comment>
+    <rdfs:domain rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+    <rdfs:range rdf:resource="#Rule"/>
+  </spin:RuleProperty>
+  <sp:Variable rdf:ID="_arg3">
+    <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >arg3</sp:varName>
+  </sp:Variable>
 </rdf:RDF>
 
-<!-- Created with TopBraid Composer -->
+<!-- Created with TopBraid -->
