@@ -17,9 +17,10 @@
 package org.graphity.ldp.model.impl;
 
 import com.hp.hpl.jena.query.Query;
-import javax.ws.rs.core.MediaType;
+import java.util.List;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Variant;
 import org.graphity.ldp.model.PageResource;
 import org.graphity.vocabulary.XHV;
 import org.slf4j.Logger;
@@ -40,10 +41,10 @@ public class EndpointPageResourceImpl extends org.graphity.ldp.model.query.impl.
     private Boolean desc = true;
     
     public EndpointPageResourceImpl(String endpointUri, Query query,
-	UriInfo uriInfo, Request request, MediaType mediaType,
+	UriInfo uriInfo, Request request, List<Variant> variants,
 	Long limit, Long offset, String orderBy, Boolean desc)
     {
-	super(endpointUri, query, request, mediaType);
+	super(endpointUri, query, request, variants);
 	if (uriInfo == null) throw new IllegalArgumentException("UriInfo must be not null");
 	if (limit == null) throw new IllegalArgumentException("LIMIT must be not null");
 	if (offset == null) throw new IllegalArgumentException("OFFSET must be not null");

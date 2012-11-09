@@ -19,10 +19,11 @@ package org.graphity.ldp.model.query.impl;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.Model;
+import java.util.List;
 import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Variant;
 import org.graphity.ldp.model.query.ModelResource;
 import org.graphity.util.ModelUtils;
 import org.slf4j.Logger;
@@ -37,18 +38,19 @@ public class QueryModelModelResourceImpl extends org.graphity.model.query.impl.Q
     private static final Logger log = LoggerFactory.getLogger(QueryModelModelResourceImpl.class);
 
     private Request request = null;
-    private MediaType mediaType = org.graphity.ldp.MediaType.APPLICATION_RDF_XML_TYPE;
+    private List<Variant> variants = null;
+    private Variant variant = null;
     private EntityTag entityTag = null;
     private Response response = null;
 
     public QueryModelModelResourceImpl(Model queryModel, Query query, 
-	Request request, MediaType mediaType)
+	Request request, List<Variant> variants)
     {
 	super(queryModel, query);
 	if (request == null) throw new IllegalArgumentException("Request must be not null");
-	//if (mediaType == null) throw new IllegalArgumentException("MediaType must be not null");
+	if (variants == null) throw new IllegalArgumentException("List of Variants must be not null");
 	this.request = request;
-	if (mediaType != null) this.mediaType = mediaType;
+	this.variants = variants;
 
 	Response.ResponseBuilder rb = null;
 	if (!getModel().isEmpty())
@@ -64,15 +66,25 @@ public class QueryModelModelResourceImpl extends org.graphity.model.query.impl.Q
 	}
 	else
 	{
-	    if (log.isTraceEnabled()) log.trace("Generating RDF Response with MediaType: {} and EntityTag: {}", mediaType, entityTag);
-	    response = Response.ok(getModel(), mediaType).tag(entityTag).build(); // uses ModelWriter
+	    variant = request.selectVariant(variants);
+	    if (variant == null)
+	    {
+		if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants: {}", variant, variants);
+		response = Response.notAcceptable(variants).build();
+	    }	
+	    else
+	    {
+		if (log.isTraceEnabled()) log.trace("Generating RDF Response with Variant: {} and EntityTag: {}", variant, entityTag);
+		response = Response.ok(getModel(), variant).
+			tag(entityTag).build(); // uses ModelWriter
+	    }
 	}
     }
 
     public QueryModelModelResourceImpl(Model queryModel, String uri,
-	    Request request, MediaType mediaType)
+	    Request request, List<Variant> variants)
     {
-	this(queryModel, QueryFactory.create("DESCRIBE <" + uri + ">"), request, mediaType);
+	this(queryModel, QueryFactory.create("DESCRIBE <" + uri + ">"), request, variants);
     }
 
     @Override
@@ -87,9 +99,10 @@ public class QueryModelModelResourceImpl extends org.graphity.model.query.impl.Q
 	return response;
     }
     
-    public MediaType getMediaType()
+    @Override
+    public List<Variant> getVariants()
     {
-	return mediaType;
+	return variants;
     }
 
     @Override

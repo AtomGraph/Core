@@ -194,6 +194,7 @@ exclude-result-prefixes="#all">
 	</div>
     </xsl:template>
 
+    <!-- subject blank node -->
     <xsl:template match="*[*][@rdf:nodeID]">
 	<div>
 	    <xsl:apply-templates select="." mode="gldp:HeaderMode"/>
@@ -202,6 +203,7 @@ exclude-result-prefixes="#all">
 	</div>
     </xsl:template>
 
+    <!-- subject URI resource -->
     <xsl:template match="*[*][@rdf:about]">
 	<xsl:apply-templates select="." mode="gldp:ListMode"/>
     </xsl:template>

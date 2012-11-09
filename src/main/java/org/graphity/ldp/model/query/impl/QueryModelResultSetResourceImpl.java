@@ -18,10 +18,11 @@ package org.graphity.ldp.model.query.impl;
 
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.rdf.model.Model;
+import java.util.List;
 import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Variant;
 import org.graphity.ldp.model.query.ResultSetResource;
 import org.graphity.util.ResultSetUtils;
 import org.slf4j.Logger;
@@ -36,18 +37,19 @@ public class QueryModelResultSetResourceImpl extends org.graphity.model.query.im
     private static final Logger log = LoggerFactory.getLogger(QueryModelResultSetResourceImpl.class);
 
     private Request request = null;
-    private MediaType mediaType = org.graphity.ldp.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE;
+    private List<Variant> variants = null;
+    private Variant variant = null;
     private EntityTag entityTag = null;
     private Response response = null;
 
     public QueryModelResultSetResourceImpl(Model queryModel, Query query,
-	    Request request, MediaType mediaType)
+	    Request request, List<Variant> variants)
     {
 	super(queryModel, query);
 	if (request == null) throw new IllegalArgumentException("Request must be not null");
 	//if (mediaType == null) throw new IllegalArgumentException("MediaType must be not null");
 	this.request = request;
-	if (mediaType != null) this.mediaType = mediaType;
+	this.variants = variants;
 	
 	Response.ResponseBuilder rb = null;
 	if (getResultSet().size() > 0)
@@ -63,8 +65,17 @@ public class QueryModelResultSetResourceImpl extends org.graphity.model.query.im
 	}
 	else
 	{
-	    if (log.isTraceEnabled()) log.trace("Generating SPARQL results Response with MediaType: {} and EntityTag: {}", mediaType, entityTag);
-	    response = Response.ok(getResultSet(), mediaType).tag(entityTag).build(); // uses ResultSetWriter
+	    variant = request.selectVariant(variants);
+	    if (variant == null)
+	    {
+		if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants: {}", variant, variants);
+		response = Response.notAcceptable(variants).build();
+	    }	
+	    else
+	    {
+		if (log.isTraceEnabled()) log.trace("Generating SPARQL results Response with Variant: {} and EntityTag: {}", variant, entityTag);
+		response = Response.ok(getResultSet(), variant).tag(entityTag).build(); // uses ResultSetWriter
+	    }	    
 	}
     }
 
@@ -80,9 +91,10 @@ public class QueryModelResultSetResourceImpl extends org.graphity.model.query.im
 	return response;
     }
 
-    public MediaType getMediaType()
+    @Override
+    public List<Variant> getVariants()
     {
-	return mediaType;
+	return variants;
     }
 
     @Override

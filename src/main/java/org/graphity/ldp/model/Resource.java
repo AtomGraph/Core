@@ -16,10 +16,12 @@
  */
 package org.graphity.ldp.model;
 
+import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Variant;
 
 /**
  *
@@ -33,5 +35,7 @@ public interface Resource
 
     //UriInfo getUriInfo(); // Request can be injected
 
+    List<Variant> getVariants();
+    
     EntityTag getEntityTag();
 }

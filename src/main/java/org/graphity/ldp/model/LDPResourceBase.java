@@ -18,6 +18,7 @@ package org.graphity.ldp.model;
 
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.rdf.model.Model;
+import java.util.List;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.*;
 import org.slf4j.Logger;
@@ -32,10 +33,10 @@ public class LDPResourceBase extends LinkedDataResourceBase implements org.graph
     private static final Logger log = LoggerFactory.getLogger(LDPResourceBase.class);
 
     public LDPResourceBase(OntResource ontResource,
-	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders,MediaType mediaType,
+	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
 	    Long limit, Long offset, String orderBy, Boolean desc)
     {
-	super(ontResource, uriInfo, request, httpHeaders, mediaType, limit, offset, orderBy, desc);
+	super(ontResource, uriInfo, request, httpHeaders, variants, limit, offset, orderBy, desc);
     }
     
     @Override

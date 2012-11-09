@@ -16,11 +16,14 @@
  */
 package org.graphity.ldp.model;
 
+import com.hp.hpl.jena.ontology.OntClass;
+import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.ResIterator;
+import java.util.List;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import org.graphity.ldp.Application;
@@ -43,14 +46,14 @@ import org.topbraid.spin.vocabulary.SP;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class LinkedDataResourceBase extends ResourceFactory implements LinkedDataResource, QueriedResource, XHTMLResource
+public class LinkedDataResourceBase extends ResourceFactory implements LinkedDataResource, QueriedResource
 {
     private static final Logger log = LoggerFactory.getLogger(LinkedDataResourceBase.class);
 
     private UriInfo uriInfo = null;
     private Request request = null;
     private HttpHeaders httpHeaders = null;
-    private MediaType mediaType = null;
+    private List<Variant> variants = null;
     private OntResource ontResource = null;
     private Query query = null;
     private ModelResource resource = null;
@@ -113,29 +116,52 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	return queryBuilder;
     }
 
-    public LinkedDataResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context HttpHeaders httpHeaders,
+    public LinkedDataResourceBase(@Context UriInfo uriInfo, @Context Request request,
+	    @Context HttpHeaders httpHeaders, @Context List<Variant> variants,
 	    @QueryParam("limit") @DefaultValue("20") Long limit,
 	    @QueryParam("offset") @DefaultValue("0") Long offset,
-	    @QueryParam("order-by") @DefaultValue("http://www.w3.org/2004/02/skos/core#prefLabel") String orderBy,
+	    String orderBy,
 	    @QueryParam("desc") @DefaultValue("false") Boolean desc)
     {
 	this(Application.getOntResource(uriInfo),
-		uriInfo, request, httpHeaders, httpHeaders.getAcceptableMediaTypes().get(0),
+		uriInfo, request, httpHeaders, variants,
 		limit, offset, orderBy, desc);
     }
-    
+
+    // intialize with default supported MediaTypes
+    public LinkedDataResourceBase(OntResource ontResource, @Context UriInfo uriInfo, @Context Request request,
+	    @Context HttpHeaders httpHeaders,
+	    @QueryParam("limit") @DefaultValue("20") Long limit,
+	    @QueryParam("offset") @DefaultValue("0") Long offset,
+	    String orderBy,
+	    @QueryParam("desc") @DefaultValue("false") Boolean desc)
+    {
+	this(ontResource, uriInfo, request, httpHeaders, 
+	    Variant.VariantListBuilder.newInstance().
+		mediaTypes(MediaType.APPLICATION_XHTML_XML_TYPE,
+			org.graphity.ldp.MediaType.APPLICATION_RDF_XML_TYPE,
+			org.graphity.ldp.MediaType.TEXT_TURTLE_TYPE).
+		//languages(new Locale("en")).
+		add().build(),
+	    limit, offset, orderBy, desc);
+    }
+
     public LinkedDataResourceBase(OntResource ontResource,
-	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, MediaType mediaType,
+	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
 	    Long limit, Long offset, String orderBy, Boolean desc)
     {
 	if (ontResource == null) throw new IllegalArgumentException("OntResource cannot be null");
+	if (request == null) throw new IllegalArgumentException("Request cannot be null");
+	if (httpHeaders == null) throw new IllegalArgumentException("HttpHeaders cannot be null");
+	if (variants == null) throw new IllegalArgumentException("Variants cannot be null");
+
 	this.ontResource = ontResource;
 	if (log.isDebugEnabled()) log.debug("Creating LinkedDataResource from OntResource with URI: {}", ontResource.getURI());
 
 	this.uriInfo = uriInfo;
 	this.request = request;
 	this.httpHeaders = httpHeaders;
-	this.mediaType = mediaType;
+	this.variants = variants;
 
 	this.limit = limit;
 	this.offset = offset;
@@ -146,62 +172,53 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     }
 
     @GET
-    @Produces({org.graphity.ldp.MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", org.graphity.ldp.MediaType.TEXT_TURTLE + "; charset=UTF-8"})
     @Override
     public Response getResponse()
     {
-	return getResource().getResponse();
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_XHTML_XML + ";qs=2;charset=UTF-8")
-    @Override
-    public Response getXHTMLResponse()
-    {
-	if (getMediaType() != null) return getResponse(); // handles &accept= query parameter
-
-	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(getEntityTag());
-	if (rb != null)
-	{
-	    if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
-	    return rb.build();
-	}
-	else
+	// always prefer XHTML if it's acceptable
+	if (getHttpHeaders().getAcceptableMediaTypes().contains(MediaType.APPLICATION_XHTML_XML_TYPE)
+		&& (getRequest().evaluatePreconditions(getEntityTag()) == null)) // resource modified
 	{
 	    if (log.isTraceEnabled()) log.trace("Generating XHTML Response");
-	    return Response.ok(this).tag(getEntityTag()).build(); // uses ResourceXHTMLWriter
+	    return Response.ok(this).tag(getEntityTag()).build(); // uses ResourceXHTMLWriter<Resource> FIX!
 	}
+	
+	return getResource().getResponse(); // uses ModelWriter<Model>
     }
 
-    public static com.hp.hpl.jena.rdf.model.Resource matchEndpoint(Class<?> cls, Model model)
+    public static OntClass matchOntClass(Class<?> cls, OntModel ontModel)
     {
 	if (log.isDebugEnabled()) log.debug("Matching @Path annotation {} of Class {}", cls.getAnnotation(Path.class).value(), cls);
-	return matchEndpoint(cls.getAnnotation(Path.class).value(), model);
+	return matchOntClass(cls.getAnnotation(Path.class).value(), ontModel);
     }
     
-    public static com.hp.hpl.jena.rdf.model.Resource matchEndpoint(String uriTemplate, Model model)
+    public static OntClass matchOntClass(String uriTemplate, OntModel ontModel)
     {
 	if (uriTemplate == null) throw new IllegalArgumentException("Item endpoint class must have a @Path annotation");
 	
-	if (log.isDebugEnabled()) log.debug("Matching URI template template {} against Model {}", uriTemplate, model);	
-	Property utProp = model.createProperty("http://purl.org/linked-data/api/vocab#uriTemplate");
-	ResIterator it = model.listResourcesWithProperty(utProp, uriTemplate);
-	
+	if (log.isDebugEnabled()) log.debug("Matching URI template template {} against Model {}", uriTemplate, ontModel);	
+	Property utProp = ontModel.createProperty("http://purl.org/linked-data/api/vocab#uriTemplate");
+	ResIterator it = ontModel.listResourcesWithProperty(utProp, uriTemplate);
+
 	if (it.hasNext())
 	{
 	    com.hp.hpl.jena.rdf.model.Resource match = it.next();
-	    if (log.isDebugEnabled()) log.debug("URI template {} matched endpoint Resource {}", uriTemplate, match);	
-	    return match;
+	    if (!match.canAs(OntClass.class)) throw new IllegalArgumentException("Resource matching this URI template is not an OntClass");
+	    
+	    if (log.isDebugEnabled()) log.debug("URI template {} matched endpoint OntClass {}", uriTemplate, match.as(OntClass.class));
+	    return match.as(OntClass.class);
 	}
 	else
 	{
-	    if (log.isDebugEnabled()) log.debug("URI template {} has no endpoint match in Model {}", uriTemplate, model);	
+	    if (log.isDebugEnabled()) log.debug("URI template {} has no endpoint match in Model {}", uriTemplate, ontModel);
 	    return null;   
 	}
     }
 
     public ModelResource getResource()
     {
+	if (log.isDebugEnabled()) log.debug("List of Variants: {}", variants);
+	
 	if (resource == null) // lazy loading
 	{
 	    if (getOntResource().hasRDFType(SIOC.CONTAINER))
@@ -216,13 +233,13 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 		    if (endpoint == null || endpoint.getURI() == null) throw new IllegalArgumentException("SPARQL Service endpoint must be URI Resource");
 
 		    if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has explicit SPARQL endpoint: {}", getOntResource().getURI(), endpoint.getURI());
-		    resource = new EndpointPageResourceImpl(endpoint.getURI(), getQuery(), getUriInfo(), getRequest(), getMediaType(),
+		    resource = new EndpointPageResourceImpl(endpoint.getURI(), getQuery(), getUriInfo(), getRequest(), getVariants(),
 			    getLimit(), getOffset(), getOrderBy(), getDesc());
 		}
 		else
 		{
 		    if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has no explicit SPARQL endpoint, querying its Model", getOntResource().getURI());
-		    resource = new QueryModelPageResourceImpl(getOntResource().getModel(), getQuery(), getUriInfo(), getRequest(), getMediaType(),
+		    resource = new QueryModelPageResourceImpl(getOntResource().getModel(), getQuery(), getUriInfo(), getRequest(), getVariants(),
 			    getLimit(), getOffset(), getOrderBy(), getDesc());
 		}
 	    }
@@ -238,12 +255,12 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 		    if (endpoint == null || endpoint.getURI() == null) throw new IllegalArgumentException("SPARQL Service endpoint must be URI Resource");
 
 		    if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has explicit SPARQL endpoint: {}", getOntResource().getURI(), endpoint.getURI());
-		    resource = new EndpointModelResourceImpl(endpoint.getURI(), getQuery(), getRequest(), getMediaType());
+		    resource = new EndpointModelResourceImpl(endpoint.getURI(), getQuery(), getRequest(), getVariants());
 		}
 		else
 		{
 		    if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has no explicit SPARQL endpoint, querying its Model", getOntResource().getURI());
-		    resource = new QueryModelModelResourceImpl(getOntResource().getModel(), getQuery(), getRequest(), getMediaType());
+		    resource = new QueryModelModelResourceImpl(getOntResource().getModel(), getQuery(), getRequest(), getVariants());
 		}
 	    }
 
@@ -293,9 +310,15 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	return uriInfo;
     }
 
-    public MediaType getMediaType()
+    @Override
+    public List<Variant> getVariants()
     {
-	return mediaType;
+	return variants;
+    }
+
+    public HttpHeaders getHttpHeaders()
+    {
+	return httpHeaders;
     }
 
     @Override
