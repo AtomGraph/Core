@@ -17,23 +17,25 @@
 package org.graphity.ldp.provider.xslt;
 
 import com.hp.hpl.jena.rdf.model.Model;
+import com.sun.jersey.spi.resource.Singleton;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 import javax.ws.rs.ext.MessageBodyWriter;
+import javax.ws.rs.ext.Provider;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamResult;
 import org.graphity.util.XSLTBuilder;
+import org.openjena.riot.WebContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,26 +43,30 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
+@Provider
+@Singleton
+@Produces({MediaType.APPLICATION_XHTML_XML})
 public class ModelXSLTWriter implements MessageBodyWriter<Model>
 {
     private static final Logger log = LoggerFactory.getLogger(ModelXSLTWriter.class);
 
-    private XSLTBuilder builder = null;
-
-    public ModelXSLTWriter(XSLTBuilder builder) throws TransformerConfigurationException
-    {
-	this.builder = builder;
-    }
-
+    //private XSLTBuilder builder = null;
+    private Source stylesheet = null;
+    private URIResolver resolver = null;
+	
+    @Context private UriInfo uriInfo;
+    
     public ModelXSLTWriter(Source stylesheet, URIResolver resolver) throws TransformerConfigurationException
     {
-	this(XSLTBuilder.fromStylesheet(stylesheet).resolver(resolver));
+	//this(XSLTBuilder.fromStylesheet(stylesheet).resolver(resolver));
+	this.stylesheet = stylesheet;
+	this.resolver = resolver;
     }
 
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-	return (Model.class.isAssignableFrom(type));
+	return Model.class.isAssignableFrom(type);
     }
 
     @Override
@@ -72,16 +78,32 @@ public class ModelXSLTWriter implements MessageBodyWriter<Model>
     @Override
     public void writeTo(Model model, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException
     {
+	if (log.isTraceEnabled()) log.trace("Writing Model with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
+
 	try
 	{
 	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	    model.write(baos);
+	    model.write(baos, WebContent.langRDFXML);
+
+	    // create XSLTBuilder per request output to avoid document() caching
+	    XSLTBuilder builder = XSLTBuilder.fromStylesheet(stylesheet).resolver(resolver);
+	    //builder.getTransformer().clearParameters(); // remove previously set param values
+
+	    builder.document(new ByteArrayInputStream(baos.toByteArray())).
+		//parameter("uri", UriBuilder.fromUri(resource.getURI()).build()). // URI can be retrieved from OntResource
+		parameter("base-uri", uriInfo.getBaseUri()).
+		parameter("absolute-path", uriInfo.getAbsolutePath()).
+		parameter("http-headers", httpHeaders.toString()).
+		result(new StreamResult(entityStream));
 	    
-	    getXSLTBuilder().
-		document(new ByteArrayInputStream(baos.toByteArray())).
-		result(new StreamResult(entityStream)).
-		transform();
-		    
+	    if (uriInfo.getQueryParameters().getFirst("lang") != null)
+		builder.parameter("lang", uriInfo.getQueryParameters().getFirst("lang"));
+	    if (uriInfo.getQueryParameters().getFirst("mode") != null)
+		builder.parameter("mode", UriBuilder.fromUri(uriInfo.getQueryParameters().getFirst("mode")).build());
+	    if (uriInfo.getQueryParameters().getFirst("query") != null)
+		builder.parameter("query", uriInfo.getQueryParameters().getFirst("query"));
+
+	    builder.transform();
 	    baos.close();
 	}
 	catch (TransformerException ex)
@@ -89,11 +111,6 @@ public class ModelXSLTWriter implements MessageBodyWriter<Model>
 	    log.error("XSLT transformation failed", ex);
 	    throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);
 	}
-    }
-    
-    public XSLTBuilder getXSLTBuilder()
-    {
-	return builder;
     }
 
 }

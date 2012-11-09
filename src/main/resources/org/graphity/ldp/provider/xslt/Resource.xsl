@@ -72,7 +72,7 @@ exclude-result-prefixes="#all">
     <xsl:param name="absolute-path" as="xs:anyURI"/>
     <xsl:param name="http-headers" as="xs:string"/>
 
-    <xsl:param name="uri" select="$absolute-path" as="xs:anyURI"/>
+    <!-- <xsl:param name="uri" select="$absolute-path" as="xs:anyURI"/> -->
     <xsl:param name="action" select="false()"/>
     <xsl:param name="lang" select="'en'" as="xs:string"/>
 
@@ -87,7 +87,8 @@ exclude-result-prefixes="#all">
     <xsl:param name="where" select="list:member(key('resources', $select-res/sp:where/@rdf:nodeID, $query-model), $query-model)"/>
     <xsl:param name="orderBy" select="if ($select-res/sp:orderBy) then list:member(key('resources', $select-res/sp:orderBy/@rdf:nodeID, $query-model), $query-model) else ()"/>
 
-    <xsl:variable name="resource" select="key('resources', $uri, $ont-model)" as="element()?"/>
+    <xsl:variable name="ont-resource" select="key('resources', $absolute-path, $ont-model)" as="element()?"/>
+    <xsl:variable name="resource" select="(key('resources', $ont-resource/foaf:isPrimaryTopicOf/@rdf:resource, $ont-model), $ont-resource)[1]" as="element()?"/>
     <xsl:variable name="ont-uri" select="resolve-uri('ontology/', $base-uri)" as="xs:anyURI"/>
     <xsl:variable name="ont-model" select="document($base-uri)" as="document-node()"/>
     <xsl:variable name="query-res" select="key('resources', $resource/g:query/@rdf:resource | $resource/g:query/@rdf:nodeID, $query-model)" as="element()?"/>
@@ -115,8 +116,8 @@ exclude-result-prefixes="#all">
 		    <xsl:apply-templates select="." mode="gldp:TableMode"/>
 		</xsl:when>
 		<xsl:otherwise>
-		    <!-- make the resource with the $uri first -->
-		    <xsl:variable name="this" select="key('resources', $uri)" as="element()?"/>
+		    <!-- make the resource with the $resource/@rdf:about first -->
+		    <xsl:variable name="this" select="key('resources', $resource/@rdf:about)" as="element()?"/>
 		    <xsl:apply-templates select="$this"/>
 		    <!-- apply all other URI resources -->
 		    <xsl:apply-templates select="*[@rdf:about] except $this"/>
@@ -158,8 +159,8 @@ exclude-result-prefixes="#all">
     <!-- TO-DO: make reusable with match="@rdf:about" - same as in gldp:HeaderMode -->
     <xsl:template match="rdf:RDF" mode="gldp:MediaTypeSelectMode">
 	<div class="btn-group pull-right">
-	    <xsl:if test="$uri != $absolute-path">
-		<a href="{$uri}" class="btn">Source</a>
+	    <xsl:if test="$resource/@rdf:about != $absolute-path">
+		<a href="{$resource/@rdf:about}" class="btn">Source</a>
 	    </xsl:if>
 	    <xsl:if test="$query">
 		<a href="{resolve-uri('sparql', $base-uri)}?query={encode-for-uri($query)}" class="btn">SPARQL</a>
@@ -171,7 +172,7 @@ exclude-result-prefixes="#all">
     
     <!-- subject -->
     
-    <xsl:template match="*[*][@rdf:about = $uri]" priority="1">
+    <xsl:template match="*[*][@rdf:about = $resource/@rdf:about]" priority="1">
 	<div>
 	    <xsl:apply-templates select="." mode="gldp:HeaderMode"/>
 	    

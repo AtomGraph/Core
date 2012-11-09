@@ -175,15 +175,7 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     @Override
     public Response getResponse()
     {
-	// always prefer XHTML if it's acceptable
-	if (getHttpHeaders().getAcceptableMediaTypes().contains(MediaType.APPLICATION_XHTML_XML_TYPE)
-		&& (getRequest().evaluatePreconditions(getEntityTag()) == null)) // resource modified
-	{
-	    if (log.isTraceEnabled()) log.trace("Generating XHTML Response");
-	    return Response.ok(this).tag(getEntityTag()).build(); // uses ResourceXHTMLWriter<Resource> FIX!
-	}
-	
-	return getResource().getResponse(); // uses ModelWriter<Model>
+	return getResource().getResponse();
     }
 
     public static OntClass matchOntClass(Class<?> cls, OntModel ontModel)
@@ -269,7 +261,6 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 		if (log.isTraceEnabled()) log.trace("Loaded Model is empty");
 		throw new WebApplicationException(Response.Status.NOT_FOUND);
 	    }
-
 	}
 	
 	return resource;
