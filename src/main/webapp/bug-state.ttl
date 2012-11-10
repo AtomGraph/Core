@@ -1,0 +1,147 @@
+# INITIAL STATE
+
+@base <http://localhost/> .
+
+@prefix : <ontology#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix sioc: <http://rdfs.org/sioc/ns#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix g: <http://graphity.org/ontology/> .
+@prefix lda: <http://purl.org/linked-data/api/vocab#> .
+
+# LDP METADATA (SITEMAP ONTOLOGY)
+
+# Containers
+
+<bugs> a sioc:Container ;
+	g:memberClass :BugResource .
+
+<bugs/critical> a sioc:Container ;
+	sioc:has_parent <bugs> ;
+	g:memberClass :CriticalBug.
+
+# Resources
+
+<bugs/bug1> a :BugResource ;
+	sioc:has_parent <bugs> ;
+	foaf:primaryTopic :Bug1 .
+
+<bugs/critical/bug2> a :BugResource ;
+	sioc:has_parent <bugs/critical> ;
+	foaf:primaryTopic <bugs/critical/bug2#bug> .
+
+# Classes
+
+:BugResource a owl:Class ;
+	rdfs:subClassOf [ a owl:Restriction ;
+		owl:onProperty foaf:primaryTopic ;
+		owl:allValuesFrom :Bug ] ,
+		[ a owl:Restriction ;
+		owl:onProperty sioc:has_parent ;
+		owl:hasValue <bugs> ] ;
+	lda:uriTemplate "/bugs/{id}" .
+
+:CriticalBugResource a owl:Class ;
+	rdfs:subClassOf [ a owl:Restriction ;
+		owl:onProperty foaf:primaryTopic ;
+		owl:allValuesFrom :CriticalBug ] ,
+		[ a owl:Restriction ;
+		owl:onProperty sioc:has_parent ;
+		owl:hasValue <bugs/critical> ] ;
+	lda:uriTemplate "/bugs/critical/{id}" .
+
+# RDF CONTENT
+
+:Bug a owl:Class .
+:CriticalBug rdfs:subClassOf :Bug .
+
+:Bug1 a :Bug .
+<bugs/critical/bug2#bug> a :CriticalBug .
+
+# REQUESTS
+
+# GET /bugs HTTP/1.1
+# Host: localhost
+
+# HTTP/1.1 200 OK
+
+<http://localhost/bugs> a sioc:Container ;
+	g:memberClass <http://localhost/ontology#BugResource> .
+
+<http://localhost/bugs/bug1> a :BugResource ;
+	sioc:has_parent <http://localhost/bugs> ;
+	foaf:primaryTopic <http://localhost/ontology#Bug1> .
+
+# GET /bugs/critical HTTP/1.1
+# Host: localhost
+
+# HTTP/1.1 200 OK
+
+<http://localhost/bugs/critical> a sioc:Container ;
+	sioc:has_parent <http://localhost/bugs> ;
+	g:memberClass <http://localhost/ontology#CriticalBug> .
+
+<http://localhost/bugs/critical/bug2#bug> a <http://localhost/ontology#CriticalBug> .
+
+# GET /bugs/bug1 HTTP/1.1
+# Host: localhost
+
+# HTTP/1.1 200 OK
+
+<http://localhost/bugs/bug1> a <http://localhost/ontology#BugResource> ;
+	sioc:has_parent <http://localhost/bugs> ;
+	foaf:primaryTopic <http://localhost/ontology#Bug1> .
+
+<http://localhost/ontology#Bug1> a <http://localhost/ontology#Bug> .
+
+# PUT /bugs/bug3 HTTP/1.1
+# Host: localhost
+
+<http://localhost/bugs/bug3#bug> a <http://localhost/ontology#Bug> .
+
+# HTTP/1.1 201 Created
+
+<http://localhost/bugs/bug3#bug> a <http://localhost/ontology#Bug> .
+
+<http://localhost/bugs/bug3> a <http://localhost/ontology#BugResource> ;
+	foaf:primaryTopic <http://localhost/bugs/bug3#bug> ;
+	sioc:has_host <http://localhost/bugs> .
+
+# POST /bugs/critical HTTP/1.1
+# Host: localhost
+
+<http://localhost/ontology#Bug4> a <http://localhost/ontology#CriticalBug> .
+
+# LDP: INFER :CriticalBug => :CriticalBugResource => "/bugs/critical/{id}"
+# HTTP/1.1 200 OK
+
+<http://localhost/ontology#Bug4> a <http://localhost/ontology#CriticalBug> .
+
+<http://localhost/bugs/critical/123> a <http://localhost/ontology#CriticalBugResource> ;
+	foaf:primaryTopic <http://localhost/ontology#Bug4> ;
+	sioc:has_host <http://localhost/bugs/critical> .
+
+# POST /bugs HTTP/1.1
+# Host: localhost
+
+<http://localhost/ontology#Bug5> a <http://localhost/ontology#CriticalBug> .
+
+# LDP: INFER :CriticalBug => :CriticalBugResource => "/bugs/critical/{id}"
+# HTTP/1.1 200 OK
+
+<http://localhost/ontology#Bug5> a <http://localhost/ontology#CriticalBug> .
+
+<http://localhost/bugs/critical/345> a <http://localhost/ontology#CriticalBugResource> ;
+	foaf:primaryTopic <http://localhost/ontology#Bug5> ;
+	sioc:has_host <http://localhost/bugs/critical> .
+
+# POST /bugs
+# Host: localhost
+
+<http://host.com/ontology#Bug3> a <http://localhost/ontology#Bug> .
+
+# LDP: INFER
+
+<http://localhost/bugs/bug3> foaf:primaryTopic <http://host.com/ontology#Bug3> .
