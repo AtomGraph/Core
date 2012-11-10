@@ -114,7 +114,6 @@
 
 <http://localhost/ontology#Bug4> a <http://localhost/ontology#CriticalBug> .
 
-# LDP: INFER :CriticalBug => :CriticalBugResource => "/bugs/critical/{id}"
 # HTTP/1.1 200 OK
 
 <http://localhost/ontology#Bug4> a <http://localhost/ontology#CriticalBug> .
@@ -128,7 +127,6 @@
 
 <http://localhost/ontology#Bug5> a <http://localhost/ontology#CriticalBug> .
 
-# LDP: INFER :CriticalBug => :CriticalBugResource => "/bugs/critical/{id}"
 # HTTP/1.1 200 OK
 
 <http://localhost/ontology#Bug5> a <http://localhost/ontology#CriticalBug> .
@@ -140,8 +138,10 @@
 # POST /bugs
 # Host: localhost
 
-<http://host.com/ontology#Bug3> a <http://localhost/ontology#Bug> .
+<http://host.com/ontology#Bug6> a <http://localhost/ontology#Bug> .
 
-# LDP: INFER
+# HTTP/1.1 200 OK
 
-<http://localhost/bugs/bug3> foaf:primaryTopic <http://host.com/ontology#Bug3> .
+<http://host.com/ontology#Bug6> a <http://localhost/ontology#Bug> .
+
+<http://localhost/bugs/bug6> foaf:primaryTopic <http://host.com/ontology#Bug6> .
