@@ -107,7 +107,7 @@
 
 <http://localhost/bugs/bug3> a <http://localhost/ontology#BugResource> ;
 	foaf:primaryTopic <http://localhost/bugs/bug3#bug> ;
-	sioc:has_host <http://localhost/bugs> .
+	sioc:has_parent <http://localhost/bugs> .
 
 # POST /bugs/critical HTTP/1.1
 # Host: localhost
@@ -120,7 +120,7 @@
 
 <http://localhost/bugs/critical/123> a <http://localhost/ontology#CriticalBugResource> ;
 	foaf:primaryTopic <http://localhost/ontology#Bug4> ;
-	sioc:has_host <http://localhost/bugs/critical> .
+	sioc:has_parent <http://localhost/bugs/critical> .
 
 # POST /bugs HTTP/1.1
 # Host: localhost
@@ -133,7 +133,7 @@
 
 <http://localhost/bugs/critical/345> a <http://localhost/ontology#CriticalBugResource> ;
 	foaf:primaryTopic <http://localhost/ontology#Bug5> ;
-	sioc:has_host <http://localhost/bugs/critical> .
+	sioc:has_parent <http://localhost/bugs/critical> .
 
 # POST /bugs
 # Host: localhost
