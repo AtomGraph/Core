@@ -70,7 +70,7 @@
 <http://localhost/bugs> a sioc:Container ;
 	g:memberClass <http://localhost/ontology#BugResource> .
 
-<http://localhost/bugs/bug1> a :BugResource ;
+<http://localhost/bugs/bug1> a <http://localhost/ontology#BugResource> ;
 	sioc:has_parent <http://localhost/bugs> ;
 	foaf:primaryTopic <http://localhost/ontology#Bug1> .
 
