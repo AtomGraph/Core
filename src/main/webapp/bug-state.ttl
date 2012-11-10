@@ -28,7 +28,7 @@
 	sioc:has_parent <bugs> ;
 	foaf:primaryTopic :Bug1 .
 
-<bugs/critical/bug2> a :BugResource ;
+<bugs/critical/bug2> a :CriticalBugResource ;
 	sioc:has_parent <bugs/critical> ;
 	foaf:primaryTopic <bugs/critical/bug2#bug> .
 
@@ -138,10 +138,15 @@
 # POST /bugs
 # Host: localhost
 
-<http://host.com/ontology#Bug6> a <http://localhost/ontology#Bug> .
+<http://host.com/bugs/bug6#bug> a <http://localhost/ontology#Bug> .
 
 # HTTP/1.1 200 OK
 
-<http://host.com/ontology#Bug6> a <http://localhost/ontology#Bug> .
+<http://host.com/bugs/bug6#bug> a <http://localhost/ontology#Bug> .
 
-<http://localhost/bugs/bug6> foaf:primaryTopic <http://host.com/ontology#Bug6> .
+<http://localhost/bugs/bug6> a <http://localhost/ontology#BugResource> ;
+	foaf:primaryTopic <http://host.com/bugs/bug6#bug> .
+
+# DELETE /bugs/bug1
+
+# HTTP/1.1 204 No Content
