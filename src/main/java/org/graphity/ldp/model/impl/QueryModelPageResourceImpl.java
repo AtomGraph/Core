@@ -90,8 +90,6 @@ public class QueryModelPageResourceImpl extends QueryModelModelResourceImpl impl
     @Override
     public String getURI()
     {
-	if (getOffset() == 0) return getUriInfo().getAbsolutePath().toString(); // hack
-
 	return getUriInfo().getAbsolutePathBuilder().
 		queryParam("limit", getLimit()).
 		queryParam("offset", getOffset()).
@@ -102,6 +100,10 @@ public class QueryModelPageResourceImpl extends QueryModelModelResourceImpl impl
 
     public final com.hp.hpl.jena.rdf.model.Resource getCurrent()
     {
+	// TO-DO: this is a hack, can be removed if container by default redirects to the first page
+	if (getOffset().equals(Long.valueOf(0)))
+	    return getModel().createResource(getUriInfo().getAbsolutePath().toString());
+
 	return getModel().createResource(getUriInfo().getAbsolutePathBuilder().
 		queryParam("limit", getLimit()).
 		queryParam("offset", getOffset()).

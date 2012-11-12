@@ -188,7 +188,6 @@ exclude-result-prefixes="#all">
     </xsl:template>
 
     <xsl:template match="rdf:RDF" mode="gldp:TitleMode">
-<xsl:copy-of select="$ont-model"/>
 	<xsl:value-of select="g:label($base-uri, $ont-model, $lang)"/>
 	<xsl:text> - </xsl:text>
 	<xsl:value-of select="g:label($resource/@rdf:about, /, $lang)"/>
@@ -205,6 +204,9 @@ exclude-result-prefixes="#all">
 		</xsl:when>
 		<xsl:when test="$mode = '&gldp;TableMode'">
 		    <xsl:apply-templates select="." mode="gldp:TableMode"/>
+		</xsl:when>
+		<xsl:when test="$mode = '&gldp;InputMode'">
+		    <xsl:apply-templates select="." mode="gldp:InputMode"/>
 		</xsl:when>
 		<xsl:otherwise>
 		    <!-- make the resource with the $resource/@rdf:about first -->
@@ -242,6 +244,15 @@ exclude-result-prefixes="#all">
 
 		<a href="{$absolute-path}{g:query-string($offset, $limit, $order-by, $desc, $lang, '&gldp;TableMode')}">
 		    <xsl:value-of select="g:label(xs:anyURI('&gldp;TableMode'), /, $lang)"/>
+		</a>
+	    </li>
+	    <li>
+		<xsl:if test="$mode = '&gldp;InputMode'">
+		    <xsl:attribute name="class">active</xsl:attribute>
+		</xsl:if>
+
+		<a href="{$absolute-path}{g:query-string($offset, $limit, $order-by, $desc, $lang, '&gldp;InputMode')}">
+		    <xsl:value-of select="g:label(xs:anyURI('&gldp;InputMode'), /, $lang)"/>
 		</a>
 	    </li>
 	</ul>
@@ -309,6 +320,12 @@ exclude-result-prefixes="#all">
     <!-- HEADER MODE -->
 
     <xsl:template match="*[*][@rdf:about] | *[*][@rdf:nodeID]" mode="gldp:HeaderMode">
+	<h1 class="page-header">
+	    <xsl:value-of select="g:label(@rdf:about | @rdf:nodeID, /, $lang)"/>
+	</h1>
+    </xsl:template>
+	
+    <xsl:template match="*[*][@rdf:about = $resource/@rdf:about]" mode="gldp:HeaderMode" priority="1">
 	<div class="well well-large">
 	    <xsl:apply-templates mode="gldp:HeaderImageMode"/>
 	    
@@ -552,9 +569,11 @@ exclude-result-prefixes="#all">
 	<div class="nav row-fluid">
 	    <xsl:apply-templates select="." mode="gldp:ModeSelectMode"/>
 
-	    <xsl:apply-templates select="." mode="gldp:MediaTypeSelectMode"/>
+	    <!-- <xsl:apply-templates select="." mode="gldp:MediaTypeSelectMode"/> -->
 	</div>
-	
+
+	<xsl:apply-templates select="key('resources', $absolute-path)" mode="gldp:HeaderMode"/>
+
 	<xsl:apply-templates select="." mode="gldp:PaginationMode"/>
 
 	<xsl:apply-templates mode="gldp:ListMode"/>
@@ -633,9 +652,11 @@ exclude-result-prefixes="#all">
 	<div class="nav row-fluid">
 	    <xsl:apply-templates select="." mode="gldp:ModeSelectMode"/>
 
-	    <xsl:apply-templates select="." mode="gldp:MediaTypeSelectMode"/>
+	    <!-- <xsl:apply-templates select="." mode="gldp:MediaTypeSelectMode"/> -->
 	</div>
 	
+	<xsl:apply-templates select="key('resources', $absolute-path)" mode="gldp:HeaderMode"/>
+
 	<xsl:apply-templates select="." mode="gldp:PaginationMode"/>
 
 	<xsl:variable name="predicates" as="element()*">
@@ -714,4 +735,174 @@ exclude-result-prefixes="#all">
 	</td>
     </xsl:template>
 
+    <!-- INPUT MODE -->
+    
+    <xsl:template match="rdf:RDF" mode="gldp:InputMode">
+	<div class="nav row-fluid">
+	    <xsl:apply-templates select="." mode="gldp:ModeSelectMode"/>
+
+	    <!-- <xsl:apply-templates select="." mode="gldp:MediaTypeSelectMode"/> -->
+	</div>
+
+	<xsl:apply-templates select="key('resources', $absolute-path)" mode="gldp:HeaderMode"/>
+
+	<form class="form-horizontal">
+	    <xsl:apply-templates mode="gldp:InputMode"/>
+	    
+	    <div class="form-actions">
+		<button type="submit" class="btn btn-primary">Save</button>
+	    </div>
+	</form>
+    </xsl:template>
+
+    <xsl:template match="*[@rdf:about] | *[@rdf:nodeID]" mode="gldp:InputMode">
+	<fieldset>
+	    <xsl:apply-templates select="@rdf:about | @rdf:nodeID" mode="gldp:InputMode"/>
+
+	    <xsl:apply-templates mode="gldp:InputMode"/>
+	</fieldset>
+    </xsl:template>
+
+    <!-- subject resource -->
+    <xsl:template match="@rdf:about" mode="gldp:InputMode">
+	<legend>
+	    <xsl:apply-templates select="."/>
+	</legend>
+
+	<input type="hidden" name="su" value="{.}"/>
+	<!-- <xsl:apply-templates select="."/> -->
+    </xsl:template>
+
+    <!-- subject blank node -->
+    <xsl:template match="@rdf:nodeID" mode="gldp:InputMode">
+	<legend>
+	    <xsl:apply-templates select="."/>
+	</legend>
+
+	<input type="hidden" name="sb" value="{.}"/>	
+    </xsl:template>
+
+    <!-- property -->
+    <xsl:template match="*[@rdf:about or @rdf:nodeID]/* | *[@rdf:resource]" mode="gldp:InputMode">
+	<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(.), local-name(.)))" as="xs:anyURI"/>
+	<xsl:variable name="property" select="key('resources', $this, document(g:document-uri($this)))"/>
+
+	<div class="control-group">
+	    <label for="what" class="control-label" title="{$property/rdfs:comment}">
+		<xsl:apply-templates select="$property/@rdf:about"/>
+	    </label>
+
+	    <!-- <xsl:value-of select="rdfs:range/@rdf:resource"/>!! -->
+
+	    <div class="controls">
+		<input type="hidden" name="pu" value="{$this}"/>
+
+		<xsl:choose>
+		    <xsl:when test="$property/rdf:type/@rdf:resource = '&owl;ObjectProperty'">
+			<select name="ou">
+			    <xsl:apply-templates select="@rdf:resource | @rdf:nodeID" mode="gldp:InputMode"/>
+			</select>
+		    </xsl:when>
+		    <xsl:when test="$property/rdf:type/@rdf:resource = '&owl;DatatypeProperty'">
+			<xsl:apply-templates select="text()" mode="gldp:InputMode"/>
+		    </xsl:when>
+		    <xsl:otherwise>
+			<xsl:for-each select="text() | @rdf:resource | @rdf:nodeID"> <!-- node() -->
+			    <input type="text" name="ol" value="{.}"/>
+			</xsl:for-each>
+		    </xsl:otherwise>
+		</xsl:choose>
+	    </div>
+	</div>
+    </xsl:template>
+
+    <!-- skip <dt> for properties that are not first in the sorted group -->
+    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*[preceding-sibling::*[concat(namespace-uri(.), local-name(.)) = concat(namespace-uri(current()), local-name(current()))]]" mode="gldp:InputMode" priority="1">
+	<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(.), local-name(.)))" as="xs:anyURI"/>
+	<xsl:variable name="property" select="key('resources', $this, document(g:document-uri($this)))"/>
+
+	<div class="control-group">
+	    <div class="controls">
+		<input type="hidden" name="pu" value="{$this}"/>
+
+		<xsl:choose>
+		    <xsl:when test="$property/rdf:type/@rdf:resource = '&owl;ObjectProperty'">
+			<select name="ou">
+			    <xsl:apply-templates select="@rdf:resource | @rdf:nodeID" mode="gldp:InputMode"/>
+			</select>
+		    </xsl:when>
+		    <xsl:when test="$property/rdf:type/@rdf:resource = '&owl;DatatypeProperty'">
+			<xsl:apply-templates select="text()" mode="gldp:InputMode"/>
+		    </xsl:when>
+		    <xsl:otherwise>
+			<xsl:for-each select="text() | @rdf:resource | @rdf:nodeID"> <!-- node() -->
+			    <input type="text" name="ol" value="{.}"/>
+			</xsl:for-each>
+		    </xsl:otherwise>
+		</xsl:choose>
+		
+		<xsl:if test="@rdf:datatype | @xml:lang">
+		    <span class="help-inline">
+			<xsl:apply-templates select="@rdf:datatype | @xml:lang"/> <!-- datatype xor language -->
+		    </span>
+		</xsl:if>
+	    </div>
+	</div>
+    </xsl:template>
+
+    <!-- object resource -->
+    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*/@rdf:resource" mode="gldp:InputMode">
+	<!-- <input type="hidden" name="ou" value="{.}"/> -->
+	<!-- <xsl:apply-templates select="."/> -->
+	<option value="{.}">
+	    <xsl:value-of select="g:label(., /, $lang)"/>
+	</option>
+	
+	<!--
+	<select>
+	    <option>New</option>
+	</select>
+	<button class="btn btn-primary">Add</button>
+	-->
+    </xsl:template>
+
+    <!-- object blank node -->
+    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*/@rdf:nodeID" mode="gldp:InputMode">
+	<input type="hidden" name="ob" value="{.}"/>
+	<!-- <xsl:apply-templates select="."/> -->
+	
+	<!-- <xsl:apply-templates select="key('resources', .)" mode="gldp:InputMode"/> -->
+    </xsl:template>
+
+    <!-- object literal -->
+    <xsl:template match="text()" mode="gldp:InputMode">
+	<input type="text" name="ol" value="{.}">
+	    <xsl:if test="not(../@rdf:datatype) or ../@rdf:datatype = '&xsd;string'">
+		<xsl:attribute name="class">input-xxlarge</xsl:attribute>
+	    </xsl:if>
+	</input>
+    </xsl:template>
+
+    <xsl:template match="@rdf:datatype" mode="gldp:InputMode">
+	<input type="text" name="lt" value="{.}"/>
+
+	<xsl:value-of select="g:label(., /, $lang)"/>
+    </xsl:template>
+
+    <xsl:template match="@xml:lang" mode="gldp:InputMode">
+	<input type="text" name="ll" value="{.}"/>
+
+	<xsl:value-of select="g:label(., /, $lang)"/>
+    </xsl:template>
+
+    <xsl:function name="rdfs:range" as="xs:anyURI*">
+	<xsl:param name="property-uri" as="xs:anyURI+"/>
+	<!-- <xsl:message>$property-uri: <xsl:value-of select="$property-uri"/></xsl:message> -->
+	<xsl:for-each select="$property-uri">
+	    <xsl:for-each select="document(g:document-uri($property-uri))">
+		<xsl:sequence select="key('resources', $property-uri)/rdfs:range/@rdf:resource"/>
+	    </xsl:for-each>
+	</xsl:for-each>
+    </xsl:function>
+    
 </xsl:stylesheet>

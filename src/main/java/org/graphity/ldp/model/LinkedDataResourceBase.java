@@ -239,7 +239,7 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	this.desc = desc;
 
 	if (log.isDebugEnabled()) log.debug("Locking ontResource.getModel() before QueryBuilder call");
-	synchronized (ontResource.getModel())
+	synchronized (ontResource.getOntModel())
 	{
 	    query = getQueryBuilder(limit, offset, orderBy, desc).build();
 	}
@@ -283,10 +283,13 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 		{
 		    if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has no explicit SPARQL endpoint, querying its Model", getOntResource().getURI());
 		    if (log.isDebugEnabled()) log.debug("Locking getOntResource.getModel() before SPARQL query");
-		    synchronized(getOntResource().getModel())
+		    synchronized(getOntResource().getOntModel())
 		    {
-			resource = new QueryModelPageResourceImpl(getOntResource().getModel(), getQuery(), getUriInfo(), getRequest(), getVariants(),
+			resource = new QueryModelPageResourceImpl(getOntResource().getOntModel(), getQuery(), getUriInfo(), getRequest(), getVariants(),
 			    getLimit(), getOffset(), getOrderBy(), getDesc());
+			
+			// EXPERIMENTAL!				
+			resource.getModel().add(getOntResource().listProperties());
 		    }
 		    if (log.isDebugEnabled()) log.debug("Unlocking getOntResource.getModel()");
 		}
@@ -309,9 +312,9 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 		{
 		    if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has no explicit SPARQL endpoint, querying its Model", getOntResource().getURI());
 		    if (log.isDebugEnabled()) log.debug("Locking getOntResource.getModel() before SPARQL query");
-		    synchronized(getOntResource().getModel())
+		    synchronized(getOntResource().getOntModel())
 		    {
-			resource = new QueryModelModelResourceImpl(getOntResource().getModel(), getQuery(), getRequest(), getVariants());
+			resource = new QueryModelModelResourceImpl(getOntResource().getOntModel(), getQuery(), getRequest(), getVariants());
 		    }
 		    if (log.isDebugEnabled()) log.debug("Unlocking getOntResource.getModel()");
 		}
