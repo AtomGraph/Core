@@ -58,7 +58,8 @@ public class ModelXSLTWriter implements MessageBodyWriter<Model>
     
     public ModelXSLTWriter(Source stylesheet, URIResolver resolver) throws TransformerConfigurationException
     {
-	//this(XSLTBuilder.fromStylesheet(stylesheet).resolver(resolver));
+	if (stylesheet == null) throw new IllegalArgumentException("XSLT stylesheet Source cannot be null");
+	if (resolver == null) throw new IllegalArgumentException("URIResolver cannot be null");
 	this.stylesheet = stylesheet;
 	this.resolver = resolver;
     }

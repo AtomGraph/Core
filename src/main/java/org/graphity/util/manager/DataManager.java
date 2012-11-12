@@ -162,27 +162,31 @@ public class DataManager extends FileManager implements URIResolver
 	if (log.isDebugEnabled()) log.debug("loadModel({})", filenameOrURI);
 	filenameOrURI = UriBuilder.fromUri(filenameOrURI).fragment(null).build().toString(); // remove document fragments
 	
-        if (hasCachedModel(filenameOrURI)) return getFromCache(filenameOrURI) ;  
+        if (hasCachedModel(filenameOrURI))
+	{
+	    if (log.isDebugEnabled()) log.debug("Returning cached Model for URI: {}", filenameOrURI);
+	    return getFromCache(filenameOrURI) ;
+	}  
 
-	Model m;
+	Model mode;
 	if (isSPARQLService(filenameOrURI))
 	{
 	    SPARQLService service = findSPARQLService(filenameOrURI);
 	    if (log.isDebugEnabled()) log.debug("URI {} is a SPARQL service, executing Query on SparqlService: {}", service.getEndpointURI());
 	    
-	    m = loadModel(service, parseQuery(filenameOrURI));
+	    mode = loadModel(service, parseQuery(filenameOrURI));
 	}
 	else
 	{
 	    if (log.isDebugEnabled()) log.debug("URI {} is *not* a SPARQL service, reading Model from TypedStream", filenameOrURI);
 
-	    m = ModelFactory.createDefaultModel();
-	    readModel(m, filenameOrURI);
+	    mode = ModelFactory.createDefaultModel();
+	    readModel(mode, filenameOrURI);
 	}
+
+	addCacheModel(filenameOrURI, mode);
 	
-	addCacheModel(filenameOrURI, m);
-	
-        return m;
+        return mode;
     }
 
     public Model loadModel(String endpointURI, Query query, MultivaluedMap<String, String> params)
@@ -330,7 +334,7 @@ public class DataManager extends FileManager implements URIResolver
 	if (!mappedURI.equals(filenameOrURI) && !mappedURI.startsWith("http:")) // if URI is mapped and local
 	{
 	    if (log.isDebugEnabled()) log.debug("URI {} is mapped to {}, letting FileManager.readModel() handle it", filenameOrURI, mappedURI);
-	    if (log.isDebugEnabled()) log.debug("FileManager.readModel() URI: {} Base URI: {}", filenameOrURI, filenameOrURI);
+	    if (log.isDebugEnabled()) log.debug("FileManager.readModel() URI: {} Base URI: {}", mappedURI, filenameOrURI);
 
 	    return super.readModel(model, mappedURI, filenameOrURI, null); // let FileManager handle
 	}

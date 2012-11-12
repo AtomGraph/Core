@@ -40,21 +40,38 @@ public class LDPResourceBase extends LinkedDataResourceBase implements org.graph
     }
     
     @Override
+    // http://tools.ietf.org/html/draft-ietf-httpbis-p2-semantics-21#section-5.3.3
+    // on base URI: http://lists.w3.org/Archives/Public/public-ldp-wg/2012Oct/0181.html
     public Response post(Model model)
     {
 	throw new WebApplicationException(405);
+	
+	//getOntResource().getOntModel().add(model);
+	
+	//return Response.created(null).build();
     }
 
     @Override
+    // http://tools.ietf.org/html/draft-ietf-httpbis-p2-semantics-21#section-5.3.4
     public Response put(Model model)
     {
-	throw new WebApplicationException(405);
+	// if (getService() != null) DataManager.get().putModel(endpointUri, getUriInfo().getAbsolutePath(), model);
+
+	getOntResource().getOntModel().add(model);
+	
+	return Response.created(getUriInfo().getAbsolutePath()).build();
     }
 
     @Override
+    // http://tools.ietf.org/html/draft-ietf-httpbis-p2-semantics-21#section-5.3.5
     public Response delete()
     {
-	throw new WebApplicationException(405);
+	// if (getService() != null) DataManager.get().deleteModel(endpointUri, getUriInfo().getAbsolutePath()
+	
+	getOntResource().remove();
+	
+	return Response.noContent().build(); // 204 No Content
+	// 410 Gone if provenance shows previous versions: http://www.w3.org/TR/chips/#cp4.2
     }
 
 }

@@ -1,4 +1,4 @@
-@base <http://ldp.graphity.org/> .
+# @base <http://ldp.graphity.org/> .
 
 @prefix : <ontology/> .
 @prefix g: <http://graphity.org/ontology/> .
@@ -43,8 +43,8 @@ _:sparql a sd:Service ;
     sd:endpoint <sparql> ;
     sd:supportedLanguage sd:SPARQL11Query .
 
-_:dydra a sd:Service ;
-    dct:title "Dydra cloud SPARQL service" ;
+<services/dydra> a sd:Service ;
+    dct:title "Dydra SPARQL service" ;
     foaf:homepage <http://dydra.com> ;
     sd:endpoint <http://dydra.com/graphity/ldp/sparql> .
 
@@ -69,28 +69,34 @@ gfb-app:type rdfs:label "Facebook application" ;
 
 # RESOURCES
 
+<> a sioc:Site, lda:ItemEndpoint ;
+    dct:title "Graphity Linked Data Platform" ;
+    g:selectQuery :SelectClasses ;
+    # g:service _:sparql ;
+    rdfs:isDefinedBy : ;
+    void:inDataset _:dataset .
+
 <instances> a sioc:Container, lda:ListEndpoint ;
     sioc:has_host <> ;
     dct:title "Instances" ;
     g:selectQuery :SelectInstances ;
-    g:service _:sparql ;
+    # g:service _:sparql ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
 <ontologies> a sioc:Container, lda:ListEndpoint ;
     sioc:has_host <> ;
     dct:title "Ontologies" ;
-    g:selectQuery g:SelectOntologies ;
-    g:service _:sparql ;
+    g:selectQuery :SelectOntologies ;
+    # g:service _:sparql ;
     rdfs:isDefinedBy : ;
-    void:inDataset _:dataset ;
-    g:service _:service .
+    void:inDataset _:dataset .
 
 <classes> a sioc:Container, lda:ListEndpoint ;
     sioc:has_host <> ;
     dct:title "Classes" ;
     g:selectQuery :SelectClasses ;
-    g:service _:sparql ;
+    # g:service _:sparql ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
@@ -98,7 +104,7 @@ gfb-app:type rdfs:label "Facebook application" ;
     sioc:has_host <> ;
     dct:title "Properties" ;
     g:selectQuery :SelectProperties ;
-    g:service _:sparql ;
+    # g:service _:sparql ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
@@ -106,7 +112,7 @@ gfb-app:type rdfs:label "Facebook application" ;
     sioc:has_host <> ;
     dct:title "Services" ;
     g:selectQuery :SelectServices ;
-    g:service _:sparql ;
+    # g:service _:sparql ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
@@ -114,7 +120,20 @@ gfb-app:type rdfs:label "Facebook application" ;
     sioc:has_host <> ;
     dct:title "Queries" ;
     g:selectQuery :SelectQueries ;
-    g:service _:sparql ;
+    # g:service _:sparql ;
+    rdfs:isDefinedBy : ;
+    void:inDataset _:dataset .
+
+<modes> a sioc:Container, lda:ListEndpoint ;
+    sioc:has_host <> ;
+    dct:title "XSLT modes" ;
+    g:selectQuery :SelectModes ;
+    # g:service _:sparql ;
+    rdfs:isDefinedBy : ;
+    void:inDataset _:dataset .
+
+<sparql> dct:title "SPARQL endpoint" ;
+    sioc:has_host <> ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
@@ -124,74 +143,135 @@ gfb-app:type rdfs:label "Facebook application" ;
     dct:title "Edit" ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
-:ListMode a g:XSLTPageMode ;
+:ListMode a g:XSLTMode, g:XSLTPageMode ;
     dct:title "List" ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
-:TableMode a g:XSLTPageMode ;
+:TableMode a g:XSLTMode, g:XSLTPageMode ;
     dct:title "Table" ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
 # QUERIES
 
-:SelectOntologies    a       sp:Select ;
-      sp:resultVariables (:SubjectVar) ;
-      sp:where (:UnionDefaultNamed
-		[ a       sp:Filter ;
-                  sp:expression
-                          [ a       sp:eq ;
-                            sp:arg1 :PredicateVar ;
-                            sp:arg2 rdf:type
-                          ]
-                ] [ a       sp:Filter ;
-                  sp:expression
-			[ a       sp:eq ;
-				    sp:arg1 :ObjectVar ;
-				    sp:arg2 owl:Ontology
-			]
+:SelectInstances    a       sp:Select, sp:Query ;
+      sp:resultVariables (_:instanceVar) ;
+      sp:text """SELECT ?instance
+WHERE {
+    ?instance a ?type .
+}"""^^xsd:string ;
+      sp:where ([ sp:object
+                          [ sp:varName "type"^^xsd:string
+                          ] ;
+                  sp:predicate rdf:type ;
+                  sp:subject _:instanceVar
                 ]) .
 
-# =============================
+_:instanceVar  sp:varName "instance"^^xsd:string .
 
-:SelectClasses    a       sp:Select ;
-      sp:resultVariables (:SubjectVar) ;
-      sp:where (:UnionDefaultNamed
-		[ a       sp:Filter ;
-                  sp:expression
-                          [ a       sp:eq ;
-                            sp:arg1 :PredicateVar ;
-                            sp:arg2 rdf:type
-                          ]
-                ] [ a       sp:Filter ;
-                  sp:expression
-			[ a       sp:or ;
-				    sp:arg1 [ a	    sp:eq ;
-						sp:arg1 :ObjectVar ;
-						sp:arg2 owl:Class
-					    ] ;
-				    sp:arg2 [ a	    sp:eq ;
-						sp:arg1 :ObjectVar ;
-						sp:arg2 rdfs:Class
-					    ]
-			]
-		]) .
+# ====
 
-# =================
-
-:SelectQueries    a       sp:Select ;
-      sp:resultVariables (:SubjectVar) ;
-      sp:where (:UnionDefaultNamed
-		[ a       sp:Filter ;
-                  sp:expression
-                          [ a       sp:eq ;
-                            sp:arg1 :PredicateVar ;
-                            sp:arg2 rdf:type
-                          ]
-                ] [ a       sp:Filter ;
-                  sp:expression
-			[ a       sp:eq ;
-				    sp:arg1 :ObjectVar ;
-				    sp:arg2 sp:Query
-			]
+:SelectOntologies    a       sp:Select, sp:Query ;
+      sp:resultVariables (_:ontologyVar) ;
+      sp:text """PREFIX owl: <http://www.w3.org/2002/07/owl#>
+SELECT ?ontology
+WHERE {
+    ?ontology a owl:Ontology .
+}"""^^xsd:string ;
+      sp:where ([ sp:object owl:Ontology ;
+                  sp:predicate rdf:type ;
+                  sp:subject _:ontologyVar
                 ]) .
+
+_:ontologyVar  sp:varName "ontology"^^xsd:string .
+
+# ====
+
+:SelectClasses    a       sp:Select, sp:Query ;
+      sp:resultVariables (_:classVar) ;
+      sp:text """PREFIX owl: <http://www.w3.org/2002/07/owl#>
+SELECT ?class
+WHERE {
+    ?class a owl:Class .
+}"""^^xsd:string ;
+      sp:where ([ sp:object owl:Class ;
+                  sp:predicate rdf:type ;
+                  sp:subject _:classVar
+                ]) .
+
+_:classVar  sp:varName "class"^^xsd:string .
+
+# ====
+
+:SelectProperties    a       sp:Select, sp:Query ;
+      sp:resultVariables (_:propertyVar) ;
+      sp:text """PREFIX owl: <http://www.w3.org/2002/07/owl#>
+SELECT ?property
+WHERE {
+    {
+        ?property a owl:ObjectProperty .
+    }
+    UNION
+    {
+        ?property a owl:DatatypeProperty .
+    } .
+}"""^^xsd:string ;
+      sp:where ([ a       sp:Union ;
+                  sp:elements (([ sp:object owl:ObjectProperty ;
+                                sp:predicate rdf:type ;
+                                sp:subject _:propertyVar
+                              ]) ([ sp:object owl:DatatypeProperty ;
+                                sp:predicate rdf:type ;
+                                sp:subject _:propertyVar
+                              ]))
+                ]) .
+
+_:propertyVar  sp:varName "property"^^xsd:string .
+
+# ====
+
+:SelectServices    a       sp:Select, sp:Query ;
+      sp:resultVariables (_:serviceVar) ;
+      sp:text """PREFIX sd: <http://www.w3.org/ns/sparql-service-description#>
+SELECT ?service
+WHERE {
+    ?service a sd:Service .
+}"""^^xsd:string ;
+      sp:where ([ sp:object sd:Service ;
+                  sp:predicate rdf:type ;
+                  sp:subject _:serviceVar
+                ]) .
+
+_:serviceVar  sp:varName "service"^^xsd:string .
+
+# ====
+
+:SelectQueries    a       sp:Select, sp:Query ;
+      sp:resultVariables (_:queryVar) ;
+      sp:text """PREFIX sp: <http://spinrdf.org/sp#>
+SELECT ?query
+WHERE {
+    ?query a sp:Query .
+}"""^^xsd:string ;
+      sp:where ([ sp:object sp:Query ;
+                  sp:predicate rdf:type ;
+                  sp:subject _:queryVar
+                ]) .
+
+_:queryVar  sp:varName "query"^^xsd:string .
+
+# ====
+
+:SelectModes    a       sp:Select, sp:Query ;
+      sp:resultVariables (_:modeVar) ;
+      sp:text """PREFIX g: <http://graphity.org/ontology/>
+SELECT ?mode
+WHERE {
+    ?mode a g:XSLTMode .
+}"""^^xsd:string ;
+      sp:where ([ sp:object g:XSLTMode ;
+                  sp:predicate rdf:type ;
+                  sp:subject _:modeVar
+                ]) .
+
+_:modeVar  sp:varName "mode"^^xsd:string .

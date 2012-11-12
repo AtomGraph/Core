@@ -17,9 +17,6 @@
 package org.graphity.ldp;
 
 import com.hp.hpl.jena.ontology.OntDocumentManager;
-import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.ontology.OntModelSpec;
-import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.util.LocationMapper;
@@ -29,14 +26,15 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.PostConstruct;
-import javax.ws.rs.core.UriInfo;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.stream.StreamSource;
+import org.graphity.ldp.model.LinkedDataResourceBase;
 import org.graphity.ldp.provider.ModelProvider;
 import org.graphity.ldp.provider.QueryParamProvider;
 import org.graphity.ldp.provider.RDFPostReader;
 import org.graphity.ldp.provider.ResultSetWriter;
+import org.graphity.ldp.provider.xslt.ModelXSLTWriter;
 import org.graphity.util.locator.LocatorGRDDL;
 import org.graphity.util.locator.PrefixMapper;
 import org.graphity.util.locator.grddl.LocatorAtom;
@@ -53,7 +51,8 @@ import org.topbraid.spin.system.SPINModuleRegistry;
 public class Application extends javax.ws.rs.core.Application
 {
     private static final Logger log = LoggerFactory.getLogger(Application.class);
-    
+
+    private Set<Class<?>> classes = new HashSet<Class<?>>();
     private Set<Object> singletons = new HashSet<Object>();
     
     @PostConstruct
@@ -104,12 +103,37 @@ public class Application extends javax.ws.rs.core.Application
     }
 
     @Override
+    public Set<Class<?>> getClasses()
+    {
+	classes.add(LinkedDataResourceBase.class); // handles all
+	
+        return classes;
+    }
+
+    @Override
     public Set<Object> getSingletons()
     {
 	singletons.add(new ModelProvider());
 	singletons.add(new ResultSetWriter());
 	singletons.add(new RDFPostReader());
 	singletons.add(new QueryParamProvider(Query.class));
+	
+	try
+	{
+	    singletons.add(new ModelXSLTWriter(getStylesheet("org/graphity/ldp/provider/xslt/Resource.xsl"), DataManager.get())); // writes XHTML responses
+	}
+	catch (TransformerConfigurationException ex)
+	{
+	    log.error("XSLT stylesheet error", ex);
+	}
+	catch (FileNotFoundException ex)
+	{
+	    log.error("XSLT stylesheet not found", ex);
+	}
+	catch (URISyntaxException ex)
+	{
+	    log.error("XSLT stylesheet URI error", ex);
+	}
 
 	return singletons;
     }
@@ -122,30 +146,6 @@ public class Application extends javax.ws.rs.core.Application
 	String xsltUri = xsltUrl.toURI().toString();
 	if (log.isDebugEnabled()) log.debug("XSLT stylesheet URI: {}", xsltUri);
 	return new StreamSource(xsltUri);
-    }
-
-    public static OntModel getOntology(UriInfo uriInfo)
-    {
-	return getOntology(uriInfo.getBaseUri().toString(), "org/graphity/ldp/vocabulary/graphity-ldp.ttl");
-    }
-    
-    public static OntModel getOntology(String baseUri, String ontologyPath)
-    {
-	if (log.isDebugEnabled()) log.debug("Adding prefix mapping prefix: {} altName: {} ", baseUri, ontologyPath);
-	
-	LocationMapper mapper = OntDocumentManager.getInstance().getFileManager().getLocationMapper();
-	mapper.addAltEntry(baseUri, ontologyPath);
-	((PrefixMapper)mapper).addAltPrefixEntry(baseUri, ontologyPath);
-	if (log.isDebugEnabled()) log.debug("DataManager.get().getLocationMapper(): {}", DataManager.get().getLocationMapper());
-	
-	OntModel ontModel = OntDocumentManager.getInstance().getOntology(baseUri, OntModelSpec.OWL_MEM_RDFS_INF);
-	if (log.isDebugEnabled()) log.debug("Ontology size: {}", ontModel.size());
-	return ontModel;
-    }
-
-    public static OntResource getOntResource(UriInfo uriInfo)
-    {
-	return getOntology(uriInfo).createOntResource(uriInfo.getAbsolutePath().toString());
     }
 
 }

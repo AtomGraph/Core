@@ -96,12 +96,20 @@ public class PrefixMapper extends LocationMapper
     {
 	if (log.isDebugEnabled()) log.debug("PrefixMapper.altMapping({}, {})", uri, otherwise);
 
-        if (getAltEntry(uri) != null) 
-            return getAltEntry(uri) ;
+	String altEntry = getAltEntry(uri);
+        if (altEntry != null) 
+	{
+	    if (log.isDebugEnabled()) log.debug("Returning existing altName mapping: {} for URI: {}", altEntry, uri);
+            return altEntry;
+	}
 	
 	String prefix = getPrefix(uri);
-	if (prefix != null && getPrefixAltEntry(prefix) != null)
+	String prefixAltEntry = getPrefixAltEntry(prefix);
+	if (prefix != null && prefixAltEntry != null)
+	{
+	    if (log.isDebugEnabled()) log.debug("Returning existing altName mapping: {} for prefix: {}", prefixAltEntry, prefix);
 	    return getPrefixAltEntry(prefix);
+	}
         
         return super.altMapping(uri, otherwise);
     }

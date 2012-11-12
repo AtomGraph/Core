@@ -59,6 +59,7 @@ xmlns:xhv="&xhv;"
 exclude-result-prefixes="#all">
 
     <xsl:import href="imports/default.xsl"/>
+    <xsl:import href="group-sort-triples.xsl"/>
     
     <xsl:include href="imports/foaf.xsl"/>
     <xsl:include href="imports/dbpedia-owl.xsl"/>
@@ -105,6 +106,96 @@ exclude-result-prefixes="#all">
     <rdf:Description rdf:nodeID="next">
 	<rdfs:label xml:lang="en">Next</rdfs:label>
     </rdf:Description>
+
+    <xsl:template match="/">
+	<html>
+	    <head>
+		<title>
+		    <xsl:apply-templates select="." mode="gldp:TitleMode"/>
+		</title>
+		<base href="{$base-uri}" />
+		
+		<xsl:for-each select="key('resources', $base-uri, $ont-model)">
+		    <meta name="author" content="{dct:creator/@rdf:resource}"/>
+		    <meta name="description" content="{dct:description}" xml:lang="{dct:description/@xml:lang}" lang="{dct:description/@xml:lang}"/>
+		</xsl:for-each>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		
+		<link href="static/css/bootstrap.css" rel="stylesheet"/>
+		<link href="static/css/bootstrap-responsive.css" rel="stylesheet"/>
+		
+		<style type="text/css">
+		    <![CDATA[
+			body { padding-top: 60px; padding-bottom: 40px; }
+			form.form-inline { margin: 0; }
+			ul.inline { margin-left: 0; }
+			.inline li { display: inline; }
+			.well-small { background-color: #FAFAFA ; }
+			textarea#query-string { font-family: monospace; }
+		    ]]>
+		</style>
+		
+		<xsl:apply-templates mode="gldp:ScriptMode"/>
+      	    </head>
+	    <body>
+		<div class="navbar navbar-fixed-top">
+		    <div class="navbar-inner">
+			<div class="container-fluid">    
+			    <a class="brand" href="{$base-uri}{g:query-string($lang)}">
+				<xsl:value-of select="g:label($base-uri, /, $lang)"/>
+			    </a>
+
+			    <div class="nav-collapse">
+				<ul class="nav">
+				    <!-- make menu links for all resources in the ontology, except base URI -->
+				    <xsl:for-each select="key('resources-by-host', $base-uri, $ont-model)/@rdf:about[not(. = $base-uri)]">
+					<xsl:sort select="g:label(., /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
+					<li>
+					    <xsl:if test=". = $absolute-path">
+						<xsl:attribute name="class">active</xsl:attribute>
+					    </xsl:if>
+					    <xsl:apply-templates select="."/>
+					</li>
+				    </xsl:for-each>
+				</ul>
+
+				<!--
+				<form class="navbar-search pull-left" action="search" method="get">
+				    <input class="search-query span2" name="query" type="text" placeholder="Search"/>
+				</form>
+				-->
+			    </div>
+			</div>
+		    </div>
+		</div>
+
+		<div class="container-fluid">
+		    <div class="row-fluid">
+			<xsl:variable name="grouped-rdf">
+			    <xsl:apply-templates mode="g:GroupTriples"/>
+			</xsl:variable>
+			<xsl:apply-templates select="$grouped-rdf/rdf:RDF"/>
+		    </div>
+		    
+		    <div class="footer">
+			<p>
+			    <xsl:value-of select="format-date(current-date(), '[Y]', $lang, (), ())"/>
+			</p>
+		    </div>
+		</div>
+	    </body>
+	</html>
+    </xsl:template>
+
+    <xsl:template match="rdf:RDF" mode="gldp:TitleMode">
+<xsl:copy-of select="$ont-model"/>
+	<xsl:value-of select="g:label($base-uri, $ont-model, $lang)"/>
+	<xsl:text> - </xsl:text>
+	<xsl:value-of select="g:label($resource/@rdf:about, /, $lang)"/>
+    </xsl:template>
+
+    <xsl:template match="rdf:RDF" mode="gldp:ScriptMode">
+    </xsl:template>
 
     <xsl:template match="rdf:RDF">
 	<div class="span8">
