@@ -576,7 +576,7 @@ exclude-result-prefixes="#all">
 
 	<xsl:apply-templates select="." mode="gldp:PaginationMode"/>
 
-	<xsl:apply-templates mode="gldp:ListMode"/>
+	<xsl:apply-templates select="* except key('resources', $absolute-path)" mode="gldp:ListMode"/>
 	
 	<xsl:apply-templates select="." mode="gldp:PaginationMode"/>
     </xsl:template>
@@ -594,7 +594,6 @@ exclude-result-prefixes="#all">
 		    </xsl:apply-templates>
 		</ul>
 	    </xsl:if>
-	    
 	    <xsl:if test="rdfs:comment[lang($lang) or not(@xml:lang)] or dc:description[lang($lang) or not(@xml:lang)] or dct:description[lang($lang) or not(@xml:lang)] or dbpedia-owl:abstract[lang($lang) or not(@xml:lang)] or sioc:content[lang($lang) or not(@xml:lang)]">
 		<p>
 		    <xsl:choose>
@@ -620,9 +619,9 @@ exclude-result-prefixes="#all">
     </xsl:template>
 
     <xsl:template match="@rdf:about | @rdf:nodeID" mode="gldp:ListMode">
-	<h1>
+	<h2>
 	    <xsl:apply-templates select="."/>
-	</h1>
+	</h2>
     </xsl:template>
 
     <!-- ignore all other properties -->
@@ -660,7 +659,7 @@ exclude-result-prefixes="#all">
 	<xsl:apply-templates select="." mode="gldp:PaginationMode"/>
 
 	<xsl:variable name="predicates" as="element()*">
-	    <xsl:for-each-group select="*/*" group-by="concat(namespace-uri(.), local-name(.))">
+	    <xsl:for-each-group select="(* except key('resources', $absolute-path))/*" group-by="concat(namespace-uri(.), local-name(.))">
 		<xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(.), local-name(.))), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
 		<xsl:sequence select="current-group()[1]"/>
 	    </xsl:for-each-group>
@@ -679,7 +678,7 @@ exclude-result-prefixes="#all">
 		</tr>
 	    </thead>
 	    <tbody>
-		<xsl:apply-templates mode="gldp:TableMode"/>
+		<xsl:apply-templates select="* except key('resources', $absolute-path)" mode="gldp:TableMode"/>
 	    </tbody>
 	</table>
 	
@@ -688,7 +687,7 @@ exclude-result-prefixes="#all">
 
     <xsl:template match="*[*][@rdf:about] | *[*][@rdf:nodeID]" mode="gldp:TableMode">
 	<xsl:variable name="predicates" as="element()*">
-	    <xsl:for-each-group select="../*/*" group-by="concat(namespace-uri(.), local-name(.))">
+	    <xsl:for-each-group select="(../* except key('resources', $absolute-path))/*" group-by="concat(namespace-uri(.), local-name(.))">
 		<xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(.), local-name(.))), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
 		<xsl:sequence select="current-group()[1]"/>
 	    </xsl:for-each-group>
@@ -747,7 +746,7 @@ exclude-result-prefixes="#all">
 	<xsl:apply-templates select="key('resources', $absolute-path)" mode="gldp:HeaderMode"/>
 
 	<form class="form-horizontal">
-	    <xsl:apply-templates mode="gldp:InputMode"/>
+	    <xsl:apply-templates select="* except key('resources', $absolute-path)" mode="gldp:InputMode"/>
 	    
 	    <div class="form-actions">
 		<button type="submit" class="btn btn-primary">Save</button>
@@ -904,5 +903,5 @@ exclude-result-prefixes="#all">
 	    </xsl:for-each>
 	</xsl:for-each>
     </xsl:function>
-    
+
 </xsl:stylesheet>

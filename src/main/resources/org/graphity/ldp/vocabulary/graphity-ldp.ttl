@@ -73,6 +73,7 @@ gfb-app:type rdfs:label "Facebook application" ;
     g:selectQuery :SelectClasses ;
     # g:service _:sparql ;
     g:mode gldp:ListMode ;
+    g:orderBy (rdfs:label) ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
@@ -82,6 +83,7 @@ gfb-app:type rdfs:label "Facebook application" ;
     g:selectQuery :SelectInstances ;
     # g:service _:sparql ;
     g:mode gldp:ListMode ;
+    g:orderBy (rdfs:label dct:title) ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
@@ -91,6 +93,7 @@ gfb-app:type rdfs:label "Facebook application" ;
     g:selectQuery :SelectOntologies ;
     # g:service _:sparql ;
     g:mode gldp:ListMode ;
+    g:orderBy (rdfs:label dct:title) ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
@@ -100,6 +103,7 @@ gfb-app:type rdfs:label "Facebook application" ;
     g:selectQuery :SelectClasses ;
     # g:service _:sparql ;
     g:mode gldp:ListMode ;
+    g:orderBy (rdfs:label) ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
@@ -109,6 +113,7 @@ gfb-app:type rdfs:label "Facebook application" ;
     g:selectQuery :SelectProperties ;
     # g:service _:sparql ;
     g:mode gldp:ListMode ;
+    g:orderBy (rdfs:label) ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
@@ -118,6 +123,7 @@ gfb-app:type rdfs:label "Facebook application" ;
     g:selectQuery :SelectServices ;
     # g:service _:sparql ;
     g:mode gldp:ListMode ;
+    g:orderBy (dct:title) ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
@@ -127,6 +133,7 @@ gfb-app:type rdfs:label "Facebook application" ;
     g:selectQuery :SelectQueries ;
     # g:service _:sparql ;
     g:mode gldp:ListMode ;
+    g:orderBy (dct:title) ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
@@ -136,6 +143,7 @@ gfb-app:type rdfs:label "Facebook application" ;
     g:selectQuery :SelectModes ;
     # g:service _:sparql ;
     g:mode gldp:ListMode ;
+    g:orderBy (dct:title) ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 

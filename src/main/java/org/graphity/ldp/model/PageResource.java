@@ -20,7 +20,7 @@ package org.graphity.ldp.model;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public interface PageResource extends LinkedDataResource
+public interface PageResource //extends LinkedDataResource
 {
     Long getLimit();
     
