@@ -607,6 +607,10 @@ exclude-result-prefixes="#all">
 		    </xsl:choose>
 		</p>
 	    </xsl:if>
+	    
+	    <xsl:if test="@rdf:nodeID">
+		<xsl:apply-templates select="." mode="gldp:PropertyListMode"/>
+	    </xsl:if>
 	</div>
     </xsl:template>
 
