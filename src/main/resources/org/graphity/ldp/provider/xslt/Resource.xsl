@@ -200,8 +200,6 @@ exclude-result-prefixes="#all">
     </xsl:template>
 
     <xsl:template match="rdf:RDF">
-<xsl:copy-of select="$ont-model"/>
-<xsl:copy-of select="$page"/>
 	<div class="span8">
 	    <xsl:choose>
 		<xsl:when test="$mode = '&gldp;ListMode'">
