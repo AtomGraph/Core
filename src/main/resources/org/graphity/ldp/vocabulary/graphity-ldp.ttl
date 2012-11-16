@@ -75,7 +75,8 @@ gfb-app:type rdfs:label "Facebook application" ;
     g:mode gldp:ListMode ;
     g:orderBy (rdfs:label) ;
     rdfs:isDefinedBy : ;
-    void:inDataset _:dataset .
+    void:inDataset _:dataset ;
+    rdfs:seeAlso : .
 
 <instances> a sioc:Container, lda:ListEndpoint ;
     sioc:has_host <> ;

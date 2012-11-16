@@ -21,6 +21,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import java.util.List;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
+import org.graphity.ldp.model.query.ModelResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,13 +33,27 @@ public class LDPResourceBase extends LinkedDataResourceBase implements LDPResour
 {    
     private static final Logger log = LoggerFactory.getLogger(LDPResourceBase.class);
 
-    public LDPResourceBase(OntResource ontResource,
+    public LDPResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context HttpHeaders httpHeaders,
+	    @QueryParam("limit") @DefaultValue("20") Long limit,
+	    @QueryParam("offset") @DefaultValue("0") Long offset,
+	    @QueryParam("order-by") String orderBy,
+	    @QueryParam("desc") Boolean desc)
+    {
+	this(getOntology(uriInfo).createOntResource(uriInfo.getAbsolutePath().toString()),
+		getResource(getOntology(uriInfo).createOntResource(uriInfo.getAbsolutePath().toString()),
+		    uriInfo, request, httpHeaders, VARIANTS,
+		    limit, offset, orderBy, desc),
+		uriInfo, request, httpHeaders, VARIANTS,
+		limit, offset, orderBy, desc);
+    }
+    
+    protected LDPResourceBase(OntResource ontResource, ModelResource resource,
 	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
 	    Long limit, Long offset, String orderBy, Boolean desc)
     {
-	super(ontResource, uriInfo, request, httpHeaders, variants, limit, offset, orderBy, desc);
+	super(ontResource, resource, uriInfo, request, httpHeaders, variants, limit, offset, orderBy, desc);
     }
-    
+
     @Override
     // http://tools.ietf.org/html/draft-ietf-httpbis-p2-semantics-21#section-5.3.3
     // on base URI: http://lists.w3.org/Archives/Public/public-ldp-wg/2012Oct/0181.html

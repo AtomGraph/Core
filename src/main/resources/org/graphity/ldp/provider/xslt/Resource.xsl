@@ -88,12 +88,15 @@ exclude-result-prefixes="#all">
     <xsl:param name="orderBy" select="if ($select-res/sp:orderBy) then list:member(key('resources', $select-res/sp:orderBy/@rdf:nodeID, $query-model), $query-model) else ()"/>
 
     <xsl:variable name="ont-resource" select="key('resources', $absolute-path, $ont-model)" as="element()?"/>
-    <xsl:variable name="resource" select="(key('resources', $ont-resource/foaf:isPrimaryTopicOf/@rdf:resource, $ont-model), $ont-resource)[1]" as="element()?"/>
+    <!-- <xsl:variable name="resource" select="(key('resources', $ont-resource/foaf:isPrimaryTopicOf/@rdf:resource, $ont-model), $ont-resource)[1]" as="element()?"/> -->
+    <xsl:variable name="resource" select="$ont-resource" as="element()?"/>
     <xsl:variable name="ont-uri" select="resolve-uri('ontology/', $base-uri)" as="xs:anyURI"/>
     <xsl:variable name="ont-model" select="document($base-uri)" as="document-node()"/>
     <xsl:variable name="query-res" select="key('resources', $resource/g:query/@rdf:resource | $resource/g:query/@rdf:nodeID, $query-model)" as="element()?"/>
     <xsl:variable name="select-res" select="key('resources', $resource/g:selectQuery/@rdf:resource | $resource/g:selectQuery/@rdf:nodeID, $query-model)" as="element()?"/>
     
+    <xsl:variable name="page" select="key('resources-by-container', $absolute-path)"/>
+
     <xsl:key name="resources" match="*[*][@rdf:about] | *[*][@rdf:nodeID]" use="@rdf:about | @rdf:nodeID"/>
     <xsl:key name="predicates" match="*[@rdf:about]/* | *[@rdf:nodeID]/*" use="concat(namespace-uri(.), local-name(.))"/>
     <xsl:key name="resources-by-host" match="*[@rdf:about]" use="sioc:has_host/@rdf:resource"/>
@@ -197,6 +200,8 @@ exclude-result-prefixes="#all">
     </xsl:template>
 
     <xsl:template match="rdf:RDF">
+<xsl:copy-of select="$ont-model"/>
+<xsl:copy-of select="$page"/>
 	<div class="span8">
 	    <xsl:choose>
 		<xsl:when test="$mode = '&gldp;ListMode'">
@@ -329,6 +334,7 @@ exclude-result-prefixes="#all">
 	<div class="well well-large">
 	    <xsl:apply-templates mode="gldp:HeaderImageMode"/>
 	    
+	    <!--
 	    <xsl:if test="@rdf:about">
 		<div class="btn-group pull-right">
 		    <xsl:if test="@rdf:about != $absolute-path">
@@ -341,6 +347,7 @@ exclude-result-prefixes="#all">
 		    <a href="{@rdf:about}?accept={encode-for-uri('text/turtle')}" class="btn">Turtle</a>
 		</div>
 	    </xsl:if>
+	    -->
 
 	    <xsl:apply-templates select="@rdf:about | @rdf:nodeID" mode="gldp:HeaderMode"/>
 
@@ -514,43 +521,39 @@ exclude-result-prefixes="#all">
 
     <!-- PAGINATION MODE -->
 
-    <xsl:template match="rdf:RDF" mode="gldp:PaginationMode">
-	<xsl:variable name="page" select="key('resources-by-container', $absolute-path)"/>
-
-	<xsl:if test="$page">
-	    <ul class="pager">
-		<li class="previous">
-		    <xsl:choose>
-			<xsl:when test="$page/xhv:prev">
-			    <a href="{$page/xhv:prev/@rdf:resource}" class="active">
-				&#8592; <xsl:value-of select="key('resources', 'previous', document(''))/rdfs:label[lang($lang)]"/>
-			    </a>
-			</xsl:when>
-			<xsl:otherwise>
-			    <xsl:attribute name="class">previous disabled</xsl:attribute>
-			    <a>
-				&#8592; <xsl:value-of select="key('resources', 'previous', document(''))/rdfs:label[lang($lang)]"/>
-			    </a>
-			</xsl:otherwise>
-		    </xsl:choose>
-		</li>
-		<li class="next">
-		    <xsl:choose>
-			<xsl:when test="$page/xhv:next">
-			    <a href="{$page/xhv:next/@rdf:resource}">
-				<xsl:value-of select="key('resources', 'next', document(''))/rdfs:label[lang($lang)]"/> &#8594;
-			    </a>
-			</xsl:when>
-			<xsl:otherwise>
-			    <xsl:attribute name="class">next disabled</xsl:attribute>
-			    <a>
-				<xsl:value-of select="key('resources', 'next', document(''))/rdfs:label[lang($lang)]"/> &#8594;
-			    </a>
-			</xsl:otherwise>
-		    </xsl:choose>
-		</li>
-	    </ul>
-	</xsl:if>
+    <xsl:template match="*[xhv:prev] | *[xhv:next]" mode="gldp:PaginationMode">
+	<ul class="pager">
+	    <li class="previous">
+		<xsl:choose>
+		    <xsl:when test="xhv:prev">
+			<a href="{xhv:prev/@rdf:resource}" class="active">
+			    &#8592; <xsl:value-of select="key('resources', 'previous', document(''))/rdfs:label[lang($lang)]"/>
+			</a>
+		    </xsl:when>
+		    <xsl:otherwise>
+			<xsl:attribute name="class">previous disabled</xsl:attribute>
+			<a>
+			    &#8592; <xsl:value-of select="key('resources', 'previous', document(''))/rdfs:label[lang($lang)]"/>
+			</a>
+		    </xsl:otherwise>
+		</xsl:choose>
+	    </li>
+	    <li class="next">
+		<xsl:choose>
+		    <xsl:when test="xhv:next">
+			<a href="{xhv:next/@rdf:resource}">
+			    <xsl:value-of select="key('resources', 'next', document(''))/rdfs:label[lang($lang)]"/> &#8594;
+			</a>
+		    </xsl:when>
+		    <xsl:otherwise>
+			<xsl:attribute name="class">next disabled</xsl:attribute>
+			<a>
+			    <xsl:value-of select="key('resources', 'next', document(''))/rdfs:label[lang($lang)]"/> &#8594;
+			</a>
+		    </xsl:otherwise>
+		</xsl:choose>
+	    </li>
+	</ul>
     </xsl:template>
 
     <!-- LIST MODE -->
@@ -562,13 +565,14 @@ exclude-result-prefixes="#all">
 	    <!-- <xsl:apply-templates select="." mode="gldp:MediaTypeSelectMode"/> -->
 	</div>
 
-	<xsl:apply-templates select="key('resources', $absolute-path)" mode="gldp:HeaderMode"/>
+	<xsl:apply-templates select="$ont-resource" mode="gldp:HeaderMode"/>
 
-	<xsl:apply-templates select="." mode="gldp:PaginationMode"/>
+	<xsl:apply-templates select="$page" mode="gldp:PaginationMode"/>
 
-	<xsl:apply-templates select="* except key('resources', $absolute-path)" mode="gldp:ListMode"/>
+	<!-- exclude page metadata -->
+	<xsl:apply-templates select="*[not(xhv:prev or xhv:next or sioc:has_container/@rdf:resource = $absolute-path)]" mode="gldp:ListMode"/>
 	
-	<xsl:apply-templates select="." mode="gldp:PaginationMode"/>
+	<xsl:apply-templates select="$page" mode="gldp:PaginationMode"/>
     </xsl:template>
 
     <xsl:template match="*[*][@rdf:about] | *[*][@rdf:nodeID]" mode="gldp:ListMode">
@@ -644,12 +648,13 @@ exclude-result-prefixes="#all">
 	    <!-- <xsl:apply-templates select="." mode="gldp:MediaTypeSelectMode"/> -->
 	</div>
 	
-	<xsl:apply-templates select="key('resources', $absolute-path)" mode="gldp:HeaderMode"/>
+	<xsl:apply-templates select="$ont-resource" mode="gldp:HeaderMode"/>
 
-	<xsl:apply-templates select="." mode="gldp:PaginationMode"/>
+	<xsl:apply-templates select="$page" mode="gldp:PaginationMode"/>
 
 	<xsl:variable name="predicates" as="element()*">
-	    <xsl:for-each-group select="(* except key('resources', $absolute-path))/*" group-by="concat(namespace-uri(.), local-name(.))">
+	    <!-- exclude page metadata -->
+	    <xsl:for-each-group select="(*[not(xhv:prev or xhv:next or sioc:has_container/@rdf:resource = $absolute-path)])/*" group-by="concat(namespace-uri(.), local-name(.))">
 		<xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(.), local-name(.))), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
 		<xsl:sequence select="current-group()[1]"/>
 	    </xsl:for-each-group>
@@ -668,16 +673,18 @@ exclude-result-prefixes="#all">
 		</tr>
 	    </thead>
 	    <tbody>
-		<xsl:apply-templates select="* except key('resources', $absolute-path)" mode="gldp:TableMode"/>
+		<!-- exclude page metadata -->
+		<xsl:apply-templates select="*[not(xhv:prev or xhv:next or sioc:has_container/@rdf:resource = $absolute-path)]" mode="gldp:TableMode"/>
 	    </tbody>
 	</table>
 	
-	<xsl:apply-templates select="." mode="gldp:PaginationMode"/>
+	<xsl:apply-templates select="$page" mode="gldp:PaginationMode"/>
     </xsl:template>
 
     <xsl:template match="*[*][@rdf:about] | *[*][@rdf:nodeID]" mode="gldp:TableMode">
 	<xsl:variable name="predicates" as="element()*">
-	    <xsl:for-each-group select="(../* except key('resources', $absolute-path))/*" group-by="concat(namespace-uri(.), local-name(.))">
+	    <!-- exclude page metadata -->
+	    <xsl:for-each-group select="(../*[not(xhv:prev or xhv:next or sioc:has_container/@rdf:resource = $absolute-path)])/*" group-by="concat(namespace-uri(.), local-name(.))">
 		<xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(.), local-name(.))), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
 		<xsl:sequence select="current-group()[1]"/>
 	    </xsl:for-each-group>
@@ -733,10 +740,11 @@ exclude-result-prefixes="#all">
 	    <!-- <xsl:apply-templates select="." mode="gldp:MediaTypeSelectMode"/> -->
 	</div>
 
-	<xsl:apply-templates select="key('resources', $absolute-path)" mode="gldp:HeaderMode"/>
+	<xsl:apply-templates select="$ont-resource" mode="gldp:HeaderMode"/>
 
 	<form class="form-horizontal">
-	    <xsl:apply-templates select="* except key('resources', $absolute-path)" mode="gldp:InputMode"/>
+	    <!-- exclude page metadata -->
+	    <xsl:apply-templates select="*[not(xhv:prev or xhv:next or sioc:has_container/@rdf:resource = $absolute-path)]" mode="gldp:InputMode"/>
 	    
 	    <div class="form-actions">
 		<button type="submit" class="btn btn-primary">Save</button>

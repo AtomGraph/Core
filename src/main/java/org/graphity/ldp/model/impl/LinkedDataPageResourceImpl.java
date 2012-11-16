@@ -93,16 +93,14 @@ public final class LinkedDataPageResourceImpl extends LinkedDataResourceBase imp
 	if (limit == null) throw new IllegalArgumentException("LIMIT must be not null");
 	if (offset == null) throw new IllegalArgumentException("OFFSET must be not null");
 
-	//if (limit == null) limit = Long.valueOf(20); // lda:defaultPageSize?
-	//if (offset == null) offset = Long.valueOf(0);
-
 	// different URI from Container!
 	UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder().
 		replaceQueryParam("limit", limit).
 		replaceQueryParam("offset", offset);
 	if (orderBy != null) uriBuilder.replaceQueryParam("order-by", orderBy);
 	if (desc != null) uriBuilder.replaceQueryParam("desc", desc);
-		
+
+	if (log.isDebugEnabled()) log.debug("Creating LinkedDataPageResource from OntResource with URI: {}", uriBuilder.build().toString());
 	OntResource ontResource = container.getOntModel().createOntResource(uriBuilder.build().toString());
 	
 	if (log.isDebugEnabled()) log.debug("Locking ontResource.getOntModel() before QueryBuilder call");
@@ -126,16 +124,15 @@ public final class LinkedDataPageResourceImpl extends LinkedDataResourceBase imp
 	Long limit, Long offset, String orderBy, Boolean desc)
     {
 	super(getOntResource(container, uriInfo, limit, offset, orderBy, desc),
+		getResource(getOntResource(container, uriInfo, limit, offset, orderBy, desc),
+				    uriInfo, request, httpHeaders, VARIANTS,
+				    limit, offset, orderBy, desc),
 		uriInfo, request, httpHeaders, variants,
 		limit, offset, orderBy, desc);
 	if (limit == null) throw new IllegalArgumentException("LIMIT must be not null");
 	if (offset == null) throw new IllegalArgumentException("OFFSET must be not null");
 
 	this.container = container;
-
-	// LIMIT & OFFSET must not be null for a page! ORDER BY & DESC can be null
-	//if (limit == null) limit = Long.valueOf(20); // lda:defaultPageSize?
-	//if (offset == null) offset = Long.valueOf(0);
 
 	this.limit = limit;
 	this.offset = offset;
@@ -168,9 +165,8 @@ public final class LinkedDataPageResourceImpl extends LinkedDataResourceBase imp
 		getOntResource().addProperty(XHV.next, getNext());
 	    }
 	    
-	    // combine container/page metadata with query results
-	    getModel().add(container.listProperties()).
-		    add(getOntResource().listProperties());
+	    // combine page metadata with query results (then exclude it in XSLT transformation)
+	    getModel().add(getOntResource().listProperties());
 	}
     }
     
