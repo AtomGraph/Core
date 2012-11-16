@@ -18,12 +18,8 @@ package org.graphity.ldp.model.impl;
 
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.vocabulary.DCTerms;
 import java.util.List;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.core.Variant;
+import javax.ws.rs.core.*;
 import org.graphity.ldp.model.LinkedDataResourceBase;
 import org.graphity.ldp.model.PageResource;
 import org.graphity.util.QueryBuilder;
@@ -88,33 +84,29 @@ public final class LinkedDataPageResourceImpl extends LinkedDataResourceBase imp
 	return queryBuilder;
     }
     
-    public static OntResource getOntResource(OntResource container, UriInfo uriInfo, Long limit, Long offset, String orderBy, Boolean desc)
+    public static OntResource getOntResource(OntResource container, UriInfo uriInfo,
+	    Long limit, Long offset, String orderBy, Boolean desc)
     {
 	if (container == null) throw new IllegalArgumentException("Container must be not null");
 	if (!container.hasProperty(Graphity.selectQuery)) throw new IllegalArgumentException("Container Resource must have a SELECT query");
 
-	/*
 	if (limit == null) throw new IllegalArgumentException("LIMIT must be not null");
 	if (offset == null) throw new IllegalArgumentException("OFFSET must be not null");
-	if (orderBy == null) throw new IllegalArgumentException("ORDER BY must be not null");
-	if (desc == null) throw new IllegalArgumentException("DESC must be not null");
-	*/
-	if (limit == null) limit = Long.valueOf(20); // lda:defaultPageSize?
-	if (offset == null) offset = Long.valueOf(0);
-	if (orderBy == null) orderBy = DCTerms.title.getURI();
-	if (desc == null) desc = true;
+
+	//if (limit == null) limit = Long.valueOf(20); // lda:defaultPageSize?
+	//if (offset == null) offset = Long.valueOf(0);
 
 	// different URI from Container!
-	OntResource ontResource = container.getOntModel().createOntResource(uriInfo.
-		getAbsolutePathBuilder().
-		    queryParam("limit", limit).
-		    queryParam("offset", offset).
-		    queryParam("order-by", orderBy).
-		    queryParam("desc", desc).
-		    build().toString());
+	UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder().
+		replaceQueryParam("limit", limit).
+		replaceQueryParam("offset", offset);
+	if (orderBy != null) uriBuilder.replaceQueryParam("order-by", orderBy);
+	if (desc != null) uriBuilder.replaceQueryParam("desc", desc);
+		
+	OntResource ontResource = container.getOntModel().createOntResource(uriBuilder.build().toString());
 	
 	if (log.isDebugEnabled()) log.debug("Locking ontResource.getOntModel() before QueryBuilder call");
-	synchronized (ontResource.getOntModel())
+	//synchronized (ontResource.getOntModel())
 	{
 	    SelectBuilder selectBuilder = getSelectBuilder(container.getPropertyResourceValue(Graphity.selectQuery),
 		    limit, offset, orderBy, desc);
@@ -136,24 +128,49 @@ public final class LinkedDataPageResourceImpl extends LinkedDataResourceBase imp
 	super(getOntResource(container, uriInfo, limit, offset, orderBy, desc),
 		uriInfo, request, httpHeaders, variants,
 		limit, offset, orderBy, desc);
+	if (limit == null) throw new IllegalArgumentException("LIMIT must be not null");
+	if (offset == null) throw new IllegalArgumentException("OFFSET must be not null");
 
 	this.container = container;
 
-	if (limit == null) limit = Long.valueOf(20); // lda:defaultPageSize?
-	if (offset == null) offset = Long.valueOf(0);
-	if (orderBy == null) orderBy = DCTerms.title.getURI();
-	if (desc == null) desc = true;
+	// LIMIT & OFFSET must not be null for a page! ORDER BY & DESC can be null
+	//if (limit == null) limit = Long.valueOf(20); // lda:defaultPageSize?
+	//if (offset == null) offset = Long.valueOf(0);
+
 	this.limit = limit;
 	this.offset = offset;
 	this.orderBy = orderBy;
 	this.desc = desc;
 	
-	// add links to previous/next page (HATEOS)
-	synchronized (getOntModel())
+	int subjectCount = getModel().listSubjects().toList().size();
+	
+	if (log.isDebugEnabled())
 	{
+	    log.debug("OFFSET: {} LIMIT: {}", offset, limit);
+	    log.debug("ORDER BY: {} DESC: {}", orderBy, desc);
+	    log.debug("getModel().size(): {} getModel().listSubjects().toList().size(): {}", getModel().size(), subjectCount);
+	}
+	
+	// add links to container, previous/next page etc (HATEOS)
+	//synchronized (getOntModel())
+	{
+	    if (log.isDebugEnabled()) log.debug("Adding page metadata: {} sioc:has_container {}", getURI(), container.getURI());
 	    getOntResource().addProperty(SIOC.HAS_CONTAINER, container);
-	    if (getOffset() >= getLimit()) getOntResource().addProperty(XHV.prev, getPrevious());
-	    if (getModel().size() >= getLimit()) getOntResource().addProperty(XHV.next, getNext());
+	    	    
+	    if (getOffset() >= getLimit())
+	    {
+		if (log.isDebugEnabled()) log.debug("Adding page metadata: {} xhv:previous {}", getURI(), getPrevious().getURI());
+		getOntResource().addProperty(XHV.prev, getPrevious());
+	    }
+	    if (subjectCount >= getLimit())
+	    {
+		if (log.isDebugEnabled()) log.debug("Adding page metadata: {} xhv:next {}", getURI(), getNext().getURI());
+		getOntResource().addProperty(XHV.next, getNext());
+	    }
+	    
+	    // combine container/page metadata with query results
+	    getModel().add(container.listProperties()).
+		    add(getOntResource().listProperties());
 	}
     }
     
@@ -189,23 +206,27 @@ public final class LinkedDataPageResourceImpl extends LinkedDataResourceBase imp
     @Override
     public final com.hp.hpl.jena.rdf.model.Resource getPrevious()
     {
-	return getOntModel().createResource(getUriInfo().getAbsolutePathBuilder().
-		queryParam("limit", getLimit()).
-		queryParam("offset", getOffset() - getLimit()).
-		queryParam("order-by", getOrderBy()).
-		queryParam("desc", getDesc()).
-		build().toString());
+	UriBuilder uriBuilder = getUriInfo().getAbsolutePathBuilder().
+	    replaceQueryParam("limit", getLimit()).
+	    replaceQueryParam("offset", getOffset() - getLimit());
+
+	if (getOrderBy() != null) uriBuilder.replaceQueryParam("order-by", getOrderBy());
+	if (getDesc() != null) uriBuilder.replaceQueryParam("desc", getDesc());
+
+	return getOntModel().createResource(uriBuilder.build().toString());
     }
 
     @Override
     public final com.hp.hpl.jena.rdf.model.Resource getNext()
     {
-	return getOntModel().createResource(getUriInfo().getAbsolutePathBuilder().
-		queryParam("limit", getLimit()).
-		queryParam("offset", getOffset() + getLimit()).
-		queryParam("order-by", getOrderBy()).
-		queryParam("desc", getDesc()).
-		build().toString());
+	UriBuilder uriBuilder = getUriInfo().getAbsolutePathBuilder().
+	    replaceQueryParam("limit", getLimit()).
+	    replaceQueryParam("offset", getOffset() + getLimit());
+
+	if (getOrderBy() != null) uriBuilder.replaceQueryParam("order-by", getOrderBy());
+	if (getDesc() != null) uriBuilder.replaceQueryParam("desc", getDesc());
+
+	return getOntModel().createResource(uriBuilder.build().toString());
     }
 
 }

@@ -94,6 +94,7 @@ public class ModelXSLTWriter implements MessageBodyWriter<Model>
 		//parameter("uri", UriBuilder.fromUri(resource.getURI()).build()). // URI can be retrieved from OntResource
 		parameter("base-uri", uriInfo.getBaseUri()).
 		parameter("absolute-path", uriInfo.getAbsolutePath()).
+		parameter("request-uri", uriInfo.getRequestUri()).
 		parameter("http-headers", httpHeaders.toString()).
 		result(new StreamResult(entityStream));
 	    

@@ -70,7 +70,8 @@ public class Application extends javax.ws.rs.core.Application
 	}
 	
 	DataManager.get().setLocationMapper(mapper);
-	DataManager.get().setModelCaching(true);
+	// WARNING! ontology caching can cause concurrency/consistency problems
+	DataManager.get().setModelCaching(false);
 	if (log.isDebugEnabled())
 	{
 	    log.debug("FileManager.get(): {} DataManager.get(): {}", FileManager.get(), DataManager.get());

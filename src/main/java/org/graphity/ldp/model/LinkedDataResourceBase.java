@@ -23,10 +23,7 @@ import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.util.LocationMapper;
 import java.util.List;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import org.graphity.ldp.model.impl.LinkedDataPageResourceImpl;
 import org.graphity.ldp.model.query.ModelResource;
@@ -75,9 +72,9 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     // https://open.med.harvard.edu/svn/eagle-i-dev/apps/tags/1.0-MS4.0/common/model-jena/src/main/java/org/eaglei/model/jena/EagleIOntDocumentManager.java
     public static OntModel getOntology(String baseUri, String ontologyPath)
     {
-	synchronized (OntDocumentManager.getInstance())
+	//synchronized (OntDocumentManager.getInstance())
 	{
-	    if (!OntDocumentManager.getInstance().getFileManager().hasCachedModel(baseUri)) // not cached
+	    //if (!OntDocumentManager.getInstance().getFileManager().hasCachedModel(baseUri)) // not cached
 	    {	    
 		if (log.isDebugEnabled()) log.debug("Ontology not cached, reading from file: {}", ontologyPath);
 		if (log.isDebugEnabled()) log.debug("DataManager.get().getLocationMapper(): {}", DataManager.get().getLocationMapper());
@@ -89,8 +86,8 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 		if (log.isDebugEnabled()) log.debug("Adding prefix/altName mapping: {} altName: {} ", baseUri, ontologyPath);
 		((PrefixMapper)mapper).addAltPrefixEntry(baseUri, ontologyPath);	    
 	    }
-	    else
-		if (log.isDebugEnabled()) log.debug("Ontology already cached, returning cached instance");
+	    //else
+		//if (log.isDebugEnabled()) log.debug("Ontology already cached, returning cached instance");
 
 	    OntModel ontModel = OntDocumentManager.getInstance().getOntology(baseUri, OntModelSpec.OWL_MEM_RDFS_INF);
 	    if (log.isDebugEnabled()) log.debug("Ontology size: {}", ontModel.size());
@@ -146,8 +143,8 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     }
 
     public LinkedDataResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context HttpHeaders httpHeaders,
-	    @QueryParam("limit") Long limit,
-	    @QueryParam("offset") Long offset,
+	    @QueryParam("limit") @DefaultValue("20") Long limit,
+	    @QueryParam("offset") @DefaultValue("0") Long offset,
 	    @QueryParam("order-by") String orderBy,
 	    @QueryParam("desc") Boolean desc)
     {
@@ -181,9 +178,6 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	    if (log.isDebugEnabled()) log.debug("OntResource is a container, returning page Resource");
 	    resource = new LinkedDataPageResourceImpl(getOntResource(), getUriInfo(), getRequest(), getHttpHeaders(), getVariants(),
 		limit, offset, orderBy, desc);
-	    
-	    // EXPERIMENTAL!				
-	    resource.getModel().add(getOntResource().listProperties());
 	}
     }
 
@@ -219,12 +213,12 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	    Query query;
 
 	    if (log.isDebugEnabled()) log.debug("Locking ontResource.getModel() before QueryBuilder call");
-	    synchronized (getOntResource().getModel())
+	    //synchronized (getOntResource().getModel())
 	    {
 		queryBuilder = getQueryBuilder();
 		query = queryBuilder.build();
 	    }
-	    synchronized (getOntResource().getOntModel())
+	    //synchronized (getOntResource().getOntModel())
 	    {
 		getOntResource().setPropertyValue(Graphity.query, queryBuilder); // Resource alway get a g:query value		
 	    }
@@ -247,7 +241,7 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	    {
 		if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has no explicit SPARQL endpoint, querying its Model", getOntResource().getURI());
 		if (log.isDebugEnabled()) log.debug("Locking getOntResource.getModel() before SPARQL query");
-		synchronized (getOntModel())
+		//synchronized (getOntModel())
 		{
 		    resource = new QueryModelModelResourceImpl(getOntModel(), query, getRequest(), getVariants());
 		}

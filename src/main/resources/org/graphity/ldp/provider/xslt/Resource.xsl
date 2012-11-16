@@ -71,10 +71,9 @@ exclude-result-prefixes="#all">
 
     <xsl:param name="base-uri" as="xs:anyURI"/>
     <xsl:param name="absolute-path" as="xs:anyURI"/>
+    <xsl:param name="request-uri" as="xs:anyURI"/>
     <xsl:param name="http-headers" as="xs:string"/>
 
-    <!-- <xsl:param name="uri" select="$absolute-path" as="xs:anyURI"/> -->
-    <xsl:param name="action" select="false()"/>
     <xsl:param name="lang" select="'en'" as="xs:string"/>
 
     <xsl:param name="mode" select="$resource/g:mode/@rdf:resource" as="xs:anyURI?"/>
@@ -98,6 +97,7 @@ exclude-result-prefixes="#all">
     <xsl:key name="resources" match="*[*][@rdf:about] | *[*][@rdf:nodeID]" use="@rdf:about | @rdf:nodeID"/>
     <xsl:key name="predicates" match="*[@rdf:about]/* | *[@rdf:nodeID]/*" use="concat(namespace-uri(.), local-name(.))"/>
     <xsl:key name="resources-by-host" match="*[@rdf:about]" use="sioc:has_host/@rdf:resource"/>
+    <xsl:key name="resources-by-container" match="*[@rdf:about]" use="sioc:has_container/@rdf:resource"/>
  
     <rdf:Description rdf:nodeID="previous">
 	<rdfs:label xml:lang="en">Previous</rdfs:label>
@@ -515,18 +515,20 @@ exclude-result-prefixes="#all">
     <!-- PAGINATION MODE -->
 
     <xsl:template match="rdf:RDF" mode="gldp:PaginationMode">
-	<xsl:if test="count(*) &gt; 0">
+	<xsl:variable name="page" select="key('resources-by-container', $absolute-path)"/>
+
+	<xsl:if test="$page">
 	    <ul class="pager">
 		<li class="previous">
 		    <xsl:choose>
-			<xsl:when test="not($offset &gt;= $limit)">
-			    <xsl:attribute name="class">previous disabled</xsl:attribute>
-			    <a>
+			<xsl:when test="$page/xhv:prev">
+			    <a href="{$page/xhv:prev/@rdf:resource}" class="active">
 				&#8592; <xsl:value-of select="key('resources', 'previous', document(''))/rdfs:label[lang($lang)]"/>
 			    </a>
 			</xsl:when>
 			<xsl:otherwise>
-			    <a href="{$absolute-path}{g:query-string($offset - $limit, $limit, $order-by, $desc, $lang, $mode)}" class="active">
+			    <xsl:attribute name="class">previous disabled</xsl:attribute>
+			    <a>
 				&#8592; <xsl:value-of select="key('resources', 'previous', document(''))/rdfs:label[lang($lang)]"/>
 			    </a>
 			</xsl:otherwise>
@@ -534,14 +536,14 @@ exclude-result-prefixes="#all">
 		</li>
 		<li class="next">
 		    <xsl:choose>
-			<xsl:when test="count(*) &lt; $limit">
-			    <xsl:attribute name="class">next disabled</xsl:attribute>
-			    <a>
+			<xsl:when test="$page/xhv:next">
+			    <a href="{$page/xhv:next/@rdf:resource}">
 				<xsl:value-of select="key('resources', 'next', document(''))/rdfs:label[lang($lang)]"/> &#8594;
 			    </a>
 			</xsl:when>
 			<xsl:otherwise>
-			    <a href="{$absolute-path}{g:query-string($offset + $limit, $limit, $order-by, $desc, $lang, $mode)}">
+			    <xsl:attribute name="class">next disabled</xsl:attribute>
+			    <a>
 				<xsl:value-of select="key('resources', 'next', document(''))/rdfs:label[lang($lang)]"/> &#8594;
 			    </a>
 			</xsl:otherwise>
@@ -549,18 +551,6 @@ exclude-result-prefixes="#all">
 		</li>
 	    </ul>
 	</xsl:if>
-    </xsl:template>
-
-    <xsl:template match="xhv:prev" mode="gldp:PaginationMode">
-	<a href="{@rdf:resource}" class="active">
-	    &#8592; <xsl:value-of select="key('resources', 'previous', document(''))/rdfs:label[lang($lang)]"/>
-	</a>
-    </xsl:template>
-
-    <xsl:template match="xhv:next" mode="gldp:PaginationMode">
-	<a href="{@rdf:resource}">
-	    <xsl:value-of select="key('resources', 'next', document(''))/rdfs:label[lang($lang)]"/> &#8594;
-	</a>
     </xsl:template>
 
     <!-- LIST MODE -->
