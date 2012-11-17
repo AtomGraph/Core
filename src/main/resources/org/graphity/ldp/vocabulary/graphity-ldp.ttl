@@ -21,6 +21,7 @@
 
 : a owl:Ontology ;
     owl:imports <http://graphity.org/ontology/> ;
+    owl:versionInfo "1.0.4" ;
     dct:title "Graphity Linked Data Platform ontology" ;
     rdfs:label "Graphity Linked Data Platform ontology" ;
     dct:created "2012-10-26T01:04:00+03:00"^^xsd:dateTime ;

@@ -124,9 +124,6 @@ public final class LinkedDataPageResourceImpl extends LinkedDataResourceBase imp
 	Long limit, Long offset, String orderBy, Boolean desc)
     {
 	super(getOntResource(container, uriInfo, limit, offset, orderBy, desc),
-		getResource(getOntResource(container, uriInfo, limit, offset, orderBy, desc),
-				    uriInfo, request, httpHeaders, VARIANTS,
-				    limit, offset, orderBy, desc),
 		uriInfo, request, httpHeaders, variants,
 		limit, offset, orderBy, desc);
 	if (limit == null) throw new IllegalArgumentException("LIMIT must be not null");
@@ -164,9 +161,6 @@ public final class LinkedDataPageResourceImpl extends LinkedDataResourceBase imp
 		if (log.isDebugEnabled()) log.debug("Adding page metadata: {} xhv:next {}", getURI(), getNext().getURI());
 		getOntResource().addProperty(XHV.next, getNext());
 	    }
-	    
-	    // combine page metadata with query results (then exclude it in XSLT transformation)
-	    getModel().add(getOntResource().listProperties());
 	}
     }
     

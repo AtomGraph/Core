@@ -16,6 +16,8 @@
  */
 package org.graphity.ldp.provider.xslt;
 
+import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.sun.jersey.spi.resource.Singleton;
 import java.io.ByteArrayInputStream;
@@ -34,6 +36,7 @@ import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 import org.graphity.util.XSLTBuilder;
 import org.openjena.riot.WebContent;
 import org.slf4j.Logger;
@@ -86,16 +89,19 @@ public class ModelXSLTWriter implements MessageBodyWriter<Model>
 	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	    model.write(baos, WebContent.langRDFXML);
 
-	    // create XSLTBuilder per request output to avoid document() caching
-	    XSLTBuilder builder = XSLTBuilder.fromStylesheet(stylesheet).resolver(resolver);
-	    //builder.getTransformer().clearParameters(); // remove previously set param values
+	    // injecting Resource to get its OntModel. Is there a better way to do this?
+	    OntResource ontResource = (OntResource)uriInfo.getMatchedResources().get(0);
+	    if (log.isDebugEnabled()) log.error("Matched Resource: {}", ontResource);
 
-	    builder.document(new ByteArrayInputStream(baos.toByteArray())).
-		//parameter("uri", UriBuilder.fromUri(resource.getURI()).build()). // URI can be retrieved from OntResource
+	    // create XSLTBuilder per request output to avoid document() caching
+	    XSLTBuilder builder = XSLTBuilder.fromStylesheet(stylesheet).
+		resolver(resolver).
+		document(new ByteArrayInputStream(baos.toByteArray())).
 		parameter("base-uri", uriInfo.getBaseUri()).
 		parameter("absolute-path", uriInfo.getAbsolutePath()).
 		parameter("request-uri", uriInfo.getRequestUri()).
 		parameter("http-headers", httpHeaders.toString()).
+		parameter("ont-model", getSource(ontResource.getOntModel())). // $ont-model from the current Resource
 		result(new StreamResult(entityStream));
 	    
 	    if (uriInfo.getQueryParameters().getFirst("lang") != null)
@@ -110,9 +116,21 @@ public class ModelXSLTWriter implements MessageBodyWriter<Model>
 	}
 	catch (TransformerException ex)
 	{
-	    log.error("XSLT transformation failed", ex);
+	    if (log.isErrorEnabled()) log.error("XSLT transformation failed", ex);
 	    throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);
 	}
+    }
+
+    public Source getSource(OntModel ontModel)
+    {
+	if (log.isDebugEnabled()) log.debug("Number of OntModel stmts read: {}", ontModel.size());
+	
+	ByteArrayOutputStream stream = new ByteArrayOutputStream();
+	ontModel.write(stream);
+
+	if (log.isDebugEnabled()) log.debug("RDF/XML bytes written: {}", stream.toByteArray().length);
+
+	return new StreamSource(new ByteArrayInputStream(stream.toByteArray()));	
     }
 
 }
