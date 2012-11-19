@@ -29,19 +29,19 @@
     vann:preferredNamespacePrefix "gldp";
     foaf:homepage : ;
     dct:license <http://www.opendatacommons.org/licenses/pddl/1.0/> ;
-    dct:creator <http://semantic-web.dk#martynas> ;
-    rdfs:seeAlso <sparql> .
+    dct:creator <http://semantic-web.dk#martynas> .
+    # rdfs:seeAlso <sparql> .
 
 _:dataset a void:Dataset ;
     dct:title "The dataset of this application" ;
     foaf:homepage <> ;
-    rdfs:isDefinedBy : ;
-    void:sparqlEndpoint <sparql> .
+    rdfs:isDefinedBy : .
+    # void:sparqlEndpoint <sparql> .
 
-_:sparql a sd:Service ;
-    dct:title "Local SPARQL service" ;
-    sd:endpoint <sparql> ;
-    sd:supportedLanguage sd:SPARQL11Query .
+# _:sparql a sd:Service ;
+#    dct:title "Local SPARQL service" ;
+#    sd:endpoint <sparql> ;
+#    sd:supportedLanguage sd:SPARQL11Query .
 
 <services/dydra> a sd:Service ;
     dct:title "Dydra SPARQL service" ;
@@ -149,10 +149,10 @@ gfb-app:type rdfs:label "Facebook application" ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
-<sparql> dct:title "SPARQL endpoint" ;
-    sioc:has_host <> ;
-    rdfs:isDefinedBy : ;
-    void:inDataset _:dataset .
+# <sparql> dct:title "SPARQL endpoint" ;
+#    sioc:has_host <> ;
+#    rdfs:isDefinedBy : ;
+#    void:inDataset _:dataset .
 
 # MODES
 

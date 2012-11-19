@@ -24,7 +24,9 @@ import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
 import java.lang.reflect.Type;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +60,15 @@ public class QueryParamProvider extends PerRequestTypeInjectableProvider<QueryPa
 		if (value == null || value.isEmpty()) return null;
 		    
 		if (log.isTraceEnabled()) log.trace("Providing Injectable<Query> with @QueryParam({}) and value: {}", paramName, value);
-		return QueryFactory.create(value);
+		try
+		{
+		    return QueryFactory.create(value);
+		}
+		catch (Exception ex)
+		{
+		    if (log.isWarnEnabled()) log.warn("Supplied SPARQL query string could not be parsed, check syntax: {}", value);
+		    throw new WebApplicationException(ex, Response.Status.BAD_REQUEST);
+		}
 	    }
 	};
     }

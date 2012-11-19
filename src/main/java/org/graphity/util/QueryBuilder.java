@@ -63,6 +63,8 @@ public class QueryBuilder implements org.topbraid.spin.model.Query
 	return query;
     }
 
+    // public static QueryBuilder fromTemplateCall(Template template, TemplateCall call)
+    
     public static QueryBuilder fromQuery(org.topbraid.spin.model.Query query)
     {
 	return new QueryBuilder(query);
@@ -353,12 +355,17 @@ public class QueryBuilder implements org.topbraid.spin.model.Query
 	else return null;
     }
 
-    public Query build()
+   public Query build()
+    {
+	return build(true);
+    }
+
+    public Query build(boolean printPrefixes)
     {
 	// generate SPARQL query string
 	StringBuilder sb = new StringBuilder();
 	PrintContext pc = new StringPrintContext(sb);
-	pc.setPrintPrefixes(true);
+	pc.setPrintPrefixes(printPrefixes);
 	print(pc);
 
 	removeAll(SP.text)
