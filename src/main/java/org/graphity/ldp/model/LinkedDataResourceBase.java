@@ -116,7 +116,7 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	return queryBuilder;
     }
 
-    public static ModelResource getResource(OntResource ontResource,
+    public static ModelResource getModelResource(OntResource ontResource,
 	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
 	    Long limit, Long offset, String orderBy, Boolean desc)
     {	
@@ -222,7 +222,7 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	    log.debug("List of Variants: {}", variants);
 	}
 
-	resource = getResource(ontResource, uriInfo, request, httpHeaders, VARIANTS, limit, offset, orderBy, desc);
+	resource = getModelResource(ontResource, uriInfo, request, httpHeaders, VARIANTS, limit, offset, orderBy, desc);
 	if (resource.getModel().isEmpty())
 	{
 	    if (log.isTraceEnabled()) log.trace("Loaded Model is empty; returnin 404 Not Found");
@@ -242,18 +242,6 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     {
 	// Content-Location http://www.w3.org/TR/chips/#cp5.2
 	// http://www.w3.org/wiki/HR14aCompromise
-
-	// redirect to the first page
-	/*
-	if (getOntResource().hasRDFType(SIOC.CONTAINER))
-	    return Response.seeOther(UriBuilder.fromUri(getURI()).
-		    replaceQueryParam("limit", limit).
-		    replaceQueryParam("offset", offset).
-		    replaceQueryParam("order-by", orderBy).
-		    replaceQueryParam("desc", desc).
-		    build()).
-		build();
-	*/
 	
 	if (log.isDebugEnabled()) log.debug("Returning @GET Response");
 	return getResource().getResponse();
