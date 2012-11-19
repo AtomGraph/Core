@@ -223,12 +223,7 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	}
 
 	resource = getModelResource(ontResource, uriInfo, request, httpHeaders, VARIANTS, limit, offset, orderBy, desc);
-	if (resource.getModel().isEmpty())
-	{
-	    if (log.isTraceEnabled()) log.trace("Loaded Model is empty; returnin 404 Not Found");
-	    throw new WebApplicationException(Response.Status.NOT_FOUND);
-	}
-
+	
 	this.uriInfo = uriInfo;
 	this.request = request;
 	this.httpHeaders = httpHeaders;
@@ -242,7 +237,13 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     {
 	// Content-Location http://www.w3.org/TR/chips/#cp5.2
 	// http://www.w3.org/wiki/HR14aCompromise
-	
+
+	if (getResource().getModel().isEmpty())
+	{
+	    if (log.isTraceEnabled()) log.trace("Loaded Model is empty; returnin 404 Not Found");
+	    throw new WebApplicationException(Response.Status.NOT_FOUND);
+	}
+
 	if (log.isDebugEnabled()) log.debug("Returning @GET Response");
 	return getResource().getResponse();
     }

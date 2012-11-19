@@ -77,7 +77,7 @@ exclude-result-prefixes="#all">
     <xsl:param name="lang" select="'en'" as="xs:string"/>
 
     <xsl:param name="mode" select="$ont-resource/g:mode/@rdf:resource" as="xs:anyURI?"/>
-    <xsl:param name="ont-model" select="document($base-uri)" as="document-node()"/>
+    <xsl:param name="ont-model" as="document-node()"/> <!-- select="document($base-uri)"  -->
     <xsl:param name="offset" select="$select-res/sp:offset" as="xs:integer?"/>
     <xsl:param name="limit" select="$select-res/sp:limit" as="xs:integer?"/>
     <xsl:param name="order-by" select="key('resources', $orderBy/sp:expression/@rdf:resource, $ont-model)/sp:varName" as="xs:string?"/>

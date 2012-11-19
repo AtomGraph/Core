@@ -34,7 +34,6 @@ import org.topbraid.spin.arq.ARQ2SPIN;
 import org.topbraid.spin.arq.ARQFactory;
 import org.topbraid.spin.model.*;
 import org.topbraid.spin.model.print.PrintContext;
-import org.topbraid.spin.model.print.StringPrintContext;
 import org.topbraid.spin.system.SPINModuleRegistry;
 import org.topbraid.spin.vocabulary.SP;
 
@@ -355,24 +354,16 @@ public class QueryBuilder implements org.topbraid.spin.model.Query
 	else return null;
     }
 
-   public Query build()
+    public Query build()
     {
-	return build(true);
-    }
-
-    public Query build(boolean printPrefixes)
-    {
-	// generate SPARQL query string
-	StringBuilder sb = new StringBuilder();
-	PrintContext pc = new StringPrintContext(sb);
-	pc.setPrintPrefixes(printPrefixes);
-	print(pc);
-
-	removeAll(SP.text)
-	    .addLiteral(SP.text, getModel().createTypedLiteral(sb.toString()));
-
 	// ARQFactory.get().setUseCaches(false) to avoid caching
-	return ARQFactory.get().createQuery(getQuery());
+	com.hp.hpl.jena.query.Query arqQuery = ARQFactory.get().createQuery(getQuery());
+	
+	// generate SPARQL query string
+	removeAll(SP.text)
+	    .addLiteral(SP.text, getModel().createTypedLiteral(arqQuery.toString()));
+	
+	return arqQuery;
     }
 
     @Override
