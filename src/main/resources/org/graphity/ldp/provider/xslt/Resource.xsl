@@ -224,14 +224,16 @@ exclude-result-prefixes="#all">
 	</div>
     </xsl:template>
 
-    <xsl:template match="rdf:RDF" mode="gldp:ModeSelectMode">
-	<ul class="nav nav-tabs pull-right">
+    <xsl:template match="*" mode="gldp:ModeSelectMode"/>
+	
+    <xsl:template match="sioc:Container | *[rdf:type/@rdf:resource = '&sioc;Container']" mode="gldp:ModeSelectMode" priority="1">
+	<ul class="nav nav-tabs">
 	    <li>
 		<xsl:if test="$mode = '&gldp;ListMode'">
 		    <xsl:attribute name="class">active</xsl:attribute>
 		</xsl:if>
 
-		<a href="{$absolute-path}{g:query-string($offset, $limit, $order-by, $desc, $lang, '&gldp;ListMode')}">
+		<a href="{@rdf:about}{g:query-string($offset, $limit, $order-by, $desc, $lang, '&gldp;ListMode')}">
 		    <xsl:value-of select="g:label(xs:anyURI('&gldp;ListMode'), /, $lang)"/>
 		</a>
 	    </li>
@@ -240,7 +242,7 @@ exclude-result-prefixes="#all">
 		    <xsl:attribute name="class">active</xsl:attribute>
 		</xsl:if>
 
-		<a href="{$absolute-path}{g:query-string($offset, $limit, $order-by, $desc, $lang, '&gldp;TableMode')}">
+		<a href="{@rdf:about}{g:query-string($offset, $limit, $order-by, $desc, $lang, '&gldp;TableMode')}">
 		    <xsl:value-of select="g:label(xs:anyURI('&gldp;TableMode'), /, $lang)"/>
 		</a>
 	    </li>
@@ -249,7 +251,7 @@ exclude-result-prefixes="#all">
 		    <xsl:attribute name="class">active</xsl:attribute>
 		</xsl:if>
 
-		<a href="{$absolute-path}{g:query-string($offset, $limit, $order-by, $desc, $lang, '&gldp;InputMode')}">
+		<a href="{@rdf:about}{g:query-string($offset, $limit, $order-by, $desc, $lang, '&gldp;InputMode')}">
 		    <xsl:value-of select="g:label(xs:anyURI('&gldp;InputMode'), /, $lang)"/>
 		</a>
 	    </li>
@@ -344,14 +346,17 @@ exclude-result-prefixes="#all">
 		</p>
 	    </xsl:if>
 
+	    <!-- xsl:apply-templates? -->
 	    <xsl:if test="rdf:type">
 		<ul class="inline">
 		    <xsl:apply-templates select="rdf:type" mode="gldp:HeaderMode">
 			<xsl:sort select="g:label(@rdf:resource | @rdf:nodeID, /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
 		    </xsl:apply-templates>
 		</ul>
-	    </xsl:if>
+	    </xsl:if>	    
 	</div>
+	
+	<xsl:apply-templates select="." mode="gldp:ModeSelectMode"/>
     </xsl:template>
 
     <xsl:template match="@rdf:about" mode="gldp:HeaderMode">
@@ -532,12 +537,6 @@ exclude-result-prefixes="#all">
     <!-- LIST MODE -->
 
     <xsl:template match="rdf:RDF" mode="gldp:ListMode">
-	<div class="nav row-fluid">
-	    <xsl:apply-templates select="." mode="gldp:ModeSelectMode"/>
-
-	    <!-- <xsl:apply-templates select="." mode="gldp:MediaTypeSelectMode"/> -->
-	</div>
-
 	<xsl:apply-templates select="$ont-resource" mode="gldp:HeaderMode"/>
 
 	<xsl:apply-templates select="$page" mode="gldp:PaginationMode"/>
@@ -618,12 +617,6 @@ exclude-result-prefixes="#all">
     <!-- TABLE MODE -->
 
     <xsl:template match="rdf:RDF" mode="gldp:TableMode">
-	<div class="nav row-fluid">
-	    <xsl:apply-templates select="." mode="gldp:ModeSelectMode"/>
-
-	    <!-- <xsl:apply-templates select="." mode="gldp:MediaTypeSelectMode"/> -->
-	</div>
-	
 	<xsl:apply-templates select="$ont-resource" mode="gldp:HeaderMode"/>
 
 	<xsl:apply-templates select="$page" mode="gldp:PaginationMode"/>
@@ -707,12 +700,6 @@ exclude-result-prefixes="#all">
     <!-- INPUT MODE -->
     
     <xsl:template match="rdf:RDF" mode="gldp:InputMode">
-	<div class="nav row-fluid">
-	    <xsl:apply-templates select="." mode="gldp:ModeSelectMode"/>
-
-	    <!-- <xsl:apply-templates select="." mode="gldp:MediaTypeSelectMode"/> -->
-	</div>
-
 	<xsl:apply-templates select="$ont-resource" mode="gldp:HeaderMode"/>
 
 	<form class="form-horizontal">
