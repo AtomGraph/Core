@@ -18,7 +18,6 @@
 package org.graphity.model.query.impl;
 
 import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import org.graphity.model.query.EndpointResource;
 import org.graphity.model.query.ResultSetResource;

@@ -27,10 +27,8 @@ import java.util.List;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import org.graphity.ldp.model.impl.LinkedDataPageResourceImpl;
-import org.graphity.ldp.model.query.ModelResource;
-import org.graphity.ldp.model.query.impl.EndpointModelResourceImpl;
-import org.graphity.ldp.model.query.impl.QueryModelModelResourceImpl;
 import org.graphity.model.ResourceFactory;
+import org.graphity.util.ModelUtils;
 import org.graphity.util.QueryBuilder;
 import org.graphity.util.locator.PrefixMapper;
 import org.graphity.util.manager.DataManager;
@@ -60,17 +58,19 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     private final HttpHeaders httpHeaders;
     private final List<Variant> variants;
     private final OntResource ontResource;
-    private final ModelResource resource;
-
+    private final Long limit;
+    private final Long offset;
+    private final String orderBy;
+    private final Boolean desc;
+    private final Model model;
+    private final EntityTag entityTag;
+    
     public static OntModel getOntology(UriInfo uriInfo)
     {
 	// ResourceConfig.getProperty()
 	return getOntology(uriInfo.getBaseUri().toString(), "org/graphity/ldp/vocabulary/graphity-ldp.ttl");
     }
     
-    // avoid (double-checked) locking and make state changes transactional with synchronized
-    // http://www.ibm.com/developerworks/java/library/j-dcl/index.html
-    // https://open.med.harvard.edu/svn/eagle-i-dev/apps/tags/1.0-MS4.0/common/model-jena/src/main/java/org/eaglei/model/jena/EagleIOntDocumentManager.java
     public static OntModel getOntology(String baseUri, String ontologyPath)
     {
 	//synchronized (OntDocumentManager.getInstance())
@@ -95,71 +95,6 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	    OntModel ontModel = OntDocumentManager.getInstance().getOntology(baseUri, OntModelSpec.OWL_MEM_RDFS_INF);
 	    if (log.isDebugEnabled()) log.debug("Ontology size: {}", ontModel.size());
 	    return ontModel;
-	}
-    }
-
-    public static QueryBuilder getQueryBuilder(OntResource ontResource)
-    {
-	QueryBuilder queryBuilder;
-	
-	if (ontResource.hasProperty(Graphity.query))
-	{
-	    queryBuilder = QueryBuilder.fromResource(ontResource.getPropertyResourceValue(Graphity.query));
-	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} has Query Resource {}", ontResource.getURI(), ontResource.getPropertyResourceValue(Graphity.query));
-	}
-	else
-	{
-	    queryBuilder = QueryBuilder.fromDescribe(ontResource.getURI(), ontResource.getModel());
-	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} gets explicit Query Resource {}", ontResource.getURI(), queryBuilder);
-	}
-
-	return queryBuilder;
-    }
-
-    public static ModelResource getModelResource(OntResource ontResource,
-	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
-	    Long limit, Long offset, String orderBy, Boolean desc)
-    {	
-	if (ontResource.hasRDFType(SIOC.CONTAINER))
-	{
-	    if (log.isDebugEnabled()) log.debug("OntResource is a container, returning page Resource");
-	    return new LinkedDataPageResourceImpl(ontResource,
-		uriInfo, request, httpHeaders, variants,
-		limit, offset, orderBy, desc);
-	}
-	else
-	{
-	    QueryBuilder queryBuilder = getQueryBuilder(ontResource);
-	    Query query = queryBuilder.build();
-
-	    ontResource.setPropertyValue(Graphity.query, queryBuilder); // Resource alway get a g:query value		
-
-	    if (ontResource.hasProperty(Graphity.service))
-	    {
-		com.hp.hpl.jena.rdf.model.Resource service = ontResource.getPropertyResourceValue(Graphity.service);
-		if (service == null) throw new IllegalArgumentException("SPARQL Service must be a Resource");
-
-		com.hp.hpl.jena.rdf.model.Resource endpoint = service.getPropertyResourceValue(com.hp.hpl.jena.rdf.model.ResourceFactory.
-		    createProperty("http://www.w3.org/ns/sparql-service-description#endpoint"));
-		if (endpoint == null || endpoint.getURI() == null) throw new IllegalArgumentException("SPARQL Service endpoint must be URI Resource");
-
-		if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has explicit SPARQL endpoint: {}", ontResource.getURI(), endpoint.getURI());
-
-		return new EndpointModelResourceImpl(endpoint.getURI(), query, request, variants);
-	    }
-	    else
-	    {
-		if (log.isDebugEnabled())
-		{
-		    log.debug("OntResource with URI: {} has no explicit SPARQL endpoint, querying its Model", ontResource.getURI());
-		    log.debug("Locking getOntResource.getModel() before SPARQL query");
-		}
-		//synchronized (getOntModel())
-		{
-		    return new QueryModelModelResourceImpl(ontResource.getOntModel(), query, request, variants);
-		}
-		//if (log.isDebugEnabled()) log.debug("Unlocking getOntResource.getModel()");
-	    }
 	}
     }
 
@@ -203,7 +138,6 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 		limit, offset, orderBy, desc);
     }
 
-    //OntResource ontResource, ModelResource resource,
     protected LinkedDataResourceBase(OntResource ontResource,
 	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
 	    Long limit, Long offset, String orderBy, Boolean desc)
@@ -221,54 +155,129 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	    log.debug("Creating LinkedDataResource from OntResource with URI: {}", ontResource.getURI());
 	    log.debug("List of Variants: {}", variants);
 	}
-
-	resource = getModelResource(ontResource, uriInfo, request, httpHeaders, VARIANTS, limit, offset, orderBy, desc);
 	
 	this.uriInfo = uriInfo;
 	this.request = request;
 	this.httpHeaders = httpHeaders;
 	this.variants = variants;
+	
+	this.limit = limit;
+	this.offset = offset;
+	this.orderBy = orderBy;
+	this.desc = desc;
+	
+	model = getModel();
+	if (model.isEmpty())
+	{
+	    if (log.isTraceEnabled()) log.trace("Loaded Model is empty; returnin 404 Not Found");
+	    throw new WebApplicationException(Response.Status.NOT_FOUND);
+	}
+	entityTag = new EntityTag(Long.toHexString(ModelUtils.hashModel(model)));
     }
 
     @GET
-    @Override
     // http://tools.ietf.org/html/draft-ietf-httpbis-p2-semantics-21#section-5.3.1
+    @Override
     public Response getResponse()
     {
 	// Content-Location http://www.w3.org/TR/chips/#cp5.2
 	// http://www.w3.org/wiki/HR14aCompromise
 
-	if (getResource().getModel().isEmpty())
+	if (log.isDebugEnabled()) log.debug("Returning @GET Response");
+		
+	if (getOntResource().hasRDFType(SIOC.CONTAINER))
 	{
-	    if (log.isTraceEnabled()) log.trace("Loaded Model is empty; returnin 404 Not Found");
-	    throw new WebApplicationException(Response.Status.NOT_FOUND);
+	    if (log.isDebugEnabled()) log.debug("OntResource is a container, returning page Resource");
+	    return new LinkedDataPageResourceImpl(getOntResource(),
+		getUriInfo(), getRequest(), getHttpHeaders(), getVariants(),
+		getLimit(), getOffset(), getOrderBy(), getDesc()).getResponse();
 	}
 
-	if (log.isDebugEnabled()) log.debug("Returning @GET Response");
-	return getResource().getResponse();
-    }
-
-    public ModelResource getResource()
-    {
-	return resource;
+	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(getEntityTag());
+	if (rb != null)
+	{
+	    if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
+	    return rb.build();
+	}
+	else
+	{
+	    Variant variant = getRequest().selectVariant(getVariants());
+	    if (variant == null)
+	    {
+		if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants: {}", variant, variants);
+		return Response.notAcceptable(getVariants()).build();
+	    }	
+	    else
+	    {
+		if (log.isTraceEnabled()) log.trace("Generating RDF Response with Variant: {} and EntityTag: {}", variant, entityTag);
+		return Response.ok(getModel(), variant).
+			tag(getEntityTag()).build(); // uses ModelXSLTWriter/ModelWriter
+	    }
+	}
     }
     
+    @Override
+    public final Model getModel() // lazy Model loading
+    {
+	if (model == null)
+	{
+	    QueryBuilder queryBuilder = getQueryBuilder();
+	    Query query = queryBuilder.build();
+
+	    getOntResource().setPropertyValue(Graphity.query, queryBuilder); // Resource alway get a g:query value		
+
+	    if (getOntResource().hasProperty(Graphity.service))
+	    {
+		com.hp.hpl.jena.rdf.model.Resource service = getOntResource().getPropertyResourceValue(Graphity.service);
+		if (service == null) throw new IllegalArgumentException("SPARQL Service must be a Resource");
+
+		com.hp.hpl.jena.rdf.model.Resource endpoint = service.getPropertyResourceValue(com.hp.hpl.jena.rdf.model.ResourceFactory.
+		    createProperty("http://www.w3.org/ns/sparql-service-description#endpoint"));
+		if (endpoint == null || endpoint.getURI() == null) throw new IllegalArgumentException("SPARQL Service endpoint must be URI Resource");
+
+		if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has explicit SPARQL endpoint: {}", ontResource.getURI(), endpoint.getURI());
+
+		return getModelResource(endpoint.getURI(), query).getModel();
+	    }
+	    else
+	    {
+		if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has no explicit SPARQL endpoint, querying its Model", ontResource.getURI());
+		return getModelResource(getOntResource().getOntModel(), query).getModel();
+	    }
+	}
+	
+	return model;
+    }
+
+    @Override
+    public EntityTag getEntityTag()
+    {
+	return entityTag;
+    }
+
+
+    public QueryBuilder getQueryBuilder()
+    {
+	QueryBuilder queryBuilder;
+	
+	if (getOntResource().hasProperty(Graphity.query))
+	{
+	    queryBuilder = QueryBuilder.fromResource(getOntResource().getPropertyResourceValue(Graphity.query));
+	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} has Query Resource {}", getOntResource().getURI(), getOntResource().getPropertyResourceValue(Graphity.query));
+	}
+	else
+	{
+	    queryBuilder = QueryBuilder.fromDescribe(getOntResource().getURI(), getOntResource().getModel());
+	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} gets explicit Query Resource {}", getOntResource().getURI(), queryBuilder);
+	}
+
+	return queryBuilder;
+    }
+
     @Override
     public final String getURI()
     {
 	return getOntResource().getURI();
-    }
-
-    @Override
-    public final EntityTag getEntityTag()
-    {
-	return getResource().getEntityTag();
-    }
-
-    @Override
-    public final Model getModel()
-    {
-	return getResource().getModel();
     }
 
     @Override
@@ -302,6 +311,26 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     public final HttpHeaders getHttpHeaders()
     {
 	return httpHeaders;
+    }
+
+    public final Long getLimit()
+    {
+	return limit;
+    }
+
+    public final Long getOffset()
+    {
+	return offset;
+    }
+
+    public final String getOrderBy()
+    {
+	return orderBy;
+    }
+
+    public final Boolean getDesc()
+    {
+	return desc;
     }
 
     @Override

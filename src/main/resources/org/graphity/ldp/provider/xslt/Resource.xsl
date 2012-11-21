@@ -111,7 +111,7 @@ exclude-result-prefixes="#all">
 	<html>
 	    <head>
 		<title>
-		    <xsl:apply-templates select="." mode="gldp:TitleMode"/>
+		    <xsl:apply-templates mode="gldp:TitleMode"/>
 		</title>
 		<base href="{$base-uri}" />
 		
@@ -190,7 +190,11 @@ exclude-result-prefixes="#all">
     <xsl:template match="rdf:RDF" mode="gldp:TitleMode">
 	<xsl:value-of select="g:label($base-uri, $ont-model, $lang)"/>
 	<xsl:text> - </xsl:text>
-	<xsl:value-of select="g:label($absolute-path, /, $lang)"/>
+	<xsl:apply-templates select="key('resources', $absolute-path, $ont-model)" mode="gldp:TitleMode"/>
+    </xsl:template>
+
+    <xsl:template match="*[@rdf:about]" mode="gldp:TitleMode">
+	<xsl:value-of select="g:label(@rdf:about, /, $lang)"/>
     </xsl:template>
 
     <xsl:template match="rdf:RDF" mode="gldp:ScriptMode">

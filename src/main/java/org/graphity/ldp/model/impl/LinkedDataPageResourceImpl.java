@@ -40,10 +40,6 @@ public final class LinkedDataPageResourceImpl extends LinkedDataResourceBase imp
     private static final Logger log = LoggerFactory.getLogger(LinkedDataPageResourceImpl.class);
 
     private final OntResource container;
-    private final Long limit;
-    private final Long offset;
-    private final String orderBy;
-    private final Boolean desc;
 
     public static SelectBuilder getSelectBuilder(Resource select, Long limit, Long offset, String orderBy, Boolean desc)
     {
@@ -130,11 +126,6 @@ public final class LinkedDataPageResourceImpl extends LinkedDataResourceBase imp
 	if (offset == null) throw new IllegalArgumentException("OFFSET must be not null");
 
 	this.container = container;
-
-	this.limit = limit;
-	this.offset = offset;
-	this.orderBy = orderBy;
-	this.desc = desc;
 	
 	int subjectCount = getModel().listSubjects().toList().size();
 	
@@ -162,30 +153,6 @@ public final class LinkedDataPageResourceImpl extends LinkedDataResourceBase imp
 		getOntResource().addProperty(XHV.next, getNext());
 	    }
 	}
-    }
-    
-    @Override
-    public final Long getLimit()
-    {
-	return limit;
-    }
-
-    @Override
-    public final Long getOffset()
-    {
-	return offset;
-    }
-
-    @Override
-    public final String getOrderBy()
-    {
-	return orderBy;
-    }
-
-    @Override
-    public final Boolean getDesc()
-    {
-	return desc;
     }
 
     public final com.hp.hpl.jena.rdf.model.Resource getContainer()
