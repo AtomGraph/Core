@@ -39,125 +39,109 @@ public final class LinkedDataPageResourceImpl extends LinkedDataResourceBase imp
 {
     private static final Logger log = LoggerFactory.getLogger(LinkedDataPageResourceImpl.class);
 
-    private final OntResource container;
-
-    public static SelectBuilder getSelectBuilder(Resource select, Long limit, Long offset, String orderBy, Boolean desc)
-    {
-	SelectBuilder selectBuilder = SelectBuilder.fromResource(select).
-	    limit(limit).offset(offset);
-
-	/*
-	if (orderBy != null)
-	{
-	    com.hp.hpl.jena.rdf.model.Resource modelVar = getOntology().createResource().addLiteral(SP.varName, "model");
-	    Property orderProperty = ResourceFactory.createProperty(orderBy);
-	    com.hp.hpl.jena.rdf.model.Resource orderVar = getOntology().createResource().addLiteral(SP.varName, orderProperty.getLocalName());
-
-	    selectBuilder.orderBy(orderVar, desc).optional(modelVar, orderProperty, orderVar);
-	}
-	*/
-
-	return selectBuilder;
-    }
-
-    
-    public static QueryBuilder getQueryBuilder(SelectBuilder selectBuilder)
-    {
-	QueryBuilder queryBuilder;
-
-	if (selectBuilder.getPropertyResourceValue(SP.resultVariables) != null)
-	{
-	    if (log.isDebugEnabled()) log.debug("Query Resource {} has result variables: {}", selectBuilder, selectBuilder.getPropertyResourceValue(SP.resultVariables));
-	    queryBuilder = QueryBuilder.fromDescribe(selectBuilder.getPropertyResourceValue(SP.resultVariables)).
-		subQuery(selectBuilder);
-	}
-	else
-	{
-	    if (log.isDebugEnabled()) log.debug("Query Resource {} does not have result variables, using wildcard", selectBuilder);
-	    queryBuilder = QueryBuilder.fromDescribe(selectBuilder.getModel()).subQuery(selectBuilder);
-	}
-	
-	return queryBuilder;
-    }
-    
-    public static OntResource getOntResource(OntResource container, UriInfo uriInfo,
-	    Long limit, Long offset, String orderBy, Boolean desc)
-    {
-	if (container == null) throw new IllegalArgumentException("Container must be not null");
-	if (!container.hasProperty(Graphity.selectQuery)) throw new IllegalArgumentException("Container Resource must have a SELECT query");
-
-	if (limit == null) throw new IllegalArgumentException("LIMIT must be not null");
-	if (offset == null) throw new IllegalArgumentException("OFFSET must be not null");
-
-	// different URI from Container!
-	UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder().
-		replaceQueryParam("limit", limit).
-		replaceQueryParam("offset", offset);
-	if (orderBy != null) uriBuilder.replaceQueryParam("order-by", orderBy);
-	if (desc != null) uriBuilder.replaceQueryParam("desc", desc);
-
-	if (log.isDebugEnabled()) log.debug("Creating LinkedDataPageResource from OntResource with URI: {}", uriBuilder.build().toString());
-	OntResource ontResource = container.getOntModel().createOntResource(uriBuilder.build().toString());
-	
-	if (log.isDebugEnabled()) log.debug("Locking ontResource.getOntModel() before QueryBuilder call");
-	//synchronized (ontResource.getOntModel())
-	{
-	    SelectBuilder selectBuilder = getSelectBuilder(container.getPropertyResourceValue(Graphity.selectQuery),
-		    limit, offset, orderBy, desc);
-
-	    QueryBuilder queryBuilder = getQueryBuilder(selectBuilder);
-	    ontResource.setPropertyValue(Graphity.query, queryBuilder); // Resource alway get a g:query value
-	    
-	    ontResource.setPropertyValue(Graphity.service, container.getPropertyResourceValue(Graphity.service));
-	}
-	if (log.isDebugEnabled()) log.debug("Unlocking ontResource.getModel()");
-	
-	return ontResource;
-    }
+    private OntResource ontResource = null;
+    private QueryBuilder queryBuilder = null;
+    private SelectBuilder selectBuilder = null;
     
     public LinkedDataPageResourceImpl(OntResource container,
 	UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
 	Long limit, Long offset, String orderBy, Boolean desc)
     {
-	super(getOntResource(container, uriInfo, limit, offset, orderBy, desc),
-		uriInfo, request, httpHeaders, variants,
-		limit, offset, orderBy, desc);
+	super(container, uriInfo, request, httpHeaders, variants, limit, offset, orderBy, desc);
 	if (limit == null) throw new IllegalArgumentException("LIMIT must be not null");
 	if (offset == null) throw new IllegalArgumentException("OFFSET must be not null");
 
-	this.container = container;
-	
-	int subjectCount = getModel().listSubjects().toList().size();
-	
+	if (!container.hasProperty(Graphity.selectQuery)) throw new IllegalArgumentException("Container Resource must have a SELECT query");
+
+	int subjectCount = loadModel().listSubjects().toList().size();	
 	if (log.isDebugEnabled())
 	{
-	    log.debug("OFFSET: {} LIMIT: {}", offset, limit);
-	    log.debug("ORDER BY: {} DESC: {}", orderBy, desc);
-	    log.debug("getModel().size(): {} getModel().listSubjects().toList().size(): {}", getModel().size(), subjectCount);
+	    log.debug("OFFSET: {} LIMIT: {}", getOffset(), getLimit());
+	    log.debug("ORDER BY: {} DESC: {}", getOrderBy(), getDesc());
+	    log.debug("loadModel().listSubjects().toList().size(): {}", subjectCount);
 	}
 	
 	// add links to container, previous/next page etc (HATEOS)
-	//synchronized (getOntModel())
+	if (log.isDebugEnabled()) log.debug("Adding page metadata: {} sioc:has_container {}", getURI(), container.getURI());
+	getOntResource().addProperty(SIOC.HAS_CONTAINER, container);
+
+	if (getOffset() >= getLimit())
 	{
-	    if (log.isDebugEnabled()) log.debug("Adding page metadata: {} sioc:has_container {}", getURI(), container.getURI());
-	    getOntResource().addProperty(SIOC.HAS_CONTAINER, container);
-	    	    
-	    if (getOffset() >= getLimit())
-	    {
-		if (log.isDebugEnabled()) log.debug("Adding page metadata: {} xhv:previous {}", getURI(), getPrevious().getURI());
-		getOntResource().addProperty(XHV.prev, getPrevious());
-	    }
-	    if (subjectCount >= getLimit())
-	    {
-		if (log.isDebugEnabled()) log.debug("Adding page metadata: {} xhv:next {}", getURI(), getNext().getURI());
-		getOntResource().addProperty(XHV.next, getNext());
-	    }
+	    if (log.isDebugEnabled()) log.debug("Adding page metadata: {} xhv:previous {}", getURI(), getPrevious().getURI());
+	    getOntResource().addProperty(XHV.prev, getPrevious());
+	}
+	if (subjectCount >= getLimit())
+	{
+	    if (log.isDebugEnabled()) log.debug("Adding page metadata: {} xhv:next {}", getURI(), getNext().getURI());
+	    getOntResource().addProperty(XHV.next, getNext());
 	}
     }
 
-    public final com.hp.hpl.jena.rdf.model.Resource getContainer()
+    @Override
+    public OntResource getOntResource()
     {
-	return container;
+	if (ontResource == null)
+	{
+	    // different URI from Container!
+	    UriBuilder uriBuilder = getUriInfo().getAbsolutePathBuilder().
+		    replaceQueryParam("limit", getLimit()).
+		    replaceQueryParam("offset", getOffset());
+	    if (getOrderBy() != null) uriBuilder.replaceQueryParam("order-by", getOrderBy());
+	    if (getDesc() != null) uriBuilder.replaceQueryParam("desc", getDesc());
+
+	    if (log.isDebugEnabled()) log.debug("Creating LinkedDataPageResource from OntResource with URI: {}", uriBuilder.build().toString());
+	    ontResource = super.getOntResource().getOntModel().createOntResource(uriBuilder.build().toString());
+
+	    ontResource.setPropertyValue(Graphity.query, getQueryBuilder()); // Resource alway get a g:query value
+	    ontResource.setPropertyValue(Graphity.service, super.getOntResource().getPropertyResourceValue(Graphity.service));
+	}
+	
+	return ontResource;
+    }
+
+    public SelectBuilder getSelectBuilder()
+    {
+	if (selectBuilder == null)
+	{
+	    Resource select = super.getOntResource().getPropertyResourceValue(Graphity.selectQuery);
+
+	    selectBuilder = SelectBuilder.fromResource(select).
+		limit(getLimit()).offset(getOffset());
+
+	    /*
+	    if (orderBy != null)
+	    {
+		com.hp.hpl.jena.rdf.model.Resource modelVar = getOntology().createResource().addLiteral(SP.varName, "model");
+		Property orderProperty = ResourceFactory.createProperty(getOrderBy();
+		com.hp.hpl.jena.rdf.model.Resource orderVar = getOntology().createResource().addLiteral(SP.varName, orderProperty.getLocalName());
+
+		selectBuilder.orderBy(orderVar, getDesc()).optional(modelVar, orderProperty, orderVar);
+	    }
+	    */
+	}
+	
+	return selectBuilder;
+    }
+    
+    @Override
+    public QueryBuilder getQueryBuilder()
+    {
+	if (queryBuilder == null)
+	{
+	    if (getSelectBuilder().getPropertyResourceValue(SP.resultVariables) != null)
+	    {
+		if (log.isDebugEnabled()) log.debug("Query Resource {} has result variables: {}", getSelectBuilder(), getSelectBuilder().getPropertyResourceValue(SP.resultVariables));
+		queryBuilder = QueryBuilder.fromDescribe(getSelectBuilder().getPropertyResourceValue(SP.resultVariables)).
+		    subQuery(getSelectBuilder());
+	    }
+	    else
+	    {
+		if (log.isDebugEnabled()) log.debug("Query Resource {} does not have result variables, using wildcard", selectBuilder);
+		queryBuilder = QueryBuilder.fromDescribe(getSelectBuilder().getModel()).subQuery(getSelectBuilder());
+	    }
+	}
+	
+	return queryBuilder;
     }
     
     @Override

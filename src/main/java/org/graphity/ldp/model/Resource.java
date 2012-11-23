@@ -34,5 +34,5 @@ public interface Resource
 
     List<Variant> getVariants();
     
-    EntityTag getEntityTag();
+    //EntityTag getEntityTag();
 }

@@ -33,7 +33,7 @@ import org.graphity.model.query.impl.QueryModelResultSetResourceImpl;
  */
 public class ResourceFactory
 {
-    public static LinkedDataResource getLinkedDataResourceResource(String uri)
+    public static LinkedDataResource getLinkedDataResource(String uri)
     {
 	return new LinkedDataResourceImpl(uri);
     }
