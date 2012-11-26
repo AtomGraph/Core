@@ -53,27 +53,27 @@ public final class LinkedDataPageResourceImpl extends LinkedDataResourceBase imp
 
 	if (!container.hasProperty(Graphity.selectQuery)) throw new IllegalArgumentException("Container Resource must have a SELECT query");
 
-	int subjectCount = loadModel().listSubjects().toList().size();	
+	int subjectCount = describe().listSubjects().toList().size();	
 	if (log.isDebugEnabled())
 	{
 	    log.debug("OFFSET: {} LIMIT: {}", getOffset(), getLimit());
 	    log.debug("ORDER BY: {} DESC: {}", getOrderBy(), getDesc());
-	    log.debug("loadModel().listSubjects().toList().size(): {}", subjectCount);
+	    log.debug("describe().listSubjects().toList().size(): {}", subjectCount);
 	}
 	
 	// add links to container, previous/next page etc (HATEOS)
 	if (log.isDebugEnabled()) log.debug("Adding page metadata: {} sioc:has_container {}", getURI(), container.getURI());
-	getOntResource().addProperty(SIOC.HAS_CONTAINER, container);
+	addProperty(SIOC.HAS_CONTAINER, container);
 
 	if (getOffset() >= getLimit())
 	{
 	    if (log.isDebugEnabled()) log.debug("Adding page metadata: {} xhv:previous {}", getURI(), getPrevious().getURI());
-	    getOntResource().addProperty(XHV.prev, getPrevious());
+	    addProperty(XHV.prev, getPrevious());
 	}
 	if (subjectCount >= getLimit())
 	{
 	    if (log.isDebugEnabled()) log.debug("Adding page metadata: {} xhv:next {}", getURI(), getNext().getURI());
-	    getOntResource().addProperty(XHV.next, getNext());
+	    addProperty(XHV.next, getNext());
 	}
     }
 

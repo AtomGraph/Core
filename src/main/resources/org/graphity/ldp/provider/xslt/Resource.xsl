@@ -96,6 +96,7 @@ exclude-result-prefixes="#all">
 
     <xsl:key name="resources" match="*[*][@rdf:about] | *[*][@rdf:nodeID]" use="@rdf:about | @rdf:nodeID"/>
     <xsl:key name="predicates" match="*[@rdf:about]/* | *[@rdf:nodeID]/*" use="concat(namespace-uri(.), local-name(.))"/>
+    <xsl:key name="predicates-by-object" match="*[@rdf:about]/* | *[@rdf:nodeID]/*" use="@rdf:about | @rdf:nodeID"/>
     <xsl:key name="resources-by-host" match="*[@rdf:about]" use="sioc:has_host/@rdf:resource"/>
     <xsl:key name="resources-by-container" match="*[@rdf:about]" use="sioc:has_container/@rdf:resource"/>
  
@@ -138,6 +139,8 @@ exclude-result-prefixes="#all">
 		<xsl:apply-templates mode="gldp:ScriptMode"/>
       	    </head>
 	    <body>
+<!-- <xsl:copy-of select="/"/> -->
+<!-- <xsl:copy-of select="$ont-model"/>? -->
 		<div class="navbar navbar-fixed-top">
 		    <div class="navbar-inner">
 			<div class="container-fluid">    
@@ -541,13 +544,15 @@ exclude-result-prefixes="#all">
     <!-- LIST MODE -->
 
     <xsl:template match="rdf:RDF" mode="gldp:ListMode">
-	<xsl:apply-templates select="$ont-resource" mode="gldp:HeaderMode"/>
+	<xsl:apply-templates select="key('resources', $absolute-path)" mode="gldp:HeaderMode"/>
 
-	<xsl:apply-templates select="$page" mode="gldp:PaginationMode"/>
+	<!-- page resource -->
+	<xsl:apply-templates select="key('resources-by-container', $absolute-path)" mode="gldp:PaginationMode"/>
 
-	<xsl:apply-templates mode="gldp:ListMode"/>
+	<!-- all resources that are not recursive blank nodes, except page -->
+	<xsl:apply-templates select="*[not(key('predicates-by-object', @rdf:nodeID))] except key('resources-by-container', $absolute-path)" mode="gldp:ListMode"/>
 	
-	<xsl:apply-templates select="$page" mode="gldp:PaginationMode"/>
+	<xsl:apply-templates select="key('resources-by-container', $absolute-path)" mode="gldp:PaginationMode"/>
     </xsl:template>
 
     <xsl:template match="*[*][@rdf:about] | *[*][@rdf:nodeID]" mode="gldp:ListMode">

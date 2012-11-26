@@ -139,7 +139,7 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	
 	//if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has no explicit SPARQL endpoint, querying its Model", getURI());
 	//setPropertyValue(Graphity.query, getQueryBuilder()); // Resource alway get a g:query value
-	model = getModelResource(getOntModel(), getURI()).getModel();
+	//model = getModelResource(getOntModel(), getURI()).getModel();
     }
 
     @GET
@@ -152,23 +152,13 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 
 	if (log.isDebugEnabled()) log.debug("Returning @GET Response");
 
-	if (hasRDFType(SIOC.CONTAINER))
-	{
-	    if (log.isDebugEnabled()) log.debug("OntResource is a container, returning page Resource");
-	    return new LinkedDataPageResourceImpl(this,
-		getUriInfo(), getRequest(), getHttpHeaders(), getVariants(),
-		getLimit(), getOffset(), getOrderBy(), getDesc()).getResponse();
-	}
-
-	model.add(loadModel());
-
-	if (model.isEmpty())
+	if (describe().isEmpty())
 	{
 	    if (log.isTraceEnabled()) log.trace("Loaded Model is empty; returnin 404 Not Found");
 	    throw new WebApplicationException(Response.Status.NOT_FOUND);
 	}
 	
-	EntityTag entityTag = new EntityTag(Long.toHexString(ModelUtils.hashModel(model)));
+	EntityTag entityTag = new EntityTag(Long.toHexString(ModelUtils.hashModel(describe())));
 	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(entityTag);
 	if (rb != null)
 	{
@@ -186,7 +176,7 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	    else
 	    {
 		if (log.isTraceEnabled()) log.trace("Generating RDF Response with Variant: {} and EntityTag: {}", variant, entityTag);
-		return Response.ok(model, variant).
+		return Response.ok(describe(), variant).
 			tag(entityTag).build(); // uses ModelXSLTWriter/ModelWriter
 	    }
 	}
@@ -195,15 +185,25 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     @Override
     public Query getQuery()
     {
-	if (getQueryBuilder() != null) return getQueryBuilder().build();
-	
-	return null;
+	return getQueryBuilder().build();
     }
     
-    public Model loadModel() // lazy Model loading
+    public Model describe() // lazy Model loading
     {
-	if (getQuery() != null)
+	//if (model == null)
 	{
+	    model = ModelFactory.createDefaultModel();
+
+	    if (hasRDFType(SIOC.CONTAINER))
+	    {
+		if (log.isDebugEnabled()) log.debug("OntResource is a container, returning page Resource");
+		LinkedDataResourceBase page = new LinkedDataPageResourceImpl(this,
+		    getUriInfo(), getRequest(), getHttpHeaders(), getVariants(),
+		    getLimit(), getOffset(), getOrderBy(), getDesc());
+
+		model.add(page.describe());
+	    }
+
 	    if (hasProperty(Graphity.service))
 	    {
 		com.hp.hpl.jena.rdf.model.Resource service = getPropertyResourceValue(Graphity.service);
@@ -214,16 +214,34 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 		if (endpoint == null || endpoint.getURI() == null) throw new IllegalArgumentException("SPARQL Service endpoint must be URI Resource");
 
 		if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has explicit SPARQL endpoint: {}", getURI(), endpoint.getURI());
-		return getModelResource(endpoint.getURI(), getQuery()).getModel();
+
+		if (!hasProperty(Graphity.query))
+		{
+		    if (log.isDebugEnabled()) log.debug("OntResource with URI {} gets explicit Query Resource {}", getURI(), getDefaultQueryBuilder());
+		    setPropertyValue(Graphity.query, getDefaultQueryBuilder());
+		}
+		// query endpoint whenever g:service is present
+		model.add(getModelResource(endpoint.getURI(), getQuery()).getModel());
 	    }
 	    else
 	    {
-		if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has no explicit SPARQL endpoint, querying its Model", getURI());
-		return getModelResource(getOntModel(), getQuery()).getModel();
+		if (!hasProperty(Graphity.query))
+		{
+		    if (log.isDebugEnabled()) log.debug("OntResource with URI {} gets explicit Query Resource {}", getURI(), getDefaultQueryBuilder());
+		    setPropertyValue(Graphity.query, getDefaultQueryBuilder()); // Resource always gets a g:query value
+		}
+		else // query OntModel only if explicit g:query is present
+		{
+		    if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has no explicit SPARQL endpoint, querying its Model", getURI());
+		    model.add(getModelResource(getOntModel(), getQuery()).getModel());
+		}
 	    }
+
+	    // Default DESCRIBE queried always
+	    model.add(getModelResource(getOntModel(), getDefaultQueryBuilder().build()).getModel());
 	}
 	
-	return ModelFactory.createDefaultModel();
+	return model;
     }
 
     /*
@@ -238,7 +256,7 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     {
 	if (queryBuilder == null)
 	{
-	    if (hasProperty(Graphity.query))
+	    //if (hasProperty(Graphity.query))
 	    {
 		queryBuilder = QueryBuilder.fromResource(getPropertyResourceValue(Graphity.query));
 		if (log.isDebugEnabled()) log.debug("OntResource with URI {} has Query Resource {}", getURI(), getPropertyResourceValue(Graphity.query));
