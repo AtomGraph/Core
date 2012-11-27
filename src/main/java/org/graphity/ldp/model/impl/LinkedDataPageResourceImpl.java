@@ -53,12 +53,10 @@ public final class LinkedDataPageResourceImpl extends LinkedDataResourceBase imp
 
 	if (!container.hasProperty(Graphity.selectQuery)) throw new IllegalArgumentException("Container Resource must have a SELECT query");
 
-	int subjectCount = describe().listSubjects().toList().size();	
 	if (log.isDebugEnabled())
 	{
 	    log.debug("OFFSET: {} LIMIT: {}", getOffset(), getLimit());
 	    log.debug("ORDER BY: {} DESC: {}", getOrderBy(), getDesc());
-	    log.debug("describe().listSubjects().toList().size(): {}", subjectCount);
 	}
 	
 	// add links to container, previous/next page etc (HATEOS)
@@ -70,7 +68,11 @@ public final class LinkedDataPageResourceImpl extends LinkedDataResourceBase imp
 	    if (log.isDebugEnabled()) log.debug("Adding page metadata: {} xhv:previous {}", getURI(), getPrevious().getURI());
 	    addProperty(XHV.prev, getPrevious());
 	}
-	if (subjectCount >= getLimit())
+
+	// no way to know if there's a next page without counting results (either total or in current page)
+	//int subjectCount = describe().listSubjects().toList().size();
+	//log.debug("describe().listSubjects().toList().size(): {}", subjectCount);
+	//if (subjectCount >= getLimit())
 	{
 	    if (log.isDebugEnabled()) log.debug("Adding page metadata: {} xhv:next {}", getURI(), getNext().getURI());
 	    addProperty(XHV.next, getNext());
