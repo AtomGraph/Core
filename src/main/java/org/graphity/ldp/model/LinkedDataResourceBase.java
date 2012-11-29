@@ -146,13 +146,14 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 
 	if (log.isDebugEnabled()) log.debug("Returning @GET Response");
 
-	if (describe().isEmpty())
+	Model description = describe();
+	if (description.isEmpty())
 	{
 	    if (log.isTraceEnabled()) log.trace("DESCRIBE Model is empty; returning 404 Not Found");
 	    throw new WebApplicationException(Response.Status.NOT_FOUND);
 	}
 	
-	EntityTag entityTag = new EntityTag(Long.toHexString(ModelUtils.hashModel(loadModel())));
+	EntityTag entityTag = new EntityTag(Long.toHexString(ModelUtils.hashModel(description)));
 	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(entityTag);
 	if (rb != null)
 	{
@@ -170,7 +171,7 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	    else
 	    {
 		if (log.isTraceEnabled()) log.trace("Generating RDF Response with Variant: {} and EntityTag: {}", variant, entityTag);
-		return Response.ok(loadModel(), variant).
+		return Response.ok(description, variant).
 			tag(entityTag).build(); // uses ModelXSLTWriter/ModelWriter
 	    }
 	}
@@ -181,19 +182,14 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     {
 	return getQueryBuilder().build();
     }
-    
-    public Model loadModel()
+        
+    public final Model describe()
     {
-	/*
-	if (!hasProperty(Graphity.query))
-	{
-	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} gets explicit Query Resource {}", getURI(), getDescribeQueryBuilder());
-	    setPropertyValue(Graphity.query, getDescribeQueryBuilder()); // Resource always gets a g:query value
-	}
-	*/ 
+	if (log.isDebugEnabled()) log.debug("Creating default QueryBuilder for DESCRIBE <{}>", getURI());
+	QueryBuilder describe = QueryBuilder.fromDescribe(getOntResource().getURI(), getOntResource().getModel());
+	Model model = ModelFactory.createDefaultModel();
 
-	Model model = describe();
-	
+	// CONFIGURED BEHAVIOUR START
 	if (hasRDFType(SIOC.CONTAINER))
 	{
 	    if (log.isDebugEnabled()) log.debug("OntResource is a container, returning page Resource");
@@ -201,13 +197,18 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 		getUriInfo(), getRequest(), getHttpHeaders(), getVariants(),
 		getLimit(), getOffset(), getOrderBy(), getDesc());
 
-	    model.add(page.loadModel());
+	    model.add(page.describe());
 	}
 
-	if (hasProperty(Graphity.query))
+	if (!hasProperty(Graphity.query)) // Resource always gets a g:query value
+	{
+	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} gets explicit Query Resource {}", getURI(), describe);
+	    setPropertyValue(Graphity.query, describe);
+	}
+	else // override default DESCRIBE query
 	{
 	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} has explicit Query: {}", getURI(), getQuery());
-	    
+
 	    if (hasProperty(Graphity.service))
 	    {
 		com.hp.hpl.jena.rdf.model.Resource service = getPropertyResourceValue(Graphity.service);
@@ -228,14 +229,13 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 		model.add(getModelResource(getOntModel(), getQuery()).getModel());
 	    }
 	}
+	// CONFIGURED BEHAVIOUR END
+
+	// what about g:service here?
+	if (log.isDebugEnabled()) log.debug("Querying OntModel with default Query: {}", describe.build());
+	model.add(getModelResource(getOntModel(), describe.build()).getModel());
 	
 	return model;
-    }
-    
-    public final Model describe()
-    {
-	if (log.isDebugEnabled()) log.debug("Querying OntModel with defaul DESCRIBE <{}>", getURI());
-	return getModelResource(getOntModel(), getURI()).getModel();
     }
 
     /*
@@ -246,7 +246,7 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     }
     */
     
-    public QueryBuilder getQueryBuilder()
+    public final QueryBuilder getQueryBuilder()
     {
 	if (log.isDebugEnabled()) log.debug("OntResource with URI {} has Query Resource {}", getURI(), getPropertyResourceValue(Graphity.query));
 	return QueryBuilder.fromResource(getPropertyResourceValue(Graphity.query));

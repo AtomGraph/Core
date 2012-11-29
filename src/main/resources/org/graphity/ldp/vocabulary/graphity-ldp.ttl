@@ -24,6 +24,7 @@
     owl:versionInfo "1.0.4" ;
     dct:title "Graphity Linked Data Platform ontology" ;
     rdfs:label "Graphity Linked Data Platform ontology" ;
+    dct:description "Graphity LDP configuration ontology. Should be imported and reused by all extending applications" ;
     dct:created "2012-10-26T01:04:00+03:00"^^xsd:dateTime ;
     vann:preferredNamespaceUri "http://ldp.graphity.org/ontology/" ;
     vann:preferredNamespacePrefix "gldp";
@@ -38,10 +39,10 @@ _:dataset a void:Dataset ;
     rdfs:isDefinedBy : .
     # void:sparqlEndpoint <sparql> .
 
-_:sparql a sd:Service ;
-    dct:title "Local SPARQL service" ;
-    sd:endpoint <sparql> ;
-    sd:supportedLanguage sd:SPARQL11Query .
+#_:sparql a sd:Service ;
+#    dct:title "Local SPARQL service" ;
+#    sd:endpoint <sparql> ;
+#    sd:supportedLanguage sd:SPARQL11Query .
 
 <services/dydra> a sd:Service ;
     dct:title "Dydra SPARQL service" ;
@@ -83,7 +84,7 @@ gfb-app:type rdfs:label "Facebook application" ;
     sioc:has_host <> ;
     dct:title "Instances" ;
     g:selectQuery :SelectInstances ;
-    g:service _:sparql ;
+    # g:service _:sparql ;
     g:mode gldp:ListMode ;
     g:orderBy (rdfs:label dct:title) ;
     rdfs:isDefinedBy : ;
