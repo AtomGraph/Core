@@ -252,25 +252,25 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	return QueryBuilder.fromResource(getPropertyResourceValue(Graphity.query));
     }
 
-    public OntClass matchOntClass()
+    public OntClass matchOntClass(OntModel ontModel)
     {
 	if (log.isDebugEnabled()) log.debug("Matching @Path annotation {} of Class {}", getClass().getAnnotation(Path.class).value(), getClass());
-	return matchOntClass(getClass().getAnnotation(Path.class).value());
+	return matchOntClass(getClass().getAnnotation(Path.class).value(), ontModel);
     }
 
-    public OntClass matchOntClass(Class<?> cls)
+    public OntClass matchOntClass(Class<?> cls, OntModel ontModel)
     {
 	if (log.isDebugEnabled()) log.debug("Matching @Path annotation {} of Class {}", cls.getAnnotation(Path.class).value(), cls);
-	return matchOntClass(cls.getAnnotation(Path.class).value());
+	return matchOntClass(cls.getAnnotation(Path.class).value(), ontModel);
     }
     
-    public OntClass matchOntClass(String uriTemplate)
+    public OntClass matchOntClass(String uriTemplate, OntModel ontModel)
     {
 	if (uriTemplate == null) throw new IllegalArgumentException("Item endpoint class must have a @Path annotation");
 	
-	if (log.isDebugEnabled()) log.debug("Matching URI template template {} against Model {}", uriTemplate, getOntModel());
-	Property utProp = getOntModel().createProperty("http://purl.org/linked-data/api/vocab#uriTemplate");
-	ResIterator it = getOntModel().listResourcesWithProperty(utProp, uriTemplate);
+	if (log.isDebugEnabled()) log.debug("Matching URI template template {} against Model {}", uriTemplate, ontModel);
+	Property utProp = ontModel.createProperty("http://purl.org/linked-data/api/vocab#uriTemplate");
+	ResIterator it = ontModel.listResourcesWithProperty(utProp, uriTemplate);
 
 	if (it.hasNext())
 	{
@@ -282,7 +282,7 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	}
 	else
 	{
-	    if (log.isDebugEnabled()) log.debug("URI template {} has no OntClass match in OntModel {}", uriTemplate, getOntModel());
+	    if (log.isDebugEnabled()) log.debug("URI template {} has no OntClass match in OntModel {}", uriTemplate, ontModel);
 	    return null;   
 	}
     }

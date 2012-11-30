@@ -62,9 +62,9 @@ exclude-result-prefixes="#all">
 	</span>
     </xsl:template>
 
-    <!-- object blank node -->
+    <!-- object blank node (avoid infinite loop) -->
     <xsl:template match="*[@rdf:about or @rdf:nodeID]/*/@rdf:nodeID">
-	<xsl:apply-templates select="key('resources', .)"/>
+	<xsl:apply-templates select="key('resources', .)[not(@rdf:nodeID = current()/../../@rdf:nodeID)]"/>
     </xsl:template>
 
     <!-- object literal -->
