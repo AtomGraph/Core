@@ -19,22 +19,13 @@ package org.graphity.ldp.model;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.ontology.*;
-import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.rdf.model.*;
-import com.hp.hpl.jena.util.LocationMapper;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import java.util.List;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
-import org.graphity.ldp.model.impl.LinkedDataPageResourceImpl;
 import org.graphity.model.ResourceFactory;
-import org.graphity.model.query.QueriedResource;
 import org.graphity.util.ModelUtils;
-import org.graphity.util.QueryBuilder;
-import org.graphity.util.locator.PrefixMapper;
-import org.graphity.util.manager.DataManager;
-import org.graphity.vocabulary.Graphity;
-import org.graphity.vocabulary.SIOC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 @Path("{path: .*}")
-public class LinkedDataResourceBase extends ResourceFactory implements LinkedDataResource, QueriedResource
+public class LinkedDataResourceBase extends ResourceFactory implements LinkedDataResource
 {
     private static final Logger log = LoggerFactory.getLogger(LinkedDataResourceBase.class);
 
@@ -63,47 +54,12 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     private final String orderBy;
     private final Boolean desc;
     
-    public static OntModel getOntology(UriInfo uriInfo)
+    public LinkedDataResourceBase(OntModel ontModel,
+	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
+	    Long limit, Long offset, String orderBy, Boolean desc)
     {
-	// ResourceConfig.getProperty()
-	return getOntology(uriInfo.getBaseUri().toString(), "org/graphity/ldp/vocabulary/graphity-ldp.ttl");
-    }
-    
-    public static OntModel getOntology(String baseUri, String ontologyPath)
-    {
-	//synchronized (OntDocumentManager.getInstance())
-	{
-	    //if (!OntDocumentManager.getInstance().getFileManager().hasCachedModel(baseUri)) // not cached
-	    {	    
-		if (log.isDebugEnabled())
-		{
-		    log.debug("Ontology not cached, reading from file: {}", ontologyPath);
-		    log.debug("DataManager.get().getLocationMapper(): {}", DataManager.get().getLocationMapper());
-		    log.debug("Adding name/altName mapping: {} altName: {} ", baseUri, ontologyPath);
-		}
-		OntDocumentManager.getInstance().addAltEntry(baseUri, ontologyPath);
-
-		LocationMapper mapper = OntDocumentManager.getInstance().getFileManager().getLocationMapper();
-		if (log.isDebugEnabled()) log.debug("Adding prefix/altName mapping: {} altName: {} ", baseUri, ontologyPath);
-		((PrefixMapper)mapper).addAltPrefixEntry(baseUri, ontologyPath);	    
-	    }
-	    //else
-		//if (log.isDebugEnabled()) log.debug("Ontology already cached, returning cached instance");
-
-	    OntModel ontModel = OntDocumentManager.getInstance().getOntology(baseUri, OntModelSpec.OWL_MEM_RDFS_INF);
-	    if (log.isDebugEnabled()) log.debug("Ontology size: {}", ontModel.size());
-	    return ontModel;
-	}
-    }
-
-    public LinkedDataResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context HttpHeaders httpHeaders,
-	    @QueryParam("limit") @DefaultValue("20") Long limit,
-	    @QueryParam("offset") @DefaultValue("0") Long offset,
-	    @QueryParam("order-by") String orderBy,
-	    @QueryParam("desc") Boolean desc)
-    {
-	this(getOntology(uriInfo).createOntResource(uriInfo.getAbsolutePath().toString()),
-		uriInfo, request, httpHeaders, VARIANTS,
+	this(ontModel.createOntResource(uriInfo.getAbsolutePath().toString()),
+		uriInfo, request, httpHeaders, variants,
 		limit, offset, orderBy, desc);
     }
 
@@ -176,66 +132,14 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	    }
 	}
     }
-    
-    @Override
-    public Query getQuery()
-    {
-	return getQueryBuilder().build();
-    }
         
-    public final Model describe()
+    public Model describe()
     {
-	if (log.isDebugEnabled()) log.debug("Creating default QueryBuilder for DESCRIBE <{}>", getURI());
-	QueryBuilder describe = QueryBuilder.fromDescribe(getOntResource().getURI(), getOntResource().getModel());
-	Model model = ModelFactory.createDefaultModel();
+	//if (log.isDebugEnabled()) log.debug("Creating default QueryBuilder for DESCRIBE <{}>", getURI());
+	//QueryBuilder describe = QueryBuilder.fromDescribe(getOntResource().getURI(), getOntResource().getModel());
 
-	// CONFIGURED BEHAVIOUR START
-	if (hasRDFType(SIOC.CONTAINER))
-	{
-	    if (log.isDebugEnabled()) log.debug("OntResource is a container, returning page Resource");
-	    LinkedDataResourceBase page = new LinkedDataPageResourceImpl(this,
-		getUriInfo(), getRequest(), getHttpHeaders(), getVariants(),
-		getLimit(), getOffset(), getOrderBy(), getDesc());
-
-	    model.add(page.describe());
-	}
-
-	if (!hasProperty(Graphity.query)) // Resource always gets a g:query value
-	{
-	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} gets explicit Query Resource {}", getURI(), describe);
-	    setPropertyValue(Graphity.query, describe);
-	}
-	else // override default DESCRIBE query
-	{
-	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} has explicit Query: {}", getURI(), getQuery());
-
-	    if (hasProperty(Graphity.service))
-	    {
-		com.hp.hpl.jena.rdf.model.Resource service = getPropertyResourceValue(Graphity.service);
-		if (service == null) throw new IllegalArgumentException("SPARQL Service must be a Resource");
-
-		com.hp.hpl.jena.rdf.model.Resource endpoint = service.getPropertyResourceValue(com.hp.hpl.jena.rdf.model.ResourceFactory.
-		    createProperty("http://www.w3.org/ns/sparql-service-description#endpoint"));
-		if (endpoint == null || endpoint.getURI() == null) throw new IllegalArgumentException("SPARQL Service endpoint must be URI Resource");
-
-		if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has explicit SPARQL endpoint: {}", getURI(), endpoint.getURI());
-
-		// query endpoint whenever g:service is present
-		model.add(getModelResource(endpoint.getURI(), getQuery()).getModel());
-	    }
-	    else
-	    {
-		if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has no explicit SPARQL endpoint, querying its OntModel", getURI());
-		model.add(getModelResource(getOntModel(), getQuery()).getModel());
-	    }
-	}
-	// CONFIGURED BEHAVIOUR END
-
-	// what about g:service here?
-	if (log.isDebugEnabled()) log.debug("Querying OntModel with default Query: {}", describe.build());
-	model.add(getModelResource(getOntModel(), describe.build()).getModel());
-	
-	return model;
+	if (log.isDebugEnabled()) log.debug("Querying OntModel with default DESCRIBE <{}> Query: {}", getURI());
+	return getModelResource(getOntModel(), getURI()).getModel();
     }
 
     /*
@@ -246,47 +150,6 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     }
     */
     
-    public final QueryBuilder getQueryBuilder()
-    {
-	if (log.isDebugEnabled()) log.debug("OntResource with URI {} has Query Resource {}", getURI(), getPropertyResourceValue(Graphity.query));
-	return QueryBuilder.fromResource(getPropertyResourceValue(Graphity.query));
-    }
-
-    public OntClass matchOntClass(OntModel ontModel)
-    {
-	if (log.isDebugEnabled()) log.debug("Matching @Path annotation {} of Class {}", getClass().getAnnotation(Path.class).value(), getClass());
-	return matchOntClass(getClass().getAnnotation(Path.class).value(), ontModel);
-    }
-
-    public OntClass matchOntClass(Class<?> cls, OntModel ontModel)
-    {
-	if (log.isDebugEnabled()) log.debug("Matching @Path annotation {} of Class {}", cls.getAnnotation(Path.class).value(), cls);
-	return matchOntClass(cls.getAnnotation(Path.class).value(), ontModel);
-    }
-    
-    public OntClass matchOntClass(String uriTemplate, OntModel ontModel)
-    {
-	if (uriTemplate == null) throw new IllegalArgumentException("Item endpoint class must have a @Path annotation");
-	
-	if (log.isDebugEnabled()) log.debug("Matching URI template template {} against Model {}", uriTemplate, ontModel);
-	Property utProp = ontModel.createProperty("http://purl.org/linked-data/api/vocab#uriTemplate");
-	ResIterator it = ontModel.listResourcesWithProperty(utProp, uriTemplate);
-
-	if (it.hasNext())
-	{
-	    com.hp.hpl.jena.rdf.model.Resource match = it.next();
-	    if (!match.canAs(OntClass.class)) throw new IllegalArgumentException("Resource matching this URI template is not an OntClass");
-	    
-	    if (log.isDebugEnabled()) log.debug("URI template {} matched endpoint OntClass {}", uriTemplate, match.as(OntClass.class));
-	    return match.as(OntClass.class);
-	}
-	else
-	{
-	    if (log.isDebugEnabled()) log.debug("URI template {} has no OntClass match in OntModel {}", uriTemplate, ontModel);
-	    return null;   
-	}
-    }
-
     @Override
     public final String getURI()
     {
