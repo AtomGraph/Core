@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-@Path("{path: .*}")
 public class LinkedDataResourceBase extends ResourceFactory implements LinkedDataResource
 {
     private static final Logger log = LoggerFactory.getLogger(LinkedDataResourceBase.class);
@@ -133,13 +132,11 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	}
     }
         
+    @Override
     public Model describe()
     {
-	//if (log.isDebugEnabled()) log.debug("Creating default QueryBuilder for DESCRIBE <{}>", getURI());
-	//QueryBuilder describe = QueryBuilder.fromDescribe(getOntResource().getURI(), getOntResource().getModel());
-
 	if (log.isDebugEnabled()) log.debug("Querying OntModel with default DESCRIBE <{}> Query: {}", getURI());
-	return getModelResource(getOntModel(), getURI()).getModel();
+	return getModelResource(getOntModel(), getURI()).describe();
     }
 
     /*

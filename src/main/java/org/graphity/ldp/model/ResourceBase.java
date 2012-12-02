@@ -28,7 +28,7 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.*;
-import org.graphity.ldp.model.impl.LinkedDataPageResourceImpl;
+import org.graphity.ldp.model.impl.PageResourceImpl;
 import org.graphity.model.query.QueriedResource;
 import org.graphity.util.QueryBuilder;
 import org.graphity.util.locator.PrefixMapper;
@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
+@Path("{path: .*}")
 public class ResourceBase extends LDPResourceBase implements QueriedResource
 {
     private static final Logger log = LoggerFactory.getLogger(ResourceBase.class);
@@ -85,18 +86,29 @@ public class ResourceBase extends LDPResourceBase implements QueriedResource
 	    @QueryParam("order-by") String orderBy,
 	    @QueryParam("desc") Boolean desc)
     {
-	super(getOntology(uriInfo).createOntResource(uriInfo.getAbsolutePath().toString()),
+	this(getOntology(uriInfo),
 		uriInfo, request, httpHeaders, VARIANTS,
 		limit, offset, orderBy, desc);
     }
 
-    public ResourceBase(OntModel ontModel,
-	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders,
+    protected ResourceBase(OntModel ontModel,
+	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
 	    Long limit, Long offset, String orderBy, Boolean desc)
     {
-	super(ontModel.createOntResource(uriInfo.getAbsolutePath().toString()),
-		uriInfo, request, httpHeaders, VARIANTS,
+	super(ontModel,
+		uriInfo, request, httpHeaders, variants,
 		limit, offset, orderBy, desc);
+	
+	if (log.isDebugEnabled()) log.debug("Constructing LDP ResourceBase");
+    }
+
+    protected ResourceBase(OntResource ontResource,
+	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
+	    Long limit, Long offset, String orderBy, Boolean desc)
+    {
+	super(ontResource, uriInfo, request, httpHeaders, variants, limit, offset, orderBy, desc);
+	
+	if (log.isDebugEnabled()) log.debug("Constructing LDP ResourceBase");
     }
     
     @Override
@@ -110,7 +122,7 @@ public class ResourceBase extends LDPResourceBase implements QueriedResource
 	if (hasRDFType(SIOC.CONTAINER))
 	{
 	    if (log.isDebugEnabled()) log.debug("OntResource is a container, returning page Resource");
-	    LinkedDataResourceBase page = new LinkedDataPageResourceImpl(this,
+	    LinkedDataResourceBase page = new PageResourceImpl(this,
 		getUriInfo(), getRequest(), getHttpHeaders(), getVariants(),
 		getLimit(), getOffset(), getOrderBy(), getDesc());
 
@@ -138,12 +150,12 @@ public class ResourceBase extends LDPResourceBase implements QueriedResource
 		if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has explicit SPARQL endpoint: {}", getURI(), endpoint.getURI());
 
 		// query endpoint whenever g:service is present
-		model.add(getModelResource(endpoint.getURI(), getQuery()).getModel());
+		model.add(getModelResource(endpoint.getURI(), getQuery()).describe());
 	    }
 	    else
 	    {
 		if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has no explicit SPARQL endpoint, querying its OntModel", getURI());
-		model.add(getModelResource(getOntModel(), getQuery()).getModel());
+		model.add(getModelResource(getOntModel(), getQuery()).describe());
 	    }
 	}
 	// CONFIGURED BEHAVIOUR END

@@ -20,8 +20,8 @@ import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.rdf.model.Resource;
 import java.util.List;
 import javax.ws.rs.core.*;
-import org.graphity.ldp.model.LinkedDataResourceBase;
 import org.graphity.ldp.model.PageResource;
+import org.graphity.ldp.model.ResourceBase;
 import org.graphity.util.QueryBuilder;
 import org.graphity.util.SelectBuilder;
 import org.graphity.vocabulary.Graphity;
@@ -35,13 +35,13 @@ import org.topbraid.spin.vocabulary.SP;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public final class LinkedDataPageResourceImpl extends LinkedDataResourceBase implements PageResource
+public final class PageResourceImpl extends ResourceBase implements PageResource
 {
-    private static final Logger log = LoggerFactory.getLogger(LinkedDataPageResourceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(PageResourceImpl.class);
 
     private OntResource ontResource = null;
     
-    public LinkedDataPageResourceImpl(OntResource container,
+    public PageResourceImpl(OntResource container,
 	UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
 	Long limit, Long offset, String orderBy, Boolean desc)
     {

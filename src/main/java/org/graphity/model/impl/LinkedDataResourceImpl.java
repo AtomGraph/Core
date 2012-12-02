@@ -47,7 +47,7 @@ public class LinkedDataResourceImpl implements LinkedDataResource
     }
 
     @Override
-    public Model getModel()
+    public Model describe()
     {
 	return model;
     }

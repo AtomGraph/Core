@@ -25,5 +25,5 @@ import com.hp.hpl.jena.rdf.model.Model;
  */
 public interface ModelResource
 {
-    Model getModel();
+    Model describe();
 }

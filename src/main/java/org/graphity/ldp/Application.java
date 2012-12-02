@@ -29,7 +29,7 @@ import javax.annotation.PostConstruct;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.stream.StreamSource;
-import org.graphity.ldp.model.LinkedDataResourceBase;
+import org.graphity.ldp.model.ResourceBase;
 import org.graphity.ldp.provider.ModelProvider;
 import org.graphity.ldp.provider.QueryParamProvider;
 import org.graphity.ldp.provider.RDFPostReader;
@@ -106,7 +106,7 @@ public class Application extends javax.ws.rs.core.Application
     @Override
     public Set<Class<?>> getClasses()
     {
-	classes.add(LinkedDataResourceBase.class); // handles all
+	classes.add(ResourceBase.class); // handles all
 	
         return classes;
     }

@@ -56,7 +56,7 @@ public class QueryModelModelResourceImpl implements QueryModelResource, ModelRes
     }
 
     @Override
-    public Model getModel()
+    public Model describe()
     {
 	return model;
     }

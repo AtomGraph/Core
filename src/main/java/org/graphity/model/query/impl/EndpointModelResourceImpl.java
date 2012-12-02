@@ -57,7 +57,7 @@ public class EndpointModelResourceImpl implements EndpointResource, ModelResourc
     }
 
     @Override
-    public Model getModel()
+    public Model describe()
     {
 	return model;
     }
