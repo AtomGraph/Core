@@ -39,7 +39,8 @@ public final class PageResourceImpl extends ResourceBase implements PageResource
 {
     private static final Logger log = LoggerFactory.getLogger(PageResourceImpl.class);
 
-    private OntResource ontResource = null;
+    private final OntResource ontResource;
+    private final QueryBuilder queryBuilder;
     
     public PageResourceImpl(OntResource container,
 	UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
@@ -58,9 +59,9 @@ public final class PageResourceImpl extends ResourceBase implements PageResource
 	if (getDesc() != null) uriBuilder.replaceQueryParam("desc", getDesc());
 
 	if (log.isDebugEnabled()) log.debug("Creating LinkedDataPageResource from OntResource with URI: {}", uriBuilder.build().toString());
-	ontResource = super.getOntResource().getOntModel().createOntResource(uriBuilder.build().toString());
+	ontResource = container.getOntModel().createOntResource(uriBuilder.build().toString());
 
-	Resource select = super.getOntResource().getPropertyResourceValue(Graphity.selectQuery);
+	Resource select = container.getPropertyResourceValue(Graphity.selectQuery);
 	SelectBuilder selectBuilder = SelectBuilder.fromResource(select).
 	    limit(getLimit()).offset(getOffset());
 	/*
@@ -73,7 +74,7 @@ public final class PageResourceImpl extends ResourceBase implements PageResource
 	    selectBuilder.orderBy(orderVar, getDesc()).optional(modelVar, orderProperty, orderVar);
 	}
 	*/
-	QueryBuilder queryBuilder;
+	//QueryBuilder queryBuilder;
 	if (selectBuilder.getPropertyResourceValue(SP.resultVariables) != null)
 	{
 	    if (log.isDebugEnabled()) log.debug("Query Resource {} has result variables: {}", selectBuilder, selectBuilder.getPropertyResourceValue(SP.resultVariables));
@@ -87,7 +88,7 @@ public final class PageResourceImpl extends ResourceBase implements PageResource
 	}
 	
 	ontResource.setPropertyValue(Graphity.query, queryBuilder); // Resource alway get a g:query value
-	ontResource.setPropertyValue(Graphity.service, super.getOntResource().getPropertyResourceValue(Graphity.service));
+	ontResource.setPropertyValue(Graphity.service, container.getPropertyResourceValue(Graphity.service));
 
 	if (log.isDebugEnabled())
 	{
@@ -119,6 +120,12 @@ public final class PageResourceImpl extends ResourceBase implements PageResource
     public OntResource getOntResource()
     {
 	return ontResource;
+    }
+    
+    @Override
+    public QueryBuilder getQueryBuilder()
+    {
+	return queryBuilder;
     }
     
     @Override

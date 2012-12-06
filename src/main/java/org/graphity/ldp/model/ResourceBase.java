@@ -19,7 +19,6 @@ package org.graphity.ldp.model;
 import com.hp.hpl.jena.ontology.*;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.util.LocationMapper;
@@ -46,6 +45,12 @@ import org.slf4j.LoggerFactory;
 public class ResourceBase extends LDPResourceBase implements QueriedResource
 {
     private static final Logger log = LoggerFactory.getLogger(ResourceBase.class);
+
+    private final Long limit, offset;
+    private final String orderBy;
+    private final Boolean desc;
+    private final QueryBuilder describeQuery, queryBuilder;
+    private Model description = null;
 
     public static OntModel getOntology(UriInfo uriInfo)
     {
@@ -95,7 +100,7 @@ public class ResourceBase extends LDPResourceBase implements QueriedResource
 	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
 	    Long limit, Long offset, String orderBy, Boolean desc)
     {
-	super(ontModel,
+	this(ontModel.createOntResource(uriInfo.getAbsolutePath().toString()),
 		uriInfo, request, httpHeaders, variants,
 		limit, offset, orderBy, desc);
 	
@@ -107,36 +112,47 @@ public class ResourceBase extends LDPResourceBase implements QueriedResource
 	    Long limit, Long offset, String orderBy, Boolean desc)
     {
 	super(ontResource, uriInfo, request, httpHeaders, variants, limit, offset, orderBy, desc);
-	
+
+	this.limit = limit;
+	this.offset = offset;
+	this.orderBy = orderBy;
+	this.desc = desc;
+
 	if (log.isDebugEnabled()) log.debug("Constructing LDP ResourceBase");
+
+	describeQuery = QueryBuilder.fromDescribe(ontResource.getURI(), ontResource.getModel());
+	
+	if (!ontResource.hasProperty(Graphity.query)) // Resource always gets a g:query value
+	{
+	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} gets explicit Query Resource {}", ontResource.getURI(), describeQuery);
+	    ontResource.setPropertyValue(Graphity.query, describeQuery);
+	}
+	
+	if (log.isDebugEnabled()) log.debug("OntResource with URI {} has Query Resource {}", ontResource.getURI(), ontResource.getPropertyResourceValue(Graphity.query));
+	queryBuilder = QueryBuilder.fromResource(ontResource.getPropertyResourceValue(Graphity.query));
+    }
+
+    public QueryBuilder getDescribeQuery()
+    {
+	return describeQuery;
     }
     
     @Override
     public Model describe()
     {
-	if (log.isDebugEnabled()) log.debug("Creating default QueryBuilder for DESCRIBE <{}>", getURI());
-	QueryBuilder describe = QueryBuilder.fromDescribe(getOntResource().getURI(), getOntResource().getModel());
-	Model model = ModelFactory.createDefaultModel();
-
-	// CONFIGURED BEHAVIOUR START
-	if (hasRDFType(SIOC.CONTAINER))
+	if (description == null)
 	{
-	    if (log.isDebugEnabled()) log.debug("OntResource is a container, returning page Resource");
-	    LinkedDataResourceBase page = new PageResourceImpl(this,
-		getUriInfo(), getRequest(), getHttpHeaders(), getVariants(),
-		getLimit(), getOffset(), getOrderBy(), getDesc());
+	    description = super.describe();
 
-	    model.add(page.describe());
-	}
+	    if (hasRDFType(SIOC.CONTAINER))
+	    {
+		if (log.isDebugEnabled()) log.debug("OntResource is a container, adding PageResource description");
+		PageResource page = new PageResourceImpl(this,
+		    getUriInfo(), getRequest(), getHttpHeaders(), getVariants(),
+		    getLimit(), getOffset(), getOrderBy(), getDesc());
 
-	if (!hasProperty(Graphity.query)) // Resource always gets a g:query value
-	{
-	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} gets explicit Query Resource {}", getURI(), describe);
-	    setPropertyValue(Graphity.query, describe);
-	}
-	else // override default DESCRIBE query
-	{
-	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} has explicit Query: {}", getURI(), getQuery());
+		description.add(page.describe());
+	    }
 
 	    if (hasProperty(Graphity.service))
 	    {
@@ -150,21 +166,22 @@ public class ResourceBase extends LDPResourceBase implements QueriedResource
 		if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has explicit SPARQL endpoint: {}", getURI(), endpoint.getURI());
 
 		// query endpoint whenever g:service is present
-		model.add(getModelResource(endpoint.getURI(), getQuery()).describe());
+		description.add(getModelResource(endpoint.getURI(), getQuery()).describe());
 	    }
 	    else
 	    {
-		if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has no explicit SPARQL endpoint, querying its OntModel", getURI());
-		model.add(getModelResource(getOntModel(), getQuery()).describe());
+		// don't do default DESCRIBE on OntModel again - super.describe() does it
+		// compare on the SPARQL syntax level - equals() on objects doesn't seem to work
+		//if (!getQueryBuilder().equals(getDescribeQuery()))
+		if (!getQueryBuilder().toString().equals(getDescribeQuery().toString()))
+		{
+		    if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has no explicit SPARQL endpoint, querying its OntModel", getURI());
+		    description.add(getModelResource(getOntModel(), getQuery()).describe());
+		}
 	    }
 	}
-	// CONFIGURED BEHAVIOUR END
-
-	// what about g:service here?
-	if (log.isDebugEnabled()) log.debug("Adding default DESCRIBE Model");
-	model.add(super.describe());
 	
-	return model;
+	return description;
     }
 
     @Override
@@ -173,10 +190,9 @@ public class ResourceBase extends LDPResourceBase implements QueriedResource
 	return getQueryBuilder().build();
     }
 
-    public final QueryBuilder getQueryBuilder()
+    public QueryBuilder getQueryBuilder()
     {
-	if (log.isDebugEnabled()) log.debug("OntResource with URI {} has Query Resource {}", getURI(), getPropertyResourceValue(Graphity.query));
-	return QueryBuilder.fromResource(getPropertyResourceValue(Graphity.query));
+	return queryBuilder;
     }
 
     public OntClass matchOntClass(OntModel ontModel)
@@ -212,6 +228,26 @@ public class ResourceBase extends LDPResourceBase implements QueriedResource
 	    if (log.isDebugEnabled()) log.debug("URI template {} has no OntClass match in OntModel {}", uriTemplate, ontModel);
 	    return null;   
 	}
+    }
+
+    public final Long getLimit()
+    {
+	return limit;
+    }
+
+    public final Long getOffset()
+    {
+	return offset;
+    }
+
+    public final String getOrderBy()
+    {
+	return orderBy;
+    }
+
+    public final Boolean getDesc()
+    {
+	return desc;
     }
 
 }

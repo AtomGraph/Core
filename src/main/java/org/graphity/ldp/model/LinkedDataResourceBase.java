@@ -22,7 +22,8 @@ import com.hp.hpl.jena.ontology.*;
 import com.hp.hpl.jena.rdf.model.*;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import java.util.List;
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.*;
 import org.graphity.model.ResourceFactory;
 import org.graphity.util.ModelUtils;
@@ -49,20 +50,9 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     private final HttpHeaders httpHeaders;
     private final List<Variant> variants;
     private final OntResource ontResource;
-    private final Long limit, offset;
-    private final String orderBy;
-    private final Boolean desc;
+    private final Model description;
     
-    public LinkedDataResourceBase(OntModel ontModel,
-	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
-	    Long limit, Long offset, String orderBy, Boolean desc)
-    {
-	this(ontModel.createOntResource(uriInfo.getAbsolutePath().toString()),
-		uriInfo, request, httpHeaders, variants,
-		limit, offset, orderBy, desc);
-    }
-
-    protected LinkedDataResourceBase(OntResource ontResource,
+    public LinkedDataResourceBase(OntResource ontResource,
 	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
 	    Long limit, Long offset, String orderBy, Boolean desc)
     {
@@ -84,11 +74,9 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	this.request = request;
 	this.httpHeaders = httpHeaders;
 	this.variants = variants;
-	
-	this.limit = limit;
-	this.offset = offset;
-	this.orderBy = orderBy;
-	this.desc = desc;
+
+	if (log.isDebugEnabled()) log.debug("Querying OntModel with default DESCRIBE <{}> Query: {}", ontResource.getURI());
+	this.description = getModelResource(ontResource.getOntModel(), ontResource.getURI()).describe();
     }
 
     @GET
@@ -101,14 +89,13 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 
 	if (log.isDebugEnabled()) log.debug("Returning @GET Response");
 
-	Model description = describe();
-	if (description.isEmpty())
+	if (describe().isEmpty())
 	{
 	    if (log.isTraceEnabled()) log.trace("DESCRIBE Model is empty; returning 404 Not Found");
 	    throw new WebApplicationException(Response.Status.NOT_FOUND);
 	}
 	
-	EntityTag entityTag = new EntityTag(Long.toHexString(ModelUtils.hashModel(description)));
+	EntityTag entityTag = new EntityTag(Long.toHexString(ModelUtils.hashModel(describe())));
 	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(entityTag);
 	if (rb != null)
 	{
@@ -135,17 +122,8 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     @Override
     public Model describe()
     {
-	if (log.isDebugEnabled()) log.debug("Querying OntModel with default DESCRIBE <{}> Query: {}", getURI());
-	return getModelResource(getOntModel(), getURI()).describe();
+	return description;
     }
-
-    /*
-    @Override
-    public EntityTag getEntityTag()
-    {
-	return entityTag;
-    }
-    */
     
     @Override
     public final String getURI()
@@ -190,26 +168,6 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     public final HttpHeaders getHttpHeaders()
     {
 	return httpHeaders;
-    }
-
-    public final Long getLimit()
-    {
-	return limit;
-    }
-
-    public final Long getOffset()
-    {
-	return offset;
-    }
-
-    public final String getOrderBy()
-    {
-	return orderBy;
-    }
-
-    public final Boolean getDesc()
-    {
-	return desc;
     }
 
     @Override

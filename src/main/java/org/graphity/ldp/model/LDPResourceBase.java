@@ -32,21 +32,8 @@ import org.slf4j.LoggerFactory;
 public class LDPResourceBase extends LinkedDataResourceBase implements LDPResource
 {    
     private static final Logger log = LoggerFactory.getLogger(LDPResourceBase.class);
-
-    public LDPResourceBase(OntModel ontModel,
-	    @Context UriInfo uriInfo, @Context Request request, @Context HttpHeaders httpHeaders,
-	    List<Variant> variants,
-	    @QueryParam("limit") @DefaultValue("20") Long limit,
-	    @QueryParam("offset") @DefaultValue("0") Long offset,
-	    @QueryParam("order-by") String orderBy,
-	    @QueryParam("desc") Boolean desc)
-    {
-	super(ontModel,
-		uriInfo, request, httpHeaders, variants,
-		limit, offset, orderBy, desc);
-    }
     
-    protected LDPResourceBase(OntResource ontResource,
+    public LDPResourceBase(OntResource ontResource,
 	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
 	    Long limit, Long offset, String orderBy, Boolean desc)
     {
