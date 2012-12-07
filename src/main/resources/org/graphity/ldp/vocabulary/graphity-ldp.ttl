@@ -68,12 +68,15 @@ _:dataset a void:Dataset ;
 gfb-app:type rdfs:label "Facebook application" ;
     rdfs:isDefinedBy gfb-app: .
 
+sioc:has_container a owl:ObjectProperty ;
+    rdfs:domain sioc:Item ;
+    rdfs:range sioc:Container ;
+    rdfs:isDefinedBy sioc: .
+
 # RESOURCES
 
 <> a sioc:Site, lda:ListEndpoint ;
     dct:title "Graphity Linked Data Platform" ;
-    g:selectQuery :SelectClasses ;
-    # g:service _:sparql ;
     g:mode gldp:ListMode ;
     g:orderBy (rdfs:label) ;
     rdfs:isDefinedBy : ;
@@ -83,8 +86,6 @@ gfb-app:type rdfs:label "Facebook application" ;
 <instances> a sioc:Container, lda:ListEndpoint ;
     sioc:has_host <> ;
     dct:title "Instances" ;
-    g:selectQuery :SelectInstances ;
-    # g:service _:sparql ;
     g:mode gldp:ListMode ;
     g:orderBy (rdfs:label dct:title) ;
     rdfs:isDefinedBy : ;
@@ -93,8 +94,6 @@ gfb-app:type rdfs:label "Facebook application" ;
 <ontologies> a sioc:Container, lda:ListEndpoint ;
     sioc:has_host <> ;
     dct:title "Ontologies" ;
-    g:selectQuery :SelectOntologies ;
-    # g:service _:sparql ;
     g:mode gldp:ListMode ;
     g:orderBy (rdfs:label dct:title) ;
     rdfs:isDefinedBy : ;
@@ -103,8 +102,6 @@ gfb-app:type rdfs:label "Facebook application" ;
 <classes> a sioc:Container, lda:ListEndpoint ;
     sioc:has_host <> ;
     dct:title "Classes" ;
-    g:selectQuery :SelectClasses ;
-    # g:service _:sparql ;
     g:mode gldp:ListMode ;
     g:orderBy (rdfs:label) ;
     rdfs:isDefinedBy : ;
@@ -113,8 +110,6 @@ gfb-app:type rdfs:label "Facebook application" ;
 <properties> a sioc:Container, lda:ListEndpoint ;
     sioc:has_host <> ;
     dct:title "Properties" ;
-    g:selectQuery :SelectProperties ;
-    # g:service _:sparql ;
     g:mode gldp:ListMode ;
     g:orderBy (rdfs:label) ;
     rdfs:isDefinedBy : ;
@@ -123,8 +118,6 @@ gfb-app:type rdfs:label "Facebook application" ;
 <services> a sioc:Container, lda:ListEndpoint ;
     sioc:has_host <> ;
     dct:title "Services" ;
-    g:selectQuery :SelectServices ;
-    # g:service _:sparql ;
     g:mode gldp:ListMode ;
     g:orderBy (dct:title) ;
     rdfs:isDefinedBy : ;
@@ -133,8 +126,6 @@ gfb-app:type rdfs:label "Facebook application" ;
 <queries> a sioc:Container, lda:ListEndpoint ;
     sioc:has_host <> ;
     dct:title "Queries" ;
-    g:selectQuery :SelectQueries ;
-    # g:service _:sparql ;
     g:mode gldp:ListMode ;
     g:orderBy (dct:title) ;
     rdfs:isDefinedBy : ;
@@ -143,8 +134,6 @@ gfb-app:type rdfs:label "Facebook application" ;
 <modes> a sioc:Container, lda:ListEndpoint ;
     sioc:has_host <> ;
     dct:title "XSLT modes" ;
-    g:selectQuery :SelectModes ;
-    # g:service _:sparql ;
     g:mode gldp:ListMode ;
     g:orderBy (dct:title) ;
     rdfs:isDefinedBy : ;
@@ -154,6 +143,78 @@ gfb-app:type rdfs:label "Facebook application" ;
     sioc:has_host <> ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
+
+# PAGES
+
+:InstancesPageResource a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+		owl:onProperty sioc:has_container ;
+		owl:hasValue <instances>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty g:selectQuery ;
+		owl:hasValue :SelectInstances
+	] .
+
+:OntologiesPageResource a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+		owl:onProperty sioc:has_container ;
+		owl:hasValue <ontologies>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty g:selectQuery ;
+		owl:hasValue :SelectOntologies
+	] .
+
+:ClassesPageResource a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+		owl:onProperty sioc:has_container ;
+		owl:hasValue <classes>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty g:selectQuery ;
+		owl:hasValue :SelectClasses
+	] .
+
+:PropertiesPageResource a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+		owl:onProperty sioc:has_container ;
+		owl:hasValue <properties>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty g:selectQuery ;
+		owl:hasValue :SelectProperties
+	] .
+
+:ServicesPageResource a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+		owl:onProperty sioc:has_container ;
+		owl:hasValue <services>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty g:selectQuery ;
+		owl:hasValue :SelectServices
+	] .
+
+:QueriesPageResource a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+		owl:onProperty sioc:has_container ;
+		owl:hasValue <queries>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty g:selectQuery ;
+		owl:hasValue :SelectQueries
+	] .
+
+:ModesPageResource a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+		owl:onProperty sioc:has_container ;
+		owl:hasValue <modes>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty g:selectQuery ;
+		owl:hasValue :SelectModes
+	] .
 
 # MODES
 

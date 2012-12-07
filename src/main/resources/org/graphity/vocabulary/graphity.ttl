@@ -29,13 +29,13 @@
 :query a owl:ObjectProperty ;
     rdfs:label "has SPIN query" ;
     rdfs:isDefinedBy : ;
+    rdfs:domain sioc:Item ;
     rdfs:range sp:Query . # should actually be a owl:unionOf (sp:Describe, sp:Construct)
 
 :selectQuery a owl:ObjectProperty ;
-    # rdfs:subPropertyOf :query ; # cannot be subproperty - SELECT becomes illegal g:query value
     rdfs:label "has SPIN SELECT query" ;
     rdfs:isDefinedBy : ;
-    rdfs:domain sioc:Container ;
+    rdfs:domain sioc:Item ;
     rdfs:range sp:Select .
 
 :service a owl:ObjectProperty ;

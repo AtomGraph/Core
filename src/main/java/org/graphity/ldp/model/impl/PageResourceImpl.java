@@ -42,7 +42,7 @@ public final class PageResourceImpl extends ResourceBase implements PageResource
     //private final OntResource ontResource;
     private final QueryBuilder queryBuilder;
     
-    public PageResourceImpl(OntResource ontResource, OntResource container,
+    public PageResourceImpl(OntResource ontResource,
 	UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
 	Long limit, Long offset, String orderBy, Boolean desc)
     {
@@ -50,9 +50,11 @@ public final class PageResourceImpl extends ResourceBase implements PageResource
 	if (limit == null) throw new IllegalArgumentException("LIMIT must be not null");
 	if (offset == null) throw new IllegalArgumentException("OFFSET must be not null");
 
-	if (!container.hasProperty(Graphity.selectQuery)) throw new IllegalArgumentException("Container Resource must have a SELECT query");
+	//if (!container.hasProperty(Graphity.selectQuery)) throw new IllegalArgumentException("Container Resource must have a SELECT query");
+	if (!hasProperty(SIOC.HAS_CONTAINER)) throw new IllegalArgumentException("PageResource must have a container (sioc:has_container property)");
+	if (!hasProperty(Graphity.selectQuery)) throw new IllegalArgumentException("PageResource must have a SELECT query (g:selectQuery property)");
 
-	Resource select = container.getPropertyResourceValue(Graphity.selectQuery);
+	Resource select = getPropertyResourceValue(Graphity.selectQuery);
 	SelectBuilder selectBuilder = SelectBuilder.fromResource(select).
 	    limit(getLimit()).offset(getOffset());
 	/*
@@ -79,7 +81,7 @@ public final class PageResourceImpl extends ResourceBase implements PageResource
 	}
 	
 	ontResource.setPropertyValue(Graphity.query, queryBuilder); // Resource alway get a g:query value
-	ontResource.setPropertyValue(Graphity.service, container.getPropertyResourceValue(Graphity.service));
+	//ontResource.setPropertyValue(Graphity.service, container.getPropertyResourceValue(Graphity.service));
 
 	if (log.isDebugEnabled())
 	{
@@ -88,8 +90,8 @@ public final class PageResourceImpl extends ResourceBase implements PageResource
 	}
 	
 	// add links to container, previous/next page etc (HATEOS)
-	if (log.isDebugEnabled()) log.debug("Adding page metadata: {} sioc:has_container {}", getURI(), container.getURI());
-	addProperty(SIOC.HAS_CONTAINER, container);
+	//if (log.isDebugEnabled()) log.debug("Adding page metadata: {} sioc:has_container {}", getURI(), container.getURI());
+	//addProperty(SIOC.HAS_CONTAINER, container);
 
 	if (getOffset() >= getLimit())
 	{

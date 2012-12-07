@@ -50,7 +50,6 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     private final HttpHeaders httpHeaders;
     private final List<Variant> variants;
     private final OntResource ontResource;
-    private final Model description;
     
     public LinkedDataResourceBase(OntResource ontResource,
 	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
@@ -74,9 +73,6 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	this.request = request;
 	this.httpHeaders = httpHeaders;
 	this.variants = variants;
-
-	if (log.isDebugEnabled()) log.debug("Querying OntModel with default DESCRIBE <{}> Query: {}", ontResource.getURI());
-	this.description = getModelResource(ontResource.getOntModel(), ontResource.getURI()).describe();
     }
 
     @GET
@@ -89,13 +85,15 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 
 	if (log.isDebugEnabled()) log.debug("Returning @GET Response");
 
-	if (describe().isEmpty())
+	Model description = describe();
+
+	if (description.isEmpty())
 	{
 	    if (log.isTraceEnabled()) log.trace("DESCRIBE Model is empty; returning 404 Not Found");
 	    throw new WebApplicationException(Response.Status.NOT_FOUND);
 	}
-	
-	EntityTag entityTag = new EntityTag(Long.toHexString(ModelUtils.hashModel(describe())));
+
+	EntityTag entityTag = new EntityTag(Long.toHexString(ModelUtils.hashModel(description)));
 	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(entityTag);
 	if (rb != null)
 	{
@@ -122,7 +120,8 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     @Override
     public Model describe()
     {
-	return description;
+	if (log.isDebugEnabled()) log.debug("Querying OntModel with default DESCRIBE <{}> Query: {}", getURI());
+	return getModelResource(getOntModel(), getURI()).describe();
     }
     
     @Override
