@@ -29,7 +29,6 @@
 :query a owl:ObjectProperty ;
     rdfs:label "has SPIN query" ;
     rdfs:isDefinedBy : ;
-    rdfs:domain sioc:Item ;
     rdfs:range sp:Query . # should actually be a owl:unionOf (sp:Describe, sp:Construct)
 
 :selectQuery a owl:ObjectProperty ;
