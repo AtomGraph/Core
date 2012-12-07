@@ -39,27 +39,18 @@ public final class PageResourceImpl extends ResourceBase implements PageResource
 {
     private static final Logger log = LoggerFactory.getLogger(PageResourceImpl.class);
 
-    private final OntResource ontResource;
+    //private final OntResource ontResource;
     private final QueryBuilder queryBuilder;
     
-    public PageResourceImpl(OntResource container,
+    public PageResourceImpl(OntResource ontResource, OntResource container,
 	UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
 	Long limit, Long offset, String orderBy, Boolean desc)
     {
-	super(container, uriInfo, request, httpHeaders, variants, limit, offset, orderBy, desc);
+	super(ontResource, uriInfo, request, httpHeaders, variants, limit, offset, orderBy, desc);
 	if (limit == null) throw new IllegalArgumentException("LIMIT must be not null");
 	if (offset == null) throw new IllegalArgumentException("OFFSET must be not null");
 
 	if (!container.hasProperty(Graphity.selectQuery)) throw new IllegalArgumentException("Container Resource must have a SELECT query");
-
-	UriBuilder uriBuilder = getUriInfo().getAbsolutePathBuilder().
-		replaceQueryParam("limit", getLimit()).
-		replaceQueryParam("offset", getOffset());
-	if (getOrderBy() != null) uriBuilder.replaceQueryParam("order-by", getOrderBy());
-	if (getDesc() != null) uriBuilder.replaceQueryParam("desc", getDesc());
-
-	if (log.isDebugEnabled()) log.debug("Creating LinkedDataPageResource from OntResource with URI: {}", uriBuilder.build().toString());
-	ontResource = container.getOntModel().createOntResource(uriBuilder.build().toString());
 
 	Resource select = container.getPropertyResourceValue(Graphity.selectQuery);
 	SelectBuilder selectBuilder = SelectBuilder.fromResource(select).
@@ -116,11 +107,13 @@ public final class PageResourceImpl extends ResourceBase implements PageResource
 	}
     }
 
+    /*
     @Override
     public OntResource getOntResource()
     {
 	return ontResource;
     }
+    */
     
     @Override
     public QueryBuilder getQueryBuilder()

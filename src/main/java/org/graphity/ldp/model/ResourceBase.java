@@ -49,7 +49,7 @@ public class ResourceBase extends LDPResourceBase implements QueriedResource
     private final Long limit, offset;
     private final String orderBy;
     private final Boolean desc;
-    private final QueryBuilder describeQuery, queryBuilder;
+    private final QueryBuilder describeQuery;
     private Model description = null;
 
     public static OntModel getOntology(UriInfo uriInfo)
@@ -127,9 +127,6 @@ public class ResourceBase extends LDPResourceBase implements QueriedResource
 	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} gets explicit Query Resource {}", ontResource.getURI(), describeQuery);
 	    ontResource.setPropertyValue(Graphity.query, describeQuery);
 	}
-	
-	if (log.isDebugEnabled()) log.debug("OntResource with URI {} has Query Resource {}", ontResource.getURI(), ontResource.getPropertyResourceValue(Graphity.query));
-	queryBuilder = QueryBuilder.fromResource(ontResource.getPropertyResourceValue(Graphity.query));
     }
 
     public QueryBuilder getDescribeQuery()
@@ -140,14 +137,23 @@ public class ResourceBase extends LDPResourceBase implements QueriedResource
     @Override
     public Model describe()
     {
-	if (description == null)
+	//if (description == null)
 	{
 	    description = super.describe();
 
 	    if (hasRDFType(SIOC.CONTAINER))
 	    {
+		UriBuilder uriBuilder = getUriInfo().getAbsolutePathBuilder().
+			replaceQueryParam("limit", getLimit()).
+			replaceQueryParam("offset", getOffset());
+		if (getOrderBy() != null) uriBuilder.replaceQueryParam("order-by", getOrderBy());
+		if (getDesc() != null) uriBuilder.replaceQueryParam("desc", getDesc());
+
+		if (log.isDebugEnabled()) log.debug("Creating LinkedDataPageResource from OntResource with URI: {}", uriBuilder.build().toString());
+		OntResource pageOntResource = getOntModel().createOntResource(uriBuilder.build().toString());
+
 		if (log.isDebugEnabled()) log.debug("OntResource is a container, adding PageResource description");
-		PageResource page = new PageResourceImpl(this,
+		PageResource page = new PageResourceImpl(pageOntResource, this,
 		    getUriInfo(), getRequest(), getHttpHeaders(), getVariants(),
 		    getLimit(), getOffset(), getOrderBy(), getDesc());
 
@@ -192,7 +198,8 @@ public class ResourceBase extends LDPResourceBase implements QueriedResource
 
     public QueryBuilder getQueryBuilder()
     {
-	return queryBuilder;
+	if (log.isDebugEnabled()) log.debug("OntResource with URI {} has Query Resource {}", getURI(), getPropertyResourceValue(Graphity.query));
+	return QueryBuilder.fromResource(getPropertyResourceValue(Graphity.query));
     }
 
     public OntClass matchOntClass(OntModel ontModel)

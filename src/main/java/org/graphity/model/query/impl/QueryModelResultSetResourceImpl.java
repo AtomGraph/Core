@@ -51,9 +51,14 @@ public class QueryModelResultSetResourceImpl implements QueryModelResource, Resu
     }
 
     @Override
-    public ResultSetRewindable getResultSet()
+    public ResultSet getResultSet()
     {
-	resultSet.reset();
+	return resultSet;
+    }
+
+    @Override
+    public ResultSetRewindable getResultSetRewindable()
+    {
 	return resultSet;
     }
 

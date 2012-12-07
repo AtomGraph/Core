@@ -18,6 +18,7 @@
 package org.graphity.model.query;
 
 import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.query.ResultSetRewindable;
 
 /**
  *
@@ -26,4 +27,6 @@ import com.hp.hpl.jena.query.ResultSet;
 public interface ResultSetResource
 {
     ResultSet getResultSet();
+    
+    ResultSetRewindable getResultSetRewindable();
 }
