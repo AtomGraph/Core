@@ -120,7 +120,7 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     @Override
     public Model describe()
     {
-	if (log.isDebugEnabled()) log.debug("Querying OntModel with default DESCRIBE <{}> Query: {}", getURI());
+	if (log.isDebugEnabled()) log.debug("Querying OntModel with default DESCRIBE <{}> Query", getURI());
 	return getModelResource(getOntModel(), getURI()).describe();
     }
     
@@ -136,7 +136,7 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	return request;
     }
 
-    public OntResource getOntResource()
+    public final OntResource getOntResource()
     {
 	return ontResource;
     }

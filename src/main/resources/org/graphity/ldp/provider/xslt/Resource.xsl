@@ -90,7 +90,8 @@ exclude-result-prefixes="#all">
     <xsl:variable name="ont-resource" select="key('resources', $absolute-path)" as="element()?"/>
     <xsl:variable name="page" select="key('resources-by-container', $absolute-path)"/>
     <xsl:variable name="ont-uri" select="resolve-uri('ontology/', $base-uri)" as="xs:anyURI"/>
-    <xsl:variable name="query-res" select="(key('resources', $page/g:query/@rdf:resource | $page/g:query/@rdf:nodeID), key('resources', $ont-resource/g:query/@rdf:resource | $ont-resource/g:query/@rdf:nodeID))[1]" as="element()?"/>
+    <!-- <xsl:variable name="query-res" select="(key('resources', $page/g:query/@rdf:resource | $page/g:query/@rdf:nodeID), key('resources', $ont-resource/g:query/@rdf:resource | $ont-resource/g:query/@rdf:nodeID))[1]" as="element()?"/> -->
+    <xsl:variable name="query-res" select="key('resources', $ont-resource/g:query/@rdf:resource | $ont-resource/g:query/@rdf:nodeID)" as="element()?"/>
     <xsl:variable name="select-res" select="key('resources', $ont-resource/g:selectQuery/@rdf:resource | $ont-resource/g:selectQuery/@rdf:nodeID)" as="element()?"/>
     <xsl:variable name="service-res" select="key('resources', $ont-resource/g:service/@rdf:resource | $ont-resource/g:service/@rdf:nodeID)"/>
     <xsl:variable name="endpoint-uri" select="$service-res/sd:endpoint/@rdf:resource" as="xs:anyURI?"/>

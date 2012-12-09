@@ -75,7 +75,7 @@ sioc:has_container a owl:ObjectProperty ;
 
 # RESOURCES
 
-<> a sioc:Site, lda:ListEndpoint ;
+<> a sioc:Site, sioc:Container, lda:ListEndpoint ;
     dct:title "Graphity Linked Data Platform" ;
     g:mode gldp:ListMode ;
     g:orderBy (rdfs:label) ;
@@ -216,6 +216,16 @@ sioc:has_container a owl:ObjectProperty ;
 		owl:hasValue :SelectModes
 	] .
 
+:ContainersPageResource a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+		owl:onProperty sioc:has_container ;
+		owl:hasValue <>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty g:selectQuery ;
+		owl:hasValue :SelectContainers
+	] .
+
 # MODES
 
 gldp:InputMode a g:XSLTMode ;
@@ -354,3 +364,19 @@ WHERE {
                 ]) .
 
 _:modeVar  sp:varName "mode"^^xsd:string .
+
+# ====
+
+:SelectContainers    a       sp:Select ;
+      sp:resultVariables (_:containerVar) ;
+      sp:text """PREFIX sioc: <http://rdfs.org/sioc/ns#>
+SELECT ?container
+WHERE {
+    ?container a sioc:Container .
+}"""^^xsd:string ;
+      sp:where ([ sp:object sioc:Container ;
+                  sp:predicate rdf:type ;
+                  sp:subject _:containerVar
+                ]) .
+
+_:containerVar  sp:varName "container"^^xsd:string .

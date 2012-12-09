@@ -79,6 +79,7 @@ public final class PageResourceImpl extends ResourceBase implements PageResource
 	    if (log.isDebugEnabled()) log.debug("Query Resource {} does not have result variables, using wildcard", selectBuilder);
 	    queryBuilder = QueryBuilder.fromDescribe(selectBuilder.getModel()).subQuery(selectBuilder);
 	}
+	queryBuilder.build(); // sets sp:text value
 	
 	ontResource.setPropertyValue(Graphity.query, queryBuilder); // Resource alway get a g:query value
 	//ontResource.setPropertyValue(Graphity.service, container.getPropertyResourceValue(Graphity.service));
@@ -88,10 +89,6 @@ public final class PageResourceImpl extends ResourceBase implements PageResource
 	    log.debug("OFFSET: {} LIMIT: {}", getOffset(), getLimit());
 	    log.debug("ORDER BY: {} DESC: {}", getOrderBy(), getDesc());
 	}
-	
-	// add links to container, previous/next page etc (HATEOS)
-	//if (log.isDebugEnabled()) log.debug("Adding page metadata: {} sioc:has_container {}", getURI(), container.getURI());
-	//addProperty(SIOC.HAS_CONTAINER, container);
 
 	if (getOffset() >= getLimit())
 	{
@@ -108,14 +105,6 @@ public final class PageResourceImpl extends ResourceBase implements PageResource
 	    addProperty(XHV.next, getNext());
 	}
     }
-
-    /*
-    @Override
-    public OntResource getOntResource()
-    {
-	return ontResource;
-    }
-    */
     
     @Override
     public QueryBuilder getQueryBuilder()

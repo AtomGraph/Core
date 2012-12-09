@@ -19,6 +19,7 @@ package org.graphity.ldp.model;
 import com.hp.hpl.jena.ontology.*;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.util.LocationMapper;
@@ -143,6 +144,7 @@ public class ResourceBase extends LDPResourceBase implements QueriedResource
 	{
 	    description = super.describe();
 
+	    // if resource is a container, add page description
 	    if (hasRDFType(SIOC.CONTAINER))
 	    {
 		UriBuilder uriBuilder = getUriInfo().getAbsolutePathBuilder().
@@ -152,14 +154,13 @@ public class ResourceBase extends LDPResourceBase implements QueriedResource
 		if (getDesc() != null) uriBuilder.replaceQueryParam("desc", getDesc());
 
 		//OntClass pageOntClass = matchOntClass();
-		//OntClass pageOntClass = getOntModel().getOntClass("http://localhost:8080/ontology/InstancesPageResource");
 		OntClass pageOntClass = matchOntClass(getOntResource());
 		if (pageOntClass == null) throw new IllegalArgumentException("Container must have a matching PageResource owl:Class");
 
 		if (log.isDebugEnabled()) log.debug("Creating PageResource from with URI: {} ant OntClass: {}", uriBuilder.build().toString(), pageOntClass);
-		//OntResource pageOntResource = getOntModel().createOntResource(uriBuilder.build().toString());
 		Individual pageInd = pageOntClass.createIndividual(uriBuilder.build().toString());
 		
+		if (log.isDebugEnabled()) log.debug("Adding PageResource metadata: {} sioc:has_container {}", pageInd, this);
 		pageInd.setPropertyValue(SIOC.HAS_CONTAINER, this);
 		pageInd.setPropertyValue(Graphity.selectQuery, getSelectQuery(pageInd));
 		pageInd.setPropertyValue(Graphity.service, getService(pageInd));
@@ -172,34 +173,50 @@ public class ResourceBase extends LDPResourceBase implements QueriedResource
 		description.add(page.describe());
 	    }
 
-	    if (hasProperty(Graphity.service))
-	    {
-		com.hp.hpl.jena.rdf.model.Resource service = getPropertyResourceValue(Graphity.service);
-		if (service == null) throw new IllegalArgumentException("SPARQL Service must be a Resource");
-
-		com.hp.hpl.jena.rdf.model.Resource endpoint = service.getPropertyResourceValue(com.hp.hpl.jena.rdf.model.ResourceFactory.
-		    createProperty("http://www.w3.org/ns/sparql-service-description#endpoint"));
-		if (endpoint == null || endpoint.getURI() == null) throw new IllegalArgumentException("SPARQL Service endpoint must be URI Resource");
-
-		if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has explicit SPARQL endpoint: {}", getURI(), endpoint.getURI());
-
-		// query endpoint whenever g:service is present
-		description.add(getModelResource(endpoint.getURI(), getQuery()).describe());
-	    }
-	    else
-	    {
-		// don't do default DESCRIBE on OntModel again - super.describe() does it
-		// compare on the SPARQL syntax level - equals() on objects doesn't seem to work
-		//if (!getQueryBuilder().equals(getDescribeQuery()))
-		if (!getQueryBuilder().toString().equals(getDescribeQuery().toString()))
-		{
-		    if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has no explicit SPARQL endpoint, querying its OntModel", getURI());
-		    description.add(getModelResource(getOntModel(), getQuery()).describe());
-		}
-	    }
+	    description.add(loadModel(getOntResource())); // add description based on g:query & g:service	    
 	}
 	
 	return description;
+    }
+
+    public Model loadModel(OntResource ontResource)
+    {
+	if (log.isDebugEnabled()) log.debug("OntResource with URI {} has Query Resource {}", ontResource.getURI(), ontResource.getPropertyResourceValue(Graphity.query));
+	QueryBuilder qb = QueryBuilder.fromResource(ontResource.getPropertyResourceValue(Graphity.query));
+
+	return loadModel(ontResource, qb.build());
+    }
+    
+    public Model loadModel(OntResource ontResource, Query query)
+    {
+	if (ontResource.hasProperty(Graphity.service))
+	{
+	    String endpointUri = null;
+	    com.hp.hpl.jena.rdf.model.Resource service = ontResource.getPropertyResourceValue(Graphity.service);
+	    if (service != null) endpointUri = service.getPropertyResourceValue(com.hp.hpl.jena.rdf.model.ResourceFactory.
+		createProperty("http://www.w3.org/ns/sparql-service-description#endpoint")).getURI();
+
+	    com.hp.hpl.jena.rdf.model.Resource endpoint = service.getPropertyResourceValue(com.hp.hpl.jena.rdf.model.ResourceFactory.
+		createProperty("http://www.w3.org/ns/sparql-service-description#endpoint"));
+	    if (endpoint == null || endpoint.getURI() == null) throw new IllegalArgumentException("SPARQL Service endpoint must be URI Resource");
+
+	    if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has explicit SPARQL endpoint: {}", ontResource.getURI(), endpoint.getURI());
+
+	    return getModelResource(endpointUri, query).describe();
+	}
+	else
+	{
+	    // don't do default DESCRIBE on OntModel again - super.describe() does it
+	    // compare on the SPARQL syntax level - equals() on objects doesn't seem to work
+	    //if (!getQueryBuilder().equals(getDescribeQuery()))
+	    if (!getQueryBuilder().toString().equals(getDescribeQuery().toString()))
+	    {
+		if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has no explicit SPARQL endpoint, querying its OntModel", getURI());
+		return getModelResource(getOntModel(), query).describe();
+	    }
+	}
+
+	return ModelFactory.createDefaultModel();
     }
 
     @Override
