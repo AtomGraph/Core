@@ -1,4 +1,4 @@
-@prefix : <ontology/> .
+@prefix : <> .
 @prefix g: <http://graphity.org/ontology/> .
 @prefix gldp: <http://ldp.graphity.org/ontology/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -20,7 +20,7 @@
 
 
 : a owl:Ontology ;
-    owl:imports <http://graphity.org/ontology/> ;
+    owl:imports g: ;
     owl:versionInfo "1.0.4" ;
     dct:title "Graphity Linked Data Platform ontology" ;
     rdfs:label "Graphity Linked Data Platform ontology" ;
@@ -35,16 +35,16 @@
 
 _:dataset a void:Dataset ;
     dct:title "The dataset of this application" ;
-    foaf:homepage <> ;
+    foaf:homepage <..> ;
     rdfs:isDefinedBy : .
-    # void:sparqlEndpoint <sparql> .
+    # void:sparqlEndpoint <../sparql> .
 
 #_:sparql a sd:Service ;
 #    dct:title "Local SPARQL service" ;
-#    sd:endpoint <sparql> ;
+#    sd:endpoint <../sparql> ;
 #    sd:supportedLanguage sd:SPARQL11Query .
 
-<services/dydra> a sd:Service ;
+<../services/dydra> a sd:Service ;
     dct:title "Dydra SPARQL service" ;
     foaf:homepage <http://dydra.com> ;
     sd:endpoint <http://dydra.com/graphity/ldp/sparql> .
@@ -75,7 +75,7 @@ sioc:has_container a owl:ObjectProperty ;
 
 # RESOURCES
 
-<> a sioc:Site, sioc:Container, lda:ListEndpoint ;
+<..> a sioc:Site, sioc:Container, lda:ListEndpoint ;
     dct:title "Graphity Linked Data Platform" ;
     g:mode gldp:ListMode ;
     g:orderBy (rdfs:label) ;
@@ -83,64 +83,64 @@ sioc:has_container a owl:ObjectProperty ;
     void:inDataset _:dataset ;
     rdfs:seeAlso : .
 
-<instances> a sioc:Container, lda:ListEndpoint ;
-    sioc:has_host <> ;
+<../instances> a sioc:Container, lda:ListEndpoint ;
+    sioc:has_host <..> ;
     dct:title "Instances" ;
     g:mode gldp:ListMode ;
     g:orderBy (rdfs:label dct:title) ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
-<ontologies> a sioc:Container, lda:ListEndpoint ;
-    sioc:has_host <> ;
+<../ontologies> a sioc:Container, lda:ListEndpoint ;
+    sioc:has_host <..> ;
     dct:title "Ontologies" ;
     g:mode gldp:ListMode ;
     g:orderBy (rdfs:label dct:title) ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
-<classes> a sioc:Container, lda:ListEndpoint ;
-    sioc:has_host <> ;
+<../classes> a sioc:Container, lda:ListEndpoint ;
+    sioc:has_host <..> ;
     dct:title "Classes" ;
     g:mode gldp:ListMode ;
     g:orderBy (rdfs:label) ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
-<properties> a sioc:Container, lda:ListEndpoint ;
-    sioc:has_host <> ;
+<../properties> a sioc:Container, lda:ListEndpoint ;
+    sioc:has_host <..> ;
     dct:title "Properties" ;
     g:mode gldp:ListMode ;
     g:orderBy (rdfs:label) ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
-<services> a sioc:Container, lda:ListEndpoint ;
-    sioc:has_host <> ;
+<../services> a sioc:Container, lda:ListEndpoint ;
+    sioc:has_host <..> ;
     dct:title "Services" ;
     g:mode gldp:ListMode ;
     g:orderBy (dct:title) ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
-<queries> a sioc:Container, lda:ListEndpoint ;
-    sioc:has_host <> ;
+<../queries> a sioc:Container, lda:ListEndpoint ;
+    sioc:has_host <..> ;
     dct:title "Queries" ;
     g:mode gldp:ListMode ;
     g:orderBy (dct:title) ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
-<modes> a sioc:Container, lda:ListEndpoint ;
-    sioc:has_host <> ;
+<../modes> a sioc:Container, lda:ListEndpoint ;
+    sioc:has_host <..> ;
     dct:title "XSLT modes" ;
     g:mode gldp:ListMode ;
     g:orderBy (dct:title) ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
-<sparql> dct:title "SPARQL endpoint" ;
-    sioc:has_host <> ;
+<../sparql> dct:title "SPARQL endpoint" ;
+    sioc:has_host <..> ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
@@ -149,7 +149,7 @@ sioc:has_container a owl:ObjectProperty ;
 :InstancesPageResource a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
 		owl:onProperty sioc:has_container ;
-		owl:hasValue <instances>
+		owl:hasValue <../instances>
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty g:selectQuery ;
@@ -159,7 +159,7 @@ sioc:has_container a owl:ObjectProperty ;
 :OntologiesPageResource a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
 		owl:onProperty sioc:has_container ;
-		owl:hasValue <ontologies>
+		owl:hasValue <../ontologies>
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty g:selectQuery ;
@@ -169,7 +169,7 @@ sioc:has_container a owl:ObjectProperty ;
 :ClassesPageResource a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
 		owl:onProperty sioc:has_container ;
-		owl:hasValue <classes>
+		owl:hasValue <../classes>
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty g:selectQuery ;
@@ -179,7 +179,7 @@ sioc:has_container a owl:ObjectProperty ;
 :PropertiesPageResource a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
 		owl:onProperty sioc:has_container ;
-		owl:hasValue <properties>
+		owl:hasValue <../properties>
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty g:selectQuery ;
@@ -189,7 +189,7 @@ sioc:has_container a owl:ObjectProperty ;
 :ServicesPageResource a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
 		owl:onProperty sioc:has_container ;
-		owl:hasValue <services>
+		owl:hasValue <../services>
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty g:selectQuery ;
@@ -199,7 +199,7 @@ sioc:has_container a owl:ObjectProperty ;
 :QueriesPageResource a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
 		owl:onProperty sioc:has_container ;
-		owl:hasValue <queries>
+		owl:hasValue <../queries>
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty g:selectQuery ;
@@ -209,7 +209,7 @@ sioc:has_container a owl:ObjectProperty ;
 :ModesPageResource a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
 		owl:onProperty sioc:has_container ;
-		owl:hasValue <modes>
+		owl:hasValue <../modes>
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty g:selectQuery ;
@@ -219,7 +219,7 @@ sioc:has_container a owl:ObjectProperty ;
 :ContainersPageResource a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
 		owl:onProperty sioc:has_container ;
-		owl:hasValue <>
+		owl:hasValue <..>
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty g:selectQuery ;
@@ -228,15 +228,15 @@ sioc:has_container a owl:ObjectProperty ;
 
 # MODES
 
-gldp:InputMode a g:XSLTMode ;
+:InputMode a g:XSLTMode ;
     dct:title "Edit" ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
-gldp:ListMode a g:XSLTMode, g:XSLTPageMode ;
+:ListMode a g:XSLTMode, g:XSLTPageMode ;
     dct:title "List" ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
-gldp:TableMode a g:XSLTMode, g:XSLTPageMode ;
+:TableMode a g:XSLTMode, g:XSLTPageMode ;
     dct:title "Table" ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
@@ -367,7 +367,7 @@ _:modeVar  sp:varName "mode"^^xsd:string .
 
 # ====
 
-:SelectContainers    a       sp:Select ;
+:SelectContainers    a       sp:Select, sp:Query ;
       sp:resultVariables (_:containerVar) ;
       sp:text """PREFIX sioc: <http://rdfs.org/sioc/ns#>
 SELECT ?container

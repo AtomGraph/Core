@@ -168,25 +168,25 @@ public class DataManager extends FileManager implements URIResolver
 	    return getFromCache(filenameOrURI) ;
 	}  
 
-	Model mode;
+	Model model;
 	if (isSPARQLService(filenameOrURI))
 	{
 	    SPARQLService service = findSPARQLService(filenameOrURI);
 	    if (log.isDebugEnabled()) log.debug("URI {} is a SPARQL service, executing Query on SparqlService: {}", service.getEndpointURI());
 	    
-	    mode = loadModel(service, parseQuery(filenameOrURI));
+	    model = loadModel(service, parseQuery(filenameOrURI));
 	}
 	else
 	{
 	    if (log.isDebugEnabled()) log.debug("URI {} is *not* a SPARQL service, reading Model from TypedStream", filenameOrURI);
 
-	    mode = ModelFactory.createDefaultModel();
-	    readModel(mode, filenameOrURI);
+	    model = ModelFactory.createDefaultModel();
+	    readModel(model, filenameOrURI);
 	}
 
-	addCacheModel(filenameOrURI, mode);
+	addCacheModel(filenameOrURI, model);
 	
-        return mode;
+        return model;
     }
 
     public Model loadModel(String endpointURI, Query query, MultivaluedMap<String, String> params)

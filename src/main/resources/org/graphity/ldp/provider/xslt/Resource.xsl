@@ -145,7 +145,7 @@ exclude-result-prefixes="#all">
 		    <div class="navbar-inner">
 			<div class="container-fluid">    
 			    <a class="brand" href="{$base-uri}{g:query-string($lang)}">
-				<xsl:value-of select="g:label($base-uri, /, $lang)"/>
+				<xsl:value-of select="g:label($base-uri, $ont-model, $lang)"/>
 			    </a>
 
 			    <div class="nav-collapse">

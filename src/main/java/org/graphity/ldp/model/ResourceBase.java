@@ -57,7 +57,7 @@ public class ResourceBase extends LDPResourceBase implements QueriedResource
     public static OntModel getOntology(UriInfo uriInfo)
     {
 	// ResourceConfig.getProperty()
-	return getOntology(uriInfo.getBaseUri().toString(), "org/graphity/ldp/vocabulary/graphity-ldp.ttl");
+	return getOntology(uriInfo.getBaseUriBuilder().path("ontology/").build().toString(), "org/graphity/ldp/vocabulary/graphity-ldp.ttl");
     }
     
     public static OntModel getOntology(String baseUri, String ontologyPath)
