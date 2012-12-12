@@ -16,7 +16,6 @@
  */
 package org.graphity.ldp.model;
 
-import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.rdf.model.Model;
 import java.util.List;
@@ -34,10 +33,9 @@ public class LDPResourceBase extends LinkedDataResourceBase implements LDPResour
     private static final Logger log = LoggerFactory.getLogger(LDPResourceBase.class);
     
     public LDPResourceBase(OntResource ontResource,
-	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
-	    Long limit, Long offset, String orderBy, Boolean desc)
+	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants)
     {
-	super(ontResource, uriInfo, request, httpHeaders, variants, limit, offset, orderBy, desc);
+	super(ontResource, uriInfo, request, httpHeaders, variants);
     }
 
     @Override

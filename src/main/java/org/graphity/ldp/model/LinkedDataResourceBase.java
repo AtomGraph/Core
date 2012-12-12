@@ -52,8 +52,7 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     private final OntResource ontResource;
     
     public LinkedDataResourceBase(OntResource ontResource,
-	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
-	    Long limit, Long offset, String orderBy, Boolean desc)
+	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants)
     {
 	if (ontResource == null) throw new IllegalArgumentException("OntResource cannot be null");
 	if (uriInfo == null) throw new IllegalArgumentException("UriInfo cannot be null");

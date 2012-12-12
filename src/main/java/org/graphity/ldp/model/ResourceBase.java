@@ -113,7 +113,7 @@ public class ResourceBase extends LDPResourceBase implements QueriedResource
 	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
 	    Long limit, Long offset, String orderBy, Boolean desc)
     {
-	super(ontResource, uriInfo, request, httpHeaders, variants, limit, offset, orderBy, desc);
+	super(ontResource, uriInfo, request, httpHeaders, variants);
 
 	this.limit = limit;
 	this.offset = offset;
