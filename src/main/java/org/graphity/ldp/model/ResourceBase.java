@@ -60,7 +60,7 @@ public class ResourceBase extends LDPResourceBase implements QueriedResource
 	return getOntology(uriInfo.getBaseUriBuilder().path("ontology/").build().toString(), "org/graphity/ldp/vocabulary/graphity-ldp.ttl");
     }
     
-    public static OntModel getOntology(String baseUri, String ontologyPath)
+    public static OntModel getOntology(String ontologyUri, String ontologyPath)
     {
 	//synchronized (OntDocumentManager.getInstance())
 	{
@@ -70,18 +70,18 @@ public class ResourceBase extends LDPResourceBase implements QueriedResource
 		{
 		    log.debug("Ontology not cached, reading from file: {}", ontologyPath);
 		    log.debug("DataManager.get().getLocationMapper(): {}", DataManager.get().getLocationMapper());
-		    log.debug("Adding name/altName mapping: {} altName: {} ", baseUri, ontologyPath);
+		    log.debug("Adding name/altName mapping: {} altName: {} ", ontologyUri, ontologyPath);
 		}
-		OntDocumentManager.getInstance().addAltEntry(baseUri, ontologyPath);
+		OntDocumentManager.getInstance().addAltEntry(ontologyUri, ontologyPath);
 
 		LocationMapper mapper = OntDocumentManager.getInstance().getFileManager().getLocationMapper();
-		if (log.isDebugEnabled()) log.debug("Adding prefix/altName mapping: {} altName: {} ", baseUri, ontologyPath);
-		((PrefixMapper)mapper).addAltPrefixEntry(baseUri, ontologyPath);	    
+		if (log.isDebugEnabled()) log.debug("Adding prefix/altName mapping: {} altName: {} ", ontologyUri, ontologyPath);
+		((PrefixMapper)mapper).addAltPrefixEntry(ontologyUri, ontologyPath);	    
 	    }
 	    //else
 		//if (log.isDebugEnabled()) log.debug("Ontology already cached, returning cached instance");
 
-	    OntModel ontModel = OntDocumentManager.getInstance().getOntology(baseUri, OntModelSpec.OWL_MEM_RDFS_INF);
+	    OntModel ontModel = OntDocumentManager.getInstance().getOntology(ontologyUri, OntModelSpec.OWL_MEM_RDFS_INF);
 	    if (log.isDebugEnabled()) log.debug("Ontology size: {}", ontModel.size());
 	    return ontModel;
 	}
