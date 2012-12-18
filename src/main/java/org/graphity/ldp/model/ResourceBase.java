@@ -18,41 +18,42 @@ package org.graphity.ldp.model;
 
 import com.hp.hpl.jena.ontology.*;
 import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.ResIterator;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.util.LocationMapper;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
+import com.sun.jersey.api.uri.UriTemplate;
+import java.util.HashMap;
 import java.util.List;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.*;
 import org.graphity.ldp.model.impl.PageResourceImpl;
-import org.graphity.model.query.QueriedResource;
-import org.graphity.util.QueryBuilder;
 import org.graphity.util.locator.PrefixMapper;
 import org.graphity.util.manager.DataManager;
 import org.graphity.vocabulary.Graphity;
 import org.graphity.vocabulary.SIOC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.topbraid.spin.model.SPINFactory;
+import org.topbraid.spin.model.TemplateCall;
+import org.topbraid.spin.vocabulary.SPIN;
 
 /**
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 @Path("{path: .*}")
-public class ResourceBase extends LDPResourceBase implements QueriedResource
+public class ResourceBase extends LDPResourceBase
 {
     private static final Logger log = LoggerFactory.getLogger(ResourceBase.class);
 
     private final Long limit, offset;
     private final String orderBy;
     private final Boolean desc;
-    private final QueryBuilder describeQuery;
-    private Model description = null;
 
     public static OntModel getOntology(UriInfo uriInfo)
     {
@@ -62,29 +63,26 @@ public class ResourceBase extends LDPResourceBase implements QueriedResource
     
     public static OntModel getOntology(String ontologyUri, String ontologyPath)
     {
-	//synchronized (OntDocumentManager.getInstance())
-	{
-	    //if (!OntDocumentManager.getInstance().getFileManager().hasCachedModel(baseUri)) // not cached
-	    {	    
-		if (log.isDebugEnabled())
-		{
-		    log.debug("Ontology not cached, reading from file: {}", ontologyPath);
-		    log.debug("DataManager.get().getLocationMapper(): {}", DataManager.get().getLocationMapper());
-		    log.debug("Adding name/altName mapping: {} altName: {} ", ontologyUri, ontologyPath);
-		}
-		OntDocumentManager.getInstance().addAltEntry(ontologyUri, ontologyPath);
-
-		LocationMapper mapper = OntDocumentManager.getInstance().getFileManager().getLocationMapper();
-		if (log.isDebugEnabled()) log.debug("Adding prefix/altName mapping: {} altName: {} ", ontologyUri, ontologyPath);
-		((PrefixMapper)mapper).addAltPrefixEntry(ontologyUri, ontologyPath);	    
+	//if (!OntDocumentManager.getInstance().getFileManager().hasCachedModel(baseUri)) // not cached
+	{	    
+	    if (log.isDebugEnabled())
+	    {
+		log.debug("Ontology not cached, reading from file: {}", ontologyPath);
+		log.debug("DataManager.get().getLocationMapper(): {}", DataManager.get().getLocationMapper());
+		log.debug("Adding name/altName mapping: {} altName: {} ", ontologyUri, ontologyPath);
 	    }
-	    //else
-		//if (log.isDebugEnabled()) log.debug("Ontology already cached, returning cached instance");
+	    OntDocumentManager.getInstance().addAltEntry(ontologyUri, ontologyPath);
 
-	    OntModel ontModel = OntDocumentManager.getInstance().getOntology(ontologyUri, OntModelSpec.OWL_MEM_RDFS_INF);
-	    if (log.isDebugEnabled()) log.debug("Ontology size: {}", ontModel.size());
-	    return ontModel;
+	    LocationMapper mapper = OntDocumentManager.getInstance().getFileManager().getLocationMapper();
+	    if (log.isDebugEnabled()) log.debug("Adding prefix/altName mapping: {} altName: {} ", ontologyUri, ontologyPath);
+	    ((PrefixMapper)mapper).addAltPrefixEntry(ontologyUri, ontologyPath);	    
 	}
+	//else
+	    //if (log.isDebugEnabled()) log.debug("Ontology already cached, returning cached instance");
+
+	OntModel ontModel = OntDocumentManager.getInstance().getOntology(ontologyUri, OntModelSpec.OWL_MEM_RDFS_INF);
+	if (log.isDebugEnabled()) log.debug("Ontology size: {}", ontModel.size());
+	return ontModel;
     }
 
     public ResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context HttpHeaders httpHeaders,
@@ -120,79 +118,65 @@ public class ResourceBase extends LDPResourceBase implements QueriedResource
 	this.orderBy = orderBy;
 	this.desc = desc;
 
-	if (log.isDebugEnabled()) log.debug("Constructing LDP ResourceBase");
-
-	describeQuery = QueryBuilder.fromDescribe(ontResource.getURI(), ontResource.getModel());
-	describeQuery.build(); // sets sp:text value
-	
-	if (!ontResource.hasProperty(Graphity.query)) // Resource always gets a g:query value
-	{
-	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} gets explicit Query Resource {}", ontResource.getURI(), describeQuery);
-	    ontResource.setPropertyValue(Graphity.query, describeQuery);
-	}
+	if (log.isDebugEnabled()) log.debug("Constructing ResourceBase");
     }
 
-    public QueryBuilder getDescribeQuery()
-    {
-	return describeQuery;
-    }
-    
     @Override
     public Model describe()
     {
-	//if (description == null)
+	Model description = super.describe();
+
+	//if (!getOntModel().containsResource(getOntResource()))
+	if (description.isEmpty() || this instanceof PageResource)
 	{
-	    description = super.describe();
-
-	    // if resource is a container, add page description
-	    if (hasRDFType(SIOC.CONTAINER))
+	    OntClass ontClass = matchOntClass();
+	    if (ontClass != null)
 	    {
-		UriBuilder uriBuilder = getUriInfo().getAbsolutePathBuilder().
-			replaceQueryParam("limit", getLimit()).
-			replaceQueryParam("offset", getOffset());
-		if (getOrderBy() != null) uriBuilder.replaceQueryParam("order-by", getOrderBy());
-		if (getDesc() != null) uriBuilder.replaceQueryParam("desc", getDesc());
+		Individual individual = ontClass.createIndividual(getURI());
+		if (log.isDebugEnabled()) log.debug("Individual {} created from resource OntClass {}", individual, ontClass);
 
-		//OntClass pageOntClass = matchOntClass();
-		OntClass pageOntClass = matchOntClass(getOntResource());
-		if (pageOntClass == null) throw new IllegalArgumentException("Container must have a matching PageResource owl:Class");
-
-		if (log.isDebugEnabled()) log.debug("Creating PageResource from with URI: {} ant OntClass: {}", uriBuilder.build().toString(), pageOntClass);
-		Individual pageInd = pageOntClass.createIndividual(uriBuilder.build().toString());
-		
-		if (log.isDebugEnabled()) log.debug("Adding PageResource metadata: {} sioc:has_container {}", pageInd, this);
-		pageInd.setPropertyValue(SIOC.HAS_CONTAINER, this);
-		pageInd.setPropertyValue(Graphity.selectQuery, getSelectQuery(pageInd));
-		pageInd.setPropertyValue(Graphity.service, getService(pageInd));
-		
-		if (log.isDebugEnabled()) log.debug("OntResource is a container, adding PageResource description");
-		PageResource page = new PageResourceImpl(pageInd,
-		    getUriInfo(), getRequest(), getHttpHeaders(), getVariants(),
-		    getLimit(), getOffset(), getOrderBy(), getDesc());
-
-		description.add(page.describe());
+		if (ontClass.hasProperty(SPIN.constraint))
+		{
+		    RDFNode constraint = getModel().getResource(ontClass.getURI()).getProperty(SPIN.constraint).getObject();
+		    TemplateCall call = SPINFactory.asTemplateCall(constraint);
+		    
+		    description.add(loadModel(call));
+		}
 	    }
+	}
 
-	    description.add(loadModel(getOntResource())); // add description based on g:query & g:service	    
+	// if resource is a container, add page description
+	if (hasRDFType(SIOC.CONTAINER))
+	{
+	    UriBuilder uriBuilder = getUriInfo().getAbsolutePathBuilder().
+		    replaceQueryParam("limit", getLimit()).
+		    replaceQueryParam("offset", getOffset());
+	    if (getOrderBy() != null) uriBuilder.replaceQueryParam("order-by", getOrderBy());
+	    if (getDesc() != null) uriBuilder.replaceQueryParam("desc", getDesc());
+
+	    if (log.isDebugEnabled()) log.debug("Creating PageResource from with URI: {}", uriBuilder.build().toString());
+	    OntResource ontResource = getOntModel().createOntResource(uriBuilder.build().toString());
+
+	    if (log.isDebugEnabled()) log.debug("OntResource is a container, adding PageResource description");
+	    PageResource page = new PageResourceImpl(ontResource,
+		getUriInfo(), getRequest(), getHttpHeaders(), getVariants(),
+		getLimit(), getOffset(), getOrderBy(), getDesc());
+
+	    if (log.isDebugEnabled()) log.debug("Adding PageResource metadata: {} sioc:has_parent {}", page, this);
+	    page.setPropertyValue(SIOC.HAS_CONTAINER, this);
+
+	    description.add(page.describe());
 	}
 	
 	return description;
     }
 
-    public Model loadModel(OntResource ontResource)
+    public Model loadModel(TemplateCall call)
     {
-	if (log.isDebugEnabled()) log.debug("OntResource with URI {} has Query Resource {}", ontResource.getURI(), ontResource.getPropertyResourceValue(Graphity.query));
-	QueryBuilder qb = QueryBuilder.fromResource(ontResource.getPropertyResourceValue(Graphity.query));
-
-	return loadModel(ontResource, qb.build());
-    }
-    
-    public Model loadModel(OntResource ontResource, Query query)
-    {
-	if (ontResource.hasProperty(Graphity.service))
+	if (call.hasProperty(Graphity.service))
 	{
 	    String endpointUri = null;
-	    com.hp.hpl.jena.rdf.model.Resource service = ontResource.getPropertyResourceValue(Graphity.service);
+	    com.hp.hpl.jena.rdf.model.Resource service = call.getPropertyResourceValue(Graphity.service);
 	    if (service != null) endpointUri = service.getPropertyResourceValue(com.hp.hpl.jena.rdf.model.ResourceFactory.
 		createProperty("http://www.w3.org/ns/sparql-service-description#endpoint")).getURI();
 
@@ -200,93 +184,63 @@ public class ResourceBase extends LDPResourceBase implements QueriedResource
 		createProperty("http://www.w3.org/ns/sparql-service-description#endpoint"));
 	    if (endpoint == null || endpoint.getURI() == null) throw new IllegalArgumentException("SPARQL Service endpoint must be URI Resource");
 
-	    if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has explicit SPARQL endpoint: {}", ontResource.getURI(), endpoint.getURI());
+	    if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has explicit SPARQL endpoint: {}", call.getURI(), endpoint.getURI());
 
-	    return getModelResource(endpointUri, query).describe();
+	    return getModelResource(endpointUri, getQuery(call)).describe();
 	}
 	else
 	{
-	    // don't do default DESCRIBE on OntModel again - super.describe() does it
-	    // compare on the SPARQL syntax level - equals() on objects doesn't seem to work
-	    //if (!getQueryBuilder().equals(getDescribeQuery()))
-	    if (!getQueryBuilder().toString().equals(getDescribeQuery().toString()))
-	    {
-		if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has no explicit SPARQL endpoint, querying its OntModel", getURI());
-		return getModelResource(getOntModel(), query).describe();
-	    }
+	    if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has no explicit SPARQL endpoint, querying its OntModel", getURI());
+	    return getModelResource(getOntModel(), getQuery(call)).describe();
 	}
-
-	return ModelFactory.createDefaultModel();
-    }
-
-    @Override
-    public Query getQuery()
-    {
-	return getQueryBuilder().build();
-    }
-
-    public QueryBuilder getQueryBuilder()
-    {
-	if (log.isDebugEnabled()) log.debug("OntResource with URI {} has Query Resource {}", getURI(), getPropertyResourceValue(Graphity.query));
-	return QueryBuilder.fromResource(getPropertyResourceValue(Graphity.query));
-    }
-
-    public OntClass matchOntClass(OntResource container)
-    {
-	if (container == null) throw new IllegalArgumentException("Container must not be null");	
-	//container.getOntModel().listRestrictions();
-	//ExtendedIterator<OntClass> it = container.getOntModel().listClasses();
-	ExtendedIterator<Restriction> it = container.getOntModel().listRestrictions();
-	
-	while (it.hasNext())
-	{
-	    //OntClass ontClass = it.next();
-	    Restriction restriction = it.next();
-	    if (restriction.canAs(HasValueRestriction.class))
-	    {
-		HasValueRestriction hvr = restriction.asHasValueRestriction();
-		if (hvr.getOnProperty().asResource().equals(SIOC.HAS_CONTAINER.asResource())
-			&& hvr.getHasValue().equals(container))
-		    return hvr.getSubClass();
-	    }
-	}
-	
-	return null;
-    }
-
-    public OntClass matchOntClass(OntModel ontModel)
-    {
-	if (log.isDebugEnabled()) log.debug("Matching @Path annotation {} of Class {}", getClass().getAnnotation(Path.class).value(), getClass());
-	return matchOntClass(getClass().getAnnotation(Path.class).value(), ontModel);
-    }
-
-    public OntClass matchOntClass(Class<?> cls, OntModel ontModel)
-    {
-	if (log.isDebugEnabled()) log.debug("Matching @Path annotation {} of Class {}", cls.getAnnotation(Path.class).value(), cls);
-	return matchOntClass(cls.getAnnotation(Path.class).value(), ontModel);
     }
     
-    public OntClass matchOntClass(String uriTemplate, OntModel ontModel)
+    public Query getQuery(TemplateCall call)
     {
-	if (uriTemplate == null) throw new IllegalArgumentException("Item endpoint class must have a @Path annotation");
-	
-	if (log.isDebugEnabled()) log.debug("Matching URI template template {} against Model {}", uriTemplate, ontModel);
-	Property utProp = ontModel.createProperty("http://purl.org/linked-data/api/vocab#uriTemplate");
-	ResIterator it = ontModel.listResourcesWithProperty(utProp, uriTemplate);
+	String queryString = call.getQueryString();
+	queryString = queryString.replace("?this", "<" + getURI() + ">"); // binds ?this to URI of current resource
+	return QueryFactory.create(queryString);
+    }
+    
+    public final OntClass matchOntClass()
+    {
+	StringBuilder path = new StringBuilder();
+	path.append("/").append(getUriInfo().getPath(false));
+	return matchOntClass(path);
+    }
+    
+    public final OntClass matchOntClass(CharSequence path)
+    {
+	Property utProp = getOntModel().createProperty("http://purl.org/linked-data/api/vocab#uriTemplate");
+	ExtendedIterator<Restriction> it = getOntModel().listRestrictions();
 
-	if (it.hasNext())
+	while (it.hasNext())
 	{
-	    com.hp.hpl.jena.rdf.model.Resource match = it.next();
-	    if (!match.canAs(OntClass.class)) throw new IllegalArgumentException("Resource matching this URI template is not an OntClass");
-	    
-	    if (log.isDebugEnabled()) log.debug("URI template {} matched endpoint OntClass {}", uriTemplate, match.as(OntClass.class));
-	    return match.as(OntClass.class);
+	    Restriction restriction = it.next();	    
+	    if (restriction.canAs(HasValueRestriction.class)) // throw new IllegalArgumentException("Resource matching this URI template is not a HasValueRestriction");
+	    {
+		HasValueRestriction hvr = restriction.asHasValueRestriction();
+		if (hvr.getOnProperty().equals(utProp))
+		{
+		    UriTemplate uriTemplate = new UriTemplate(hvr.getHasValue().toString());
+		    HashMap<String, String> map = new HashMap<String, String>();
+
+		    if (uriTemplate.match(path, map))
+		    {
+			if (log.isDebugEnabled()) log.debug("Path {} matched UriTemplate {}", path, uriTemplate);
+
+			OntClass ontClass = hvr.listSubClasses(true).next(); //hvr.getSubClass();	    
+			if (log.isDebugEnabled()) log.debug("Path {} matched endpoint OntClass {}", path, ontClass);
+			return ontClass;
+		    }
+		    else
+			if (log.isDebugEnabled()) log.debug("Path {} did not match UriTemplate {}", path, uriTemplate);
+		}
+	    }
 	}
-	else
-	{
-	    if (log.isDebugEnabled()) log.debug("URI template {} has no OntClass match in OntModel {}", uriTemplate, ontModel);
-	    return null;   
-	}
+
+	if (log.isDebugEnabled()) log.debug("Path {} has no OntClass match in this OntModel", path);
+	return null;   
     }
 
     public final Long getLimit()
@@ -309,72 +263,4 @@ public class ResourceBase extends LDPResourceBase implements QueriedResource
 	return desc;
     }
 
-    public static com.hp.hpl.jena.rdf.model.Resource getSelectQuery(OntClass ontClass)
-    {
-	ExtendedIterator<OntClass> it = ontClass.listSuperClasses(true);
-	while (it.hasNext())
-	{
-	    OntClass superClass = it.next();
-	    if (superClass.canAs(HasValueRestriction.class))
-	    {
-		HasValueRestriction restriction = superClass.asRestriction().asHasValueRestriction();
-		if (restriction.getOnProperty().equals(Graphity.selectQuery))
-		    return restriction.getHasValue().asResource();
-	    }
-	}
-	
-	return null;
-    }
-
-    public com.hp.hpl.jena.rdf.model.Resource getService(Individual ind)
-    {
-	ExtendedIterator<OntClass> it = ind.listOntClasses(false);
-	while (it.hasNext())
-	{
-	    OntClass ontClass = it.next();
-	    if (ontClass.canAs(HasValueRestriction.class))
-	    {
-		HasValueRestriction restriction = ontClass.asRestriction().asHasValueRestriction();
-		if (restriction.getOnProperty().equals(Graphity.service))
-		    return restriction.getHasValue().asResource();
-	    }
-	}
-	
-	return null;
-    }
-
-    public com.hp.hpl.jena.rdf.model.Resource getSelectQuery(Individual ind)
-    {
-	ExtendedIterator<OntClass> it = ind.listOntClasses(false);
-	while (it.hasNext())
-	{
-	    OntClass ontClass = it.next();
-	    if (ontClass.canAs(HasValueRestriction.class))
-	    {
-		HasValueRestriction restriction = ontClass.asRestriction().asHasValueRestriction();
-		if (restriction.getOnProperty().equals(Graphity.selectQuery))
-		    return restriction.getHasValue().asResource();
-	    }
-	}
-	
-	return null;
-    }
-
-    public static com.hp.hpl.jena.rdf.model.Resource getService(OntClass ontClass)
-    {
-	ExtendedIterator<OntClass> it = ontClass.listSuperClasses(true);
-	while (it.hasNext())
-	{
-	    OntClass superClass = it.next();
-	    if (superClass.canAs(HasValueRestriction.class))
-	    {
-		HasValueRestriction restriction = superClass.asRestriction().asHasValueRestriction();
-		if (restriction.getOnProperty().equals(Graphity.service))
-		    return restriction.getHasValue().asResource();
-	    }
-	}
-	
-	return null;
-    }
-    
 }

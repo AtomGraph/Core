@@ -173,8 +173,10 @@ public class DataManager extends FileManager implements URIResolver
 	{
 	    SPARQLService service = findSPARQLService(filenameOrURI);
 	    if (log.isDebugEnabled()) log.debug("URI {} is a SPARQL service, executing Query on SparqlService: {}", service.getEndpointURI());
-	    
-	    model = loadModel(service, parseQuery(filenameOrURI));
+
+	    model = ModelFactory.createDefaultModel();
+	    Query query = parseQuery(filenameOrURI);
+	    if (query != null) model = loadModel(service, query);
 	}
 	else
 	{
@@ -192,6 +194,7 @@ public class DataManager extends FileManager implements URIResolver
     public Model loadModel(String endpointURI, Query query, MultivaluedMap<String, String> params)
     {
 	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, query);
+	if (query == null) throw new IllegalArgumentException("Query must be not null");
 	
 	if (!(query.isConstructType() || query.isDescribeType()))
 	    throw new QueryExecException("Query to load Model must be CONSTRUCT or DESCRIBE"); // return null;
@@ -231,6 +234,7 @@ public class DataManager extends FileManager implements URIResolver
     public Model loadModel(SPARQLService service, Query query)
     {
 	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", service.getEndpointURI(), query);
+	if (query == null) throw new IllegalArgumentException("Query must be not null");
 	
 	if (!(query.isConstructType() || query.isDescribeType()))
 	    throw new QueryExecException("Query to load Model must be CONSTRUCT or DESCRIBE"); // return null;
@@ -263,6 +267,7 @@ public class DataManager extends FileManager implements URIResolver
     public Model loadModel(Model model, Query query)
     {
 	if (log.isDebugEnabled()) log.debug("Local Model Query: {}", query);
+	if (query == null) throw new IllegalArgumentException("Query must be not null");
 	
 	if (!(query.isConstructType() || query.isDescribeType()))
 	    throw new QueryExecException("Query to load Model must be CONSTRUCT or DESCRIBE"); // return null;
@@ -404,6 +409,7 @@ public class DataManager extends FileManager implements URIResolver
 	else
 	{
 	    if (log.isDebugEnabled()) log.debug("Remote service {} Query execution: {} ", endpointURI, query);
+	    if (query == null) throw new IllegalArgumentException("Query must be not null");
 
 	    if (!query.isSelectType())
 		throw new QueryExecException("Query to load ResultSet must be SELECT or ASK"); // return null
@@ -436,6 +442,7 @@ public class DataManager extends FileManager implements URIResolver
     public ResultSetRewindable loadResultSet(SPARQLService service, Query query)
     {
 	if (log.isDebugEnabled()) log.debug("Remote service {} Query execution: {} ", service.getEndpointURI(), query);
+	if (query == null) throw new IllegalArgumentException("Query must be not null");
 
 	if (!query.isSelectType())
 	    throw new QueryExecException("Query to load ResultSet must be SELECT or ASK"); // return null
@@ -466,6 +473,7 @@ public class DataManager extends FileManager implements URIResolver
     public ResultSetRewindable loadResultSet(Model model, Query query)
     {
 	if (log.isDebugEnabled()) log.debug("Local Model Query: {}", query);
+	if (query == null) throw new IllegalArgumentException("Query must be not null");
 
 	if (!query.isSelectType())
 	    throw new QueryExecException("Query to load ResultSet must be SELECT or ASK"); // return null

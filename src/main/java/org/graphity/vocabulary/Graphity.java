@@ -44,9 +44,9 @@ public class Graphity
     /** <p>The namespace of the vocabulary as a resource</p> */
     public static final Resource NAMESPACE = m_model.createResource( NS );
     
-    public static final Property query = m_model.createProperty( NS + "query" );
+    //public static final Property query = m_model.createProperty( NS + "query" );
     
-    public static final Property selectQuery = m_model.createProperty( NS + "selectQuery" );
+    //public static final Property selectQuery = m_model.createProperty( NS + "selectQuery" );
     
     public static final Property service = m_model.createProperty( NS + "service" );
     

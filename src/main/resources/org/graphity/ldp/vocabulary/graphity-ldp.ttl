@@ -9,6 +9,8 @@
 @prefix dct: <http://purl.org/dc/terms/> .
 @prefix sioc: <http://rdfs.org/sioc/ns#> .
 @prefix sp: <http://spinrdf.org/sp#> .
+@prefix spin: <http://spinrdf.org/spin#> .
+@prefix spl: <http://spinrdf.org/spl#> .
 @prefix void: <http://rdfs.org/ns/void#> .
 @prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
 @prefix lda: <http://purl.org/linked-data/api/vocab#> .
@@ -68,17 +70,24 @@ _:dataset a void:Dataset ;
 gfb-app:type rdfs:label "Facebook application" ;
     rdfs:isDefinedBy gfb-app: .
 
-sioc:has_container a owl:ObjectProperty ;
-    rdfs:domain sioc:Item ;
+sioc:has_parent a owl:ObjectProperty ;
+    rdfs:domain sioc:Container ;
     rdfs:range sioc:Container ;
     rdfs:isDefinedBy sioc: .
 
+lda:uriTemplate a rdf:Property ;
+    rdfs:label "URI template"@en ;
+    rdfs:comment "A template that can be used to match against request URIs. This template can contain variable names within {}s; when the URI is matched then the substrings that appear in these locations are bound to the named variable."@en ;
+    rdfs:domain lda:Endpoint ;
+    rdfs:range rdfs:Literal ;
+    rdfs:isDefinedBy lda: ; .
+
 # RESOURCES
 
-<..> a sioc:Site, sioc:Container, lda:ListEndpoint ;
+<..> a sioc:Site ;
     dct:title "Graphity Linked Data Platform" ;
-    g:mode gldp:ListMode ;
-    g:orderBy (rdfs:label) ;
+    # g:mode gldp:ListMode ;
+    # g:orderBy (rdfs:label) ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset ;
     rdfs:seeAlso : .
@@ -144,87 +153,131 @@ sioc:has_container a owl:ObjectProperty ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
-# PAGES
+# RESOURCE CLASSES
+
+#:FrontPageResource a owl:Class ;
+#    rdfs:subClassOf lda:ListEndpoint ,
+#	[ a owl:Restriction ;
+#		owl:onProperty lda:uriTemplate ;
+#		owl:hasValue "/"
+#	] ,
+#	[ a owl:Restriction ;
+#		owl:onProperty sioc:has_parent ;
+#		owl:hasValue <..>
+#	] ;
+#    spin:constraint [ a :SelectInstancesTemplate ;
+#	    g:type sioc:Container
+#	    ] .
 
 :InstancesPageResource a owl:Class ;
-    rdfs:subClassOf [ a owl:Restriction ;
-		owl:onProperty sioc:has_container ;
-		owl:hasValue <../instances>
+    rdfs:subClassOf lda:ListEndpoint ,
+	[ a owl:Restriction ;
+		owl:onProperty lda:uriTemplate ;
+		owl:hasValue "/instances"
 	] ,
 	[ a owl:Restriction ;
-		owl:onProperty g:selectQuery ;
-		owl:hasValue :SelectInstances
-	] .
+		owl:onProperty sioc:has_parent ;
+		owl:hasValue <../instances>
+	] ;
+    spin:constraint [ a :SelectInstancesTemplate ] .
 
 :OntologiesPageResource a owl:Class ;
-    rdfs:subClassOf [ a owl:Restriction ;
-		owl:onProperty sioc:has_container ;
-		owl:hasValue <../ontologies>
+    rdfs:subClassOf lda:ListEndpoint ,
+	[ a owl:Restriction ;
+		owl:onProperty lda:uriTemplate ;
+		owl:hasValue "/ontologies"
 	] ,
 	[ a owl:Restriction ;
-		owl:onProperty g:selectQuery ;
-		owl:hasValue :SelectOntologies
-	] .
+		owl:onProperty sioc:has_parent ;
+		owl:hasValue <../ontologies>
+	] ;
+    spin:constraint [ a :SelectInstancesTemplate ;
+	    g:type owl:Ontology
+	    ] .
 
 :ClassesPageResource a owl:Class ;
-    rdfs:subClassOf [ a owl:Restriction ;
-		owl:onProperty sioc:has_container ;
-		owl:hasValue <../classes>
+    rdfs:subClassOf lda:ListEndpoint ,
+	[ a owl:Restriction ;
+		owl:onProperty lda:uriTemplate ;
+		owl:hasValue "/classes"
 	] ,
 	[ a owl:Restriction ;
-		owl:onProperty g:selectQuery ;
-		owl:hasValue :SelectClasses
-	] .
+		owl:onProperty sioc:has_parent ;
+		owl:hasValue <..>
+	] ;
+    spin:constraint [ a :SelectInstancesTemplate ;
+	    g:type owl:Class
+	    ] .
 
 :PropertiesPageResource a owl:Class ;
-    rdfs:subClassOf [ a owl:Restriction ;
-		owl:onProperty sioc:has_container ;
-		owl:hasValue <../properties>
+    rdfs:subClassOf lda:ListEndpoint ,
+	[ a owl:Restriction ;
+		owl:onProperty lda:uriTemplate ;
+		owl:hasValue "/properties"
 	] ,
 	[ a owl:Restriction ;
-		owl:onProperty g:selectQuery ;
-		owl:hasValue :SelectProperties
-	] .
+		owl:onProperty sioc:has_parent ;
+		owl:hasValue <../properties>
+	] ;
+    spin:constraint [ a :SelectPropertiesTemplate ;
+	    g:type owl:Ontology
+	    ] .
 
 :ServicesPageResource a owl:Class ;
-    rdfs:subClassOf [ a owl:Restriction ;
-		owl:onProperty sioc:has_container ;
-		owl:hasValue <../services>
+    rdfs:subClassOf lda:ListEndpoint ,
+	[ a owl:Restriction ;
+		owl:onProperty lda:uriTemplate ;
+		owl:hasValue "/services"
 	] ,
 	[ a owl:Restriction ;
-		owl:onProperty g:selectQuery ;
-		owl:hasValue :SelectServices
-	] .
+		owl:onProperty sioc:has_parent ;
+		owl:hasValue <../services>
+	] ;
+    spin:constraint [ a :SelectInstancesTemplate ;
+	    g:type sd:Service
+	    ] .
 
 :QueriesPageResource a owl:Class ;
-    rdfs:subClassOf [ a owl:Restriction ;
-		owl:onProperty sioc:has_container ;
-		owl:hasValue <../queries>
+    rdfs:subClassOf lda:ListEndpoint ,
+	[ a owl:Restriction ;
+		owl:onProperty lda:uriTemplate ;
+		owl:hasValue "/queries"
 	] ,
 	[ a owl:Restriction ;
-		owl:onProperty g:selectQuery ;
-		owl:hasValue :SelectQueries
-	] .
+		owl:onProperty sioc:has_parent ;
+		owl:hasValue <../queries>
+	] ;
+    spin:constraint [ a :SelectInstancesTemplate ;
+	    g:type sp:Query
+	    ] .
 
 :ModesPageResource a owl:Class ;
-    rdfs:subClassOf [ a owl:Restriction ;
-		owl:onProperty sioc:has_container ;
-		owl:hasValue <../modes>
+    rdfs:subClassOf lda:ListEndpoint ,
+	[ a owl:Restriction ;
+		owl:onProperty lda:uriTemplate ;
+		owl:hasValue "/modes"
 	] ,
 	[ a owl:Restriction ;
-		owl:onProperty g:selectQuery ;
-		owl:hasValue :SelectModes
-	] .
+		owl:onProperty sioc:has_parent ;
+		owl:hasValue <../modes>
+	] ;
+    spin:constraint [ a :SelectInstancesTemplate ;
+	    g:type g:XSLTMode
+	    ] .
 
 :ContainersPageResource a owl:Class ;
-    rdfs:subClassOf [ a owl:Restriction ;
-		owl:onProperty sioc:has_container ;
-		owl:hasValue <..>
+    rdfs:subClassOf lda:ListEndpoint ,
+	[ a owl:Restriction ;
+		owl:onProperty lda:uriTemplate ;
+		owl:hasValue "/containers"
 	] ,
 	[ a owl:Restriction ;
-		owl:onProperty g:selectQuery ;
-		owl:hasValue :SelectContainers
-	] .
+		owl:onProperty sioc:has_parent ;
+		owl:hasValue <../containers>
+	] ;
+    spin:constraint [ a :SelectInstancesTemplate ;
+	    g:type sioc:Container
+	    ] .
 
 # MODES
 
@@ -241,7 +294,14 @@ sioc:has_container a owl:ObjectProperty ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
-# QUERIES
+# TEMPLATES & QUERIES
+
+:SelectInstancesTemplate a spin:Template ;
+    spin:body :SelectInstances ;
+    spin:constraint [ a       spl:Argument ;
+		spl:predicate g:type ;
+		spl:valueType rdf:Resource
+	] .
 
 :SelectInstances    a       sp:Select, sp:Query ;
       sp:resultVariables (_:instanceVar) ;
@@ -260,37 +320,8 @@ _:instanceVar  sp:varName "instance"^^xsd:string .
 
 # ====
 
-:SelectOntologies    a       sp:Select, sp:Query ;
-      sp:resultVariables (_:ontologyVar) ;
-      sp:text """PREFIX owl: <http://www.w3.org/2002/07/owl#>
-SELECT ?ontology
-WHERE {
-    ?ontology a owl:Ontology .
-}"""^^xsd:string ;
-      sp:where ([ sp:object owl:Ontology ;
-                  sp:predicate rdf:type ;
-                  sp:subject _:ontologyVar
-                ]) .
-
-_:ontologyVar  sp:varName "ontology"^^xsd:string .
-
-# ====
-
-:SelectClasses    a       sp:Select, sp:Query ;
-      sp:resultVariables (_:classVar) ;
-      sp:text """PREFIX owl: <http://www.w3.org/2002/07/owl#>
-SELECT ?class
-WHERE {
-    ?class a owl:Class .
-}"""^^xsd:string ;
-      sp:where ([ sp:object owl:Class ;
-                  sp:predicate rdf:type ;
-                  sp:subject _:classVar
-                ]) .
-
-_:classVar  sp:varName "class"^^xsd:string .
-
-# ====
+:SelectPropertiesTemplate a spin:Template ;
+    spin:body :SelectProperties .
 
 :SelectProperties    a       sp:Select, sp:Query ;
       sp:resultVariables (_:propertyVar) ;
@@ -316,67 +347,3 @@ WHERE {
                 ]) .
 
 _:propertyVar  sp:varName "property"^^xsd:string .
-
-# ====
-
-:SelectServices    a       sp:Select, sp:Query ;
-      sp:resultVariables (_:serviceVar) ;
-      sp:text """PREFIX sd: <http://www.w3.org/ns/sparql-service-description#>
-SELECT ?service
-WHERE {
-    ?service a sd:Service .
-}"""^^xsd:string ;
-      sp:where ([ sp:object sd:Service ;
-                  sp:predicate rdf:type ;
-                  sp:subject _:serviceVar
-                ]) .
-
-_:serviceVar  sp:varName "service"^^xsd:string .
-
-# ====
-
-:SelectQueries    a       sp:Select, sp:Query ;
-      sp:resultVariables (_:queryVar) ;
-      sp:text """PREFIX sp: <http://spinrdf.org/sp#>
-SELECT ?query
-WHERE {
-    ?query a sp:Query .
-}"""^^xsd:string ;
-      sp:where ([ sp:object sp:Query ;
-                  sp:predicate rdf:type ;
-                  sp:subject _:queryVar
-                ]) .
-
-_:queryVar  sp:varName "query"^^xsd:string .
-
-# ====
-
-:SelectModes    a       sp:Select, sp:Query ;
-      sp:resultVariables (_:modeVar) ;
-      sp:text """PREFIX g: <http://graphity.org/ontology/>
-SELECT ?mode
-WHERE {
-    ?mode a g:XSLTMode .
-}"""^^xsd:string ;
-      sp:where ([ sp:object g:XSLTMode ;
-                  sp:predicate rdf:type ;
-                  sp:subject _:modeVar
-                ]) .
-
-_:modeVar  sp:varName "mode"^^xsd:string .
-
-# ====
-
-:SelectContainers    a       sp:Select, sp:Query ;
-      sp:resultVariables (_:containerVar) ;
-      sp:text """PREFIX sioc: <http://rdfs.org/sioc/ns#>
-SELECT ?container
-WHERE {
-    ?container a sioc:Container .
-}"""^^xsd:string ;
-      sp:where ([ sp:object sioc:Container ;
-                  sp:predicate rdf:type ;
-                  sp:subject _:containerVar
-                ]) .
-
-_:containerVar  sp:varName "container"^^xsd:string .

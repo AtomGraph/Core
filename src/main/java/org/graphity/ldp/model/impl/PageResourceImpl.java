@@ -17,18 +17,19 @@
 package org.graphity.ldp.model.impl;
 
 import com.hp.hpl.jena.ontology.OntResource;
-import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.query.Query;
 import java.util.List;
 import javax.ws.rs.core.*;
 import org.graphity.ldp.model.PageResource;
 import org.graphity.ldp.model.ResourceBase;
 import org.graphity.util.QueryBuilder;
 import org.graphity.util.SelectBuilder;
-import org.graphity.vocabulary.Graphity;
-import org.graphity.vocabulary.SIOC;
 import org.graphity.vocabulary.XHV;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.topbraid.spin.arq.ARQ2SPIN;
+import org.topbraid.spin.model.Select;
+import org.topbraid.spin.model.TemplateCall;
 import org.topbraid.spin.vocabulary.SP;
 
 /**
@@ -38,9 +39,6 @@ import org.topbraid.spin.vocabulary.SP;
 public final class PageResourceImpl extends ResourceBase implements PageResource
 {
     private static final Logger log = LoggerFactory.getLogger(PageResourceImpl.class);
-
-    //private final OntResource ontResource;
-    private final QueryBuilder queryBuilder;
     
     public PageResourceImpl(OntResource ontResource,
 	UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
@@ -49,40 +47,6 @@ public final class PageResourceImpl extends ResourceBase implements PageResource
 	super(ontResource, uriInfo, request, httpHeaders, variants, limit, offset, orderBy, desc);
 	if (limit == null) throw new IllegalArgumentException("LIMIT must be not null");
 	if (offset == null) throw new IllegalArgumentException("OFFSET must be not null");
-
-	//if (!container.hasProperty(Graphity.selectQuery)) throw new IllegalArgumentException("Container Resource must have a SELECT query");
-	if (!hasProperty(SIOC.HAS_CONTAINER)) throw new IllegalArgumentException("PageResource must have a container (sioc:has_container property)");
-	if (!hasProperty(Graphity.selectQuery)) throw new IllegalArgumentException("PageResource must have a SELECT query (g:selectQuery property)");
-
-	Resource select = getPropertyResourceValue(Graphity.selectQuery);
-	SelectBuilder selectBuilder = SelectBuilder.fromResource(select).
-	    limit(getLimit()).offset(getOffset());
-	/*
-	if (orderBy != null)
-	{
-	    com.hp.hpl.jena.rdf.model.Resource modelVar = getOntology().createResource().addLiteral(SP.varName, "model");
-	    Property orderProperty = ResourceFactory.createProperty(getOrderBy();
-	    com.hp.hpl.jena.rdf.model.Resource orderVar = getOntology().createResource().addLiteral(SP.varName, orderProperty.getLocalName());
-
-	    selectBuilder.orderBy(orderVar, getDesc()).optional(modelVar, orderProperty, orderVar);
-	}
-	*/
-	//QueryBuilder queryBuilder;
-	if (selectBuilder.getPropertyResourceValue(SP.resultVariables) != null)
-	{
-	    if (log.isDebugEnabled()) log.debug("Query Resource {} has result variables: {}", selectBuilder, selectBuilder.getPropertyResourceValue(SP.resultVariables));
-	    queryBuilder = QueryBuilder.fromDescribe(selectBuilder.getPropertyResourceValue(SP.resultVariables)).
-		subQuery(selectBuilder);
-	}
-	else
-	{
-	    if (log.isDebugEnabled()) log.debug("Query Resource {} does not have result variables, using wildcard", selectBuilder);
-	    queryBuilder = QueryBuilder.fromDescribe(selectBuilder.getModel()).subQuery(selectBuilder);
-	}
-	queryBuilder.build(); // sets sp:text value
-	
-	ontResource.setPropertyValue(Graphity.query, queryBuilder); // Resource alway get a g:query value
-	//ontResource.setPropertyValue(Graphity.service, container.getPropertyResourceValue(Graphity.service));
 
 	if (log.isDebugEnabled())
 	{
@@ -104,12 +68,6 @@ public final class PageResourceImpl extends ResourceBase implements PageResource
 	    if (log.isDebugEnabled()) log.debug("Adding page metadata: {} xhv:next {}", getURI(), getNext().getURI());
 	    addProperty(XHV.next, getNext());
 	}
-    }
-    
-    @Override
-    public QueryBuilder getQueryBuilder()
-    {
-	return queryBuilder;
     }
     
     @Override
@@ -136,6 +94,39 @@ public final class PageResourceImpl extends ResourceBase implements PageResource
 	if (getDesc() != null) uriBuilder.replaceQueryParam("desc", getDesc());
 
 	return getOntModel().createResource(uriBuilder.build().toString());
+    }
+
+    @Override
+    public Query getQuery(TemplateCall call)
+    {
+	QueryBuilder queryBuilder;
+	org.topbraid.spin.model.Query query = ARQ2SPIN.parseQuery(call.getQueryString(), getModel());
+	if (!(query instanceof Select)) throw new IllegalArgumentException("PageResource must have a SPIN Select query");
+	SelectBuilder selectBuilder = SelectBuilder.fromSelect((Select)query).
+	    limit(getLimit()).offset(getOffset());
+	/*
+	if (orderBy != null)
+	{
+	    com.hp.hpl.jena.rdf.model.Resource modelVar = getOntology().createResource().addLiteral(SP.varName, "model");
+	    Property orderProperty = ResourceFactory.createProperty(getOrderBy();
+	    com.hp.hpl.jena.rdf.model.Resource orderVar = getOntology().createResource().addLiteral(SP.varName, orderProperty.getLocalName());
+
+	    selectBuilder.orderBy(orderVar, getDesc()).optional(modelVar, orderProperty, orderVar);
+	}
+	*/
+	//QueryBuilder queryBuilder;
+	if (selectBuilder.getPropertyResourceValue(SP.resultVariables) != null)
+	{
+	    if (log.isDebugEnabled()) log.debug("Query Resource {} has result variables: {}", selectBuilder, selectBuilder.getPropertyResourceValue(SP.resultVariables));
+	    queryBuilder = QueryBuilder.fromDescribe(selectBuilder.getPropertyResourceValue(SP.resultVariables)).
+		subQuery(selectBuilder);
+	}
+	else
+	{
+	    if (log.isDebugEnabled()) log.debug("Query Resource {} does not have result variables, using wildcard", selectBuilder);
+	    queryBuilder = QueryBuilder.fromDescribe(selectBuilder.getModel()).subQuery(selectBuilder);
+	}
+	return queryBuilder.build();
     }
 
 }
