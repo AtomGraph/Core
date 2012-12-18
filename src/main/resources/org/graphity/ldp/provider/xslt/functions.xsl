@@ -256,16 +256,13 @@ exclude-result-prefixes="#all">
     </xsl:function>
 
     <xsl:function name="list:member" as="node()*">
-	<xsl:param name="list" as="node()"/>
+	<xsl:param name="list" as="node()?"/>
 	<xsl:param name="document" as="document-node()"/>
 
-	<xsl:sequence select="key('resources', $list/rdf:first/@rdf:resource, $document) | key('resources', $list/rdf:first/@rdf:nodeID, $document)"/>
+	<xsl:if test="$list">
+	    <xsl:sequence select="key('resources', $list/rdf:first/@rdf:resource, $document) | key('resources', $list/rdf:first/@rdf:nodeID, $document)"/>
 
-	<xsl:if test="$list/rdf:rest/@rdf:resource">
-  	    <xsl:sequence select="list:member(key('resources', $list/rdf:rest/@rdf:resource, $document), $document)"/>
-	</xsl:if>
-	<xsl:if test="$list/rdf:rest/@rdf:nodeID">
-	    <xsl:sequence select="list:member(key('resources', $list/rdf:rest/@rdf:nodeID, $document), $document)"/>
+	    <xsl:sequence select="list:member(key('resources', $list/rdf:rest/@rdf:resource, $document), $document) | list:member(key('resources', $list/rdf:rest/@rdf:nodeID, $document), $document)"/>
 	</xsl:if>
     </xsl:function>
 	

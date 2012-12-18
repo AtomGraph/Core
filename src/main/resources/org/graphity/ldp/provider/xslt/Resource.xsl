@@ -31,6 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <!ENTITY foaf "http://xmlns.com/foaf/0.1/">
     <!ENTITY sioc "http://rdfs.org/sioc/ns#">
     <!ENTITY sp "http://spinrdf.org/sp#">
+    <!ENTITY spin "http://spinrdf.org/spin#">
     <!ENTITY sd "http://www.w3.org/ns/sparql-service-description#">
     <!ENTITY list "http://jena.hpl.hp.com/ARQ/list#">
     <!ENTITY xhv "http://www.w3.org/1999/xhtml/vocab#">
@@ -53,6 +54,7 @@ xmlns:dct="&dct;"
 xmlns:foaf="&foaf;"
 xmlns:sioc="&sioc;"
 xmlns:sp="&sp;"
+xmlns:spin="&spin;"
 xmlns:sd="&sd;"
 xmlns:list="&list;"
 xmlns:xhv="&xhv;"
@@ -84,17 +86,20 @@ exclude-result-prefixes="#all">
     <xsl:param name="desc" select="$orderBy[1]/rdf:type/@rdf:resource = '&sp;Desc'" as="xs:boolean"/>
 
     <xsl:param name="query" as="xs:string?"/>
-    <!-- <xsl:param name="where" select="list:member(key('resources', $select-res/sp:where/@rdf:nodeID, $ont-model), $ont-model)"/> -->
-    <xsl:param name="orderBy" select="if ($select-res/sp:orderBy) then list:member(key('resources', $select-res/sp:orderBy/@rdf:nodeID), /) else ()"/>
 
-    <xsl:variable name="ont-resource" select="key('resources', $absolute-path)" as="element()?"/>
-    <xsl:variable name="page" select="key('resources-by-container', $absolute-path)"/>
     <xsl:variable name="ont-uri" select="resolve-uri('ontology/', $base-uri)" as="xs:anyURI"/>
-    <!-- <xsl:variable name="query-res" select="(key('resources', $page/g:query/@rdf:resource | $page/g:query/@rdf:nodeID), key('resources', $ont-resource/g:query/@rdf:resource | $ont-resource/g:query/@rdf:nodeID))[1]" as="element()?"/> -->
-    <xsl:variable name="query-res" select="key('resources', $ont-resource/g:query/@rdf:resource | $ont-resource/g:query/@rdf:nodeID)" as="element()?"/>
-    <xsl:variable name="select-res" select="key('resources', $ont-resource/g:selectQuery/@rdf:resource | $ont-resource/g:selectQuery/@rdf:nodeID)" as="element()?"/>
-    <xsl:variable name="service-res" select="key('resources', $ont-resource/g:service/@rdf:resource | $ont-resource/g:service/@rdf:nodeID)"/>
+    <xsl:variable name="resource" select="key('resources', $request-uri, $ont-model)" as="element()?"/>
+    <xsl:variable name="ont-resource" select="key('resources', $absolute-path, $ont-model)" as="element()?"/>
+    <xsl:variable name="query-res" select="key('resources', $resource/spin:query/@rdf:resource | $resource/spin:query/@rdf:nodeID, $ont-model)" as="element()?"/>
+    <xsl:variable name="where-res" select="list:member(key('resources', $query-res/sp:where/@rdf:nodeID, $ont-model), $ont-model)"/>
+    <xsl:variable name="select-res" select="key('resources', $where-res/sp:query/@rdf:resource | $where-res/sp:query/@rdf:nodeID, $ont-model)" as="element()?"/>
+    <xsl:variable name="orderBy" select="if ($select-res/sp:orderBy) then list:member(key('resources', $select-res/sp:orderBy/@rdf:nodeID), /) else ()"/>
+
+    <!--
+    <xsl:variable name="page" select="key('resources-by-container', $absolute-path)"/>
+    <xsl:variable name="service-res" select="key('resources', $resource/g:service/@rdf:resource | $resource/g:service/@rdf:nodeID)"/>
     <xsl:variable name="endpoint-uri" select="$service-res/sd:endpoint/@rdf:resource" as="xs:anyURI?"/>
+    -->
     
     <xsl:key name="resources" match="*[*][@rdf:about] | *[*][@rdf:nodeID]" use="@rdf:about | @rdf:nodeID"/>
     <xsl:key name="predicates" match="*[@rdf:about]/* | *[@rdf:nodeID]/*" use="concat(namespace-uri(.), local-name(.))"/>
@@ -144,7 +149,7 @@ exclude-result-prefixes="#all">
 		<div class="navbar navbar-fixed-top">
 		    <div class="navbar-inner">
 			<div class="container-fluid">    
-			    <a class="brand" href="{$base-uri}{g:query-string($lang)}">
+			    <a class="brand" href="{$base-uri}">
 				<xsl:value-of select="g:label($base-uri, $ont-model, $lang)"/>
 			    </a>
 
@@ -235,23 +240,12 @@ exclude-result-prefixes="#all">
 	
     <xsl:template match="sioc:Container | *[rdf:type/@rdf:resource = '&sioc;Container']" mode="gldp:ModeSelectMode" priority="1">
 	<ul class="nav nav-tabs">
-	    <!--
-	    <li>
-		<xsl:if test="not($mode)">
-		    <xsl:attribute name="class">active</xsl:attribute>
-		</xsl:if>
-
-		<a href="{@rdf:about}{g:query-string($offset, $limit, $order-by, $desc, $lang, '&gldp;ItemMode')}">
-		    <xsl:value-of select="g:label(xs:anyURI('&gldp;ItemMode'), /, $lang)"/>
-		</a>
-	    </li>
-	    -->
 	    <li>
 		<xsl:if test="$mode = '&gldp;ListMode'">
 		    <xsl:attribute name="class">active</xsl:attribute>
 		</xsl:if>
 
-		<a href="{@rdf:about}{g:query-string($offset, $limit, $order-by, $desc, $lang, '&gldp;ListMode')}">
+		<a href="{@rdf:about}{g:query-string($offset, $limit, $order-by, $desc, (), '&gldp;ListMode')}">
 		    <xsl:value-of select="g:label(xs:anyURI('&gldp;ListMode'), /, $lang)"/>
 		</a>
 	    </li>
@@ -260,7 +254,7 @@ exclude-result-prefixes="#all">
 		    <xsl:attribute name="class">active</xsl:attribute>
 		</xsl:if>
 
-		<a href="{@rdf:about}{g:query-string($offset, $limit, $order-by, $desc, $lang, '&gldp;TableMode')}">
+		<a href="{@rdf:about}{g:query-string($offset, $limit, $order-by, $desc, (), '&gldp;TableMode')}">
 		    <xsl:value-of select="g:label(xs:anyURI('&gldp;TableMode'), /, $lang)"/>
 		</a>
 	    </li>
@@ -269,7 +263,7 @@ exclude-result-prefixes="#all">
 		    <xsl:attribute name="class">active</xsl:attribute>
 		</xsl:if>
 
-		<a href="{@rdf:about}{g:query-string($offset, $limit, $order-by, $desc, $lang, '&gldp;InputMode')}">
+		<a href="{@rdf:about}{g:query-string($offset, $limit, $order-by, $desc, (), '&gldp;InputMode')}">
 		    <xsl:value-of select="g:label(xs:anyURI('&gldp;InputMode'), /, $lang)"/>
 		</a>
 	    </li>
@@ -466,7 +460,7 @@ exclude-result-prefixes="#all">
 	
 	<div class="well sidebar-nav">
 	    <h2 class="nav-header">
-		<a href="{$base-uri}{g:query-string($lang)}" title="{$this}">
+		<a href="{$base-uri}" title="{$this}">
 		    <xsl:value-of select="g:label($this, /, $lang)"/>
 		</a>
 	    </h2>
@@ -600,7 +594,7 @@ exclude-result-prefixes="#all">
 	<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(.), local-name(.)))" as="xs:anyURI"/>
 
 	<th>
-	    <a href="{$absolute-path}{g:query-string($offset, $limit, $this, $desc, $lang, $mode)}" title="{$this}">
+	    <a href="{$absolute-path}{g:query-string($offset, $limit, $this, $desc, (), $mode)}" title="{$this}">
 		<xsl:value-of select="g:label($this, /, $lang)"/>
 	    </a>
 	</th>
@@ -629,7 +623,7 @@ exclude-result-prefixes="#all">
 	    <thead>
 		<tr>
 		    <th>
-			<a href="{$absolute-path}{g:query-string($offset, $limit, (), $desc, $lang, $mode)}">
+			<a href="{$absolute-path}{g:query-string($offset, $limit, (), $desc, (), $mode)}">
 			    <xsl:value-of select="g:label(xs:anyURI('&rdf;Resource'), /, $lang)"/>
 			</a>
 		    </th>

@@ -32,6 +32,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.*;
 import org.graphity.ldp.model.impl.PageResourceImpl;
+import org.graphity.util.QueryBuilder;
 import org.graphity.util.locator.PrefixMapper;
 import org.graphity.util.manager.DataManager;
 import org.graphity.vocabulary.Graphity;
@@ -132,19 +133,31 @@ public class ResourceBase extends LDPResourceBase
 	    OntClass ontClass = matchOntClass();
 	    if (ontClass != null)
 	    {
-		Individual individual = ontClass.createIndividual(getURI());
-		if (log.isDebugEnabled()) log.debug("Individual {} created from resource OntClass {}", individual, ontClass);
+		//Individual individual = ontClass.createIndividual(getURI());
+		//if (log.isDebugEnabled()) log.debug("Individual {} created from resource OntClass {}", individual, ontClass);
 
 		if (ontClass.hasProperty(SPIN.constraint))
 		{
 		    RDFNode constraint = getModel().getResource(ontClass.getURI()).getProperty(SPIN.constraint).getObject();
 		    TemplateCall call = SPINFactory.asTemplateCall(constraint);
+
+		    QueryBuilder queryBuilder = QueryBuilder.fromQuery(getQuery(call), getModel());
+		    queryBuilder.build(); // sets sp:text value
+		    if (log.isDebugEnabled()) log.debug("OntResource {} gets explicit spin:query value {}", this, queryBuilder);
+		    setPropertyValue(SPIN.query, queryBuilder);
 		    
 		    description.add(loadModel(call));
 		}
 	    }
 	}
-
+	else
+	{
+	    QueryBuilder queryBuilder = QueryBuilder.fromDescribe(getURI(), getModel());
+	    queryBuilder.build(); // sets sp:text value
+	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} gets explicit spin:query value {}", getURI(), queryBuilder);
+	    setPropertyValue(SPIN.query, queryBuilder);
+	}
+	
 	// if resource is a container, add page description
 	if (hasRDFType(SIOC.CONTAINER))
 	{
