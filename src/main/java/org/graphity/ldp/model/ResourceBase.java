@@ -48,7 +48,7 @@ import org.topbraid.spin.vocabulary.SPIN;
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 @Path("{path: .*}")
-public class ResourceBase extends LDPResourceBase
+public class ResourceBase extends LDPResourceBase //implements QueriedResource
 {
     private static final Logger log = LoggerFactory.getLogger(ResourceBase.class);
 
@@ -197,7 +197,7 @@ public class ResourceBase extends LDPResourceBase
 			setPropertyValue(Graphity.mode, mode);
 		    }
 
-		    description.add(loadModel(call));
+		    description.add(loadModel(getService(ontClass), getQuery(call)));
 		}
 	    }
 	    else
@@ -211,33 +211,37 @@ public class ResourceBase extends LDPResourceBase
     
 	return description;
     }
-
-    public Model loadModel(TemplateCall call)
+    
+    public com.hp.hpl.jena.rdf.model.Resource getService(OntClass ontClass)
     {
-	if (call.hasProperty(Graphity.service))
-	{
-	    String endpointUri = null;
-	    com.hp.hpl.jena.rdf.model.Resource service = call.getPropertyResourceValue(Graphity.service);
-	    if (service != null) endpointUri = service.getPropertyResourceValue(com.hp.hpl.jena.rdf.model.ResourceFactory.
-		createProperty("http://www.w3.org/ns/sparql-service-description#endpoint")).getURI();
+	RDFNode hasValue = getRestrictionHasValue(ontClass, Graphity.service);
+	if (hasValue != null && hasValue.isResource()) return hasValue.asResource();
 
+	return null;
+    }
+
+    public Model loadModel(com.hp.hpl.jena.rdf.model.Resource service, Query query)
+    {
+	if (service != null)
+	{
 	    com.hp.hpl.jena.rdf.model.Resource endpoint = service.getPropertyResourceValue(com.hp.hpl.jena.rdf.model.ResourceFactory.
 		createProperty("http://www.w3.org/ns/sparql-service-description#endpoint"));
 	    if (endpoint == null || endpoint.getURI() == null) throw new IllegalArgumentException("SPARQL Service endpoint must be URI Resource");
 
-	    if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has explicit SPARQL endpoint: {}", call.getURI(), endpoint.getURI());
+	    if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has explicit SPARQL endpoint: {}", getURI(), endpoint.getURI());
 
-	    return getModelResource(endpointUri, getQuery(call)).describe();
+	    return getModelResource(endpoint.getURI(), query).describe();
 	}
 	else
 	{
 	    if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has no explicit SPARQL endpoint, querying its OntModel", getURI());
-	    return getModelResource(getOntModel(), getQuery(call)).describe();
+	    return getModelResource(getOntModel(), query).describe();
 	}
     }
-    
+
     public Query getQuery(TemplateCall call)
     {
+	if (call == null) throw new IllegalArgumentException("TemplateCall cannot be null");
 	String queryString = call.getQueryString();
 	queryString = queryString.replace("?this", "<" + getURI() + ">"); // binds ?this to URI of current resource
 	return QueryFactory.create(queryString);

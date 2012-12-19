@@ -33,7 +33,7 @@ public class SPARQLService
     private char[] password = null;
     private String apiKey = null;
     
-    private SPARQLService(String endpointUri)
+    public SPARQLService(String endpointUri)
     {
 	this.endpointUri = endpointUri;	
     }

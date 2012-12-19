@@ -158,7 +158,7 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     }
 
     @Override
-    public final List<Variant> getVariants()
+    public List<Variant> getVariants()
     {
 	return variants;
     }
