@@ -17,9 +17,11 @@
 
 package org.graphity.vocabulary;
 
-import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.ontology.DatatypeProperty;
+import com.hp.hpl.jena.ontology.ObjectProperty;
+import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 /**
@@ -29,7 +31,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
 public class Graphity
 {
     /** <p>The RDF model that holds the vocabulary terms</p> */
-    private static Model m_model = ModelFactory.createDefaultModel();
+  private static OntModel m_model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, null);
     
     /** <p>The namespace of the vocabulary as a string</p> */
     public static final String NS = "http://graphity.org/ontology/";
@@ -48,10 +50,10 @@ public class Graphity
     
     //public static final Property selectQuery = m_model.createProperty( NS + "selectQuery" );
     
-    public static final Property service = m_model.createProperty( NS + "service" );
+    public static final ObjectProperty service = m_model.createObjectProperty( NS + "service" );
     
-    public static final Property mode = m_model.createProperty( NS + "mode" );
+    public static final ObjectProperty mode = m_model.createObjectProperty( NS + "mode" );
     
-    public static final Property apiKey = m_model.createProperty( NS + "apiKey" );
+    public static final DatatypeProperty apiKey = m_model.createDatatypeProperty( NS + "apiKey" );
     
 }

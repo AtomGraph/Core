@@ -28,12 +28,13 @@
     rdfs:label "Graphity Linked Data Platform ontology" ;
     dct:description "Graphity LDP configuration ontology. Should be imported and reused by all extending applications" ;
     dct:created "2012-10-26T01:04:00+03:00"^^xsd:dateTime ;
+    dct:modified "2012-12-19T02:29:00+03:00"^^xsd:dateTime ;
     vann:preferredNamespaceUri "http://ldp.graphity.org/ontology/" ;
     vann:preferredNamespacePrefix "gldp";
     foaf:homepage : ;
     dct:license <http://www.opendatacommons.org/licenses/pddl/1.0/> ;
     dct:creator <http://semantic-web.dk#martynas> .
-    # rdfs:seeAlso <sparql> .
+    # rdfs:seeAlso <../sparql> .
 
 _:dataset a void:Dataset ;
     dct:title "The dataset of this application" ;
@@ -86,8 +87,6 @@ lda:uriTemplate a rdf:Property ;
 
 <..> a sioc:Site ;
     dct:title "Graphity Linked Data Platform" ;
-    # g:mode gldp:ListMode ;
-    # g:orderBy (rdfs:label) ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset ;
     rdfs:seeAlso : .
@@ -95,56 +94,42 @@ lda:uriTemplate a rdf:Property ;
 <../instances> a sioc:Container, lda:ListEndpoint ;
     sioc:has_host <..> ;
     dct:title "Instances" ;
-    g:mode gldp:ListMode ;
-    g:orderBy (rdfs:label dct:title) ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
 <../ontologies> a sioc:Container, lda:ListEndpoint ;
     sioc:has_host <..> ;
     dct:title "Ontologies" ;
-    g:mode gldp:ListMode ;
-    g:orderBy (rdfs:label dct:title) ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
 <../classes> a sioc:Container, lda:ListEndpoint ;
     sioc:has_host <..> ;
     dct:title "Classes" ;
-    g:mode gldp:ListMode ;
-    g:orderBy (rdfs:label) ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
 <../properties> a sioc:Container, lda:ListEndpoint ;
     sioc:has_host <..> ;
     dct:title "Properties" ;
-    g:mode gldp:ListMode ;
-    g:orderBy (rdfs:label) ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
 <../services> a sioc:Container, lda:ListEndpoint ;
     sioc:has_host <..> ;
     dct:title "Services" ;
-    g:mode gldp:ListMode ;
-    g:orderBy (dct:title) ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
 <../queries> a sioc:Container, lda:ListEndpoint ;
     sioc:has_host <..> ;
     dct:title "Queries" ;
-    g:mode gldp:ListMode ;
-    g:orderBy (dct:title) ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
 <../modes> a sioc:Container, lda:ListEndpoint ;
     sioc:has_host <..> ;
     dct:title "XSLT modes" ;
-    g:mode gldp:ListMode ;
-    g:orderBy (dct:title) ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
@@ -178,6 +163,10 @@ lda:uriTemplate a rdf:Property ;
 	[ a owl:Restriction ;
 		owl:onProperty sioc:has_parent ;
 		owl:hasValue <../instances>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty g:mode ;
+		owl:hasValue gldp:ListMode
 	] ;
     spin:constraint [ a :SelectInstancesTemplate ] .
 
@@ -190,6 +179,10 @@ lda:uriTemplate a rdf:Property ;
 	[ a owl:Restriction ;
 		owl:onProperty sioc:has_parent ;
 		owl:hasValue <../ontologies>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty g:mode ;
+		owl:hasValue gldp:ListMode
 	] ;
     spin:constraint [ a :SelectInstancesTemplate ;
 	    g:type owl:Ontology
@@ -204,6 +197,10 @@ lda:uriTemplate a rdf:Property ;
 	[ a owl:Restriction ;
 		owl:onProperty sioc:has_parent ;
 		owl:hasValue <..>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty g:mode ;
+		owl:hasValue gldp:ListMode
 	] ;
     spin:constraint [ a :SelectInstancesTemplate ;
 	    g:type owl:Class
@@ -218,6 +215,10 @@ lda:uriTemplate a rdf:Property ;
 	[ a owl:Restriction ;
 		owl:onProperty sioc:has_parent ;
 		owl:hasValue <../properties>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty g:mode ;
+		owl:hasValue gldp:ListMode
 	] ;
     spin:constraint [ a :SelectPropertiesTemplate ;
 	    g:type owl:Ontology
@@ -232,6 +233,10 @@ lda:uriTemplate a rdf:Property ;
 	[ a owl:Restriction ;
 		owl:onProperty sioc:has_parent ;
 		owl:hasValue <../services>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty g:mode ;
+		owl:hasValue gldp:ListMode
 	] ;
     spin:constraint [ a :SelectInstancesTemplate ;
 	    g:type sd:Service
@@ -246,6 +251,10 @@ lda:uriTemplate a rdf:Property ;
 	[ a owl:Restriction ;
 		owl:onProperty sioc:has_parent ;
 		owl:hasValue <../queries>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty g:mode ;
+		owl:hasValue gldp:ListMode
 	] ;
     spin:constraint [ a :SelectInstancesTemplate ;
 	    g:type sp:Query
@@ -260,6 +269,10 @@ lda:uriTemplate a rdf:Property ;
 	[ a owl:Restriction ;
 		owl:onProperty sioc:has_parent ;
 		owl:hasValue <../modes>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty g:mode ;
+		owl:hasValue gldp:ListMode
 	] ;
     spin:constraint [ a :SelectInstancesTemplate ;
 	    g:type g:XSLTMode
@@ -274,6 +287,10 @@ lda:uriTemplate a rdf:Property ;
 	[ a owl:Restriction ;
 		owl:onProperty sioc:has_parent ;
 		owl:hasValue <../containers>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty g:mode ;
+		owl:hasValue gldp:ListMode
 	] ;
     spin:constraint [ a :SelectInstancesTemplate ;
 	    g:type sioc:Container

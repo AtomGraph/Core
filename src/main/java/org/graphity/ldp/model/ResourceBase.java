@@ -146,6 +146,10 @@ public class ResourceBase extends LDPResourceBase
 		    if (log.isDebugEnabled()) log.debug("OntResource {} gets explicit spin:query value {}", this, queryBuilder);
 		    setPropertyValue(SPIN.query, queryBuilder);
 		    
+		    com.hp.hpl.jena.rdf.model.Resource mode = getRestrictionHasValue(ontClass, Graphity.mode).asResource();
+		    if (log.isDebugEnabled()) log.debug("OntResource {} gets explicit g:mode value {}", this, mode);
+		    setPropertyValue(Graphity.mode, mode);
+		    
 		    description.add(loadModel(call));
 		}
 	    }
@@ -274,6 +278,23 @@ public class ResourceBase extends LDPResourceBase
     public final Boolean getDesc()
     {
 	return desc;
+    }
+
+    public RDFNode getRestrictionHasValue(OntClass ontClass, OntProperty property)
+    {
+	ExtendedIterator<OntClass> it = ontClass.listSuperClasses(true);
+	while (it.hasNext())
+	{
+	    OntClass superClass = it.next();
+	    if (superClass.canAs(HasValueRestriction.class))
+	    {
+		HasValueRestriction restriction = superClass.asRestriction().asHasValueRestriction();
+		if (restriction.getOnProperty().equals(property))
+		    return restriction.getHasValue();
+	    }
+	}
+	
+	return null;
     }
 
 }
