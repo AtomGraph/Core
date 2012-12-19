@@ -97,6 +97,15 @@ public class ResourceBase extends LDPResourceBase
 		limit, offset, orderBy, desc);
     }
 
+    public static Resource getResource(OntResource ontResource,
+	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
+	    Long limit, Long offset, String orderBy, Boolean desc)
+    {
+	return new ResourceBase(ontResource,
+		uriInfo, request, httpHeaders, variants,
+		limit, offset, orderBy, desc);
+    }
+    
     protected ResourceBase(OntModel ontModel,
 	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
 	    Long limit, Long offset, String orderBy, Boolean desc)
