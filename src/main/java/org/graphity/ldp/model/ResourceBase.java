@@ -36,7 +36,7 @@ import org.graphity.util.QueryBuilder;
 import org.graphity.util.locator.PrefixMapper;
 import org.graphity.util.manager.DataManager;
 import org.graphity.vocabulary.Graphity;
-import org.graphity.vocabulary.SIOC;
+import org.graphity.vocabulary.LDP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.topbraid.spin.model.SPINFactory;
@@ -101,7 +101,7 @@ public class ResourceBase extends LDPResourceBase
 	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
 	    Long limit, Long offset, String orderBy, Boolean desc)
     {
-	this(ontModel.createOntResource(uriInfo.getAbsolutePath().toString()),
+	this(ontModel.createOntResource(uriInfo.getRequestUri().toString()),
 		uriInfo, request, httpHeaders, variants,
 		limit, offset, orderBy, desc);
 	
@@ -120,6 +120,44 @@ public class ResourceBase extends LDPResourceBase
 	this.desc = desc;
 
 	if (log.isDebugEnabled()) log.debug("Constructing ResourceBase");
+	
+	// in case this OntResource does not exist in the ontology OntModel
+	if (!getOntModel().containsResource(getOntResource()))
+	{
+	    OntClass ontClass = matchOntClass();
+	    if (ontClass != null)
+	    {
+		Individual individual = ontClass.createIndividual(getURI());
+		if (log.isDebugEnabled()) log.debug("Individual {} created from resource OntClass {}", individual, ontClass);
+	    }
+	}
+    }
+
+    @Override
+    public Response getResponse()
+    {
+	 // ldp:Container always redirects to first ldp:Page
+	if (hasRDFType(LDP.Container))
+	{
+	    UriBuilder uriBuilder = getUriInfo().getAbsolutePathBuilder().
+		    replaceQueryParam("limit", getLimit()).
+		    replaceQueryParam("offset", getOffset());
+	    if (getOrderBy() != null) uriBuilder.replaceQueryParam("order-by", getOrderBy());
+	    if (getDesc() != null) uriBuilder.replaceQueryParam("desc", getDesc());
+	    
+	    return Response.seeOther(uriBuilder.build()).build();
+	}
+	if (hasRDFType(LDP.Page) && !(this instanceof PageResource))
+	{
+	    if (log.isDebugEnabled()) log.debug("OntResource is a page, returning PageResource Response");
+	    PageResource page = new PageResourceImpl(getOntResource(),
+		getUriInfo(), getRequest(), getHttpHeaders(), getVariants(),
+		getLimit(), getOffset(), getOrderBy(), getDesc());
+
+	    return page.getResponse();
+	}
+
+	return super.getResponse();
     }
 
     @Override
@@ -127,15 +165,12 @@ public class ResourceBase extends LDPResourceBase
     {
 	Model description = super.describe();
 
-	//if (!getOntModel().containsResource(getOntResource()))
-	if (description.isEmpty() || this instanceof PageResource)
+	if (!description.isEmpty())
 	{
-	    OntClass ontClass = matchOntClass();
-	    if (ontClass != null)
+	    if (asIndividual().listOntClasses(true).hasNext())
 	    {
-		//Individual individual = ontClass.createIndividual(getURI());
-		//if (log.isDebugEnabled()) log.debug("Individual {} created from resource OntClass {}", individual, ontClass);
-
+		//OntClass ontClass = asIndividual().getOntClass(true);
+		OntClass ontClass = asIndividual().listOntClasses(true).next();
 		if (ontClass.hasProperty(SPIN.constraint))
 		{
 		    RDFNode constraint = getModel().getResource(ontClass.getURI()).getProperty(SPIN.constraint).getObject();
@@ -145,46 +180,26 @@ public class ResourceBase extends LDPResourceBase
 		    queryBuilder.build(); // sets sp:text value
 		    if (log.isDebugEnabled()) log.debug("OntResource {} gets explicit spin:query value {}", this, queryBuilder);
 		    setPropertyValue(SPIN.query, queryBuilder);
-		    
-		    com.hp.hpl.jena.rdf.model.Resource mode = getRestrictionHasValue(ontClass, Graphity.mode).asResource();
-		    if (log.isDebugEnabled()) log.debug("OntResource {} gets explicit g:mode value {}", this, mode);
-		    setPropertyValue(Graphity.mode, mode);
-		    
+
+		    RDFNode mode = getRestrictionHasValue(ontClass, Graphity.mode);
+		    if (mode != null && mode.isURIResource())
+		    {
+			if (log.isDebugEnabled()) log.debug("OntResource {} gets explicit g:mode value {}", this, mode);
+			setPropertyValue(Graphity.mode, mode);
+		    }
+
 		    description.add(loadModel(call));
 		}
 	    }
+	    else
+	    {
+		QueryBuilder queryBuilder = QueryBuilder.fromDescribe(getURI(), getModel());
+		queryBuilder.build(); // sets sp:text value
+		if (log.isDebugEnabled()) log.debug("OntResource with URI {} gets explicit spin:query value {}", getURI(), queryBuilder);
+		setPropertyValue(SPIN.query, queryBuilder);
+	    }
 	}
-	else
-	{
-	    QueryBuilder queryBuilder = QueryBuilder.fromDescribe(getURI(), getModel());
-	    queryBuilder.build(); // sets sp:text value
-	    if (log.isDebugEnabled()) log.debug("OntResource with URI {} gets explicit spin:query value {}", getURI(), queryBuilder);
-	    setPropertyValue(SPIN.query, queryBuilder);
-	}
-	
-	// if resource is a container, add page description
-	if (hasRDFType(SIOC.CONTAINER))
-	{
-	    UriBuilder uriBuilder = getUriInfo().getAbsolutePathBuilder().
-		    replaceQueryParam("limit", getLimit()).
-		    replaceQueryParam("offset", getOffset());
-	    if (getOrderBy() != null) uriBuilder.replaceQueryParam("order-by", getOrderBy());
-	    if (getDesc() != null) uriBuilder.replaceQueryParam("desc", getDesc());
-
-	    if (log.isDebugEnabled()) log.debug("Creating PageResource from with URI: {}", uriBuilder.build().toString());
-	    OntResource ontResource = getOntModel().createOntResource(uriBuilder.build().toString());
-
-	    if (log.isDebugEnabled()) log.debug("OntResource is a container, adding PageResource description");
-	    PageResource page = new PageResourceImpl(ontResource,
-		getUriInfo(), getRequest(), getHttpHeaders(), getVariants(),
-		getLimit(), getOffset(), getOrderBy(), getDesc());
-
-	    if (log.isDebugEnabled()) log.debug("Adding PageResource metadata: {} sioc:has_parent {}", page, this);
-	    page.setPropertyValue(SIOC.HAS_CONTAINER, this);
-
-	    description.add(page.describe());
-	}
-	
+    
 	return description;
     }
 

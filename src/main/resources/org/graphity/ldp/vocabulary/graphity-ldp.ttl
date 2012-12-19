@@ -11,6 +11,7 @@
 @prefix sp: <http://spinrdf.org/sp#> .
 @prefix spin: <http://spinrdf.org/spin#> .
 @prefix spl: <http://spinrdf.org/spl#> .
+@prefix ldp: <http://www.w3.org/ns/ldp#> .
 @prefix void: <http://rdfs.org/ns/void#> .
 @prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
 @prefix lda: <http://purl.org/linked-data/api/vocab#> .
@@ -91,43 +92,43 @@ lda:uriTemplate a rdf:Property ;
     void:inDataset _:dataset ;
     rdfs:seeAlso : .
 
-<../instances> a sioc:Container, lda:ListEndpoint ;
+<../instances> a ldp:Container, sioc:Container, lda:ListEndpoint ;
     sioc:has_host <..> ;
     dct:title "Instances" ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
-<../ontologies> a sioc:Container, lda:ListEndpoint ;
+<../ontologies> a ldp:Container, sioc:Container, lda:ListEndpoint ;
     sioc:has_host <..> ;
     dct:title "Ontologies" ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
-<../classes> a sioc:Container, lda:ListEndpoint ;
+<../classes> a ldp:Container, sioc:Container, lda:ListEndpoint ;
     sioc:has_host <..> ;
     dct:title "Classes" ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
-<../properties> a sioc:Container, lda:ListEndpoint ;
+<../properties> a ldp:Container, sioc:Container, lda:ListEndpoint ;
     sioc:has_host <..> ;
     dct:title "Properties" ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
-<../services> a sioc:Container, lda:ListEndpoint ;
+<../services> a ldp:Container, sioc:Container, lda:ListEndpoint ;
     sioc:has_host <..> ;
     dct:title "Services" ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
-<../queries> a sioc:Container, lda:ListEndpoint ;
+<../queries> a ldp:Container, sioc:Container, lda:ListEndpoint ;
     sioc:has_host <..> ;
     dct:title "Queries" ;
     rdfs:isDefinedBy : ;
     void:inDataset _:dataset .
 
-<../modes> a sioc:Container, lda:ListEndpoint ;
+<../modes> a ldp:Container, sioc:Container, lda:ListEndpoint ;
     sioc:has_host <..> ;
     dct:title "XSLT modes" ;
     rdfs:isDefinedBy : ;
@@ -141,7 +142,7 @@ lda:uriTemplate a rdf:Property ;
 # RESOURCE CLASSES
 
 #:FrontPageResource a owl:Class ;
-#    rdfs:subClassOf lda:ListEndpoint ,
+#    rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 #	[ a owl:Restriction ;
 #		owl:onProperty lda:uriTemplate ;
 #		owl:hasValue "/"
@@ -155,7 +156,7 @@ lda:uriTemplate a rdf:Property ;
 #	    ] .
 
 :InstancesPageResource a owl:Class ;
-    rdfs:subClassOf lda:ListEndpoint ,
+    rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
 		owl:hasValue "/instances"
@@ -171,7 +172,7 @@ lda:uriTemplate a rdf:Property ;
     spin:constraint [ a :SelectInstancesTemplate ] .
 
 :OntologiesPageResource a owl:Class ;
-    rdfs:subClassOf lda:ListEndpoint ,
+    rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
 		owl:hasValue "/ontologies"
@@ -189,7 +190,7 @@ lda:uriTemplate a rdf:Property ;
 	    ] .
 
 :ClassesPageResource a owl:Class ;
-    rdfs:subClassOf lda:ListEndpoint ,
+    rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
 		owl:hasValue "/classes"
@@ -207,7 +208,7 @@ lda:uriTemplate a rdf:Property ;
 	    ] .
 
 :PropertiesPageResource a owl:Class ;
-    rdfs:subClassOf lda:ListEndpoint ,
+    rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
 		owl:hasValue "/properties"
@@ -225,7 +226,7 @@ lda:uriTemplate a rdf:Property ;
 	    ] .
 
 :ServicesPageResource a owl:Class ;
-    rdfs:subClassOf lda:ListEndpoint ,
+    rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
 		owl:hasValue "/services"
@@ -243,7 +244,7 @@ lda:uriTemplate a rdf:Property ;
 	    ] .
 
 :QueriesPageResource a owl:Class ;
-    rdfs:subClassOf lda:ListEndpoint ,
+    rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
 		owl:hasValue "/queries"
@@ -261,7 +262,7 @@ lda:uriTemplate a rdf:Property ;
 	    ] .
 
 :ModesPageResource a owl:Class ;
-    rdfs:subClassOf lda:ListEndpoint ,
+    rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
 		owl:hasValue "/modes"
@@ -279,7 +280,7 @@ lda:uriTemplate a rdf:Property ;
 	    ] .
 
 :ContainersPageResource a owl:Class ;
-    rdfs:subClassOf lda:ListEndpoint ,
+    rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
 		owl:hasValue "/containers"

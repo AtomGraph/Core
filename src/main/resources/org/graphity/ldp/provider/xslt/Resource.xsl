@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <!ENTITY owl "http://www.w3.org/2002/07/owl#">
     <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#">
     <!ENTITY sparql "http://www.w3.org/2005/sparql-results#">
+    <!ENTITY ldp "http://www.w3.org/ns/ldp#">
     <!ENTITY geo "http://www.w3.org/2003/01/geo/wgs84_pos#">
     <!ENTITY dbpedia-owl "http://dbpedia.org/ontology/">
     <!ENTITY dc "http://purl.org/dc/elements/1.1/">
@@ -47,6 +48,7 @@ xmlns:rdf="&rdf;"
 xmlns:rdfs="&rdfs;"
 xmlns:owl="&owl;"
 xmlns:sparql="&sparql;"
+xmlns:ldp="&ldp;"
 xmlns:geo="&geo;"
 xmlns:dbpedia-owl="&dbpedia-owl;"
 xmlns:dc="&dc;"
@@ -96,7 +98,6 @@ exclude-result-prefixes="#all">
     <xsl:variable name="orderBy" select="if ($select-res/sp:orderBy) then list:member(key('resources', $select-res/sp:orderBy/@rdf:nodeID), /) else ()"/>
 
     <!--
-    <xsl:variable name="page" select="key('resources-by-container', $absolute-path)"/>
     <xsl:variable name="service-res" select="key('resources', $resource/g:service/@rdf:resource | $resource/g:service/@rdf:nodeID)"/>
     <xsl:variable name="endpoint-uri" select="$service-res/sd:endpoint/@rdf:resource" as="xs:anyURI?"/>
     -->
@@ -105,7 +106,7 @@ exclude-result-prefixes="#all">
     <xsl:key name="predicates" match="*[@rdf:about]/* | *[@rdf:nodeID]/*" use="concat(namespace-uri(.), local-name(.))"/>
     <xsl:key name="predicates-by-object" match="*[@rdf:about]/* | *[@rdf:nodeID]/*" use="@rdf:about | @rdf:nodeID"/>
     <xsl:key name="resources-by-host" match="*[@rdf:about]" use="sioc:has_host/@rdf:resource"/>
-    <xsl:key name="resources-by-container" match="*[@rdf:about]" use="sioc:has_container/@rdf:resource"/>
+    <xsl:key name="resources-by-page-of" match="*[@rdf:about]" use="ldp:pageOf/@rdf:resource"/>
  
     <rdf:Description rdf:nodeID="previous">
 	<rdfs:label xml:lang="en">Previous</rdfs:label>
@@ -529,13 +530,13 @@ exclude-result-prefixes="#all">
 	<xsl:apply-templates select="key('resources', $absolute-path)" mode="gldp:ModeSelectMode"/>
 
 	<!-- page resource -->
-	<xsl:apply-templates select="key('resources-by-container', $absolute-path)" mode="gldp:PaginationMode"/>
+	<xsl:apply-templates select="key('resources', $request-uri)" mode="gldp:PaginationMode"/>
 
 	<!-- all resources that are not recursive blank nodes, except page -->
-	<xsl:apply-templates select="*[not(@rdf:about = $absolute-path)][not(key('predicates-by-object', @rdf:nodeID))] except key('resources-by-container', $absolute-path)" mode="gldp:ListMode"/>
+	<xsl:apply-templates select="*[not(@rdf:about = $absolute-path)][not(@rdf:about = $request-uri)][not(key('predicates-by-object', @rdf:nodeID))]" mode="gldp:ListMode"/>
 	
 	<!-- page resource -->
-	<xsl:apply-templates select="key('resources-by-container', $absolute-path)" mode="gldp:PaginationMode"/>
+	<xsl:apply-templates select="key('resources', $request-uri)" mode="gldp:PaginationMode"/>
     </xsl:template>
 
     <xsl:template match="*[*][@rdf:about] | *[*][@rdf:nodeID]" mode="gldp:ListMode">
@@ -608,10 +609,10 @@ exclude-result-prefixes="#all">
 	<xsl:apply-templates select="key('resources', $absolute-path)" mode="gldp:ModeSelectMode"/>
 
 	<!-- page resource -->
-	<xsl:apply-templates select="key('resources-by-container', $absolute-path)" mode="gldp:PaginationMode"/>
+	<xsl:apply-templates select="key('resources', $request-uri)" mode="gldp:PaginationMode"/>
 
 	<!-- loaded resources = everything except container, page, and non-root blank nodes -->
-	<xsl:variable name="loaded-resources" select="*[not(@rdf:about = $absolute-path)][not(key('predicates-by-object', @rdf:nodeID))] except key('resources-by-container', $absolute-path)"/>
+	<xsl:variable name="loaded-resources" select="*[not(@rdf:about = $absolute-path)][not(@rdf:about = $request-uri)][not(key('predicates-by-object', @rdf:nodeID))]"/>
 	<xsl:variable name="predicates" as="element()*">
 	    <xsl:for-each-group select="$loaded-resources/*" group-by="concat(namespace-uri(.), local-name(.))">
 		<xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(.), local-name(.))), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
@@ -637,12 +638,12 @@ exclude-result-prefixes="#all">
 	</table>
 	
 	<!-- page resource -->
-	<xsl:apply-templates select="key('resources-by-container', $absolute-path)" mode="gldp:PaginationMode"/>
+	<xsl:apply-templates select="key('resources', $request-uri)" mode="gldp:PaginationMode"/>
     </xsl:template>
 
     <xsl:template match="*[*][@rdf:about] | *[*][@rdf:nodeID]" mode="gldp:TableMode">
 	<!-- loaded resources = everything except container, page, and non-root blank nodes -->
-	<xsl:variable name="loaded-resources" select="../*[not(@rdf:about = $absolute-path)][not(key('predicates-by-object', @rdf:nodeID))] except key('resources-by-container', $absolute-path)"/>
+	<xsl:variable name="loaded-resources" select="../*[not(@rdf:about = $absolute-path)][not(@rdf:about = $request-uri)][not(key('predicates-by-object', @rdf:nodeID))]"/>
 	<xsl:variable name="predicates" as="element()*">
 	    <xsl:for-each-group select="$loaded-resources/*" group-by="concat(namespace-uri(.), local-name(.))">
 		<xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(.), local-name(.))), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>

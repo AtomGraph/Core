@@ -18,12 +18,16 @@ package org.graphity.ldp.model.impl;
 
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.rdf.model.Model;
 import java.util.List;
 import javax.ws.rs.core.*;
+import org.graphity.ldp.model.LinkedDataResource;
+import org.graphity.ldp.model.LinkedDataResourceBase;
 import org.graphity.ldp.model.PageResource;
 import org.graphity.ldp.model.ResourceBase;
 import org.graphity.util.QueryBuilder;
 import org.graphity.util.SelectBuilder;
+import org.graphity.vocabulary.LDP;
 import org.graphity.vocabulary.XHV;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +52,10 @@ public final class PageResourceImpl extends ResourceBase implements PageResource
 	if (limit == null) throw new IllegalArgumentException("LIMIT must be not null");
 	if (offset == null) throw new IllegalArgumentException("OFFSET must be not null");
 
+	OntResource container = getOntModel().createOntResource(getUriInfo().getAbsolutePath().toString());
+	if (log.isDebugEnabled()) log.debug("Adding PageResource metadata: {} sioc:has_parent {}", getOntResource(), container);
+	setPropertyValue(LDP.pageOf, container);
+
 	if (log.isDebugEnabled())
 	{
 	    log.debug("OFFSET: {} LIMIT: {}", getOffset(), getLimit());
@@ -68,6 +76,19 @@ public final class PageResourceImpl extends ResourceBase implements PageResource
 	    if (log.isDebugEnabled()) log.debug("Adding page metadata: {} xhv:next {}", getURI(), getNext().getURI());
 	    addProperty(XHV.next, getNext());
 	}
+    }
+
+    @Override
+    public Model describe()
+    {
+	Model description = super.describe();
+
+	 // add description of ldp:Container
+	OntResource container = getPropertyResourceValue(LDP.pageOf).as(OntResource.class);
+	LinkedDataResource ldc = new LinkedDataResourceBase(container, getUriInfo(), getRequest(), getHttpHeaders(), getVariants());
+	description.add(ldc.describe());
+
+	return description;
     }
     
     @Override

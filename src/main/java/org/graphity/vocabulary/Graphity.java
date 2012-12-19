@@ -31,7 +31,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
 public class Graphity
 {
     /** <p>The RDF model that holds the vocabulary terms</p> */
-  private static OntModel m_model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, null);
+    private static OntModel m_model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, null);
     
     /** <p>The namespace of the vocabulary as a string</p> */
     public static final String NS = "http://graphity.org/ontology/";
@@ -45,10 +45,6 @@ public class Graphity
     
     /** <p>The namespace of the vocabulary as a resource</p> */
     public static final Resource NAMESPACE = m_model.createResource( NS );
-    
-    //public static final Property query = m_model.createProperty( NS + "query" );
-    
-    //public static final Property selectQuery = m_model.createProperty( NS + "selectQuery" );
     
     public static final ObjectProperty service = m_model.createObjectProperty( NS + "service" );
     
