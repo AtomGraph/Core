@@ -120,10 +120,11 @@ public final class PageResourceImpl extends ResourceBase implements PageResource
     @Override
     public Query getQuery(TemplateCall call)
     {
-	if (call == null) throw new IllegalArgumentException("TemplateCall cannot be null");
-	QueryBuilder queryBuilder;
-	org.topbraid.spin.model.Query query = ARQ2SPIN.parseQuery(call.getQueryString(), getModel());
-	if (!(query instanceof Select)) throw new IllegalArgumentException("PageResource must have a SPIN Select query");
+	Query arqQuery = super.getQuery(call);
+	if (!arqQuery.isSelectType()) throw new IllegalArgumentException("PageResource must have a SPIN Select query");
+
+	QueryBuilder queryBuilder ;
+	org.topbraid.spin.model.Query query = ARQ2SPIN.parseQuery(arqQuery.toString(), getModel());
 	SelectBuilder selectBuilder = SelectBuilder.fromSelect((Select)query).
 	    limit(getLimit()).offset(getOffset());
 	/*
