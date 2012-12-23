@@ -21,7 +21,6 @@
 @prefix dbpedia: <http://dbpedia.org/resource/> .
 @prefix gfb-app: <http://graph.facebook.com/schema/application#> .
 
-
 : a owl:Ontology ;
     owl:imports g: ;
     owl:versionInfo "1.0.4" ;
@@ -83,6 +82,11 @@ lda:uriTemplate a rdf:Property ;
     rdfs:domain lda:Endpoint ;
     rdfs:range rdfs:Literal ;
     rdfs:isDefinedBy lda: ; .
+
+ldp:pageOf a owl:ObjectProperty ;
+    rdfs:domain ldp:Page ;
+    rdfs:range ldp:Container ;
+    rdfs:isDefinedBy ldp: .
 
 # RESOURCES
 
@@ -162,7 +166,7 @@ lda:uriTemplate a rdf:Property ;
 		owl:hasValue "/instances"
 	] ,
 	[ a owl:Restriction ;
-		owl:onProperty sioc:has_parent ;
+		owl:onProperty ldp:pageOf ;
 		owl:hasValue <../instances>
 	] ,
 	[ a owl:Restriction ;
@@ -178,7 +182,7 @@ lda:uriTemplate a rdf:Property ;
 		owl:hasValue "/ontologies"
 	] ,
 	[ a owl:Restriction ;
-		owl:onProperty sioc:has_parent ;
+		owl:onProperty ldp:pageOf ;
 		owl:hasValue <../ontologies>
 	] ,
 	[ a owl:Restriction ;
@@ -196,8 +200,8 @@ lda:uriTemplate a rdf:Property ;
 		owl:hasValue "/classes"
 	] ,
 	[ a owl:Restriction ;
-		owl:onProperty sioc:has_parent ;
-		owl:hasValue <..>
+		owl:onProperty ldp:pageOf ;
+		owl:hasValue <../classes>
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty g:mode ;
@@ -214,7 +218,7 @@ lda:uriTemplate a rdf:Property ;
 		owl:hasValue "/properties"
 	] ,
 	[ a owl:Restriction ;
-		owl:onProperty sioc:has_parent ;
+		owl:onProperty ldp:pageOf ;
 		owl:hasValue <../properties>
 	] ,
 	[ a owl:Restriction ;
@@ -232,7 +236,7 @@ lda:uriTemplate a rdf:Property ;
 		owl:hasValue "/services"
 	] ,
 	[ a owl:Restriction ;
-		owl:onProperty sioc:has_parent ;
+		owl:onProperty ldp:pageOf ;
 		owl:hasValue <../services>
 	] ,
 	[ a owl:Restriction ;
@@ -250,7 +254,7 @@ lda:uriTemplate a rdf:Property ;
 		owl:hasValue "/queries"
 	] ,
 	[ a owl:Restriction ;
-		owl:onProperty sioc:has_parent ;
+		owl:onProperty ldp:pageOf ;
 		owl:hasValue <../queries>
 	] ,
 	[ a owl:Restriction ;
@@ -268,7 +272,7 @@ lda:uriTemplate a rdf:Property ;
 		owl:hasValue "/modes"
 	] ,
 	[ a owl:Restriction ;
-		owl:onProperty sioc:has_parent ;
+		owl:onProperty ldp:pageOf ;
 		owl:hasValue <../modes>
 	] ,
 	[ a owl:Restriction ;
@@ -286,7 +290,7 @@ lda:uriTemplate a rdf:Property ;
 		owl:hasValue "/containers"
 	] ,
 	[ a owl:Restriction ;
-		owl:onProperty sioc:has_parent ;
+		owl:onProperty ldp:pageOf ;
 		owl:hasValue <../containers>
 	] ,
 	[ a owl:Restriction ;

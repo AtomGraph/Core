@@ -31,16 +31,20 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.*;
-import org.graphity.ldp.model.impl.PageResourceImpl;
 import org.graphity.util.QueryBuilder;
+import org.graphity.util.SelectBuilder;
 import org.graphity.util.locator.PrefixMapper;
 import org.graphity.util.manager.DataManager;
 import org.graphity.vocabulary.Graphity;
 import org.graphity.vocabulary.LDP;
+import org.graphity.vocabulary.XHV;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.topbraid.spin.arq.ARQ2SPIN;
 import org.topbraid.spin.model.SPINFactory;
+import org.topbraid.spin.model.Select;
 import org.topbraid.spin.model.TemplateCall;
+import org.topbraid.spin.vocabulary.SP;
 import org.topbraid.spin.vocabulary.SPIN;
 
 /**
@@ -129,7 +133,7 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
 	this.desc = desc;
 
 	if (log.isDebugEnabled()) log.debug("Constructing ResourceBase");
-	
+
 	// in case this OntResource does not exist in the ontology OntModel
 	if (!getOntModel().containsResource(getOntResource()))
 	{
@@ -138,6 +142,34 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
 	    {
 		Individual individual = ontClass.createIndividual(getURI());
 		if (log.isDebugEnabled()) log.debug("Individual {} created from resource OntClass {}", individual, ontClass);
+		
+		if (hasRDFType(LDP.Page))
+		{
+		    OntResource container = getOntModel().createOntResource(getUriInfo().getAbsolutePath().toString());
+		    if (log.isDebugEnabled()) log.debug("Adding PageResource metadata: {} ldp:pageOf {}", getOntResource(), container);
+		    setPropertyValue(LDP.pageOf, container);
+
+		    if (log.isDebugEnabled())
+		    {
+			log.debug("OFFSET: {} LIMIT: {}", getOffset(), getLimit());
+			log.debug("ORDER BY: {} DESC: {}", getOrderBy(), getDesc());
+		    }
+
+		    if (getOffset() >= getLimit())
+		    {
+			if (log.isDebugEnabled()) log.debug("Adding page metadata: {} xhv:previous {}", getURI(), getPrevious().getURI());
+			addProperty(XHV.prev, getPrevious());
+		    }
+
+		    // no way to know if there's a next page without counting results (either total or in current page)
+		    //int subjectCount = describe().listSubjects().toList().size();
+		    //log.debug("describe().listSubjects().toList().size(): {}", subjectCount);
+		    //if (subjectCount >= getLimit())
+		    {
+			if (log.isDebugEnabled()) log.debug("Adding page metadata: {} xhv:next {}", getURI(), getNext().getURI());
+			addProperty(XHV.next, getNext());
+		    }
+		}
 	    }
 	}
     }
@@ -148,6 +180,7 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
 	 // ldp:Container always redirects to first ldp:Page
 	if (hasRDFType(LDP.Container))
 	{
+	    if (log.isDebugEnabled()) log.debug("OntResource is ldp:Container, redirecting to the first ldp:Page");
 	    UriBuilder uriBuilder = getUriInfo().getAbsolutePathBuilder().
 		    replaceQueryParam("limit", getLimit()).
 		    replaceQueryParam("offset", getOffset());
@@ -156,16 +189,7 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
 	    
 	    return Response.seeOther(uriBuilder.build()).build();
 	}
-	if (hasRDFType(LDP.Page) && !(this instanceof PageResource))
-	{
-	    if (log.isDebugEnabled()) log.debug("OntResource is a page, returning PageResource Response");
-	    PageResource page = new PageResourceImpl(getOntResource(),
-		getUriInfo(), getRequest(), getHttpHeaders(), getVariants(),
-		getLimit(), getOffset(), getOrderBy(), getDesc());
-
-	    return page.getResponse();
-	}
-
+	
 	return super.getResponse();
     }
 
@@ -198,6 +222,14 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
 		    }
 
 		    description.add(loadModel(getService(ontClass), getQuery(call)));
+		}
+		
+		if (hasRDFType(LDP.Page))
+		{
+		    // add description of ldp:Container
+		    OntResource container = getPropertyResourceValue(LDP.pageOf).as(OntResource.class);
+		    LinkedDataResource ldc = new LinkedDataResourceBase(container, getUriInfo(), getRequest(), getHttpHeaders(), getVariants());
+		    description.add(ldc.describe());
 		}
 	    }
 	    else
@@ -244,7 +276,42 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
 	if (call == null) throw new IllegalArgumentException("TemplateCall cannot be null");
 	String queryString = call.getQueryString();
 	queryString = queryString.replace("?this", "<" + getURI() + ">"); // binds ?this to URI of current resource
-	return QueryFactory.create(queryString);
+	Query arqQuery = QueryFactory.create(queryString);
+	
+	if (hasRDFType(LDP.Page))
+	{
+	    if (!arqQuery.isSelectType()) throw new IllegalArgumentException("PageResource must have a SPIN Select query");
+
+	    QueryBuilder queryBuilder ;
+	    org.topbraid.spin.model.Query query = ARQ2SPIN.parseQuery(arqQuery.toString(), getModel());
+	    SelectBuilder selectBuilder = SelectBuilder.fromSelect((Select)query).
+		limit(getLimit()).offset(getOffset());
+	    /*
+	    if (orderBy != null)
+	    {
+		com.hp.hpl.jena.rdf.model.Resource modelVar = getOntology().createResource().addLiteral(SP.varName, "model");
+		Property orderProperty = ResourceFactory.createProperty(getOrderBy();
+		com.hp.hpl.jena.rdf.model.Resource orderVar = getOntology().createResource().addLiteral(SP.varName, orderProperty.getLocalName());
+
+		selectBuilder.orderBy(orderVar, getDesc()).optional(modelVar, orderProperty, orderVar);
+	    }
+	    */
+	    //QueryBuilder queryBuilder;
+	    if (selectBuilder.getPropertyResourceValue(SP.resultVariables) != null)
+	    {
+		if (log.isDebugEnabled()) log.debug("Query Resource {} has result variables: {}", selectBuilder, selectBuilder.getPropertyResourceValue(SP.resultVariables));
+		queryBuilder = QueryBuilder.fromDescribe(selectBuilder.getPropertyResourceValue(SP.resultVariables)).
+		    subQuery(selectBuilder);
+	    }
+	    else
+	    {
+		if (log.isDebugEnabled()) log.debug("Query Resource {} does not have result variables, using wildcard", selectBuilder);
+		queryBuilder = QueryBuilder.fromDescribe(selectBuilder.getModel()).subQuery(selectBuilder);
+	    }
+	    return queryBuilder.build();
+	}
+	
+	return arqQuery;
     }
     
     public final OntClass matchOntClass()
@@ -285,7 +352,7 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
 	}
 
 	if (log.isDebugEnabled()) log.debug("Path {} has no OntClass match in this OntModel", path);
-	return null;   
+	return null;
     }
 
     public final Long getLimit()
@@ -323,6 +390,30 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
 	}
 	
 	return null;
+    }
+
+    public final com.hp.hpl.jena.rdf.model.Resource getPrevious()
+    {
+	UriBuilder uriBuilder = getUriInfo().getAbsolutePathBuilder().
+	    replaceQueryParam("limit", getLimit()).
+	    replaceQueryParam("offset", getOffset() - getLimit());
+
+	if (getOrderBy() != null) uriBuilder.replaceQueryParam("order-by", getOrderBy());
+	if (getDesc() != null) uriBuilder.replaceQueryParam("desc", getDesc());
+
+	return getOntModel().createResource(uriBuilder.build().toString());
+    }
+
+    public final com.hp.hpl.jena.rdf.model.Resource getNext()
+    {
+	UriBuilder uriBuilder = getUriInfo().getAbsolutePathBuilder().
+	    replaceQueryParam("limit", getLimit()).
+	    replaceQueryParam("offset", getOffset() + getLimit());
+
+	if (getOrderBy() != null) uriBuilder.replaceQueryParam("order-by", getOrderBy());
+	if (getDesc() != null) uriBuilder.replaceQueryParam("desc", getDesc());
+
+	return getOntModel().createResource(uriBuilder.build().toString());
     }
 
 }
