@@ -24,6 +24,7 @@ import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.util.LocationMapper;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
+import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.api.uri.UriTemplate;
 import java.util.HashMap;
 import java.util.List;
@@ -56,31 +57,36 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
 {
     private static final Logger log = LoggerFactory.getLogger(ResourceBase.class);
 
+    //@Context ResourceConfig config;
     private final Long limit, offset;
     private final String orderBy;
     private final Boolean desc;
 
-    public static OntModel getOntology(UriInfo uriInfo)
+    public static OntModel getOntology(UriInfo uriInfo, ResourceConfig config)
     {
-	// ResourceConfig.getProperty()
-	return getOntology(uriInfo.getBaseUriBuilder().path("ontology/").build().toString(), "org/graphity/ldp/vocabulary/graphity-ldp.ttl");
+	if (log.isDebugEnabled()) log.debug("ResourceConfig properties: {}", config.getProperties());
+	Object ontologyLocation = config.getProperty("org.graphity.ldp.ontology.location");
+	Object ontologyPath = config.getProperty("org.graphity.ldp.ontology.path");
+	if (ontologyLocation == null || ontologyPath == null) throw new IllegalStateException("Ontology for this Graphity LDP Application is not configured properly. Check ResourceConfig and/or web.xml");
+	
+	return getOntology(uriInfo.getBaseUriBuilder().path(ontologyPath.toString()).build().toString(), ontologyLocation.toString());
     }
     
-    public static OntModel getOntology(String ontologyUri, String ontologyPath)
+    public static OntModel getOntology(String ontologyUri, String ontologyLocation)
     {
 	//if (!OntDocumentManager.getInstance().getFileManager().hasCachedModel(baseUri)) // not cached
 	{	    
 	    if (log.isDebugEnabled())
 	    {
-		log.debug("Ontology not cached, reading from file: {}", ontologyPath);
+		log.debug("Ontology not cached, reading from file: {}", ontologyLocation);
 		log.debug("DataManager.get().getLocationMapper(): {}", DataManager.get().getLocationMapper());
-		log.debug("Adding name/altName mapping: {} altName: {} ", ontologyUri, ontologyPath);
+		log.debug("Adding name/altName mapping: {} altName: {} ", ontologyUri, ontologyLocation);
 	    }
-	    OntDocumentManager.getInstance().addAltEntry(ontologyUri, ontologyPath);
+	    OntDocumentManager.getInstance().addAltEntry(ontologyUri, ontologyLocation);
 
 	    LocationMapper mapper = OntDocumentManager.getInstance().getFileManager().getLocationMapper();
-	    if (log.isDebugEnabled()) log.debug("Adding prefix/altName mapping: {} altName: {} ", ontologyUri, ontologyPath);
-	    ((PrefixMapper)mapper).addAltPrefixEntry(ontologyUri, ontologyPath);	    
+	    if (log.isDebugEnabled()) log.debug("Adding prefix/altName mapping: {} altName: {} ", ontologyUri, ontologyLocation);
+	    ((PrefixMapper)mapper).addAltPrefixEntry(ontologyUri, ontologyLocation);	    
 	}
 	//else
 	    //if (log.isDebugEnabled()) log.debug("Ontology already cached, returning cached instance");
@@ -91,22 +97,14 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
     }
 
     public ResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context HttpHeaders httpHeaders,
+	    @Context ResourceConfig config,
 	    @QueryParam("limit") @DefaultValue("20") Long limit,
 	    @QueryParam("offset") @DefaultValue("0") Long offset,
 	    @QueryParam("order-by") String orderBy,
 	    @QueryParam("desc") Boolean desc)
     {
-	this(getOntology(uriInfo),
+	this(getOntology(uriInfo, config),
 		uriInfo, request, httpHeaders, VARIANTS,
-		limit, offset, orderBy, desc);
-    }
-
-    public static Resource getResource(OntResource ontResource,
-	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
-	    Long limit, Long offset, String orderBy, Boolean desc)
-    {
-	return new ResourceBase(ontResource,
-		uriInfo, request, httpHeaders, variants,
 		limit, offset, orderBy, desc);
     }
     
@@ -208,9 +206,8 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
 		{
 		    RDFNode constraint = getModel().getResource(ontClass.getURI()).getProperty(SPIN.constraint).getObject();
 		    TemplateCall call = SPINFactory.asTemplateCall(constraint);
+		    QueryBuilder queryBuilder = getQueryBuilder(call);
 
-		    QueryBuilder queryBuilder = QueryBuilder.fromQuery(getQuery(call), getModel());
-		    queryBuilder.build(); // sets sp:text value
 		    if (log.isDebugEnabled()) log.debug("OntResource {} gets explicit spin:query value {}", this, queryBuilder);
 		    setPropertyValue(SPIN.query, queryBuilder);
 
@@ -221,7 +218,7 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
 			setPropertyValue(Graphity.mode, mode);
 		    }
 
-		    description.add(loadModel(getService(ontClass), getQuery(call)));
+		    description.add(loadModel(getService(ontClass), queryBuilder.build()));
 		}
 		
 		if (hasRDFType(LDP.Page))
@@ -271,18 +268,15 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
 	}
     }
 
-    public Query getQuery(TemplateCall call)
+    public QueryBuilder getQueryBuilder(TemplateCall call)
     {
-	if (call == null) throw new IllegalArgumentException("TemplateCall cannot be null");
-	String queryString = call.getQueryString();
-	queryString = queryString.replace("?this", "<" + getURI() + ">"); // binds ?this to URI of current resource
-	Query arqQuery = QueryFactory.create(queryString);
-	
+	Query arqQuery = getQuery(call);
+
 	if (hasRDFType(LDP.Page))
 	{
 	    if (!arqQuery.isSelectType()) throw new IllegalArgumentException("PageResource must have a SPIN Select query");
 
-	    QueryBuilder queryBuilder ;
+	    QueryBuilder queryBuilder;
 	    org.topbraid.spin.model.Query query = ARQ2SPIN.parseQuery(arqQuery.toString(), getModel());
 	    SelectBuilder selectBuilder = SelectBuilder.fromSelect((Select)query).
 		limit(getLimit()).offset(getOffset());
@@ -308,10 +302,20 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
 		if (log.isDebugEnabled()) log.debug("Query Resource {} does not have result variables, using wildcard", selectBuilder);
 		queryBuilder = QueryBuilder.fromDescribe(selectBuilder.getModel()).subQuery(selectBuilder);
 	    }
-	    return queryBuilder.build();
+	    return queryBuilder;
 	}
-	
-	return arqQuery;
+	else
+	{
+	    return QueryBuilder.fromQuery(arqQuery, getModel());
+	}
+    }
+    
+    public Query getQuery(TemplateCall call)
+    {
+	if (call == null) throw new IllegalArgumentException("TemplateCall cannot be null");
+	String queryString = call.getQueryString();
+	queryString = queryString.replace("?this", "<" + getURI() + ">"); // binds ?this to URI of current resource
+	return QueryFactory.create(queryString);
     }
     
     public final OntClass matchOntClass()
