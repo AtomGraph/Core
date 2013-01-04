@@ -3,13 +3,17 @@
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	 xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 	 version="3.0">
-    <servlet>
-        <servlet-name>index</servlet-name>
-        <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+    <filter>
+        <filter-name>index</filter-name>
+        <filter-class>com.sun.jersey.spi.container.servlet.ServletContainer</filter-class>
         <init-param>
             <param-name>javax.ws.rs.Application</param-name>
             <param-value>org.graphity.ldp.Application</param-value>
         </init-param>
+	<init-param>
+	    <param-name>com.sun.jersey.config.property.WebPageContentRegex</param-name>
+	    <param-value>/static/.*</param-value>
+	</init-param>
         <init-param>
             <param-name>org.graphity.ldp.ontology.path</param-name>
             <param-value>ontology/</param-value>
@@ -19,7 +23,12 @@
             <param-value>org/graphity/ldp/vocabulary/graphity-ldp.ttl</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
-    </servlet>
+    </filter>
+   <filter-mapping>
+      <filter-name>index</filter-name>
+      <url-pattern>/*</url-pattern>
+   </filter-mapping>
+    <!--
     <servlet-mapping>
         <servlet-name>default</servlet-name>
         <url-pattern>/static/*</url-pattern>
@@ -28,6 +37,7 @@
         <servlet-name>index</servlet-name>
         <url-pattern>/</url-pattern>
     </servlet-mapping>
+    -->
     <session-config>
         <session-timeout>
             30

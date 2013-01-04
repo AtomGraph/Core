@@ -26,17 +26,6 @@
     dct:license <http://www.opendatacommons.org/licenses/pddl/1.0/> ;
     dct:creator <http://semantic-web.dk#martynas> .
 
-#:query a owl:ObjectProperty ;
-#    rdfs:label "has SPIN query" ;
-#    rdfs:isDefinedBy : ;
-#    rdfs:range sp:Query . # should actually be a owl:unionOf (sp:Describe, sp:Construct)
-
-#:selectQuery a owl:ObjectProperty ;
-#    rdfs:label "has SPIN SELECT query" ;
-#    rdfs:isDefinedBy : ;
-#    rdfs:domain sioc:Item ;
-#    rdfs:range sp:Select .
-
 :service a owl:ObjectProperty ;
     rdfs:label "uses SPARQL service" ;
     rdfs:isDefinedBy : ;

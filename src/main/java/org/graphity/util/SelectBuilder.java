@@ -17,12 +17,15 @@
 
 package org.graphity.util;
 
+import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.RDF;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.topbraid.spin.arq.ARQ2SPIN;
 import org.topbraid.spin.model.Query;
 import org.topbraid.spin.model.SPINFactory;
 import org.topbraid.spin.model.Select;
@@ -50,6 +53,11 @@ public class SelectBuilder extends QueryBuilder implements Select
 	return new SelectBuilder(select);
     }
 
+    public static SelectBuilder fromQuery(org.topbraid.spin.model.Query query)
+    {
+	return fromSelect((Select)query);
+    }
+
     public static SelectBuilder fromResource(Resource resource)
     {
 	if (resource == null) throw new IllegalArgumentException("Select Resource cannot be null");
@@ -60,7 +68,25 @@ public class SelectBuilder extends QueryBuilder implements Select
 
 	return fromSelect((Select)query);
     }
-    
+
+    public static SelectBuilder fromQuery(com.hp.hpl.jena.query.Query query, String uri, Model model)
+    {
+	if (query == null) throw new IllegalArgumentException("Query cannot be null");
+	
+	ARQ2SPIN arq2spin = new ARQ2SPIN(model);
+	return fromQuery(arq2spin.createQuery(query, uri));
+    }
+
+    public static SelectBuilder fromQuery(com.hp.hpl.jena.query.Query query, Model model)
+    {
+	return fromQuery(query, null, model);
+    }
+
+    public static SelectBuilder fromQueryString(String queryString, Model model)
+    {
+	return fromQuery(QueryFactory.create(queryString), model);
+    }
+
     @Override
     protected Select getQuery()
     {

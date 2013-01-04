@@ -115,7 +115,7 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	    }
 	}
     }
-        
+   
     @Override
     public Model describe()
     {

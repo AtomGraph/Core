@@ -25,7 +25,9 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.util.LocationMapper;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.sun.jersey.api.core.ResourceConfig;
+import com.sun.jersey.api.uri.UriComponent;
 import com.sun.jersey.api.uri.UriTemplate;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import javax.ws.rs.DefaultValue;
@@ -61,6 +63,7 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
     private final Long limit, offset;
     private final String orderBy;
     private final Boolean desc;
+    private final OntClass matchedOntClass;
 
     public static OntModel getOntology(UriInfo uriInfo, ResourceConfig config)
     {
@@ -129,17 +132,18 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
 	this.offset = offset;
 	this.orderBy = orderBy;
 	this.desc = desc;
+	this.matchedOntClass = matchOntClass(getRealURI());
 
 	if (log.isDebugEnabled()) log.debug("Constructing ResourceBase");
 
 	// in case this OntResource does not exist in the ontology OntModel
 	if (!getOntModel().containsResource(getOntResource()))
 	{
-	    OntClass ontClass = matchOntClass();
-	    if (ontClass != null)
+	    //OntClass ontClass = matchOntClass();
+	    if (getMatchedOntClass() != null)
 	    {
-		Individual individual = ontClass.createIndividual(getURI());
-		if (log.isDebugEnabled()) log.debug("Individual {} created from resource OntClass {}", individual, ontClass);
+		Individual individual = getMatchedOntClass().createIndividual(getURI());
+		if (log.isDebugEnabled()) log.debug("Individual {} created from resource OntClass {}", individual, getMatchedOntClass());
 		
 		if (hasRDFType(LDP.Page))
 		{
@@ -179,15 +183,17 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
 	if (hasRDFType(LDP.Container))
 	{
 	    if (log.isDebugEnabled()) log.debug("OntResource is ldp:Container, redirecting to the first ldp:Page");
+	    if (log.isDebugEnabled()) log.debug("Encoded order-by URI: {}", UriComponent.encode(getOrderBy(), UriComponent.Type.QUERY));
+
 	    UriBuilder uriBuilder = getUriInfo().getAbsolutePathBuilder().
-		    replaceQueryParam("limit", getLimit()).
-		    replaceQueryParam("offset", getOffset());
-	    if (getOrderBy() != null) uriBuilder.replaceQueryParam("order-by", getOrderBy());
-	    if (getDesc() != null) uriBuilder.replaceQueryParam("desc", getDesc());
+		queryParam("limit", getLimit()).
+		queryParam("offset", getOffset());
+	    //if (getOrderBy() != null) uriBuilder.queryParam("order-by", UriComponent.encode(getOrderBy(), UriComponent.Type.QUERY));
+	    //if (getDesc() != null) uriBuilder.queryParam("desc", getDesc());
 	    
-	    return Response.seeOther(uriBuilder.build()).build();
+	    return Response.seeOther(uriBuilder.buildFromEncoded()).build();
 	}
-	
+
 	return super.getResponse();
     }
 
@@ -198,34 +204,36 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
 
 	if (!description.isEmpty())
 	{
-	    if (asIndividual().listOntClasses(true).hasNext())
+	    //if (asIndividual().listOntClasses(true).hasNext())
+	    if (getMatchedOntClass() != null)
 	    {
 		//OntClass ontClass = asIndividual().getOntClass(true);
-		OntClass ontClass = asIndividual().listOntClasses(true).next();
-		if (ontClass.hasProperty(SPIN.constraint))
+		//OntClass ontClass = asIndividual().listOntClasses(true).next();
+		if (getMatchedOntClass().hasProperty(SPIN.constraint))
 		{
-		    RDFNode constraint = getModel().getResource(ontClass.getURI()).getProperty(SPIN.constraint).getObject();
+		    RDFNode constraint = getModel().getResource(getMatchedOntClass().getURI()).getProperty(SPIN.constraint).getObject();
 		    TemplateCall call = SPINFactory.asTemplateCall(constraint);
 		    QueryBuilder queryBuilder = getQueryBuilder(call);
 
 		    if (log.isDebugEnabled()) log.debug("OntResource {} gets explicit spin:query value {}", this, queryBuilder);
 		    setPropertyValue(SPIN.query, queryBuilder);
 
-		    RDFNode mode = getRestrictionHasValue(ontClass, Graphity.mode);
+		    RDFNode mode = getRestrictionHasValue(getMatchedOntClass(), Graphity.mode);
 		    if (mode != null && mode.isURIResource())
 		    {
 			if (log.isDebugEnabled()) log.debug("OntResource {} gets explicit g:mode value {}", this, mode);
 			setPropertyValue(Graphity.mode, mode);
 		    }
 
-		    description.add(loadModel(getService(ontClass), queryBuilder.build()));
+		    description.add(loadModel(getService(getMatchedOntClass()), queryBuilder.build()));
 		}
 		
 		if (hasRDFType(LDP.Page))
 		{
 		    // add description of ldp:Container
 		    OntResource container = getPropertyResourceValue(LDP.pageOf).as(OntResource.class);
-		    LinkedDataResource ldc = new LinkedDataResourceBase(container, getUriInfo(), getRequest(), getHttpHeaders(), getVariants());
+		    LinkedDataResource ldc = new ResourceBase(container, getUriInfo(), getRequest(), getHttpHeaders(), getVariants(),
+			    getLimit(), getOffset(), getOrderBy(), getDesc());
 		    description.add(ldc.describe());
 		}
 	    }
@@ -276,38 +284,45 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
 	{
 	    if (!arqQuery.isSelectType()) throw new IllegalArgumentException("PageResource must have a SPIN Select query");
 
-	    QueryBuilder queryBuilder;
+	    if (log.isDebugEnabled()) log.debug("OntResource is an ldp:Page, creating QueryBuilding by wrapping its SELECT Query: {} into DESCRIBE", arqQuery);
 	    org.topbraid.spin.model.Query query = ARQ2SPIN.parseQuery(arqQuery.toString(), getModel());
-	    SelectBuilder selectBuilder = SelectBuilder.fromSelect((Select)query).
-		limit(getLimit()).offset(getOffset());
-	    /*
-	    if (orderBy != null)
-	    {
-		com.hp.hpl.jena.rdf.model.Resource modelVar = getOntology().createResource().addLiteral(SP.varName, "model");
-		Property orderProperty = ResourceFactory.createProperty(getOrderBy();
-		com.hp.hpl.jena.rdf.model.Resource orderVar = getOntology().createResource().addLiteral(SP.varName, orderProperty.getLocalName());
-
-		selectBuilder.orderBy(orderVar, getDesc()).optional(modelVar, orderProperty, orderVar);
-	    }
-	    */
-	    //QueryBuilder queryBuilder;
-	    if (selectBuilder.getPropertyResourceValue(SP.resultVariables) != null)
-	    {
-		if (log.isDebugEnabled()) log.debug("Query Resource {} has result variables: {}", selectBuilder, selectBuilder.getPropertyResourceValue(SP.resultVariables));
-		queryBuilder = QueryBuilder.fromDescribe(selectBuilder.getPropertyResourceValue(SP.resultVariables)).
-		    subQuery(selectBuilder);
-	    }
-	    else
-	    {
-		if (log.isDebugEnabled()) log.debug("Query Resource {} does not have result variables, using wildcard", selectBuilder);
-		queryBuilder = QueryBuilder.fromDescribe(selectBuilder.getModel()).subQuery(selectBuilder);
-	    }
-	    return queryBuilder;
+	    return getQueryBuilder((Select)query);
 	}
 	else
 	{
+	    if (log.isDebugEnabled()) log.debug("Creating QueryBuilder from Query: {}", arqQuery);
 	    return QueryBuilder.fromQuery(arqQuery, getModel());
 	}
+    }
+
+    public QueryBuilder getQueryBuilder(Select select)
+    {
+	SelectBuilder selectBuilder = SelectBuilder.fromSelect(select).
+	    limit(getLimit()).offset(getOffset());
+	/*
+	if (orderBy != null)
+	{
+	    com.hp.hpl.jena.rdf.model.Resource modelVar = getOntology().createResource().addLiteral(SP.varName, "model");
+	    Property orderProperty = ResourceFactory.createProperty(getOrderBy();
+	    com.hp.hpl.jena.rdf.model.Resource orderVar = getOntology().createResource().addLiteral(SP.varName, orderProperty.getLocalName());
+
+	    selectBuilder.orderBy(orderVar, getDesc()).optional(modelVar, orderProperty, orderVar);
+	}
+	*/
+
+	QueryBuilder queryBuilder;
+	if (selectBuilder.getPropertyResourceValue(SP.resultVariables) != null)
+	{
+	    if (log.isDebugEnabled()) log.debug("Query Resource {} has result variables: {}", selectBuilder, selectBuilder.getPropertyResourceValue(SP.resultVariables));
+	    queryBuilder = QueryBuilder.fromDescribe(selectBuilder.getPropertyResourceValue(SP.resultVariables)).
+		subQuery(selectBuilder);
+	}
+	else
+	{
+	    if (log.isDebugEnabled()) log.debug("Query Resource {} does not have result variables, using wildcard", selectBuilder);
+	    queryBuilder = QueryBuilder.fromDescribe(selectBuilder.getModel()).subQuery(selectBuilder);
+	}
+	return queryBuilder;
     }
     
     public Query getQuery(TemplateCall call)
@@ -317,11 +332,13 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
 	queryString = queryString.replace("?this", "<" + getURI() + ">"); // binds ?this to URI of current resource
 	return QueryFactory.create(queryString);
     }
-    
-    public final OntClass matchOntClass()
+
+    public final OntClass matchOntClass(URI uri)
     {
 	StringBuilder path = new StringBuilder();
-	path.append("/").append(getUriInfo().getPath(false));
+	//path.append("/").append(getUriInfo().getPath(false));
+	// instead of path, include query string by relativizing request URI against base URI
+	path.append("/").append(getUriInfo().getBaseUri().relativize(uri));
 	return matchOntClass(path);
     }
     
@@ -399,11 +416,10 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
     public final com.hp.hpl.jena.rdf.model.Resource getPrevious()
     {
 	UriBuilder uriBuilder = getUriInfo().getAbsolutePathBuilder().
-	    replaceQueryParam("limit", getLimit()).
-	    replaceQueryParam("offset", getOffset() - getLimit());
-
-	if (getOrderBy() != null) uriBuilder.replaceQueryParam("order-by", getOrderBy());
-	if (getDesc() != null) uriBuilder.replaceQueryParam("desc", getDesc());
+	    queryParam("limit", getLimit()).
+	    queryParam("offset", getOffset() - getLimit());
+	//if (getOrderBy() != null) uriBuilder.queryParam("order-by", getOrderBy());
+	//if (getDesc() != null) uriBuilder.queryParam("desc", getDesc());
 
 	return getOntModel().createResource(uriBuilder.build().toString());
     }
@@ -411,13 +427,27 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
     public final com.hp.hpl.jena.rdf.model.Resource getNext()
     {
 	UriBuilder uriBuilder = getUriInfo().getAbsolutePathBuilder().
-	    replaceQueryParam("limit", getLimit()).
-	    replaceQueryParam("offset", getOffset() + getLimit());
-
-	if (getOrderBy() != null) uriBuilder.replaceQueryParam("order-by", getOrderBy());
-	if (getDesc() != null) uriBuilder.replaceQueryParam("desc", getDesc());
+	    queryParam("limit", getLimit()).
+	    queryParam("offset", getOffset() + getLimit());
+	//if (getOrderBy() != null) uriBuilder.queryParam("order-by", getOrderBy());
+	//if (getDesc() != null) uriBuilder.queryParam("desc", getDesc());
 
 	return getOntModel().createResource(uriBuilder.build().toString());
+    }
+
+    public final UriBuilder getUriBuilder()
+    {
+	return UriBuilder.fromUri(getURI());
+    }
+    
+    public final URI getRealURI()
+    {
+	return getUriBuilder().build();
+    }
+
+    public final OntClass getMatchedOntClass()
+    {
+	return matchedOntClass;
     }
 
 }

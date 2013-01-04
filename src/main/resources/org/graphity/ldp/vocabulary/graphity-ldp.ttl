@@ -149,7 +149,7 @@ ldp:pageOf a owl:ObjectProperty ;
 #    rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 #	[ a owl:Restriction ;
 #		owl:onProperty lda:uriTemplate ;
-#		owl:hasValue "/"
+#		owl:hasValue "/?limit={limit}&offset={offset}"
 #	] ,
 #	[ a owl:Restriction ;
 #		owl:onProperty sioc:has_parent ;
@@ -163,7 +163,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/instances"
+		owl:hasValue "/instances?limit={limit}&offset={offset}"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;
@@ -179,7 +179,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/ontologies"
+		owl:hasValue "/ontologies?limit={limit}&offset={offset}"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;
@@ -197,7 +197,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/classes"
+		owl:hasValue "/classes?limit={limit}&offset={offset}"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;
@@ -215,7 +215,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/properties"
+		owl:hasValue "/properties?limit={limit}&offset={offset}"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;
@@ -233,7 +233,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/services"
+		owl:hasValue "/services?limit={limit}&offset={offset}"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;
@@ -251,7 +251,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/queries"
+		owl:hasValue "/queries?limit={limit}&offset={offset}"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;
@@ -269,7 +269,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/modes"
+		owl:hasValue "/modes?limit={limit}&offset={offset}"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;
@@ -287,7 +287,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/containers"
+		owl:hasValue "/containers?limit={limit}&offset={offset}"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;
