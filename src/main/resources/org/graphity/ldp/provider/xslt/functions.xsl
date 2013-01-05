@@ -174,21 +174,29 @@ exclude-result-prefixes="#all">
 	<xsl:param name="document" as="document-node()"/>
 	<xsl:param name="lang" as="xs:string"/>
 	<xsl:variable name="local-lang-label" select="g:local-label($resource-uri, $document, $lang)" as="xs:string?"/>
+	<xsl:variable name="local-en-label" select="g:local-label($resource-uri, $document, 'en')" as="xs:string?"/>
 	<xsl:variable name="local-label" select="g:local-label($resource-uri, $document)" as="xs:string?"/>
 
 	<xsl:choose>
 	    <xsl:when test="$local-lang-label"> <!-- try localized label first -->
 		<xsl:sequence select="concat(upper-case(substring($local-lang-label, 1, 1)), substring($local-lang-label, 2))"/>
 	    </xsl:when>
-	    <xsl:when test="$local-label">
+	    <xsl:when test="$local-en-label"> <!-- try english label second -->
+		<xsl:sequence select="concat(upper-case(substring($local-en-label, 1, 1)), substring($local-en-label, 2))"/>
+	    </xsl:when>
+	    <xsl:when test="$local-label"> <!-- fallback to any label as the last resort -->
 		<xsl:sequence select="concat(upper-case(substring($local-label, 1, 1)), substring($local-label, 2))"/>
 	    </xsl:when>
 	    <xsl:otherwise>
 		<xsl:variable name="imported-lang-label" select="g:local-label($resource-uri, document(g:document-uri($resource-uri)), $lang)" as="xs:string?"/>
+		<xsl:variable name="imported-en-label" select="g:local-label($resource-uri, document(g:document-uri($resource-uri)), 'en')" as="xs:string?"/>
 		<xsl:variable name="imported-label" select="g:local-label($resource-uri, document(g:document-uri($resource-uri)))" as="xs:string?"/>
 		<xsl:choose>
 		    <xsl:when test="$imported-lang-label">
 			<xsl:sequence select="concat(upper-case(substring($imported-lang-label, 1, 1)), substring($imported-lang-label, 2))"/>
+		    </xsl:when>
+		    <xsl:when test="$imported-en-label">
+			<xsl:sequence select="concat(upper-case(substring($imported-en-label, 1, 1)), substring($imported-en-label, 2))"/>
 		    </xsl:when>
 		    <xsl:when test="$imported-label">
 			<xsl:sequence select="concat(upper-case(substring($imported-label, 1, 1)), substring($imported-label, 2))"/>

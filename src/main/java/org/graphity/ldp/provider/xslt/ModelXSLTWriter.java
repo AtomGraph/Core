@@ -58,6 +58,7 @@ public class ModelXSLTWriter implements MessageBodyWriter<Model>
     private URIResolver resolver = null;
 	
     @Context private UriInfo uriInfo;
+    @Context private HttpHeaders httpHeaders;
     
     public ModelXSLTWriter(Source stylesheet, URIResolver resolver) throws TransformerConfigurationException
     {
@@ -80,9 +81,9 @@ public class ModelXSLTWriter implements MessageBodyWriter<Model>
     }
 
     @Override
-    public void writeTo(Model model, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException
+    public void writeTo(Model model, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> headerMap, OutputStream entityStream) throws IOException, WebApplicationException
     {
-	if (log.isTraceEnabled()) log.trace("Writing Model with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
+	if (log.isTraceEnabled()) log.trace("Writing Model with HTTP headers: {} MediaType: {}", headerMap, mediaType);
 
 	try
 	{
@@ -100,12 +101,15 @@ public class ModelXSLTWriter implements MessageBodyWriter<Model>
 		parameter("base-uri", uriInfo.getBaseUri()).
 		parameter("absolute-path", uriInfo.getAbsolutePath()).
 		parameter("request-uri", uriInfo.getRequestUri()).
-		parameter("http-headers", httpHeaders.toString()).
+		parameter("http-headers", headerMap.toString()).
 		parameter("ont-model", getSource(ontResource.getOntModel())). // $ont-model from the current Resource
 		result(new StreamResult(entityStream));
-	    
-	    if (uriInfo.getQueryParameters().getFirst("lang") != null)
-		builder.parameter("lang", uriInfo.getQueryParameters().getFirst("lang"));
+
+	    if (!httpHeaders.getAcceptableLanguages().isEmpty())
+		builder.parameter("lang", httpHeaders.getAcceptableLanguages().get(0).toLanguageTag());
+
+	    //if (uriInfo.getQueryParameters().getFirst("lang") != null)
+		//builder.parameter("lang", uriInfo.getQueryParameters().getFirst("lang"));
 	    if (uriInfo.getQueryParameters().getFirst("mode") != null)
 		builder.parameter("mode", UriBuilder.fromUri(uriInfo.getQueryParameters().getFirst("mode")).build());
 	    if (uriInfo.getQueryParameters().getFirst("query") != null)

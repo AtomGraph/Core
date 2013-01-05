@@ -139,7 +139,6 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
 	// in case this OntResource does not exist in the ontology OntModel
 	if (!getOntModel().containsResource(getOntResource()))
 	{
-	    //OntClass ontClass = matchOntClass();
 	    if (getMatchedOntClass() != null)
 	    {
 		Individual individual = getMatchedOntClass().createIndividual(getURI());
@@ -204,11 +203,8 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
 
 	if (!description.isEmpty())
 	{
-	    //if (asIndividual().listOntClasses(true).hasNext())
 	    if (getMatchedOntClass() != null)
 	    {
-		//OntClass ontClass = asIndividual().getOntClass(true);
-		//OntClass ontClass = asIndividual().listOntClasses(true).next();
 		if (getMatchedOntClass().hasProperty(SPIN.constraint))
 		{
 		    RDFNode constraint = getModel().getResource(getMatchedOntClass().getURI()).getProperty(SPIN.constraint).getObject();
