@@ -18,6 +18,7 @@
    [ lm:name "http://spinrdf.org/spin#" ; lm:altName "org/graphity/vocabulary/spin.owl" ],
    [ lm:name "http://graphity.org/ontology/" ; lm:altName "org/graphity/vocabulary/graphity.ttl" ] ,
    # [ lm:name "http://ldp.graphity.org/ontology/" ; lm:altName "org/graphity/ldp/vocabulary/graphity-ldp.ttl" ] ,
+   [ lm:name "http://purl.org/linked-data/api/vocab#" ; lm:altName "org/graphity/ldp/vocabulary/lda.ttl" ],
    [ lm:name "http://www.w3.org/2006/time#" ; lm:altName "org/graphity/vocabulary/time.owl" ],
    [ lm:name "http://usefulinc.com/ns/doap#" ; lm:altName "org/graphity/vocabulary/doap.owl" ],
    [ lm:name "http://purl.org/goodrelations/v1#" ; lm:altName "org/graphity/vocabulary/goodrelations.owl" ],
@@ -38,6 +39,7 @@
    [ lm:prefix "http://spinrdf.org/spin" ; lm:altName "org/graphity/vocabulary/spin.owl" ],
    [ lm:prefix "http://graphity.org/ontology/" ; lm:altName "org/graphity/vocabulary/graphity.ttl" ] ,
    # [ lm:prefix "http://ldp.graphity.org/ontology/" ; lm:altName "org/graphity/ldp/vocabulary/graphity-ldp.ttl" ] ,
+   [ lm:prefix "http://purl.org/linked-data/api/vocab" ; lm:altName "org/graphity/ldp/vocabulary/lda.ttl" ],
    [ lm:prefix "http://www.w3.org/2006/time" ; lm:altName "org/graphity/vocabulary/time.owl" ],
    [ lm:prefix "http://usefulinc.com/ns/doap" ; lm:altName "org/graphity/vocabulary/doap.owl" ],
    [ lm:prefix "http://purl.org/goodrelations/v1" ; lm:altName "org/graphity/vocabulary/goodrelations.owl" ]

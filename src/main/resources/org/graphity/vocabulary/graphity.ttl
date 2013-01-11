@@ -49,3 +49,16 @@
 :XSLTPageMode a owl:Class ;
     rdfs:subClassOf :XSLTMode ;
     rdfs:label "XSLT page template mode" .
+
+:InputMode a :XSLTMode ;
+    dct:title "Edit" ;
+    rdfs:isDefinedBy : ;
+    void:inDataset _:dataset .
+:ListMode a :XSLTMode, :XSLTPageMode ;
+    dct:title "List" ;
+    rdfs:isDefinedBy : ;
+    void:inDataset _:dataset .
+:TableMode a :XSLTMode, :XSLTPageMode ;
+    dct:title "Table" ;
+    rdfs:isDefinedBy : ;
+    void:inDataset _:dataset .

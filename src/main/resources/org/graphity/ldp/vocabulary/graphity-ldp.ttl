@@ -171,7 +171,7 @@ ldp:pageOf a owl:ObjectProperty ;
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty g:mode ;
-		owl:hasValue gldp:ListMode
+		owl:hasValue g:ListMode
 	] ;
     spin:constraint [ a :SelectInstancesTemplate ] .
 
@@ -187,7 +187,7 @@ ldp:pageOf a owl:ObjectProperty ;
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty g:mode ;
-		owl:hasValue gldp:ListMode
+		owl:hasValue g:ListMode
 	] ;
     spin:constraint [ a :SelectInstancesTemplate ;
 	    g:type owl:Ontology
@@ -205,7 +205,7 @@ ldp:pageOf a owl:ObjectProperty ;
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty g:mode ;
-		owl:hasValue gldp:ListMode
+		owl:hasValue g:ListMode
 	] ;
     spin:constraint [ a :SelectInstancesTemplate ;
 	    g:type owl:Class
@@ -223,7 +223,7 @@ ldp:pageOf a owl:ObjectProperty ;
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty g:mode ;
-		owl:hasValue gldp:ListMode
+		owl:hasValue g:ListMode
 	] ;
     spin:constraint [ a :SelectPropertiesTemplate ;
 	    g:type owl:Ontology
@@ -241,7 +241,7 @@ ldp:pageOf a owl:ObjectProperty ;
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty g:mode ;
-		owl:hasValue gldp:ListMode
+		owl:hasValue g:ListMode
 	] ;
     spin:constraint [ a :SelectInstancesTemplate ;
 	    g:type sd:Service
@@ -259,7 +259,7 @@ ldp:pageOf a owl:ObjectProperty ;
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty g:mode ;
-		owl:hasValue gldp:ListMode
+		owl:hasValue g:ListMode
 	] ;
     spin:constraint [ a :SelectInstancesTemplate ;
 	    g:type sp:Query
@@ -277,7 +277,7 @@ ldp:pageOf a owl:ObjectProperty ;
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty g:mode ;
-		owl:hasValue gldp:ListMode
+		owl:hasValue g:ListMode
 	] ;
     spin:constraint [ a :SelectInstancesTemplate ;
 	    g:type g:XSLTMode
@@ -295,26 +295,11 @@ ldp:pageOf a owl:ObjectProperty ;
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty g:mode ;
-		owl:hasValue gldp:ListMode
+		owl:hasValue g:ListMode
 	] ;
     spin:constraint [ a :SelectInstancesTemplate ;
 	    g:type sioc:Container
 	    ] .
-
-# MODES
-
-:InputMode a g:XSLTMode ;
-    dct:title "Edit" ;
-    rdfs:isDefinedBy : ;
-    void:inDataset _:dataset .
-:ListMode a g:XSLTMode, g:XSLTPageMode ;
-    dct:title "List" ;
-    rdfs:isDefinedBy : ;
-    void:inDataset _:dataset .
-:TableMode a g:XSLTMode, g:XSLTPageMode ;
-    dct:title "Table" ;
-    rdfs:isDefinedBy : ;
-    void:inDataset _:dataset .
 
 # TEMPLATES & QUERIES
 

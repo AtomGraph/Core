@@ -182,7 +182,7 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
 	if (hasRDFType(LDP.Container))
 	{
 	    if (log.isDebugEnabled()) log.debug("OntResource is ldp:Container, redirecting to the first ldp:Page");
-	    if (log.isDebugEnabled()) log.debug("Encoded order-by URI: {}", UriComponent.encode(getOrderBy(), UriComponent.Type.QUERY));
+	    //if (log.isDebugEnabled()) log.debug("Encoded order-by URI: {}", UriComponent.encode(getOrderBy(), UriComponent.Type.QUERY));
 
 	    UriBuilder uriBuilder = getUriInfo().getAbsolutePathBuilder().
 		queryParam("limit", getLimit()).
