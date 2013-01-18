@@ -33,33 +33,62 @@ xmlns:rdf="&rdf;"
 xmlns:rdfs="&rdfs;"
 xmlns:xsd="&xsd;"
 xmlns:sparql="&sparql;"
+xmlns:url="&java;java.net.URLDecoder"
 exclude-result-prefixes="#all">
 
     <!-- subject/object resource -->
-    <xsl:template match="@rdf:about | @rdf:resource | sparql:uri">
+    <xsl:template match="@rdf:about | @rdf:nodeID">
 	<a href="{.}" title="{.}">
-	    <xsl:value-of select="g:label(., /, $lang)"/>
+	    <xsl:apply-templates select=".." mode="g:LabelMode"/>
 	</a>
     </xsl:template>
 
-    <!--
-    <xsl:template match="@rdf:about[starts-with(., $base-uri)] | @rdf:resource[starts-with(., $base-uri)] | sparql:uri[starts-with(., $base-uri)]">
-	<a href="{g:document-uri(.)}{g:query-string($lang)}{if (g:fragment-id(.)) then concat('#', g:fragment-id(.)) else ()}" title="{.}">
-	    <xsl:value-of select="g:label(., /, $lang)"/>
+    <!-- object resource -->
+    <xsl:template match="@rdf:resource | sparql:uri">
+	<a href="{.}" title="{.}">
+	    <xsl:variable name="doc" select="document(g:document-uri(.))"/>
+	    <xsl:choose>
+		<xsl:when test="key('resources', ., $doc)">
+		    <xsl:apply-templates select="key('resources', ., $doc)" mode="g:LabelMode"/>
+		</xsl:when>
+		<xsl:when test="starts-with(., $base-uri)">
+		    <xsl:apply-templates select="key('resources', ., $ont-model)" mode="g:LabelMode"/>
+		</xsl:when>
+		<xsl:when test="contains(., '#') and not(ends-with(., '#'))">
+		    <xsl:value-of select="substring-after(., '#')"/>
+		</xsl:when>
+		<xsl:when test="string-length(tokenize(., '/')[last()]) &gt; 0">
+		    <xsl:value-of select="translate(url:decode(tokenize(., '/')[last()], 'UTF-8'), '_', ' ')"/>
+		</xsl:when>
+		<xsl:otherwise>
+		    <xsl:value-of select="."/>
+		</xsl:otherwise>
+	    </xsl:choose>
 	</a>
-    </xsl:template>
-    -->
-
-    <xsl:template match="@rdf:nodeID">
-	<!-- fix this! add bnode-compatible g:label() function -->
-	<xsl:value-of select="g:label(., /, $lang)"/>
     </xsl:template>
 
     <!-- property -->
     <xsl:template match="*[@rdf:about or @rdf:nodeID]/*">
 	<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(.), local-name(.)))" as="xs:anyURI"/>
 	<span title="{$this}">
-	    <xsl:value-of select="g:label($this, /, $lang)"/>
+	    <xsl:variable name="doc" select="document(g:document-uri($this))"/>
+	    <xsl:choose>
+		<xsl:when test="key('resources', $this, $doc)">
+		    <xsl:apply-templates select="key('resources', $this, $doc)" mode="g:LabelMode"/>
+		</xsl:when>
+		<xsl:when test="starts-with($this, $base-uri)">
+		    <xsl:apply-templates select="key('resources', $this, $ont-model)" mode="g:LabelMode"/>
+		</xsl:when>
+		<xsl:when test="contains($this, '#') and not(ends-with($this, '#'))">
+		    <xsl:value-of select="substring-after($this, '#')"/>
+		</xsl:when>
+		<xsl:when test="string-length(tokenize($this, '/')[last()]) &gt; 0">
+		    <xsl:value-of select="translate(url:decode(tokenize($this, '/')[last()], 'UTF-8'), '_', ' ')"/>
+		</xsl:when>
+		<xsl:otherwise>
+		    <xsl:value-of select="."/>
+		</xsl:otherwise>
+	    </xsl:choose>
 	</span>
     </xsl:template>
 

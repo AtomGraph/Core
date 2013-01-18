@@ -62,6 +62,7 @@ xmlns:spin="&spin;"
 xmlns:sd="&sd;"
 xmlns:list="&list;"
 xmlns:xhv="&xhv;"
+xmlns:url="&java;java.net.URLDecoder"
 exclude-result-prefixes="#all">
 
     <xsl:import href="imports/default.xsl"/>
@@ -144,7 +145,6 @@ exclude-result-prefixes="#all">
 		<xsl:apply-templates mode="gldp:ScriptMode"/>
       	    </head>
 	    <body>
-<xsl:copy-of select="/"/>
 		<div class="navbar navbar-fixed-top">
 		    <div class="navbar-inner">
 			<div class="container-fluid">    
@@ -551,28 +551,9 @@ exclude-result-prefixes="#all">
 		    </xsl:apply-templates>
 		</ul>
 	    </xsl:if>
-	    <xsl:if test="rdfs:comment[lang($lang) or not(@xml:lang)] or dc:description[lang($lang) or not(@xml:lang)] or dct:description[lang($lang) or not(@xml:lang)] or dbpedia-owl:abstract[lang($lang) or not(@xml:lang)] or sioc:content[lang($lang) or not(@xml:lang)]">
-		<p>
-		    <xsl:choose>
-			<xsl:when test="rdfs:comment[lang($lang) or not(@xml:lang)]">
-			    <xsl:value-of select="substring(rdfs:comment[lang($lang) or not(@xml:lang)][1], 1, 300)"/>
-			</xsl:when>
-			<xsl:when test="dc:description[lang($lang) or not(@xml:lang)]">
-			    <xsl:value-of select="substring(dc:description[lang($lang) or not(@xml:lang)][1], 1, 300)"/>
-			</xsl:when>
-			<xsl:when test="dct:description[lang($lang) or not(@xml:lang)]">
-			    <xsl:value-of select="substring(dct:description[lang($lang) or not(@xml:lang)][1], 1, 300)"/>
-			</xsl:when>
-			<xsl:when test="dbpedia-owl:abstract[lang($lang) or not(@xml:lang)]">
-			    <xsl:value-of select="substring(dbpedia-owl:abstract[lang($lang) or not(@xml:lang)][1], 1, 300)"/>
-			</xsl:when>
-			<xsl:when test="sioc:content[lang($lang) or not(@xml:lang)]">
-			    <xsl:value-of select="substring(sioc:content[lang($lang) or not(@xml:lang)][1], 1, 300)"/>
-			</xsl:when>
-		    </xsl:choose>
-		</p>
-	    </xsl:if>
-	    
+
+	    <xsl:apply-templates select="." mode="g:DescriptionMode"/>
+
 	    <xsl:if test="@rdf:nodeID">
 		<xsl:apply-templates select="." mode="gldp:PropertyListMode"/>
 	    </xsl:if>
@@ -595,7 +576,8 @@ exclude-result-prefixes="#all">
 
 	<th>
 	    <a href="{$absolute-path}{g:query-string($offset, $limit, $this, $desc, (), $mode)}" title="{$this}">
-		<xsl:apply-templates select="key('resources', $this)" mode="g:LabelMode"/>
+		<xsl:variable name="doc" select="document(g:document-uri($this))"/>		
+		<xsl:apply-templates select="key('resources', $this, $doc)" mode="g:LabelMode"/>
 	    </a>
 	</th>
     </xsl:template>
@@ -919,16 +901,56 @@ exclude-result-prefixes="#all">
 	    <xsl:when test="skos:prefLabel | @skos:prefLabel">
 		<xsl:value-of select="(skos:prefLabel | @skos:prefLabel)[1]"/>
 	    </xsl:when>
-
-	    <!--
+	    <xsl:when test="contains(@rdf:about, '#') and not(ends-with(@rdf:about, '#'))">
+		<xsl:value-of select="substring-after(@rdf:about, '#')"/>
+	    </xsl:when>
 	    <xsl:when test="string-length(tokenize(@rdf:about, '/')[last()]) &gt; 0">
 		<xsl:value-of select="translate(url:decode(tokenize(@rdf:about, '/')[last()], 'UTF-8'), '_', ' ')"/>
 	    </xsl:when>
-	    -->
 	    <xsl:otherwise>
 		<xsl:value-of select="@rdf:about | @rdf:nodeID"/>
 	    </xsl:otherwise>
 	</xsl:choose>
+    </xsl:template>
+
+    <xsl:template match="*[@rdf:about] | *[@rdf:nodeID]" mode="g:DescriptionMode">
+	<xsl:if test="rdfs:comment[lang($lang) or not(@xml:lang)] or dc:description[lang($lang) or not(@xml:lang)] or dct:description[lang($lang) or not(@xml:lang)] or dbpedia-owl:abstract[lang($lang) or not(@xml:lang)] or sioc:content[lang($lang) or not(@xml:lang)]">
+	    <p>
+		<xsl:choose>
+		    <xsl:when test="rdfs:comment[lang($lang)]">
+			<xsl:value-of select="substring(rdfs:comment[lang($lang)][1], 1, 300)"/>
+		    </xsl:when>
+		    <xsl:when test="dc:description[lang($lang)]">
+			<xsl:value-of select="substring(dc:description[lang($lang)][1], 1, 300)"/>
+		    </xsl:when>
+		    <xsl:when test="dct:description[lang($lang)]">
+			<xsl:value-of select="substring(dct:description[lang($lang)][1], 1, 300)"/>
+		    </xsl:when>
+		    <xsl:when test="dbpedia-owl:abstract[lang($lang)]">
+			<xsl:value-of select="substring(dbpedia-owl:abstract[lang($lang)][1], 1, 300)"/>
+		    </xsl:when>
+		    <xsl:when test="sioc:content[lang($lang)]">
+			<xsl:value-of select="substring(sioc:content[lang($lang)][1], 1, 300)"/>
+		    </xsl:when>
+		    
+		    <xsl:when test="rdfs:comment[not(@xml:lang)]">
+			<xsl:value-of select="substring(rdfs:comment[not(@xml:lang)][1], 1, 300)"/>
+		    </xsl:when>
+		    <xsl:when test="dc:description[not(@xml:lang)]">
+			<xsl:value-of select="substring(dc:description[not(@xml:lang)][1], 1, 300)"/>
+		    </xsl:when>
+		    <xsl:when test="dct:description[not(@xml:lang)]">
+			<xsl:value-of select="substring(dct:description[not(@xml:lang)][1], 1, 300)"/>
+		    </xsl:when>
+		    <xsl:when test="dbpedia-owl:abstract[not(@xml:lang)]">
+			<xsl:value-of select="substring(dbpedia-owl:abstract[not(@xml:lang)][1], 1, 300)"/>
+		    </xsl:when>
+		    <xsl:when test="sioc:content[not(@xml:lang)]">
+			<xsl:value-of select="substring(sioc:content[not(@xml:lang)][1], 1, 300)"/>
+		    </xsl:when>
+		</xsl:choose>
+	    </p>
+	</xsl:if>
     </xsl:template>
 
 </xsl:stylesheet>

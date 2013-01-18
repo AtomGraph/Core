@@ -25,7 +25,6 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.util.LocationMapper;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.sun.jersey.api.core.ResourceConfig;
-import com.sun.jersey.api.uri.UriComponent;
 import com.sun.jersey.api.uri.UriTemplate;
 import java.net.URI;
 import java.util.HashMap;
@@ -55,7 +54,7 @@ import org.topbraid.spin.vocabulary.SPIN;
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 @Path("{path: .*}")
-public class ResourceBase extends LDPResourceBase //implements QueriedResource
+public class ResourceBase extends LDPResourceBase implements PageResource
 {
     private static final Logger log = LoggerFactory.getLogger(ResourceBase.class);
 
@@ -372,21 +371,25 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
 	return null;
     }
 
+    @Override
     public final Long getLimit()
     {
 	return limit;
     }
 
+    @Override
     public final Long getOffset()
     {
 	return offset;
     }
 
+    @Override
     public final String getOrderBy()
     {
 	return orderBy;
     }
 
+    @Override
     public final Boolean getDesc()
     {
 	return desc;
@@ -409,6 +412,7 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
 	return null;
     }
 
+    @Override
     public final com.hp.hpl.jena.rdf.model.Resource getPrevious()
     {
 	UriBuilder uriBuilder = getUriInfo().getAbsolutePathBuilder().
@@ -420,6 +424,7 @@ public class ResourceBase extends LDPResourceBase //implements QueriedResource
 	return getOntModel().createResource(uriBuilder.build().toString());
     }
 
+    @Override
     public final com.hp.hpl.jena.rdf.model.Resource getNext()
     {
 	UriBuilder uriBuilder = getUriInfo().getAbsolutePathBuilder().

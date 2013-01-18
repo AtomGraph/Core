@@ -23,7 +23,7 @@
 
 : a owl:Ontology ;
     owl:imports g: ;
-    owl:versionInfo "1.0.4" ;
+    owl:versionInfo "1.0.6" ;
     dct:title "Graphity Linked Data Platform ontology" ;
     rdfs:label "Graphity Linked Data Platform ontology" ;
     dct:description "Graphity LDP configuration ontology. Should be imported and reused by all extending applications" ;
@@ -36,9 +36,9 @@
     dct:creator <http://semantic-web.dk#martynas> .
     # rdfs:seeAlso <../sparql> .
 
-_:dataset a void:Dataset ;
+:Dataset a void:Dataset ;
     dct:title "The dataset of this application" ;
-    foaf:homepage <..> ;
+    # foaf:homepage <../dataset> ;
     rdfs:isDefinedBy : .
     # void:sparqlEndpoint <../sparql> .
 
@@ -93,59 +93,59 @@ ldp:pageOf a owl:ObjectProperty ;
 <..> a sioc:Site ;
     dct:title "Graphity Linked Data Platform" ;
     rdfs:isDefinedBy : ;
-    void:inDataset _:dataset ;
+    void:inDataset :Dataset ;
     rdfs:seeAlso : .
 
 <../instances> a ldp:Container, sioc:Container, lda:ListEndpoint ;
     sioc:has_host <..> ;
     dct:title "Instances" ;
     rdfs:isDefinedBy : ;
-    void:inDataset _:dataset .
+    void:inDataset :Dataset .
 
 <../ontologies> a ldp:Container, sioc:Container, lda:ListEndpoint ;
     sioc:has_host <..> ;
     dct:title "Ontologies" ;
     rdfs:isDefinedBy : ;
-    void:inDataset _:dataset .
+    void:inDataset :Dataset .
 
 <../classes> a ldp:Container, sioc:Container, lda:ListEndpoint ;
     sioc:has_host <..> ;
     dct:title "Classes" ;
     rdfs:isDefinedBy : ;
-    void:inDataset _:dataset .
+    void:inDataset :Dataset .
 
 <../properties> a ldp:Container, sioc:Container, lda:ListEndpoint ;
     sioc:has_host <..> ;
     dct:title "Properties" ;
     rdfs:isDefinedBy : ;
-    void:inDataset _:dataset .
+    void:inDataset :Dataset .
 
 <../services> a ldp:Container, sioc:Container, lda:ListEndpoint ;
     sioc:has_host <..> ;
     dct:title "Services" ;
     rdfs:isDefinedBy : ;
-    void:inDataset _:dataset .
+    void:inDataset :Dataset .
 
 <../queries> a ldp:Container, sioc:Container, lda:ListEndpoint ;
     sioc:has_host <..> ;
     dct:title "Queries" ;
     rdfs:isDefinedBy : ;
-    void:inDataset _:dataset .
+    void:inDataset :Dataset .
 
 <../modes> a ldp:Container, sioc:Container, lda:ListEndpoint ;
     sioc:has_host <..> ;
     dct:title "XSLT modes" ;
     rdfs:isDefinedBy : ;
-    void:inDataset _:dataset .
+    void:inDataset :Dataset .
 
 <../sparql> dct:title "SPARQL endpoint" ;
     sioc:has_host <..> ;
     rdfs:isDefinedBy : ;
-    void:inDataset _:dataset .
+    void:inDataset :Dataset .
 
 # RESOURCE CLASSES
 
-#:FrontPageResource a owl:Class ;
+#:FrontPageClass a owl:Class ;
 #    rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 #	[ a owl:Restriction ;
 #		owl:onProperty lda:uriTemplate ;
@@ -159,21 +159,56 @@ ldp:pageOf a owl:ObjectProperty ;
 #	    g:type sioc:Container
 #	    ] .
 
-:InstancesPageResource a owl:Class ;
+:InstancesPageClass a owl:Class ;
     rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
+	[ a owl:Restriction ;
+		owl:onProperty ldp:pageOf ;
+		owl:hasValue <../instances>
+	] ;
+    rdfs:label "Instances page resource class" ;
+    rdfs:isDefinedBy : .
+
+:InstancesPageListClass a owl:Class ;
+    rdfs:subClassOf :InstancesPageClass ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
 		owl:hasValue "/instances?limit={limit}&offset={offset}"
 	] ,
 	[ a owl:Restriction ;
-		owl:onProperty ldp:pageOf ;
-		owl:hasValue <../instances>
-	] ,
-	[ a owl:Restriction ;
 		owl:onProperty g:mode ;
 		owl:hasValue g:ListMode
 	] ;
-    spin:constraint [ a :SelectInstancesTemplate ] .
+    spin:constraint [ a :SelectInstancesTemplate ] ;
+    rdfs:label "Instances page list class" ;
+    rdfs:isDefinedBy : .
+
+:InstancesPageTableClass a owl:Class ;
+    rdfs:subClassOf :InstancesPageClass ,
+	[ a owl:Restriction ;
+		owl:onProperty lda:uriTemplate ;
+		owl:hasValue "/instances?limit={limit}&offset={offset}&mode=http%3A%2F%2Fgraphity.org%2Fontology%2FTableMode"
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty g:mode ;
+		owl:hasValue g:TableMode
+	] ;
+    spin:constraint [ a :SelectInstancesTemplate ] ;
+    rdfs:label "Instances page table class" ;
+    rdfs:isDefinedBy : .
+
+:InstancesPageInputClass a owl:Class ;
+    rdfs:subClassOf :InstancesPageClass ,
+	[ a owl:Restriction ;
+		owl:onProperty lda:uriTemplate ;
+		owl:hasValue "/instances?limit={limit}&offset={offset}&mode=http%3A%2F%2Fgraphity.org%2Fontology%2FInputMode"
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty g:mode ;
+		owl:hasValue g:InputMode
+	] ;
+    spin:constraint [ a :SelectInstancesTemplate ] ;
+    rdfs:label "Instances page input class" ;
+    rdfs:isDefinedBy : .
 
 :OntologiesPageResource a owl:Class ;
     rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
@@ -189,9 +224,11 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:onProperty g:mode ;
 		owl:hasValue g:ListMode
 	] ;
+    rdfs:label "Ontologies page resource class" ;
     spin:constraint [ a :SelectInstancesTemplate ;
 	    g:type owl:Ontology
-	    ] .
+	    ] ;
+    rdfs:isDefinedBy : .
 
 :ClassesPageResource a owl:Class ;
     rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
@@ -207,9 +244,11 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:onProperty g:mode ;
 		owl:hasValue g:ListMode
 	] ;
+    rdfs:label "Classes page resource class" ;
     spin:constraint [ a :SelectInstancesTemplate ;
 	    g:type owl:Class
-	    ] .
+	    ] ;
+    rdfs:isDefinedBy : .
 
 :PropertiesPageResource a owl:Class ;
     rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
@@ -225,9 +264,11 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:onProperty g:mode ;
 		owl:hasValue g:ListMode
 	] ;
+    rdfs:label "Properties page resource class" ;
     spin:constraint [ a :SelectPropertiesTemplate ;
 	    g:type owl:Ontology
-	    ] .
+	    ] ;
+    rdfs:isDefinedBy : .
 
 :ServicesPageResource a owl:Class ;
     rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
@@ -243,9 +284,11 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:onProperty g:mode ;
 		owl:hasValue g:ListMode
 	] ;
+    rdfs:label "Services page resource class" ;
     spin:constraint [ a :SelectInstancesTemplate ;
 	    g:type sd:Service
-	    ] .
+	    ] ;
+    rdfs:isDefinedBy : .
 
 :QueriesPageResource a owl:Class ;
     rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
@@ -261,9 +304,11 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:onProperty g:mode ;
 		owl:hasValue g:ListMode
 	] ;
+    rdfs:label "Queries page resource class" ;
     spin:constraint [ a :SelectInstancesTemplate ;
 	    g:type sp:Query
-	    ] .
+	    ] ;
+    rdfs:isDefinedBy : .
 
 :ModesPageResource a owl:Class ;
     rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
@@ -279,9 +324,11 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:onProperty g:mode ;
 		owl:hasValue g:ListMode
 	] ;
+    rdfs:label "Modes page resource class" ;
     spin:constraint [ a :SelectInstancesTemplate ;
 	    g:type g:XSLTMode
-	    ] .
+	    ] ;
+    rdfs:isDefinedBy : .
 
 :ContainersPageResource a owl:Class ;
     rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
@@ -297,9 +344,11 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:onProperty g:mode ;
 		owl:hasValue g:ListMode
 	] ;
+    rdfs:label "Containers page resource class" ;
     spin:constraint [ a :SelectInstancesTemplate ;
 	    g:type sioc:Container
-	    ] .
+	    ] ;
+    rdfs:isDefinedBy : .
 
 # TEMPLATES & QUERIES
 
@@ -308,7 +357,8 @@ ldp:pageOf a owl:ObjectProperty ;
     spin:constraint [ a       spl:Argument ;
 		spl:predicate g:type ;
 		spl:valueType rdf:Resource
-	] .
+	] ;
+    rdfs:isDefinedBy : .
 
 :SelectInstances    a       sp:Select, sp:Query ;
       sp:resultVariables (_:instanceVar) ;
@@ -321,14 +371,16 @@ WHERE {
                           ] ;
                   sp:predicate rdf:type ;
                   sp:subject _:instanceVar
-                ]) .
+                ]) ;
+    rdfs:isDefinedBy : .
 
 _:instanceVar  sp:varName "instance"^^xsd:string .
 
 # ====
 
 :SelectPropertiesTemplate a spin:Template ;
-    spin:body :SelectProperties .
+    spin:body :SelectProperties ;
+    rdfs:isDefinedBy : .
 
 :SelectProperties    a       sp:Select, sp:Query ;
       sp:resultVariables (_:propertyVar) ;
@@ -351,6 +403,7 @@ WHERE {
                                 sp:predicate rdf:type ;
                                 sp:subject _:propertyVar
                               ]))
-                ]) .
+                ]) ;
+    rdfs:isDefinedBy : .
 
 _:propertyVar  sp:varName "property"^^xsd:string .

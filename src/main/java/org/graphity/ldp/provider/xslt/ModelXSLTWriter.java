@@ -110,8 +110,8 @@ public class ModelXSLTWriter implements MessageBodyWriter<Model>
 
 	    //if (uriInfo.getQueryParameters().getFirst("lang") != null)
 		//builder.parameter("lang", uriInfo.getQueryParameters().getFirst("lang"));
-	    if (uriInfo.getQueryParameters().getFirst("mode") != null)
-		builder.parameter("mode", UriBuilder.fromUri(uriInfo.getQueryParameters().getFirst("mode")).build());
+	    //if (uriInfo.getQueryParameters().getFirst("mode") != null)
+		//builder.parameter("mode", UriBuilder.fromUri(uriInfo.getQueryParameters().getFirst("mode")).build());
 	    if (uriInfo.getQueryParameters().getFirst("query") != null)
 		builder.parameter("query", uriInfo.getQueryParameters().getFirst("query"));
 
