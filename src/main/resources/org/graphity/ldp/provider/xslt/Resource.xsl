@@ -880,6 +880,25 @@ exclude-result-prefixes="#all">
 		<xsl:value-of select="skos:prefLabel[not(@xml:lang)][1]"/>
 	    </xsl:when>
 
+	    <xsl:when test="rdfs:label[lang('en')]">
+		<xsl:value-of select="rdfs:label[lang('en')][1]"/>
+	    </xsl:when>
+	    <xsl:when test="foaf:nick[lang('en')]">
+		<xsl:value-of select="foaf:nick[lang('en')][1]"/>
+	    </xsl:when>
+	    <xsl:when test="foaf:name[lang('en')]">
+		<xsl:value-of select="foaf:name[lang('en')][1]"/>
+	    </xsl:when>
+	    <xsl:when test="dc:title[lang('en')]">
+		<xsl:value-of select="dc:title[lang('en')][1]"/>
+	    </xsl:when>
+	    <xsl:when test="dct:title[lang('en')]">
+		<xsl:value-of select="dct:title[lang('en')][1]"/>
+	    </xsl:when>
+	    <xsl:when test="skos:prefLabel[lang('en')]">
+		<xsl:value-of select="skos:prefLabel[lang('en')][1]"/>
+	    </xsl:when>
+
 	    <xsl:when test="rdfs:label | @rdfs:label">
 		<xsl:value-of select="(rdfs:label | @rdfs:label)[1]"/>
 	    </xsl:when>

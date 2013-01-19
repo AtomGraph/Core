@@ -22,7 +22,6 @@
             <param-name>org.graphity.ldp.ontology.location</param-name>
             <param-value>org/graphity/ldp/vocabulary/graphity-ldp.ttl</param-value>
         </init-param>
-        <load-on-startup>1</load-on-startup>
     </filter>
    <filter-mapping>
       <filter-name>index</filter-name>

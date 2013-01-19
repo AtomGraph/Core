@@ -33,7 +33,7 @@
     vann:preferredNamespacePrefix "gldp";
     foaf:homepage : ;
     dct:license <http://www.opendatacommons.org/licenses/pddl/1.0/> ;
-    dct:creator <http://semantic-web.dk#martynas> .
+    dct:creator <http://semantic-web.dk/#martynas> .
     # rdfs:seeAlso <../sparql> .
 
 :Dataset a void:Dataset ;
@@ -57,7 +57,7 @@
     doap:repository <https://github.com/Graphity/graphity-ldp.git> ;
     doap:browse <https://github.com/Graphity/graphity-ldp> ;
     doap:bug-database <https://github.com/Graphity/graphity-ldp/issues> ;
-    doap:maintainer <http://semantic-web.dk#martynas> ;
+    doap:maintainer <http://semantic-web.dk/#martynas> ;
     doap:programming-language dbpedia:XSLT,
 	<http://dbpedia.org/resource/Java_%28programming_language%29> .
 
@@ -149,7 +149,7 @@ ldp:pageOf a owl:ObjectProperty ;
 #    rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 #	[ a owl:Restriction ;
 #		owl:onProperty lda:uriTemplate ;
-#		owl:hasValue "/?limit={limit}&offset={offset}"
+#		owl:hasValue "/?limit={limit: [0-9]+}&offset={offset: [0-9]+}"
 #	] ,
 #	[ a owl:Restriction ;
 #		owl:onProperty sioc:has_parent ;
@@ -172,7 +172,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf :InstancesPageClass ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/instances?limit={limit}&offset={offset}"
+		owl:hasValue "/instances?limit={limit: [0-9]+}&offset={offset: [0-9]+}"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty g:mode ;
@@ -186,7 +186,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf :InstancesPageClass ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/instances?limit={limit}&offset={offset}&mode=http%3A%2F%2Fgraphity.org%2Fontology%2FTableMode"
+		owl:hasValue "/instances?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%2FTableMode"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty g:mode ;
@@ -200,7 +200,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf :InstancesPageClass ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/instances?limit={limit}&offset={offset}&mode=http%3A%2F%2Fgraphity.org%2Fontology%2FInputMode"
+		owl:hasValue "/instances?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%2FInputMode"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty g:mode ;
@@ -214,7 +214,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/ontologies?limit={limit}&offset={offset}"
+		owl:hasValue "/ontologies?limit={limit: [0-9]+}&offset={offset: [0-9]+}"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;
@@ -234,7 +234,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/classes?limit={limit}&offset={offset}"
+		owl:hasValue "/classes?limit={limit: [0-9]+}&offset={offset: [0-9]+}"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;
@@ -254,7 +254,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/properties?limit={limit}&offset={offset}"
+		owl:hasValue "/properties?limit={limit: [0-9]+}&offset={offset: [0-9]+}"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;
@@ -274,7 +274,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/services?limit={limit}&offset={offset}"
+		owl:hasValue "/services?limit={limit: [0-9]+}&offset={offset: [0-9]+}"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;
@@ -294,7 +294,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/queries?limit={limit}&offset={offset}"
+		owl:hasValue "/queries?limit={limit: [0-9]+}&offset={offset: [0-9]+}"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;
@@ -314,7 +314,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/modes?limit={limit}&offset={offset}"
+		owl:hasValue "/modes?limit={limit: [0-9]+}&offset={offset: [0-9]+}"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;
@@ -334,7 +334,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/containers?limit={limit}&offset={offset}"
+		owl:hasValue "/containers?limit={limit: [0-9]+}&offset={offset: [0-9]+}"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;

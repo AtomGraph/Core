@@ -51,7 +51,7 @@ exclude-result-prefixes="#all">
 		<xsl:when test="key('resources', ., $doc)">
 		    <xsl:apply-templates select="key('resources', ., $doc)" mode="g:LabelMode"/>
 		</xsl:when>
-		<xsl:when test="starts-with(., $base-uri)">
+		<xsl:when test="key('resources', ., $ont-model)">
 		    <xsl:apply-templates select="key('resources', ., $ont-model)" mode="g:LabelMode"/>
 		</xsl:when>
 		<xsl:when test="contains(., '#') and not(ends-with(., '#'))">

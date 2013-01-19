@@ -3,7 +3,7 @@
 
     <groupId>org.graphity</groupId>
     <artifactId>ldp</artifactId>
-    <version>1.0.5-SNAPSHOT</version>
+    <version>1.0.6-SNAPSHOT</version>
 
     <name>Graphity Linked Data platform</name>
     <description>Generic Linked Data platform</description>
