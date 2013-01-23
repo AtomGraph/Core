@@ -133,20 +133,6 @@ ldp:pageOf a owl:ObjectProperty ;
 
 # RESOURCE CLASSES
 
-#:FrontPageClass a owl:Class ;
-#    rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
-#	[ a owl:Restriction ;
-#		owl:onProperty lda:uriTemplate ;
-#		owl:hasValue "/?limit={limit: [0-9]+}&offset={offset: [0-9]+}"
-#	] ,
-#	[ a owl:Restriction ;
-#		owl:onProperty sioc:has_parent ;
-#		owl:hasValue <..>
-#	] ;
-#    spin:constraint [ a :SelectInstancesTemplate ;
-#	    g:type sioc:Container
-#	    ] .
-
 :Resource a owl:Class ;
     rdfs:subClassOf ldp:Container, lda:ListEndpoint ,
 	[ a owl:Restriction ;
