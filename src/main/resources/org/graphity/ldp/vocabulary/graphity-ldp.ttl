@@ -147,6 +147,20 @@ ldp:pageOf a owl:ObjectProperty ;
 #	    g:type sioc:Container
 #	    ] .
 
+:Resource a owl:Class ;
+    rdfs:subClassOf ldp:Container, lda:ListEndpoint ,
+	[ a owl:Restriction ;
+		owl:onProperty sioc:has_host ;
+		owl:hasValue <..>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty lda:uriTemplate ;
+		owl:hasValue "/{path: .*}"
+	] ;
+    spin:constraint [ a :DescribeTemplate ] ;
+    rdfs:label "Resource" ;
+    rdfs:isDefinedBy : .
+
 :InstancesPageListResource a owl:Class ;
     rdfs:subClassOf ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
@@ -638,3 +652,14 @@ WHERE {
     rdfs:isDefinedBy : .
 
 _:propertyVar  sp:varName "property"^^xsd:string .
+
+# ====
+
+:DescribeTemplate a spin:Template ;
+    spin:body :DefaultDescribe .
+
+:DefaultDescribe    a       sp:Describe ;
+      sp:resultNodes (spin:_this) ;
+      sp:text """DESCRIBE ?this"""^^xsd:string .
+
+spin:_this sp:varName "this"^^xsd:string .

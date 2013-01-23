@@ -384,6 +384,13 @@ exclude-result-prefixes="#all">
 	</dd>
     </xsl:template>
 
+    <!-- skip <dt> for properties that are not first in the sorted group -->
+    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*[preceding-sibling::*[concat(namespace-uri(.), local-name(.)) = concat(namespace-uri(current()), local-name(current()))]]" mode="gldp:PropertyListMode" priority="1">
+	<dd>
+	    <xsl:apply-templates select="node() | @rdf:resource | @rdf:nodeID" mode="gldp:PropertyListMode"/>
+	</dd>
+    </xsl:template>
+
     <xsl:template match="node() | @rdf:resource" mode="gldp:PropertyListMode">
 	<xsl:apply-templates select="."/>
     </xsl:template>

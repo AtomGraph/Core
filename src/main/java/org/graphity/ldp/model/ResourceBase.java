@@ -20,6 +20,7 @@ import com.hp.hpl.jena.ontology.*;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.util.LocationMapper;
@@ -27,11 +28,11 @@ import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.api.uri.UriTemplate;
 import java.net.URI;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.*;
 import org.graphity.util.QueryBuilder;
 import org.graphity.util.SelectBuilder;
@@ -58,7 +59,6 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 {
     private static final Logger log = LoggerFactory.getLogger(ResourceBase.class);
 
-    //@Context ResourceConfig config;
     private final Long limit, offset;
     private final String orderBy;
     private final Boolean desc;
@@ -135,43 +135,38 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 
 	if (log.isDebugEnabled()) log.debug("Constructing ResourceBase");
 
-	// in case this OntResource does not exist in the ontology OntModel
-	if (!getOntModel().containsResource(getOntResource()))
+	if (getMatchedOntClass() == null) throw new WebApplicationException(Response.Status.NOT_FOUND);
+
+	//Individual individual = getMatchedOntClass().createIndividual(getURI());
+	//if (log.isDebugEnabled()) log.debug("Individual {} created from resource OntClass {}", individual, getMatchedOntClass());
+
+	if (getMatchedOntClass().hasSuperClass(LDP.Page)) //if (hasRDFType(LDP.Page))
 	{
-	    if (getMatchedOntClass() != null)
+	    OntResource container = getOntModel().createOntResource(getUriInfo().getAbsolutePath().toString());
+	    if (log.isDebugEnabled()) log.debug("Adding PageResource metadata: {} ldp:pageOf {}", getOntResource(), container);
+	    setPropertyValue(LDP.pageOf, container);
+
+	    if (log.isDebugEnabled())
 	    {
-		Individual individual = getMatchedOntClass().createIndividual(getURI());
-		if (log.isDebugEnabled()) log.debug("Individual {} created from resource OntClass {}", individual, getMatchedOntClass());
-		
-		if (hasRDFType(LDP.Page))
-		{
-		    OntResource container = getOntModel().createOntResource(getUriInfo().getAbsolutePath().toString());
-		    if (log.isDebugEnabled()) log.debug("Adding PageResource metadata: {} ldp:pageOf {}", getOntResource(), container);
-		    setPropertyValue(LDP.pageOf, container);
-
-		    if (log.isDebugEnabled())
-		    {
-			log.debug("OFFSET: {} LIMIT: {}", getOffset(), getLimit());
-			log.debug("ORDER BY: {} DESC: {}", getOrderBy(), getDesc());
-		    }
-
-		    if (getOffset() >= getLimit())
-		    {
-			if (log.isDebugEnabled()) log.debug("Adding page metadata: {} xhv:previous {}", getURI(), getPrevious().getURI());
-			addProperty(XHV.prev, getPrevious());
-		    }
-
-		    // no way to know if there's a next page without counting results (either total or in current page)
-		    //int subjectCount = describe().listSubjects().toList().size();
-		    //log.debug("describe().listSubjects().toList().size(): {}", subjectCount);
-		    //if (subjectCount >= getLimit())
-		    {
-			if (log.isDebugEnabled()) log.debug("Adding page metadata: {} xhv:next {}", getURI(), getNext().getURI());
-			addProperty(XHV.next, getNext());
-		    }
-		}
+		log.debug("OFFSET: {} LIMIT: {}", getOffset(), getLimit());
+		log.debug("ORDER BY: {} DESC: {}", getOrderBy(), getDesc());
 	    }
-	}
+
+	    if (getOffset() >= getLimit())
+	    {
+		if (log.isDebugEnabled()) log.debug("Adding page metadata: {} xhv:previous {}", getURI(), getPrevious().getURI());
+		addProperty(XHV.prev, getPrevious());
+	    }
+
+	    // no way to know if there's a next page without counting results (either total or in current page)
+	    //int subjectCount = describe().listSubjects().toList().size();
+	    //log.debug("describe().listSubjects().toList().size(): {}", subjectCount);
+	    //if (subjectCount >= getLimit())
+	    {
+		if (log.isDebugEnabled()) log.debug("Adding page metadata: {} xhv:next {}", getURI(), getNext().getURI());
+		addProperty(XHV.next, getNext());
+	    }
+	}	    
     }
 
     @Override
@@ -198,49 +193,36 @@ public class ResourceBase extends LDPResourceBase implements PageResource
     @Override
     public Model describe()
     {
-	Model description = super.describe();
+	Model description = ModelFactory.createDefaultModel();
 
-	if (!description.isEmpty())
+	if (getMatchedOntClass().hasProperty(SPIN.constraint))
 	{
-	    if (getMatchedOntClass() != null)
-	    {
-		if (getMatchedOntClass().hasProperty(SPIN.constraint))
-		{
-		    RDFNode constraint = getModel().getResource(getMatchedOntClass().getURI()).getProperty(SPIN.constraint).getObject();
-		    TemplateCall call = SPINFactory.asTemplateCall(constraint);
-		    QueryBuilder queryBuilder = getQueryBuilder(call);
+	    RDFNode constraint = getModel().getResource(getMatchedOntClass().getURI()).getProperty(SPIN.constraint).getObject();
+	    TemplateCall call = SPINFactory.asTemplateCall(constraint);
+	    QueryBuilder queryBuilder = getQueryBuilder(call);
 
-		    if (log.isDebugEnabled()) log.debug("OntResource {} gets explicit spin:query value {}", this, queryBuilder);
-		    setPropertyValue(SPIN.query, queryBuilder);
+	    description.add(loadModel(getService(getMatchedOntClass()), queryBuilder.build()));
 
-		    RDFNode mode = getRestrictionHasValue(getMatchedOntClass(), Graphity.mode);
-		    if (mode != null && mode.isURIResource())
-		    {
-			if (log.isDebugEnabled()) log.debug("OntResource {} gets explicit g:mode value {}", this, mode);
-			setPropertyValue(Graphity.mode, mode);
-		    }
+	    if (log.isDebugEnabled()) log.debug("OntResource {} gets explicit spin:query value {}", this, queryBuilder);
+	    setPropertyValue(SPIN.query, queryBuilder);
+	}
 
-		    description.add(loadModel(getService(getMatchedOntClass()), queryBuilder.build()));
-		}
-		
-		if (hasRDFType(LDP.Page))
-		{
-		    // add description of ldp:Container
-		    OntResource container = getPropertyResourceValue(LDP.pageOf).as(OntResource.class);
-		    LinkedDataResource ldc = new ResourceBase(container, getUriInfo(), getRequest(), getHttpHeaders(), getVariants(),
-			    getLimit(), getOffset(), getOrderBy(), getDesc());
-		    description.add(ldc.describe());
-		}
-	    }
-	    else
-	    {
-		QueryBuilder queryBuilder = QueryBuilder.fromDescribe(getURI(), getModel());
-		queryBuilder.build(); // sets sp:text value
-		if (log.isDebugEnabled()) log.debug("OntResource with URI {} gets explicit spin:query value {}", getURI(), queryBuilder);
-		setPropertyValue(SPIN.query, queryBuilder);
-	    }
+	if (hasRDFType(LDP.Page))
+	{
+	    // add description of ldp:Container
+	    OntResource container = getPropertyResourceValue(LDP.pageOf).as(OntResource.class);
+	    LinkedDataResource ldc = new ResourceBase(container, getUriInfo(), getRequest(), getHttpHeaders(), getVariants(),
+		    getLimit(), getOffset(), getOrderBy(), getDesc());
+	    description.add(ldc.describe());
 	}
     
+	RDFNode mode = getRestrictionHasValue(getMatchedOntClass(), Graphity.mode);
+	if (mode != null && mode.isURIResource())
+	{
+	    if (log.isDebugEnabled()) log.debug("OntResource {} gets explicit g:mode value {}", this, mode);
+	    setPropertyValue(Graphity.mode, mode);
+	}
+
 	return description;
     }
     
@@ -341,7 +323,8 @@ public class ResourceBase extends LDPResourceBase implements PageResource
     {
 	Property utProp = getOntModel().createProperty("http://purl.org/linked-data/api/vocab#uriTemplate");
 	ExtendedIterator<Restriction> it = getOntModel().listRestrictions();
-
+	TreeMap<UriTemplate, OntClass> matchedClasses = new TreeMap<UriTemplate,OntClass>(UriTemplate.COMPARATOR);
+		
 	while (it.hasNext())
 	{
 	    Restriction restriction = it.next();	    
@@ -359,7 +342,8 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 
 			OntClass ontClass = hvr.listSubClasses(true).next(); //hvr.getSubClass();	    
 			if (log.isDebugEnabled()) log.debug("Path {} matched endpoint OntClass {}", path, ontClass);
-			return ontClass;
+			//return ontClass;
+			matchedClasses.put(uriTemplate, ontClass);
 		    }
 		    else
 			if (log.isDebugEnabled()) log.debug("Path {} did not match UriTemplate {}", path, uriTemplate);
@@ -367,6 +351,12 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	    }
 	}
 
+	if (!matchedClasses.isEmpty())
+	{
+	    if (log.isDebugEnabled()) log.debug("Matched UriTemplate: {} OntClass: {}", matchedClasses.firstKey(), matchedClasses.firstEntry().getValue());
+	    return matchedClasses.firstEntry().getValue(); //matchedClasses.lastEntry().getValue();
+	}
+	
 	if (log.isDebugEnabled()) log.debug("Path {} has no OntClass match in this OntModel", path);
 	return null;
     }
