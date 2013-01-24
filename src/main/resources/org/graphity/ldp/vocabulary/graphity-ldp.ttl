@@ -128,7 +128,6 @@ ldp:pageOf a owl:ObjectProperty ;
 
 <../sparql> a foaf:Document ;
     dct:title "SPARQL endpoint" ;
-    sioc:has_host <..> ;
     rdfs:isDefinedBy : ;
     void:inDataset :Dataset .
 
@@ -588,7 +587,7 @@ ldp:pageOf a owl:ObjectProperty ;
     spin:body :SelectInstances ;
     spin:constraint [ a       spl:Argument ;
 		spl:predicate g:type ;
-		spl:valueType rdf:Resource
+		spl:valueType rdfs:Resource
 	] ;
     rdfs:isDefinedBy : .
 
