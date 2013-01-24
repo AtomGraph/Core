@@ -39,9 +39,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Reads RDF/POST encoding http://www.lsrn.org/semweb/rdfpost.html
+ * Reads RDF from RDF/POST-encoded request body
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
+ * @see <a href="http://www.lsrn.org/semweb/rdfpost.html">RDF/POST Encoding for RDF</a>
+ * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/rdf/model/Model.html">Model</a>
+ * @see <a href="http://jsr311.java.net/nonav/javadoc/javax/ws/rs/ext/MessageBodyReader.html">MessageBodyReader</a>
  */
 @Provider
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)

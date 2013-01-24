@@ -39,16 +39,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Reads RDF from request body or writes RDF to response
+ * 
  * @author Martynas Jusevičius <martynas@graphity.org>
+ * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/rdf/model/Model.html">Model</a>
+ * @see <a href="http://jsr311.java.net/nonav/javadoc/javax/ws/rs/ext/MessageBodyReader.html">MessageBodyReader</a>
+ * @see <a href="http://jsr311.java.net/nonav/javadoc/javax/ws/rs/ext/MessageBodyWriter.html">MessageBodyWriter</a>
  */
 @Provider
 @Produces({MediaType.APPLICATION_RDF_XML, MediaType.TEXT_TURTLE, MediaType.TEXT_PLAIN})
 @Consumes({MediaType.APPLICATION_RDF_XML, MediaType.TEXT_TURTLE, MediaType.TEXT_PLAIN})
 public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWriter<Model>
 {
-    //private @Context UriInfo uriInfo = null;
     
+    /**
+     * Supported RDF syntaxes
+     * 
+     * @see org.graphity.ldp.MediaType
+     * @see <a href="http://jena.apache.org/documentation/javadoc/arq/org/openjena/riot/lang/package-summary.html">RIOT</a>
+     */
     public static final Map<String, Lang> LANGS = new HashMap<String, Lang>();
     static
     {

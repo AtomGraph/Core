@@ -32,8 +32,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Provides HTTP query parameter with SPARQL string as injectable ARQ query
+ * 
  * @author Martynas Jusevičius <martynas@graphity.org>
+ * @see <a href="http://jsr311.java.net/nonav/javadoc/javax/ws/rs/QueryParam.html">@QueryParam</a>
+ * @see <a href="http://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/spi/inject/PerRequestTypeInjectableProvider.html">PerRequestTypeInjectableProvider</a>
  */
 @Provider
 public class QueryParamProvider extends PerRequestTypeInjectableProvider<QueryParam, Query> // implements InjectableProvider<QueryParam, Parameter>

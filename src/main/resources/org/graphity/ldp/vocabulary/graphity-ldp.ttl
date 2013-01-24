@@ -126,7 +126,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:isDefinedBy : ;
     void:inDataset :Dataset .
 
-<../sparql> foaf:Document;
+<../sparql> a foaf:Document ;
     dct:title "SPARQL endpoint" ;
     sioc:has_host <..> ;
     rdfs:isDefinedBy : ;

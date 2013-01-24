@@ -53,8 +53,10 @@ import org.topbraid.spin.vocabulary.SP;
 import org.topbraid.spin.vocabulary.SPIN;
 
 /**
- *
+ * Base class of generic read-write Graphity LDP resources
+ * 
  * @author Martynas Jusevičius <martynas@graphity.org>
+ * @see PageResource
  */
 @Path("{path: .*}")
 public class ResourceBase extends LDPResourceBase implements PageResource
@@ -66,11 +68,18 @@ public class ResourceBase extends LDPResourceBase implements PageResource
     private final Boolean desc;
     private final OntClass matchedOntClass;
 
+    /**
+     * Reads ontology from configured file and resolves against base URI of the request
+     * @param uriInfo JAX-RS URI info
+     * @param config configuration from web.xml
+     * @return ontology Model
+     * @see <a href="http://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceConfig.html">ResourceConfig</a>
+     */
     public static OntModel getOntology(UriInfo uriInfo, ResourceConfig config)
     {
 	if (log.isDebugEnabled()) log.debug("ResourceConfig properties: {}", config.getProperties());
-	Object ontologyLocation = config.getProperty("org.graphity.ldp.ontology.location");
-	Object ontologyPath = config.getProperty("org.graphity.ldp.ontology.path");
+	Object ontologyLocation = config.getProperty(org.graphity.ldp.Application.PROPERTY_ONTOLOGY_LOCATION);
+	Object ontologyPath = config.getProperty(org.graphity.ldp.Application.PROPERTY_ONTOLOGY_PATH);
 	if (ontologyLocation == null || ontologyPath == null) throw new IllegalStateException("Ontology for this Graphity LDP Application is not configured properly. Check ResourceConfig and/or web.xml");
 	
 	return getOntology(uriInfo.getBaseUriBuilder().path(ontologyPath.toString()).build().toString(), ontologyLocation.toString());

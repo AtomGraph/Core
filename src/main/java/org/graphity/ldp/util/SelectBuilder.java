@@ -32,8 +32,12 @@ import org.topbraid.spin.model.Variable;
 import org.topbraid.spin.vocabulary.SP;
 
 /**
- *
+ * SPARQL SELECT query builder based on SPIN RDF syntax
+ * 
  * @author Martynas Jusevičius <martynas@graphity.org>
+ * @see QueryBuilder
+ * @see <a href="http://www.w3.org/Submission/2011/SUBM-spin-sparql-20110222/">SPIN - SPARQL Syntax</a>
+ * @see <a href="http://topbraid.org/spin/api/1.2.0/spin/apidocs/org/topbraid/spin/model/Select.html">SPIN Select</a>
  */
 public class SelectBuilder extends QueryBuilder implements Select
 {
@@ -41,6 +45,11 @@ public class SelectBuilder extends QueryBuilder implements Select
 
     private Select select = null;
 
+    /**
+     * Constructs builder from SPIN query
+     * 
+     * @param query SPIN SELECT resource
+     */
     protected SelectBuilder(Select select)
     {
 	super(select);
@@ -86,6 +95,11 @@ public class SelectBuilder extends QueryBuilder implements Select
 	return fromQuery(QueryFactory.create(queryString), model);
     }
 
+    /**
+     * SPIN SELECT resource
+     * 
+     * @return the query resource of this builder
+     */
     @Override
     protected Select getQuery()
     {

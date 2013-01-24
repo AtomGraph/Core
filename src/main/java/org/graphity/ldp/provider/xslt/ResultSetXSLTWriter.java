@@ -39,23 +39,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Transforms SPARQL XML results with XSLT stylesheet and writes result to response
+ * 
  * @author Martynas Jusevičius <martynas@graphity.org>
+ * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/ResultSet.html">ResultSet</a>
+ * @see <a href="http://jsr311.java.net/nonav/javadoc/javax/ws/rs/ext/MessageBodyWriter.html">MessageBodyWriter</a>
  */
 public class ResultSetXSLTWriter implements MessageBodyWriter<ResultSet>
 {
     private static final Logger log = LoggerFactory.getLogger(ResultSetXSLTWriter.class);
 
-    private XSLTBuilder builder = null;
+    private Source stylesheet = null;
+    private URIResolver resolver = null;
 
-    public ResultSetXSLTWriter(XSLTBuilder builder) throws TransformerConfigurationException
-    {
-	this.builder = builder;
-    }
-
+    /**
+     * Constructs from stylesheet source and URI resolver
+     * 
+     * @param stylesheet the source of the XSLT transformation
+     * @param resolver URI resolver to be used in the transformation
+     * @throws TransformerConfigurationException 
+     * @see <a href="http://docs.oracle.com/javase/6/docs/api/javax/xml/transform/Source.html">Source</a>
+     * @see <a href="http://docs.oracle.com/javase/6/docs/api/javax/xml/transform/URIResolver.html">URIResolver</a>
+     */
     public ResultSetXSLTWriter(Source stylesheet, URIResolver resolver) throws TransformerConfigurationException
     {
-	this(XSLTBuilder.fromStylesheet(stylesheet).resolver(resolver));
+	if (stylesheet == null) throw new IllegalArgumentException("XSLT stylesheet Source cannot be null");
+	if (resolver == null) throw new IllegalArgumentException("URIResolver cannot be null");
+	this.stylesheet = stylesheet;
+	this.resolver = resolver;
     }
     
     @Override
@@ -78,7 +89,9 @@ public class ResultSetXSLTWriter implements MessageBodyWriter<ResultSet>
 	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	    ResultSetFormatter.outputAsXML(baos, results);
 	    
-	    getXSLTBuilder().
+	    // create XSLTBuilder per request output to avoid document() caching
+	    XSLTBuilder.fromStylesheet(stylesheet).
+		resolver(resolver).
 		document(new ByteArrayInputStream(baos.toByteArray())).
 		result(new StreamResult(entityStream)).
 		transform();
@@ -90,11 +103,6 @@ public class ResultSetXSLTWriter implements MessageBodyWriter<ResultSet>
 	    log.error("XSLT transformation failed", ex);
 	    throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);
 	}
-    }
-
-    public XSLTBuilder getXSLTBuilder()
-    {
-	return builder;
     }
 
 }

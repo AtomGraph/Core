@@ -43,8 +43,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Transforms RDF with XSLT stylesheet and writes XHTML result to response
+ * 
  * @author Martynas Jusevičius <martynas@graphity.org>
+ * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/rdf/model/Model.html">Model</a>
+ * @see <a href="http://jsr311.java.net/nonav/javadoc/javax/ws/rs/ext/MessageBodyWriter.html">MessageBodyWriter</a>
  */
 @Provider
 @Singleton
@@ -53,13 +56,21 @@ public class ModelXSLTWriter implements MessageBodyWriter<Model>
 {
     private static final Logger log = LoggerFactory.getLogger(ModelXSLTWriter.class);
 
-    //private XSLTBuilder builder = null;
     private Source stylesheet = null;
     private URIResolver resolver = null;
 	
     @Context private UriInfo uriInfo;
     @Context private HttpHeaders httpHeaders;
     
+    /**
+     * Constructs from stylesheet source and URI resolver
+     * 
+     * @param stylesheet the source of the XSLT transformation
+     * @param resolver URI resolver to be used in the transformation
+     * @throws TransformerConfigurationException 
+     * @see <a href="http://docs.oracle.com/javase/6/docs/api/javax/xml/transform/Source.html">Source</a>
+     * @see <a href="http://docs.oracle.com/javase/6/docs/api/javax/xml/transform/URIResolver.html">URIResolver</a>
+     */
     public ModelXSLTWriter(Source stylesheet, URIResolver resolver) throws TransformerConfigurationException
     {
 	if (stylesheet == null) throw new IllegalArgumentException("XSLT stylesheet Source cannot be null");

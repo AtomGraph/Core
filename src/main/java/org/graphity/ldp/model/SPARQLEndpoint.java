@@ -24,12 +24,21 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 /**
- *
+ * Generic SPARQL endpoint interface
+ * 
  * @author Martynas Jusevičius <martynas@graphity.org>
+ * @see <a href="http://www.w3.org/TR/rdf-sparql-protocol/">SPARQL Protocol for RDF</a>
  */
 @Path("/sparql")
 @Produces({org.graphity.ldp.MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", org.graphity.ldp.MediaType.TEXT_TURTLE + "; charset=UTF-8", org.graphity.ldp.MediaType.APPLICATION_SPARQL_RESULTS_XML + "; charset=UTF-8", org.graphity.ldp.MediaType.APPLICATION_SPARQL_RESULTS_JSON + "; charset=UTF-8"})
 public interface SPARQLEndpoint
 {
+    /**
+     * Handles SPARQL Protocol for RDF request and returns query result as response
+     * 
+     * @param query the submitted SPARQL query or null
+     * @return result response (in one of the representation variants)
+     * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/Query.html">ARQ Query</a>
+     */
     @GET Response query(@QueryParam("query") Query query);
 }

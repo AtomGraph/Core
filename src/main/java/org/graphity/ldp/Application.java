@@ -54,6 +54,21 @@ import org.topbraid.spin.system.SPINModuleRegistry;
 public class Application extends javax.ws.rs.core.Application
 {
     private static final Logger log = LoggerFactory.getLogger(Application.class);
+    /**
+     * Configuration property for ontology file location (set in web.xml)
+     * 
+     * @see <a href="http://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceConfig.html">ResourceConfig</a>
+     * @see <a href="http://docs.oracle.com/cd/E24329_01/web.1211/e24983/configure.htm#CACEAEGG">Packaging the RESTful Web Service Application Using web.xml With Application Subclass</a>
+     */
+    public static final String PROPERTY_ONTOLOGY_LOCATION = "org.graphity.ldp.ontology.location";
+    
+    /**
+     * Configuration property for ontology path relative to the base URI (set in web.xml)
+     * 
+     * @see <a href="http://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceConfig.html">ResourceConfig</a>
+     * @see <a href="http://docs.oracle.com/cd/E24329_01/web.1211/e24983/configure.htm#CACEAEGG">Packaging the RESTful Web Service Application Using web.xml With Application Subclass</a>
+     */
+    public static final String PROPERTY_ONTOLOGY_PATH = "org.graphity.ldp.ontology.path";
 
     private Set<Class<?>> classes = new HashSet<Class<?>>();
     private Set<Object> singletons = new HashSet<Object>();
@@ -117,6 +132,7 @@ public class Application extends javax.ws.rs.core.Application
     /**
      * Provides JAX-RS root resource classes.
      * @return set of root resource classes
+     * @see org.graphity.ldp.model
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/Application.html#getClasses()">Application.getClasses()</a>
      */
     @Override
@@ -130,6 +146,7 @@ public class Application extends javax.ws.rs.core.Application
     /**
      * Provides JAX-RS singleton objects (e.g. resources or Providers)
      * @return set of singleton objects
+     * @see org.graphity.ldp.provider
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/Application.html#getSingletons()">Application.getSingletons()</a>
      */
     @Override

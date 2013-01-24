@@ -37,8 +37,12 @@ import org.topbraid.spin.system.SPINModuleRegistry;
 import org.topbraid.spin.vocabulary.SP;
 
 /**
- *
+ * SPARQL query builder based on SPIN RDF syntax
+ * 
  * @author Martynas Jusevičius <martynas@graphity.org>
+ * @see SelectBuilder
+ * @see <a href="http://www.w3.org/Submission/2011/SUBM-spin-sparql-20110222/">SPIN - SPARQL Syntax</a>
+ * @see <a href="http://topbraid.org/spin/api/1.2.0/spin/apidocs/org/topbraid/spin/model/Query.html">SPIN Query</a>
  */
 public class QueryBuilder implements org.topbraid.spin.model.Query
 {
@@ -46,6 +50,11 @@ public class QueryBuilder implements org.topbraid.spin.model.Query
     private org.topbraid.spin.model.Query query = null;
     //private ARQ2SPIN arq2spin = null; //new ARQ2SPIN(model);
 
+    /**
+     * Constructs builder from SPIN query
+     * 
+     * @param query SPIN query resource
+     */
     protected QueryBuilder(org.topbraid.spin.model.Query query)
     {
 	if (query == null) throw new IllegalArgumentException("SPIN Query cannot be null");
@@ -56,6 +65,11 @@ public class QueryBuilder implements org.topbraid.spin.model.Query
 	this.query = query;
     }
 
+    /**
+     * SPIN query resource
+     * 
+     * @return the query resource of this builder
+     */
     protected org.topbraid.spin.model.Query getQuery()
     {
 	return query;
