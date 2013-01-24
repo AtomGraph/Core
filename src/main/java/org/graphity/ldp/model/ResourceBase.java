@@ -28,7 +28,9 @@ import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.api.uri.UriTemplate;
 import java.net.URI;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.TreeMap;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
@@ -199,10 +201,12 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	{
 	    RDFNode constraint = getModel().getResource(getMatchedOntClass().getURI()).getProperty(SPIN.constraint).getObject();
 	    TemplateCall call = SPINFactory.asTemplateCall(constraint);
-	    QueryBuilder queryBuilder = getQueryBuilder(call);
+	    //QueryBuilder queryBuilder = getQueryBuilder(getQuery(call));
 
-	    description.add(loadModel(getService(getMatchedOntClass()), queryBuilder.build()));
+	    Query query = getQuery(call);
+	    description.add(loadModel(getService(getMatchedOntClass()), query));
 
+	    QueryBuilder queryBuilder = QueryBuilder.fromQuery(query, getModel());
 	    if (log.isDebugEnabled()) log.debug("OntResource {} gets explicit spin:query value {}", this, queryBuilder);
 	    setPropertyValue(SPIN.query, queryBuilder);
 	}
@@ -253,25 +257,6 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	}
     }
 
-    public QueryBuilder getQueryBuilder(TemplateCall call)
-    {
-	Query arqQuery = getQuery(call);
-
-	if (hasRDFType(LDP.Page))
-	{
-	    if (!arqQuery.isSelectType()) throw new IllegalArgumentException("PageResource must have a SPIN Select query");
-
-	    if (log.isDebugEnabled()) log.debug("OntResource is an ldp:Page, creating QueryBuilding by wrapping its SELECT Query: {} into DESCRIBE", arqQuery);
-	    org.topbraid.spin.model.Query query = ARQ2SPIN.parseQuery(arqQuery.toString(), getModel());
-	    return getQueryBuilder((Select)query);
-	}
-	else
-	{
-	    if (log.isDebugEnabled()) log.debug("Creating QueryBuilder from Query: {}", arqQuery);
-	    return QueryBuilder.fromQuery(arqQuery, getModel());
-	}
-    }
-
     public QueryBuilder getQueryBuilder(Select select)
     {
 	SelectBuilder selectBuilder = SelectBuilder.fromSelect(select).
@@ -301,13 +286,29 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	}
 	return queryBuilder;
     }
-    
+
     public Query getQuery(TemplateCall call)
+    {
+	return getQuery(call, getRealURI());
+    }
+    
+    public Query getQuery(TemplateCall call, URI thisUri)
     {
 	if (call == null) throw new IllegalArgumentException("TemplateCall cannot be null");
 	String queryString = call.getQueryString();
-	queryString = queryString.replace("?this", "<" + getURI() + ">"); // binds ?this to URI of current resource
-	return QueryFactory.create(queryString);
+	queryString = queryString.replace("?this", "<" + thisUri.toString() + ">"); // binds ?this to URI of current resource
+	Query arqQuery = QueryFactory.create(queryString);
+	
+	if (hasRDFType(LDP.Page))
+	{
+	    if (!arqQuery.isSelectType()) throw new IllegalArgumentException("PageResource must have a SPIN Select query");
+
+	    if (log.isDebugEnabled()) log.debug("OntResource is an ldp:Page, creating QueryBuilding by wrapping its SELECT Query: {} into DESCRIBE", arqQuery);
+	    org.topbraid.spin.model.Query query = ARQ2SPIN.parseQuery(arqQuery.toString(), getModel());
+	    return getQueryBuilder((Select)query).build();
+	}
+	
+	return arqQuery;
     }
 
     public final OntClass matchOntClass(URI uri)

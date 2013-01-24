@@ -84,43 +84,43 @@ ldp:pageOf a owl:ObjectProperty ;
     void:inDataset :Dataset ;
     rdfs:seeAlso : .
 
-<../instances> a ldp:Container, sioc:Container, lda:ListEndpoint ;
+<../instances> a ldp:Container, sioc:Container ;
     sioc:has_host <..> ;
     dct:title "Instances" ;
     rdfs:isDefinedBy : ;
     void:inDataset :Dataset .
 
-<../ontologies> a ldp:Container, sioc:Container, lda:ListEndpoint ;
+<../ontologies> a ldp:Container, sioc:Container ;
     sioc:has_host <..> ;
     dct:title "Ontologies" ;
     rdfs:isDefinedBy : ;
     void:inDataset :Dataset .
 
-<../classes> a ldp:Container, sioc:Container, lda:ListEndpoint ;
+<../classes> a ldp:Container, sioc:Container ;
     sioc:has_host <..> ;
     dct:title "Classes" ;
     rdfs:isDefinedBy : ;
     void:inDataset :Dataset .
 
-<../properties> a ldp:Container, sioc:Container, lda:ListEndpoint ;
+<../properties> a ldp:Container, sioc:Container ;
     sioc:has_host <..> ;
     dct:title "Properties" ;
     rdfs:isDefinedBy : ;
     void:inDataset :Dataset .
 
-<../services> a ldp:Container, sioc:Container, lda:ListEndpoint ;
+<../services> a ldp:Container, sioc:Container ;
     sioc:has_host <..> ;
     dct:title "Services" ;
     rdfs:isDefinedBy : ;
     void:inDataset :Dataset .
 
-<../queries> a ldp:Container, sioc:Container, lda:ListEndpoint ;
+<../queries> a ldp:Container, sioc:Container ;
     sioc:has_host <..> ;
     dct:title "Queries" ;
     rdfs:isDefinedBy : ;
     void:inDataset :Dataset .
 
-<../modes> a ldp:Container, sioc:Container, lda:ListEndpoint ;
+<../modes> a ldp:Container, sioc:Container ;
     sioc:has_host <..> ;
     dct:title "XSLT modes" ;
     rdfs:isDefinedBy : ;
@@ -134,7 +134,7 @@ ldp:pageOf a owl:ObjectProperty ;
 # RESOURCE CLASSES
 
 :Resource a owl:Class ;
-    rdfs:subClassOf ldp:Container, lda:ListEndpoint ,
+    rdfs:subClassOf sioc:Item, lda:ItemEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty sioc:has_host ;
 		owl:hasValue <..>
