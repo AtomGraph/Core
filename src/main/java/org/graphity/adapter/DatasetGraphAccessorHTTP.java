@@ -48,6 +48,12 @@ import org.openjena.riot.lang.SinkTriplesToGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class is borrowed from Fuseki and adds authentication to SPARQL Graph Protocol accessor.
+ * 
+ * @see <a href="http://jena.apache.org/documentation/javadoc/fuseki/org/apache/jena/fuseki/http/DatasetGraphAccessorHTTP.html">DatasetGraphAccessorHTTP</a>
+ */
+
 public class DatasetGraphAccessorHTTP implements DatasetGraphAccessor
 {
     private static final Logger log = LoggerFactory.getLogger(DatasetGraphAccessorHTTP.class);

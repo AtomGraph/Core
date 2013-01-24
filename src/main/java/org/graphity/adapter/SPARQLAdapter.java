@@ -1,20 +1,19 @@
-/**
- *  Copyright 2012 Martynas Jusevičius <martynas@graphity.org>
+/*
+ * Copyright (C) 2012 Martynas Jusevičius <martynas@graphity.org>
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.graphity.adapter;
 
 import com.hp.hpl.jena.query.Query;
@@ -31,7 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * SPARQL Update implementation of Fuseki DatasetAccessor
+ * @see <a href="http://jena.apache.org/documentation/javadoc/fuseki/org/apache/jena/fuseki/DatasetAccessor.html">Fuseki's DatasetAccessor</a>
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 public class SPARQLAdapter // implements org.openjena.fuseki.DatasetAccessor
@@ -40,20 +40,32 @@ public class SPARQLAdapter // implements org.openjena.fuseki.DatasetAccessor
     
     private String endpoint = null;
     
+    /**
+     * Constructs adapter based on SPARQL endpoint URI.
+     * @param	endpoint    Absolute SPARQL endpoint URI
+     */
     public SPARQLAdapter(String endpoint)
     {
 	this.endpoint = endpoint;
     }
 
+    /**
+     * Returns SPARQL endpoint URI for this adapter.
+     * @return	absolute SPARQL endpoint URI
+     */
     public String getEndpoint()
     {
 	return endpoint;
     }
     
-    public void add(Model data)
+    /**
+     * Adds RDF Model to the default graph.
+     * @param	data	RDF Model
+     */
+    public void add(Model model)
     {
 	ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	data.write(baos, WebContent.langNTriples);
+	model.write(baos, WebContent.langNTriples);
 
 	//UpdateDataInsert;
 	// http://www.w3.org/TR/sparql11-update/#insertData
@@ -66,10 +78,15 @@ public class SPARQLAdapter // implements org.openjena.fuseki.DatasetAccessor
 	process.execute();	
     }
     
-    public void add(String graphUri, Model data)
+    /**
+     * Adds RDF Model to specified named graph.
+     * @param	graphUri    URI of the named graph
+     * @param	model	    RDF Model
+     */
+    public void add(String graphUri, Model model)
     {
 	ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	data.write(baos, WebContent.langNTriples);
+	model.write(baos, WebContent.langNTriples);
 
 	//UpdateDataInsert;
 	// http://www.w3.org/TR/sparql11-update/#insertData
@@ -83,6 +100,11 @@ public class SPARQLAdapter // implements org.openjena.fuseki.DatasetAccessor
 	process.execute();
     }
     
+    /**
+     * Checks if named graph exists.
+     * @param	graphUri    URI of the named graph
+     * @return	true if named graph exists
+     */
     public boolean containsModel(String graphUri)
     {
 	Query query = QueryFactory.create("ASK { <" + graphUri + "> ?p ?o }");

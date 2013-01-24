@@ -19,7 +19,11 @@ package org.graphity.ldp.model;
 import com.hp.hpl.jena.ontology.OntResource;
 
 /**
- *
+ * Generic read-only Linked Data resource interface
+ * 
+ * @see Resource
+ * @see org.graphity.model.LinkedDataResource
+ * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/ontology/OntResource.html">OntResource</a>
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 public interface LinkedDataResource extends Resource, org.graphity.model.LinkedDataResource, OntResource

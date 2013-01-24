@@ -31,13 +31,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Base class of generic read-only Linked Data resources
+ * 
+ * @see LinkedDataResource
+ * @see ResourceFactory
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 public class LinkedDataResourceBase extends ResourceFactory implements LinkedDataResource
 {
     private static final Logger log = LoggerFactory.getLogger(LinkedDataResourceBase.class);
 
+    /**
+     * RDF representation variants supported by default
+     */
     public static List<Variant> VARIANTS = Variant.VariantListBuilder.newInstance().
 		mediaTypes(MediaType.APPLICATION_XHTML_XML_TYPE,
 			org.graphity.ldp.MediaType.APPLICATION_RDF_XML_TYPE,
@@ -51,6 +57,16 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     private final List<Variant> variants;
     private final OntResource ontResource;
     
+    /** 
+     * Constructs read-only LD resource from Jena's OntResource and JAX-RS context
+     * 
+     * @param ontResource the current resource in the ontology
+     * @param uriInfo URI information
+     * @param request current request
+     * @param httpHeaders current request headers
+     * @param variants representation variants
+     * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/ontology/OntResource.html">OntResource</a>
+     */
     public LinkedDataResourceBase(OntResource ontResource,
 	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants)
     {
@@ -75,7 +91,6 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     }
 
     @GET
-    // http://tools.ietf.org/html/draft-ietf-httpbis-p2-semantics-21#section-5.3.1
     @Override
     public Response getResponse()
     {

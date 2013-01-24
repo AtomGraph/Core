@@ -17,7 +17,10 @@
 package org.graphity.ldp.model;
 
 /**
- *
+ * Interface of page resources (with LIMIT, OFFSET, ORDER BY, DESC parameters)
+ * 
+ * @see <a href="http://www.w3.org/TR/rdf-sparql-query/#solutionModifiers">SPARQL Solution Sequences and Modifiers</a>
+ * @see <a href="http://www.w3.org/TR/2012/WD-ldp-20121025/#ldpc-paging">Linked Data Platform 1.0: Paging</a>
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 public interface PageResource extends LinkedDataResource
@@ -30,8 +33,18 @@ public interface PageResource extends LinkedDataResource
     
     Boolean getDesc();
 
+    /**
+     * Get the resource of the previous page
+     * 
+     * @return Jena resource with previous page URI
+     */
     com.hp.hpl.jena.rdf.model.Resource getPrevious();
-    
+
+    /**
+     * Get the resource of the next page
+     * 
+     * @return Jena resource with next page URI
+     */
     com.hp.hpl.jena.rdf.model.Resource getNext();
 
 }

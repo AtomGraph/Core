@@ -25,13 +25,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Base class of generic read-write Linked Data resources
+ * 
+ * @see LDPResource
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 public class LDPResourceBase extends LinkedDataResourceBase implements LDPResource
 {    
     private static final Logger log = LoggerFactory.getLogger(LDPResourceBase.class);
     
+    /**
+     * Constructs read-write LD resource from Jena's OntResource and JAX-RS context
+     * 
+     * @param ontResource the current resource in the ontology
+     * @param uriInfo URI information
+     * @param request current request
+     * @param httpHeaders current request headers
+     * @param variants representation variants
+     * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/ontology/OntResource.html">OntResource</a>
+     */
     public LDPResourceBase(OntResource ontResource,
 	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants)
     {
@@ -39,8 +51,10 @@ public class LDPResourceBase extends LinkedDataResourceBase implements LDPResour
     }
 
     @Override
-    // http://tools.ietf.org/html/draft-ietf-httpbis-p2-semantics-21#section-5.3.3
-    // on base URI: http://lists.w3.org/Archives/Public/public-ldp-wg/2012Oct/0181.html
+    /**
+     * @link <a href="http://lists.w3.org/Archives/Public/public-ldp-wg/2012Oct/0181.html">What is the document base URI of a POSTed document?</a>
+     * 
+     */
     public Response post(Model model)
     {
 	throw new WebApplicationException(405);
@@ -51,7 +65,6 @@ public class LDPResourceBase extends LinkedDataResourceBase implements LDPResour
     }
 
     @Override
-    // http://tools.ietf.org/html/draft-ietf-httpbis-p2-semantics-21#section-5.3.4
     public Response put(Model model)
     {
 	throw new WebApplicationException(405);
@@ -64,7 +77,6 @@ public class LDPResourceBase extends LinkedDataResourceBase implements LDPResour
     }
 
     @Override
-    // http://tools.ietf.org/html/draft-ietf-httpbis-p2-semantics-21#section-5.3.5
     public Response delete()
     {
 	throw new WebApplicationException(405);

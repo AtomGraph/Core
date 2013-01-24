@@ -45,8 +45,11 @@ import org.slf4j.LoggerFactory;
 import org.topbraid.spin.system.SPINModuleRegistry;
 
 /**
- *
+ * Graphity JAX-RS application base class.
+ * Can be extended or used as it is (needs to be registered in web.xml).
+ * 
  * @author Martynas Jusevičius <martynas@graphity.org>
+ * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/Application.html">JAX-RS Application</a>
  */
 public class Application extends javax.ws.rs.core.Application
 {
@@ -54,7 +57,15 @@ public class Application extends javax.ws.rs.core.Application
 
     private Set<Class<?>> classes = new HashSet<Class<?>>();
     private Set<Object> singletons = new HashSet<Object>();
-    
+
+    /**
+     * Initializes (post construction) DataManager, its LocationMapper and Locators
+     * @see org.graphity.util.manager.DataManager
+     * @see org.graphity.util.locator
+     * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/util/FileManager.html">FileManager</a>
+     * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/util/LocationMapper.html">LocationMapper</a>
+     * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/util/Locator.html">Locator</a>
+     */
     @PostConstruct
     public void init()
     {
@@ -103,6 +114,11 @@ public class Application extends javax.ws.rs.core.Application
 	}
     }
 
+    /**
+     * Provides JAX-RS root resource classes.
+     * @return set of root resource classes
+     * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/Application.html#getClasses()">Application.getClasses()</a>
+     */
     @Override
     public Set<Class<?>> getClasses()
     {
@@ -111,6 +127,11 @@ public class Application extends javax.ws.rs.core.Application
         return classes;
     }
 
+    /**
+     * Provides JAX-RS singleton objects (e.g. resources or Providers)
+     * @return set of singleton objects
+     * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/Application.html#getSingletons()">Application.getSingletons()</a>
+     */
     @Override
     public Set<Object> getSingletons()
     {
@@ -139,6 +160,14 @@ public class Application extends javax.ws.rs.core.Application
 	return singletons;
     }
     
+    /**
+     * Provides stylesheet as XML string
+     * @param filename
+     * @return XML source
+     * @throws FileNotFoundException
+     * @throws URISyntaxException 
+     * @see <a href="http://docs.oracle.com/javase/6/docs/api/javax/xml/transform/Source.html">Source</a>
+     */
     public Source getStylesheet(String filename) throws FileNotFoundException, URISyntaxException
     {
 	// using getResource() because getResourceAsStream() does not retain systemId
