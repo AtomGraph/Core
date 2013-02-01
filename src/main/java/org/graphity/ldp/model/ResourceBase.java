@@ -47,9 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.topbraid.spin.arq.ARQ2SPIN;
 import org.topbraid.spin.model.SPINFactory;
-import org.topbraid.spin.model.Select;
 import org.topbraid.spin.model.TemplateCall;
-import org.topbraid.spin.vocabulary.SP;
 import org.topbraid.spin.vocabulary.SPIN;
 
 /**
@@ -210,7 +208,6 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	{
 	    RDFNode constraint = getModel().getResource(getMatchedOntClass().getURI()).getProperty(SPIN.constraint).getObject();
 	    TemplateCall call = SPINFactory.asTemplateCall(constraint);
-	    //QueryBuilder queryBuilder = getQueryBuilder(getQuery(call));
 
 	    Query query = getQuery(call);
 	    description.add(loadModel(getService(getMatchedOntClass()), query));
@@ -266,9 +263,12 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	}
     }
 
-    public QueryBuilder getQueryBuilder(Select select)
+    public QueryBuilder getQueryBuilder(org.topbraid.spin.model.Query query)
     {
-	SelectBuilder selectBuilder = SelectBuilder.fromSelect(select).
+	QueryBuilder queryBuilder = QueryBuilder.fromQuery(query);
+	if (queryBuilder.getSubSelectBuilder() == null) throw new IllegalArgumentException("The SPIN query for ldp:Page class does not have a SELECT subquery");
+	
+	SelectBuilder selectBuilder = queryBuilder.getSubSelectBuilder().
 	    limit(getLimit()).offset(getOffset());
 	/*
 	if (orderBy != null)
@@ -281,18 +281,6 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	}
 	*/
 
-	QueryBuilder queryBuilder;
-	if (selectBuilder.getPropertyResourceValue(SP.resultVariables) != null)
-	{
-	    if (log.isDebugEnabled()) log.debug("Query Resource {} has result variables: {}", selectBuilder, selectBuilder.getPropertyResourceValue(SP.resultVariables));
-	    queryBuilder = QueryBuilder.fromDescribe(selectBuilder.getPropertyResourceValue(SP.resultVariables)).
-		subQuery(selectBuilder);
-	}
-	else
-	{
-	    if (log.isDebugEnabled()) log.debug("Query Resource {} does not have result variables, using wildcard", selectBuilder);
-	    queryBuilder = QueryBuilder.fromDescribe(selectBuilder.getModel()).subQuery(selectBuilder);
-	}
 	return queryBuilder;
     }
 
@@ -310,11 +298,8 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	
 	if (hasRDFType(LDP.Page))
 	{
-	    if (!arqQuery.isSelectType()) throw new IllegalArgumentException("PageResource must have a SPIN Select query");
-
 	    if (log.isDebugEnabled()) log.debug("OntResource is an ldp:Page, creating QueryBuilding by wrapping its SELECT Query: {} into DESCRIBE", arqQuery);
-	    org.topbraid.spin.model.Query query = ARQ2SPIN.parseQuery(arqQuery.toString(), getModel());
-	    return getQueryBuilder((Select)query).build();
+	    return getQueryBuilder(ARQ2SPIN.parseQuery(arqQuery.toString(), getModel())).build();
 	}
 	
 	return arqQuery;

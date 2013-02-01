@@ -161,7 +161,7 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:onProperty g:mode ;
 		owl:hasValue g:ListMode
 	] ;
-    spin:constraint [ a :SelectInstancesTemplate ] ;
+    spin:constraint [ a :DescribeInstancesTemplate ] ;
     rdfs:label "Instances page list class" ;
     rdfs:isDefinedBy : .
 
@@ -179,7 +179,7 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:onProperty g:mode ;
 		owl:hasValue g:TableMode
 	] ;
-    spin:constraint [ a :SelectInstancesTemplate ] ;
+    spin:constraint [ a :DescribeInstancesTemplate ] ;
     rdfs:label "Instances page table class" ;
     rdfs:isDefinedBy : .
 
@@ -197,7 +197,7 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:onProperty g:mode ;
 		owl:hasValue g:InputMode
 	] ;
-    spin:constraint [ a :SelectInstancesTemplate ] ;
+    spin:constraint [ a :DescribeInstancesTemplate ] ;
     rdfs:label "Instances page input class" ;
     rdfs:isDefinedBy : .
 
@@ -216,7 +216,7 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:hasValue g:ListMode
 	] ;
     rdfs:label "Ontologies page resource class" ;
-    spin:constraint [ a :SelectInstancesTemplate ;
+    spin:constraint [ a :DescribeInstancesTemplate ;
 	    g:type owl:Ontology
 	    ] ;
     rdfs:isDefinedBy : .
@@ -236,7 +236,7 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:hasValue g:TableMode
 	] ;
     rdfs:label "Ontologies page resource class" ;
-    spin:constraint [ a :SelectInstancesTemplate ;
+    spin:constraint [ a :DescribeInstancesTemplate ;
 	    g:type owl:Ontology
 	    ] ;
     rdfs:isDefinedBy : .
@@ -256,7 +256,7 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:hasValue g:InputMode
 	] ;
     rdfs:label "Ontologies page resource class" ;
-    spin:constraint [ a :SelectInstancesTemplate ;
+    spin:constraint [ a :DescribeInstancesTemplate ;
 	    g:type owl:Ontology
 	    ] ;
     rdfs:isDefinedBy : .
@@ -276,7 +276,7 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:hasValue g:ListMode
 	] ;
     rdfs:label "Classes page resource class" ;
-    spin:constraint [ a :SelectInstancesTemplate ;
+    spin:constraint [ a :DescribeInstancesTemplate ;
 	    g:type owl:Class
 	    ] ;
     rdfs:isDefinedBy : .
@@ -296,7 +296,7 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:hasValue g:TableMode
 	] ;
     rdfs:label "Classes page resource class" ;
-    spin:constraint [ a :SelectInstancesTemplate ;
+    spin:constraint [ a :DescribeInstancesTemplate ;
 	    g:type owl:Class
 	    ] ;
     rdfs:isDefinedBy : .
@@ -316,7 +316,7 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:hasValue g:InputMode
 	] ;
     rdfs:label "Classes page resource class" ;
-    spin:constraint [ a :SelectInstancesTemplate ;
+    spin:constraint [ a :DescribeInstancesTemplate ;
 	    g:type owl:Class
 	    ] ;
     rdfs:isDefinedBy : .
@@ -336,7 +336,7 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:hasValue g:ListMode
 	] ;
     rdfs:label "Properties page resource class" ;
-    spin:constraint [ a :SelectPropertiesTemplate ;
+    spin:constraint [ a :DescribetPropertiesTemplate ;
 	    g:type owl:Ontology
 	    ] ;
     rdfs:isDefinedBy : .
@@ -356,7 +356,7 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:hasValue g:TableMode
 	] ;
     rdfs:label "Properties page resource class" ;
-    spin:constraint [ a :SelectPropertiesTemplate ;
+    spin:constraint [ a :DescribetPropertiesTemplate ;
 	    g:type owl:Ontology
 	    ] ;
     rdfs:isDefinedBy : .
@@ -376,7 +376,7 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:hasValue g:InputMode
 	] ;
     rdfs:label "Properties page resource class" ;
-    spin:constraint [ a :SelectPropertiesTemplate ;
+    spin:constraint [ a :DescribetPropertiesTemplate ;
 	    g:type owl:Ontology
 	    ] ;
     rdfs:isDefinedBy : .
@@ -396,7 +396,7 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:hasValue g:ListMode
 	] ;
     rdfs:label "Services page resource class" ;
-    spin:constraint [ a :SelectInstancesTemplate ;
+    spin:constraint [ a :DescribeInstancesTemplate ;
 	    g:type sd:Service
 	    ] ;
     rdfs:isDefinedBy : .
@@ -416,7 +416,7 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:hasValue g:TableMode
 	] ;
     rdfs:label "Services page resource class" ;
-    spin:constraint [ a :SelectInstancesTemplate ;
+    spin:constraint [ a :DescribeInstancesTemplate ;
 	    g:type sd:Service
 	    ] ;
     rdfs:isDefinedBy : .
@@ -436,7 +436,7 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:hasValue g:InputMode
 	] ;
     rdfs:label "Services page resource class" ;
-    spin:constraint [ a :SelectInstancesTemplate ;
+    spin:constraint [ a :DescribeInstancesTemplate ;
 	    g:type sd:Service
 	    ] ;
     rdfs:isDefinedBy : .
@@ -456,7 +456,7 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:hasValue g:ListMode
 	] ;
     rdfs:label "Queries page resource class" ;
-    spin:constraint [ a :SelectInstancesTemplate ;
+    spin:constraint [ a :DescribeInstancesTemplate ;
 	    g:type sp:Query
 	    ] ;
     rdfs:isDefinedBy : .
@@ -476,7 +476,7 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:hasValue g:TableMode
 	] ;
     rdfs:label "Queries page resource class" ;
-    spin:constraint [ a :SelectInstancesTemplate ;
+    spin:constraint [ a :DescribeInstancesTemplate ;
 	    g:type sp:Query
 	    ] ;
     rdfs:isDefinedBy : .
@@ -496,7 +496,7 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:hasValue g:InputMode
 	] ;
     rdfs:label "Queries page resource class" ;
-    spin:constraint [ a :SelectInstancesTemplate ;
+    spin:constraint [ a :DescribeInstancesTemplate ;
 	    g:type sp:Query
 	    ] ;
     rdfs:isDefinedBy : .
@@ -516,7 +516,7 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:hasValue g:ListMode
 	] ;
     rdfs:label "Modes page resource class" ;
-    spin:constraint [ a :SelectInstancesTemplate ;
+    spin:constraint [ a :DescribeInstancesTemplate ;
 	    g:type g:XSLTMode
 	    ] ;
     rdfs:isDefinedBy : .
@@ -536,7 +536,7 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:hasValue g:TableMode
 	] ;
     rdfs:label "Modes page resource class" ;
-    spin:constraint [ a :SelectInstancesTemplate ;
+    spin:constraint [ a :DescribeInstancesTemplate ;
 	    g:type g:XSLTMode
 	    ] ;
     rdfs:isDefinedBy : .
@@ -556,7 +556,7 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:hasValue g:InputMode
 	] ;
     rdfs:label "Modes page resource class" ;
-    spin:constraint [ a :SelectInstancesTemplate ;
+    spin:constraint [ a :DescribeInstancesTemplate ;
 	    g:type g:XSLTMode
 	    ] ;
     rdfs:isDefinedBy : .
@@ -576,66 +576,86 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:hasValue g:ListMode
 	] ;
     rdfs:label "Containers page resource class" ;
-    spin:constraint [ a :SelectInstancesTemplate ;
+    spin:constraint [ a :DescribeInstancesTemplate ;
 	    g:type sioc:Container
 	    ] ;
     rdfs:isDefinedBy : .
 
-# TEMPLATES & QUERIES
+# QUERIES & TEMPLATES
 
-:SelectInstancesTemplate a spin:Template ;
-    spin:body :SelectInstances ;
+:DescribeInstancesTemplate a spin:Template ;
+    spin:body :DescribeInstances ;
     spin:constraint [ a       spl:Argument ;
 		spl:predicate g:type ;
 		spl:valueType rdfs:Resource
 	] ;
     rdfs:isDefinedBy : .
 
-:SelectInstances    a       sp:Select, sp:Query ;
-      sp:resultVariables (_:instanceVar) ;
-      sp:text """SELECT ?instance
-WHERE {
-    ?instance a ?type .
+:DescribeInstances    a       sp:Describe ;
+      sp:resultNodes (spin:_this _:instanceVar) ;
+      sp:text """DESCRIBE ?this ?instance WHERE {
+    {
+        SELECT ?instance
+        WHERE {
+            ?instance a ?type .
+        }
+    } .
 }"""^^xsd:string ;
-      sp:where ([ sp:object
-                          [ sp:varName "type"^^xsd:string
-                          ] ;
-                  sp:predicate rdf:type ;
-                  sp:subject _:instanceVar
-                ]) ;
-    rdfs:isDefinedBy : .
+      sp:where ([ a       sp:SubQuery ;
+                  sp:query
+                          [ a       sp:Select ;
+                            sp:resultVariables (_:instanceVar) ;
+                            sp:where ([ sp:object
+                                                [ sp:varName "type"^^xsd:string
+                                                ] ;
+                                        sp:predicate rdf:type ;
+                                        sp:subject _:instanceVar
+                                      ])
+                          ]
+                ]) .
 
 _:instanceVar  sp:varName "instance"^^xsd:string .
 
 # ====
 
-:SelectPropertiesTemplate a spin:Template ;
-    spin:body :SelectProperties ;
+:DescribetPropertiesTemplate a spin:Template ;
+    spin:body :DescribeProperties ;
     rdfs:isDefinedBy : .
 
-:SelectProperties    a       sp:Select, sp:Query ;
-      sp:resultVariables (_:propertyVar) ;
+:DescribeProperties    a       sp:Describe ;
+      sp:resultNodes ([ sp:varName "this"^^xsd:string
+                ] _:propertyVar) ;
       sp:text """PREFIX owl: <http://www.w3.org/2002/07/owl#>
-SELECT ?property
-WHERE {
+DESCRIBE ?this ?property WHERE {
     {
-        ?property a owl:ObjectProperty .
-    }
-    UNION
-    {
-        ?property a owl:DatatypeProperty .
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+        SELECT ?property
+        WHERE {
+            {
+                ?property a owl:ObjectProperty .
+            }
+            UNION
+            {
+                ?property a owl:DatatypeProperty .
+            } .
+        }
     } .
 }"""^^xsd:string ;
-      sp:where ([ a       sp:Union ;
-                  sp:elements (([ sp:object owl:ObjectProperty ;
-                                sp:predicate rdf:type ;
-                                sp:subject _:propertyVar
-                              ]) ([ sp:object owl:DatatypeProperty ;
-                                sp:predicate rdf:type ;
-                                sp:subject _:propertyVar
-                              ]))
-                ]) ;
-    rdfs:isDefinedBy : .
+      sp:where ([ a       sp:SubQuery ;
+                  sp:query
+                          [ a       sp:Select ;
+                            sp:resultVariables (_:propertyVar) ;
+                            sp:where ([ a       sp:Union ;
+                                        sp:elements (([ sp:object owl:ObjectProperty ;
+                                                      sp:predicate rdf:type ;
+                                                      sp:subject _:propertyVar
+                                                    ]) ([ sp:object owl:DatatypeProperty ;
+                                                      sp:predicate rdf:type ;
+                                                      sp:subject _:propertyVar
+                                                    ]))
+                                      ])
+                          ]
+                ]) .
 
 _:propertyVar  sp:varName "property"^^xsd:string .
 

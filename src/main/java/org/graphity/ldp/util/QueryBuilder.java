@@ -74,8 +74,6 @@ public class QueryBuilder implements org.topbraid.spin.model.Query
     {
 	return query;
     }
-
-    // public static QueryBuilder fromTemplateCall(Template template, TemplateCall call)
     
     public static QueryBuilder fromQuery(org.topbraid.spin.model.Query query)
     {
@@ -159,14 +157,23 @@ public class QueryBuilder implements org.topbraid.spin.model.Query
 	return this;
     }
 
-    /*
-    public QueryBuilder subQuery(org.topbraid.spin.model.Query query)
+    public SelectBuilder getSubSelectBuilder()
     {
-	if (query == null) throw new IllegalArgumentException("Sub-query resource cannot be null");
-
-	return subQuery((Select)query);  // exception if not SELECT ?
+	Iterator<Element> it = getWhereElements().iterator();
+	while (it.hasNext())
+	{
+	    Element elem = it.next();
+	    if (elem.canAs(org.topbraid.spin.model.SubQuery.class))
+	    {
+		org.topbraid.spin.model.Query sub = elem.as(org.topbraid.spin.model.SubQuery.class).getQuery();
+		// only SELECTs can be subqueries??
+		if (sub.canAs(Select.class))
+		    return SelectBuilder.fromSelect(sub.as(Select.class));
+	    }
+	}
+	
+	return null;
     }
-    */
     
     public QueryBuilder subQuery(Select select)
     {

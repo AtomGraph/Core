@@ -36,14 +36,27 @@
         <netbeans.hint.deploy.server>Tomcat</netbeans.hint.deploy.server>
     </properties>
  
-<scm>
-    <url>https://github.com/Graphity/graphity-ldp</url>
-    <connection>scm:git:git://github.com/Graphity/graphity-ldp.git</connection>
-    <developerConnection>scm:git:git@github.com:pumba-lt/graphity-ldp.git</developerConnection>
-</scm>
+    <scm>
+	<url>https://github.com/Graphity/graphity-ldp</url>
+	<connection>scm:git:git://github.com/Graphity/graphity-ldp.git</connection>
+	<developerConnection>scm:git:git@github.com:pumba-lt/graphity-ldp.git</developerConnection>
+    </scm>
+
+    <repositories>
+	<repository>
+	    <id>apache-repo-releases</id>
+	    <url>https://repository.apache.org/content/repositories/releases/</url>
+	    <releases>
+	    <enabled>true</enabled>
+	    </releases>
+	</repository>
+	<repository>
+	    <id>org.topbraid</id>
+	    <url>http://topquadrant.com/repository/spin</url>
+	</repository>
+    </repositories>
 
     <dependencies>
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -60,23 +73,6 @@
             <artifactId>jersey-servlet</artifactId>
             <version>1.10</version>
         </dependency>
-	<!--
-        <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-client</artifactId>
-            <version>1.9</version>
-        </dependency>
-	-->
-        <dependency>
-            <groupId>com.hp.hpl.jena</groupId>
-            <artifactId>arq</artifactId>
-            <version>2.8.7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.topbraid</groupId>
-            <artifactId>spin</artifactId>
-            <version>1.2.0</version>
-        </dependency>
         <dependency>
             <groupId>com.sun.jersey.oauth</groupId>
             <artifactId>oauth-signature</artifactId>
@@ -88,35 +84,25 @@
             <version>1.1.1-ea</version>
         </dependency>
         <dependency>
-            <groupId>com.hp.hpl.jena</groupId>
-            <artifactId>jena</artifactId>
-            <version>2.6.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjena</groupId>
-            <artifactId>fuseki</artifactId>
-            <version>0.2.0</version>
+            <groupId>org.apache.jena</groupId>
+            <artifactId>jena-fuseki</artifactId>
+            <version>0.2.3</version>
             <exclusions>
                 <exclusion>
-                    <artifactId>tdb</artifactId>
-                    <groupId>com.hp.hpl.jena</groupId>
+                    <artifactId>org.apache.jena</artifactId>
+                    <groupId>jena-tdb</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>4.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.1.1</version>
         </dependency>
         <dependency>
             <groupId>net.sourceforge.saxon</groupId>
             <artifactId>saxon</artifactId>
             <version>9.1.0.8</version>
+        </dependency>
+        <dependency>
+            <groupId>org.topbraid</groupId>
+            <artifactId>spin</artifactId>
+            <version>1.3.0</version>
         </dependency>
     </dependencies>
 
@@ -150,5 +136,5 @@
             </plugin>
         </plugins>
     </build>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
 </project>
