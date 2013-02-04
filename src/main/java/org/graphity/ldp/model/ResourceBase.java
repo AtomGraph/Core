@@ -219,7 +219,10 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 
 	if (hasRDFType(LDP.Page))
 	{
-	    // add description of ldp:Container
+	    if (log.isDebugEnabled()) log.debug("Adding description of the ldp:Page");
+	    description.add(super.describe());
+	    
+	    if (log.isDebugEnabled()) log.debug("Adding description of the ldp:Container");
 	    OntResource container = getPropertyResourceValue(LDP.pageOf).as(OntResource.class);
 	    LinkedDataResource ldc = new ResourceBase(container, getUriInfo(), getRequest(), getHttpHeaders(), getVariants(),
 		    getLimit(), getOffset(), getOrderBy(), getDesc());

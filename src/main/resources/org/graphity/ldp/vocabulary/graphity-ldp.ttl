@@ -591,9 +591,9 @@ ldp:pageOf a owl:ObjectProperty ;
 	] ;
     rdfs:isDefinedBy : .
 
-:DescribeInstances    a       sp:Describe ;
-      sp:resultNodes (spin:_this _:instanceVar) ;
-      sp:text """DESCRIBE ?this ?instance WHERE {
+:DescribeInstances    a       sp:Describe, sp:Query ;
+      sp:resultNodes (_:instanceVar) ;
+      sp:text """DESCRIBE ?instance WHERE {
     {
         SELECT ?instance
         WHERE {
@@ -622,11 +622,10 @@ _:instanceVar  sp:varName "instance"^^xsd:string .
     spin:body :DescribeProperties ;
     rdfs:isDefinedBy : .
 
-:DescribeProperties    a       sp:Describe ;
-      sp:resultNodes ([ sp:varName "this"^^xsd:string
-                ] _:propertyVar) ;
+:DescribeProperties    a       sp:Describe, sp:Query ;
+      sp:resultNodes (_:propertyVar) ;
       sp:text """PREFIX owl: <http://www.w3.org/2002/07/owl#>
-DESCRIBE ?this ?property WHERE {
+DESCRIBE ?property WHERE {
     {
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
         SELECT ?property
@@ -664,7 +663,7 @@ _:propertyVar  sp:varName "property"^^xsd:string .
 :DescribeTemplate a spin:Template ;
     spin:body :DefaultDescribe .
 
-:DefaultDescribe    a       sp:Describe ;
+:DefaultDescribe    a       sp:Describe, sp:Query ;
       sp:resultNodes (spin:_this) ;
       sp:text """DESCRIBE ?this"""^^xsd:string .
 
