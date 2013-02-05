@@ -51,12 +51,15 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 		//languages(new Locale("en")).
 		add().build();
 
+    public static CacheControl NO_CACHE = CacheControl.valueOf("no-cache");
+    
     private final UriInfo uriInfo;
     private final Request request;
     private final HttpHeaders httpHeaders;
     private final List<Variant> variants;
     private final OntResource ontResource;
-    
+    private final CacheControl cacheControl;
+
     /** 
      * Constructs read-only LD resource from Jena's OntResource and JAX-RS context
      * 
@@ -68,13 +71,14 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
      * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/ontology/OntResource.html">OntResource</a>
      */
     public LinkedDataResourceBase(OntResource ontResource,
-	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants)
+	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants, CacheControl cacheControl)
     {
 	if (ontResource == null) throw new IllegalArgumentException("OntResource cannot be null");
 	if (uriInfo == null) throw new IllegalArgumentException("UriInfo cannot be null");
 	if (request == null) throw new IllegalArgumentException("Request cannot be null");
 	if (httpHeaders == null) throw new IllegalArgumentException("HttpHeaders cannot be null");
 	if (variants == null) throw new IllegalArgumentException("Variants cannot be null");
+	if (cacheControl == null) throw new IllegalArgumentException("CacheControl cannot be null");
 	
 	if (!ontResource.isURIResource()) throw new IllegalArgumentException("OntResource must be URI Resource (not a blank node)");
 	this.ontResource = ontResource;
@@ -88,6 +92,7 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	this.request = request;
 	this.httpHeaders = httpHeaders;
 	this.variants = variants;
+	this.cacheControl = cacheControl;
     }
 
     @GET
@@ -126,7 +131,9 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	    {
 		if (log.isTraceEnabled()) log.trace("Generating RDF Response with Variant: {} and EntityTag: {}", variant, entityTag);
 		return Response.ok(description, variant).
-			tag(entityTag).build(); // uses ModelXSLTWriter/ModelWriter
+			tag(entityTag).
+			cacheControl(getCacheControl()).
+			build(); // uses ModelXSLTWriter/ModelWriter
 	    }
 	}
     }
@@ -181,6 +188,11 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     public final HttpHeaders getHttpHeaders()
     {
 	return httpHeaders;
+    }
+
+    public final CacheControl getCacheControl()
+    {
+	return cacheControl;
     }
 
     @Override

@@ -115,26 +115,26 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	    @QueryParam("desc") Boolean desc)
     {
 	this(getOntology(uriInfo, config),
-		uriInfo, request, httpHeaders, VARIANTS,
+		uriInfo, request, httpHeaders, VARIANTS, NO_CACHE,
 		limit, offset, orderBy, desc);
     }
     
     protected ResourceBase(OntModel ontModel,
-	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
+	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants, CacheControl cacheControl,
 	    Long limit, Long offset, String orderBy, Boolean desc)
     {
 	this(ontModel.createOntResource(uriInfo.getRequestUri().toString()),
-		uriInfo, request, httpHeaders, variants,
+		uriInfo, request, httpHeaders, variants, cacheControl,
 		limit, offset, orderBy, desc);
 	
 	if (log.isDebugEnabled()) log.debug("Constructing LDP ResourceBase");
     }
 
     protected ResourceBase(OntResource ontResource,
-	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants,
+	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants, CacheControl cacheControl,
 	    Long limit, Long offset, String orderBy, Boolean desc)
     {
-	super(ontResource, uriInfo, request, httpHeaders, variants);
+	super(ontResource, uriInfo, request, httpHeaders, variants, cacheControl);
 
 	this.limit = limit;
 	this.offset = offset;
@@ -224,7 +224,7 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	    
 	    if (log.isDebugEnabled()) log.debug("Adding description of the ldp:Container");
 	    OntResource container = getPropertyResourceValue(LDP.pageOf).as(OntResource.class);
-	    LinkedDataResource ldc = new ResourceBase(container, getUriInfo(), getRequest(), getHttpHeaders(), getVariants(),
+	    LinkedDataResource ldc = new ResourceBase(container, getUriInfo(), getRequest(), getHttpHeaders(), getVariants(), getCacheControl(),
 		    getLimit(), getOffset(), getOrderBy(), getDesc());
 	    description.add(ldc.describe());
 	}

@@ -45,9 +45,9 @@ public class LDPResourceBase extends LinkedDataResourceBase implements LDPResour
      * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/ontology/OntResource.html">OntResource</a>
      */
     public LDPResourceBase(OntResource ontResource,
-	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants)
+	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants, CacheControl cacheControl)
     {
-	super(ontResource, uriInfo, request, httpHeaders, variants);
+	super(ontResource, uriInfo, request, httpHeaders, variants, cacheControl);
     }
 
     @Override
