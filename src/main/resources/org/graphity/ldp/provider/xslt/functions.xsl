@@ -235,6 +235,16 @@ exclude-result-prefixes="#all">
 	</xsl:for-each>
     </xsl:function>
 
+    <xsl:function name="rdfs:range" as="xs:anyURI*">
+	<xsl:param name="property-uri" as="xs:anyURI+"/>
+	<!-- <xsl:message>$property-uri: <xsl:value-of select="$property-uri"/></xsl:message> -->
+	<xsl:for-each select="$property-uri">
+	    <xsl:for-each select="document(g:document-uri($property-uri))">
+		<xsl:sequence select="key('resources', $property-uri)/rdfs:range/@rdf:resource"/>
+	    </xsl:for-each>
+	</xsl:for-each>
+    </xsl:function>
+
     <xsl:function name="rdfs:subClassOf" as="xs:anyURI*">
 	<xsl:param name="uri" as="xs:anyURI+"/>
 	<xsl:for-each select="document(g:document-uri($uri))">

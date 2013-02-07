@@ -205,13 +205,13 @@ exclude-result-prefixes="#all">
     <!-- property -->
     <xsl:template match="*[@rdf:about or @rdf:nodeID]/*" mode="g:LabelMode">
 	<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(.), local-name(.)))" as="xs:anyURI"/>
-	<xsl:variable name="doc" select="document(g:document-uri($this))"/>
+	<xsl:variable name="doc" select="document(namespace-uri())"/>
 	<xsl:choose>
 	    <xsl:when test="key('resources', $this, $doc)/@rdf:about">
 		<xsl:apply-templates select="key('resources', $this, $doc)/@rdf:about" mode="g:LabelMode"/>
 	    </xsl:when>
-	    <xsl:when test="starts-with($this, $base-uri)">
-		<xsl:apply-templates select="key('resources', $this, $ont-model)/@rdf:about" mode="g:LabelMode"/>
+	    <xsl:when test="key('resources', $this)">
+		<xsl:apply-templates select="key('resources', $this)/@rdf:about" mode="g:LabelMode"/>
 	    </xsl:when>
 	    <xsl:when test="contains($this, '#') and not(ends-with($this, '#'))">
 		<xsl:value-of select="substring-after($this, '#')"/>
@@ -235,11 +235,11 @@ exclude-result-prefixes="#all">
 	    <xsl:when test="key('resources', ., $doc)/@rdf:nodeID">
 		<xsl:apply-templates select="key('resources', ., $doc)/@rdf:nodeID" mode="g:LabelMode"/>
 	    </xsl:when>
-	    <xsl:when test="key('resources', ., $ont-model)/@rdf:about">
-		<xsl:apply-templates select="key('resources', ., $ont-model)/@rdf:about" mode="g:LabelMode"/>
+	    <xsl:when test="key('resources', .)/@rdf:about">
+		<xsl:apply-templates select="key('resources', .)/@rdf:about" mode="g:LabelMode"/>
 	    </xsl:when>
-	    <xsl:when test="key('resources', ., $ont-model)/@rdf:nodeID">
-		<xsl:apply-templates select="key('resources', ., $ont-model)/@rdf:nodeID" mode="g:LabelMode"/>
+	    <xsl:when test="key('resources', .)/@rdf:nodeID">
+		<xsl:apply-templates select="key('resources', .)/@rdf:nodeID" mode="g:LabelMode"/>
 	    </xsl:when>
 	    <xsl:when test="contains(., '#') and not(ends-with(., '#'))">
 		<xsl:value-of select="substring-after(., '#')"/>

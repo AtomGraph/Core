@@ -439,4 +439,11 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	return matchedOntClass;
     }
 
+    @Override
+    public Response post(Model model)
+    {
+	if (log.isDebugEnabled()) log.debug("Returning @POST Response of the POSTed Model");
+	return getResponse(model);
+    }
+
 }

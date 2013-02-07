@@ -17,6 +17,7 @@
 
 package org.graphity.ldp.provider;
 
+import com.hp.hpl.jena.datatypes.BaseDatatype;
 import com.hp.hpl.jena.rdf.model.*;
 import com.sun.jersey.api.core.HttpContext;
 import com.sun.jersey.core.util.ReaderWriter;
@@ -98,7 +99,12 @@ public class RDFPostReader implements MessageBodyReader<Model>
     public Model readFrom(Class<Model> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException, WebApplicationException
     {
 	// hrc.getRequest().getFormParameters() returns same info, but ordering is lost	
-	initKeysValues(hrc.getRequest().getEntity(String.class), ReaderWriter.getCharset(mediaType).name());
+	return parse(hrc.getRequest().getEntity(String.class), ReaderWriter.getCharset(mediaType).name());
+    }
+
+    public Model parse(String request, String encoding)
+    {
+	initKeysValues(request, encoding);
 	Model model = ModelFactory.createDefaultModel();
 
 	Resource subject = null;
@@ -107,56 +113,114 @@ public class RDFPostReader implements MessageBodyReader<Model>
 
 	for (int i = 0; i < keys.size(); i++)
 	{
-	    if (keys.get(i).equals("v")) model.setNsPrefix("", values.get(i)); // default namespace
-	    if (keys.get(i).equals("n") && keys.get(i + 1).equals("v"))
-            {
-                model.setNsPrefix(values.get(i), values.get(i + 1));
-                i++;
-            } // namespace with prefix
-	    if (keys.get(i).equals("sb") || keys.get(i).equals("su") || keys.get(i).equals("sv") || keys.get(i).equals("sn"))
+	    switch (keys.get(i))
 	    {
-		property = null; object = null;
-		if (keys.get(i).equals("sb")) subject = model.createResource(new AnonId(values.get(i))); // blank node
-		if (keys.get(i).equals("su")) subject = model.createResource(values.get(i)); // full URI
-		if (keys.get(i).equals("sv")) subject = model.createResource(model.getNsPrefixURI("") + values.get(i)); // default namespace
-		if (keys.get(i).equals("sn") && keys.get(i + 1).equals("sv"))
-                {
-                    subject = model.createResource(model.getNsPrefixURI(values.get(i)) + values.get(i + 1)); // ns prefix + local name
-                    i++;
-                }
-	    }
-	    if (keys.get(i).equals("pu") || keys.get(i).equals("pv") || keys.get(i).equals("pn") || keys.get(i).equals("sn"))
-	    {
-		object = null;
-		if (keys.get(i).equals("pu")) property = model.createProperty(values.get(i));
-		if (keys.get(i).equals("pv")) property = model.createProperty(model.getNsPrefixURI(""), values.get(i));
-		if (keys.get(i).equals("pn") && keys.get(i + 1).equals("pv"))
-                {
-                    property = model.createProperty(model.getNsPrefixURI(values.get(i)) + values.get(i + 1)); // ns prefix + local name
-                    i++;
-                }
-	    }
-	    if (keys.get(i).equals("ob") || keys.get(i).equals("ou") || keys.get(i).equals("ov") || keys.get(i).equals("on") || keys.get(i).equals("ol"))
-	    {
-		if (keys.get(i).equals("ob")) object = model.createResource(new AnonId(values.get(i))); // blank node
-		if (keys.get(i).equals("ou")) object = model.createResource(values.get(i)); // full URI
-		if (keys.get(i).equals("ov")) object = model.createResource(model.getNsPrefixURI("") + values.get(i)); // default namespace
-		if (keys.get(i).equals("on") && keys.get(i + 1).equals("ov"))
-                {
-                    object = model.createResource(model.getNsPrefixURI(values.get(i)) + values.get(i + 1)); // ns prefix + local name
-                    i++;
-                }
-		if (keys.get(i).equals("ol")) object = model.createTypedLiteral(values.get(i)); // literal
+		case "v":
+		    model.setNsPrefix("", values.get(i)); // default namespace
+		    break;
+		case "n":
+		    if (keys.get(i + 1).equals("v")) // if followed by "v"
+		    {
+			model.setNsPrefix(values.get(i), values.get(i + 1)); // namespace with prefix
+			i++; // skip the following "v"
+		    }
+		    break;
+		    
+		case "sb":
+		    subject = model.createResource(new AnonId(values.get(i))); // blank node
+		    property = null;
+		    object = null;
+		    break;
+		case "su":
+		    subject = model.createResource(values.get(i)); // full URI
+		    property = null;
+		    object = null;
+		    break;
+		case "sv":
+		    subject = model.createResource(model.getNsPrefixURI("") + values.get(i)); // default namespace
+		    property = null;
+		    object = null;
+		    break;
+		case "sn":
+		    if (keys.get(i + 1).equals("sv")) // if followed by "sv"
+		    {
+			subject = model.createResource(model.getNsPrefixURI(values.get(i)) + values.get(i + 1)); // ns prefix + local name
+			property = null;
+			object = null;
+			i++; // skip the following "sv"
+		    }
+		    break;
 
+		case "pu":
+		    property = model.createProperty(values.get(i));
+		    object = null;
+		    break;
+		case "pv":
+		    property = model.createProperty(model.getNsPrefixURI(""), values.get(i));
+		    object = null;
+		    break;
+		case "pn":
+		    if (keys.get(i + 1).equals("pv")) // followed by "pv"
+		    {
+			property = model.createProperty(model.getNsPrefixURI(values.get(i)) + values.get(i + 1)); // ns prefix + local name
+			object = null;
+			i++; // skip the following "pv"
+		    }
+		    break;
+
+		case "ob":
+		    object = model.createResource(new AnonId(values.get(i))); // blank node
+		    break;
+		case "ou":
+		    object = model.createResource(values.get(i)); // full URI
+		    break;
+		case "ov":
+		    object = model.createResource(model.getNsPrefixURI("") + values.get(i)); // default namespace
+		    break;
+		case "on":
+		    if (keys.get(i + 1).equals("ov")) // followed by "ov"
+		    {
+			object = model.createResource(model.getNsPrefixURI(values.get(i)) + values.get(i + 1)); // ns prefix + local name
+			i++; // skip the following "ov"
+		    }
+		    break;
+		case "ol":
+		    switch (keys.get(i + 1))
+		    {
+			case "lt":
+			    object = model.createTypedLiteral(values.get(i), new BaseDatatype(values.get(i + 1))); // typed literal (value+datatype)
+			    i++; // skip the following "lt"
+			    break;
+			case "ll":
+			    object = model.createLiteral(values.get(i), values.get(i + 1)); // literal with language (value+lang)
+			    i++; // skip the following "ll"
+			    break;
+			default:
+			    object = model.createLiteral(values.get(i)); // literal
+			    break;
+		    }
+		    break;
+		    
+		case "lt":
+		    if (keys.get(i + 1).equals("ol")) // followed by "ol"
+		    {
+			object = model.createTypedLiteral(values.get(i + 1), new BaseDatatype(values.get(i))); // typed literal (datatype+value)
+			i++; // skip the following "ol"
+		    }
+		    break;
+		case "ll":
+		    if (keys.get(i + 1).equals("ol")) // followed by "ol"
+		    {
+			model.createLiteral(values.get(i + 1), values.get(i)); // literal with language (lang+value)
+			i++; // skip the following "ol"
+		    }
+		    break;
 	    }
 
 	    if (subject != null && property != null && object != null)
-	    {
 		model.add(model.createStatement(subject, property, object));
-	    }
 	}
 
 	return model;
     }
-    
 }

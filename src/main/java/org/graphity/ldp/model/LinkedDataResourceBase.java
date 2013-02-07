@@ -95,24 +95,19 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	this.cacheControl = cacheControl;
     }
 
-    @GET
-    @Override
-    public Response getResponse()
+    public Response getResponse(Model model)
     {
 	// Content-Location http://www.w3.org/TR/chips/#cp5.2
 	// http://www.w3.org/wiki/HR14aCompromise
 
-	if (log.isDebugEnabled()) log.debug("Returning @GET Response");
-
-	Model description = describe();
-
-	if (description.isEmpty())
+	if (model.isEmpty())
 	{
 	    if (log.isTraceEnabled()) log.trace("DESCRIBE Model is empty; returning 404 Not Found");
 	    throw new WebApplicationException(Response.Status.NOT_FOUND);
 	}
-
-	EntityTag entityTag = new EntityTag(Long.toHexString(ModelUtils.hashModel(description)));
+	if (log.isDebugEnabled()) log.debug("Returning @GET Response with {} statements in Model", model.size());
+	
+	EntityTag entityTag = new EntityTag(Long.toHexString(ModelUtils.hashModel(model)));
 	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(entityTag);
 	if (rb != null)
 	{
@@ -130,12 +125,20 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	    else
 	    {
 		if (log.isTraceEnabled()) log.trace("Generating RDF Response with Variant: {} and EntityTag: {}", variant, entityTag);
-		return Response.ok(description, variant).
+		return Response.ok(model, variant).
 			tag(entityTag).
 			cacheControl(getCacheControl()).
 			build(); // uses ModelXSLTWriter/ModelWriter
 	    }
-	}
+	}	
+    }
+    
+    @GET
+    @Override
+    public Response getResponse()
+    {
+	if (log.isDebugEnabled()) log.debug("Returning @GET Response for the default DESCRIBE Model");
+	return getResponse(describe());
     }
    
     @Override
