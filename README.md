@@ -30,11 +30,7 @@ You have the following options to install Graphity:
 * checkout the source code from the Git repository and build it as a Maven webapp
 * [download](https://github.com/Graphity/graphity-ldp/downloads) the project as a `.jar` library and include it in your Java project (Maven repository is not available yet)
 
-Maven dependencies are discovered automatically from `pom.xml`, others (such as SPIN API and pre-Apache version of Fuseki) are included as `.jar` files in the `/lib` folder.
-They can be "installed locally" using Maven from command line like this:
-
-    mvn install:install-file -Dfile=${basedir}/lib/spin-1.2.0.jar -DgroupId=org.topbraid -DartifactId=spin -Dversion=1.2.0 -Dpackaging=jar
-    mvn install:install-file -Dfile=${basedir}/lib/fuseki-0.2.0.jar -DgroupId=org.openjena -DartifactId=fuseki -Dversion=0.2.0 -Dpackaging=jar
+Maven dependencies are discovered automatically from `pom.xml`.
 
 From Java
 ---------

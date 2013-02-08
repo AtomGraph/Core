@@ -36,6 +36,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.*;
+import org.graphity.ldp.util.InsertDataBuilder;
 import org.graphity.ldp.util.QueryBuilder;
 import org.graphity.ldp.util.SelectBuilder;
 import org.graphity.util.locator.PrefixMapper;
@@ -78,9 +79,40 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	if (log.isDebugEnabled()) log.debug("ResourceConfig properties: {}", config.getProperties());
 	Object ontologyLocation = config.getProperty(org.graphity.ldp.Application.PROPERTY_ONTOLOGY_LOCATION);
 	Object ontologyPath = config.getProperty(org.graphity.ldp.Application.PROPERTY_ONTOLOGY_PATH);
-	if (ontologyLocation == null || ontologyPath == null) throw new IllegalStateException("Ontology for this Graphity LDP Application is not configured properly. Check ResourceConfig and/or web.xml");
-	
-	return getOntology(uriInfo.getBaseUriBuilder().path(ontologyPath.toString()).build().toString(), ontologyLocation.toString());
+	Object ontologyEndpoint = config.getProperty(org.graphity.ldp.Application.PROPERTY_ONTOLOGY_ENDPOINT);
+	Object ontologyUri = config.getProperty(org.graphity.ldp.Application.PROPERTY_ONTOLOGY_URI);
+
+	if (ontologyUri != null)
+	{
+	    if (ontologyEndpoint != null)
+	    {
+		if (log.isDebugEnabled()) log.debug("Reading ontology from named graph {} in SPARQL endpoint {}", ontologyUri, ontologyEndpoint);
+		Query query = QueryFactory.create("CONSTRUCT { ?s ?p ?o } WHERE { GRAPH ?g { ?s ?p ?o } }");
+		return ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM_RDFS_INF,
+			DataManager.get().loadModel(ontologyEndpoint.toString(), query));
+	    }
+	    else
+	    {
+		if (log.isDebugEnabled()) log.debug("Reading ontology from remote file with URI: {}", ontologyUri);
+		return OntDocumentManager.getInstance().getOntology(ontologyUri.toString(), OntModelSpec.OWL_MEM_RDFS_INF);
+	    }
+	}
+	else
+	{
+	    if (ontologyEndpoint != null)
+	    {
+		if (log.isDebugEnabled()) log.debug("Reading ontology from default graph in SPARQL endpoint {}", ontologyEndpoint);
+		Query query = QueryFactory.create("CONSTRUCT WHERE { ?s ?p ?o }");
+		return ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM_RDFS_INF,
+			DataManager.get().loadModel(ontologyEndpoint.toString(), query));
+	    }
+	    else
+	    {
+		if (ontologyLocation == null || ontologyPath == null) throw new IllegalStateException("Ontology for this Graphity LDP Application is not configured properly. Check ResourceConfig and/or web.xml");
+		if (log.isDebugEnabled()) log.debug("Reading ontology from local file");
+		return getOntology(uriInfo.getBaseUriBuilder().path(ontologyPath.toString()).build().toString(), ontologyLocation.toString());
+	    }
+	}
     }
     
     public static OntModel getOntology(String ontologyUri, String ontologyLocation)
@@ -443,6 +475,10 @@ public class ResourceBase extends LDPResourceBase implements PageResource
     public Response post(Model model)
     {
 	if (log.isDebugEnabled()) log.debug("Returning @POST Response of the POSTed Model");
+	
+	InsertDataBuilder insertBuilder = InsertDataBuilder.fromData(model);
+	if (log.isDebugEnabled()) log.debug("INSERT DATA generated from the POSTed Model: {}", insertBuilder);
+	
 	return getResponse(model);
     }
 

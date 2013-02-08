@@ -41,14 +41,13 @@ import org.topbraid.spin.vocabulary.SP;
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  * @see SelectBuilder
- * @see <a href="http://www.w3.org/Submission/2011/SUBM-spin-sparql-20110222/">SPIN - SPARQL Syntax</a>
+ * @see <a href="http://spinrdf.org/sp.html">SPIN - SPARQL Syntax</a>
  * @see <a href="http://topbraid.org/spin/api/1.2.0/spin/apidocs/org/topbraid/spin/model/Query.html">SPIN Query</a>
  */
 public class QueryBuilder implements org.topbraid.spin.model.Query
 {
     private static final Logger log = LoggerFactory.getLogger(QueryBuilder.class);
     private org.topbraid.spin.model.Query query = null;
-    //private ARQ2SPIN arq2spin = null; //new ARQ2SPIN(model);
 
     /**
      * Constructs builder from SPIN query
@@ -290,10 +289,10 @@ public class QueryBuilder implements org.topbraid.spin.model.Query
 
 	if (log.isTraceEnabled()) log.trace("Setting FILTER param: {}", resources.getModel());
 	
-	return filter(SPINFactory.createFilter(getModel(), getFilterExpression(var, resources)));
+	return filter(SPINFactory.createFilter(getModel(), createFilterExpression(var, resources)));
     }
 
-    private Resource getFilterExpression(Variable var, RDFList resources)
+    private Resource createFilterExpression(Variable var, RDFList resources)
     {
 	Resource eqExpr = getModel().createResource().
 		addProperty(RDF.type, SP.eq).
@@ -307,7 +306,7 @@ public class QueryBuilder implements org.topbraid.spin.model.Query
 	    return getModel().createResource().
 		addProperty(RDF.type, SP.getArgProperty("or")).
 		addProperty(SP.getArgProperty(1), eqExpr).
-		addProperty(SP.getArgProperty(2), getFilterExpression(var, resources.getTail()));
+		addProperty(SP.getArgProperty(2), createFilterExpression(var, resources.getTail()));
     }
     
     public QueryBuilder filter(String varName, RDFList resources)

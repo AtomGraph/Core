@@ -22,6 +22,16 @@
             <param-name>org.graphity.ldp.ontology.location</param-name>
             <param-value>org/graphity/ldp/vocabulary/graphity-ldp.ttl</param-value>
         </init-param>
+	<!--
+        <init-param>
+            <param-name>org.graphity.ldp.ontology.uri</param-name>
+            <param-value>http://ldp.graphity.org/ontology/</param-value>
+        </init-param>
+	-->
+        <init-param>
+            <param-name>org.graphity.ldp.ontology.endpoint</param-name>
+            <param-value>http://dydra.com/graphity/ldp/sparql</param-value>
+        </init-param>
     </filter>
    <filter-mapping>
       <filter-name>index</filter-name>

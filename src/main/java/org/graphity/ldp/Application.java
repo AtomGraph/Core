@@ -70,6 +70,22 @@ public class Application extends javax.ws.rs.core.Application
      */
     public static final String PROPERTY_ONTOLOGY_PATH = "org.graphity.ldp.ontology.path";
 
+    /**
+     * Configuration property for absolute ontology URI (set in web.xml)
+     * 
+     * @see <a href="http://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceConfig.html">ResourceConfig</a>
+     * @see <a href="http://docs.oracle.com/cd/E24329_01/web.1211/e24983/configure.htm#CACEAEGG">Packaging the RESTful Web Service Application Using web.xml With Application Subclass</a>
+     */
+    public static final String PROPERTY_ONTOLOGY_URI = "org.graphity.ldp.ontology.uri";
+
+    /**
+     * Configuration property for ontology SPARQL endpoint (set in web.xml)
+     * 
+     * @see <a href="http://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceConfig.html">ResourceConfig</a>
+     * @see <a href="http://docs.oracle.com/cd/E24329_01/web.1211/e24983/configure.htm#CACEAEGG">Packaging the RESTful Web Service Application Using web.xml With Application Subclass</a>
+     */
+    public static final String PROPERTY_ONTOLOGY_ENDPOINT = "org.graphity.ldp.ontology.endpoint";
+
     private Set<Class<?>> classes = new HashSet<Class<?>>();
     private Set<Object> singletons = new HashSet<Object>();
 

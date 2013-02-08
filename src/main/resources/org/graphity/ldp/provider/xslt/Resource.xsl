@@ -728,13 +728,13 @@ exclude-result-prefixes="#all">
     </xsl:template>
 
     <xsl:template match="@rdf:datatype" mode="g:InputMode">
-	<input type="text" name="lt" value="{.}" class="input-mini"/>
+	<input type="text" name="lt" value="{.}" class="input-small"/>
 
 	<!-- <xsl:apply-templates select="." mode="g:LabelMode"/> -->
     </xsl:template>
 
     <xsl:template match="@xml:lang" mode="g:InputMode">
-	<input type="text" name="ll" value="{.}" class="input-small"/>
+	<input type="text" name="ll" value="{.}" class="input-mini"/>
 
 	<!-- <xsl:apply-templates select="." mode="g:LabelMode"/> -->
     </xsl:template>
