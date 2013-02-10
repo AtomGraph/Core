@@ -156,30 +156,7 @@ exclude-result-prefixes="#all">
 		<div class="navbar navbar-fixed-top">
 		    <div class="navbar-inner">
 			<div class="container-fluid">    
-			    <a class="brand" href="{$base-uri}">
-				<xsl:apply-templates select="key('resources', $base-uri, $ont-model)/@rdf:about" mode="g:LabelMode"/>
-			    </a>
-
-			    <div class="nav-collapse">
-				<ul class="nav">
-				    <!-- make menu links for all resources in the ontology, except base URI -->
-				    <xsl:for-each select="key('resources-by-host', $base-uri, $ont-model)/@rdf:about[not(. = $base-uri)]">
-					<xsl:sort select="g:label(., /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
-					<li>
-					    <xsl:if test=". = $absolute-path">
-						<xsl:attribute name="class">active</xsl:attribute>
-					    </xsl:if>
-					    <xsl:apply-templates select="."/>
-					</li>
-				    </xsl:for-each>
-				</ul>
-
-				<!--
-				<form class="navbar-search pull-left" action="search" method="get">
-				    <input class="search-query span2" name="query" type="text" placeholder="Search"/>
-				</form>
-				-->
-			    </div>
+			    <xsl:apply-templates select="." mode="gldp:HeaderMode"/>
 			</div>
 		    </div>
 		</div>
@@ -187,16 +164,47 @@ exclude-result-prefixes="#all">
 		<div class="container-fluid">
 		    <div class="row-fluid">
 			<xsl:apply-templates/>
-		    </div>
+		    </div>		    
 		    
 		    <div class="footer">
-			<p>
-			    <xsl:value-of select="format-date(current-date(), '[Y]', $lang, (), ())"/>
-			</p>
+			<xsl:apply-templates select="." mode="gldp:FooterMode"/>
 		    </div>
 		</div>
 	    </body>
 	</html>
+    </xsl:template>
+
+    <xsl:template match="/" mode="gldp:HeaderMode">
+	<a class="brand" href="{$base-uri}">
+	    <xsl:apply-templates select="key('resources', $base-uri, $ont-model)/@rdf:about" mode="g:LabelMode"/>
+	</a>
+
+	<div class="nav-collapse">
+	    <ul class="nav">
+		<!-- make menu links for all resources in the ontology, except base URI -->
+		<xsl:for-each select="key('resources-by-host', $base-uri, $ont-model)/@rdf:about[not(. = $base-uri)]">
+		    <xsl:sort select="g:label(., /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
+		    <li>
+			<xsl:if test=". = $absolute-path">
+			    <xsl:attribute name="class">active</xsl:attribute>
+			</xsl:if>
+			<xsl:apply-templates select="."/>
+		    </li>
+		</xsl:for-each>
+	    </ul>
+
+	    <!--
+	    <form class="navbar-search pull-left" action="search" method="get">
+		<input class="search-query span2" name="query" type="text" placeholder="Search"/>
+	    </form>
+	    -->
+	</div>
+    </xsl:template>
+
+    <xsl:template match="/" mode="gldp:FooterMode">
+	<p>
+	    <xsl:value-of select="format-date(current-date(), '[Y]', $lang, (), ())"/>
+	</p>
     </xsl:template>
 
     <xsl:template match="rdf:RDF" mode="gldp:TitleMode">

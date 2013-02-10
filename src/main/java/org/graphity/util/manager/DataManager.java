@@ -85,9 +85,6 @@ public class DataManager extends FileManager implements URIResolver
     static
     {
         LANGS.put(WebContent.contentTypeRDFXML, WebContent.langRDFXML);
-        LANGS.put(WebContent.contentTypeTurtle1, WebContent.langTurtle);
-        LANGS.put(WebContent.contentTypeTurtle2, WebContent.langTurtle);
-        LANGS.put(WebContent.contentTypeTurtle3, WebContent.langTurtle);
         LANGS.put(WebContent.contentTypeNTriples, WebContent.langNTriple); // text/plain
         LANGS.put(WebContent.contentTypeNTriplesAlt, WebContent.langNTriple);
 	LANGS.put(WebContent.contentTypeN3, WebContent.langN3);
