@@ -9,7 +9,7 @@
   xmlns:wot="http://xmlns.com/wot/0.1/"
   xmlns:dcterms="http://purl.org/dc/terms/"
   xmlns:sioc="http://rdfs.org/sioc/ns#"
-  xml:base="http://rdfs.org/sioc/ns#"
+  xml:base="http://rdfs.org/sioc/ns"
 >
 
 <!-- OWL-DL Compliance statements -->
@@ -47,7 +47,7 @@
 </rdf:Description>
 
 <!-- SIOC Core Ontology -->
-<owl:Ontology rdf:about="" rdf:type="http://www.w3.org/2002/07/owl#Thing">
+<owl:Ontology rdf:about="#" rdf:type="http://www.w3.org/2002/07/owl#Thing">
   <dcterms:title xml:lang="en">SIOC Core Ontology Namespace</dcterms:title>
   <owl:versionInfo>Revision: 1.35</owl:versionInfo>
   <dcterms:description xml:lang="en">SIOC (Semantically-Interlinked Online Communities) is an ontology for describing the information in online communities. 
