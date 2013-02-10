@@ -28,9 +28,15 @@
             <param-value>http://ldp.graphity.org/ontology/</param-value>
         </init-param>
 	-->
+	<!--
         <init-param>
-            <param-name>org.graphity.ldp.ontology.endpoint</param-name>
+            <param-name>org.graphity.ldp.ontology.endpoint.uri</param-name>
             <param-value>http://dydra.com/graphity/ldp/sparql</param-value>
+        </init-param>
+	-->
+        <init-param>
+            <param-name>org.graphity.ldp.provider.xslt.location</param-name>
+            <param-value>org/graphity/ldp/provider/xslt/Resource.xsl</param-value>
         </init-param>
     </filter>
    <filter-mapping>

@@ -14,9 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.graphity.ldp.util;
+package org.graphity.ldp.query;
 
-import com.hp.hpl.jena.rdf.model.*;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.RDFList;
+import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.RDF;
 import org.topbraid.spin.model.SPINFactory;
 import org.topbraid.spin.model.update.InsertData;
@@ -68,30 +71,18 @@ public class InsertDataBuilder extends UpdateBuilder
 	return newInstance().data(model);
     }
     
-    public InsertDataBuilder data(Model model)
+    public InsertDataBuilder data(RDFList dataList)
     {
-	addProperty(SP.data, createDataList(model));
-	
+	if (dataList == null) throw new IllegalArgumentException("INSERT DATA data List cannot be null");
+
+	addProperty(SP.data, dataList);
+
 	return this;
     }
-
-    private Resource createTripleTemplate(Statement stmt)
+    
+    public InsertDataBuilder data(Model model)
     {
-	return getModel().createResource().
-	    addProperty(SP.subject, stmt.getSubject()).
-	    addProperty(SP.predicate, stmt.getPredicate()).
-	    addProperty(SP.object, stmt.getObject());
-    }
-
-    private RDFList createDataList(Model model)
-    {
-	RDFList data = getModel().createList();
-	
-	StmtIterator it = model.listStatements();
-	while (it.hasNext())
-	    data = data.with(createTripleTemplate(it.next()));
-	
-	return data;
+	return data(createDataList(model));
     }
 
     @Override

@@ -36,9 +36,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.*;
-import org.graphity.ldp.util.InsertDataBuilder;
-import org.graphity.ldp.util.QueryBuilder;
-import org.graphity.ldp.util.SelectBuilder;
+import org.graphity.ldp.query.InsertDataBuilder;
+import org.graphity.ldp.query.QueryBuilder;
+import org.graphity.ldp.query.SelectBuilder;
 import org.graphity.util.locator.PrefixMapper;
 import org.graphity.util.manager.DataManager;
 import org.graphity.vocabulary.Graphity;
@@ -76,7 +76,7 @@ public class ResourceBase extends LDPResourceBase implements PageResource
      */
     public static OntModel getOntology(UriInfo uriInfo, ResourceConfig config)
     {
-	if (log.isDebugEnabled()) log.debug("ResourceConfig properties: {}", config.getProperties());
+	if (log.isDebugEnabled()) log.debug("web.xml properties: {}", config.getProperties());
 	Object ontologyLocation = config.getProperty(org.graphity.ldp.Application.PROPERTY_ONTOLOGY_LOCATION);
 	Object ontologyPath = config.getProperty(org.graphity.ldp.Application.PROPERTY_ONTOLOGY_PATH);
 	Object ontologyEndpoint = config.getProperty(org.graphity.ldp.Application.PROPERTY_ONTOLOGY_ENDPOINT);
@@ -478,6 +478,8 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	
 	InsertDataBuilder insertBuilder = InsertDataBuilder.fromData(model);
 	if (log.isDebugEnabled()) log.debug("INSERT DATA generated from the POSTed Model: {}", insertBuilder);
+	
+	//getQueryBuilder()
 	
 	return getResponse(model);
     }

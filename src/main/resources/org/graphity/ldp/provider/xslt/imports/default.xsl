@@ -177,6 +177,9 @@ exclude-result-prefixes="#all">
 		<xsl:when test="foaf:firstName and foaf:lastName">
 		    <xsl:value-of select="concat(foaf:firstName[1], ' ', foaf:lastName[1])"/>
 		</xsl:when>
+		<xsl:when test="foaf:givenName and foaf:familyName">
+		    <xsl:value-of select="concat(foaf:givenName[1], ' ', foaf:familyName[1])"/>
+		</xsl:when>
 		<xsl:when test="foaf:name | @foaf:name">
 		    <xsl:value-of select="(foaf:name | @foaf:name)[1]"/>
 		</xsl:when>

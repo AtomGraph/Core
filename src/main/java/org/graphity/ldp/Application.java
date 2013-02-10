@@ -20,12 +20,14 @@ import com.hp.hpl.jena.ontology.OntDocumentManager;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.util.LocationMapper;
+import com.sun.jersey.api.core.ResourceConfig;
 import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.PostConstruct;
+import javax.ws.rs.core.Context;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.stream.StreamSource;
@@ -53,6 +55,8 @@ import org.topbraid.spin.system.SPINModuleRegistry;
  */
 public class Application extends javax.ws.rs.core.Application
 {
+    @Context ResourceConfig resourceConfig;
+
     private static final Logger log = LoggerFactory.getLogger(Application.class);
     /**
      * Configuration property for ontology file location (set in web.xml)
@@ -85,6 +89,14 @@ public class Application extends javax.ws.rs.core.Application
      * @see <a href="http://docs.oracle.com/cd/E24329_01/web.1211/e24983/configure.htm#CACEAEGG">Packaging the RESTful Web Service Application Using web.xml With Application Subclass</a>
      */
     public static final String PROPERTY_ONTOLOGY_ENDPOINT = "org.graphity.ldp.ontology.endpoint";
+
+    /**
+     * Configuration property for master XSLT stylesheet location (set in web.xml)
+     * 
+     * @see <a href="http://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceConfig.html">ResourceConfig</a>
+     * @see <a href="http://docs.oracle.com/cd/E24329_01/web.1211/e24983/configure.htm#CACEAEGG">Packaging the RESTful Web Service Application Using web.xml With Application Subclass</a>
+     */
+    public static final String PROPERTY_XSLT_LOCATION = "org.graphity.ldp.provider.xslt.location";
 
     private Set<Class<?>> classes = new HashSet<Class<?>>();
     private Set<Object> singletons = new HashSet<Object>();
@@ -133,15 +145,15 @@ public class Application extends javax.ws.rs.core.Application
 	}
 	catch (TransformerConfigurationException ex)
 	{
-	    log.error("XSLT stylesheet error", ex);
+	    if (log.isErrorEnabled()) log.error("XSLT stylesheet error", ex);
 	}
 	catch (FileNotFoundException ex)
 	{
-	    log.error("XSLT stylesheet not found", ex);
+	    if (log.isErrorEnabled()) log.error("XSLT stylesheet not found", ex);
 	}
 	catch (URISyntaxException ex)
 	{
-	    log.error("XSLT stylesheet URI error", ex);
+	    if (log.isErrorEnabled()) log.error("XSLT stylesheet URI error", ex);
 	}
     }
 
@@ -172,23 +184,26 @@ public class Application extends javax.ws.rs.core.Application
 	singletons.add(new ResultSetWriter());
 	singletons.add(new RDFPostReader());
 	singletons.add(new QueryParamProvider(Query.class));
-	
-	try
-	{
-	    singletons.add(new ModelXSLTWriter(getStylesheet("org/graphity/ldp/provider/xslt/Resource.xsl"), DataManager.get())); // writes XHTML responses
-	}
-	catch (TransformerConfigurationException ex)
-	{
-	    log.error("XSLT stylesheet error", ex);
-	}
-	catch (FileNotFoundException ex)
-	{
-	    log.error("XSLT stylesheet not found", ex);
-	}
-	catch (URISyntaxException ex)
-	{
-	    log.error("XSLT stylesheet URI error", ex);
-	}
+
+	if (getResourceConfig().getProperty(PROPERTY_XSLT_LOCATION) != null)
+	    try
+	    {
+		singletons.add(new ModelXSLTWriter(getStylesheet(getResourceConfig().getProperty(PROPERTY_XSLT_LOCATION).toString()), DataManager.get())); // writes XHTML responses
+	    }
+	    catch (TransformerConfigurationException ex)
+	    {
+		if (log.isErrorEnabled()) log.error("XSLT stylesheet error", ex);
+	    }
+	    catch (FileNotFoundException ex)
+	    {
+		if (log.isErrorEnabled()) log.error("XSLT stylesheet not found", ex);
+	    }
+	    catch (URISyntaxException ex)
+	    {
+		if (log.isErrorEnabled()) log.error("XSLT stylesheet URI error", ex);
+	    }
+	else
+	    if (log.isWarnEnabled()) log.warn("Master XSLT stylesheet not configured in web.xml, no XHTML @Provider will be available");
 
 	return singletons;
     }
@@ -209,6 +224,11 @@ public class Application extends javax.ws.rs.core.Application
 	String xsltUri = xsltUrl.toURI().toString();
 	if (log.isDebugEnabled()) log.debug("XSLT stylesheet URI: {}", xsltUri);
 	return new StreamSource(xsltUri);
+    }
+
+    public ResourceConfig getResourceConfig()
+    {
+	return resourceConfig;
     }
 
 }

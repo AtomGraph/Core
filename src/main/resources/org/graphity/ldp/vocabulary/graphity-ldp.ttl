@@ -336,7 +336,7 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:hasValue g:ListMode
 	] ;
     rdfs:label "Properties page resource class" ;
-    spin:constraint [ a :DescribetPropertiesTemplate ;
+    spin:constraint [ a :DescribePropertiesTemplate ;
 	    g:type owl:Ontology
 	    ] ;
     rdfs:isDefinedBy : .
@@ -356,7 +356,7 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:hasValue g:TableMode
 	] ;
     rdfs:label "Properties page resource class" ;
-    spin:constraint [ a :DescribetPropertiesTemplate ;
+    spin:constraint [ a :DescribePropertiesTemplate ;
 	    g:type owl:Ontology
 	    ] ;
     rdfs:isDefinedBy : .
@@ -376,7 +376,7 @@ ldp:pageOf a owl:ObjectProperty ;
 		owl:hasValue g:InputMode
 	] ;
     rdfs:label "Properties page resource class" ;
-    spin:constraint [ a :DescribetPropertiesTemplate ;
+    spin:constraint [ a :DescribePropertiesTemplate ;
 	    g:type owl:Ontology
 	    ] ;
     rdfs:isDefinedBy : .
@@ -618,7 +618,7 @@ _:instanceVar  sp:varName "instance"^^xsd:string .
 
 # ====
 
-:DescribetPropertiesTemplate a spin:Template ;
+:DescribePropertiesTemplate a spin:Template ;
     spin:body :DescribeProperties ;
     rdfs:isDefinedBy : .
 

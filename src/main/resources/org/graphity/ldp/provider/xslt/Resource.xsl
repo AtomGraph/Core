@@ -115,6 +115,13 @@ exclude-result-prefixes="#all">
 	<rdfs:label xml:lang="en">Next</rdfs:label>
     </rdf:Description>
 
+    <xsl:function name="gldp:properties-by-uri" as="element()*">
+	<xsl:param name="properties" as="element()*"/>
+	<xsl:perform-sort select="$properties">
+	    <xsl:sort select="xs:anyURI(concat(namespace-uri(.), local-name(.)))"/>
+	</xsl:perform-sort>
+    </xsl:function>
+
     <xsl:template match="/">
 	<html>
 	    <head>
@@ -298,9 +305,12 @@ exclude-result-prefixes="#all">
 			</span>
 		    </h3>
 		    <dl>
-			<xsl:apply-templates select="current-group()" mode="gldp:PropertyListMode">
+			<xsl:variable name="sorted-properties" as="element()*">
+			    <xsl:sequence select="gldp:properties-by-uri(current-group())"/>
+			</xsl:variable>
+			<xsl:apply-templates select="$sorted-properties" mode="gldp:PropertyListMode">
 			    <xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(.), local-name(.))), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
-			    <xsl:sort select="if (@rdf:resource) then (g:label(@rdf:resource, /, $lang)) else text()" data-type="text" order="ascending" lang="{$lang}"/> <!-- g:label(@rdf:nodeID, /, $lang) -->
+			    <xsl:sort select="if (@rdf:resource) then (g:label(@rdf:resource, /, $lang)) else text()" data-type="text" order="ascending" lang="{$lang}"/>
 			</xsl:apply-templates>
 		    </dl>
 		</div>
@@ -849,6 +859,7 @@ exclude-result-prefixes="#all">
 			    <textarea name="ol"></textarea>
 			    <label>Datatype</label>
 			    <input type="text" name="lt"/>
+			    <span class="help-inline">URI</span>
 			</div>
 		    </div>
 		</div>

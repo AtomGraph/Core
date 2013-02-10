@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.graphity.ldp.util;
+package org.graphity.ldp.query;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
@@ -73,6 +73,29 @@ public class UpdateBuilder implements Update
 	
 	ARQ2SPIN arq2spin = new ARQ2SPIN(model);
 	return fromUpdate(arq2spin.createUpdate(update, uri));
+    }
+
+    protected Resource createTripleTemplate(Statement stmt)
+    {
+	if (stmt == null) throw new IllegalArgumentException("Statement cannot be null");
+
+	return getModel().createResource().
+	    addProperty(SP.subject, stmt.getSubject()).
+	    addProperty(SP.predicate, stmt.getPredicate()).
+	    addProperty(SP.object, stmt.getObject());
+    }
+
+    protected RDFList createDataList(Model model)
+    {
+	if (model == null) throw new IllegalArgumentException("Model cannot be null");
+
+	RDFList data = getModel().createList();
+	
+	StmtIterator it = model.listStatements();
+	while (it.hasNext())
+	    data = data.with(createTripleTemplate(it.next()));
+	
+	return data;
     }
 
     public UpdateRequest build()
