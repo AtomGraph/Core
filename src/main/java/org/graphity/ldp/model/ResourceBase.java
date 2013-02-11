@@ -147,7 +147,8 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	    @QueryParam("desc") Boolean desc)
     {
 	this(getOntology(uriInfo, config),
-		uriInfo, request, httpHeaders, VARIANTS, NO_CACHE,
+		uriInfo, request, httpHeaders, VARIANTS,
+		(config.getProperty(org.graphity.ldp.Application.PROPERTY_CACHE_CONTROL) == null) ? null : CacheControl.valueOf(config.getProperty(org.graphity.ldp.Application.PROPERTY_CACHE_CONTROL).toString()),
 		limit, offset, orderBy, desc);
     }
     

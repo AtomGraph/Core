@@ -50,8 +50,6 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 			org.graphity.ldp.MediaType.TEXT_TURTLE_TYPE).
 		//languages(new Locale("en")).
 		add().build();
-
-    public static CacheControl NO_CACHE = CacheControl.valueOf("no-cache");
     
     private final UriInfo uriInfo;
     private final Request request;
@@ -78,7 +76,6 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
 	if (request == null) throw new IllegalArgumentException("Request cannot be null");
 	if (httpHeaders == null) throw new IllegalArgumentException("HttpHeaders cannot be null");
 	if (variants == null) throw new IllegalArgumentException("Variants cannot be null");
-	if (cacheControl == null) throw new IllegalArgumentException("CacheControl cannot be null");
 	
 	if (!ontResource.isURIResource()) throw new IllegalArgumentException("OntResource must be URI Resource (not a blank node)");
 	this.ontResource = ontResource;

@@ -596,7 +596,9 @@ exclude-result-prefixes="#all">
 		</tr>
 	    </thead>
 	    <tbody>
-		<xsl:apply-templates select="$loaded-resources" mode="g:TableMode"/>
+		<xsl:apply-templates select="$loaded-resources" mode="g:TableMode">
+		    <xsl:with-param name="predicates" select="$predicates"/>
+		</xsl:apply-templates>
 	    </tbody>
 	</table>
 	
@@ -605,15 +607,8 @@ exclude-result-prefixes="#all">
     </xsl:template>
 
     <xsl:template match="*[*][@rdf:about] | *[*][@rdf:nodeID]" mode="g:TableMode">
-	<!-- loaded resources = everything except container, page, and non-root blank nodes -->
-	<xsl:variable name="loaded-resources" select="../*[not(@rdf:about = $absolute-path)][not(@rdf:about = $request-uri)][not(key('predicates-by-object', @rdf:nodeID))]"/>
-	<xsl:variable name="predicates" as="element()*">
-	    <xsl:for-each-group select="$loaded-resources/*" group-by="concat(namespace-uri(.), local-name(.))">
-		<xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(.), local-name(.))), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
-		<xsl:sequence select="current-group()[1]"/>
-	    </xsl:for-each-group>
-	</xsl:variable>
-	
+	<xsl:param name="predicates" as="element()*"/>
+
 	<tr>
 	    <xsl:apply-templates select="@rdf:about | @rdf:nodeID" mode="g:TableMode"/>
 
