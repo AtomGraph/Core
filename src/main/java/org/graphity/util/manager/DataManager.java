@@ -519,7 +519,7 @@ public class DataManager extends FileManager implements URIResolver
     @Override
     public Source resolve(String href, String base) throws TransformerException
     {
-	if (!href.equals(""))
+	if (!href.equals("") && URI.create(href).isAbsolute())
 	{
 	    if (log.isDebugEnabled()) log.debug("Resolving URI: {} against base URI: {}", href, base);
 	    String uri = URI.create(base).resolve(href).toString();

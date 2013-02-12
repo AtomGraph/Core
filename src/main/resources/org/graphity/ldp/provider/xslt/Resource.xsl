@@ -554,7 +554,7 @@ exclude-result-prefixes="#all">
 
     <!-- TABLE HEADER MODE -->
 
-    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*" mode="gldp:TableHeaderMode">
+    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*" mode="g:TableHeaderMode">
 	<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(.), local-name(.)))" as="xs:anyURI"/>
 
 	<th>
@@ -592,7 +592,7 @@ exclude-result-prefixes="#all">
 			</a>
 		    </th>
 
-		    <xsl:apply-templates select="$predicates" mode="gldp:TableHeaderMode"/>
+		    <xsl:apply-templates select="$predicates" mode="g:TableHeaderMode"/>
 		</tr>
 	    </thead>
 	    <tbody>
@@ -873,5 +873,5 @@ exclude-result-prefixes="#all">
 	    </div>
 	</form>
     </xsl:template>
-	
+
 </xsl:stylesheet>
