@@ -47,8 +47,8 @@ import org.slf4j.LoggerFactory;
  * @see <a href="http://jsr311.java.net/nonav/javadoc/javax/ws/rs/ext/MessageBodyWriter.html">MessageBodyWriter</a>
  */
 @Provider
-@Produces({MediaType.APPLICATION_RDF_XML, MediaType.TEXT_TURTLE, MediaType.TEXT_PLAIN})
 @Consumes({MediaType.APPLICATION_RDF_XML, MediaType.TEXT_TURTLE, MediaType.TEXT_PLAIN})
+@Produces({MediaType.APPLICATION_RDF_XML, MediaType.TEXT_TURTLE, MediaType.TEXT_PLAIN})
 public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWriter<Model>
 {
     

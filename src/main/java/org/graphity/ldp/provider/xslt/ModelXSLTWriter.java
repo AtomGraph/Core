@@ -29,7 +29,6 @@ import java.lang.reflect.Type;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.*;
-import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerConfigurationException;
@@ -37,13 +36,14 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+import org.graphity.ldp.provider.ModelProvider;
 import org.graphity.util.XSLTBuilder;
 import org.openjena.riot.WebContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Transforms RDF with XSLT stylesheet and writes XHTML result to response
+ * Transforms RDF with XSLT stylesheet and writes XHTML/XML result to response
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/rdf/model/Model.html">Model</a>
@@ -51,8 +51,8 @@ import org.slf4j.LoggerFactory;
  */
 @Provider
 @Singleton
-@Produces({MediaType.APPLICATION_XHTML_XML})
-public class ModelXSLTWriter implements MessageBodyWriter<Model>
+@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_XHTML_XML})
+public class ModelXSLTWriter extends ModelProvider // implements RDFWriter
 {
     private static final Logger log = LoggerFactory.getLogger(ModelXSLTWriter.class);
 
@@ -77,18 +77,6 @@ public class ModelXSLTWriter implements MessageBodyWriter<Model>
 	if (resolver == null) throw new IllegalArgumentException("URIResolver cannot be null");
 	this.stylesheet = stylesheet;
 	this.resolver = resolver;
-    }
-
-    @Override
-    public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
-    {
-	return Model.class.isAssignableFrom(type);
-    }
-
-    @Override
-    public long getSize(Model model, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
-    {
-	return -1;
     }
 
     @Override
