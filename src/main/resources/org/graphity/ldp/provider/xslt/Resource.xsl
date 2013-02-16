@@ -766,6 +766,7 @@ exclude-result-prefixes="#all">
     </xsl:template>
 
     <!-- model -->
+    <!--
     <xsl:template match="rdf:RDF" mode="g:StmtInputMode" priority="0">
 	<form class="form-horizontal" method="post" action="">
 	    <fieldset>
@@ -887,6 +888,7 @@ exclude-result-prefixes="#all">
 	    </div>
 	</form>
     </xsl:template>
+    -->
 
     <!-- model -->
     <xsl:template match="rdf:RDF" mode="g:StmtInputMode">
@@ -1033,38 +1035,78 @@ exclude-result-prefixes="#all">
 
 		<div class="controls">
 		    <ul class="nav nav-tabs">
-			<li class="active" id="li-ou-{generate-id()}" onclick="this.className = 'active'; document.getElementById('li-ob-{generate-id()}').className = ''; document.getElementById('li-olll-{generate-id()}').className = ''; document.getElementById('li-ollt-{generate-id()}').className = ''; document.getElementById('div-ou-{generate-id()}').style.display = 'block'; document.getElementById('div-ob-{generate-id()}').style.display = 'none'; document.getElementById('div-olll-{generate-id()}').style.display = 'none'; document.getElementById('div-ollt-{generate-id()}').style.display = 'none';">
+			<li id="li-ou-{generate-id()}" onclick="this.className = 'active'; document.getElementById('li-ob-{generate-id()}').className = ''; document.getElementById('li-olll-{generate-id()}').className = ''; document.getElementById('li-ollt-{generate-id()}').className = ''; document.getElementById('div-ou-{generate-id()}').style.display = 'block'; document.getElementById('div-ob-{generate-id()}').style.display = 'none'; document.getElementById('div-olll-{generate-id()}').style.display = 'none'; document.getElementById('div-ollt-{generate-id()}').style.display = 'none';">
+			    <xsl:if test="@rdf:resource">
+				<xsl:attribute name="class">active</xsl:attribute>
+			    </xsl:if>
 			    <a id="a-ou-{generate-id()}">Resource</a>
 			</li>
 			<li id="li-ob-{generate-id()}" onclick="this.className = 'active'; document.getElementById('li-ou-{generate-id()}').className = ''; document.getElementById('li-olll-{generate-id()}').className = ''; document.getElementById('li-ollt-{generate-id()}').className = ''; document.getElementById('div-ob-{generate-id()}').style.display = 'block'; document.getElementById('div-ou-{generate-id()}').style.display = 'none'; document.getElementById('div-olll-{generate-id()}').style.display = 'none'; document.getElementById('div-ollt-{generate-id()}').style.display = 'none';">
+			    <xsl:if test="@rdf:nodeID">
+				<xsl:attribute name="class">active</xsl:attribute>
+			    </xsl:if>
 			    <a id="a-ob-{generate-id()}">Blank node</a>
 			</li>
 			<li id="li-olll-{generate-id()}" onclick="this.className = 'active'; document.getElementById('li-ou-{generate-id()}').className = ''; document.getElementById('li-ob-{generate-id()}').className = ''; document.getElementById('li-ollt-{generate-id()}').className = ''; document.getElementById('div-olll-{generate-id()}').style.display = 'block'; document.getElementById('div-ou-{generate-id()}').style.display = 'none'; document.getElementById('div-ob-{generate-id()}').style.display = 'none'; document.getElementById('div-ollt-{generate-id()}').style.display = 'none';">
+			    <xsl:if test="text() and not(@rdf:datatype)">
+				<xsl:attribute name="class">active</xsl:attribute>
+			    </xsl:if>
 			    <a id="a-olll-{generate-id()}">Plain literal</a>
 			</li>
 			<li id="li-ollt-{generate-id()}" onclick="this.className = 'active'; document.getElementById('li-ou-{generate-id()}').className = ''; document.getElementById('li-ob-{generate-id()}').className = ''; document.getElementById('li-olll-{generate-id()}').className = ''; document.getElementById('div-ollt-{generate-id()}').style.display = 'block'; document.getElementById('div-ou-{generate-id()}').style.display = 'none'; document.getElementById('div-ob-{generate-id()}').style.display = 'none'; document.getElementById('div-olll-{generate-id()}').style.display = 'none';">
+			    <xsl:if test="text() and @rdf:datatype">
+				<xsl:attribute name="class">active</xsl:attribute>
+			    </xsl:if>
 			    <a id="a-ollt-{generate-id()}">Typed literal</a>
 			</li>
 		    </ul>
 
 		    <div id="div-ou-{generate-id()}">
+			<xsl:if test="not(@rdf:resource)">
+			    <xsl:attribute name="style">display: none;</xsl:attribute>
+			</xsl:if>
+
+			<xsl:apply-templates select="@rdf:resource" mode="g:InputMode"/>
+			<!--
 			<input type="text" name="ou" class="input-xlarge"/>
 			<span class="help-inline">URI</span>
+			-->
 		    </div>
 		    <div id="div-ob-{generate-id()}" style="display: none;">
+			<xsl:if test="not(@rdf:nodeID)">
+			    <xsl:attribute name="style">display: none;</xsl:attribute>
+			</xsl:if>
+
+			<xsl:apply-templates select="@rdf:nodeID" mode="g:InputMode"/>
+			<!--
 			<input type="text" name="ob"/>
 			<span class="help-inline">ID</span>
+			-->
 		    </div>
 		    <div id="div-olll-{generate-id()}" style="display: none;">
+			<xsl:if test="not(text()) or @rdf:datatype">
+			    <xsl:attribute name="style">display: none;</xsl:attribute>
+			</xsl:if>
+
+			<xsl:apply-templates select="text()" mode="g:InputMode"/>
+			<!--
 			<textarea name="ol"></textarea>
 			<label>Language</label>
 			<input type="text" name="ll" class="input-mini"/>
+			-->
 		    </div>
 		    <div id="div-ollt-{generate-id()}" style="display: none;">
+			<xsl:if test="not(text() and @rdf:datatype)">
+			    <xsl:attribute name="style">display: none;</xsl:attribute>
+			</xsl:if>
+
+			<xsl:apply-templates select="text()" mode="g:InputMode"/>
+			<!--
 			<textarea name="ol"></textarea>
 			<label>Datatype</label>
 			<input type="text" name="lt"/>
 			<span class="help-inline">URI</span>
+			-->
 		    </div>
 		</div>
 	    </div>
