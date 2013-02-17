@@ -101,7 +101,7 @@ exclude-result-prefixes="#all">
     <xsl:variable name="location-mapping" select="document('../../../../../location-mapping.ttl')" as="document-node()?"/>
 
     <xsl:key name="resources" match="*[*][@rdf:about] | *[*][@rdf:nodeID]" use="@rdf:about | @rdf:nodeID"/>
-    <xsl:key name="predicates" match="*[@rdf:about]/* | *[@rdf:nodeID]/*" use="concat(namespace-uri(.), local-name(.))"/>
+    <xsl:key name="predicates" match="*[@rdf:about]/* | *[@rdf:nodeID]/*" use="concat(namespace-uri(), local-name())"/>
     <xsl:key name="predicates-by-object" match="*[@rdf:about]/* | *[@rdf:nodeID]/*" use="@rdf:about | @rdf:nodeID"/>
     <xsl:key name="resources-by-type" match="*[*][@rdf:about] | *[*][@rdf:nodeID]" use="rdf:type/@rdf:resource"/>
     <xsl:key name="resources-by-host" match="*[@rdf:about]" use="sioc:has_host/@rdf:resource"/>
@@ -118,7 +118,7 @@ exclude-result-prefixes="#all">
     <xsl:function name="gldp:properties-by-uri" as="element()*">
 	<xsl:param name="properties" as="element()*"/>
 	<xsl:perform-sort select="$properties">
-	    <xsl:sort select="xs:anyURI(concat(namespace-uri(.), local-name(.)))"/>
+	    <xsl:sort select="xs:anyURI(concat(namespace-uri(), local-name()))"/>
 	</xsl:perform-sort>
     </xsl:function>
 
@@ -230,9 +230,9 @@ exclude-result-prefixes="#all">
 		    <xsl:apply-templates select="." mode="g:TableMode"/>
 		</xsl:when>
 		<xsl:when test="$mode = '&g;InputMode'">
-		    <xsl:apply-templates select="." mode="g:StmtInputMode"/>
-		    
 		    <!-- <xsl:apply-templates select="." mode="g:StmtInputMode"/> -->
+		    
+		    <xsl:apply-templates select="." mode="g:StmtInputMode"/>
 		</xsl:when>
 		<xsl:otherwise>
 		    <xsl:apply-templates select="key('resources', $absolute-path)"/>
@@ -243,8 +243,8 @@ exclude-result-prefixes="#all">
 	</div>
 	
 	<div class="span4">
-	    <xsl:for-each-group select="*/*" group-by="concat(namespace-uri(.), local-name(.))">
-		<xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(.), local-name(.))), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
+	    <xsl:for-each-group select="*/*" group-by="concat(namespace-uri(), local-name())">
+		<xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(), local-name())), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
 		<xsl:apply-templates select="current-group()[1]" mode="gldp:SidebarNavMode"/>
 	    </xsl:for-each-group>
 	</div>
@@ -303,8 +303,8 @@ exclude-result-prefixes="#all">
 	<xsl:apply-templates select="." mode="gldp:HeaderMode"/>
 
 	<div class="row-fluid">
-	    <xsl:for-each-group select="*" group-by="if (not(empty(rdfs:domain(xs:anyURI(concat(namespace-uri(.), local-name(.))))))) then rdfs:domain(xs:anyURI(concat(namespace-uri(.), local-name(.)))) else xs:anyURI('&rdfs;Resource')">
-		<xsl:sort select="g:label(if (not(empty(rdfs:domain(xs:anyURI(concat(namespace-uri(.), local-name(.))))))) then rdfs:domain(xs:anyURI(concat(namespace-uri(.), local-name(.)))) else xs:anyURI('&rdfs;Resource'), /, $lang)"/>
+	    <xsl:for-each-group select="*" group-by="if (not(empty(rdfs:domain(xs:anyURI(concat(namespace-uri(), local-name())))))) then rdfs:domain(xs:anyURI(concat(namespace-uri(), local-name()))) else xs:anyURI('&rdfs;Resource')">
+		<xsl:sort select="g:label(if (not(empty(rdfs:domain(xs:anyURI(concat(namespace-uri(), local-name())))))) then rdfs:domain(xs:anyURI(concat(namespace-uri(), local-name()))) else xs:anyURI('&rdfs;Resource'), /, $lang)"/>
 		
 		<div class="well well-small span6 pull-left">
 		    <h3>
@@ -317,7 +317,7 @@ exclude-result-prefixes="#all">
 			    <xsl:sequence select="gldp:properties-by-uri(current-group())"/>
 			</xsl:variable>
 			<xsl:apply-templates select="$sorted-properties" mode="gldp:PropertyListMode">
-			    <xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(.), local-name(.))), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
+			    <xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(), local-name())), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
 			    <xsl:sort select="if (@rdf:resource) then (g:label(@rdf:resource, /, $lang)) else text()" data-type="text" order="ascending" lang="{$lang}"/>
 			</xsl:apply-templates>
 		    </dl>
@@ -396,7 +396,7 @@ exclude-result-prefixes="#all">
 	<div class="well well-small">
 	    <dl>
 		<xsl:apply-templates mode="gldp:PropertyListMode">
-		    <xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(.), local-name(.))), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
+		    <xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(), local-name())), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
 		    <xsl:sort select="if (@rdf:resource) then (g:label(@rdf:resource, /, $lang)) else text()" data-type="text" order="ascending" lang="{$lang}"/> <!-- g:label(@rdf:nodeID, /, $lang) -->
 		</xsl:apply-templates>
 	    </dl>
@@ -408,9 +408,9 @@ exclude-result-prefixes="#all">
 
     <!-- property -->    
     <xsl:template match="*[@rdf:about or @rdf:nodeID]/*" mode="gldp:PropertyListMode">
-	<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(.), local-name(.)))" as="xs:anyURI"/>
+	<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(), local-name()))" as="xs:anyURI"/>
 
-	<xsl:if test="not(preceding-sibling::*[concat(namespace-uri(.), local-name(.)) = $this])">
+	<xsl:if test="not(preceding-sibling::*[concat(namespace-uri(), local-name()) = $this])">
 	    <dt>
 		<xsl:apply-templates select="."/>
 	    </dt>
@@ -433,12 +433,12 @@ exclude-result-prefixes="#all">
     
     <xsl:template match="*[@rdf:about]" mode="gldp:SidebarNavMode">
 	<xsl:apply-templates mode="gldp:SidebarNavMode">
-	    <xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(.), local-name(.))), /, $lang)" data-type="text" order="ascending"/>
+	    <xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(), local-name())), /, $lang)" data-type="text" order="ascending"/>
 	</xsl:apply-templates>
     </xsl:template>
     
     <xsl:template match="rdfs:seeAlso | owl:sameAs | dc:subject | dct:subject" mode="gldp:SidebarNavMode" priority="1">
-	<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(.), local-name(.)))" as="xs:anyURI"/>
+	<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(), local-name()))" as="xs:anyURI"/>
 	
 	<div class="well sidebar-nav">
 	    <h2 class="nav-header">
@@ -555,7 +555,7 @@ exclude-result-prefixes="#all">
     <!-- TABLE HEADER MODE -->
 
     <xsl:template match="*[@rdf:about or @rdf:nodeID]/*" mode="g:TableHeaderMode">
-	<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(.), local-name(.)))" as="xs:anyURI"/>
+	<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(), local-name()))" as="xs:anyURI"/>
 
 	<th>
 	    <a href="{$absolute-path}{g:query-string($offset, $limit, $this, $desc, (), $mode)}" title="{$this}">
@@ -577,8 +577,8 @@ exclude-result-prefixes="#all">
 	<!-- loaded resources = everything except container, page, and non-root blank nodes -->
 	<xsl:variable name="loaded-resources" select="*[not(@rdf:about = $absolute-path)][not(@rdf:about = $request-uri)][not(key('predicates-by-object', @rdf:nodeID))]"/>
 	<xsl:variable name="predicates" as="element()*">
-	    <xsl:for-each-group select="$loaded-resources/*" group-by="concat(namespace-uri(.), local-name(.))">
-		<xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(.), local-name(.))), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
+	    <xsl:for-each-group select="$loaded-resources/*" group-by="concat(namespace-uri(), local-name())">
+		<xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(), local-name())), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
 		<xsl:sequence select="current-group()[1]"/>
 	    </xsl:for-each-group>
 	</xsl:variable>
@@ -614,8 +614,8 @@ exclude-result-prefixes="#all">
 
 	    <xsl:variable name="subject" select="."/>
 	    <xsl:for-each select="$predicates">
-		<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(.), local-name(.)))" as="xs:anyURI"/>
-		<xsl:variable name="predicate" select="$subject/*[concat(namespace-uri(.), local-name(.)) = $this]"/>
+		<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(), local-name()))" as="xs:anyURI"/>
+		<xsl:variable name="predicate" select="$subject/*[concat(namespace-uri(), local-name()) = $this]"/>
 		<xsl:choose>
 		    <xsl:when test="$predicate">
 			<xsl:apply-templates select="$predicate" mode="g:TableMode"/>
@@ -644,7 +644,7 @@ exclude-result-prefixes="#all">
     </xsl:template>
     
     <!-- apply the first one in the group if there's no lang() match -->
-    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*[not(../*[concat(namespace-uri(.), local-name(.)) = concat(namespace-uri(current()), local-name(current()))][lang($lang)])][not(preceding-sibling::*[concat(namespace-uri(.), local-name(.)) = concat(namespace-uri(current()), local-name(current()))])]" mode="g:TableMode" priority="1">
+    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*[not(../*[concat(namespace-uri(), local-name()) = concat(namespace-uri(current()), local-name(current()))][lang($lang)])][not(preceding-sibling::*[concat(namespace-uri(), local-name()) = concat(namespace-uri(current()), local-name(current()))])]" mode="g:TableMode" priority="1">
 	<td>
 	    <xsl:apply-templates select="node() | @rdf:resource | @rdf:nodeID"/>
 	</td>
@@ -672,97 +672,161 @@ exclude-result-prefixes="#all">
 		<xsl:apply-templates select="@rdf:about | @rdf:nodeID"/>
 	    </legend>
 
-	    <xsl:apply-templates select="@rdf:about | @rdf:nodeID" mode="g:InputMode"/>
+	    <xsl:apply-templates select="@rdf:about | @rdf:nodeID" mode="g:InputMode">
+		<xsl:with-param name="type" select="'hidden'"/>
+	    </xsl:apply-templates>
 
-	    <xsl:for-each-group select="*" group-by="concat(namespace-uri(.), local-name(.))">
-		<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(.), local-name(.)))" as="xs:anyURI"/>
-		<xsl:variable name="property" select="key('resources', $this, document(namespace-uri()))"/>
-
-		<div class="control-group">
-		    <!-- <xsl:if test="not(preceding-sibling::*[concat(namespace-uri(.), local-name(.)) = $this])"> -->
-			<label class="control-label" title="{$property/rdfs:comment}">
-			    <a href="{$this}">
-				<xsl:apply-templates select="."/>
-			    </a>
-			</label>
-		    <!-- </xsl:if> -->
-
-		    <div class="controls">
-			<input type="hidden" name="pu" value="{$this}"/>
-
-			<xsl:apply-templates select="text() | @rdf:resource | @rdf:nodeID" mode="g:InputMode"/>
-		    </div>
-		</div>		
+	    <xsl:for-each-group select="*" group-by="concat(namespace-uri(), local-name())">
+		<xsl:apply-templates select="current-group()" mode="g:ResourceInputMode"/>
 	    </xsl:for-each-group>
-	    
-	    <xsl:apply-templates mode="g:InputMode"/>
 	</fieldset>
+    </xsl:template>
+
+    <!-- property -->
+    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*" mode="g:ResourceInputMode">
+	<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(), local-name()))" as="xs:anyURI"/>
+	<xsl:variable name="property" select="key('resources', $this, document(namespace-uri()))"/>
+
+	<div class="control-group">
+	    <!-- <xsl:if test="not(preceding-sibling::*[concat(namespace-uri(), local-name()) = $this])"> -->
+		<label class="control-label" title="{$property/rdfs:comment}">
+		    <a href="{$this}">
+			<xsl:apply-templates select="."/>
+		    </a>
+		</label>
+	    <!-- </xsl:if> -->
+
+	    <div class="controls">
+		<xsl:apply-templates select="." mode="g:InputMode">
+		    <xsl:with-param name="type" select="'hidden'"/>
+		</xsl:apply-templates>
+
+		<xsl:apply-templates select="text()" mode="g:InputMode">
+		    <xsl:with-param name="class" select="'span6'"/>
+		</xsl:apply-templates>
+		<xsl:apply-templates select="@rdf:resource | @rdf:nodeID" mode="g:InputMode"/>
+
+		<xsl:variable name="stmt" as="element()">
+		    <rdf:Description>
+			<xsl:copy-of select="../@rdf:about | ../@rdf:nodeID"/>
+			<xsl:copy>
+			    <xsl:attribute name="xml:lang"><xsl:value-of select="@xml:lang"/></xsl:attribute>
+			    <xsl:attribute name="rdf:datatype"><xsl:value-of select="@rdf:datatype"/></xsl:attribute>
+			    <xsl:value-of select="."/>
+			</xsl:copy>
+		    </rdf:Description>
+		</xsl:variable>
+
+		<xsl:if test="text()">
+		    <xsl:apply-templates select="$stmt/*/@xml:lang" mode="g:InputMode">
+			<xsl:with-param name="class" select="'span3'"/>
+		    </xsl:apply-templates>
+		    <!-- <span class="help-inline">Language tag</span> -->
+
+		    <xsl:apply-templates select="$stmt/*/@rdf:datatype" mode="g:InputMode">
+			<xsl:with-param name="class" select="'span3'"/>
+		    </xsl:apply-templates>
+		    <!-- <span class="help-inline">URI</span> -->
+		</xsl:if>
+	    </div>
+	</div>	
     </xsl:template>
 
     <!-- subject resource -->
     <xsl:template match="@rdf:about" mode="g:InputMode">
 	<xsl:param name="type" select="'text'" as="xs:string"/>
-	<input type="{$type}" name="su" value="{.}" class="input-xxlarge"/>
-	<!-- <span class="help-inline">URI</span> -->
+	<xsl:param name="class" select="'input-xxlarge'" as="xs:string?"/>
+
+	<input type="{$type}" name="su" value="{.}">
+	    <xsl:if test="$class">
+		<xsl:attribute name="class"><xsl:value-of select="$class"/></xsl:attribute>
+	    </xsl:if>
+	</input>
     </xsl:template>
 
     <!-- subject blank node -->
     <xsl:template match="@rdf:nodeID" mode="g:InputMode">
 	<xsl:param name="type" select="'text'" as="xs:string"/>
-	<input type="{$type}" name="sb" value="{.}"/>
-	<!-- <span class="help-inline">ID</span> -->
+	<xsl:param name="class" as="xs:string?"/>
+
+	<input type="{$type}" name="sb" value="{.}">
+	    <xsl:if test="$class">
+		<xsl:attribute name="class"><xsl:value-of select="$class"/></xsl:attribute>
+	    </xsl:if>
+	</input>
     </xsl:template>
 
     <!-- property -->
     <xsl:template match="*[@rdf:about or @rdf:nodeID]/*" mode="g:InputMode">
 	<xsl:param name="type" select="'text'" as="xs:string"/>
-	<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(.), local-name(.)))" as="xs:anyURI"/>
+	<xsl:param name="class" select="'input-xxlarge'" as="xs:string?"/>
+	<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(), local-name()))" as="xs:anyURI"/>
 
-	<input type="{$type}" name="pu" value="{$this}" class="input-xxlarge"/>
-
-	<!-- <xsl:apply-templates select="text() | @rdf:resource | @rdf:nodeID" mode="g:InputMode"/> -->
+	<input type="{$type}" name="pu" value="{$this}">
+	    <xsl:if test="$class">
+		<xsl:attribute name="class"><xsl:value-of select="$class"/></xsl:attribute>
+	    </xsl:if>
+	</input>
     </xsl:template>
     
     <!-- object resource -->
     <xsl:template match="*[@rdf:about or @rdf:nodeID]/*/@rdf:resource" mode="g:InputMode">
 	<xsl:param name="type" select="'text'" as="xs:string"/>
-	<input type="{$type}" name="ou" value="{.}" class="input-xxlarge"/>
+	<xsl:param name="class" select="'input-xxlarge'" as="xs:string?"/>
+	
+	<input type="{$type}" name="ou" value="{.}">
+	    <xsl:if test="$class">
+		<xsl:attribute name="class"><xsl:value-of select="$class"/></xsl:attribute>
+	    </xsl:if>
+	</input>
     </xsl:template>
 
     <!-- object blank node -->
     <xsl:template match="*[@rdf:about or @rdf:nodeID]/*/@rdf:nodeID" mode="g:InputMode">
 	<xsl:param name="type" select="'text'" as="xs:string"/>
-	<input type="{$type}" name="ob" value="{.}"/>
+	<xsl:param name="class" as="xs:string?"/>
+	
+	<input type="{$type}" name="ob" value="{.}">
+	    <xsl:if test="$class">
+		<xsl:attribute name="class"><xsl:value-of select="$class"/></xsl:attribute>
+	    </xsl:if>
+	</input>
     </xsl:template>
 
     <!-- object literal -->
-    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*/text()" mode="g:InputMode">
+    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*/text()" mode="g:InputMode" name="g:LiteralInputTemplate">
 	<xsl:param name="type" select="'text'" as="xs:string"/>
-	<input type="{$type}" name="ol" value="{.}">
-	    <xsl:if test="not(../@rdf:datatype) or ../@rdf:datatype = '&xsd;string'">
-		<xsl:attribute name="class">input-xxlarge</xsl:attribute>
-	    </xsl:if>
-	</input>
+	<xsl:param name="class" as="xs:string?"/>
 	
-	<xsl:if test="../@rdf:datatype | ../@xml:lang">
-	    <span class="help-inline">
-		<xsl:apply-templates select="../@rdf:datatype | ../@xml:lang" mode="g:InputMode"/>
-	    </span>
-	</xsl:if>
+	<textarea name="ol">
+	    <xsl:if test="$class">
+		<xsl:attribute name="class"><xsl:value-of select="$class"/></xsl:attribute>
+	    </xsl:if>
+
+	    <xsl:value-of select="."/>
+	</textarea>
     </xsl:template>
 
     <xsl:template match="@rdf:datatype" mode="g:InputMode">
 	<xsl:param name="type" select="'text'" as="xs:string"/>
-	<input type="{$type}" name="lt" value="{.}" class="input-small"/>
+	<xsl:param name="class" select="'input-xlarge'" as="xs:string?"/>
 
-	<!-- <xsl:apply-templates select="." mode="g:LabelMode"/> -->
+	<input type="{$type}" name="lt" value="{.}">
+	    <xsl:if test="$class">
+		<xsl:attribute name="class"><xsl:value-of select="$class"/></xsl:attribute>
+	    </xsl:if>
+	</input>
     </xsl:template>
 
     <xsl:template match="@xml:lang" mode="g:InputMode">
 	<xsl:param name="type" select="'text'" as="xs:string"/>
-	<input type="{$type}" name="ll" value="{.}" class="input-mini"/>
+	<xsl:param name="class" select="'input-xlarge'" as="xs:string?"/>
 
-	<!-- <xsl:apply-templates select="." mode="g:LabelMode"/> -->
+	<input type="{$type}" name="ll" value="{.}">
+	    <xsl:if test="$class">
+		<xsl:attribute name="class"><xsl:value-of select="$class"/></xsl:attribute>
+	    </xsl:if>
+	</input>
     </xsl:template>
 
     <!-- model -->
@@ -905,8 +969,56 @@ exclude-result-prefixes="#all">
 	</form>
     </xsl:template>
 
+    <xsl:template match="@rdf:about | @rdf:nodeID" mode="g:StmtInputMode">
+	<xsl:param name="property" as="element()"/>
+
+	<ul class="nav nav-tabs">
+	    <li id="li-su-{generate-id($property)}" onclick="this.className = 'active'; document.getElementById('li-sb-{generate-id($property)}').className = ''; document.getElementById('div-su-{generate-id($property)}').style.display = 'block'; document.getElementById('div-sb-{generate-id($property)}').style.display = 'none';">
+		<xsl:if test="../@rdf:about">
+		    <xsl:attribute name="class">active</xsl:attribute>
+		</xsl:if>
+		
+		<a id="a-su-{generate-id($property)}">Resource</a>
+	    </li>
+	    <li id="li-sb-{generate-id($property)}" onclick="this.className = 'active'; document.getElementById('li-su-{generate-id($property)}').className = ''; document.getElementById('div-sb-{generate-id($property)}').style.display = 'block'; document.getElementById('div-su-{generate-id($property)}').style.display = 'none';">
+		<xsl:if test="../@rdf:nodeID">
+		    <xsl:attribute name="class">active</xsl:attribute>
+		</xsl:if>			
+		
+		<a id="a-sb-{generate-id($property)}">Blank node</a>
+	    </li>
+	</ul>
+
+	<div id="div-su-{generate-id($property)}">
+	    <xsl:if test="not(../@rdf:about)">
+		<xsl:attribute name="style">display: none;</xsl:attribute>
+	    </xsl:if>
+
+	    <xsl:variable name="stmt" as="element()">
+		<rdf:Description rdf:about="{../@rdf:about}"/>
+	    </xsl:variable>
+
+	    <xsl:apply-templates select="$stmt/@rdf:about" mode="g:InputMode"/>
+	    <span class="help-inline">URI</span>
+	</div>		
+	<div id="div-sb-{generate-id($property)}">
+	    <xsl:if test="not(../@rdf:nodeID)">
+		<xsl:attribute name="style">display: none;</xsl:attribute>
+	    </xsl:if>
+
+	    <xsl:variable name="stmt" as="element()">
+		<rdf:Description rdf:nodeID="{../@rdf:nodeID}"/>
+	    </xsl:variable>
+
+	    <xsl:apply-templates select="$stmt/@rdf:nodeID" mode="g:InputMode"/>
+	    <span class="help-inline">ID</span>
+	</div>
+    </xsl:template>
+
     <!-- resource statements -->
     <xsl:template match="*[@rdf:about or @rdf:nodeID]/*" mode="g:StmtInputMode">
+	<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(), local-name()))" as="xs:anyURI"/>
+
 	<fieldset>
 	    <legend>Statement</legend>
 
@@ -914,54 +1026,9 @@ exclude-result-prefixes="#all">
 		<label class="control-label">Subject</label>
 
 		<div class="controls">
-		    <ul class="nav nav-tabs">
-			<li id="li-su-{generate-id()}" onclick="this.className = 'active'; document.getElementById('li-sb-{generate-id()}').className = ''; document.getElementById('div-su-{generate-id()}').style.display = 'block'; document.getElementById('div-sb-{generate-id()}').style.display = 'none';">
-			    <xsl:if test="../@rdf:about">
-				<xsl:attribute name="class">active</xsl:attribute>
-			    </xsl:if>
-			    <a id="a-su-{generate-id()}">Resource</a>
-			</li>
-			<li id="li-sb-{generate-id()}" onclick="this.className = 'active'; document.getElementById('li-su-{generate-id()}').className = ''; document.getElementById('div-sb-{generate-id()}').style.display = 'block'; document.getElementById('div-su-{generate-id()}').style.display = 'none';">
-			    <xsl:if test="../@rdf:nodeID">
-				<xsl:attribute name="class">active</xsl:attribute>
-			    </xsl:if>			
-			    <a id="a-sb-{generate-id()}">Blank node</a>
-			</li>
-		    </ul>
-
-		    <div id="div-su-{generate-id()}">
-			<xsl:if test="not(../@rdf:about)">
-			    <xsl:attribute name="style">display: none;</xsl:attribute>
-			</xsl:if>
-			<xsl:variable name="subject-resource" as="attribute()">
-			    <xsl:choose>
-				<xsl:when test="../@rdf:about">
-				    <xsl:sequence select="../@rdf:about"/>
-				</xsl:when>
-				<xsl:otherwise>
-				    <xsl:attribute name="rdf:about"></xsl:attribute>
-				</xsl:otherwise>
-			    </xsl:choose>
-			</xsl:variable>
-
-			<xsl:apply-templates select="$subject-resource" mode="g:InputMode"/>
-		    </div>		
-		    <div id="div-sb-{generate-id()}">
-			<xsl:if test="not(../@rdf:nodeID)">
-			    <xsl:attribute name="style">display: none;</xsl:attribute>
-			</xsl:if>
-			<xsl:variable name="subject-bnode" as="attribute()">
-			    <xsl:choose>
-				<xsl:when test="../@rdf:nodeID">
-				    <xsl:sequence select="../@rdf:nodeID"/>
-				</xsl:when>
-				<xsl:otherwise>
-				    <xsl:attribute name="rdf:nodeID"></xsl:attribute>
-				</xsl:otherwise>
-			    </xsl:choose>
-			</xsl:variable>
-			<xsl:apply-templates select="$subject-bnode" mode="g:InputMode"/>
-		    </div>
+		    <xsl:apply-templates select="../@rdf:about | ../@rdf:nodeID" mode="g:StmtInputMode">
+			<xsl:with-param name="property" select="."/>
+		    </xsl:apply-templates>
 		</div>
 	    </div>	    
 
@@ -969,64 +1036,8 @@ exclude-result-prefixes="#all">
 		<label class="control-label">Property</label>
 
 		<div class="controls">
-		    <xsl:variable name="ontology-uris" select="('&rdf;', '&rdfs;', '&owl;', '&foaf;', '&sioc;')" as="xs:string*"/>
-		    <ul class="nav nav-tabs">
-			<li id="li-pu-existing-{generate-id()}" onclick="this.className = 'active'; document.getElementById('li-pu-new-{generate-id()}').className = ''; document.getElementById('div-pu-existing-{generate-id()}').style.display = 'block'; document.getElementById('div-pu-new-{generate-id()}').style.display = 'none';">
-			    <xsl:if test="namespace-uri(.) = $ontology-uris">
-				<xsl:attribute name="class">active</xsl:attribute>
-			    </xsl:if>
-			    <a id="a-pu-existing-{generate-id()}">Existing</a>
-			</li>
-			<li id="li-pu-new-{generate-id()}" onclick="this.className = 'active'; document.getElementById('li-pu-existing-{generate-id()}').className = ''; document.getElementById('div-pu-new-{generate-id()}').style.display = 'block'; document.getElementById('div-pu-existing-{generate-id()}').style.display = 'none';">
-			    <xsl:if test="not(namespace-uri(.) = $ontology-uris)">
-				<xsl:attribute name="class">active</xsl:attribute>
-			    </xsl:if>
-			    <a id="a-pu-new-{generate-id()}">New</a>
-			</li>
-		    </ul>
-
-		    <div id="div-pu-existing-{generate-id()}">
-			<xsl:if test="not(namespace-uri(.) = $ontology-uris)">
-			    <xsl:attribute name="style">display: none;</xsl:attribute>
-			</xsl:if>
-
-			<select name="pu">
-			    <xsl:for-each select="$ontology-uris">
-				<xsl:for-each select="document(.)">
-				    <optgroup>
-					<xsl:attribute name="label">
-					    <xsl:apply-templates select="key('resources-by-type', '&owl;Ontology')/@rdf:about" mode="g:LabelMode"/>
-					</xsl:attribute>
-
-					<xsl:for-each select="key('resources-by-type', ('&rdf;Property', '&owl;ObjectProperty', '&owl;DatatypeProperty'))">
-					    <xsl:sort select="g:label(@rdf:about, /, $lang)" lang="{$lang}"/>
-					    <option value="{@rdf:about}">
-						<!--
-						<xsl:if test="@rdf:about = concat(namespace-uri(current()), local-name(current()))">
-						    <xsl:attribute name="selected">selected</xsl:attribute>
-						</xsl:if>
-						-->
-						<xsl:apply-templates select="@rdf:about" mode="g:LabelMode"/>
-
-						<xsl:if test="rdfs:range/@rdf:resource">
-						    <xsl:text> (</xsl:text>
-						    <xsl:apply-templates select="rdfs:range/@rdf:resource" mode="g:LabelMode"/>
-						    <xsl:text>)</xsl:text>
-						</xsl:if>
-					    </option>
-					</xsl:for-each>
-				    </optgroup>
-				</xsl:for-each>
-			    </xsl:for-each>
-			</select>
-		    </div>
-		    <div id="div-pu-new-{generate-id()}">
-			<xsl:if test="namespace-uri(.) = $ontology-uris">
-			    <xsl:attribute name="style">display: none;</xsl:attribute>
-			</xsl:if>
-			<xsl:apply-templates select="." mode="g:InputMode"/>
-			<span class="help-inline">URI</span>
-		    </div>
+		    <xsl:apply-templates select="." mode="g:InputMode"/>
+		    <span class="help-inline">URI</span>
 		</div>
 	    </div>
 	    
@@ -1034,83 +1045,126 @@ exclude-result-prefixes="#all">
 		<label class="control-label">Object</label>
 
 		<div class="controls">
-		    <ul class="nav nav-tabs">
-			<li id="li-ou-{generate-id()}" onclick="this.className = 'active'; document.getElementById('li-ob-{generate-id()}').className = ''; document.getElementById('li-olll-{generate-id()}').className = ''; document.getElementById('li-ollt-{generate-id()}').className = ''; document.getElementById('div-ou-{generate-id()}').style.display = 'block'; document.getElementById('div-ob-{generate-id()}').style.display = 'none'; document.getElementById('div-olll-{generate-id()}').style.display = 'none'; document.getElementById('div-ollt-{generate-id()}').style.display = 'none';">
-			    <xsl:if test="@rdf:resource">
-				<xsl:attribute name="class">active</xsl:attribute>
-			    </xsl:if>
-			    <a id="a-ou-{generate-id()}">Resource</a>
-			</li>
-			<li id="li-ob-{generate-id()}" onclick="this.className = 'active'; document.getElementById('li-ou-{generate-id()}').className = ''; document.getElementById('li-olll-{generate-id()}').className = ''; document.getElementById('li-ollt-{generate-id()}').className = ''; document.getElementById('div-ob-{generate-id()}').style.display = 'block'; document.getElementById('div-ou-{generate-id()}').style.display = 'none'; document.getElementById('div-olll-{generate-id()}').style.display = 'none'; document.getElementById('div-ollt-{generate-id()}').style.display = 'none';">
-			    <xsl:if test="@rdf:nodeID">
-				<xsl:attribute name="class">active</xsl:attribute>
-			    </xsl:if>
-			    <a id="a-ob-{generate-id()}">Blank node</a>
-			</li>
-			<li id="li-olll-{generate-id()}" onclick="this.className = 'active'; document.getElementById('li-ou-{generate-id()}').className = ''; document.getElementById('li-ob-{generate-id()}').className = ''; document.getElementById('li-ollt-{generate-id()}').className = ''; document.getElementById('div-olll-{generate-id()}').style.display = 'block'; document.getElementById('div-ou-{generate-id()}').style.display = 'none'; document.getElementById('div-ob-{generate-id()}').style.display = 'none'; document.getElementById('div-ollt-{generate-id()}').style.display = 'none';">
-			    <xsl:if test="text() and not(@rdf:datatype)">
-				<xsl:attribute name="class">active</xsl:attribute>
-			    </xsl:if>
-			    <a id="a-olll-{generate-id()}">Plain literal</a>
-			</li>
-			<li id="li-ollt-{generate-id()}" onclick="this.className = 'active'; document.getElementById('li-ou-{generate-id()}').className = ''; document.getElementById('li-ob-{generate-id()}').className = ''; document.getElementById('li-olll-{generate-id()}').className = ''; document.getElementById('div-ollt-{generate-id()}').style.display = 'block'; document.getElementById('div-ou-{generate-id()}').style.display = 'none'; document.getElementById('div-ob-{generate-id()}').style.display = 'none'; document.getElementById('div-olll-{generate-id()}').style.display = 'none';">
-			    <xsl:if test="text() and @rdf:datatype">
-				<xsl:attribute name="class">active</xsl:attribute>
-			    </xsl:if>
-			    <a id="a-ollt-{generate-id()}">Typed literal</a>
-			</li>
-		    </ul>
-
-		    <div id="div-ou-{generate-id()}">
-			<xsl:if test="not(@rdf:resource)">
-			    <xsl:attribute name="style">display: none;</xsl:attribute>
-			</xsl:if>
-
-			<xsl:apply-templates select="@rdf:resource" mode="g:InputMode"/>
-			<!--
-			<input type="text" name="ou" class="input-xlarge"/>
-			<span class="help-inline">URI</span>
-			-->
-		    </div>
-		    <div id="div-ob-{generate-id()}" style="display: none;">
-			<xsl:if test="not(@rdf:nodeID)">
-			    <xsl:attribute name="style">display: none;</xsl:attribute>
-			</xsl:if>
-
-			<xsl:apply-templates select="@rdf:nodeID" mode="g:InputMode"/>
-			<!--
-			<input type="text" name="ob"/>
-			<span class="help-inline">ID</span>
-			-->
-		    </div>
-		    <div id="div-olll-{generate-id()}" style="display: none;">
-			<xsl:if test="not(text()) or @rdf:datatype">
-			    <xsl:attribute name="style">display: none;</xsl:attribute>
-			</xsl:if>
-
-			<xsl:apply-templates select="text()" mode="g:InputMode"/>
-			<!--
-			<textarea name="ol"></textarea>
-			<label>Language</label>
-			<input type="text" name="ll" class="input-mini"/>
-			-->
-		    </div>
-		    <div id="div-ollt-{generate-id()}" style="display: none;">
-			<xsl:if test="not(text() and @rdf:datatype)">
-			    <xsl:attribute name="style">display: none;</xsl:attribute>
-			</xsl:if>
-
-			<xsl:apply-templates select="text()" mode="g:InputMode"/>
-			<!--
-			<textarea name="ol"></textarea>
-			<label>Datatype</label>
-			<input type="text" name="lt"/>
-			<span class="help-inline">URI</span>
-			-->
-		    </div>
+		    <xsl:apply-templates select="text() | @rdf:resource | @rdf:nodeID" mode="g:StmtInputMode"/>
 		</div>
 	    </div>
 	</fieldset>
+    </xsl:template>
+
+    <xsl:template match="text() | @rdf:resource | @rdf:nodeID" mode="g:StmtInputMode">
+	<ul class="nav nav-tabs">
+	    <li id="li-ou-{generate-id(..)}" onclick="this.className = 'active'; document.getElementById('li-ob-{generate-id(..)}').className = ''; document.getElementById('li-olll-{generate-id(..)}').className = ''; document.getElementById('li-ollt-{generate-id(..)}').className = ''; document.getElementById('div-ou-{generate-id(..)}').style.display = 'block'; document.getElementById('div-ob-{generate-id(..)}').style.display = 'none'; document.getElementById('div-olll-{generate-id(..)}').style.display = 'none'; document.getElementById('div-ollt-{generate-id(..)}').style.display = 'none';">
+		<xsl:if test="../@rdf:resource">
+		    <xsl:attribute name="class">active</xsl:attribute>
+		</xsl:if>
+
+		<a id="a-ou-{generate-id(..)}">Resource</a>
+	    </li>
+	    <li id="li-ob-{generate-id(..)}" onclick="this.className = 'active'; document.getElementById('li-ou-{generate-id(..)}').className = ''; document.getElementById('li-olll-{generate-id(..)}').className = ''; document.getElementById('li-ollt-{generate-id(..)}').className = ''; document.getElementById('div-ob-{generate-id(..)}').style.display = 'block'; document.getElementById('div-ou-{generate-id(..)}').style.display = 'none'; document.getElementById('div-olll-{generate-id(..)}').style.display = 'none'; document.getElementById('div-ollt-{generate-id(..)}').style.display = 'none';">
+		<xsl:if test="../@rdf:nodeID">
+		    <xsl:attribute name="class">active</xsl:attribute>
+		</xsl:if>
+
+		<a id="a-ob-{generate-id(..)}">Blank node</a>
+	    </li>
+	    <li id="li-olll-{generate-id(..)}" onclick="this.className = 'active'; document.getElementById('li-ou-{generate-id(..)}').className = ''; document.getElementById('li-ob-{generate-id(..)}').className = ''; document.getElementById('li-ollt-{generate-id(..)}').className = ''; document.getElementById('div-olll-{generate-id(..)}').style.display = 'block'; document.getElementById('div-ou-{generate-id(..)}').style.display = 'none'; document.getElementById('div-ob-{generate-id(..)}').style.display = 'none'; document.getElementById('div-ollt-{generate-id(..)}').style.display = 'none';">
+		<xsl:if test="../text() and not(../@rdf:datatype)">
+		    <xsl:attribute name="class">active</xsl:attribute>
+		</xsl:if>
+
+		<a id="a-olll-{generate-id(..)}">Plain literal</a>
+	    </li>
+	    <li id="li-ollt-{generate-id(..)}" onclick="this.className = 'active'; document.getElementById('li-ou-{generate-id(..)}').className = ''; document.getElementById('li-ob-{generate-id(..)}').className = ''; document.getElementById('li-olll-{generate-id(..)}').className = ''; document.getElementById('div-ollt-{generate-id(..)}').style.display = 'block'; document.getElementById('div-ou-{generate-id(..)}').style.display = 'none'; document.getElementById('div-ob-{generate-id(..)}').style.display = 'none'; document.getElementById('div-olll-{generate-id(..)}').style.display = 'none';">
+		<xsl:if test="../text() and ../@rdf:datatype">
+		    <xsl:attribute name="class">active</xsl:attribute>
+		</xsl:if>
+
+		<a id="a-ollt-{generate-id(..)}">Typed literal</a>
+	    </li>
+	</ul>
+
+	<div id="div-ou-{generate-id(..)}">
+	    <xsl:if test="not(../@rdf:resource)">
+		<xsl:attribute name="style">display: none;</xsl:attribute>
+	    </xsl:if>
+
+	    <xsl:variable name="stmt" as="element()">
+		<rdf:Description>
+		    <xsl:for-each select="..">
+			<xsl:copy-of select="../@rdf:about | ../@rdf:nodeID"/>
+			<xsl:copy>
+			    <xsl:attribute name="rdf:resource"><xsl:value-of select="@rdf:resource"/></xsl:attribute>
+			</xsl:copy>
+		    </xsl:for-each>
+		</rdf:Description>
+	    </xsl:variable>
+
+	    <xsl:apply-templates select="$stmt/*/@rdf:resource" mode="g:InputMode"/>
+	    <span class="help-inline">URI</span>
+	</div>
+	<div id="div-ob-{generate-id(..)}">
+	    <xsl:if test="not(../@rdf:nodeID)">
+		<xsl:attribute name="style">display: none;</xsl:attribute>
+	    </xsl:if>
+
+	    <xsl:variable name="stmt" as="element()">
+		<rdf:Description>
+		    <xsl:for-each select="..">
+			<xsl:copy-of select="../@rdf:about | ../@rdf:nodeID"/>
+			<xsl:copy>
+			    <xsl:attribute name="rdf:nodeID"><xsl:value-of select="@rdf:nodeID"/></xsl:attribute>
+			</xsl:copy>
+		    </xsl:for-each>
+		</rdf:Description>
+	    </xsl:variable>
+
+	    <xsl:apply-templates select="$stmt/*/@rdf:nodeID" mode="g:InputMode"/>
+	    <span class="help-inline">ID</span>
+	</div>
+	<div id="div-olll-{generate-id(..)}">
+	    <xsl:if test="not(../text() and not(../@rdf:datatype))">
+		<xsl:attribute name="style">display: none;</xsl:attribute>
+	    </xsl:if>
+
+	    <xsl:variable name="stmt" as="element()">
+		<rdf:Description>
+		    <xsl:for-each select="..">
+			<xsl:copy-of select="../@rdf:about | ../@rdf:nodeID"/>
+			<xsl:copy>
+			    <xsl:attribute name="xml:lang"><xsl:value-of select="@xml:lang"/></xsl:attribute>
+			    <xsl:value-of select="."/>
+			</xsl:copy>
+		    </xsl:for-each>
+		</rdf:Description>
+	    </xsl:variable>
+
+	    <xsl:call-template name="g:LiteralInputTemplate"/>
+	    <br/>
+	    <xsl:apply-templates select="$stmt/*/@xml:lang" mode="g:InputMode"/>
+	    <span class="help-inline">Language tag</span>
+	</div>
+	<div id="div-ollt-{generate-id(..)}">
+	    <xsl:if test="not(../text() and ../@rdf:datatype)">
+		<xsl:attribute name="style">display: none;</xsl:attribute>
+	    </xsl:if>
+
+	    <xsl:variable name="stmt" as="element()">
+		<rdf:Description>
+		    <xsl:for-each select="..">
+			<xsl:copy-of select="../@rdf:about | ../@rdf:nodeID"/>
+			<xsl:copy>
+			    <xsl:attribute name="rdf:datatype"><xsl:value-of select="@rdf:datatype"/></xsl:attribute>
+			    <xsl:value-of select="."/>
+			</xsl:copy>
+		    </xsl:for-each>
+		</rdf:Description>
+	    </xsl:variable>
+
+	    <xsl:call-template name="g:LiteralInputTemplate"/>
+	    <br/>
+	    <xsl:apply-templates select="$stmt/*/@rdf:datatype" mode="g:InputMode"/>
+	    <span class="help-inline">Datatype URI</span>
+	</div>	
     </xsl:template>
 
 </xsl:stylesheet>
