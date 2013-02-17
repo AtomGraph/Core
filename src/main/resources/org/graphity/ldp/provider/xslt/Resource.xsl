@@ -232,7 +232,7 @@ exclude-result-prefixes="#all">
 		<xsl:when test="$mode = '&g;InputMode'">
 		    <!-- <xsl:apply-templates select="." mode="g:StmtInputMode"/> -->
 		    
-		    <xsl:apply-templates select="." mode="g:StmtInputMode"/>
+		    <xsl:apply-templates select="." mode="g:InputMode"/>
 		</xsl:when>
 		<xsl:otherwise>
 		    <xsl:apply-templates select="key('resources', $absolute-path)"/>
@@ -667,11 +667,12 @@ exclude-result-prefixes="#all">
     </xsl:template>
 
     <xsl:template match="*[*][@rdf:about] | *[*][@rdf:nodeID]" mode="g:InputMode">
-	<fieldset>
+	<fieldset id="fieldset-{generate-id()}">
 	    <legend>
+		<button type="button" class="btn pull-right" onclick="document.getElementById('fieldset-{generate-id()}').style.display = 'none';">&#x2715;</button>
 		<xsl:apply-templates select="@rdf:about | @rdf:nodeID"/>
 	    </legend>
-
+		
 	    <xsl:apply-templates select="@rdf:about | @rdf:nodeID" mode="g:InputMode">
 		<xsl:with-param name="type" select="'hidden'"/>
 	    </xsl:apply-templates>
@@ -687,7 +688,7 @@ exclude-result-prefixes="#all">
 	<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(), local-name()))" as="xs:anyURI"/>
 	<xsl:variable name="property" select="key('resources', $this, document(namespace-uri()))"/>
 
-	<div class="control-group">
+	<div class="control-group" id="control-group-{generate-id()}">
 	    <!-- <xsl:if test="not(preceding-sibling::*[concat(namespace-uri(), local-name()) = $this])"> -->
 		<label class="control-label" title="{$property/rdfs:comment}">
 		    <a href="{$this}">
@@ -697,37 +698,13 @@ exclude-result-prefixes="#all">
 	    <!-- </xsl:if> -->
 
 	    <div class="controls">
+		<button type="button" class="btn btn-small pull-right" onclick="document.getElementById('control-group-{generate-id()}').style.display = 'none';">&#x2715;</button>
+		
 		<xsl:apply-templates select="." mode="g:InputMode">
 		    <xsl:with-param name="type" select="'hidden'"/>
 		</xsl:apply-templates>
-
-		<xsl:apply-templates select="text()" mode="g:InputMode">
-		    <xsl:with-param name="class" select="'span6'"/>
-		</xsl:apply-templates>
-		<xsl:apply-templates select="@rdf:resource | @rdf:nodeID" mode="g:InputMode"/>
-
-		<xsl:variable name="stmt" as="element()">
-		    <rdf:Description>
-			<xsl:copy-of select="../@rdf:about | ../@rdf:nodeID"/>
-			<xsl:copy>
-			    <xsl:attribute name="xml:lang"><xsl:value-of select="@xml:lang"/></xsl:attribute>
-			    <xsl:attribute name="rdf:datatype"><xsl:value-of select="@rdf:datatype"/></xsl:attribute>
-			    <xsl:value-of select="."/>
-			</xsl:copy>
-		    </rdf:Description>
-		</xsl:variable>
-
-		<xsl:if test="text()">
-		    <xsl:apply-templates select="$stmt/*/@xml:lang" mode="g:InputMode">
-			<xsl:with-param name="class" select="'span3'"/>
-		    </xsl:apply-templates>
-		    <!-- <span class="help-inline">Language tag</span> -->
-
-		    <xsl:apply-templates select="$stmt/*/@rdf:datatype" mode="g:InputMode">
-			<xsl:with-param name="class" select="'span3'"/>
-		    </xsl:apply-templates>
-		    <!-- <span class="help-inline">URI</span> -->
-		</xsl:if>
+		
+		<xsl:apply-templates select="text() | @rdf:resource | @rdf:nodeID" mode="g:StmtInputMode"/>
 	    </div>
 	</div>	
     </xsl:template>
@@ -820,7 +797,7 @@ exclude-result-prefixes="#all">
 
     <xsl:template match="@xml:lang" mode="g:InputMode">
 	<xsl:param name="type" select="'text'" as="xs:string"/>
-	<xsl:param name="class" select="'input-xlarge'" as="xs:string?"/>
+	<xsl:param name="class" select="'input-mini'" as="xs:string?"/>
 
 	<input type="{$type}" name="ll" value="{.}">
 	    <xsl:if test="$class">
@@ -828,131 +805,6 @@ exclude-result-prefixes="#all">
 	    </xsl:if>
 	</input>
     </xsl:template>
-
-    <!-- model -->
-    <!--
-    <xsl:template match="rdf:RDF" mode="g:StmtInputMode" priority="0">
-	<form class="form-horizontal" method="post" action="">
-	    <fieldset>
-		<legend>Add statement</legend>
-
-		<div class="control-group">
-		    <label class="control-label">Subject</label>
-
-		    <div class="controls">
-			<ul class="nav nav-tabs">
-			    <li class="active" id="li-su" onclick="this.className = 'active'; document.getElementById('li-sb').className = ''; document.getElementById('div-su').style.display = 'block'; document.getElementById('div-sb').style.display = 'none';">
-				<a id="a-su">Resource</a>
-			    </li>
-			    <li id="li-sb" onclick="this.className = 'active'; document.getElementById('li-su').className = ''; document.getElementById('div-sb').style.display = 'block'; document.getElementById('div-su').style.display = 'none';">
-				<a id="a-sb">Blank node</a>
-			    </li>
-			</ul>
-
-			<div id="div-su">
-			    <input type="text" name="su" class="input-xlarge"/>
-			    <span class="help-inline">URI</span>
-			</div>
-			<div id="div-sb" style="display: none;">
-			    <input type="text" name="sb"/>
-			    <span class="help-inline">ID</span>
-			</div>
-		    </div>
-		</div>
-		<div class="control-group">
-		    <label class="control-label">Property</label>
-
-		    <div class="controls">
-			<ul class="nav nav-tabs">
-			    <li id="li-pu-existing" class="active" onclick="this.className = 'active'; document.getElementById('li-pu-new').className = ''; document.getElementById('div-pu-existing').style.display = 'block'; document.getElementById('div-pu-new').style.display = 'none';">
-				<a id="a-pu-existing">Existing</a>
-			    </li>
-			    <li id="li-pu-new" onclick="this.className = 'active'; document.getElementById('li-pu-existing').className = ''; document.getElementById('div-pu-new').style.display = 'block'; document.getElementById('div-pu-existing').style.display = 'none';">
-				<a id="a-pu-new">New</a>
-			    </li>
-			</ul>
-
-			<div id="div-pu-existing">
-			    <xsl:variable name="ontology-uris" select="('&rdf;', '&rdfs;', '&owl;', '&foaf;', '&sioc;')" as="xs:string*"/>
-			    <select name="pu">
-				<xsl:for-each select="$ontology-uris">
-				    <xsl:for-each select="document(.)">
-					<optgroup>
-					    <xsl:attribute name="label">
-						<xsl:apply-templates select="key('resources-by-type', '&owl;Ontology')/@rdf:about" mode="g:LabelMode"/>
-					    </xsl:attribute>
-
-					    <xsl:for-each select="key('resources-by-type', ('&rdf;Property', '&owl;ObjectProperty', '&owl;DatatypeProperty'))">
-						<xsl:sort select="g:label(@rdf:about, /, $lang)" lang="{$lang}"/>
-						<option value="{@rdf:about}">
-						    <xsl:apply-templates select="@rdf:about" mode="g:LabelMode"/>
-
-						    <xsl:if test="rdfs:range/@rdf:resource">
-							<xsl:text> (</xsl:text>
-							<xsl:apply-templates select="rdfs:range/@rdf:resource" mode="g:LabelMode"/>
-							<xsl:text>)</xsl:text>
-						    </xsl:if>
-						</option>
-					    </xsl:for-each>
-					</optgroup>
-				    </xsl:for-each>
-				</xsl:for-each>
-			    </select>
-			</div>
-			<div id="div-pu-new" style="display: none;">
-			    <input type="text" name="pu" class="input-xlarge"/>
-			    <span class="help-inline">URI</span>
-			</div>
-		    </div>
-		</div>
-		<div class="control-group">
-		    <label class="control-label">Object</label>
-
-		    <div class="controls">
-			<ul class="nav nav-tabs">
-			    <li class="active" id="li-ou" onclick="this.className = 'active'; document.getElementById('li-ob').className = ''; document.getElementById('li-olll').className = ''; document.getElementById('li-ollt').className = ''; document.getElementById('div-ou').style.display = 'block'; document.getElementById('div-ob').style.display = 'none'; document.getElementById('div-olll').style.display = 'none'; document.getElementById('div-ollt').style.display = 'none';">
-				<a id="a-ou">Resource</a>
-			    </li>
-			    <li id="li-ob" onclick="this.className = 'active'; document.getElementById('li-ou').className = ''; document.getElementById('li-olll').className = ''; document.getElementById('li-ollt').className = ''; document.getElementById('div-ob').style.display = 'block'; document.getElementById('div-ou').style.display = 'none'; document.getElementById('div-olll').style.display = 'none'; document.getElementById('div-ollt').style.display = 'none';">
-				<a id="a-ob">Blank node</a>
-			    </li>
-			    <li id="li-olll" onclick="this.className = 'active'; document.getElementById('li-ou').className = ''; document.getElementById('li-ob').className = ''; document.getElementById('li-ollt').className = ''; document.getElementById('div-olll').style.display = 'block'; document.getElementById('div-ou').style.display = 'none'; document.getElementById('div-ob').style.display = 'none'; document.getElementById('div-ollt').style.display = 'none';">
-				<a id="a-olll">Plain literal</a>
-			    </li>
-			    <li id="li-ollt" onclick="this.className = 'active'; document.getElementById('li-ou').className = ''; document.getElementById('li-ob').className = ''; document.getElementById('li-olll').className = ''; document.getElementById('div-ollt').style.display = 'block'; document.getElementById('div-ou').style.display = 'none'; document.getElementById('div-ob').style.display = 'none'; document.getElementById('div-olll').style.display = 'none';">
-				<a id="a-ollt">Typed literal</a>
-			    </li>
-			</ul>
-
-			<div id="div-ou">
-			    <input type="text" name="ou" class="input-xlarge"/>
-			    <span class="help-inline">URI</span>
-			</div>
-			<div id="div-ob" style="display: none;">
-			    <input type="text" name="ob"/>
-			    <span class="help-inline">ID</span>
-			</div>
-			<div id="div-olll" style="display: none;">
-			    <textarea name="ol"></textarea>
-			    <label>Language</label>
-			    <input type="text" name="ll" class="input-mini"/>
-			</div>
-			<div id="div-ollt" style="display: none;">
-			    <textarea name="ol"></textarea>
-			    <label>Datatype</label>
-			    <input type="text" name="lt"/>
-			    <span class="help-inline">URI</span>
-			</div>
-		    </div>
-		</div>
-	    </fieldset>
-	    
-	    <div class="form-actions">
-		<button type="submit" class="btn btn-primary">Post</button>
-	    </div>
-	</form>
-    </xsl:template>
-    -->
 
     <!-- model -->
     <xsl:template match="rdf:RDF" mode="g:StmtInputMode">
@@ -1019,8 +871,11 @@ exclude-result-prefixes="#all">
     <xsl:template match="*[@rdf:about or @rdf:nodeID]/*" mode="g:StmtInputMode">
 	<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(), local-name()))" as="xs:anyURI"/>
 
-	<fieldset>
-	    <legend>Statement</legend>
+	<fieldset id="fieldset-{generate-id()}">
+	    <legend>
+		<button type="button" class="btn pull-right" onclick="document.getElementById('fieldset-{generate-id()}').style.display = 'none';">&#x2715;</button>
+		Statement
+	    </legend>
 
 	    <div class="control-group">
 		<label class="control-label">Subject</label>
@@ -1051,7 +906,7 @@ exclude-result-prefixes="#all">
 	</fieldset>
     </xsl:template>
 
-    <xsl:template match="text() | @rdf:resource | @rdf:nodeID" mode="g:StmtInputMode">
+    <xsl:template match="text() | *[@rdf:about or @rdf:nodeID]/*/@rdf:resource | *[@rdf:about or @rdf:nodeID]/*/@rdf:nodeID" mode="g:StmtInputMode">
 	<ul class="nav nav-tabs">
 	    <li id="li-ou-{generate-id(..)}" onclick="this.className = 'active'; document.getElementById('li-ob-{generate-id(..)}').className = ''; document.getElementById('li-olll-{generate-id(..)}').className = ''; document.getElementById('li-ollt-{generate-id(..)}').className = ''; document.getElementById('div-ou-{generate-id(..)}').style.display = 'block'; document.getElementById('div-ob-{generate-id(..)}').style.display = 'none'; document.getElementById('div-olll-{generate-id(..)}').style.display = 'none'; document.getElementById('div-ollt-{generate-id(..)}').style.display = 'none';">
 		<xsl:if test="../@rdf:resource">
@@ -1138,7 +993,9 @@ exclude-result-prefixes="#all">
 		</rdf:Description>
 	    </xsl:variable>
 
-	    <xsl:call-template name="g:LiteralInputTemplate"/>
+	    <xsl:for-each select="..">
+		<xsl:call-template name="g:LiteralInputTemplate"/>
+	    </xsl:for-each>
 	    <br/>
 	    <xsl:apply-templates select="$stmt/*/@xml:lang" mode="g:InputMode"/>
 	    <span class="help-inline">Language tag</span>
@@ -1160,7 +1017,9 @@ exclude-result-prefixes="#all">
 		</rdf:Description>
 	    </xsl:variable>
 
-	    <xsl:call-template name="g:LiteralInputTemplate"/>
+	    <xsl:for-each select="..">
+		<xsl:call-template name="g:LiteralInputTemplate"/>
+	    </xsl:for-each>
 	    <br/>
 	    <xsl:apply-templates select="$stmt/*/@rdf:datatype" mode="g:InputMode"/>
 	    <span class="help-inline">Datatype URI</span>
