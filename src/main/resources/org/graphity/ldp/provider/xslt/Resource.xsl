@@ -680,6 +680,12 @@ exclude-result-prefixes="#all">
 	    <xsl:for-each-group select="*" group-by="concat(namespace-uri(), local-name())">
 		<xsl:apply-templates select="current-group()" mode="g:ResourceInputMode"/>
 	    </xsl:for-each-group>
+
+	    <div class="control-group">
+		<div class="control-label">
+		    <button type="button" class="btn" onclick="document.getElementById('control-group-{generate-id()}').style.display = 'none';">&#x271A;</button>
+		</div>
+	    </div>
 	</fieldset>
     </xsl:template>
 
@@ -706,7 +712,14 @@ exclude-result-prefixes="#all">
 		
 		<xsl:apply-templates select="text() | @rdf:resource | @rdf:nodeID" mode="g:StmtInputMode"/>
 	    </div>
-	</div>	
+	</div>
+	
+	<div class="control-group">
+	    <div class="controls">
+		<button type="button" class="btn btn-small" onclick="document.getElementById('control-group-{generate-id()}').style.display = 'none';">&#x271A;</button>
+		<!-- <span class="help-inline">Add object</span> -->
+	    </div>
+	</div>
     </xsl:template>
 
     <!-- subject resource -->
