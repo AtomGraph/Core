@@ -238,6 +238,10 @@ exclude-result-prefixes="#all">
 		    var controlsElement = controlGroupElement.lastElementChild;
 		    controlsElement.id = "controls-" + newId;
 		    
+		    // "Remove object" button
+		    controlsElement.children[0].onclick = function() { removeObject(newId); };
+
+		    // tab headings list
 		    var tabList = controlsElement.children[1];
 		    tabList.children[0].id = "li-ou-" + newId;
 		    tabList.children[0].onclick = function() { toggleObjectTabs("ou", newId); };
@@ -248,10 +252,19 @@ exclude-result-prefixes="#all">
 		    tabList.children[3].id = "li-ollt-" + newId;
 		    tabList.children[3].onclick = function() { toggleObjectTabs("ollt", newId); };
 
-		    controlsElement.children[2].id = "div-ou-" + newId;
-		    controlsElement.children[3].id = "div-ob-" + newId;
-		    controlsElement.children[4].id = "div-olll-" + newId;
-		    controlsElement.children[5].id = "div-ollt-" + newId;
+		    // tab panes
+		    var ouDiv = controlsElement.children[2];
+		    ouDiv.id = "div-ou-" + newId;
+		    ouDiv.children[0].removeAttribute("value");
+		    var obDiv = controlsElement.children[3];
+		    obDiv.id = "div-ob-" + newId;
+		    obDiv.children[0].removeAttribute("value");
+		    var olllDiv = controlsElement.children[4];
+		    olllDiv.id = "div-olll-" + newId;
+		    olllDiv.children[0].removeAttribute("value");
+		    var olltDiv = controlsElement.children[5];
+		    olltDiv.id = "div-ollt-" + newId;
+		    olltDiv.children[0].removeAttribute("value");
 		    //alert(ouDiv);
 		    
 		    return controlGroupElement;
@@ -271,6 +284,11 @@ exclude-result-prefixes="#all">
 			if (type === types[i]) tabPaneDiv.style.display = 'block';
 			else tabPaneDiv.style.display = 'none';
 		    }		    
+		}
+		
+		function removeObject(id)
+		{
+		    document.getElementById("control-group-" + id).style.display = 'none';
 		}
 	    ]]>
 	</script>
@@ -764,7 +782,7 @@ exclude-result-prefixes="#all">
 	    </xsl:apply-templates>
 
 	    <div class="controls" id="controls-{generate-id()}">
-		<button type="button" class="btn btn-small pull-right" title="Remove this object node" onclick="document.getElementById('control-group-{generate-id()}').style.display = 'none';">&#x2715;</button>
+		<button type="button" class="btn btn-small pull-right" title="Remove this object node" onclick="removeObject('{generate-id()}');">&#x2715;</button>
 
 		<xsl:apply-templates select="text() | @rdf:resource | @rdf:nodeID" mode="g:StmtInputMode"/>
 	    </div>
