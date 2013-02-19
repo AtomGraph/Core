@@ -139,17 +139,7 @@ exclude-result-prefixes="#all">
 		<link href="static/css/bootstrap.css" rel="stylesheet"/>
 		<link href="static/css/bootstrap-responsive.css" rel="stylesheet"/>
 		
-		<style type="text/css">
-		    <![CDATA[
-			body { padding-top: 60px; padding-bottom: 40px; }
-			form.form-inline { margin: 0; }
-			ul.inline { margin-left: 0; }
-			.inline li { display: inline; }
-			.well-small { background-color: #FAFAFA ; }
-			textarea#query-string { font-family: monospace; }
-		    ]]>
-		</style>
-		
+		<xsl:apply-templates mode="gldp:StyleMode"/>
 		<xsl:apply-templates mode="gldp:ScriptMode"/>
       	    </head>
 	    <body>
@@ -217,7 +207,73 @@ exclude-result-prefixes="#all">
 	<xsl:apply-templates select="@rdf:about" mode="g:LabelMode"/>
     </xsl:template>
 
+    <xsl:template match="rdf:RDF" mode="gldp:StyleMode">
+	<style type="text/css">
+	    <![CDATA[
+		body { padding-top: 60px; padding-bottom: 40px; }
+		form.form-inline { margin: 0; }
+		ul.inline { margin-left: 0; }
+		.inline li { display: inline; }
+		.well-small { background-color: #FAFAFA ; }
+		textarea#query-string { font-family: monospace; }
+	    ]]>
+	</style>	
+    </xsl:template>
+
     <xsl:template match="rdf:RDF" mode="gldp:ScriptMode">
+	<script type="text/javascript">
+	    <![CDATA[
+		function generateUUID()
+		{
+		    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+			var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+			return v.toString(16);
+		    });
+		}
+	    
+		function cloneUniqueObject(controlGroupElement, newId)
+		{
+		    controlGroupElement.id = "control-group-" + newId;
+		    
+		    var controlsElement = controlGroupElement.lastElementChild;
+		    controlsElement.id = "controls-" + newId;
+		    
+		    var tabList = controlsElement.children[1];
+		    tabList.children[0].id = "li-ou-" + newId;
+		    tabList.children[0].onclick = function() { toggleObjectTabs("ou", newId); };
+		    tabList.children[1].id = "li-ob-" + newId;
+		    tabList.children[1].onclick = function() { toggleObjectTabs("ob", newId); };
+		    tabList.children[2].id = "li-olll-" + newId;
+		    tabList.children[2].onclick = function() { toggleObjectTabs("olll", newId); };
+		    tabList.children[3].id = "li-ollt-" + newId;
+		    tabList.children[3].onclick = function() { toggleObjectTabs("ollt", newId); };
+
+		    controlsElement.children[2].id = "div-ou-" + newId;
+		    controlsElement.children[3].id = "div-ob-" + newId;
+		    controlsElement.children[4].id = "div-olll-" + newId;
+		    controlsElement.children[5].id = "div-ollt-" + newId;
+		    //alert(ouDiv);
+		    
+		    return controlGroupElement;
+		}
+		
+		function toggleObjectTabs(type, id)
+		{
+		    var types = new Array("ou", "ob", "olll", "ollt");
+		    
+		    for (var i = 0; i < types.length; i++)
+		    {
+			var tabListItem = document.getElementById("li-" + types[i] + "-" + id);
+			if (type === types[i]) tabListItem.className = 'active';
+			else tabListItem.className = '';
+			
+			var tabPaneDiv = document.getElementById("div-" + types[i] + "-" + id);
+			if (type === types[i]) tabPaneDiv.style.display = 'block';
+			else tabPaneDiv.style.display = 'none';
+		    }		    
+		}
+	    ]]>
+	</script>
     </xsl:template>
 
     <xsl:template match="rdf:RDF">
@@ -669,7 +725,7 @@ exclude-result-prefixes="#all">
     <xsl:template match="*[*][@rdf:about] | *[*][@rdf:nodeID]" mode="g:InputMode">
 	<fieldset id="fieldset-{generate-id()}">
 	    <legend>
-		<button type="button" class="btn pull-right" onclick="document.getElementById('fieldset-{generate-id()}').style.display = 'none';">&#x2715;</button>
+		<button type="button" class="btn pull-right" title="Remove this resource" onclick="document.getElementById('fieldset-{generate-id()}').style.display = 'none';">&#x2715;</button>
 		<xsl:apply-templates select="@rdf:about | @rdf:nodeID"/>
 	    </legend>
 		
@@ -683,7 +739,7 @@ exclude-result-prefixes="#all">
 
 	    <div class="control-group">
 		<div class="control-label">
-		    <button type="button" class="btn" onclick="document.getElementById('control-group-{generate-id()}').style.display = 'none';">&#x271A;</button>
+		    <button type="button" class="btn" title="Add new property">&#x271A;</button>
 		</div>
 	    </div>
 	</fieldset>
@@ -703,21 +759,20 @@ exclude-result-prefixes="#all">
 		</label>
 	    <!-- </xsl:if> -->
 
-	    <div class="controls">
-		<button type="button" class="btn btn-small pull-right" onclick="document.getElementById('control-group-{generate-id()}').style.display = 'none';">&#x2715;</button>
-		
-		<xsl:apply-templates select="." mode="g:InputMode">
-		    <xsl:with-param name="type" select="'hidden'"/>
-		</xsl:apply-templates>
-		
+	    <xsl:apply-templates select="." mode="g:InputMode">
+		<xsl:with-param name="type" select="'hidden'"/>
+	    </xsl:apply-templates>
+
+	    <div class="controls" id="controls-{generate-id()}">
+		<button type="button" class="btn btn-small pull-right" title="Remove this object node" onclick="document.getElementById('control-group-{generate-id()}').style.display = 'none';">&#x2715;</button>
+
 		<xsl:apply-templates select="text() | @rdf:resource | @rdf:nodeID" mode="g:StmtInputMode"/>
 	    </div>
 	</div>
 	
 	<div class="control-group">
 	    <div class="controls">
-		<button type="button" class="btn btn-small" onclick="document.getElementById('control-group-{generate-id()}').style.display = 'none';">&#x271A;</button>
-		<!-- <span class="help-inline">Add object</span> -->
+		<button type="button" class="btn btn-small" title="Add new object" onclick="this.parentNode.parentNode.parentNode.insertBefore(cloneUniqueObject(document.getElementById('control-group-{generate-id()}').cloneNode(true), generateUUID()), this.parentNode.parentNode);">&#x271A;</button>
 	    </div>
 	</div>
     </xsl:template>
@@ -921,28 +976,28 @@ exclude-result-prefixes="#all">
 
     <xsl:template match="text() | *[@rdf:about or @rdf:nodeID]/*/@rdf:resource | *[@rdf:about or @rdf:nodeID]/*/@rdf:nodeID" mode="g:StmtInputMode">
 	<ul class="nav nav-tabs">
-	    <li id="li-ou-{generate-id(..)}" onclick="this.className = 'active'; document.getElementById('li-ob-{generate-id(..)}').className = ''; document.getElementById('li-olll-{generate-id(..)}').className = ''; document.getElementById('li-ollt-{generate-id(..)}').className = ''; document.getElementById('div-ou-{generate-id(..)}').style.display = 'block'; document.getElementById('div-ob-{generate-id(..)}').style.display = 'none'; document.getElementById('div-olll-{generate-id(..)}').style.display = 'none'; document.getElementById('div-ollt-{generate-id(..)}').style.display = 'none';">
+	    <li id="li-ou-{generate-id(..)}" onclick="toggleObjectTabs('ou', '{generate-id(..)}');">
 		<xsl:if test="../@rdf:resource">
 		    <xsl:attribute name="class">active</xsl:attribute>
 		</xsl:if>
 
 		<a id="a-ou-{generate-id(..)}">Resource</a>
 	    </li>
-	    <li id="li-ob-{generate-id(..)}" onclick="this.className = 'active'; document.getElementById('li-ou-{generate-id(..)}').className = ''; document.getElementById('li-olll-{generate-id(..)}').className = ''; document.getElementById('li-ollt-{generate-id(..)}').className = ''; document.getElementById('div-ob-{generate-id(..)}').style.display = 'block'; document.getElementById('div-ou-{generate-id(..)}').style.display = 'none'; document.getElementById('div-olll-{generate-id(..)}').style.display = 'none'; document.getElementById('div-ollt-{generate-id(..)}').style.display = 'none';">
+	    <li id="li-ob-{generate-id(..)}" onclick="toggleObjectTabs('ob', '{generate-id(..)}');">
 		<xsl:if test="../@rdf:nodeID">
 		    <xsl:attribute name="class">active</xsl:attribute>
 		</xsl:if>
 
 		<a id="a-ob-{generate-id(..)}">Blank node</a>
 	    </li>
-	    <li id="li-olll-{generate-id(..)}" onclick="this.className = 'active'; document.getElementById('li-ou-{generate-id(..)}').className = ''; document.getElementById('li-ob-{generate-id(..)}').className = ''; document.getElementById('li-ollt-{generate-id(..)}').className = ''; document.getElementById('div-olll-{generate-id(..)}').style.display = 'block'; document.getElementById('div-ou-{generate-id(..)}').style.display = 'none'; document.getElementById('div-ob-{generate-id(..)}').style.display = 'none'; document.getElementById('div-ollt-{generate-id(..)}').style.display = 'none';">
+	    <li id="li-olll-{generate-id(..)}" onclick="toggleObjectTabs('olll', '{generate-id(..)}');">
 		<xsl:if test="../text() and not(../@rdf:datatype)">
 		    <xsl:attribute name="class">active</xsl:attribute>
 		</xsl:if>
 
 		<a id="a-olll-{generate-id(..)}">Plain literal</a>
 	    </li>
-	    <li id="li-ollt-{generate-id(..)}" onclick="this.className = 'active'; document.getElementById('li-ou-{generate-id(..)}').className = ''; document.getElementById('li-ob-{generate-id(..)}').className = ''; document.getElementById('li-olll-{generate-id(..)}').className = ''; document.getElementById('div-ollt-{generate-id(..)}').style.display = 'block'; document.getElementById('div-ou-{generate-id(..)}').style.display = 'none'; document.getElementById('div-ob-{generate-id(..)}').style.display = 'none'; document.getElementById('div-olll-{generate-id(..)}').style.display = 'none';">
+	    <li id="li-ollt-{generate-id(..)}" onclick="toggleObjectTabs('ollt', '{generate-id(..)}');">
 		<xsl:if test="../text() and ../@rdf:datatype">
 		    <xsl:attribute name="class">active</xsl:attribute>
 		</xsl:if>
