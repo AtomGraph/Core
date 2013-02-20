@@ -17,8 +17,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <!DOCTYPE xsl:stylesheet [
     <!ENTITY java "http://xml.apache.org/xalan/java/">
-    <!ENTITY g "http://graphity.org/ontology/">
-    <!ENTITY gldp "http://ldp.graphity.org/ontology/">
+    <!ENTITY g "http://graphity.org/ontology#">
+    <!ENTITY gldp "http://ldp.graphity.org/ontology#">
     <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#">
     <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#">
     <!ENTITY owl "http://www.w3.org/2002/07/owl#">
@@ -136,9 +136,6 @@ exclude-result-prefixes="#all">
 		</xsl:for-each>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 		
-		<link href="static/css/bootstrap.css" rel="stylesheet"/>
-		<link href="static/css/bootstrap-responsive.css" rel="stylesheet"/>
-		
 		<xsl:apply-templates mode="gldp:StyleMode"/>
 		<xsl:apply-templates mode="gldp:ScriptMode"/>
       	    </head>
@@ -208,6 +205,9 @@ exclude-result-prefixes="#all">
     </xsl:template>
 
     <xsl:template match="rdf:RDF" mode="gldp:StyleMode">
+	<link href="static/css/bootstrap.css" rel="stylesheet"/>
+	<link href="static/css/bootstrap-responsive.css" rel="stylesheet"/>
+
 	<style type="text/css">
 	    <![CDATA[
 		body { padding-top: 60px; padding-bottom: 40px; }
@@ -670,11 +670,14 @@ exclude-result-prefixes="#all">
 
 	    <xsl:apply-templates mode="g:InputMode"/>
 	    
-	    <fieldset>
-		<legend>Add new statement</legend>
+	    <fieldset id="fieldset-new-stmt">
+		<legend>
+		    <button type="button" class="btn pull-right" title="Remove this statement" style="display: none;">&#x2715;</button>
+		    New statement
+		</legend>
 
 		<xsl:call-template name="g:StmtInputTemplate">
-		    <xsl:with-param name="stmt-id" select="'xxxxxxxx'"/>
+		    <xsl:with-param name="stmt-id" select="'new-stmt'"/>
 		    <xsl:with-param name="su-value" select="''"/>
 		    <xsl:with-param name="sb-value" select="''"/>
 		    <xsl:with-param name="pu-value" select="''"/>
@@ -683,7 +686,13 @@ exclude-result-prefixes="#all">
 		    <xsl:with-param name="ol-value" select="''"/>
 		    <xsl:with-param name="ll-value" select="''"/>
 		    <xsl:with-param name="lt-value" select="''"/>
-		</xsl:call-template>
+		</xsl:call-template>		
+	    </fieldset>
+	    
+	    <fieldset>
+		<div class="control-group">
+		    <button type="button" class="btn" title="Add new statement" onclick="this.parentNode.parentNode.parentNode.insertBefore(cloneUniqueStmt(document.getElementById('fieldset-new-stmt').cloneNode(true), generateUUID()), this.parentNode.parentNode);">&#x271A;</button>
+		</div>
 	    </fieldset>
 
 	    <div class="form-actions">
@@ -761,9 +770,9 @@ exclude-result-prefixes="#all">
 		<xsl:with-param name="type" select="'hidden'"/>
 	    </xsl:apply-templates>
 
-	    <div class="controls" id="controls-{generate-id()}">
-		<button type="button" class="btn btn-small pull-right" title="Remove this object node" onclick="removeObject('{generate-id()}');">&#x2715;</button>
+	    <button type="button" class="btn btn-small pull-right" title="Remove this object node" onclick="removeObject('{generate-id()}');">&#x2715;</button>
 
+	    <div class="controls" id="controls-{generate-id()}">
 		<xsl:apply-templates select="text() | @rdf:resource | @rdf:nodeID" mode="g:StmtInputMode"/>
 	    </div>
 	</div>
@@ -1062,7 +1071,6 @@ exclude-result-prefixes="#all">
 	<xsl:param name="ol-value" select="text()" as="xs:string?"/>
 	<xsl:param name="ll-value" select="@xml:lang" as="xs:string?"/>
 	<xsl:param name="lt-value" select="@rdf:datatype" as="xs:string?"/>
-	<!-- <xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(), local-name()))" as="xs:anyURI"/> -->
 
 	<div class="control-group">
 	    <label class="control-label">Subject</label>
@@ -1079,7 +1087,7 @@ exclude-result-prefixes="#all">
 		    <xsl:with-param name="sb-value" select="$sb-value"/>
 		</xsl:call-template>
 	    </div>
-	</div>	    
+	</div>
 
 	<div class="control-group">
 	    <label class="control-label">Property</label>

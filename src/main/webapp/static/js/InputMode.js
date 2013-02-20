@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+var SUBJECT_TYPES = new Array("su", "sb");
+var OBJECT_TYPES = new Array("ou", "ob", "olll", "ollt");
 
 function generateUUID()
 {
@@ -24,18 +26,62 @@ function generateUUID()
     });
 }
 
-function cloneUniqueObject(controlGroupElement, newId)
+function cloneUniqueStmt(fieldset, newId)
 {
-    controlGroupElement.id = "control-group-" + newId;
+    fieldset.id = "fieldset-" + newId;
+    
+    // "Remove statement" button
 
-    var controlsElement = controlGroupElement.children[controlGroupElement.children.length - 1];
-    controlsElement.id = "controls-" + newId;
+    fieldset.replaceChild(fieldset.children[1], cloneUniqueSubject(fieldset.children[1], newId));
+    fieldset.replaceChild(fieldset.children[2], cloneUniqueProperty(fieldset.children[2], newId));
+    fieldset.replaceChild(fieldset.children[3], cloneUniqueObject(fieldset.children[3], newId));
+    
+    return fieldset;
+}
 
-    // "Remove object" button
-    controlsElement.children[0].onclick = function() { removeObject(newId); };
+function cloneUniqueSubject(controlGroupDiv, newId)
+{
+    var controlsDiv = controlGroupDiv.children[controlGroupDiv.children.length - 1];
 
     // tab headings list
-    var tabList = controlsElement.children[1];
+    var tabList = controlsDiv.children[0];
+    tabList.children[0].id = "li-su-" + newId;
+    tabList.children[0].onclick = function() { toggleSubjectTabs("su", newId); };
+    tabList.children[1].id = "li-sb-" + newId;
+    tabList.children[1].onclick = function() { toggleSubjectTabs("sb", newId); };
+
+    // tab panes
+    var suDiv = controlsDiv.children[1];
+    suDiv.id = "div-su-" + newId;
+    suDiv.children[0].removeAttribute("value");
+    var sbDiv = controlsDiv.children[2];
+    sbDiv.id = "div-sb-" + newId;
+    sbDiv.children[0].removeAttribute("value");
+    
+    return controlGroupDiv;
+}
+
+function cloneUniqueProperty(controlGroupDiv, newId)
+{
+    var controlsDiv = controlGroupDiv.children[controlGroupDiv.children.length - 1];
+    controlsDiv.children[0].id = "pu" + newId;
+    controlsDiv.children[0].removeAttribute("value");
+    
+    return controlGroupDiv;
+}
+
+function cloneUniqueObject(controlGroupDiv, newId)
+{
+    //controlGroupDiv.id = "control-group-" + newId;
+
+    var controlsDiv = controlGroupDiv.children[controlGroupDiv.children.length - 1];
+    controlsDiv.id = "controls-" + newId;
+
+    // "Remove object" button
+    //controlsDiv.children[0].onclick = function() { removeObject(newId); };
+
+    // tab headings list
+    var tabList = controlsDiv.children[0];
     tabList.children[0].id = "li-ou-" + newId;
     tabList.children[0].onclick = function() { toggleObjectTabs("ou", newId); };
     tabList.children[1].id = "li-ob-" + newId;
@@ -46,40 +92,47 @@ function cloneUniqueObject(controlGroupElement, newId)
     tabList.children[3].onclick = function() { toggleObjectTabs("ollt", newId); };
 
     // tab panes
-    var ouDiv = controlsElement.children[2];
+    var ouDiv = controlsDiv.children[1];
     ouDiv.id = "div-ou-" + newId;
     ouDiv.children[0].removeAttribute("value");
-    var obDiv = controlsElement.children[3];
+    var obDiv = controlsDiv.children[2];
     obDiv.id = "div-ob-" + newId;
     obDiv.children[0].removeAttribute("value");
-    var olllDiv = controlsElement.children[4];
+    var olllDiv = controlsDiv.children[3];
     olllDiv.id = "div-olll-" + newId;
     olllDiv.children[0].removeAttribute("value");
-    var olltDiv = controlsElement.children[5];
+    var olltDiv = controlsDiv.children[4];
     olltDiv.id = "div-ollt-" + newId;
     olltDiv.children[0].removeAttribute("value");
-    //alert(ouDiv);
 
-    return controlGroupElement;
-}
-
-function toggleObjectTabs(type, id)
-{
-    var types = new Array("ou", "ob", "olll", "ollt");
-
-    for (var i = 0; i < types.length; i++)
-    {
-	var tabListItem = document.getElementById("li-" + types[i] + "-" + id);
-	if (type === types[i]) tabListItem.className = 'active';
-	else tabListItem.className = '';
-
-	var tabPaneDiv = document.getElementById("div-" + types[i] + "-" + id);
-	if (type === types[i]) tabPaneDiv.style.display = 'block';
-	else tabPaneDiv.style.display = 'none';
-    }		    
+    return controlGroupDiv;
 }
 
 function removeObject(id)
 {
     document.getElementById("control-group-" + id).style.display = 'none';
+}
+
+function toggleSubjectTabs(activeType, id)
+{
+    toggleTabs(SUBJECT_TYPES, activeType, id);
+}
+
+function toggleObjectTabs(activeType, id)
+{
+    toggleTabs(OBJECT_TYPES, activeType, id);
+}
+
+function toggleTabs(types, activeType, id)
+{
+    for (var i = 0; i < types.length; i++)
+    {
+	var tabListItem = document.getElementById("li-" + types[i] + "-" + id);
+	if (activeType === types[i]) tabListItem.className = 'active';
+	else tabListItem.className = '';
+
+	var tabPaneDiv = document.getElementById("div-" + types[i] + "-" + id);
+	if (activeType === types[i]) tabPaneDiv.style.display = 'block';
+	else tabPaneDiv.style.display = 'none';
+    }		    
 }
