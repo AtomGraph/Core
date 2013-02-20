@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <!DOCTYPE xsl:stylesheet [
     <!ENTITY java "http://xml.apache.org/xalan/java/">
-    <!ENTITY g "http://graphity.org/ontology/">
+    <!ENTITY g "http://graphity.org/ontology#">
     <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#">
     <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#">
     <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#">

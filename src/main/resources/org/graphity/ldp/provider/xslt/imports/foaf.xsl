@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <!DOCTYPE xsl:stylesheet [
-    <!ENTITY g "http://graphity.org/ontology/">
+    <!ENTITY g "http://graphity.org/ontology#">
     <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#">
     <!ENTITY foaf "http://xmlns.com/foaf/0.1/">
 ]>

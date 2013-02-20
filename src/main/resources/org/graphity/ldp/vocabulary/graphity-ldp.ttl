@@ -193,7 +193,7 @@ ldp:pageOf a owl:ObjectProperty ;
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/instances?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%2FTableMode"
+		owl:hasValue "/instances?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%23TableMode"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty g:mode ;
@@ -211,7 +211,7 @@ ldp:pageOf a owl:ObjectProperty ;
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/instances?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%2FInputMode"
+		owl:hasValue "/instances?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%23InputMode"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty g:mode ;
@@ -245,7 +245,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf foaf:Document, ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/ontologies?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%2FTableMode"
+		owl:hasValue "/ontologies?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%23TableMode"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;
@@ -265,7 +265,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf foaf:Document, ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/ontologies?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%2FInputMode"
+		owl:hasValue "/ontologies?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%23InputMode"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;
@@ -305,7 +305,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf foaf:Document, ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/classes?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%2FTableMode"
+		owl:hasValue "/classes?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%23TableMode"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;
@@ -325,7 +325,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf foaf:Document, ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/classes?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%2FInputMode"
+		owl:hasValue "/classes?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%23InputMode"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;
@@ -365,7 +365,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf foaf:Document, ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/properties?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%2FTableMode"
+		owl:hasValue "/properties?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%23TableMode"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;
@@ -385,7 +385,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf foaf:Document, ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/properties?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%2FInputMode"
+		owl:hasValue "/properties?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%23InputMode"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;
@@ -425,7 +425,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf foaf:Document, ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/services?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%2FTableMode"
+		owl:hasValue "/services?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%23TableMode"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;
@@ -445,7 +445,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf foaf:Document, ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/services?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%2FInputMode"
+		owl:hasValue "/services?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%23InputMode"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;
@@ -485,7 +485,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf foaf:Document, ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/queries?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%2FTableMode"
+		owl:hasValue "/queries?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%23TableMode"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;
@@ -505,7 +505,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf foaf:Document, ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/queries?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%2FInputMode"
+		owl:hasValue "/queries?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%23InputMode"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;
@@ -545,7 +545,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf foaf:Document, ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/modes?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%2FTableMode"
+		owl:hasValue "/modes?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%23TableMode"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;
@@ -565,7 +565,7 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:subClassOf foaf:Document, ldp:Page, lda:ListEndpoint ,
 	[ a owl:Restriction ;
 		owl:onProperty lda:uriTemplate ;
-		owl:hasValue "/modes?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%2FInputMode"
+		owl:hasValue "/modes?limit={limit: [0-9]+}&offset={offset: [0-9]+}&mode=http%3A%2F%2Fgraphity.org%2Fontology%23InputMode"
 	] ,
 	[ a owl:Restriction ;
 		owl:onProperty ldp:pageOf ;
