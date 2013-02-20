@@ -221,77 +221,7 @@ exclude-result-prefixes="#all">
     </xsl:template>
 
     <xsl:template match="rdf:RDF" mode="gldp:ScriptMode">
-	<script type="text/javascript">
-	    <![CDATA[
-		function generateUUID()
-		{
-		    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-			var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
-			return v.toString(16);
-		    });
-		}
-	    
-		function cloneUniqueObject(controlGroupElement, newId)
-		{
-		    controlGroupElement.id = "control-group-" + newId;
-		    
-		    var controlsElement = controlGroupElement.lastElementChild;
-		    controlsElement.id = "controls-" + newId;
-		    
-		    // "Remove object" button
-		    controlsElement.children[0].onclick = function() { removeObject(newId); };
-
-		    // tab headings list
-		    var tabList = controlsElement.children[1];
-		    tabList.children[0].id = "li-ou-" + newId;
-		    tabList.children[0].onclick = function() { toggleObjectTabs("ou", newId); };
-		    tabList.children[1].id = "li-ob-" + newId;
-		    tabList.children[1].onclick = function() { toggleObjectTabs("ob", newId); };
-		    tabList.children[2].id = "li-olll-" + newId;
-		    tabList.children[2].onclick = function() { toggleObjectTabs("olll", newId); };
-		    tabList.children[3].id = "li-ollt-" + newId;
-		    tabList.children[3].onclick = function() { toggleObjectTabs("ollt", newId); };
-
-		    // tab panes
-		    var ouDiv = controlsElement.children[2];
-		    ouDiv.id = "div-ou-" + newId;
-		    ouDiv.children[0].removeAttribute("value");
-		    var obDiv = controlsElement.children[3];
-		    obDiv.id = "div-ob-" + newId;
-		    obDiv.children[0].removeAttribute("value");
-		    var olllDiv = controlsElement.children[4];
-		    olllDiv.id = "div-olll-" + newId;
-		    olllDiv.children[0].removeAttribute("value");
-		    var olltDiv = controlsElement.children[5];
-		    olltDiv.id = "div-ollt-" + newId;
-		    olltDiv.children[0].removeAttribute("value");
-		    //alert(ouDiv);
-		    
-		    return controlGroupElement;
-		}
-		
-		function toggleObjectTabs(type, id)
-		{
-		    var types = new Array("ou", "ob", "olll", "ollt");
-		    
-		    for (var i = 0; i < types.length; i++)
-		    {
-			var tabListItem = document.getElementById("li-" + types[i] + "-" + id);
-			if (type === types[i]) tabListItem.className = 'active';
-			else tabListItem.className = '';
-			
-			var tabPaneDiv = document.getElementById("div-" + types[i] + "-" + id);
-			if (type === types[i]) tabPaneDiv.style.display = 'block';
-			else tabPaneDiv.style.display = 'none';
-		    }		    
-		}
-		
-		function removeObject(id)
-		{
-		    document.getElementById("control-group-" + id).style.display = 'none';
-		}
-	    ]]>
-	</script>
+	<script type="text/javascript" src="static/js/InputMode.js"></script>
     </xsl:template>
 
     <xsl:template match="rdf:RDF">
@@ -732,6 +662,12 @@ exclude-result-prefixes="#all">
 	<xsl:apply-templates select="key('resources', $absolute-path)" mode="gldp:ModeSelectMode"/>
 
 	<form class="form-horizontal" method="post" action="">
+	    <xsl:comment>This form uses RDF/POST encoding: http://www.lsrn.org/semweb/rdfpost.html</xsl:comment>
+	    <xsl:call-template name="g:InputTemplate">
+		<xsl:with-param name="name" select="'rdf'"/>
+		<xsl:with-param name="type" select="'hidden'"/>
+	    </xsl:call-template>
+
 	    <xsl:apply-templates mode="g:InputMode"/>
 	    
 	    <div class="form-actions">
@@ -755,6 +691,7 @@ exclude-result-prefixes="#all">
 		<xsl:apply-templates select="current-group()" mode="g:ResourceInputMode"/>
 	    </xsl:for-each-group>
 
+	    <!--
 	    <div class="control-group">
 		<div class="control-label">
 		    <button type="button" class="btn" title="Add new property">&#x271A;</button>
@@ -776,15 +713,17 @@ exclude-result-prefixes="#all">
 		<label class="control-label">Object</label>
 
 		<div class="controls">
-		    <!-- <xsl:apply-templates select="text() | @rdf:resource | @rdf:nodeID" mode="g:StmtInputMode"/> -->
-		    <ul class="nav nav-tabs">
-			<li class="active"><a href="aaa">Resource</a></li>
-			<li><a href="aaa">Blank node</a></li>
-			<li><a href="aaa">Literal</a></li>
-			<li><a href="aaa">Typed literal</a></li>
-		    </ul>
+		    <xsl:call-template name="g:ObjectInputTemplate">
+			<xsl:with-param name="stmt-id" select="'xxx'"/>
+			<xsl:with-param name="ou-value" select="''"/>
+			<xsl:with-param name="ob-value" select="''"/>
+			<xsl:with-param name="ol-value" select="''"/>
+			<xsl:with-param name="ll-value" select="''"/>
+			<xsl:with-param name="lt-value" select="''"/>
+		    </xsl:call-template>
 		</div>
 	    </div>
+	    -->
 	</fieldset>
     </xsl:template>
 
@@ -804,7 +743,6 @@ exclude-result-prefixes="#all">
 
 	    <xsl:apply-templates select="." mode="g:InputMode">
 		<xsl:with-param name="type" select="'hidden'"/>
-		<xsl:with-param name="value" select="$this"/>
 	    </xsl:apply-templates>
 
 	    <div class="controls" id="controls-{generate-id()}">
@@ -900,13 +838,14 @@ exclude-result-prefixes="#all">
 	<xsl:param name="type" select="'text'" as="xs:string"/>
 	<xsl:param name="id" as="xs:string?"/>
 	<xsl:param name="class" select="'input-xxlarge'" as="xs:string?"/>
+	<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(), local-name()))" as="xs:anyURI"/>
 
 	<xsl:call-template name="g:InputTemplate">
 	    <xsl:with-param name="name" select="'pu'"/>
 	    <xsl:with-param name="type" select="$type"/>
 	    <xsl:with-param name="id" select="$id"/>
 	    <xsl:with-param name="class" select="$class"/>
-	    <xsl:with-param name="value" select="."/>
+	    <xsl:with-param name="value" select="$this"/>
 	</xsl:call-template>
     </xsl:template>
     
@@ -990,6 +929,12 @@ exclude-result-prefixes="#all">
 	<xsl:apply-templates select="key('resources', $absolute-path)" mode="gldp:ModeSelectMode"/>
 
 	<form class="form-horizontal" method="post" action="">
+	    <xsl:comment>This form uses RDF/POST encoding: http://www.lsrn.org/semweb/rdfpost.html</xsl:comment>
+	    <xsl:call-template name="g:InputTemplate">
+		<xsl:with-param name="name" select="'rdf'"/>
+		<xsl:with-param name="type" select="'hidden'"/>
+	    </xsl:call-template>
+
 	    <xsl:apply-templates select="*/*" mode="g:StmtInputMode"/>
 	    
 	    <div class="form-actions">
@@ -1069,9 +1014,7 @@ exclude-result-prefixes="#all">
 		<label class="control-label">Property</label>
 
 		<div class="controls">
-		    <xsl:apply-templates select="." mode="g:InputMode">
-			<xsl:with-param name="value" select="$this"/>
-		    </xsl:apply-templates>
+		    <xsl:apply-templates select="." mode="g:InputMode"/>
 		    <span class="help-inline">URI</span>
 		</div>
 	    </div>
@@ -1086,42 +1029,55 @@ exclude-result-prefixes="#all">
 	</fieldset>
     </xsl:template>
 
-    <xsl:template match="text() | *[@rdf:about or @rdf:nodeID]/*/@rdf:resource | *[@rdf:about or @rdf:nodeID]/*/@rdf:nodeID" mode="g:StmtInputMode">
-	<!-- <xsl:param name="property-id" as="xs:string"/> -->
+    <xsl:template match="text() | *[@rdf:about or @rdf:nodeID]/*/@rdf:resource | *[@rdf:about or @rdf:nodeID]/*/@rdf:nodeID" mode="g:StmtInputMode" name="g:ObjectInputTemplate">
+	<xsl:param name="stmt-id" select="generate-id(..)" as="xs:string"/>
+	<xsl:param name="ou-value" select="../@rdf:resource" as="xs:string?"/>
+	<xsl:param name="ob-value" select="../@rdf:nodeID" as="xs:string?"/>
+	<xsl:param name="ol-value" select="../text()" as="xs:string?"/>
+	<xsl:param name="ll-value" select="../@xml:lang" as="xs:string?"/>
+	<xsl:param name="lt-value" select="../@rdf:datatype" as="xs:string?"/>
+	<xsl:param name="active-tab" as="xs:string">
+	    <xsl:choose>
+		<xsl:when test="$ob-value">ob</xsl:when>
+		<xsl:when test="$ol-value and not($lt-value)">olll</xsl:when>
+		<xsl:when test="$ol-value and $lt-value">ollt</xsl:when>
+		<xsl:otherwise>ou</xsl:otherwise>
+	    </xsl:choose>
+	</xsl:param>
 
 	<ul class="nav nav-tabs">
-	    <li id="li-ou-{generate-id(..)}" onclick="toggleObjectTabs('ou', '{generate-id(..)}');">
-		<xsl:if test="../@rdf:resource">
+	    <li id="li-ou-{$stmt-id}" onclick="toggleObjectTabs('ou', '{$stmt-id}');">
+		<xsl:if test="$active-tab = 'ou'">
 		    <xsl:attribute name="class">active</xsl:attribute>
 		</xsl:if>
 
-		<a id="a-ou-{generate-id(..)}">Resource</a>
+		<a id="a-ou-{$stmt-id}">Resource</a>
 	    </li>
-	    <li id="li-ob-{generate-id(..)}" onclick="toggleObjectTabs('ob', '{generate-id(..)}');">
-		<xsl:if test="../@rdf:nodeID">
+	    <li id="li-ob-{$stmt-id}" onclick="toggleObjectTabs('ob', '{$stmt-id}');">
+		<xsl:if test="$active-tab = 'ob'">
 		    <xsl:attribute name="class">active</xsl:attribute>
 		</xsl:if>
 
-		<a id="a-ob-{generate-id(..)}">Blank node</a>
+		<a id="a-ob-{$stmt-id}">Blank node</a>
 	    </li>
-	    <li id="li-olll-{generate-id(..)}" onclick="toggleObjectTabs('olll', '{generate-id(..)}');">
-		<xsl:if test="../text() and not(../@rdf:datatype)">
+	    <li id="li-olll-{$stmt-id}" onclick="toggleObjectTabs('olll', '{$stmt-id}');">
+		<xsl:if test="$active-tab = 'olll'">
 		    <xsl:attribute name="class">active</xsl:attribute>
 		</xsl:if>
 
-		<a id="a-olll-{generate-id(..)}">Plain literal</a>
+		<a id="a-olll-{$stmt-id}">Plain literal</a>
 	    </li>
-	    <li id="li-ollt-{generate-id(..)}" onclick="toggleObjectTabs('ollt', '{generate-id(..)}');">
-		<xsl:if test="../text() and ../@rdf:datatype">
+	    <li id="li-ollt-{$stmt-id}" onclick="toggleObjectTabs('ollt', '{$stmt-id}');">
+		<xsl:if test="$active-tab = 'ollt'">
 		    <xsl:attribute name="class">active</xsl:attribute>
 		</xsl:if>
 
-		<a id="a-ollt-{generate-id(..)}">Typed literal</a>
+		<a id="a-ollt-{$stmt-id}">Typed literal</a>
 	    </li>
 	</ul>
 
-	<div id="div-ou-{generate-id(..)}">
-	    <xsl:if test="not(../@rdf:resource)">
+	<div id="div-ou-{$stmt-id}">
+	    <xsl:if test="not($active-tab = 'ou')">
 		<xsl:attribute name="style">display: none;</xsl:attribute>
 	    </xsl:if>
 
@@ -1129,12 +1085,12 @@ exclude-result-prefixes="#all">
 		<xsl:with-param name="name" select="'ou'"/>
 		<!-- <xsl:with-param name="id" select="$id"/> -->
 		<xsl:with-param name="class" select="'input-xxlarge'"/>
-		<xsl:with-param name="value" select="../@rdf:resource"/>
+		<xsl:with-param name="value" select="$ou-value"/>
 	    </xsl:call-template>
 	    <span class="help-inline">URI</span>
 	</div>
-	<div id="div-ob-{generate-id(..)}">
-	    <xsl:if test="not(../@rdf:nodeID)">
+	<div id="div-ob-{$stmt-id}">
+	    <xsl:if test="not($active-tab = 'ob')">
 		<xsl:attribute name="style">display: none;</xsl:attribute>
 	    </xsl:if>
 
@@ -1142,12 +1098,12 @@ exclude-result-prefixes="#all">
 		<xsl:with-param name="name" select="'ob'"/>
 		<!-- <xsl:with-param name="id" select="$id"/> -->
 		<!-- <xsl:with-param name="class" select="$class"/> -->
-		<xsl:with-param name="value" select="../@rdf:nodeID"/>
+		<xsl:with-param name="value" select="$ob-value"/>
 	    </xsl:call-template>
 	    <span class="help-inline">ID</span>
 	</div>
-	<div id="div-olll-{generate-id(..)}">
-	    <xsl:if test="not(../text() and not(../@rdf:datatype))">
+	<div id="div-olll-{$stmt-id}">
+	    <xsl:if test="not($active-tab = 'olll')">
 		<xsl:attribute name="style">display: none;</xsl:attribute>
 	    </xsl:if>
 
@@ -1155,19 +1111,19 @@ exclude-result-prefixes="#all">
 		<xsl:with-param name="name" select="'ol'"/>
 		<!-- <xsl:with-param name="id" select="$id"/> -->
 		<xsl:with-param name="class" select="'span12'"/>
-		<xsl:with-param name="value" select="../text()"/>
+		<xsl:with-param name="value" select="$ol-value"/>
 	    </xsl:call-template>
 	    <br/>
 	    <xsl:call-template name="g:InputTemplate">
 		<xsl:with-param name="name" select="'ll'"/>
 		<!-- <xsl:with-param name="id" select="$id"/> -->
 		<xsl:with-param name="class" select="'input-mini'"/>
-		<xsl:with-param name="value" select="../@xml:lang"/>
+		<xsl:with-param name="value" select="$ll-value"/>
 	    </xsl:call-template>
 	    <span class="help-inline">Language tag</span>
 	</div>
-	<div id="div-ollt-{generate-id(..)}">
-	    <xsl:if test="not(../text() and ../@rdf:datatype)">
+	<div id="div-ollt-{$stmt-id}">
+	    <xsl:if test="not($active-tab = 'ollt')">
 		<xsl:attribute name="style">display: none;</xsl:attribute>
 	    </xsl:if>
 
@@ -1175,14 +1131,14 @@ exclude-result-prefixes="#all">
 		<xsl:with-param name="name" select="'ol'"/>
 		<!-- <xsl:with-param name="id" select="$id"/> -->
 		<xsl:with-param name="class" select="'span12'"/>
-		<xsl:with-param name="value" select="../text()"/>
+		<xsl:with-param name="value" select="$ol-value"/>
 	    </xsl:call-template>
 	    <br/>
 	    <xsl:call-template name="g:InputTemplate">
-		<xsl:with-param name="name" select="'ll'"/>
+		<xsl:with-param name="name" select="'lt'"/>
 		<!-- <xsl:with-param name="id" select="$id"/> -->
 		<xsl:with-param name="class" select="'input-xlarge'"/>
-		<xsl:with-param name="value" select="../@rdf:datatype"/>
+		<xsl:with-param name="value" select="$lt-value"/>
 	    </xsl:call-template>
 	    <span class="help-inline">Datatype URI</span>
 	</div>	
