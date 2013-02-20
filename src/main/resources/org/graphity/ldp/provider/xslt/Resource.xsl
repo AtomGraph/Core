@@ -303,11 +303,11 @@ exclude-result-prefixes="#all">
     <xsl:template match="*[*][@rdf:about] | *[*][@rdf:nodeID]">
 	<xsl:apply-templates select="." mode="gldp:HeaderMode"/>
 
-	<div class="row-fluid">
+	<xsl:variable name="type-containers" as="element()*">
 	    <xsl:for-each-group select="*" group-by="if (not(empty(rdfs:domain(xs:anyURI(concat(namespace-uri(), local-name())))))) then rdfs:domain(xs:anyURI(concat(namespace-uri(), local-name()))) else xs:anyURI('&rdfs;Resource')">
 		<xsl:sort select="g:label(if (not(empty(rdfs:domain(xs:anyURI(concat(namespace-uri(), local-name())))))) then rdfs:domain(xs:anyURI(concat(namespace-uri(), local-name()))) else xs:anyURI('&rdfs;Resource'), /, $lang)"/>
-		
-		<div class="well well-small span6 pull-left">
+
+		<div class="well well-small span6">
 		    <h3>
 			<span title="{@rdf:about}" class="btn">
 			    <xsl:apply-templates select="key('resources', current-grouping-key(), document(g:document-uri(current-grouping-key())))/@rdf:about"/>
@@ -321,7 +321,14 @@ exclude-result-prefixes="#all">
 		    </dl>
 		</div>
 	    </xsl:for-each-group>
-	</div>
+	</xsl:variable>
+
+	<!-- group the class/property boxes into rows of 2 (to match fluid Bootstrap layout) -->
+	<xsl:for-each-group select="$type-containers" group-adjacent="(position() - 1) idiv 2">
+	    <div class="row-fluid">
+		<xsl:copy-of select="current-group()"/>
+	    </div>
+	</xsl:for-each-group>
     </xsl:template>
 
     <xsl:template match="rdf:type/@rdf:resource">
