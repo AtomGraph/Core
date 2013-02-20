@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 xmlns="http://www.w3.org/1999/xhtml"
 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-xmlns:g="http://graphity.org/ontology/"
+xmlns:g="http://graphity.org/ontology#"
 exclude-result-prefixes="xsl rdf g">
 
     <!-- groups and sorts triples in RDF/XML to ease further XSLT processing -->
@@ -29,6 +29,12 @@ exclude-result-prefixes="xsl rdf g">
     <!-- only match subjects (i.e. elements that have property children) -->
     <xsl:key name="resources" match="*[*][@rdf:about] | *[*][@rdf:nodeID]" use="@rdf:about | @rdf:nodeID"/>
 
+    <xsl:template match="/" mode="g:GroupTriples">
+	<xsl:copy>
+	    <xsl:apply-templates mode="g:GroupTriples"/>
+	</xsl:copy>
+    </xsl:template>
+    
     <xsl:template match="rdf:RDF" mode="g:GroupTriples">
         <xsl:copy>
             <!-- URI resources -->

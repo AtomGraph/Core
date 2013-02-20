@@ -66,7 +66,8 @@ xmlns:url="&java;java.net.URLDecoder"
 exclude-result-prefixes="#all">
 
     <xsl:import href="imports/default.xsl"/>
-    
+    <xsl:import href="group-sort-triples.xsl"/>
+
     <xsl:include href="imports/foaf.xsl"/>
     <xsl:include href="imports/dbpedia-owl.xsl"/>
     <xsl:include href="functions.xsl"/>
@@ -115,13 +116,6 @@ exclude-result-prefixes="#all">
 	<rdfs:label xml:lang="en">Next</rdfs:label>
     </rdf:Description>
 
-    <xsl:function name="gldp:properties-by-uri" as="element()*">
-	<xsl:param name="properties" as="element()*"/>
-	<xsl:perform-sort select="$properties">
-	    <xsl:sort select="xs:anyURI(concat(namespace-uri(), local-name()))"/>
-	</xsl:perform-sort>
-    </xsl:function>
-
     <xsl:template match="/">
 	<html>
 	    <head>
@@ -150,7 +144,10 @@ exclude-result-prefixes="#all">
 
 		<div class="container-fluid">
 		    <div class="row-fluid">
-			<xsl:apply-templates/>
+			<xsl:variable name="grouped-rdf" as="document-node()">
+			    <xsl:apply-templates select="." mode="g:GroupTriples"/>
+			</xsl:variable>
+			<xsl:apply-templates select="$grouped-rdf/rdf:RDF"/>
 		    </div>		    
 		    
 		    <div class="footer">
@@ -317,12 +314,9 @@ exclude-result-prefixes="#all">
 			</span>
 		    </h3>
 		    <dl>
-			<xsl:variable name="sorted-properties" as="element()*">
-			    <xsl:sequence select="gldp:properties-by-uri(current-group())"/>
-			</xsl:variable>
-			<xsl:apply-templates select="$sorted-properties" mode="gldp:PropertyListMode">
-			    <xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(), local-name())), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
-			    <xsl:sort select="if (@rdf:resource) then (g:label(@rdf:resource, /, $lang)) else text()" data-type="text" order="ascending" lang="{$lang}"/>
+			<xsl:apply-templates select="current-group()" mode="gldp:PropertyListMode">
+			    <!-- <xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(), local-name())), $root, $lang)" data-type="text" order="ascending" lang="{$lang}"/> -->
+			    <!-- <xsl:sort select="if (@rdf:resource) then (g:label(@rdf:resource, $root, $lang)) else text()" data-type="text" order="ascending" lang="{$lang}"/> -->
 			</xsl:apply-templates>
 		    </dl>
 		</div>
