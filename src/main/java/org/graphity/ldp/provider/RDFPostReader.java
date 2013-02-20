@@ -119,7 +119,7 @@ public class RDFPostReader implements MessageBodyReader<Model>
 		    model.setNsPrefix("", values.get(i)); // default namespace
 		    break;
 		case "n":
-		    if (keys.get(i + 1).equals("v")) // if followed by "v"
+		    if (i + 1 < keys.size() && keys.get(i + 1).equals("v")) // if followed by "v" (if not out of bounds)
 		    {
 			model.setNsPrefix(values.get(i), values.get(i + 1)); // namespace with prefix
 			i++; // skip the following "v"
@@ -142,7 +142,7 @@ public class RDFPostReader implements MessageBodyReader<Model>
 		    object = null;
 		    break;
 		case "sn":
-		    if (keys.get(i + 1).equals("sv")) // if followed by "sv"
+		    if (i + 1 < keys.size() && keys.get(i + 1).equals("sv")) // if followed by "sv" (if not out of bounds)
 		    {
 			subject = model.createResource(model.getNsPrefixURI(values.get(i)) + values.get(i + 1)); // ns prefix + local name
 			property = null;
@@ -160,7 +160,7 @@ public class RDFPostReader implements MessageBodyReader<Model>
 		    object = null;
 		    break;
 		case "pn":
-		    if (keys.get(i + 1).equals("pv")) // followed by "pv"
+		    if (i + 1 < keys.size() && keys.get(i + 1).equals("pv")) // followed by "pv" (if not out of bounds)
 		    {
 			property = model.createProperty(model.getNsPrefixURI(values.get(i)) + values.get(i + 1)); // ns prefix + local name
 			object = null;
@@ -178,38 +178,40 @@ public class RDFPostReader implements MessageBodyReader<Model>
 		    object = model.createResource(model.getNsPrefixURI("") + values.get(i)); // default namespace
 		    break;
 		case "on":
-		    if (keys.get(i + 1).equals("ov")) // followed by "ov"
+		    if (i + 1 < keys.size() && keys.get(i + 1).equals("ov")) // followed by "ov" (if not out of bounds)
 		    {
 			object = model.createResource(model.getNsPrefixURI(values.get(i)) + values.get(i + 1)); // ns prefix + local name
 			i++; // skip the following "ov"
 		    }
 		    break;
 		case "ol":
-		    switch (keys.get(i + 1))
-		    {
-			case "lt":
-			    object = model.createTypedLiteral(values.get(i), new BaseDatatype(values.get(i + 1))); // typed literal (value+datatype)
-			    i++; // skip the following "lt"
-			    break;
-			case "ll":
-			    object = model.createLiteral(values.get(i), values.get(i + 1)); // literal with language (value+lang)
-			    i++; // skip the following "ll"
-			    break;
-			default:
-			    object = model.createLiteral(values.get(i)); // literal
-			    break;
-		    }
+		    if (i + 1 < keys.size()) // check if not out of bounds
+			switch (keys.get(i + 1))
+			{
+			    case "lt":
+				object = model.createTypedLiteral(values.get(i), new BaseDatatype(values.get(i + 1))); // typed literal (value+datatype)
+				i++; // skip the following "lt"
+				break;
+			    case "ll":
+				object = model.createLiteral(values.get(i), values.get(i + 1)); // literal with language (value+lang)
+				i++; // skip the following "ll"
+				break;
+			    default:
+				object = model.createLiteral(values.get(i)); // plain literal (if not followed by lang or datatype)
+				break;
+			}
+		    else
+			object = model.createLiteral(values.get(i)); // plain literal
 		    break;
-		    
 		case "lt":
-		    if (keys.get(i + 1).equals("ol")) // followed by "ol"
+		    if (i + 1 < keys.size() && keys.get(i + 1).equals("ol")) // followed by "ol" (if not out of bounds)
 		    {
 			object = model.createTypedLiteral(values.get(i + 1), new BaseDatatype(values.get(i))); // typed literal (datatype+value)
 			i++; // skip the following "ol"
 		    }
 		    break;
 		case "ll":
-		    if (keys.get(i + 1).equals("ol")) // followed by "ol"
+		    if (i + 1 < keys.size() && keys.get(i + 1).equals("ol")) // followed by "ol" (if not out of bounds)
 		    {
 			model.createLiteral(values.get(i + 1), values.get(i)); // literal with language (lang+value)
 			i++; // skip the following "ol"
