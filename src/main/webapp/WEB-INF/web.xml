@@ -16,7 +16,7 @@
 	</init-param>
         <init-param>
             <param-name>org.graphity.ldp.ontology.path</param-name>
-            <param-value>ontology/</param-value>
+            <param-value>ontology</param-value>
         </init-param>
         <init-param>
             <param-name>org.graphity.ldp.ontology.location</param-name>

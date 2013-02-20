@@ -1,6 +1,6 @@
-@prefix : <> .
-@prefix g: <http://graphity.org/ontology/> .
-@prefix gldp: <http://ldp.graphity.org/ontology/> .
+@prefix : <#> .
+@prefix g: <http://graphity.org/ontology#> .
+@prefix gldp: <http://ldp.graphity.org/ontology#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
@@ -22,18 +22,19 @@
 @prefix gfb-app: <http://graph.facebook.com/schema/application#> .
 
 : a owl:Ontology ;
-    owl:imports g: , sioc:, lda: ;
-    owl:versionInfo "1.0.6" ;
+    owl:imports g: , sioc: , lda: ;
+    owl:versionInfo "1.0.7" ;
     dct:title "Graphity Linked Data Platform ontology" ;
     rdfs:label "Graphity Linked Data Platform ontology" ;
     dct:description "Graphity LDP configuration ontology. Should be imported and reused by all extending applications" ;
     dct:created "2012-10-26T01:04:00+03:00"^^xsd:dateTime ;
-    dct:modified "2012-12-19T02:29:00+03:00"^^xsd:dateTime ;
-    vann:preferredNamespaceUri "http://ldp.graphity.org/ontology/" ;
+    dct:modified "2012-12-19T02:29:00+03:00"^^xsd:dateTime, "2013-02-20T19:00:00+03:00"^^xsd:dateTime ;
+    vann:preferredNamespaceUri "http://ldp.graphity.org/ontology#" ;
     vann:preferredNamespacePrefix "gldp";
-    foaf:homepage gldp: ;
+    foaf:homepage <http://ldp.graphity.org/ontology> ;
     dct:license <http://www.opendatacommons.org/licenses/pddl/1.0/> ;
-    dct:creator <http://semantic-web.dk/#martynas> .
+    dct:creator <http://semantic-web.dk/#martynas> ;
+    foaf:isPrimaryTopicOf <../ontology> .
     # rdfs:seeAlso <../sparql> .
 
 :Dataset a void:Dataset ;
@@ -52,7 +53,7 @@
     foaf:homepage <http://dydra.com> ;
     sd:endpoint <http://dydra.com/graphity/ldp/sparql> .
 
-<http://graphity.org#ldp> a doap:Project ;
+<http://graphity.org/#ldp> a doap:Project ;
     dct:title "Graphity Linked Data Platform" ;
     doap:repository <https://github.com/Graphity/graphity-ldp.git> ;
     doap:browse <https://github.com/Graphity/graphity-ldp> ;
@@ -83,6 +84,11 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:isDefinedBy : ;
     void:inDataset :Dataset ;
     rdfs:seeAlso : .
+
+<../ontology> a foaf:Document ;
+    foaf:primaryTopic : ;
+    rdfs:isDefinedBy : ;
+    void:inDataset :Dataset .
 
 <../instances> a foaf:Document, ldp:Container, sioc:Container ;
     sioc:has_host <..> ;
@@ -145,6 +151,20 @@ ldp:pageOf a owl:ObjectProperty ;
 	] ;
     spin:constraint [ a :DescribeTemplate ] ;
     rdfs:label "Resource" ;
+    rdfs:isDefinedBy : .
+
+:OntologyDocResource a owl:Class ;
+    rdfs:subClassOf foaf:Document ,
+	[ a owl:Restriction ;
+		owl:onProperty sioc:has_host ;
+		owl:hasValue <..>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty lda:uriTemplate ;
+		owl:hasValue "/ontology"
+	] ;
+    spin:constraint [ a :DescribeTopicTemplate ] ;
+    rdfs:label "Ontology document resource" ;
     rdfs:isDefinedBy : .
 
 :InstancesPageListResource a owl:Class ;
@@ -668,3 +688,21 @@ _:propertyVar  sp:varName "property"^^xsd:string .
       sp:text """DESCRIBE ?this"""^^xsd:string .
 
 spin:_this sp:varName "this"^^xsd:string .
+
+# ====
+
+:DescribeTopicTemplate a spin:Template ;
+    spin:body :DescribeTopic .
+
+:DescribeTopic    a       sp:Describe ;
+      sp:resultNodes (_:topicVar) ;
+      sp:text """PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+DESCRIBE ?topic WHERE {
+    ?topic foaf:isPrimaryTopicOf ?this .
+}"""^^xsd:string ;
+      sp:where ([ sp:object spin:_this ;
+                  sp:predicate foaf:isPrimaryTopicOf ;
+                  sp:subject _:topicVar
+                ]) .
+
+_:topicVar  sp:varName "topic"^^xsd:string .

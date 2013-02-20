@@ -1,6 +1,6 @@
-@base <http://graphity.org/ontology/> .
+@base <http://graphity.org/ontology> .
 
-@prefix : <> .
+@prefix : <#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
@@ -19,10 +19,10 @@
     dct:title "Graphity ontology" ;
     rdfs:label "Graphity ontology" ;
     dct:created "2012-02-09T20:54:00+01:00"^^xsd:dateTime ;
-    dct:modified "2012-10-25T13:42:00+03:00"^^xsd:dateTime ;
-    vann:preferredNamespaceUri "http://graphity.org/ontology/" ;
+    dct:modified "2012-10-25T13:42:00+03:00"^^xsd:dateTime, "2013-02-20T19:00:00+03:00"^^xsd:dateTime ;
+    vann:preferredNamespaceUri "http://graphity.org/ontology#" ;
     vann:preferredNamespacePrefix "g";
-    foaf:homepage : ;
+    foaf:homepage <http://graphity.org/ontology> ;
     dct:license <http://www.opendatacommons.org/licenses/pddl/1.0/> ;
     dct:creator <http://semantic-web.dk#martynas> .
 
