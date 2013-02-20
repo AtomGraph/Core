@@ -670,6 +670,22 @@ exclude-result-prefixes="#all">
 
 	    <xsl:apply-templates mode="g:InputMode"/>
 	    
+	    <fieldset>
+		<legend>Add new statement</legend>
+
+		<xsl:call-template name="g:StmtInputTemplate">
+		    <xsl:with-param name="stmt-id" select="'xxxxxxxx'"/>
+		    <xsl:with-param name="su-value" select="''"/>
+		    <xsl:with-param name="sb-value" select="''"/>
+		    <xsl:with-param name="pu-value" select="''"/>
+		    <xsl:with-param name="ou-value" select="''"/>
+		    <xsl:with-param name="ob-value" select="''"/>
+		    <xsl:with-param name="ol-value" select="''"/>
+		    <xsl:with-param name="ll-value" select="''"/>
+		    <xsl:with-param name="lt-value" select="''"/>
+		</xsl:call-template>
+	    </fieldset>
+
 	    <div class="form-actions">
 		<button type="submit" class="btn btn-primary">Post</button>
 	    </div>
@@ -834,7 +850,7 @@ exclude-result-prefixes="#all">
     </xsl:template>
 
     <!-- property -->
-    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*" mode="g:InputMode" name="g:PropertyInputTemplate">
+    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*" mode="g:InputMode">
 	<xsl:param name="type" select="'text'" as="xs:string"/>
 	<xsl:param name="id" as="xs:string?"/>
 	<xsl:param name="class" select="'input-xxlarge'" as="xs:string?"/>
@@ -935,7 +951,44 @@ exclude-result-prefixes="#all">
 		<xsl:with-param name="type" select="'hidden'"/>
 	    </xsl:call-template>
 
-	    <xsl:apply-templates select="*/*" mode="g:StmtInputMode"/>
+	    <xsl:for-each select="*/*">
+		<xsl:variable name="stmt-id" select="generate-id()" as="xs:string"/>
+
+		<fieldset id="fieldset-{$stmt-id}">
+		    <legend>
+			<button type="button" class="btn pull-right" onclick="document.getElementById('fieldset-{$stmt-id}').style.display = 'none';">&#x2715;</button>
+			Statement <xsl:number level="any" count="/rdf:RDF/*/*"/>
+		    </legend>
+
+		    <div class="control-group">
+			<label class="control-label">Subject</label>
+
+			<div class="controls">
+			    <xsl:apply-templates select="../@rdf:about | ../@rdf:nodeID" mode="g:StmtInputMode">
+				<xsl:with-param name="stmt-id" select="$stmt-id"/>
+			    </xsl:apply-templates>
+			</div>
+		    </div>	    
+
+		    <div class="control-group">
+			<label class="control-label">Property</label>
+
+			<div class="controls">
+			    <xsl:apply-templates select="." mode="g:InputMode"/>
+			    <span class="help-inline">URI</span>
+			</div>
+		    </div>
+
+		    <div class="control-group">
+			<label class="control-label">Object</label>
+
+			<div class="controls">
+			    <xsl:apply-templates select="text() | @rdf:resource | @rdf:nodeID" mode="g:StmtInputMode"/>
+			</div>
+		    </div>
+		</fieldset>
+	    </xsl:for-each>
+	    <!-- <xsl:apply-templates select="*/*" mode="g:StmtInputMode"/> -->
 	    
 	    <div class="form-actions">
 		<button type="submit" class="btn btn-primary">Post</button>
@@ -943,28 +996,36 @@ exclude-result-prefixes="#all">
 	</form>
     </xsl:template>
 
-    <xsl:template match="@rdf:about | @rdf:nodeID" mode="g:StmtInputMode">
-	<xsl:param name="property-id" as="xs:string"/>
+    <xsl:template match="@rdf:about | @rdf:nodeID" mode="g:StmtInputMode" name="g:SubjectInputTemplate">
+	<xsl:param name="stmt-id" as="xs:string"/>
+	<xsl:param name="su-value" select="../@rdf:about" as="xs:string?"/>
+	<xsl:param name="sb-value" select="../@rdf:nodeID" as="xs:string?"/>
+	<xsl:param name="active-tab" as="xs:string">
+	    <xsl:choose>
+		<xsl:when test="$sb-value">sb</xsl:when>
+		<xsl:otherwise>su</xsl:otherwise>
+	    </xsl:choose>
+	</xsl:param>
 
 	<ul class="nav nav-tabs">
-	    <li id="li-su-{$property-id}" onclick="this.className = 'active'; document.getElementById('li-sb-{$property-id}').className = ''; document.getElementById('div-su-{$property-id}').style.display = 'block'; document.getElementById('div-sb-{$property-id}').style.display = 'none';">
-		<xsl:if test="../@rdf:about">
+	    <li id="li-su-{$stmt-id}" onclick="this.className = 'active'; document.getElementById('li-sb-{$stmt-id}').className = ''; document.getElementById('div-su-{$stmt-id}').style.display = 'block'; document.getElementById('div-sb-{$stmt-id}').style.display = 'none';">
+		<xsl:if test="$active-tab = 'su'">
 		    <xsl:attribute name="class">active</xsl:attribute>
 		</xsl:if>
 		
-		<a id="a-su-{$property-id}">Resource</a>
+		<a id="a-su-{$stmt-id}">Resource</a>
 	    </li>
-	    <li id="li-sb-{$property-id}" onclick="this.className = 'active'; document.getElementById('li-su-{$property-id}').className = ''; document.getElementById('div-sb-{$property-id}').style.display = 'block'; document.getElementById('div-su-{$property-id}').style.display = 'none';">
-		<xsl:if test="../@rdf:nodeID">
+	    <li id="li-sb-{$stmt-id}" onclick="this.className = 'active'; document.getElementById('li-su-{$stmt-id}').className = ''; document.getElementById('div-sb-{$stmt-id}').style.display = 'block'; document.getElementById('div-su-{$stmt-id}').style.display = 'none';">
+		<xsl:if test="$active-tab = 'sb'">
 		    <xsl:attribute name="class">active</xsl:attribute>
 		</xsl:if>			
 		
-		<a id="a-sb-{$property-id}">Blank node</a>
+		<a id="a-sb-{$stmt-id}">Blank node</a>
 	    </li>
 	</ul>
 
-	<div id="div-su-{$property-id}">
-	    <xsl:if test="not(../@rdf:about)">
+	<div id="div-su-{$stmt-id}">
+	    <xsl:if test="not($active-tab = 'su')">
 		<xsl:attribute name="style">display: none;</xsl:attribute>
 	    </xsl:if>
 
@@ -972,61 +1033,84 @@ exclude-result-prefixes="#all">
 		<xsl:with-param name="name" select="'su'"/>
 		<!-- <xsl:with-param name="id" select="$id"/> -->
 		<xsl:with-param name="class" select="'input-xxlarge'"/>
-		<xsl:with-param name="value" select="../@rdf:about"/>
+		<xsl:with-param name="value" select="$su-value"/>
 	    </xsl:call-template>
 	    <span class="help-inline">URI</span>
 	</div>		
-	<div id="div-sb-{$property-id}">
-	    <xsl:if test="not(../@rdf:nodeID)">
+	<div id="div-sb-{$stmt-id}">
+	    <xsl:if test="not($active-tab = 'sb')">
 		<xsl:attribute name="style">display: none;</xsl:attribute>
 	    </xsl:if>
 
 	    <xsl:call-template name="g:InputTemplate">
 		<xsl:with-param name="name" select="'sb'"/>
 		<!-- <xsl:with-param name="id" select="$id"/> -->
-		<xsl:with-param name="value" select="../@rdf:nodeID"/>
+		<xsl:with-param name="value" select="$sb-value"/>
 	    </xsl:call-template>
 	    <span class="help-inline">ID</span>
 	</div>
     </xsl:template>
 
     <!-- resource statements -->
-    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*" mode="g:StmtInputMode">
-	<xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(), local-name()))" as="xs:anyURI"/>
+    <xsl:template match="*[@rdf:about or @rdf:nodeID]/*" mode="g:StmtInputMode" name="g:StmtInputTemplate">
+	<xsl:param name="stmt-id" select="generate-id()" as="xs:string"/>
+	<xsl:param name="su-value" select="../@rdf:about" as="xs:string?"/>
+	<xsl:param name="sb-value" select="../@rdf:nodeID" as="xs:string?"/>
+	<xsl:param name="pu-value" select="concat(namespace-uri(), local-name())" as="xs:string?"/>
+	<xsl:param name="ou-value" select="@rdf:resource" as="xs:string?"/>
+	<xsl:param name="ob-value" select="@rdf:nodeID" as="xs:string?"/>
+	<xsl:param name="ol-value" select="text()" as="xs:string?"/>
+	<xsl:param name="ll-value" select="@xml:lang" as="xs:string?"/>
+	<xsl:param name="lt-value" select="@rdf:datatype" as="xs:string?"/>
+	<!-- <xsl:variable name="this" select="xs:anyURI(concat(namespace-uri(), local-name()))" as="xs:anyURI"/> -->
 
-	<fieldset id="fieldset-{generate-id()}">
-	    <legend>
-		<button type="button" class="btn pull-right" onclick="document.getElementById('fieldset-{generate-id()}').style.display = 'none';">&#x2715;</button>
-		Statement
-	    </legend>
+	<div class="control-group">
+	    <label class="control-label">Subject</label>
 
-	    <div class="control-group">
-		<label class="control-label">Subject</label>
-
-		<div class="controls">
-		    <xsl:apply-templates select="../@rdf:about | ../@rdf:nodeID" mode="g:StmtInputMode">
-			<xsl:with-param name="property-id" select="generate-id()"/>
-		    </xsl:apply-templates>
-		</div>
-	    </div>	    
-
-	    <div class="control-group">
-		<label class="control-label">Property</label>
-
-		<div class="controls">
-		    <xsl:apply-templates select="." mode="g:InputMode"/>
-		    <span class="help-inline">URI</span>
-		</div>
+	    <div class="controls">
+		<!--
+		<xsl:apply-templates select="../@rdf:about | ../@rdf:nodeID" mode="g:StmtInputMode">
+		    <xsl:with-param name="stmt-id" select="$stmt-id"/>
+		</xsl:apply-templates>
+		-->
+		<xsl:call-template name="g:SubjectInputTemplate">
+		    <xsl:with-param name="stmt-id" select="$stmt-id"/>
+		    <xsl:with-param name="su-value" select="$su-value"/>
+		    <xsl:with-param name="sb-value" select="$sb-value"/>
+		</xsl:call-template>
 	    </div>
-	    
-	    <div class="control-group">
-		<label class="control-label">Object</label>
+	</div>	    
 
-		<div class="controls">
-		    <xsl:apply-templates select="text() | @rdf:resource | @rdf:nodeID" mode="g:StmtInputMode"/>
-		</div>
+	<div class="control-group">
+	    <label class="control-label">Property</label>
+
+	    <div class="controls">
+		<!-- <xsl:apply-templates select="." mode="g:InputMode"/> -->
+		<xsl:call-template name="g:InputTemplate">
+		    <xsl:with-param name="name" select="'pu'"/>
+		    <!-- <xsl:with-param name="id" select="$id"/> -->
+		    <xsl:with-param name="class" select="'input-xxlarge'"/>
+		    <xsl:with-param name="value" select="$pu-value"/>
+		</xsl:call-template>
+		<span class="help-inline">URI</span>
 	    </div>
-	</fieldset>
+	</div>
+
+	<div class="control-group">
+	    <label class="control-label">Object</label>
+
+	    <div class="controls">
+		<!-- <xsl:apply-templates select="text() | @rdf:resource | @rdf:nodeID" mode="g:StmtInputMode"/> -->
+		<xsl:call-template name="g:ObjectInputTemplate">
+		    <xsl:with-param name="stmt-id" select="$stmt-id"/>
+		    <xsl:with-param name="ou-value" select="$ou-value"/>
+		    <xsl:with-param name="ob-value" select="$ob-value"/>
+		    <xsl:with-param name="ol-value" select="$ol-value"/>
+		    <xsl:with-param name="ll-value" select="$ll-value"/>
+		    <xsl:with-param name="lt-value" select="$lt-value"/>
+		</xsl:call-template>
+	    </div>
+	</div>
     </xsl:template>
 
     <xsl:template match="text() | *[@rdf:about or @rdf:nodeID]/*/@rdf:resource | *[@rdf:about or @rdf:nodeID]/*/@rdf:nodeID" mode="g:StmtInputMode" name="g:ObjectInputTemplate">
