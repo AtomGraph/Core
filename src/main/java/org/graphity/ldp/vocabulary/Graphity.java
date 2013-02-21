@@ -15,7 +15,7 @@
  *
  */
 
-package org.graphity.vocabulary;
+package org.graphity.ldp.vocabulary;
 
 import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.ontology.ObjectProperty;
@@ -46,7 +46,7 @@ public class Graphity
     /** <p>The namespace of the vocabulary as a resource</p> */
     public static final Resource NAMESPACE = m_model.createResource( NS );
     
-    public static final ObjectProperty service = m_model.createObjectProperty( NS + "service" );
+    // public static final ObjectProperty service = m_model.createObjectProperty( NS + "service" );
     
     public static final ObjectProperty mode = m_model.createObjectProperty( NS + "mode" );
     

@@ -24,12 +24,12 @@
     vann:preferredNamespacePrefix "g";
     foaf:homepage <http://graphity.org/ontology> ;
     dct:license <http://www.opendatacommons.org/licenses/pddl/1.0/> ;
-    dct:creator <http://semantic-web.dk#martynas> .
+    dct:creator <http://semantic-web.dk/#martynas> .
 
-:service a owl:ObjectProperty ;
-    rdfs:label "uses SPARQL service" ;
-    rdfs:isDefinedBy : ;
-    rdfs:range sd:Service .
+# :service a owl:ObjectProperty ;
+#    rdfs:label "uses SPARQL service" ;
+#    rdfs:isDefinedBy : ;
+#    rdfs:range sd:Service .
 
 :mode a owl:ObjectProperty ;
     rdfs:label "uses XSLT mode" ;

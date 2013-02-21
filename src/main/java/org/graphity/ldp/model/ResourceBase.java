@@ -41,9 +41,10 @@ import org.graphity.ldp.query.QueryBuilder;
 import org.graphity.ldp.query.SelectBuilder;
 import org.graphity.util.locator.PrefixMapper;
 import org.graphity.util.manager.DataManager;
-import org.graphity.vocabulary.Graphity;
-import org.graphity.vocabulary.LDP;
-import org.graphity.vocabulary.XHV;
+import org.graphity.ldp.vocabulary.Graphity;
+import org.graphity.ldp.vocabulary.LDP;
+import org.graphity.ldp.vocabulary.VoID;
+import org.graphity.ldp.vocabulary.XHV;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.topbraid.spin.arq.ARQ2SPIN;
@@ -243,7 +244,7 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	    TemplateCall call = SPINFactory.asTemplateCall(constraint);
 
 	    Query query = getQuery(call);
-	    description.add(loadModel(getService(getMatchedOntClass()), query));
+	    description.add(loadModel(getDataset(getMatchedOntClass()), query));
 
 	    QueryBuilder queryBuilder = QueryBuilder.fromQuery(query, getModel());
 	    if (log.isDebugEnabled()) log.debug("OntResource {} gets explicit spin:query value {}", this, queryBuilder);
@@ -272,21 +273,20 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	return description;
     }
     
-    public com.hp.hpl.jena.rdf.model.Resource getService(OntClass ontClass)
+    public com.hp.hpl.jena.rdf.model.Resource getDataset(OntClass ontClass)
     {
-	RDFNode hasValue = getRestrictionHasValue(ontClass, Graphity.service);
+	RDFNode hasValue = getRestrictionHasValue(ontClass, VoID.inDataset);
 	if (hasValue != null && hasValue.isResource()) return hasValue.asResource();
 
 	return null;
     }
 
-    public Model loadModel(com.hp.hpl.jena.rdf.model.Resource service, Query query)
+    public Model loadModel(com.hp.hpl.jena.rdf.model.Resource dataset, Query query)
     {
-	if (service != null)
+	if (dataset != null)
 	{
-	    com.hp.hpl.jena.rdf.model.Resource endpoint = service.getPropertyResourceValue(com.hp.hpl.jena.rdf.model.ResourceFactory.
-		createProperty("http://www.w3.org/ns/sparql-service-description#endpoint"));
-	    if (endpoint == null || endpoint.getURI() == null) throw new IllegalArgumentException("SPARQL Service endpoint must be URI Resource");
+	    com.hp.hpl.jena.rdf.model.Resource endpoint = dataset.getPropertyResourceValue(VoID.sparqlEndpoint);
+	    if (endpoint == null || endpoint.getURI() == null) throw new IllegalArgumentException("SPARQL endpoint must be URI Resource");
 
 	    if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has explicit SPARQL endpoint: {}", getURI(), endpoint.getURI());
 
@@ -334,7 +334,7 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	
 	if (hasRDFType(LDP.Page))
 	{
-	    if (log.isDebugEnabled()) log.debug("OntResource is an ldp:Page, creating QueryBuilding by wrapping its SELECT Query: {} into DESCRIBE", arqQuery);
+	    if (log.isDebugEnabled()) log.debug("OntResource is an ldp:Page, making QueryBuilder from Query: {}", arqQuery);
 	    return getQueryBuilder(ARQ2SPIN.parseQuery(arqQuery.toString(), getModel())).build();
 	}
 	

@@ -91,7 +91,7 @@ public class ModelXSLTWriter extends ModelProvider // implements RDFWriter
 
 	    // injecting Resource to get its OntModel. Is there a better way to do this?
 	    OntResource ontResource = (OntResource)uriInfo.getMatchedResources().get(0);
-	    if (log.isDebugEnabled()) log.error("Matched Resource: {}", ontResource);
+	    if (log.isDebugEnabled()) log.debug("Matched Resource: {}", ontResource);
 
 	    // create XSLTBuilder per request output to avoid document() caching
 	    XSLTBuilder builder = XSLTBuilder.fromStylesheet(stylesheet).

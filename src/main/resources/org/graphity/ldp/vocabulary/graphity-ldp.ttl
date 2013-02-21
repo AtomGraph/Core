@@ -32,12 +32,12 @@
     vann:preferredNamespaceUri "http://ldp.graphity.org/ontology#" ;
     vann:preferredNamespacePrefix "gldp";
     foaf:homepage <http://ldp.graphity.org/ontology> ;
+    foaf:isPrimaryTopicOf <../ontology> ;
     dct:license <http://www.opendatacommons.org/licenses/pddl/1.0/> ;
-    dct:creator <http://semantic-web.dk/#martynas> ;
-    foaf:isPrimaryTopicOf <../ontology> .
+    dct:creator <http://semantic-web.dk/#martynas> .
     # rdfs:seeAlso <../sparql> .
 
-:Dataset a void:Dataset ;
+:dataset a void:Dataset ;
     dct:title "The dataset of this application" ;
     # foaf:homepage <../dataset> ;
     rdfs:isDefinedBy : .
@@ -82,60 +82,60 @@ ldp:pageOf a owl:ObjectProperty ;
 <..> a sioc:Site, foaf:Document ;
     dct:title "Graphity Linked Data Platform" ;
     rdfs:isDefinedBy : ;
-    void:inDataset :Dataset ;
+    void:inDataset :dataset ;
     rdfs:seeAlso : .
 
 <../ontology> a foaf:Document ;
     foaf:primaryTopic : ;
     rdfs:isDefinedBy : ;
-    void:inDataset :Dataset .
+    void:inDataset :dataset .
 
 <../instances> a foaf:Document, ldp:Container, sioc:Container ;
     sioc:has_host <..> ;
     dct:title "Instances" ;
     rdfs:isDefinedBy : ;
-    void:inDataset :Dataset .
+    void:inDataset :dataset .
 
 <../ontologies> a foaf:Document, ldp:Container, sioc:Container ;
     sioc:has_host <..> ;
     dct:title "Ontologies" ;
     rdfs:isDefinedBy : ;
-    void:inDataset :Dataset .
+    void:inDataset :dataset .
 
 <../classes> a foaf:Document, ldp:Container, sioc:Container ;
     sioc:has_host <..> ;
     dct:title "Classes" ;
     rdfs:isDefinedBy : ;
-    void:inDataset :Dataset .
+    void:inDataset :dataset .
 
 <../properties> a foaf:Document, ldp:Container, sioc:Container ;
     sioc:has_host <..> ;
     dct:title "Properties" ;
     rdfs:isDefinedBy : ;
-    void:inDataset :Dataset .
+    void:inDataset :dataset .
 
 <../services> a foaf:Document, ldp:Container, sioc:Container ;
     sioc:has_host <..> ;
     dct:title "Services" ;
     rdfs:isDefinedBy : ;
-    void:inDataset :Dataset .
+    void:inDataset :dataset .
 
 <../queries> a foaf:Document, ldp:Container, sioc:Container ;
     sioc:has_host <..> ;
     dct:title "Queries" ;
     rdfs:isDefinedBy : ;
-    void:inDataset :Dataset .
+    void:inDataset :dataset .
 
 <../modes> a foaf:Document, ldp:Container, sioc:Container ;
     sioc:has_host <..> ;
     dct:title "XSLT modes" ;
     rdfs:isDefinedBy : ;
-    void:inDataset :Dataset .
+    void:inDataset :dataset .
 
 <../sparql> a foaf:Document ;
     dct:title "SPARQL endpoint" ;
     rdfs:isDefinedBy : ;
-    void:inDataset :Dataset .
+    void:inDataset :dataset .
 
 # RESOURCE CLASSES
 

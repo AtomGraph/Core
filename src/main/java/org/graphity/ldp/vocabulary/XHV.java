@@ -12,7 +12,7 @@
 	$Id$
 */
 
-package org.graphity.vocabulary;
+package org.graphity.ldp.vocabulary;
 
 import com.hp.hpl.jena.rdf.model.*;
 
