@@ -19,10 +19,7 @@ package org.graphity.ldp.model;
 import com.hp.hpl.jena.ontology.*;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.*;
 import com.hp.hpl.jena.util.LocationMapper;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.sun.jersey.api.core.ResourceConfig;
@@ -39,12 +36,9 @@ import javax.ws.rs.core.*;
 import org.graphity.ldp.query.InsertDataBuilder;
 import org.graphity.ldp.query.QueryBuilder;
 import org.graphity.ldp.query.SelectBuilder;
+import org.graphity.ldp.vocabulary.*;
 import org.graphity.util.locator.PrefixMapper;
 import org.graphity.util.manager.DataManager;
-import org.graphity.ldp.vocabulary.Graphity;
-import org.graphity.ldp.vocabulary.LDP;
-import org.graphity.ldp.vocabulary.VoID;
-import org.graphity.ldp.vocabulary.XHV;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.topbraid.spin.arq.ARQ2SPIN;
@@ -67,6 +61,9 @@ public class ResourceBase extends LDPResourceBase implements PageResource
     private final String orderBy;
     private final Boolean desc;
     private final OntClass matchedOntClass;
+    private final com.hp.hpl.jena.rdf.model.Resource dataset, endpoint, service;
+    private final Query query;
+    private final QueryBuilder queryBuilder;
 
     /**
      * Reads ontology from configured file and resolves against base URI of the request
@@ -174,14 +171,24 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	this.offset = offset;
 	this.orderBy = orderBy;
 	this.desc = desc;
-	this.matchedOntClass = matchOntClass(getRealURI());
-
-	if (log.isDebugEnabled()) log.debug("Constructing ResourceBase");
-
-	if (getMatchedOntClass() == null) throw new WebApplicationException(Response.Status.NOT_FOUND);
-
-	//Individual individual = getMatchedOntClass().createIndividual(getURI());
-	//if (log.isDebugEnabled()) log.debug("Individual {} created from resource OntClass {}", individual, getMatchedOntClass());
+	
+	matchedOntClass = matchOntClass(getRealURI());
+	if (matchedOntClass == null) throw new WebApplicationException(Response.Status.NOT_FOUND);
+	if (log.isDebugEnabled()) log.debug("Constructing ResourceBase with matched OntClass: {}", matchedOntClass);
+	
+	query = getQuery(matchedOntClass, getRealURI());
+	if (query == null) throw new IllegalArgumentException("Resource OntClass must have a SPIN constraint Template");
+	queryBuilder = QueryBuilder.fromQuery(query, getModel());
+	if (log.isDebugEnabled()) log.debug("Constructing ResourceBase with Query: {} and QueryBuilder: {}", query, queryBuilder);
+	
+	dataset = getDataset(matchedOntClass);
+	if (dataset == null) throw new IllegalArgumentException("Resource OntClass must be a subclass of void:inDataset HasValueRestriction");
+	if (log.isDebugEnabled()) log.debug("Constructing ResourceBase with Dataset: {}", dataset);
+	
+	endpoint = dataset.getPropertyResourceValue(VoID.sparqlEndpoint);
+	if (endpoint != null) service = getService(endpoint);
+	else service = null;
+	if (log.isDebugEnabled()) log.debug("Constructing ResourceBase with SPARQL endpoint: {} and sd:Service: {}", endpoint, service);
 
 	if (getMatchedOntClass().hasSuperClass(LDP.Page)) //if (hasRDFType(LDP.Page))
 	{
@@ -236,20 +243,8 @@ public class ResourceBase extends LDPResourceBase implements PageResource
     @Override
     public Model describe()
     {
-	Model description = ModelFactory.createDefaultModel();
-
-	if (getMatchedOntClass().hasProperty(SPIN.constraint))
-	{
-	    RDFNode constraint = getModel().getResource(getMatchedOntClass().getURI()).getProperty(SPIN.constraint).getObject();
-	    TemplateCall call = SPINFactory.asTemplateCall(constraint);
-
-	    Query query = getQuery(call);
-	    description.add(loadModel(getDataset(getMatchedOntClass()), query));
-
-	    QueryBuilder queryBuilder = QueryBuilder.fromQuery(query, getModel());
-	    if (log.isDebugEnabled()) log.debug("OntResource {} gets explicit spin:query value {}", this, queryBuilder);
-	    setPropertyValue(SPIN.query, queryBuilder);
-	}
+	Model description = ModelFactory.createDefaultModel().
+		add(loadModel(getEndpoint(), getQuery()));
 
 	if (hasRDFType(LDP.Page))
 	{
@@ -262,7 +257,11 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 		    getLimit(), getOffset(), getOrderBy(), getDesc());
 	    description.add(ldc.describe());
 	}
-    
+
+	// set metadata properties after description query is executed
+	if (log.isDebugEnabled()) log.debug("OntResource {} gets explicit spin:query value {}", this, getQueryBuilder());
+	setPropertyValue(SPIN.query, getQueryBuilder());
+
 	RDFNode mode = getRestrictionHasValue(getMatchedOntClass(), Graphity.mode);
 	if (mode != null && mode.isURIResource())
 	{
@@ -273,7 +272,7 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	return description;
     }
     
-    public com.hp.hpl.jena.rdf.model.Resource getDataset(OntClass ontClass)
+    public final com.hp.hpl.jena.rdf.model.Resource getDataset(OntClass ontClass)
     {
 	RDFNode hasValue = getRestrictionHasValue(ontClass, VoID.inDataset);
 	if (hasValue != null && hasValue.isResource()) return hasValue.asResource();
@@ -281,13 +280,19 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	return null;
     }
 
-    public Model loadModel(com.hp.hpl.jena.rdf.model.Resource dataset, Query query)
+    public final com.hp.hpl.jena.rdf.model.Resource getService(com.hp.hpl.jena.rdf.model.Resource endpoint)
     {
-	if (dataset != null)
-	{
-	    com.hp.hpl.jena.rdf.model.Resource endpoint = dataset.getPropertyResourceValue(VoID.sparqlEndpoint);
-	    if (endpoint == null || endpoint.getURI() == null) throw new IllegalArgumentException("SPARQL endpoint must be URI Resource");
+	ResIterator it = getModel().listResourcesWithProperty(SD.endpoint, endpoint);
+	
+	if (it.hasNext()) return it.next();
 
+	return null;
+    }
+    
+    public Model loadModel(com.hp.hpl.jena.rdf.model.Resource endpoint, Query query)
+    {
+	if (endpoint != null && endpoint.getURI() != null)
+	{
 	    if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has explicit SPARQL endpoint: {}", getURI(), endpoint.getURI());
 
 	    return getModelResource(endpoint.getURI(), query).describe();
@@ -298,13 +303,13 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	    return getModelResource(getOntModel(), query).describe();
 	}
     }
-
+    
     public QueryBuilder getQueryBuilder(org.topbraid.spin.model.Query query)
     {
-	QueryBuilder queryBuilder = QueryBuilder.fromQuery(query);
-	if (queryBuilder.getSubSelectBuilder() == null) throw new IllegalArgumentException("The SPIN query for ldp:Page class does not have a SELECT subquery");
+	QueryBuilder qb = QueryBuilder.fromQuery(query);
+	if (qb.getSubSelectBuilder() == null) throw new IllegalArgumentException("The SPIN query for ldp:Page class does not have a SELECT subquery");
 	
-	SelectBuilder selectBuilder = queryBuilder.getSubSelectBuilder().
+	SelectBuilder selectBuilder = qb.getSubSelectBuilder().
 	    limit(getLimit()).offset(getOffset());
 	/*
 	if (orderBy != null)
@@ -317,7 +322,19 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	}
 	*/
 
-	return queryBuilder;
+	return qb;
+    }
+
+    public final Query getQuery(OntClass ontClass, URI thisUri)
+    {
+	if (ontClass.hasProperty(SPIN.constraint))
+	{
+	    RDFNode constraint = getModel().getResource(ontClass.getURI()).getProperty(SPIN.constraint).getObject();
+
+	    return getQuery(SPINFactory.asTemplateCall(constraint), thisUri);
+	}
+	
+	return null;
     }
 
     public Query getQuery(TemplateCall call)
@@ -470,6 +487,31 @@ public class ResourceBase extends LDPResourceBase implements PageResource
     public final OntClass getMatchedOntClass()
     {
 	return matchedOntClass;
+    }
+
+    public final com.hp.hpl.jena.rdf.model.Resource getDataset()
+    {
+	return dataset;
+    }
+
+    public final com.hp.hpl.jena.rdf.model.Resource getEndpoint()
+    {
+	return endpoint;
+    }
+
+    public final com.hp.hpl.jena.rdf.model.Resource getService()
+    {
+	return service;
+    }
+
+    public final Query getQuery()
+    {
+	return query;
+    }
+
+    public final QueryBuilder getQueryBuilder()
+    {
+	return queryBuilder;
     }
 
     @Override

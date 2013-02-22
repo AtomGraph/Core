@@ -474,39 +474,44 @@ exclude-result-prefixes="#all">
     <!-- PAGINATION MODE -->
 
     <xsl:template match="*[xhv:prev] | *[xhv:next]" mode="gldp:PaginationMode">
-	<ul class="pager">
-	    <li class="previous">
-		<xsl:choose>
-		    <xsl:when test="xhv:prev">
-			<a href="{xhv:prev/@rdf:resource}" class="active">
-			    &#8592; <xsl:apply-templates select="key('resources', 'previous', document(''))/@rdf:nodeID" mode="g:LabelMode"/>
-			</a>
-		    </xsl:when>
-		    <xsl:otherwise>
-			<xsl:attribute name="class">previous disabled</xsl:attribute>
-			<a>
-			    &#8592; <xsl:apply-templates select="key('resources', 'previous', document(''))/@rdf:nodeID" mode="g:LabelMode"/>
-			</a>
-		    </xsl:otherwise>
-		</xsl:choose>
-	    </li>
-	    <li class="next">
-		<xsl:choose>
-		    <xsl:when test="xhv:next">
-			<!-- possible to add arrows by overriding -->
-			<a href="{xhv:next/@rdf:resource}">
-			    <xsl:apply-templates select="key('resources', 'next', document(''))/@rdf:nodeID" mode="g:LabelMode"/> &#8594;
-			</a>
-		    </xsl:when>
-		    <xsl:otherwise>
-			<xsl:attribute name="class">next disabled</xsl:attribute>
-			<a>
-			    <xsl:apply-templates select="key('resources', 'next', document(''))/@rdf:nodeID" mode="g:LabelMode"/> &#8594;
-			</a>
-		    </xsl:otherwise>
-		</xsl:choose>
-	    </li>
-	</ul>
+	<xsl:param name="selected-resources" select="../*[not(@rdf:about = $absolute-path)][not(@rdf:about = $request-uri)][not(key('predicates-by-object', @rdf:nodeID))]"/>
+	
+	<!-- no need for pagination if the number of SELECTed resources is below $limit per page? -->
+	<!-- <xsl:if test="count($selected-resources) = $limit"> -->
+	    <ul class="pager">
+		<li class="previous">
+		    <xsl:choose>
+			<xsl:when test="xhv:prev">
+			    <a href="{xhv:prev/@rdf:resource}" class="active">
+				&#8592; <xsl:apply-templates select="key('resources', 'previous', document(''))/@rdf:nodeID" mode="g:LabelMode"/>
+			    </a>
+			</xsl:when>
+			<xsl:otherwise>
+			    <xsl:attribute name="class">previous disabled</xsl:attribute>
+			    <a>
+				&#8592; <xsl:apply-templates select="key('resources', 'previous', document(''))/@rdf:nodeID" mode="g:LabelMode"/>
+			    </a>
+			</xsl:otherwise>
+		    </xsl:choose>
+		</li>
+		<li class="next">
+		    <xsl:choose>
+			<xsl:when test="xhv:next">
+			    <!-- possible to add arrows by overriding -->
+			    <a href="{xhv:next/@rdf:resource}">
+				<xsl:apply-templates select="key('resources', 'next', document(''))/@rdf:nodeID" mode="g:LabelMode"/> &#8594;
+			    </a>
+			</xsl:when>
+			<xsl:otherwise>
+			    <xsl:attribute name="class">next disabled</xsl:attribute>
+			    <a>
+				<xsl:apply-templates select="key('resources', 'next', document(''))/@rdf:nodeID" mode="g:LabelMode"/> &#8594;
+			    </a>
+			</xsl:otherwise>
+		    </xsl:choose>
+		</li>
+	    </ul>
+	<!-- </xsl:if> -->
     </xsl:template>
 
     <!-- LIST MODE -->
@@ -579,10 +584,10 @@ exclude-result-prefixes="#all">
 	<!-- page resource -->
 	<xsl:apply-templates select="key('resources', $request-uri)" mode="gldp:PaginationMode"/>
 
-	<!-- loaded resources = everything except container, page, and non-root blank nodes -->
-	<xsl:variable name="loaded-resources" select="*[not(@rdf:about = $absolute-path)][not(@rdf:about = $request-uri)][not(key('predicates-by-object', @rdf:nodeID))]"/>
+	<!-- SELECTed resources = everything except container, page, and non-root blank nodes -->
+	<xsl:variable name="selected-resources" select="*[not(@rdf:about = $absolute-path)][not(@rdf:about = $request-uri)][not(key('predicates-by-object', @rdf:nodeID))]"/>
 	<xsl:variable name="predicates" as="element()*">
-	    <xsl:for-each-group select="$loaded-resources/*" group-by="concat(namespace-uri(), local-name())">
+	    <xsl:for-each-group select="$selected-resources/*" group-by="concat(namespace-uri(), local-name())">
 		<xsl:sort select="g:label(xs:anyURI(concat(namespace-uri(), local-name())), /, $lang)" data-type="text" order="ascending" lang="{$lang}"/>
 		<xsl:sequence select="current-group()[1]"/>
 	    </xsl:for-each-group>
@@ -601,7 +606,7 @@ exclude-result-prefixes="#all">
 		</tr>
 	    </thead>
 	    <tbody>
-		<xsl:apply-templates select="$loaded-resources" mode="g:TableMode">
+		<xsl:apply-templates select="$selected-resources" mode="g:TableMode">
 		    <xsl:with-param name="predicates" select="$predicates"/>
 		</xsl:apply-templates>
 	    </tbody>
