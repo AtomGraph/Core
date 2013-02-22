@@ -35,8 +35,8 @@
         </init-param>
 	-->
         <init-param>
-            <param-name>org.graphity.ldp.provider.xslt.location</param-name>
-            <param-value>org/graphity/ldp/provider/xslt/Resource.xsl</param-value>
+            <param-name>org.graphity.client.writer.xslt-location</param-name>
+            <param-value>org/graphity/client/writer/Resource.xsl</param-value>
         </init-param>
         <init-param>
             <param-name>org.graphity.ldp.model.cache-control</param-name>

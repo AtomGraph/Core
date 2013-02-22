@@ -36,7 +36,7 @@ import org.graphity.ldp.provider.ModelProvider;
 import org.graphity.ldp.provider.QueryParamProvider;
 import org.graphity.ldp.provider.RDFPostReader;
 import org.graphity.ldp.provider.ResultSetWriter;
-import org.graphity.ldp.provider.xslt.ModelXSLTWriter;
+import org.graphity.client.writer.ModelXSLTWriter;
 import org.graphity.util.locator.LocatorGRDDL;
 import org.graphity.util.locator.PrefixMapper;
 import org.graphity.util.locator.grddl.LocatorAtom;
@@ -96,7 +96,7 @@ public class Application extends javax.ws.rs.core.Application
      * @see <a href="http://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceConfig.html">ResourceConfig</a>
      * @see <a href="http://docs.oracle.com/cd/E24329_01/web.1211/e24983/configure.htm#CACEAEGG">Packaging the RESTful Web Service Application Using web.xml With Application Subclass</a>
      */
-    public static final String PROPERTY_XSLT_LOCATION = "org.graphity.ldp.provider.xslt.location";
+    public static final String PROPERTY_XSLT_LOCATION = "org.graphity.client.writer.xslt-location";
 
     /**
      * Configuration property for default Cache-Control header value (set in web.xml)
