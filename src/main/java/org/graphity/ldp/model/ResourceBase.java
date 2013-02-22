@@ -176,20 +176,6 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	if (matchedOntClass == null) throw new WebApplicationException(Response.Status.NOT_FOUND);
 	if (log.isDebugEnabled()) log.debug("Constructing ResourceBase with matched OntClass: {}", matchedOntClass);
 	
-	query = getQuery(matchedOntClass, getRealURI());
-	if (query == null) throw new IllegalArgumentException("Resource OntClass must have a SPIN constraint Template");
-	queryBuilder = QueryBuilder.fromQuery(query, getModel());
-	if (log.isDebugEnabled()) log.debug("Constructing ResourceBase with Query: {} and QueryBuilder: {}", query, queryBuilder);
-	
-	dataset = getDataset(matchedOntClass);
-	if (dataset == null) throw new IllegalArgumentException("Resource OntClass must be a subclass of void:inDataset HasValueRestriction");
-	if (log.isDebugEnabled()) log.debug("Constructing ResourceBase with Dataset: {}", dataset);
-	
-	endpoint = dataset.getPropertyResourceValue(VoID.sparqlEndpoint);
-	if (endpoint != null) service = getService(endpoint);
-	else service = null;
-	if (log.isDebugEnabled()) log.debug("Constructing ResourceBase with SPARQL endpoint: {} and sd:Service: {}", endpoint, service);
-
 	if (getMatchedOntClass().hasSuperClass(LDP.Page)) //if (hasRDFType(LDP.Page))
 	{
 	    OntResource container = getOntModel().createOntResource(getUriInfo().getAbsolutePath().toString());
@@ -216,7 +202,21 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 		if (log.isDebugEnabled()) log.debug("Adding page metadata: {} xhv:next {}", getURI(), getNext().getURI());
 		addProperty(XHV.next, getNext());
 	    }
-	}	    
+	}
+	
+	query = getQuery(matchedOntClass, getRealURI());
+	if (query == null) throw new IllegalArgumentException("Resource OntClass must have a SPIN constraint Template");
+	queryBuilder = QueryBuilder.fromQuery(query, getModel());
+	if (log.isDebugEnabled()) log.debug("Constructing ResourceBase with Query: {} and QueryBuilder: {}", query, queryBuilder);
+	
+	dataset = getDataset(matchedOntClass);
+	if (dataset == null) throw new IllegalArgumentException("Resource OntClass must be a subclass of void:inDataset HasValueRestriction");
+	if (log.isDebugEnabled()) log.debug("Constructing ResourceBase with Dataset: {}", dataset);
+	
+	endpoint = dataset.getPropertyResourceValue(VoID.sparqlEndpoint);
+	if (endpoint != null) service = getService(endpoint);
+	else service = null;
+	if (log.isDebugEnabled()) log.debug("Constructing ResourceBase with SPARQL endpoint: {} and sd:Service: {}", endpoint, service);
     }
 
     @Override
