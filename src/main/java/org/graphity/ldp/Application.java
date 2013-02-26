@@ -22,21 +22,23 @@ import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.util.LocationMapper;
 import com.sun.jersey.api.core.ResourceConfig;
 import java.io.FileNotFoundException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.PostConstruct;
+import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.stream.StreamSource;
+import org.graphity.client.writer.ModelXSLTWriter;
 import org.graphity.ldp.model.ResourceBase;
 import org.graphity.ldp.provider.ModelProvider;
 import org.graphity.ldp.provider.QueryParamProvider;
 import org.graphity.ldp.provider.RDFPostReader;
 import org.graphity.ldp.provider.ResultSetWriter;
-import org.graphity.client.writer.ModelXSLTWriter;
 import org.graphity.util.locator.LocatorGRDDL;
 import org.graphity.util.locator.PrefixMapper;
 import org.graphity.util.locator.grddl.LocatorAtom;
@@ -56,6 +58,7 @@ import org.topbraid.spin.system.SPINModuleRegistry;
 public class Application extends javax.ws.rs.core.Application
 {
     @Context ResourceConfig resourceConfig;
+    @Context ServletContext servletContext;
 
     private static final Logger log = LoggerFactory.getLogger(Application.class);
     /**
@@ -111,6 +114,7 @@ public class Application extends javax.ws.rs.core.Application
 
     /**
      * Initializes (post construction) DataManager, its LocationMapper and Locators
+     * 
      * @see org.graphity.util.manager.DataManager
      * @see org.graphity.util.locator
      * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/util/FileManager.html">FileManager</a>
@@ -120,7 +124,7 @@ public class Application extends javax.ws.rs.core.Application
     @PostConstruct
     public void init()
     {
-	if (log.isDebugEnabled()) log.debug("Application.init()");
+	if (log.isDebugEnabled()) log.debug("Application.init() with ResourceConfig: {} and SerlvetContext: {}", getResourceConfig(), getServletContext());
 
 	// initialize locally cached ontology mapping
 	LocationMapper mapper = new PrefixMapper("location-mapping.ttl");
@@ -148,8 +152,8 @@ public class Application extends javax.ws.rs.core.Application
 
 	try
 	{
-	    DataManager.get().addLocator(new LocatorAtom(getStylesheet("org/graphity/util/locator/grddl/atom-grddl.xsl")));
-	    DataManager.get().addLocator(new LocatorGRDDL(getStylesheet("org/graphity/util/locator/grddl/twitter-grddl.xsl")));
+	    DataManager.get().addLocator(new LocatorAtom(getSource("org/graphity/util/locator/grddl/atom-grddl.xsl")));
+	    DataManager.get().addLocator(new LocatorGRDDL(getSource("org/graphity/util/locator/grddl/twitter-grddl.xsl")));
 	}
 	catch (TransformerConfigurationException ex)
 	{
@@ -163,10 +167,15 @@ public class Application extends javax.ws.rs.core.Application
 	{
 	    if (log.isErrorEnabled()) log.error("XSLT stylesheet URI error", ex);
 	}
+	catch (MalformedURLException ex)
+	{
+	    if (log.isErrorEnabled()) log.error("XSLT stylesheet URL error", ex);
+	}
     }
 
     /**
      * Provides JAX-RS root resource classes.
+     * 
      * @return set of root resource classes
      * @see org.graphity.ldp.model
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/Application.html#getClasses()">Application.getClasses()</a>
@@ -181,6 +190,7 @@ public class Application extends javax.ws.rs.core.Application
 
     /**
      * Provides JAX-RS singleton objects (e.g. resources or Providers)
+     * 
      * @return set of singleton objects
      * @see org.graphity.ldp.provider
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/Application.html#getSingletons()">Application.getSingletons()</a>
@@ -196,7 +206,7 @@ public class Application extends javax.ws.rs.core.Application
 	if (getResourceConfig().getProperty(PROPERTY_XSLT_LOCATION) != null)
 	    try
 	    {
-		singletons.add(new ModelXSLTWriter(getStylesheet(getResourceConfig().getProperty(PROPERTY_XSLT_LOCATION).toString()), DataManager.get())); // writes XHTML responses
+		singletons.add(new ModelXSLTWriter(getSource(getResourceConfig().getProperty(PROPERTY_XSLT_LOCATION).toString()), DataManager.get())); // writes XHTML responses
 	    }
 	    catch (TransformerConfigurationException ex)
 	    {
@@ -210,6 +220,10 @@ public class Application extends javax.ws.rs.core.Application
 	    {
 		if (log.isErrorEnabled()) log.error("XSLT stylesheet URI error", ex);
 	    }
+	    catch (MalformedURLException ex)
+	    {
+		if (log.isErrorEnabled()) log.error("XSLT stylesheet URL error", ex);
+	    }
 	else
 	    if (log.isWarnEnabled()) log.warn("Master XSLT stylesheet not configured in web.xml, no XHTML @Provider will be available");
 
@@ -217,18 +231,22 @@ public class Application extends javax.ws.rs.core.Application
     }
     
     /**
-     * Provides stylesheet as XML string
+     * Provides XML source from filename
+     * 
      * @param filename
      * @return XML source
      * @throws FileNotFoundException
      * @throws URISyntaxException 
      * @see <a href="http://docs.oracle.com/javase/6/docs/api/javax/xml/transform/Source.html">Source</a>
      */
-    public Source getStylesheet(String filename) throws FileNotFoundException, URISyntaxException
+    public Source getSource(String filename) throws FileNotFoundException, URISyntaxException, MalformedURLException
     {
 	// using getResource() because getResourceAsStream() does not retain systemId
+	//if (log.isDebugEnabled()) log.debug("Resource paths used to load Source: {} from filename: {}", getServletContext().getResourcePaths("/"), filename);
+	//URL xsltUrl = getServletContext().getResource(filename);
+	if (log.isDebugEnabled()) log.debug("ClassLoader {} used to load Source from filename: {}", getClass().getClassLoader(), filename);
 	URL xsltUrl = getClass().getClassLoader().getResource(filename);
-	if (xsltUrl == null) throw new FileNotFoundException();
+	if (xsltUrl == null) throw new FileNotFoundException("File '" + filename + "' not found");
 	String xsltUri = xsltUrl.toURI().toString();
 	if (log.isDebugEnabled()) log.debug("XSLT stylesheet URI: {}", xsltUri);
 	return new StreamSource(xsltUri);
@@ -237,6 +255,11 @@ public class Application extends javax.ws.rs.core.Application
     public ResourceConfig getResourceConfig()
     {
 	return resourceConfig;
+    }
+
+    public ServletContext getServletContext()
+    {
+	return servletContext;
     }
 
 }
