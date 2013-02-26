@@ -252,7 +252,7 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	    
 	    if (log.isDebugEnabled()) log.debug("Adding description of the ldp:Container");
 	    OntResource container = getPropertyResourceValue(LDP.pageOf).as(OntResource.class);
-	    LinkedDataResource ldc = new ResourceBase(container, getUriInfo(), getRequest(), getHttpHeaders(), getVariants(), getCacheControl(),
+	    Resource ldc = new ResourceBase(container, getUriInfo(), getRequest(), getHttpHeaders(), getVariants(), getCacheControl(),
 		    getLimit(), getOffset(), getOrderBy(), getDesc());
 	    description.add(ldc.describe());
 	}
@@ -294,12 +294,12 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	{
 	    if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has explicit SPARQL endpoint: {}", getURI(), endpoint.getURI());
 
-	    return getModelResource(endpoint.getURI(), query).describe();
+	    return DataManager.get().loadModel(endpoint.getURI(), query);
 	}
 	else
 	{
 	    if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has no explicit SPARQL endpoint, querying its OntModel", getURI());
-	    return getModelResource(getOntModel(), query).describe();
+	    return DataManager.get().loadModel(getOntModel(), query);
 	}
     }
     

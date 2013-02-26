@@ -1,4 +1,4 @@
-package org.graphity.adapter;
+package org.graphity.update;
 
 /*
  * (c) Copyright 2010 Epimorphics Ltd.
@@ -11,7 +11,9 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.sparql.engine.http.Service;
 import com.hp.hpl.jena.sparql.graph.GraphFactory;
+import com.hp.hpl.jena.sparql.util.Context;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -80,10 +82,10 @@ public class DatasetGraphAccessorHTTP implements DatasetGraphAccessor
 	this.password = password;
     }
 
-    public DatasetGraphAccessorHTTP(String remote, String apiKey)
+    public DatasetGraphAccessorHTTP(String remote, Context context)
     {
-        this(remote);
-	this.apiKey = apiKey;
+        this(remote, context.getAsString(Service.queryAuthUser), context.getAsString(Service.queryAuthPwd).toCharArray());
+	//this.apiKey = apiKey;
     }
 
     @Override

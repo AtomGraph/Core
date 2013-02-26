@@ -19,14 +19,15 @@ package org.graphity.ldp.model;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.ontology.*;
+import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.*;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.*;
-import org.graphity.model.ResourceFactory;
 import org.graphity.util.ModelUtils;
+import org.graphity.util.manager.DataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * @see ResourceFactory
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class LinkedDataResourceBase extends ResourceFactory implements LinkedDataResource
+public class LinkedDataResourceBase implements Resource
 {
     private static final Logger log = LoggerFactory.getLogger(LinkedDataResourceBase.class);
 
@@ -142,7 +143,7 @@ public class LinkedDataResourceBase extends ResourceFactory implements LinkedDat
     public Model describe()
     {
 	if (log.isDebugEnabled()) log.debug("Querying OntModel with default DESCRIBE <{}> Query", getURI());
-	return getModelResource(getOntModel(), getURI()).describe();
+	return DataManager.get().loadModel(getOntModel(), QueryFactory.create("DESCRIBE <" + getURI() + ">"));
     }
     
     @Override

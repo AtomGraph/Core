@@ -16,8 +16,11 @@
  */
 package org.graphity.ldp.model;
 
+import com.hp.hpl.jena.ontology.OntResource;
+import com.hp.hpl.jena.rdf.model.Model;
 import java.util.List;
 import javax.ws.rs.GET;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.*;
 
 /**
@@ -25,8 +28,17 @@ import javax.ws.rs.core.*;
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public interface Resource
+@Produces({org.graphity.ldp.MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", org.graphity.ldp.MediaType.TEXT_TURTLE + "; charset=UTF-8"})
+public interface Resource extends OntResource
 {
+    /**
+     * Returns RDF description of this resource (as in SPARQL DESCRIBE)
+     * 
+     * @return description of this resource
+     */
+
+    Model describe();
+
     /**
      * Handles GET request and returns response
      * 

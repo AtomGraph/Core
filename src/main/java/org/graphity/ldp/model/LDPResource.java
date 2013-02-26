@@ -28,8 +28,7 @@ import org.graphity.ldp.MediaType;
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 @Consumes({MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", MediaType.TEXT_TURTLE + "; charset=UTF-8"})
-@Produces({MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", MediaType.TEXT_TURTLE + "; charset=UTF-8"})
-public interface LDPResource extends LinkedDataResource
+public interface LDPResource extends Resource
 {
     //@GET Response getResponse();
     
