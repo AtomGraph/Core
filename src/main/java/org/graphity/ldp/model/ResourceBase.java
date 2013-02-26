@@ -176,7 +176,7 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	if (matchedOntClass == null) throw new WebApplicationException(Response.Status.NOT_FOUND);
 	if (log.isDebugEnabled()) log.debug("Constructing ResourceBase with matched OntClass: {}", matchedOntClass);
 	
-	if (getMatchedOntClass().hasSuperClass(LDP.Page)) //if (hasRDFType(LDP.Page))
+	if (matchedOntClass.hasSuperClass(LDP.Page)) //if (hasRDFType(LDP.Page))
 	{
 	    OntResource container = getOntModel().createOntResource(getUriInfo().getAbsolutePath().toString());
 	    if (log.isDebugEnabled()) log.debug("Adding PageResource metadata: {} ldp:pageOf {}", getOntResource(), container);
@@ -205,7 +205,6 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	}
 	
 	query = getQuery(matchedOntClass, getRealURI());
-	if (query == null) throw new IllegalArgumentException("Resource OntClass must have a SPIN constraint Template");
 	queryBuilder = QueryBuilder.fromQuery(query, getModel());
 	if (log.isDebugEnabled()) log.debug("Constructing ResourceBase with Query: {} and QueryBuilder: {}", query, queryBuilder);
 	
@@ -327,19 +326,16 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 
     public final Query getQuery(OntClass ontClass, URI thisUri)
     {
-	if (ontClass.hasProperty(SPIN.constraint))
-	{
-	    RDFNode constraint = getModel().getResource(ontClass.getURI()).getProperty(SPIN.constraint).getObject();
-
-	    return getQuery(SPINFactory.asTemplateCall(constraint), thisUri);
-	}
-	
-	return null;
+	return getQuery(getTemplateCall(ontClass), thisUri);
     }
-
-    public Query getQuery(TemplateCall call)
+    
+    public TemplateCall getTemplateCall(OntClass ontClass)
     {
-	return getQuery(call, getRealURI());
+	if (!ontClass.hasProperty(SPIN.constraint))
+	    throw new IllegalArgumentException("Resource OntClass must have a SPIN constraint Template");	    
+
+	RDFNode constraint = getModel().getResource(ontClass.getURI()).getProperty(SPIN.constraint).getObject();
+	return SPINFactory.asTemplateCall(constraint);
     }
     
     public Query getQuery(TemplateCall call, URI thisUri)
@@ -484,27 +480,27 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	return getUriBuilder().build();
     }
 
-    public final OntClass getMatchedOntClass()
+    public OntClass getMatchedOntClass()
     {
 	return matchedOntClass;
     }
 
-    public final com.hp.hpl.jena.rdf.model.Resource getDataset()
+    public com.hp.hpl.jena.rdf.model.Resource getDataset()
     {
 	return dataset;
     }
 
-    public final com.hp.hpl.jena.rdf.model.Resource getEndpoint()
+    public com.hp.hpl.jena.rdf.model.Resource getEndpoint()
     {
 	return endpoint;
     }
 
-    public final com.hp.hpl.jena.rdf.model.Resource getService()
+    public com.hp.hpl.jena.rdf.model.Resource getService()
     {
 	return service;
     }
 
-    public final Query getQuery()
+    public Query getQuery()
     {
 	return query;
     }

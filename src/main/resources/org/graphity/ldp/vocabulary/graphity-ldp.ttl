@@ -46,7 +46,8 @@
 #_:sparql a sd:Service ;
 #    dct:title "Local SPARQL service" ;
 #    sd:endpoint <../sparql> ;
-#    sd:supportedLanguage sd:SPARQL11Query .
+#    sd:supportedLanguage sd:SPARQL11Query ;
+#    rdfs:isDefinedBy : .
 
 <http://graphity.org/#ldp> a doap:Project ;
     dct:title "Graphity Linked Data Platform" ;
