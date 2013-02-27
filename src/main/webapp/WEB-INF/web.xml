@@ -3,43 +3,37 @@
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	 xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 	 version="3.0">
+    <display-name>Graphity Platform</display-name>
+    <description>Generic Linked Data platform</description>
     <filter>
         <filter-name>index</filter-name>
         <filter-class>com.sun.jersey.spi.container.servlet.ServletContainer</filter-class>
         <init-param>
             <param-name>javax.ws.rs.Application</param-name>
-            <param-value>org.graphity.ldp.Application</param-value>
+            <param-value>org.graphity.platform.Application</param-value>
         </init-param>
-	<init-param>
-	    <param-name>com.sun.jersey.config.property.WebPageContentRegex</param-name>
-	    <param-value>/static/.*</param-value>
-	</init-param>
         <init-param>
-            <param-name>org.graphity.ldp.ontology.path</param-name>
+            <param-name>org.graphity.platform.ontology.path</param-name>
             <param-value>ontology</param-value>
         </init-param>
         <init-param>
-            <param-name>org.graphity.ldp.ontology.location</param-name>
-            <param-value>org/graphity/ldp/vocabulary/graphity-ldp.ttl</param-value>
+            <param-name>org.graphity.platform.ontology.location</param-name>
+            <param-value>org/graphity/platform/vocabulary/gp.ttl</param-value>
         </init-param>
 	<!--
         <init-param>
-            <param-name>org.graphity.ldp.ontology.uri</param-name>
-            <param-value>http://ldp.graphity.org/ontology/</param-value>
+            <param-name>org.graphity.platform.ontology.uri</param-name>
+            <param-value>http://platform.graphity.org/ontology</param-value>
         </init-param>
 	-->
 	<!--
         <init-param>
-            <param-name>org.graphity.ldp.ontology.endpoint.uri</param-name>
-            <param-value>http://dydra.com/graphity/ldp/sparql</param-value>
+            <param-name>org.graphity.platform.ontology.endpoint.uri</param-name>
+            <param-value>http://dydra.com/graphity/platform/sparql</param-value>
         </init-param>
 	-->
         <init-param>
-            <param-name>org.graphity.client.writer.xslt-location</param-name>
-            <param-value>org/graphity/client/writer/Resource.xsl</param-value>
-        </init-param>
-        <init-param>
-            <param-name>org.graphity.ldp.model.cache-control</param-name>
+            <param-name>org.graphity.platform.model.cache-control</param-name>
             <param-value>no-cache</param-value>
         </init-param>
     </filter>

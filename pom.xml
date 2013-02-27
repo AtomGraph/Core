@@ -2,10 +2,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.graphity</groupId>
-    <artifactId>ldp</artifactId>
+    <artifactId>platform</artifactId>
     <version>1.0.7-SNAPSHOT</version>
 
-    <name>Graphity Linked Data platform</name>
+    <name>Graphity Platform</name>
     <description>Generic Linked Data platform</description>
 
     <developers>
@@ -131,7 +131,7 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <version>2.1.1</version>
                 <configuration>
-                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <failOnMissingWebXml>true</failOnMissingWebXml>
                 </configuration>
             </plugin>
 	    <plugin>

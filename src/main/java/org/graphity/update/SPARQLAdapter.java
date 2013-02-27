@@ -17,16 +17,15 @@
 
 package org.graphity.update;
 
-import org.graphity.ldp.update.UpdateProcessRemote;
 import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.Syntax;
 import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.sparql.engine.http.QueryEngineHTTP;
 import com.hp.hpl.jena.update.UpdateFactory;
 import com.hp.hpl.jena.update.UpdateRequest;
 import java.io.ByteArrayOutputStream;
+import org.graphity.platform.update.UpdateProcessRemote;
+import org.graphity.query.QueryEngineHTTP;
 import org.openjena.riot.WebContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * @see <a href="http://jena.apache.org/documentation/javadoc/fuseki/org/apache/jena/fuseki/DatasetAccessor.html">Fuseki's DatasetAccessor</a>
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class SPARQLAdapter // implements org.openjena.fuseki.DatasetAccessor
+public class SPARQLAdapter implements org.apache.jena.fuseki.DatasetAccessor
 {
     private static final Logger log = LoggerFactory.getLogger(SPARQLAdapter.class);
     
@@ -64,6 +63,7 @@ public class SPARQLAdapter // implements org.openjena.fuseki.DatasetAccessor
      * Adds RDF Model to the default graph.
      * @param	data	RDF Model
      */
+    @Override
     public void add(Model model)
     {
 	ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -76,7 +76,6 @@ public class SPARQLAdapter // implements org.openjena.fuseki.DatasetAccessor
 	    "}", Syntax.syntaxSPARQL_11);
 
 	UpdateProcessRemote process = new UpdateProcessRemote(request, getEndpoint());
-	//process.setBasicAuthentication(getServiceApiKey(), "X".toCharArray());
 	process.execute();	
     }
     
@@ -85,6 +84,7 @@ public class SPARQLAdapter // implements org.openjena.fuseki.DatasetAccessor
      * @param	graphUri    URI of the named graph
      * @param	model	    RDF Model
      */
+    @Override
     public void add(String graphUri, Model model)
     {
 	ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -98,7 +98,6 @@ public class SPARQLAdapter // implements org.openjena.fuseki.DatasetAccessor
 	    "} }");
 
 	UpdateProcessRemote process = new UpdateProcessRemote(request, getEndpoint());
-	//process.setBasicAuthentication(getServiceApiKey(), "X".toCharArray());
 	process.execute();
     }
     
@@ -107,11 +106,48 @@ public class SPARQLAdapter // implements org.openjena.fuseki.DatasetAccessor
      * @param	graphUri    URI of the named graph
      * @return	true if named graph exists
      */
+    @Override
     public boolean containsModel(String graphUri)
     {
 	Query query = QueryFactory.create("ASK { <" + graphUri + "> ?p ?o }");
-	QueryEngineHTTP request = QueryExecutionFactory.createServiceRequest(getEndpoint(), query);
+	QueryEngineHTTP request = new QueryEngineHTTP(getEndpoint(), query);
 	return request.execAsk();
+    }
+
+    @Override
+    public Model getModel()
+    {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Model getModel(String string)
+    {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void putModel(Model model)
+    {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void putModel(String string, Model model)
+    {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void deleteDefault()
+    {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void deleteModel(String string)
+    {
+	throw new UnsupportedOperationException("Not supported yet.");
     }
     
 }
