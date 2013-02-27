@@ -15,11 +15,12 @@
  *
  */
 
-package org.graphity.util.locator;
+package org.graphity.ldp.util.locator;
 
 import com.hp.hpl.jena.util.TypedStream;
 import org.graphity.ldp.util.oauth.OAuth2Parameters;
 import org.graphity.ldp.util.oauth.OAuth2Secrets;
+import org.graphity.util.locator.LocatorLinkedData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

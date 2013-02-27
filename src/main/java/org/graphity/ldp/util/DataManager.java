@@ -15,7 +15,7 @@
  *
  */
 
-package org.graphity.util.manager;
+package org.graphity.ldp.util;
 
 import com.hp.hpl.jena.query.*;
 import com.hp.hpl.jena.rdf.model.Model;

@@ -21,9 +21,10 @@ import com.hp.hpl.jena.util.TypedStream;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
-import javax.ws.rs.core.UriBuilder;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -65,7 +66,7 @@ public class LocatorGRDDL extends LocatorLinkedData
 
 	    getXSLTBuilder().document(new StreamSource(ts.getInput())).
 	    result(new StreamResult(bos)).
-	    parameter("uri", UriBuilder.fromUri(filenameOrURI).build()).
+	    parameter("uri", new URI(filenameOrURI)).
 	    transform();
 	    
 	    if (log.isTraceEnabled()) log.trace("GRDDL RDF/XML output: {}", bos.toString());
@@ -76,7 +77,11 @@ public class LocatorGRDDL extends LocatorLinkedData
 	}
 	catch (TransformerException ex)
 	{
-	    log.error("Error in GRDDL XSLT transformation", ex);
+	    if (log.isErrorEnabled()) log.error("Error in GRDDL XSLT transformation", ex);
+	}
+	catch (URISyntaxException ex)
+	{
+	    if (log.isErrorEnabled()) log.error("Error parsing location URI", ex);
 	}
 
 	return null;

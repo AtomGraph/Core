@@ -27,7 +27,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.*;
 import org.graphity.util.ModelUtils;
-import org.graphity.util.manager.DataManager;
+import org.graphity.ldp.util.DataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

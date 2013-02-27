@@ -38,7 +38,7 @@ import org.graphity.ldp.query.QueryBuilder;
 import org.graphity.ldp.query.SelectBuilder;
 import org.graphity.ldp.vocabulary.*;
 import org.graphity.util.locator.PrefixMapper;
-import org.graphity.util.manager.DataManager;
+import org.graphity.ldp.util.DataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.topbraid.spin.arq.ARQ2SPIN;

@@ -42,7 +42,7 @@ import org.graphity.ldp.provider.ResultSetWriter;
 import org.graphity.util.locator.LocatorGRDDL;
 import org.graphity.util.locator.PrefixMapper;
 import org.graphity.util.locator.grddl.LocatorAtom;
-import org.graphity.util.manager.DataManager;
+import org.graphity.ldp.util.DataManager;
 import org.openjena.riot.SysRIOT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

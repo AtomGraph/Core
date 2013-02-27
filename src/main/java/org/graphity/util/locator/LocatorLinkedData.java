@@ -60,10 +60,6 @@ public class LocatorLinkedData implements Locator
 	
 	typeMap.put(WebContent.contentTypeRDFXML, null);
 
-	typeMap.put(WebContent.contentTypeTurtle1, 0.9);
-	typeMap.put(WebContent.contentTypeTurtle2, 0.9);
-	typeMap.put(WebContent.contentTypeTurtle3, 0.9);
-
 	//typeMap.put(WebContent.contentTypeNTriples, 0.9);
 	typeMap.put(WebContent.contentTypeNTriplesAlt, 0.9);
 
