@@ -9,6 +9,7 @@ package org.graphity.update;
 import com.hp.hpl.jena.graph.Graph;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.query.ARQ;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.sparql.engine.http.Service;
@@ -18,6 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -67,25 +69,32 @@ public class DatasetGraphAccessorHTTP implements DatasetGraphAccessor
 
     private String user = null;
     private char[] password = null;
-    private String apiKey = null;
+    private Context context = null ;
 
     /** Create a DatasetUpdater for the remote URL */
     public DatasetGraphAccessorHTTP(String remote)
     {
         this.remote = remote ;
-    }
+	context = new Context(ARQ.getContext()) ;
+	
+	Map<String, Context> serviceContextMap = (Map<String,Context>)context.get(Service.serviceContext);
+	if (serviceContextMap != null && serviceContextMap.containsKey(remote))
+	{
+	    Context serviceContext = serviceContextMap.get(remote);
+	    if (log.isDebugEnabled()) log.debug("Endpoint URI {} has SERVICE Context: {} ", remote, serviceContext);
 
-    public DatasetGraphAccessorHTTP(String remote, String user, char[] password)
-    {
-        this(remote);
-	this.user = user;
-	this.password = password;
-    }
-
-    public DatasetGraphAccessorHTTP(String remote, Context context)
-    {
-        this(remote, context.getAsString(Service.queryAuthUser), context.getAsString(Service.queryAuthPwd).toCharArray());
-	//this.apiKey = apiKey;
+	    String usr = serviceContext.getAsString(Service.queryAuthUser);
+	    String pwd = serviceContext.getAsString(Service.queryAuthPwd);
+	    
+	    if (usr != null || pwd != null)
+	    {
+		usr = usr==null?"":usr;
+		pwd = pwd==null?"":pwd;
+		if (log.isDebugEnabled()) log.debug("Setting basic HTTP authentication for endpoint URI {} with username: {} ", remote, usr);
+		user = usr;
+		password = pwd.toCharArray();
+	    }
+	}
     }
 
     @Override
@@ -233,17 +242,11 @@ public class DatasetGraphAccessorHTTP implements DatasetGraphAccessor
         TypedInputStream ts = null ;
         // httpclient.getParams().setXXX
         try {
-	    if (getUser() != null && getPassword() != null)
+	    if (user != null && password != null)
 	    {
-		if (log.isDebugEnabled()) log.debug("HTTP Basic authentication with username: {}", getUser());
-		UsernamePasswordCredentials creds = new UsernamePasswordCredentials(getUser(), new String(getPassword()));
+		if (log.isDebugEnabled()) log.debug("HTTP Basic authentication with username: {}", user);
+		UsernamePasswordCredentials creds = new UsernamePasswordCredentials(user, new String(password));
 		httpRequest.addHeader(new BasicScheme().authenticate(creds, httpRequest));
-	    }
-	    if (getApiKey() != null)
-	    {
-		if (log.isDebugEnabled()) log.debug("Authentication with API key param: {}", getApiKey());
-		//httpclient.getParams().setParameter("apikey", getApiKey()); // Kasabi-specific
-		httpRequest.getParams().setParameter("auth_token", getApiKey()); // Dydra-specific
 	    }
 
             HttpResponse response = httpclient.execute(httpRequest) ;
@@ -351,19 +354,15 @@ public class DatasetGraphAccessorHTTP implements DatasetGraphAccessor
         IO.close(ts) ;
     }
     
-    public char[] getPassword()
+    public void setBasicAuthentication(String user, char[] password)
     {
-	return password;
+	this.user = user ;
+	this.password = password ;
     }
 
-    public String getUser()
+    public Context getContext()
     {
-	return user;
-    }
-
-    public String getApiKey()
-    {
-	return apiKey;
+	return context;
     }
 
 }

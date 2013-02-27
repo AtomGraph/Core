@@ -1,20 +1,19 @@
-/**
- *  Copyright 2012 Martynas Jusevičius <martynas@graphity.org>
+/*
+ * Copyright (C) 2013 Martynas Jusevičius <martynas@graphity.org>
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.graphity.ldp.util;
 
 import com.hp.hpl.jena.query.*;
@@ -44,8 +43,8 @@ import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamSource;
 import org.apache.jena.fuseki.DatasetAccessor;
 import org.apache.jena.fuseki.http.DatasetAdapter;
-import org.graphity.update.DatasetGraphAccessorHTTP;
 import org.graphity.query.QueryEngineHTTP;
+import org.graphity.update.DatasetGraphAccessorHTTP;
 import org.graphity.util.locator.LocatorLinkedData;
 import org.graphity.util.locator.PrefixMapper;
 import org.openjena.riot.WebContent;
@@ -200,31 +199,25 @@ public class DataManager extends FileManager implements URIResolver
 	if (!(query.isConstructType() || query.isDescribeType()))
 	    throw new QueryExecException("Query to load Model must be CONSTRUCT or DESCRIBE"); // return null;
 
-	//Entry
-	//if (isSPARQLEndpoint(endpointURI))
-	//    return loadModel(, query);
-	//else
+	QueryEngineHTTP request = new QueryEngineHTTP(endpointURI, query);
+	try
 	{
-	    QueryEngineHTTP request = new QueryEngineHTTP(endpointURI, query);
-	    try
-	    {
-		if (params != null)
-		    for (Entry<String, List<String>> entry : params.entrySet())
-			if (!entry.getKey().equals("query")) // query param is handled separately
-			    for (String value : entry.getValue())
-			    {
-				if (log.isTraceEnabled()) log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
-				request.addParam(entry.getKey(), value);
-			    }
-		if (query.isConstructType()) return request.execConstruct();
-		if (query.isDescribeType()) return request.execDescribe();
+	    if (params != null)
+		for (Entry<String, List<String>> entry : params.entrySet())
+		    if (!entry.getKey().equals("query")) // query param is handled separately
+			for (String value : entry.getValue())
+			{
+			    if (log.isTraceEnabled()) log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
+			    request.addParam(entry.getKey(), value);
+			}
+	    if (query.isConstructType()) return request.execConstruct();
+	    if (query.isDescribeType()) return request.execDescribe();
 
-		return null;
-	    }
-	    finally
-	    {
-		request.close();
-	    }
+	    return null;
+	}
+	finally
+	{
+	    request.close();
 	}
     }
     
@@ -350,34 +343,29 @@ public class DataManager extends FileManager implements URIResolver
 
     public ResultSetRewindable loadResultSet(String endpointURI, Query query, MultivaluedMap<String, String> params)
     {
-	//if (isSPARQLEndpoint(endpointURI))
-	//    return loadResultSet(findEndpoint(endpointURI), query);
-	//else
+	if (log.isDebugEnabled()) log.debug("Remote service {} Query execution: {} ", endpointURI, query);
+	if (query == null) throw new IllegalArgumentException("Query must be not null");
+
+	if (!query.isSelectType())
+	    throw new QueryExecException("Query to load ResultSet must be SELECT or ASK"); // return null
+
+	QueryEngineHTTP request = new QueryEngineHTTP(endpointURI, query);
+	try
 	{
-	    if (log.isDebugEnabled()) log.debug("Remote service {} Query execution: {} ", endpointURI, query);
-	    if (query == null) throw new IllegalArgumentException("Query must be not null");
-
-	    if (!query.isSelectType())
-		throw new QueryExecException("Query to load ResultSet must be SELECT or ASK"); // return null
-
-	    QueryEngineHTTP request = new QueryEngineHTTP(endpointURI, query);
-	    try
-	    {
-		if (params != null)
-		    for (Entry<String, List<String>> entry : params.entrySet())
-			if (!entry.getKey().equals("query")) // query param is handled separately
-			    for (String value : entry.getValue())
-			    {
-				if (log.isTraceEnabled()) log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
-				request.addParam(entry.getKey(), value);
-			    }
-		return ResultSetFactory.copyResults(request.execSelect());
-	    }
-	    finally
-	    {
-		request.close();
-	    }
-	}	
+	    if (params != null)
+		for (Entry<String, List<String>> entry : params.entrySet())
+		    if (!entry.getKey().equals("query")) // query param is handled separately
+			for (String value : entry.getValue())
+			{
+			    if (log.isTraceEnabled()) log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
+			    request.addParam(entry.getKey(), value);
+			}
+	    return ResultSetFactory.copyResults(request.execSelect());
+	}
+	finally
+	{
+	    request.close();
+	}
     }
     
     public ResultSetRewindable loadResultSet(String endpointURI, Query query)
@@ -409,24 +397,9 @@ public class DataManager extends FileManager implements URIResolver
     {
 	if (log.isDebugEnabled()) log.debug("PUTting Model to service {} with GRAPH URI {}", endpointURI, graphURI);
 	
-	DatasetGraphAccessorHTTP http;
-
-	Entry<String, Context> endpoint = findEndpoint(endpointURI);
-	if (endpoint != null) // service registered with credentials
-	{
-	    //String endpointURI = findSPARQLEndpoint(endpointURI);
-	    endpointURI = endpointURI.replace("/sparql", "/service"); // TO-DO: better to avoid this and make generic
-	    if (log.isDebugEnabled()) log.debug("URI {} is a SPARQL service, sending PUT with credentials: {}", endpointURI, endpoint.getValue());
-	    http = new DatasetGraphAccessorHTTP(endpointURI, endpoint.getValue());
-	}
-	else // no credentials
-	{
-	    endpointURI.replace("/sparql", "/service");
-	    if (log.isDebugEnabled()) log.debug("URI {} is *not* a SPARQL service, sending PUT without credentials", endpointURI);
-	    http = new DatasetGraphAccessorHTTP(endpointURI);
-	}
+	endpointURI = endpointURI.replace("/sparql", "/service"); // TO-DO: better to avoid this and make generic
 	
-	DatasetAccessor accessor = new DatasetAdapter(http);
+	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(endpointURI));
 	accessor.putModel(graphURI, model);
     }
 
