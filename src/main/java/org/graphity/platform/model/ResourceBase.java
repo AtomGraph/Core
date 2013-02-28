@@ -16,11 +16,6 @@
  */
 package org.graphity.platform.model;
 
-import org.graphity.platform.vocabulary.SD;
-import org.graphity.platform.vocabulary.Graphity;
-import org.graphity.platform.vocabulary.XHV;
-import org.graphity.platform.vocabulary.LDP;
-import org.graphity.platform.vocabulary.VoID;
 import com.hp.hpl.jena.ontology.*;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
@@ -42,7 +37,10 @@ import org.graphity.platform.query.InsertDataBuilder;
 import org.graphity.platform.query.QueryBuilder;
 import org.graphity.platform.query.SelectBuilder;
 import org.graphity.platform.util.DataManager;
-import org.graphity.util.locator.PrefixMapper;
+import org.graphity.platform.vocabulary.LDP;
+import org.graphity.platform.vocabulary.SD;
+import org.graphity.platform.vocabulary.VoID;
+import org.graphity.platform.vocabulary.XHV;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.topbraid.spin.arq.ARQ2SPIN;
@@ -131,7 +129,7 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 
 	    LocationMapper mapper = OntDocumentManager.getInstance().getFileManager().getLocationMapper();
 	    if (log.isDebugEnabled()) log.debug("Adding prefix/altName mapping: {} altName: {} ", ontologyUri, ontologyLocation);
-	    ((PrefixMapper)mapper).addAltPrefixEntry(ontologyUri, ontologyLocation);	    
+	    mapper.addAltPrefix(ontologyUri, ontologyLocation);
 	}
 	//else
 	    //if (log.isDebugEnabled()) log.debug("Ontology already cached, returning cached instance");
@@ -264,13 +262,6 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	// set metadata properties after description query is executed
 	if (log.isDebugEnabled()) log.debug("OntResource {} gets explicit spin:query value {}", this, getQueryBuilder());
 	setPropertyValue(SPIN.query, getQueryBuilder());
-
-	RDFNode mode = getRestrictionHasValue(getMatchedOntClass(), Graphity.mode);
-	if (mode != null && mode.isURIResource())
-	{
-	    if (log.isDebugEnabled()) log.debug("OntResource {} gets explicit g:mode value {}", this, mode);
-	    setPropertyValue(Graphity.mode, mode);
-	}
 
 	return description;
     }

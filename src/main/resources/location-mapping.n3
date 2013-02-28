@@ -1,0 +1,9 @@
+@prefix lm: <http://jena.hpl.hp.com/2004/08/location-mapping#> .
+
+[] lm:mapping
+   
+   [ lm:name "http://rdfs.org/sioc/ns#" ; lm:altName "org/graphity/platform/vocabulary/sioc.owl" ] ,
+   [ lm:name "http://rdfs.org/ns/void#" ; lm:altName "org/graphity/platform/vocabulary/void.owl" ] ,
+   [ lm:name "http://purl.org/linked-data/api/vocab#" ; lm:altName "org/graphity/platform/vocabulary/lda.ttl" ],
+   [ lm:name "http://platform.graphity.org/ontology#" ; lm:altName "org/graphity/platform/vocabulary/gp.ttl" ]
+.
