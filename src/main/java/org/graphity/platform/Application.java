@@ -24,6 +24,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
 import org.graphity.platform.model.ResourceBase;
+import org.graphity.platform.model.SPARQLEndpointBase;
 import org.graphity.platform.provider.ModelProvider;
 import org.graphity.platform.provider.QueryParamProvider;
 import org.graphity.platform.provider.ResultSetWriter;
@@ -45,45 +46,6 @@ public class Application extends javax.ws.rs.core.Application
     @Context ServletContext servletContext;
 
     private static final Logger log = LoggerFactory.getLogger(Application.class);
-    /**
-     * Configuration property for ontology file location (set in web.xml)
-     * 
-     * @see <a href="http://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceConfig.html">ResourceConfig</a>
-     * @see <a href="http://docs.oracle.com/cd/E24329_01/web.1211/e24983/configure.htm#CACEAEGG">Packaging the RESTful Web Service Application Using web.xml With Application Subclass</a>
-     */
-    public static final String PROPERTY_ONTOLOGY_LOCATION = "org.graphity.platform.ontology.location";
-    
-    /**
-     * Configuration property for ontology path relative to the base URI (set in web.xml)
-     * 
-     * @see <a href="http://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceConfig.html">ResourceConfig</a>
-     * @see <a href="http://docs.oracle.com/cd/E24329_01/web.1211/e24983/configure.htm#CACEAEGG">Packaging the RESTful Web Service Application Using web.xml With Application Subclass</a>
-     */
-    public static final String PROPERTY_ONTOLOGY_PATH = "org.graphity.platform.ontology.path";
-
-    /**
-     * Configuration property for absolute ontology URI (set in web.xml)
-     * 
-     * @see <a href="http://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceConfig.html">ResourceConfig</a>
-     * @see <a href="http://docs.oracle.com/cd/E24329_01/web.1211/e24983/configure.htm#CACEAEGG">Packaging the RESTful Web Service Application Using web.xml With Application Subclass</a>
-     */
-    public static final String PROPERTY_ONTOLOGY_URI = "org.graphity.platform.ontology.uri";
-
-    /**
-     * Configuration property for ontology SPARQL endpoint (set in web.xml)
-     * 
-     * @see <a href="http://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceConfig.html">ResourceConfig</a>
-     * @see <a href="http://docs.oracle.com/cd/E24329_01/web.1211/e24983/configure.htm#CACEAEGG">Packaging the RESTful Web Service Application Using web.xml With Application Subclass</a>
-     */
-    public static final String PROPERTY_ONTOLOGY_ENDPOINT = "org.graphity.platform.ontology.endpoint";
-
-    /**
-     * Configuration property for default Cache-Control header value (set in web.xml)
-     * 
-     * @see <a href="http://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceConfig.html">ResourceConfig</a>
-     * @see <a href="http://docs.oracle.com/cd/E24329_01/web.1211/e24983/configure.htm#CACEAEGG">Packaging the RESTful Web Service Application Using web.xml With Application Subclass</a>
-     */
-    public static final String PROPERTY_CACHE_CONTROL = "org.graphity.platform.model.cache-control";
 
     private Set<Class<?>> classes = new HashSet<Class<?>>();
     private Set<Object> singletons = new HashSet<Object>();
@@ -115,6 +77,7 @@ public class Application extends javax.ws.rs.core.Application
     public Set<Class<?>> getClasses()
     {
 	classes.add(ResourceBase.class); // handles all
+	classes.add(SPARQLEndpointBase.class); // handles /sparql queries
 	
         return classes;
     }

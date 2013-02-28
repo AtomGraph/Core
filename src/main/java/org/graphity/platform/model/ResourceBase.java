@@ -53,6 +53,8 @@ import org.topbraid.spin.vocabulary.SPIN;
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  * @see PageResource
+ * @see <a href="http://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceConfig.html">ResourceConfig</a>
+ * @see <a href="http://docs.oracle.com/cd/E24329_01/web.1211/e24983/configure.htm#CACEAEGG">Packaging the RESTful Web Service Application Using web.xml With Application Subclass</a>
  */
 @Path("{path: .*}")
 public class ResourceBase extends LDPResourceBase implements PageResource
@@ -68,6 +70,42 @@ public class ResourceBase extends LDPResourceBase implements PageResource
     private final QueryBuilder queryBuilder;
 
     /**
+     * Configuration property for ontology file location (set in web.xml)
+     * 
+     */
+    public static final String PROPERTY_ONTOLOGY_LOCATION = "org.graphity.platform.ontology.location";
+    
+    /**
+     * Configuration property for ontology path relative to the base URI (set in web.xml)
+     * 
+     */
+    public static final String PROPERTY_ONTOLOGY_PATH = "org.graphity.platform.ontology.path";
+
+    /**
+     * Configuration property for absolute ontology URI (set in web.xml)
+     * 
+     */
+    public static final String PROPERTY_ONTOLOGY_URI = "org.graphity.platform.ontology.uri";
+
+    /**
+     * Configuration property for ontology SPARQL endpoint (set in web.xml)
+     * 
+     */
+    public static final String PROPERTY_ONTOLOGY_ENDPOINT = "org.graphity.platform.ontology.endpoint";
+
+    /**
+     * Configuration property for ontology named graph URI (set in web.xml)
+     * 
+     */
+    public static final String PROPERTY_ONTOLOGY_GRAPH = "org.graphity.platform.ontology.graph";
+
+    /**
+     * Configuration property for default Cache-Control header value (set in web.xml)
+     * 
+     */
+    public static final String PROPERTY_CACHE_CONTROL = "org.graphity.platform.model.cache-control";
+
+    /**
      * Reads ontology from configured file and resolves against base URI of the request
      * @param uriInfo JAX-RS URI info
      * @param config configuration from web.xml
@@ -77,42 +115,57 @@ public class ResourceBase extends LDPResourceBase implements PageResource
     public static OntModel getOntology(UriInfo uriInfo, ResourceConfig config)
     {
 	if (log.isDebugEnabled()) log.debug("web.xml properties: {}", config.getProperties());
-	Object ontologyLocation = config.getProperty(org.graphity.platform.Application.PROPERTY_ONTOLOGY_LOCATION);
-	Object ontologyPath = config.getProperty(org.graphity.platform.Application.PROPERTY_ONTOLOGY_PATH);
-	Object ontologyEndpoint = config.getProperty(org.graphity.platform.Application.PROPERTY_ONTOLOGY_ENDPOINT);
-	Object ontologyUri = config.getProperty(org.graphity.platform.Application.PROPERTY_ONTOLOGY_URI);
+	Object ontologyPath = config.getProperty(PROPERTY_ONTOLOGY_PATH);
+	if (ontologyPath == null) throw new IllegalArgumentException("Property '" + PROPERTY_ONTOLOGY_PATH + "' needs to be set in ResourceConfig (web.xml)");
+	
+	String localUri = uriInfo.getBaseUriBuilder().
+			path(ontologyPath.toString()).
+			build().
+			toString();
 
-	if (ontologyUri != null)
+	if (config.getProperty(PROPERTY_ONTOLOGY_ENDPOINT) != null)
 	{
-	    if (ontologyEndpoint != null)
+	    Object ontologyEndpoint = config.getProperty(PROPERTY_ONTOLOGY_ENDPOINT);
+	    Object graphUri = config.getProperty(PROPERTY_ONTOLOGY_GRAPH);
+	    Query query;
+	    if (graphUri != null)
 	    {
-		if (log.isDebugEnabled()) log.debug("Reading ontology from named graph {} in SPARQL endpoint {}", ontologyUri, ontologyEndpoint);
-		Query query = QueryFactory.create("CONSTRUCT { ?s ?p ?o } WHERE { GRAPH ?g { ?s ?p ?o } }");
-		return ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM_RDFS_INF,
-			DataManager.get().loadModel(ontologyEndpoint.toString(), query));
+		if (log.isDebugEnabled()) log.debug("Reading ontology from named graph {} in SPARQL endpoint {}", graphUri.toString(), ontologyEndpoint);
+		query = QueryFactory.create("CONSTRUCT { ?s ?p ?o } WHERE { GRAPH <" + graphUri.toString() +  "> { ?s ?p ?o } }");
 	    }
 	    else
 	    {
-		if (log.isDebugEnabled()) log.debug("Reading ontology from remote file with URI: {}", ontologyUri);
-		return OntDocumentManager.getInstance().getOntology(ontologyUri.toString(), OntModelSpec.OWL_MEM_RDFS_INF);
+		if (log.isDebugEnabled()) log.debug("Reading ontology from default graph in SPARQL endpoint {}", ontologyEndpoint);
+		query = QueryFactory.create("CONSTRUCT WHERE { ?s ?p ?o }");		
 	    }
+    
+	    OntDocumentManager.getInstance().addModel(localUri,
+		    DataManager.get().loadModel(ontologyEndpoint.toString(), query),
+		    true);	    
 	}
 	else
 	{
-	    if (ontologyEndpoint != null)
+	    if (config.getProperty(PROPERTY_ONTOLOGY_URI) != null)
 	    {
-		if (log.isDebugEnabled()) log.debug("Reading ontology from default graph in SPARQL endpoint {}", ontologyEndpoint);
-		Query query = QueryFactory.create("CONSTRUCT WHERE { ?s ?p ?o }");
-		return ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM_RDFS_INF,
-			DataManager.get().loadModel(ontologyEndpoint.toString(), query));
+		Object externalUri = config.getProperty(PROPERTY_ONTOLOGY_URI);
+		if (log.isDebugEnabled()) log.debug("Reading ontology from remote file with URI: {}", externalUri);
+		OntDocumentManager.getInstance().addModel(localUri,
+			DataManager.get().loadModel(externalUri.toString()),
+			true);
+			//DataManager.get().loadModel(null, null, null);
 	    }
 	    else
 	    {
-		if (ontologyLocation == null || ontologyPath == null) throw new IllegalStateException("Ontology for this Graphity LDP Application is not configured properly. Check ResourceConfig and/or web.xml");
+		Object ontologyLocation = config.getProperty(PROPERTY_ONTOLOGY_LOCATION);
+		if (ontologyLocation == null) throw new IllegalStateException("Ontology for this Graphity LDP Application is not configured properly. Check ResourceConfig and/or web.xml");
 		if (log.isDebugEnabled()) log.debug("Reading ontology from local file");
-		return getOntology(uriInfo.getBaseUriBuilder().path(ontologyPath.toString()).build().toString(), ontologyLocation.toString());
+		OntDocumentManager.getInstance().addAltEntry(localUri, ontologyLocation.toString());
 	    }
 	}
+	OntModel ontModel = OntDocumentManager.getInstance().
+		getOntology(localUri, OntModelSpec.OWL_MEM_RDFS_INF);
+	if (log.isDebugEnabled()) log.debug("Ontology size: {}", ontModel.size());
+	return ontModel;
     }
     
     public static OntModel getOntology(String ontologyUri, String ontologyLocation)
@@ -148,7 +201,7 @@ public class ResourceBase extends LDPResourceBase implements PageResource
     {
 	this(getOntology(uriInfo, config),
 		uriInfo, request, httpHeaders, VARIANTS,
-		(config.getProperty(org.graphity.platform.Application.PROPERTY_CACHE_CONTROL) == null) ? null : CacheControl.valueOf(config.getProperty(org.graphity.platform.Application.PROPERTY_CACHE_CONTROL).toString()),
+		(config.getProperty(PROPERTY_CACHE_CONTROL) == null) ? null : CacheControl.valueOf(config.getProperty(PROPERTY_CACHE_CONTROL).toString()),
 		limit, offset, orderBy, desc);
     }
     
@@ -160,7 +213,7 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 		uriInfo, request, httpHeaders, variants, cacheControl,
 		limit, offset, orderBy, desc);
 	
-	if (log.isDebugEnabled()) log.debug("Constructing LDP ResourceBase");
+	if (log.isDebugEnabled()) log.debug("Constructing Graphity Platform ResourceBase");
     }
 
     protected ResourceBase(OntResource ontResource,

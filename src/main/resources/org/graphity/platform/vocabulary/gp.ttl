@@ -34,7 +34,7 @@
     foaf:isPrimaryTopicOf <ontology> ;
     dct:license <http://www.opendatacommons.org/licenses/pddl/1.0/> ;
     dct:creator <http://semantic-web.dk/#martynas> ;
-    rdfs:seeAlso :Project . # <sparql> .
+    rdfs:seeAlso :Project , <sparql> .
 
 :dataset a void:Dataset ;
     dct:title "The dataset of this application" ;
@@ -42,11 +42,11 @@
     rdfs:isDefinedBy : .
     # void:sparqlEndpoint <sparql> .
 
-#_:sparql a sd:Service ;
-#    dct:title "Local SPARQL service" ;
-#    sd:endpoint <sparql> ;
-#    sd:supportedLanguage sd:SPARQL11Query ;
-#    rdfs:isDefinedBy : .
+:service a sd:Service ;
+    dct:title "Local SPARQL service" ;
+    sd:endpoint <sparql> ;
+    sd:supportedLanguage sd:SPARQL11Query ;
+    rdfs:isDefinedBy : .
 
 :Project a doap:Project ;
     doap:name "Graphity Platform" ;
