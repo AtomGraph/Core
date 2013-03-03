@@ -65,8 +65,6 @@ public class SPARQLEndpointBase extends ResourceBase implements SPARQLEndpoint
     {
 	super(uriInfo, request, httpHeaders, config,
 		limit, offset, orderBy, desc);	
-
-	if (query == null) throw new WebApplicationException(Response.Status.BAD_REQUEST);
 	this.query = query;
     }
 
@@ -104,6 +102,8 @@ public class SPARQLEndpointBase extends ResourceBase implements SPARQLEndpoint
     @Override
     public Response query(@QueryParam("query") Query query)
     {
+	if (query == null) throw new WebApplicationException(Response.Status.BAD_REQUEST);
+
 	if (query.isSelectType())
 	{
 	    if (log.isDebugEnabled()) log.debug("SPARQL endpoint executing SELECT query: {}", query);

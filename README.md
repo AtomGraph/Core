@@ -1,3 +1,71 @@
+Reinventing Web applications
+============================
+
+The year is 2013, and you are still writing source code to build Web applications? We at Graphity want to show
+you that the current Web application architectural approaches are obsolete, ineffective, and cost more than you
+probably realize. We want to help you on the way to the Semantic Web, which is already imminent. But more on that
+later.
+
+Before you jump on the next Web application framework or another key-value store bandwagon, let's take a step
+back and look at what the Web and its applications are made of.
+
+The Web
+-------
+
+The Web as we know it consists of network of webpages, or more generally of human-readable documents and services.
+Web 2.0 also brought a network of APIs, or machine-readable documents and (mostly RESTful) services.
+Unfortunately, the human- and machine-readable networks exist largely in parallel. First of all, not all websites
+provide an API access. There is a bigger problem however -- the one of standardization.
+
+We all know what standards the webpages are made of -- HTML, CSS, and JavaScript are the technologies that
+enable any web browser to talk to almost any website on the human-readable Web. It does not matter what domain
+the website represents -- an online bookshop, a dating site, a netbank, or a failblog for the lulz -- thanks to
+the standards, we can communicate with them through the same browser software and uniform components such as
+hyperlinks and form controls.
+
+The APIs
+--------
+
+What about the machine-readable Web 2.0? Sure, we have HTTP and REST, JSON and XML -- they make up the majority
+of modern APIs. Does that mean that any Web 2.0 API can talk to any other API? Sadly, the answer is _no_ (and if
+you've read this far, you probably already know it.) The APIs use different data models and serialization formats,
+and even if they use the same ones, the data cannot be directly mapped from one domain model to the other.
+
+As a result, you cannot have your faiblog entries reposted on Twitter or vica versa, unless there is a built-in
+connector or 3rd party software that integrates this specific pair of services. If you run your own site or
+application, you need a connector for each of the services you want to integrate, and as it likely has its own
+API, it provides yet another custom-made format and/or specification.
+
+What we have here, is a fundamental problem of standardization: Web 2.0 APIs are machine-readable, but they
+cannot _natively_ communicate with each other as the is no standard communication protocol. Surely, a
+standardization problem never stopped developers and businesses from getting things done, and Web services and
+APIs get integrated all the time. From glue-code hacked in 10 minutes, to specialized connector services, to
+full-blown industries built around data integration (see [IPaaS](http://www.gartner.com/it-glossary/information-platform-as-a-service-ipaas/)),
+massive amounts of software are developed worldwide just to get the this ever-growing network of machine-readable
+nodes to intercommunicate.
+
+The costs
+---------
+
+
+
+What if we showed you all this software is unnecessary?
+
+
+Resources
+State
+Graph
+
+Imperative/declarative
+Linked Data
+Templates
+
+
+
+
+
+
+
 Description
 ===========
 
@@ -57,55 +125,6 @@ Graphity LDP is meant to be used as a library for Linked Data Web applications. 
     </servlet-mapping>
 
 For a complete example of a Web application built on Graphity LDP, take a look at [Graphity Browser](https://github.com/Graphity/graphity-browser).
-
-Java code
-=========
-
-Linked Data Platform
---------------------
-
-It contains JAX-RS-compatible convenience classes for handling Linked Data requests; writing out Linked Data and SPARQL responses either raw or via XSLT; and more.
-
-* [`org.graphity.ldp`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp)
-    * [`org.graphity.ldp.Application`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/Application.java): Base class for all LDP applications -- use for subclassing
-    * [`org.graphity.ldp.model`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/model): LDP interfaces
-        * [`org.graphity.ldp.model.ContainerResource`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/model/ContainerResource.java): Base interface for Linked Data container resources
-        * [`org.graphity.ldp.model.Resource`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/model/Resource.java): Base interface for all Linked Data-serving JAX-RS resources
-        * [`org.graphity.ldp.model.impl`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/model/impl): Abstract LDP interface implementing base classes -- use for subclassing
-    * [`org.graphity.ldp.provider`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/provider): Generic `Provider` classes for reading request/writing `Response`
-        * [`org.graphity.ldp.provider.ModelProvider`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/provider/ModelProvider.java): Reads `Model` from request body/writes `Model` to `Response` body
-        * [`org.graphity.provider.ldp.RDFPostReader`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/provider/RDFPostReader.java): Reads `Model` from [RDF/POST](http://www.lsrn.org/semweb/rdfpost.html) requests
-        * [`org.graphity.ldp.provider.ResultSetWriter`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/provider/ResultSetWriter.java): Writes [`ResultSet`](http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/ResultSet.html) with SPARQL results into `Response`
-        * [`org.graphity.ldp.provider.xslt`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/ldp/provider/xslt): Abstract base classes for XSLT transformation-based `Response` writers
-
-Core package
-------------
-
-They contain Jena-compatible convenience classes for reading Linked Data resources from URIs, SPARQL endpoints, and HTML forms; writing out Linked Data and SPARQL responses either raw or via XSLT; building SPARQL queries and XSLT transformations, and more.
-
-*Basic version of Graphity core is also available in a [PHP version](https://github.com/Graphity/graphity-core).*
-
-* [`org.graphity`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity): Classes shared by all Graphity applications
-    * [`org.graphity.adapter`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/adapter): [`DatasetAdapter`](http://jena.apache.org/documentation/javadoc/fuseki/org/apache/jena/fuseki/http/DatasetAdapter.html)-related wrappers for Model caching via Graph store protocol
-    * [`org.graphity.model`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/model): Graphity model interfaces
-        * [`org.graphity.model.LinkedDataResource`](https://github.com/Graphity/graphity-ldp/blob/master/src/main/java/org/graphity/model/LinkedDataResource.java): Prototypical Linked Data Resource interface
-        * [`org.graphity.model.ResourceFactory`](https://github.com/Graphity/graphity-ldp/blob/master/src/main/java/org/graphity/model/ResourceFactory.java): Factory creating client resource instances for remote Linked Data or SPARQL resources
-        * [`org.graphity.model.impl`](https://github.com/Graphity/graphity-ldp/blob/master/src/main/java/org/graphity/model/impl): Implementations of Graphity model interfaces
-            * [`org.graphity.model.impl.LinkedDataResourceImpl`](https://github.com/Graphity/graphity-ldp/blob/master/src/main/java/org/graphity/model/impl/LinkedDataResourceImpl.java): Base class implementation of `LinkedDataResource`
-    * [`org.graphity.util`](https://github.com/Graphity/graphity-ldp/blob/master/src/main/java/org/graphity/util): Utility classes
-        * [`org.graphity.util.QueryBuilder`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/util/QueryBuilder.java): Builds Jena [`Query`](http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/Query.html) or SPIN [`Query`](www.topquadrant.com/topbraid/spin/api/javadoc/org/topbraid/spin/model/class-use/Query.html) from components (e.g. `LIMIT`/`OFFSET` parameters; RDF resources specifying `OPTIONAL` or a subquery)
-        * [`org.graphity.util.XSLTBuilder`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/util/XSLTBuilder.java): Builds XSLT transformation out of components. Chaining is possible.
-        * [`org.graphity.util.locator`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/util/locator): Pluggable classes for retrieving RDF from URIs. Implement Jena's [`Locator`](http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/util/Locator.html) interface.
-            * [`org.graphity.util.locator.grddl`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/util/locator): Pluggable classes for [GRDDL](http://www.w3.org/TR/grddl/) import of 3rd party REST APIs and XML formats. Implement Jena's [`Locator`](http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/util/Locator.html) interface. Need to be added to `DataManager` to take effect.
-            * [`org.graphity.util.locator.LocatorGRDDL`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/util/locator/LocatorGRDDL.java): Generic base class for GRDDL XSLT transformation-based `Locator`s. Also see stylesheets [`here`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/resources/org/graphity/util/locator/grddl).
-            * [`org.graphity.util.locator.LocatorLinkedData`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/util/locator/LocatorLinkedData.java): General-purpose class for loading RDF from Linked Data URIs using content negotiation
-            * [`org.graphity.util.locator.LocatorLinkedDataOAuth2`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/util/locator/LocatorLinkedDataOAuth2.java): General-purpose class for loading RDF from Linked Data URIs using content negotiation and [OAuth2](http://oauth.net/2/) authentication (_unfinished_)
-            * [`org.graphity.util.locator.PrefixMapper`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/util/locator/PrefixMapper.java): Subclass of [`LocationMapper`](http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/util/LocationMapper.html) for mapping resource (class, property etc.) URIs into local copies of known ontologies. Also see [`resources/location-mapping.ttl`](https://github.com/Graphity/graphity-ldp/blob/master/src/main/resources/location-mapping.ttl); ontologies are cached under [`vocabulary`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/resources/org/graphity/vocabulary).
-        * [`org.graphity.util.manager`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/util/manager): RDF data management classes
-            * [`org.graphity.util.manager.DataManager`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/util/manager/DataManager.java): Subclass of Jena's [`FileManager`](http://jena.sourceforge.net/how-to/filemanager.html) for loading `Model`s and `ResultSet`s from the Web. All code making requests for RDF data or SPARQL endpoints should use this class. Implements [`URIResolver`](http://docs.oracle.com/javase/6/docs/api/javax/xml/transform/URIResolver.html) and resolves URIs when [`document()`](http://www.w3.org/TR/xslt20/#function-document) function is called in XSLT.
-            * [`org.graphity.util.manager.SPARQLService`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/util/manager/SPARQLService.java): Represent individual SPARQL endpoints, should only be used in case authentication or other custom features are needed. Need to be added to `DataManager` to take effect.
-        * [`org.graphity.util.oauth`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/util/oauth): Classes related to JAX-RS implementation of OAuth
-    * [`org.graphity.vocabulary`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/java/org/graphity/vocabulary): Graphity ontologies as classes with Jena `Resource`s
 
 
 Used libraries

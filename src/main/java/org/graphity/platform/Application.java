@@ -16,6 +16,7 @@
  */
 package org.graphity.platform;
 
+import com.hp.hpl.jena.ontology.OntDocumentManager;
 import com.hp.hpl.jena.query.Query;
 import com.sun.jersey.api.core.ResourceConfig;
 import java.util.HashSet;
@@ -64,6 +65,8 @@ public class Application extends javax.ws.rs.core.Application
     {
 	SysRIOT.wireIntoJena(); // enable RIOT parser
 	SPINModuleRegistry.get().init(); // needs to be called before any SPIN-related code
+	// WARNING! ontology caching can cause concurrency/consistency problems
+	OntDocumentManager.getInstance().setCacheModels(false);
     }
     
     /**
