@@ -27,9 +27,9 @@ The APIs
 --------
 
 What about the machine-readable Web 2.0? Sure, we have HTTP and REST, JSON and XML -- they make up the majority
-of modern APIs. Does that mean that any Web 2.0 API can talk to any other API? Sadly, the answer is _no_ (and if
-you've read this far, you probably already know it.) The APIs use different data models and serialization formats,
-and even if they use the same ones, the data cannot be directly mapped from one domain model to the other.
+of modern APIs. Does that mean that any Web 2.0 API can talk to any other API? Sadly, the answer is _no_. The
+APIs use different data models and serialization formats, and even if they use the same ones, the data cannot be
+directly mapped from one domain model to the other.
 
 As a result, you cannot have your faiblog entries reposted on Twitter or vica versa, unless there is a built-in
 connector or 3rd party software that integrates this specific pair of services. If you run your own site or
@@ -47,18 +47,37 @@ nodes to intercommunicate.
 The costs
 ---------
 
+You probably already knew all of the above. By looking at the state of the machine-readable Web, it is safe to
+predict that the demand for data integration is rapidly increasing, both internally and globally. Consider that
+for a moment with the following factors:
+* pair-wise integration with N service nodes requires N connectors, the total sum approaching N^2 in a global increasingly interconnected network
+* implementation of service connectors consume expensive developer hours and deal with data conversions code
+* source code is prone to bugs: more source code means more bugs
+* proprietary integration platforms make the process easier and more user-friendly, but still provide the old many-to-many solution and also put the customer in lock-in with switching-costs
+* data conversion code is also prone to poor performance, as there are theoretical and practical mismatches between data models (such as object-oriented, relational, XML, JSON, RDF etc.) that eventually lead to leaky abstractions
+* imperative languages suffer from poor concurrency, while declarative languages are becoming popular (see [The Downfall of Imperative Programming](http://fpcomplete.com/the-downfall-of-imperative-programming/)
 
+We think the many-to-many data integration approach does not scale, and the general "(Web) application is source
+code" paradigm has become obsolete. Software cannot be un-written and billions of dollars are already spent on
+systems that were outdated before they even got installed. But how can we avoid this in the future? We need to
+take a fresh look at Web applications. And we think Graphity provides the first solution of this kind. It
+consists of the following:
 
-What if we showed you all this software is unnecessary?
+* uniform data model
+* declarative web applications
+* pivotal integration - or native apps
+* quality data
 
+We will show how Graphity helps you with all of the options.
+
+Linked Data
+-----------
 
 Resources
 State
 Graph
 
-Imperative/declarative
-Linked Data
-Templates
+Templates / processors
 
 
 
@@ -164,7 +183,7 @@ Ontologies
 Mappings
 --------
 
-* [`resources/location-mapping.ttl`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/resources/location-mapping.ttl): Jena's [`LocationMapper`](http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/util/LocationMapper.html) [configuration file](http://jena.sourceforge.net/how-to/filemanager.html) mapping the locally cached ontologies
+* [`resources/location-mapping.n3`](https://github.com/Graphity/graphity-ldp/tree/master/src/main/resources/location-mapping.n3): Jena's [`LocationMapper`](http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/util/LocationMapper.html) [configuration file](http://jena.sourceforge.net/how-to/filemanager.html) mapping the locally cached ontologies
 
 Using resources in your project
 -------------------------------
