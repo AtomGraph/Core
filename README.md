@@ -3,8 +3,8 @@ Reinventing Web applications
 
 The year is 2013, and you are still writing source code to build Web applications? We at Graphity want to show
 you that the current Web application architectural approaches are obsolete, ineffective, and cost more than you
-probably realize. We want to help you on the way to the Semantic Web, which is already imminent. But more on that
-later.
+probably realize. We want to help you on the way to the [Semantic Web](http://www.w3.org/standards/semanticweb/),
+which is already imminent. But more on that later.
 
 Before you jump on the next Web application framework or another key-value store bandwagon, let's take a step
 back and look at what the Web and its applications are made of.
@@ -53,40 +53,76 @@ for a moment with the following factors:
 * pair-wise integration with N service nodes requires N connectors, the total sum approaching N^2 in a global increasingly interconnected network
 * implementation of service connectors consume expensive developer hours and deal with data conversions code
 * source code is prone to bugs: more source code means more bugs
-* proprietary integration platforms make the process easier and more user-friendly, but still provide the old many-to-many solution and also put the customer in lock-in with switching-costs
+* proprietary integration platforms make the process easier and more user-friendly, but still provide the old many-to-many solution and also put the customer in a lock-in with switching-costs
 * data conversion code is also prone to poor performance, as there are theoretical and practical mismatches between data models (such as object-oriented, relational, XML, JSON, RDF etc.) that eventually lead to leaky abstractions
-* imperative languages suffer from poor concurrency, while declarative languages are becoming popular (see [The Downfall of Imperative Programming](http://fpcomplete.com/the-downfall-of-imperative-programming/)
+* imperative languages suffer from poor concurrency, while declarative languages are becoming popular (see [The Downfall of Imperative Programming](http://fpcomplete.com/the-downfall-of-imperative-programming/) )
 
-We think the many-to-many data integration approach does not scale, and the general "(Web) application is source
-code" paradigm has become obsolete. Software cannot be un-written and billions of dollars are already spent on
-systems that were outdated before they even got installed. But how can we avoid this in the future? We need to
-take a fresh look at Web applications. And we think Graphity provides the first solution of this kind. It
-consists of the following:
+We think the many-to-many data integration approach does not scale, and the general "(Web) application is
+domain-specific source code" paradigm has become obsolete. Software cannot be un-written and billions of dollars
+are already spent on systems that were outdated before they even got installed.
+But how can we avoid this in the future? We need to take a fresh look at Web applications. And we think Graphity
+provides the first solution of this kind. It consists of the following:
 
-* uniform data model
-* declarative web applications
-* pivotal integration - or native apps
+* uniform data model: a cornerstone of universal [pivotal data conversion](http://en.wikipedia.org/wiki/Data_conversion#Pivotal_conversion)
+* generic Web applications: implemented in a declarative fashion, they work natively on the uniform data model
 * quality data
 
-We will show how Graphity helps you with all of the options.
+The above points are no less than a recipe for the implementation of the bottom layer of Semantic Web: data
+integration on a global scale. We will show how Graphity helps you with all of the options, so you can focus on
+building great apps and enriching your data.
 
 Linked Data
 -----------
+
+We do not need to invent the uniform data model, as it has been around for almost 10 years and is very
+well-standardized. It is the W3C [Resource Description Framework](http://www.w3.org/standards/techs/rdf), or RDF.
+
+The shape of RDF data model is a graph, or a network of nodes (by comparison, XML data model is tree-shaped).
+The graph is formed from statements that have a stable triple form: subject/property/object.
+The nodes in the graph are either
+* resources identified by [URI](http://en.wikipedia.org/wiki/Uniform_resource_identifier) references
+* anonymous resources (blank nodes)
+* predicates
+* literal values (that can only be in object position but can have a datatype or language type attached)
+
+RDF has its own standard query language called [SPARQL](http://www.w3.org/standards/techs/sparql) (just like the
+relational model has SQL), which operates on graph pattern matching. Related reusable RDF terms are often grouped
+into [ontologies](http://www.w3.org/standards/semanticweb/ontology) (semantic vocabularies).
+
+When published on the Web, RDF data (usually in conjunction with SPARQL endpoints) is called [Linked Data](http://www.w3.org/standards/semanticweb/data).
+RDF and Linked Data have the following advantages:
+* one
+* two
+* three
+
+URIs can identify both informational and real-world resources, which means that RDF can be used to encode
+metadata about documents, systems, other data, as well as the real world (although there is a [special case](http://www.w3.org/TR/cooluris/#semweb)
+in Linked Data access, as real-world objects obviously cannot be retrieved as information).
+
+In other words, Linked Data is the native fabric of the machine-readable Web. It is currently the only standard
+approach to global integration for which the demand is increasing, so if you're not using Linked Data yet, we
+strongly encourage you to do yourself a favor and start now!
+
+Generic Web applications
+------------------------
 
 Resources
 State
 Graph
 
 Templates / processors
+Finite state machines
+XSLT analogy
 
 
 
 
 
 
+Graphity
+========
 
-Description
-===========
+not reinvent, but leverage standards: SPIN, RDF/POST
 
 Graphity LDP is a fully extensible generic Linked Data platform for building Web applications.
 It can be used for publishing and analysis of open data, as well as import and integration of private user data.
