@@ -18,27 +18,24 @@ package org.graphity.platform.model;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.ontology.*;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.*;
-import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.*;
-import org.graphity.util.ModelUtils;
 import org.graphity.platform.util.DataManager;
+import org.graphity.util.ModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Base class of generic read-only Linked Data resources
  * 
- * @see LinkedDataResource
- * @see ResourceFactory
+ * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/rdf/model/Resource.html">Resource</a>
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class LinkedDataResourceBase implements Resource
+public class LinkedDataResourceBase implements LinkedDataResource
 {
     private static final Logger log = LoggerFactory.getLogger(LinkedDataResourceBase.class);
 
@@ -54,33 +51,32 @@ public class LinkedDataResourceBase implements Resource
     private final Request request;
     private final HttpHeaders httpHeaders;
     private final List<Variant> variants;
-    private final OntResource ontResource;
+    private final Resource resource;
     private final CacheControl cacheControl;
 
     /** 
-     * Constructs read-only LD resource from Jena's OntResource and JAX-RS context
+     * Constructs read-only LD resource from Jena's Resource and JAX-RS context
      * 
-     * @param ontResource the current resource in the ontology
+     * @param resource the current resource in the ontology
      * @param uriInfo URI information
      * @param request current request
      * @param httpHeaders current request headers
      * @param variants representation variants
-     * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/ontology/OntResource.html">OntResource</a>
      */
-    public LinkedDataResourceBase(OntResource ontResource,
+    public LinkedDataResourceBase(Resource resource,
 	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants, CacheControl cacheControl)
     {
-	if (ontResource == null) throw new IllegalArgumentException("OntResource cannot be null");
+	if (resource == null) throw new IllegalArgumentException("Resource cannot be null");
 	if (uriInfo == null) throw new IllegalArgumentException("UriInfo cannot be null");
 	if (request == null) throw new IllegalArgumentException("Request cannot be null");
 	if (httpHeaders == null) throw new IllegalArgumentException("HttpHeaders cannot be null");
 	if (variants == null) throw new IllegalArgumentException("Variants cannot be null");
 	
-	if (!ontResource.isURIResource()) throw new IllegalArgumentException("OntResource must be URI Resource (not a blank node)");
-	this.ontResource = ontResource;
+	if (!resource.isURIResource()) throw new IllegalArgumentException("Resource must be URI Resource (not a blank node)");
+	this.resource = resource;
 	if (log.isDebugEnabled())
 	{
-	    log.debug("Creating LinkedDataResource from OntResource with URI: {}", ontResource.getURI());
+	    log.debug("Creating LinkedDataResource from Resource with URI: {}", resource.getURI());
 	    log.debug("List of Variants: {}", variants);
 	}
 	
@@ -141,13 +137,14 @@ public class LinkedDataResourceBase implements Resource
     public Model describe()
     {
 	if (log.isDebugEnabled()) log.debug("Querying OntModel with default DESCRIBE <{}> Query", getURI());
-	return DataManager.get().loadModel(getOntModel(), QueryFactory.create("DESCRIBE <" + getURI() + ">"));
+	//return DataManager.get().loadModel(getOntModel(), QueryFactory.create("DESCRIBE <" + getURI() + ">"));
+	return DataManager.get().loadModel(getModel(), QueryFactory.create("DESCRIBE <" + getURI() + ">"));
     }
     
     @Override
     public final String getURI()
     {
-	return getOntResource().getURI();
+	return getResource().getURI();
     }
 
     @Override
@@ -156,21 +153,15 @@ public class LinkedDataResourceBase implements Resource
 	return request;
     }
 
-    public final OntResource getOntResource()
+    public final Resource getResource()
     {
-	return ontResource;
+	return resource;
     }
 
     @Override
-    public final OntModel getOntModel()
-    {
-	return getOntResource().getOntModel();
-    }
-    
-    @Override
     public final Model getModel()
     {
-	return getOntResource().getModel();
+	return getResource().getModel();
     }
     
     public final UriInfo getUriInfo()
@@ -193,779 +184,281 @@ public class LinkedDataResourceBase implements Resource
     {
 	return cacheControl;
     }
-
-    @Override
-    public Profile getProfile()
-    {
-	return getOntResource().getProfile();
-    }
-
-    @Override
-    public boolean isOntLanguageTerm()
-    {
-	return getOntResource().isOntLanguageTerm();
-    }
-
-    @Override
-    public void setSameAs(com.hp.hpl.jena.rdf.model.Resource rsrc)
-    {
-	getOntResource().setSameAs(rsrc);
-    }
-
-    @Override
-    public void addSameAs(com.hp.hpl.jena.rdf.model.Resource rsrc)
-    {
-	getOntResource().addSameAs(rsrc);
-    }
-
-    @Override
-    public OntResource getSameAs()
-    {
-	return getOntResource().getSameAs();
-    }
-
-    @Override
-    public ExtendedIterator<? extends com.hp.hpl.jena.rdf.model.Resource> listSameAs()
-    {
-	return getOntResource().listSameAs();
-    }
-
-    @Override
-    public boolean isSameAs(com.hp.hpl.jena.rdf.model.Resource rsrc)
-    {
-	return getOntResource().isSameAs(rsrc);
-    }
-
-    @Override
-    public void removeSameAs(com.hp.hpl.jena.rdf.model.Resource rsrc)
-    {
-	getOntResource().removeSameAs(rsrc);
-    }
-
-    @Override
-    public void setDifferentFrom(com.hp.hpl.jena.rdf.model.Resource rsrc)
-    {
-	getOntResource().setDifferentFrom(rsrc);
-    }
-
-    @Override
-    public void addDifferentFrom(com.hp.hpl.jena.rdf.model.Resource rsrc)
-    {
-	getOntResource().addDifferentFrom(rsrc);
-    }
-
-    @Override
-    public OntResource getDifferentFrom()
-    {
-	return getOntResource().getDifferentFrom();
-    }
-
-    @Override
-    public ExtendedIterator<? extends com.hp.hpl.jena.rdf.model.Resource> listDifferentFrom()
-    {
-	return getOntResource().listDifferentFrom();
-    }
-
-    @Override
-    public boolean isDifferentFrom(com.hp.hpl.jena.rdf.model.Resource rsrc)
-    {
-	return getOntResource().isDifferentFrom(rsrc);
-    }
-
-    @Override
-    public void removeDifferentFrom(com.hp.hpl.jena.rdf.model.Resource rsrc)
-    {
-	getOntResource().removeDifferentFrom(rsrc);
-    }
-
-    @Override
-    public void setSeeAlso(com.hp.hpl.jena.rdf.model.Resource rsrc)
-    {
-	getOntResource().setSeeAlso(rsrc);
-    }
-
-    @Override
-    public void addSeeAlso(com.hp.hpl.jena.rdf.model.Resource rsrc)
-    {
-	getOntResource().addSeeAlso(rsrc);
-    }
-
-    @Override
-    public com.hp.hpl.jena.rdf.model.Resource getSeeAlso()
-    {
-	return getOntResource().getSeeAlso();
-    }
-
-    @Override
-    public ExtendedIterator<RDFNode> listSeeAlso()
-    {
-	return getOntResource().listSeeAlso();
-    }
-
-    @Override
-    public boolean hasSeeAlso(com.hp.hpl.jena.rdf.model.Resource rsrc)
-    {
-	return getOntResource().hasSeeAlso(rsrc);
-    }
-
-    @Override
-    public void removeSeeAlso(com.hp.hpl.jena.rdf.model.Resource rsrc)
-    {
-	getOntResource().removeSeeAlso(rsrc);
-    }
-
-    @Override
-    public void setIsDefinedBy(com.hp.hpl.jena.rdf.model.Resource rsrc)
-    {
-	getOntResource().setIsDefinedBy(rsrc);
-    }
-
-    @Override
-    public void addIsDefinedBy(com.hp.hpl.jena.rdf.model.Resource rsrc)
-    {
-	getOntResource().addIsDefinedBy(rsrc);
-    }
-
-    @Override
-    public com.hp.hpl.jena.rdf.model.Resource getIsDefinedBy()
-    {
-	return getOntResource().getIsDefinedBy();
-    }
-
-    @Override
-    public ExtendedIterator<RDFNode> listIsDefinedBy()
-    {
-	return getOntResource().listIsDefinedBy();
-    }
-
-    @Override
-    public boolean isDefinedBy(com.hp.hpl.jena.rdf.model.Resource rsrc)
-    {
-	return getOntResource().isDefinedBy(rsrc);
-    }
-
-    @Override
-    public void removeDefinedBy(com.hp.hpl.jena.rdf.model.Resource rsrc)
-    {
-	getOntResource().removeDefinedBy(rsrc);
-    }
-
-    @Override
-    public void setVersionInfo(String string)
-    {
-	getOntResource().setVersionInfo(string);
-    }
-
-    @Override
-    public void addVersionInfo(String string)
-    {
-	getOntResource().addVersionInfo(string);
-    }
-
-    @Override
-    public String getVersionInfo()
-    {
-	return getOntResource().getVersionInfo();
-    }
-
-    @Override
-    public ExtendedIterator<String> listVersionInfo()
-    {
-	return getOntResource().listVersionInfo();
-    }
-
-    @Override
-    public boolean hasVersionInfo(String string)
-    {
-	return getOntResource().hasVersionInfo(string);
-    }
-
-    @Override
-    public void removeVersionInfo(String string)
-    {
-	getOntResource().removeVersionInfo(string);
-    }
-
-    @Override
-    public void setLabel(String string, String string1)
-    {
-	getOntResource().setLabel(string, string1);
-    }
-
-    @Override
-    public void addLabel(String string, String string1)
-    {
-	getOntResource().addLabel(string, string1);
-    }
-
-    @Override
-    public void addLabel(Literal ltrl)
-    {
-	getOntResource().addLabel(ltrl);
-    }
-
-    @Override
-    public String getLabel(String string)
-    {
-	return getOntResource().getLabel(string);
-    }
-
-    @Override
-    public ExtendedIterator<RDFNode> listLabels(String string)
-    {
-	return getOntResource().listLabels(string);
-    }
-
-    @Override
-    public boolean hasLabel(String string, String string1)
-    {
-	return getOntResource().hasLabel(string, string1);
-    }
-
-    @Override
-    public boolean hasLabel(Literal ltrl)
-    {
-	return getOntResource().hasLabel(ltrl);
-    }
-
-    @Override
-    public void removeLabel(String string, String string1)
-    {
-	getOntResource().removeLabel(string, string1);
-    }
-
-    @Override
-    public void removeLabel(Literal ltrl)
-    {
-	getOntResource().removeLabel(ltrl);
-    }
-
-    @Override
-    public void setComment(String string, String string1)
-    {
-	getOntResource().setComment(string, string1);
-    }
-
-    @Override
-    public void addComment(String string, String string1)
-    {
-	getOntResource().addComment(string, string1);
-    }
-
-    @Override
-    public void addComment(Literal ltrl)
-    {
-	getOntResource().addComment(ltrl);
-    }
-
-    @Override
-    public String getComment(String string)
-    {
-	return getOntResource().getComment(string);
-    }
-
-    @Override
-    public ExtendedIterator<RDFNode> listComments(String string)
-    {
-	return getOntResource().listComments(string);
-    }
-
-    @Override
-    public boolean hasComment(String string, String string1)
-    {
-	return getOntResource().hasComment(string, string1);
-    }
-
-    @Override
-    public boolean hasComment(Literal ltrl)
-    {
-	return getOntResource().hasComment(ltrl);
-    }
-
-    @Override
-    public void removeComment(String string, String string1)
-    {
-	getOntResource().removeComment(string, string1);
-    }
-
-    @Override
-    public void removeComment(Literal ltrl)
-    {
-	getOntResource().removeComment(ltrl);
-    }
-
-    @Override
-    public void setRDFType(com.hp.hpl.jena.rdf.model.Resource rsrc)
-    {
-	getOntResource().setRDFType(rsrc);
-    }
-
-    @Override
-    public void addRDFType(com.hp.hpl.jena.rdf.model.Resource rsrc)
-    {
-	getOntResource().addRDFType(rsrc);
-    }
-
-    @Override
-    public com.hp.hpl.jena.rdf.model.Resource getRDFType()
-    {
-	return getOntResource().getRDFType();
-    }
-
-    @Override
-    public com.hp.hpl.jena.rdf.model.Resource getRDFType(boolean bln)
-    {
-	return getOntResource().getRDFType(bln);
-    }
-
-    @Override
-    public ExtendedIterator<com.hp.hpl.jena.rdf.model.Resource> listRDFTypes(boolean bln)
-    {
-	return getOntResource().listRDFTypes(bln);
-    }
-
-    @Override
-    public boolean hasRDFType(com.hp.hpl.jena.rdf.model.Resource rsrc, boolean bln)
-    {
-	return getOntResource().hasRDFType(rsrc, bln);
-    }
-
-    @Override
-    public boolean hasRDFType(com.hp.hpl.jena.rdf.model.Resource rsrc)
-    {
-	return getOntResource().hasRDFType(rsrc);
-    }
-
-    @Override
-    public void removeRDFType(com.hp.hpl.jena.rdf.model.Resource rsrc)
-    {
-	getOntResource().removeRDFType(rsrc);
-    }
-
-    @Override
-    public boolean hasRDFType(String string)
-    {
-	return getOntResource().hasRDFType(string);
-    }
-
-    @Override
-    public int getCardinality(Property prprt)
-    {
-	return getOntResource().getCardinality(prprt);
-    }
-
-    @Override
-    public void setPropertyValue(Property prprt, RDFNode rdfn)
-    {
-	getOntResource().setPropertyValue(prprt, rdfn);
-    }
-
-    @Override
-    public RDFNode getPropertyValue(Property prprt)
-    {
-	return getOntResource().getPropertyValue(prprt);
-    }
-
-    @Override
-    public NodeIterator listPropertyValues(Property prprt)
-    {
-	return getOntResource().listPropertyValues(prprt);
-    }
-
-    @Override
-    public void removeProperty(Property prprt, RDFNode rdfn)
-    {
-	getOntResource().removeProperty(prprt, rdfn);
-    }
-
-    @Override
-    public void remove()
-    {
-	getOntResource().remove();
-    }
-
-    @Override
-    public OntProperty asProperty()
-    {
-	return getOntResource().asProperty();
-    }
-
-    @Override
-    public AnnotationProperty asAnnotationProperty()
-    {
-	return getOntResource().asAnnotationProperty();
-    }
-
-    @Override
-    public ObjectProperty asObjectProperty()
-    {
-	return getOntResource().asObjectProperty();
-    }
-
-    @Override
-    public DatatypeProperty asDatatypeProperty()
-    {
-	return getOntResource().asDatatypeProperty();
-    }
-
-    @Override
-    public Individual asIndividual()
-    {
-	return getOntResource().asIndividual();
-    }
-
-    @Override
-    public OntClass asClass()
-    {
-	return getOntResource().asClass();
-    }
-
-    @Override
-    public Ontology asOntology()
-    {
-	return getOntResource().asOntology();
-    }
-
-    @Override
-    public DataRange asDataRange()
-    {
-	return getOntResource().asDataRange();
-    }
-
-    @Override
-    public AllDifferent asAllDifferent()
-    {
-	return getOntResource().asAllDifferent();
-    }
-
-    @Override
-    public boolean isProperty()
-    {
-	return getOntResource().isProperty();
-    }
-
-    @Override
-    public boolean isAnnotationProperty()
-    {
-	return getOntResource().isAnnotationProperty();
-    }
-
-    @Override
-    public boolean isObjectProperty()
-    {
-	return getOntResource().isObjectProperty();
-    }
-
-    @Override
-    public boolean isDatatypeProperty()
-    {
-	return getOntResource().isDatatypeProperty();
-    }
-
-    @Override
-    public boolean isIndividual()
-    {
-	return getOntResource().isIndividual();
-    }
-
-    @Override
-    public boolean isClass()
-    {
-	return getOntResource().isClass();
-    }
-
-    @Override
-    public boolean isOntology()
-    {
-	return getOntResource().isOntology();
-    }
-
-    @Override
-    public boolean isDataRange()
-    {
-	return getOntResource().isDataRange();
-    }
-
-    @Override
-    public boolean isAllDifferent()
-    {
-	return getOntResource().isAllDifferent();
-    }
-
+    
     @Override
     public AnonId getId()
     {
-	return getOntResource().getId();
+	return getResource().getId();
     }
 
     @Override
     public com.hp.hpl.jena.rdf.model.Resource inModel(Model model)
     {
-	return getOntResource().inModel(model);
+	return getResource().inModel(model);
     }
 
     @Override
     public boolean hasURI(String string)
     {
-	return getOntResource().hasURI(string);
+	return getResource().hasURI(string);
     }
 
     @Override
     public String getNameSpace()
     {
-	return getOntResource().getNameSpace();
+	return getResource().getNameSpace();
     }
 
     @Override
     public String getLocalName()
     {
-	return getOntResource().getLocalName();
+	return getResource().getLocalName();
     }
 
     @Override
     public Statement getRequiredProperty(Property prprt)
     {
-	return getOntResource().getRequiredProperty(prprt);
+	return getResource().getRequiredProperty(prprt);
     }
 
     @Override
     public Statement getProperty(Property prprt)
     {
-	return getOntResource().getProperty(prprt);
+	return getResource().getProperty(prprt);
     }
 
     @Override
     public StmtIterator listProperties(Property prprt)
     {
-	return getOntResource().listProperties(prprt);
+	return getResource().listProperties(prprt);
     }
 
     @Override
     public StmtIterator listProperties()
     {
-	return getOntResource().listProperties();
+	return getResource().listProperties();
     }
 
     @Override
     public com.hp.hpl.jena.rdf.model.Resource addLiteral(Property prprt, boolean bln)
     {
-	return getOntResource().addLiteral(prprt, bln);
+	return getResource().addLiteral(prprt, bln);
     }
 
     @Override
     public com.hp.hpl.jena.rdf.model.Resource addLiteral(Property prprt, long l)
     {
-	return getOntResource().addLiteral(prprt, l);
+	return getResource().addLiteral(prprt, l);
     }
 
     @Override
     public com.hp.hpl.jena.rdf.model.Resource addLiteral(Property prprt, char c)
     {
-	return getOntResource().addLiteral(prprt, c);
+	return getResource().addLiteral(prprt, c);
     }
 
     @Override
     public com.hp.hpl.jena.rdf.model.Resource addLiteral(Property prprt, double d)
     {
-	return getOntResource().addLiteral(prprt, d);
+	return getResource().addLiteral(prprt, d);
     }
 
     @Override
     public com.hp.hpl.jena.rdf.model.Resource addLiteral(Property prprt, float f)
     {
-	return getOntResource().addLiteral(prprt, f);
+	return getResource().addLiteral(prprt, f);
     }
 
     @Override
     public com.hp.hpl.jena.rdf.model.Resource addLiteral(Property prprt, Object o)
     {
-	return getOntResource().addLiteral(prprt, o);
+	return getResource().addLiteral(prprt, o);
     }
 
     @Override
     public com.hp.hpl.jena.rdf.model.Resource addLiteral(Property prprt, Literal ltrl)
     {
-	return getOntResource().addLiteral(prprt, ltrl);
+	return getResource().addLiteral(prprt, ltrl);
     }
 
     @Override
     public com.hp.hpl.jena.rdf.model.Resource addProperty(Property prprt, String string)
     {
-	return getOntResource().addLiteral(prprt, string);
+	return getResource().addLiteral(prprt, string);
     }
 
     @Override
     public com.hp.hpl.jena.rdf.model.Resource addProperty(Property prprt, String string, String string1)
     {
-	return getOntResource().addProperty(prprt, string, string1);
+	return getResource().addProperty(prprt, string, string1);
     }
 
     @Override
     public com.hp.hpl.jena.rdf.model.Resource addProperty(Property prprt, String string, RDFDatatype rdfd)
     {
-	return getOntResource().addProperty(prprt, prprt);
+	return getResource().addProperty(prprt, prprt);
     }
 
     @Override
     public com.hp.hpl.jena.rdf.model.Resource addProperty(Property prprt, RDFNode rdfn)
     {
-	return getOntResource().addProperty(prprt, rdfn);
+	return getResource().addProperty(prprt, rdfn);
     }
 
     @Override
     public boolean hasProperty(Property prprt)
     {
-	return getOntResource().hasProperty(prprt);
+	return getResource().hasProperty(prprt);
     }
 
     @Override
     public boolean hasLiteral(Property prprt, boolean bln)
     {
-	return getOntResource().hasLiteral(prprt, bln);
+	return getResource().hasLiteral(prprt, bln);
     }
 
     @Override
     public boolean hasLiteral(Property prprt, long l)
     {
-	return getOntResource().hasLiteral(prprt, l);
+	return getResource().hasLiteral(prprt, l);
     }
 
     @Override
     public boolean hasLiteral(Property prprt, char c)
     {
-	return getOntResource().hasLiteral(prprt, c);
+	return getResource().hasLiteral(prprt, c);
     }
 
     @Override
     public boolean hasLiteral(Property prprt, double d)
     {
-	return getOntResource().hasLiteral(prprt, d);
+	return getResource().hasLiteral(prprt, d);
     }
 
     @Override
     public boolean hasLiteral(Property prprt, float f)
     {
-	return getOntResource().hasLiteral(prprt, f);
+	return getResource().hasLiteral(prprt, f);
     }
 
     @Override
     public boolean hasLiteral(Property prprt, Object o)
     {
-	return getOntResource().hasLiteral(prprt, o);
+	return getResource().hasLiteral(prprt, o);
     }
 
     @Override
     public boolean hasProperty(Property prprt, String string)
     {
-	return getOntResource().hasProperty(prprt, string);
+	return getResource().hasProperty(prprt, string);
     }
 
     @Override
     public boolean hasProperty(Property prprt, String string, String string1)
     {
-	return getOntResource().hasProperty(prprt, string, string1);
+	return getResource().hasProperty(prprt, string, string1);
     }
 
     @Override
     public boolean hasProperty(Property prprt, RDFNode rdfn)
     {
-	return getOntResource().hasProperty(prprt, rdfn);
+	return getResource().hasProperty(prprt, rdfn);
     }
 
     @Override
     public com.hp.hpl.jena.rdf.model.Resource removeProperties()
     {
-	return getOntResource().removeProperties();
+	return getResource().removeProperties();
     }
 
     @Override
     public com.hp.hpl.jena.rdf.model.Resource removeAll(Property prprt)
     {
-	return getOntResource().removeAll(prprt);
+	return getResource().removeAll(prprt);
     }
 
     @Override
     public com.hp.hpl.jena.rdf.model.Resource begin()
     {
-	return getOntResource().begin();
+	return getResource().begin();
     }
 
     @Override
     public com.hp.hpl.jena.rdf.model.Resource abort()
     {
-	return getOntResource().abort();
+	return getResource().abort();
     }
 
     @Override
     public com.hp.hpl.jena.rdf.model.Resource commit()
     {
-	return getOntResource().commit();
+	return getResource().commit();
     }
 
     @Override
     public com.hp.hpl.jena.rdf.model.Resource getPropertyResourceValue(Property prprt)
     {
-	return getOntResource().getPropertyResourceValue(prprt);
+	return getResource().getPropertyResourceValue(prprt);
     }
 
     @Override
     public boolean isAnon()
     {
-	return getOntResource().isAnon();
+	return getResource().isAnon();
     }
 
     @Override
     public boolean isLiteral()
     {
-	return getOntResource().isLiteral();
+	return getResource().isLiteral();
     }
 
     @Override
     public boolean isURIResource()
     {
-	return getOntResource().isURIResource();
+	return getResource().isURIResource();
     }
 
     @Override
     public boolean isResource()
     {
-	return getOntResource().isResource();
+	return getResource().isResource();
     }
 
     @Override
     public <T extends RDFNode> T as(Class<T> type)
     {
-	return getOntResource().as(type);
+	return getResource().as(type);
     }
 
     @Override
     public <T extends RDFNode> boolean canAs(Class<T> type)
     {
-	return getOntResource().canAs(type);
+	return getResource().canAs(type);
     }
 
     @Override
     public Object visitWith(RDFVisitor rdfv)
     {
-	return getOntResource().visitWith(rdfv);
+	return getResource().visitWith(rdfv);
     }
 
     @Override
     public com.hp.hpl.jena.rdf.model.Resource asResource()
     {
-	return getOntResource().asResource();
+	return getResource().asResource();
     }
 
     @Override
     public Literal asLiteral()
     {
-	return getOntResource().asLiteral();
+	return getResource().asLiteral();
     }
 
     @Override
     public Node asNode()
     {
-	return getOntResource().asNode();
+	return getResource().asNode();
     }
 
 }

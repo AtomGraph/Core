@@ -16,8 +16,8 @@
  */
 package org.graphity.platform.model;
 
-import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.Resource;
 import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
@@ -31,7 +31,7 @@ import javax.ws.rs.core.Variant;
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 @Produces({org.graphity.platform.MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", org.graphity.platform.MediaType.TEXT_TURTLE + "; charset=UTF-8"})
-public interface Resource extends OntResource
+public interface LinkedDataResource extends Resource // OntResource
 {
     /**
      * Returns RDF description of this resource (as in SPARQL DESCRIBE)

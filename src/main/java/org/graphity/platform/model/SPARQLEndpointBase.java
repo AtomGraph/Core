@@ -16,6 +16,8 @@
  */
 package org.graphity.platform.model;
 
+import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -33,7 +35,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * SPARQL endpoint resource, implementing ?query= access method
+ * SPARQL endpoint resource, implementing SPARQL HTTP protocol
+ * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 @Path("/sparql")
@@ -61,23 +64,50 @@ public class SPARQLEndpointBase extends ResourceBase implements SPARQLEndpoint
 	@QueryParam("offset") @DefaultValue("0") Long offset,
 	@QueryParam("order-by") String orderBy,
 	@QueryParam("desc") Boolean desc,
-	@QueryParam("query") Query query)
+	@QueryParam("query") Query query
+	    )
     {
 	super(uriInfo, request, httpHeaders, config,
 		limit, offset, orderBy, desc);	
 	this.query = query;
+	if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase with Query: {}", query);
     }
 
-    @Override
-    public Query getQuery()
+    protected SPARQLEndpointBase(OntModel ontModel, UriInfo uriInfo, Request request,
+	    HttpHeaders httpHeaders, List<Variant> variants, CacheControl cacheControl,
+	    Long limit, Long offset, String orderBy, Boolean desc,
+	    Query query)
+    {
+	super(ontModel, uriInfo, request, httpHeaders, variants, cacheControl, limit, offset, orderBy, desc);
+	this.query = query;
+	if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase with Query: {}", query);
+    }
+
+    protected SPARQLEndpointBase(OntResource ontResource, UriInfo uriInfo, Request request,
+	    HttpHeaders httpHeaders, List<Variant> variants, CacheControl cacheControl,
+	    Long limit, Long offset, String orderBy, Boolean desc,
+	    Query query)
+    {
+	super(ontResource, uriInfo, request, httpHeaders, variants, cacheControl, limit, offset, orderBy, desc);
+	this.query = query;
+	if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase with Query: {}", query);
+    }
+
+    public Query getUserQuery()
     {
 	return query;
     }
-
+    
     @Override
-    public Response getResponse() // can this be simplified by reusing LDP ResourceBase code?
+    public Response getResponse()
     {
-	return query(getQuery());
+	if (getUserQuery() != null)
+	{
+	    if (log.isDebugEnabled()) log.debug("Returning @GET Response for Query: {}", getQuery());
+	    return query(getUserQuery());
+	}
+	
+	return super.getResponse();
     }
 
     public ResultSetRewindable loadResultSetRewindable(Resource service, Query query)

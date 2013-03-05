@@ -41,4 +41,6 @@ public interface SPARQLEndpoint
      * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/Query.html">ARQ Query</a>
      */
     @GET Response query(@QueryParam("query") Query query);
+    
+    // Context getServiceContext();
 }

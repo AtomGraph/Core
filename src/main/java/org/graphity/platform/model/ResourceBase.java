@@ -53,14 +53,16 @@ import org.topbraid.spin.vocabulary.SPIN;
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  * @see PageResource
+ * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/ontology/OntResource.html">OntResource</a>
  * @see <a href="http://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceConfig.html">ResourceConfig</a>
  * @see <a href="http://docs.oracle.com/cd/E24329_01/web.1211/e24983/configure.htm#CACEAEGG">Packaging the RESTful Web Service Application Using web.xml With Application Subclass</a>
  */
 @Path("{path: .*}")
-public class ResourceBase extends LDPResourceBase implements PageResource
+public class ResourceBase extends LDPResourceBase implements PageResource, OntResource
 {
     private static final Logger log = LoggerFactory.getLogger(ResourceBase.class);
 
+    private final OntResource ontResource;
     private final Long limit, offset;
     private final String orderBy;
     private final Boolean desc;
@@ -222,6 +224,7 @@ public class ResourceBase extends LDPResourceBase implements PageResource
     {
 	super(ontResource, uriInfo, request, httpHeaders, variants, cacheControl);
 
+	this.ontResource = ontResource;
 	this.limit = limit;
 	this.offset = offset;
 	this.orderBy = orderBy;
@@ -234,8 +237,8 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	if (matchedOntClass.hasSuperClass(LDP.Page)) //if (hasRDFType(LDP.Page))
 	{
 	    OntResource container = getOntModel().createOntResource(getUriInfo().getAbsolutePath().toString());
-	    if (log.isDebugEnabled()) log.debug("Adding PageResource metadata: {} ldp:pageOf {}", getOntResource(), container);
-	    setPropertyValue(LDP.pageOf, container);
+	    if (log.isDebugEnabled()) log.debug("Adding PageResource metadata: {} ldp:pageOf {}", getResource(), container);
+	    addProperty(LDP.pageOf, container); // setPropertyValue(LDP.pageOf, container);
 
 	    if (log.isDebugEnabled())
 	    {
@@ -307,7 +310,7 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	    
 	    if (log.isDebugEnabled()) log.debug("Adding description of the ldp:Container");
 	    OntResource container = getPropertyResourceValue(LDP.pageOf).as(OntResource.class);
-	    Resource ldc = new ResourceBase(container, getUriInfo(), getRequest(), getHttpHeaders(), getVariants(), getCacheControl(),
+	    LinkedDataResource ldc = new ResourceBase(container, getUriInfo(), getRequest(), getHttpHeaders(), getVariants(), getCacheControl(),
 		    getLimit(), getOffset(), getOrderBy(), getDesc());
 	    description.add(ldc.describe());
 	}
@@ -528,6 +531,11 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	return getUriBuilder().build();
     }
 
+    public OntResource getOntResource()
+    {
+	return ontResource;
+    }
+
     public OntClass getMatchedOntClass()
     {
 	return matchedOntClass;
@@ -569,6 +577,511 @@ public class ResourceBase extends LDPResourceBase implements PageResource
 	//getQueryBuilder()
 	
 	return getResponse(model);
+    }
+
+    @Override
+    public final OntModel getOntModel()
+    {
+	return getOntResource().getOntModel();
+    }
+    
+
+    @Override
+    public Profile getProfile()
+    {
+	return getOntResource().getProfile();
+    }
+
+    @Override
+    public boolean isOntLanguageTerm()
+    {
+	return getOntResource().isOntLanguageTerm();
+    }
+
+    @Override
+    public void setSameAs(com.hp.hpl.jena.rdf.model.Resource rsrc)
+    {
+	getOntResource().setSameAs(rsrc);
+    }
+
+    @Override
+    public void addSameAs(com.hp.hpl.jena.rdf.model.Resource rsrc)
+    {
+	getOntResource().addSameAs(rsrc);
+    }
+
+    @Override
+    public OntResource getSameAs()
+    {
+	return getOntResource().getSameAs();
+    }
+
+    @Override
+    public ExtendedIterator<? extends com.hp.hpl.jena.rdf.model.Resource> listSameAs()
+    {
+	return getOntResource().listSameAs();
+    }
+
+    @Override
+    public boolean isSameAs(com.hp.hpl.jena.rdf.model.Resource rsrc)
+    {
+	return getOntResource().isSameAs(rsrc);
+    }
+
+    @Override
+    public void removeSameAs(com.hp.hpl.jena.rdf.model.Resource rsrc)
+    {
+	getOntResource().removeSameAs(rsrc);
+    }
+
+    @Override
+    public void setDifferentFrom(com.hp.hpl.jena.rdf.model.Resource rsrc)
+    {
+	getOntResource().setDifferentFrom(rsrc);
+    }
+
+    @Override
+    public void addDifferentFrom(com.hp.hpl.jena.rdf.model.Resource rsrc)
+    {
+	getOntResource().addDifferentFrom(rsrc);
+    }
+
+    @Override
+    public OntResource getDifferentFrom()
+    {
+	return getOntResource().getDifferentFrom();
+    }
+
+    @Override
+    public ExtendedIterator<? extends com.hp.hpl.jena.rdf.model.Resource> listDifferentFrom()
+    {
+	return getOntResource().listDifferentFrom();
+    }
+
+    @Override
+    public boolean isDifferentFrom(com.hp.hpl.jena.rdf.model.Resource rsrc)
+    {
+	return getOntResource().isDifferentFrom(rsrc);
+    }
+
+    @Override
+    public void removeDifferentFrom(com.hp.hpl.jena.rdf.model.Resource rsrc)
+    {
+	getOntResource().removeDifferentFrom(rsrc);
+    }
+
+    @Override
+    public void setSeeAlso(com.hp.hpl.jena.rdf.model.Resource rsrc)
+    {
+	getOntResource().setSeeAlso(rsrc);
+    }
+
+    @Override
+    public void addSeeAlso(com.hp.hpl.jena.rdf.model.Resource rsrc)
+    {
+	getOntResource().addSeeAlso(rsrc);
+    }
+
+    @Override
+    public com.hp.hpl.jena.rdf.model.Resource getSeeAlso()
+    {
+	return getOntResource().getSeeAlso();
+    }
+
+    @Override
+    public ExtendedIterator<RDFNode> listSeeAlso()
+    {
+	return getOntResource().listSeeAlso();
+    }
+
+    @Override
+    public boolean hasSeeAlso(com.hp.hpl.jena.rdf.model.Resource rsrc)
+    {
+	return getOntResource().hasSeeAlso(rsrc);
+    }
+
+    @Override
+    public void removeSeeAlso(com.hp.hpl.jena.rdf.model.Resource rsrc)
+    {
+	getOntResource().removeSeeAlso(rsrc);
+    }
+
+    @Override
+    public void setIsDefinedBy(com.hp.hpl.jena.rdf.model.Resource rsrc)
+    {
+	getOntResource().setIsDefinedBy(rsrc);
+    }
+
+    @Override
+    public void addIsDefinedBy(com.hp.hpl.jena.rdf.model.Resource rsrc)
+    {
+	getOntResource().addIsDefinedBy(rsrc);
+    }
+
+    @Override
+    public com.hp.hpl.jena.rdf.model.Resource getIsDefinedBy()
+    {
+	return getOntResource().getIsDefinedBy();
+    }
+
+    @Override
+    public ExtendedIterator<RDFNode> listIsDefinedBy()
+    {
+	return getOntResource().listIsDefinedBy();
+    }
+
+    @Override
+    public boolean isDefinedBy(com.hp.hpl.jena.rdf.model.Resource rsrc)
+    {
+	return getOntResource().isDefinedBy(rsrc);
+    }
+
+    @Override
+    public void removeDefinedBy(com.hp.hpl.jena.rdf.model.Resource rsrc)
+    {
+	getOntResource().removeDefinedBy(rsrc);
+    }
+
+    @Override
+    public void setVersionInfo(String string)
+    {
+	getOntResource().setVersionInfo(string);
+    }
+
+    @Override
+    public void addVersionInfo(String string)
+    {
+	getOntResource().addVersionInfo(string);
+    }
+
+    @Override
+    public String getVersionInfo()
+    {
+	return getOntResource().getVersionInfo();
+    }
+
+    @Override
+    public ExtendedIterator<String> listVersionInfo()
+    {
+	return getOntResource().listVersionInfo();
+    }
+
+    @Override
+    public boolean hasVersionInfo(String string)
+    {
+	return getOntResource().hasVersionInfo(string);
+    }
+
+    @Override
+    public void removeVersionInfo(String string)
+    {
+	getOntResource().removeVersionInfo(string);
+    }
+
+    @Override
+    public void setLabel(String string, String string1)
+    {
+	getOntResource().setLabel(string, string1);
+    }
+
+    @Override
+    public void addLabel(String string, String string1)
+    {
+	getOntResource().addLabel(string, string1);
+    }
+
+    @Override
+    public void addLabel(Literal ltrl)
+    {
+	getOntResource().addLabel(ltrl);
+    }
+
+    @Override
+    public String getLabel(String string)
+    {
+	return getOntResource().getLabel(string);
+    }
+
+    @Override
+    public ExtendedIterator<RDFNode> listLabels(String string)
+    {
+	return getOntResource().listLabels(string);
+    }
+
+    @Override
+    public boolean hasLabel(String string, String string1)
+    {
+	return getOntResource().hasLabel(string, string1);
+    }
+
+    @Override
+    public boolean hasLabel(Literal ltrl)
+    {
+	return getOntResource().hasLabel(ltrl);
+    }
+
+    @Override
+    public void removeLabel(String string, String string1)
+    {
+	getOntResource().removeLabel(string, string1);
+    }
+
+    @Override
+    public void removeLabel(Literal ltrl)
+    {
+	getOntResource().removeLabel(ltrl);
+    }
+
+    @Override
+    public void setComment(String string, String string1)
+    {
+	getOntResource().setComment(string, string1);
+    }
+
+    @Override
+    public void addComment(String string, String string1)
+    {
+	getOntResource().addComment(string, string1);
+    }
+
+    @Override
+    public void addComment(Literal ltrl)
+    {
+	getOntResource().addComment(ltrl);
+    }
+
+    @Override
+    public String getComment(String string)
+    {
+	return getOntResource().getComment(string);
+    }
+
+    @Override
+    public ExtendedIterator<RDFNode> listComments(String string)
+    {
+	return getOntResource().listComments(string);
+    }
+
+    @Override
+    public boolean hasComment(String string, String string1)
+    {
+	return getOntResource().hasComment(string, string1);
+    }
+
+    @Override
+    public boolean hasComment(Literal ltrl)
+    {
+	return getOntResource().hasComment(ltrl);
+    }
+
+    @Override
+    public void removeComment(String string, String string1)
+    {
+	getOntResource().removeComment(string, string1);
+    }
+
+    @Override
+    public void removeComment(Literal ltrl)
+    {
+	getOntResource().removeComment(ltrl);
+    }
+
+    @Override
+    public void setRDFType(com.hp.hpl.jena.rdf.model.Resource rsrc)
+    {
+	getOntResource().setRDFType(rsrc);
+    }
+
+    @Override
+    public void addRDFType(com.hp.hpl.jena.rdf.model.Resource rsrc)
+    {
+	getOntResource().addRDFType(rsrc);
+    }
+
+    @Override
+    public com.hp.hpl.jena.rdf.model.Resource getRDFType()
+    {
+	return getOntResource().getRDFType();
+    }
+
+    @Override
+    public com.hp.hpl.jena.rdf.model.Resource getRDFType(boolean bln)
+    {
+	return getOntResource().getRDFType(bln);
+    }
+
+    @Override
+    public ExtendedIterator<com.hp.hpl.jena.rdf.model.Resource> listRDFTypes(boolean bln)
+    {
+	return getOntResource().listRDFTypes(bln);
+    }
+
+    @Override
+    public boolean hasRDFType(com.hp.hpl.jena.rdf.model.Resource rsrc, boolean bln)
+    {
+	return getOntResource().hasRDFType(rsrc, bln);
+    }
+
+    @Override
+    public boolean hasRDFType(com.hp.hpl.jena.rdf.model.Resource rsrc)
+    {
+	return getOntResource().hasRDFType(rsrc);
+    }
+
+    @Override
+    public void removeRDFType(com.hp.hpl.jena.rdf.model.Resource rsrc)
+    {
+	getOntResource().removeRDFType(rsrc);
+    }
+
+    @Override
+    public boolean hasRDFType(String string)
+    {
+	return getOntResource().hasRDFType(string);
+    }
+
+    @Override
+    public int getCardinality(Property prprt)
+    {
+	return getOntResource().getCardinality(prprt);
+    }
+
+    @Override
+    public void setPropertyValue(Property prprt, RDFNode rdfn)
+    {
+	getOntResource().setPropertyValue(prprt, rdfn);
+    }
+
+    @Override
+    public RDFNode getPropertyValue(Property prprt)
+    {
+	return getOntResource().getPropertyValue(prprt);
+    }
+
+    @Override
+    public NodeIterator listPropertyValues(Property prprt)
+    {
+	return getOntResource().listPropertyValues(prprt);
+    }
+
+    @Override
+    public void removeProperty(Property prprt, RDFNode rdfn)
+    {
+	getOntResource().removeProperty(prprt, rdfn);
+    }
+
+    @Override
+    public void remove()
+    {
+	getOntResource().remove();
+    }
+
+    @Override
+    public OntProperty asProperty()
+    {
+	return getOntResource().asProperty();
+    }
+
+    @Override
+    public AnnotationProperty asAnnotationProperty()
+    {
+	return getOntResource().asAnnotationProperty();
+    }
+
+    @Override
+    public ObjectProperty asObjectProperty()
+    {
+	return getOntResource().asObjectProperty();
+    }
+
+    @Override
+    public DatatypeProperty asDatatypeProperty()
+    {
+	return getOntResource().asDatatypeProperty();
+    }
+
+    @Override
+    public Individual asIndividual()
+    {
+	return getOntResource().asIndividual();
+    }
+
+    @Override
+    public OntClass asClass()
+    {
+	return getOntResource().asClass();
+    }
+
+    @Override
+    public Ontology asOntology()
+    {
+	return getOntResource().asOntology();
+    }
+
+    @Override
+    public DataRange asDataRange()
+    {
+	return getOntResource().asDataRange();
+    }
+
+    @Override
+    public AllDifferent asAllDifferent()
+    {
+	return getOntResource().asAllDifferent();
+    }
+
+    @Override
+    public boolean isProperty()
+    {
+	return getOntResource().isProperty();
+    }
+
+    @Override
+    public boolean isAnnotationProperty()
+    {
+	return getOntResource().isAnnotationProperty();
+    }
+
+    @Override
+    public boolean isObjectProperty()
+    {
+	return getOntResource().isObjectProperty();
+    }
+
+    @Override
+    public boolean isDatatypeProperty()
+    {
+	return getOntResource().isDatatypeProperty();
+    }
+
+    @Override
+    public boolean isIndividual()
+    {
+	return getOntResource().isIndividual();
+    }
+
+    @Override
+    public boolean isClass()
+    {
+	return getOntResource().isClass();
+    }
+
+    @Override
+    public boolean isOntology()
+    {
+	return getOntResource().isOntology();
+    }
+
+    @Override
+    public boolean isDataRange()
+    {
+	return getOntResource().isDataRange();
+    }
+
+    @Override
+    public boolean isAllDifferent()
+    {
+	return getOntResource().isAllDifferent();
     }
 
 }
