@@ -48,14 +48,14 @@ The costs
 ---------
 
 You probably already knew all of the above. By looking at the state of the machine-readable Web, it is safe to
-predict that the demand for data integration is rapidly increasing, both internally and globally. Consider that
-for a moment with the following factors:
+predict that the demand for data integration is rapidly increasing, internally in organizations as well as
+globally. Consider that for a moment with the following factors:
 * pair-wise integration with N service nodes requires N connectors, the total sum approaching N^2 in a global increasingly interconnected network
 * implementation of service connectors consume expensive developer hours and deal with data conversions code
 * source code is prone to bugs: more source code means more bugs
 * proprietary integration platforms make the process easier and more user-friendly, but still provide the old many-to-many solution and also put the customer in a lock-in with switching-costs
 * data conversion code is also prone to poor performance, as there are theoretical and practical mismatches between data models (such as object-oriented, relational, XML, JSON, RDF etc.) that eventually lead to leaky abstractions
-* imperative languages suffer from poor concurrency, while declarative languages are becoming popular (see [The Downfall of Imperative Programming](http://fpcomplete.com/the-downfall-of-imperative-programming/) )
+* imperative languages suffer from poor concurrency, while declarative languages are becoming popular (see [The Downfall of Imperative Programming](http://fpcomplete.com/the-downfall-of-imperative-programming/))
 
 We think the many-to-many data integration approach does not scale, and the general "(Web) application is
 domain-specific source code" paradigm has become obsolete. Software cannot be un-written and billions of dollars
@@ -86,8 +86,10 @@ The nodes in the graph are either
 * literal values (that can only be in object position but can have a datatype or language type attached)
 
 RDF has its own standard query language called [SPARQL](http://www.w3.org/standards/techs/sparql) (just like the
-relational model has SQL), which operates on graph pattern matching. Related reusable RDF terms are often grouped
-into [ontologies](http://www.w3.org/standards/semanticweb/ontology) (semantic vocabularies).
+relational model has SQL), which operates on graph pattern matching. RDF is schema-less, and it's graph-shaped
+nature makes merging datasources natural and effortless (when was the last time you effortlessly merged
+relational databases?) Related reusable RDF terms are however often grouped into [ontologies](http://www.w3.org/standards/semanticweb/ontology)
+(semantic vocabularies).
 
 When published on the Web, RDF data (usually in conjunction with SPARQL endpoints) is called [Linked Data](http://www.w3.org/standards/semanticweb/data).
 RDF and Linked Data have the following advantages:
@@ -100,8 +102,10 @@ metadata about documents, systems, other data, as well as the real world (althou
 in Linked Data access, as real-world objects obviously cannot be retrieved as information).
 
 In other words, Linked Data is the native fabric of the machine-readable Web. It is currently the only standard
-approach to global integration for which the demand is increasing, so if you're not using Linked Data yet, we
-strongly encourage you to do yourself a favor and start now!
+approach to global integration for which the demand is increasing. In fact, Google and Facebook have both
+developed proprietary closed-wall platforms as alternatives to Linked Data: [Knowledge Graph](http://www.google.com/insidesearch/features/search/knowledge.html)
+and [Open Graph](http://developers.facebook.com/docs/concepts/opengraph/), respectively. If you're not using
+Linked Data yet, we strongly encourage you to do yourself a favor and start now!
 
 Generic Web applications
 ------------------------
@@ -113,7 +117,7 @@ Graph
 Templates / processors
 Finite state machines
 XSLT analogy
-
+Context resource
 
 
 
