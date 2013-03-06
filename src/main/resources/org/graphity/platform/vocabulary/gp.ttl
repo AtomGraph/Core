@@ -164,10 +164,6 @@ ldp:pageOf a owl:ObjectProperty ;
 :Resource a owl:Class ;
     rdfs:subClassOf foaf:Document, sioc:Item, lda:ItemEndpoint ,
 	[ a owl:Restriction ;
-		owl:onProperty sioc:has_host ;
-		owl:hasValue <..>
-	] ,
-	[ a owl:Restriction ;
 		owl:onProperty void:inDataset ;
 		owl:hasValue :dataset
 	] ,
@@ -179,12 +175,20 @@ ldp:pageOf a owl:ObjectProperty ;
     rdfs:label "Resource" ;
     rdfs:isDefinedBy : .
 
+:SPARQLResultResource a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+		owl:onProperty void:inDataset ;
+		owl:hasValue :dataset
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty lda:uriTemplate ;
+		owl:hasValue "/sparql?query={query}"
+	] ;
+    rdfs:label "SPARQL result resource" ;
+    rdfs:isDefinedBy : .
+
 :OntologyDocResource a owl:Class ;
     rdfs:subClassOf foaf:Document ,
-	[ a owl:Restriction ;
-		owl:onProperty sioc:has_host ;
-		owl:hasValue <..>
-	] ,
 	[ a owl:Restriction ;
 		owl:onProperty void:inDataset ;
 		owl:hasValue :dataset

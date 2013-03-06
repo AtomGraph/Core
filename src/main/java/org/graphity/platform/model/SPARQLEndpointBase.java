@@ -103,7 +103,7 @@ public class SPARQLEndpointBase extends ResourceBase implements SPARQLEndpoint
     {
 	if (getUserQuery() != null)
 	{
-	    if (log.isDebugEnabled()) log.debug("Returning @GET Response for Query: {}", getQuery());
+	    if (log.isDebugEnabled()) log.debug("Returning @GET Response for Query: {}", getUserQuery());
 	    return query(getUserQuery());
 	}
 	

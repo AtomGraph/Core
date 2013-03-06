@@ -68,8 +68,6 @@ public class ResourceBase extends LDPResourceBase implements PageResource, OntRe
     private final Boolean desc;
     private final OntClass matchedOntClass;
     private final com.hp.hpl.jena.rdf.model.Resource dataset, endpoint, service;
-    private final Query query;
-    private final QueryBuilder queryBuilder;
 
     /**
      * Configuration property for ontology file location (set in web.xml)
@@ -262,10 +260,6 @@ public class ResourceBase extends LDPResourceBase implements PageResource, OntRe
 	    }
 	}
 	
-	query = getQuery(matchedOntClass, getRealURI());
-	queryBuilder = QueryBuilder.fromQuery(query, getModel());
-	if (log.isDebugEnabled()) log.debug("Constructing ResourceBase with Query: {} and QueryBuilder: {}", query, queryBuilder);
-	
 	dataset = getDataset(matchedOntClass);
 	if (dataset == null) throw new IllegalArgumentException("Resource OntClass must be a subclass of void:inDataset HasValueRestriction");
 	if (log.isDebugEnabled()) log.debug("Constructing ResourceBase with Dataset: {}", dataset);
@@ -375,7 +369,7 @@ public class ResourceBase extends LDPResourceBase implements PageResource, OntRe
 	return qb;
     }
 
-    public final Query getQuery(OntClass ontClass, URI thisUri)
+    public Query getQuery(OntClass ontClass, URI thisUri)
     {
 	return getQuery(getTemplateCall(ontClass), thisUri);
     }
@@ -394,15 +388,9 @@ public class ResourceBase extends LDPResourceBase implements PageResource, OntRe
 	if (call == null) throw new IllegalArgumentException("TemplateCall cannot be null");
 	String queryString = call.getQueryString();
 	queryString = queryString.replace("?this", "<" + thisUri.toString() + ">"); // binds ?this to URI of current resource
-	Query arqQuery = QueryFactory.create(queryString);
-	
-	if (hasRDFType(LDP.Page))
-	{
-	    if (log.isDebugEnabled()) log.debug("OntResource is an ldp:Page, making QueryBuilder from Query: {}", arqQuery);
-	    return getQueryBuilder(ARQ2SPIN.parseQuery(arqQuery.toString(), getModel())).build();
-	}
-	
-	return arqQuery;
+	return QueryFactory.create(queryString);
+		
+	//return arqQuery;
     }
 
     public final OntClass matchOntClass(URI uri)
@@ -558,12 +546,21 @@ public class ResourceBase extends LDPResourceBase implements PageResource, OntRe
 
     public Query getQuery()
     {
+	Query query = getQuery(getTemplateCall(getMatchedOntClass()), getRealURI());
+	
+	if (hasRDFType(LDP.Page))
+	{
+	    if (log.isDebugEnabled()) log.debug("OntResource is an ldp:Page, making QueryBuilder from Query: {}", query);
+	    return getQueryBuilder(ARQ2SPIN.parseQuery(query.toString(), getModel())).build();
+	}
+
 	return query;
     }
 
-    public final QueryBuilder getQueryBuilder()
+    public QueryBuilder getQueryBuilder()
     {
-	return queryBuilder;
+	return QueryBuilder.fromQuery(getQuery(), getModel());
+	//return queryBuilder;
     }
 
     @Override
