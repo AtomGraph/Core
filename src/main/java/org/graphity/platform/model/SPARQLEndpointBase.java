@@ -64,13 +64,15 @@ public class SPARQLEndpointBase extends ResourceBase implements SPARQLEndpoint
 	@QueryParam("offset") @DefaultValue("0") Long offset,
 	@QueryParam("order-by") String orderBy,
 	@QueryParam("desc") Boolean desc,
-	@QueryParam("query") Query query
-	    )
+	@QueryParam("query") Query query)
     {
 	super(uriInfo, request, httpHeaders, config,
 		limit, offset, orderBy, desc);	
 	this.query = query;
 	if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase with Query: {}", query);
+	
+	if (log.isDebugEnabled()) log.debug("Adding service Context for SPARQL endpoint with URI: {}", uriInfo.getAbsolutePath().toString());
+	DataManager.get().addServiceContext(uriInfo.getAbsolutePath().toString());
     }
 
     protected SPARQLEndpointBase(OntModel ontModel, UriInfo uriInfo, Request request,
@@ -81,6 +83,9 @@ public class SPARQLEndpointBase extends ResourceBase implements SPARQLEndpoint
 	super(ontModel, uriInfo, request, httpHeaders, variants, cacheControl, limit, offset, orderBy, desc);
 	this.query = query;
 	if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase with Query: {}", query);
+	
+	if (log.isDebugEnabled()) log.debug("Adding service Context for SPARQL endpoint with URI: {}", uriInfo.getAbsolutePath().toString());
+	DataManager.get().addServiceContext(uriInfo.getAbsolutePath().toString());
     }
 
     protected SPARQLEndpointBase(OntResource ontResource, UriInfo uriInfo, Request request,
@@ -91,6 +96,9 @@ public class SPARQLEndpointBase extends ResourceBase implements SPARQLEndpoint
 	super(ontResource, uriInfo, request, httpHeaders, variants, cacheControl, limit, offset, orderBy, desc);
 	this.query = query;
 	if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase with Query: {}", query);
+	
+	if (log.isDebugEnabled()) log.debug("Adding service Context for SPARQL endpoint with URI: {}", uriInfo.getAbsolutePath().toString());
+	DataManager.get().addServiceContext(uriInfo.getAbsolutePath().toString());
     }
 
     public Query getUserQuery()

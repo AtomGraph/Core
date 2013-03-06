@@ -158,7 +158,7 @@ public class ResourceBase extends LDPResourceBase implements PageResource, OntRe
 	    {
 		Object ontologyLocation = config.getProperty(PROPERTY_ONTOLOGY_LOCATION);
 		if (ontologyLocation == null) throw new IllegalStateException("Ontology for this Graphity LDP Application is not configured properly. Check ResourceConfig and/or web.xml");
-		if (log.isDebugEnabled()) log.debug("Reading ontology from local file");
+		if (log.isDebugEnabled()) log.debug("Mapping ontology to a local file: {}", ontologyLocation.toString());
 		OntDocumentManager.getInstance().addAltEntry(localUri, ontologyLocation.toString());
 	    }
 	}

@@ -591,10 +591,27 @@ public class DataManager extends FileManager implements URIResolver
 
     public Map<String,Context> getServiceContextMap()
     {
-	if (getContext().isDefined(Service.serviceContext))
-	    return (Map<String,Context>)getContext().get(Service.serviceContext);
+	if (!getContext().isDefined(Service.serviceContext))
+	{
+	    Map<String,Context> serviceContext = new HashMap<String,Context>();
+	    getContext().put(Service.serviceContext, serviceContext);
+	}
 	
-	return null;
+	return (Map<String,Context>)getContext().get(Service.serviceContext);
     }
 
+    public void addServiceContext(String endpointURI, Context context)
+    {
+	getServiceContextMap().put(endpointURI, context);
+    }
+    
+    public void addServiceContext(String endpointURI)
+    {
+	addServiceContext(endpointURI, new Context());
+    }
+
+    public Context getServiceContext(String endpointURI)
+    {
+	return getServiceContextMap().get(endpointURI);
+    }
 }
