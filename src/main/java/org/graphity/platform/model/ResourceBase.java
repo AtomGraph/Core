@@ -288,7 +288,8 @@ public class ResourceBase extends LDPResourceBase implements PageResource, OntRe
 	    return Response.seeOther(uriBuilder.buildFromEncoded()).build();
 	}
 
-	return super.getResponse();
+	//return super.getResponse();
+	return getResponse(describe());
     }
 
     @Override
@@ -308,10 +309,6 @@ public class ResourceBase extends LDPResourceBase implements PageResource, OntRe
 		    getLimit(), getOffset(), getOrderBy(), getDesc());
 	    description.add(ldc.describe());
 	}
-
-	// set metadata properties after description query is executed
-	if (log.isDebugEnabled()) log.debug("OntResource {} gets explicit spin:query value {}", this, getQueryBuilder());
-	setPropertyValue(SPIN.query, getQueryBuilder());
 
 	return description;
     }

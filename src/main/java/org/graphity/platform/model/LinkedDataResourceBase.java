@@ -130,14 +130,13 @@ public class LinkedDataResourceBase implements LinkedDataResource
     public Response getResponse()
     {
 	if (log.isDebugEnabled()) log.debug("Returning @GET Response for the default DESCRIBE Model");
-	return getResponse(describe());
+	return getResponse(getModel()); //return getResponse(describe());
     }
    
     @Override
     public Model describe()
     {
 	if (log.isDebugEnabled()) log.debug("Querying OntModel with default DESCRIBE <{}> Query", getURI());
-	//return DataManager.get().loadModel(getOntModel(), QueryFactory.create("DESCRIBE <" + getURI() + ">"));
 	return DataManager.get().loadModel(getModel(), QueryFactory.create("DESCRIBE <" + getURI() + ">"));
     }
     
