@@ -20,6 +20,7 @@ import com.hp.hpl.jena.ontology.*;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.*;
+import com.hp.hpl.jena.sparql.engine.http.QueryExceptionHTTP;
 import com.hp.hpl.jena.util.LocationMapper;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.sun.jersey.api.core.ResourceConfig;
@@ -58,7 +59,7 @@ import org.topbraid.spin.vocabulary.SPIN;
  * @see <a href="http://docs.oracle.com/cd/E24329_01/web.1211/e24983/configure.htm#CACEAEGG">Packaging the RESTful Web Service Application Using web.xml With Application Subclass</a>
  */
 @Path("{path: .*}")
-public class ResourceBase extends LDPResourceBase implements PageResource, OntResource
+public class ResourceBase extends LDPResourceBase implements PageResource, OntResource, DocumentResource
 {
     private static final Logger log = LoggerFactory.getLogger(ResourceBase.class);
 
@@ -67,7 +68,7 @@ public class ResourceBase extends LDPResourceBase implements PageResource, OntRe
     private final String orderBy;
     private final Boolean desc;
     private final OntClass matchedOntClass;
-    private final com.hp.hpl.jena.rdf.model.Resource dataset, endpoint, service;
+    private final Resource dataset, endpoint, service;
 
     /**
      * Configuration property for ontology file location (set in web.xml)
@@ -332,10 +333,14 @@ public class ResourceBase extends LDPResourceBase implements PageResource, OntRe
     
     public Model loadModel(com.hp.hpl.jena.rdf.model.Resource endpoint, Query query)
     {
-	if (endpoint != null && endpoint.getURI() != null)
+	String internalEndpointURI = getUriInfo().getBaseUriBuilder().
+		path(SPARQLEndpointBase.class).
+		build().toString();
+	if (log.isDebugEnabled()) log.debug("Internal SPARQL endpoint URI: {}", internalEndpointURI);
+
+	if (endpoint != null && endpoint.getURI() != null && !endpoint.getURI().equals(internalEndpointURI))
 	{
 	    if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has explicit SPARQL endpoint: {}", getURI(), endpoint.getURI());
-
 	    return DataManager.get().loadModel(endpoint.getURI(), query);
 	}
 	else
@@ -526,16 +531,19 @@ public class ResourceBase extends LDPResourceBase implements PageResource, OntRe
 	return matchedOntClass;
     }
 
+    @Override
     public com.hp.hpl.jena.rdf.model.Resource getDataset()
     {
 	return dataset;
     }
 
+    @Override
     public com.hp.hpl.jena.rdf.model.Resource getEndpoint()
     {
 	return endpoint;
     }
 
+    @Override
     public com.hp.hpl.jena.rdf.model.Resource getService()
     {
 	return service;

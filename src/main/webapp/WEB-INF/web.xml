@@ -19,7 +19,7 @@
         </init-param>
         <init-param>
             <param-name>org.graphity.platform.ontology.location</param-name>
-            <param-value>org/graphity/platform/vocabulary/gp.ttl</param-value>
+            <param-value>org/graphity/platform/ontology/sitemap.ttl</param-value>
         </init-param>
         <init-param>
             <param-name>org.graphity.platform.query.result-limit</param-name>

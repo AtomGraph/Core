@@ -118,14 +118,10 @@ public class SPARQLEndpointBase extends ResourceBase implements SPARQLEndpoint
 	return super.getResponse();
     }
 
-    public ResultSetRewindable loadResultSetRewindable(Resource service, Query query)
+    public ResultSetRewindable loadResultSetRewindable(Resource endpoint, Query query)
     {
-	if (service != null)
+	if (endpoint == null || endpoint.getURI() == null)
 	{
-	    com.hp.hpl.jena.rdf.model.Resource endpoint = service.getPropertyResourceValue(
-		    ResourceFactory.createProperty("http://www.w3.org/ns/sparql-service-description#endpoint"));
-	    if (endpoint == null || endpoint.getURI() == null) throw new IllegalArgumentException("SPARQL Service endpoint must be URI Resource");
-
 	    if (log.isDebugEnabled()) log.debug("OntResource with URI: {} has explicit SPARQL endpoint: {}", getURI(), endpoint.getURI());
 
 	    return DataManager.get().loadResultSet(endpoint.getURI(), query); // .getResultSetRewindable()
