@@ -1,0 +1,338 @@
+@prefix : <#> .
+@prefix gp: <http://platform.graphity.org/ontology#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ldp: <http://www.w3.org/ns/ldp#> .
+@prefix void: <http://rdfs.org/ns/void#> .
+@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
+@prefix lda: <http://purl.org/linked-data/api/vocab#> .
+@prefix spin: <http://spinrdf.org/spin#> .
+@prefix sp: <http://spinrdf.org/sp#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix sioc: <http://rdfs.org/sioc/ns#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+
+: a owl:Ontology ;
+    owl:imports gp:, lda: , void: ;
+    dct:title "Sitemap ontology" ;
+    rdfs:label "Sitemap ontology" ;
+    dct:description "Sitemap ontology of this application" ;
+    dct:created "2013-03-09T12:34:00+03:00"^^xsd:dateTime ;
+    foaf:isPrimaryTopicOf <ontology> ;
+    rdfs:seeAlso <sparql> .
+
+:Dataset a void:Dataset ;
+    dct:title "Graphity Platform dataset" ;
+    foaf:homepage <dataset> ;
+    rdfs:isDefinedBy : ;
+    void:sparqlEndpoint <sparql> .
+
+:Service a sd:Service ;
+    dct:title "Local SPARQL service" ;
+    sd:endpoint <sparql> ;
+    sd:supportedLanguage sd:SPARQL11Query ;
+    rdfs:isDefinedBy : .
+
+# PROPERTIES
+
+ldp:pageOf a owl:ObjectProperty ;
+    rdfs:domain ldp:Page ;
+    rdfs:range ldp:Container ;
+    rdfs:isDefinedBy ldp: .
+
+# RESOURCES
+
+<..> a lda:API ;
+    dct:title "Graphity Platform" ;
+    rdfs:isDefinedBy : ;
+    void:inDataset :Dataset ;
+    rdfs:seeAlso :, <resources>, <instances>, <ontologies>, <classes>, <properties>, <datasets>, <services>, <queries>, <containers> .
+
+<ontology> a foaf:Document ;
+    foaf:primaryTopic : ;
+    rdfs:isDefinedBy : ;
+    void:inDataset :Dataset .
+
+<dataset> a foaf:Document ;
+    foaf:primaryTopic :Dataset ;
+    rdfs:isDefinedBy : ;
+    void:inDataset :Dataset .
+
+<resources> a ldp:Container, sioc:Container ;
+    sioc:has_host <..> ;
+    dct:title "Resources" ;
+    rdfs:isDefinedBy : ;
+    void:inDataset :Dataset .
+
+<instances> a ldp:Container, sioc:Container ;
+    sioc:has_host <..> ;
+    dct:title "Instances" ;
+    rdfs:isDefinedBy : ;
+    void:inDataset :Dataset .
+
+<ontologies> a ldp:Container, sioc:Container ;
+    sioc:has_host <..> ;
+    dct:title "Ontologies" ;
+    rdfs:isDefinedBy : ;
+    void:inDataset :Dataset .
+
+<classes> a ldp:Container, sioc:Container ;
+    sioc:has_host <..> ;
+    dct:title "Classes" ;
+    rdfs:isDefinedBy : ;
+    void:inDataset :Dataset .
+
+<properties> a ldp:Container, sioc:Container ;
+    sioc:has_host <..> ;
+    dct:title "Properties" ;
+    rdfs:isDefinedBy : ;
+    void:inDataset :Dataset .
+
+<datasets> a ldp:Container, sioc:Container ;
+    sioc:has_host <..> ;
+    dct:title "Datasets" ;
+    rdfs:isDefinedBy : ;
+    void:inDataset :Dataset .
+
+<services> a ldp:Container, sioc:Container ;
+    sioc:has_host <..> ;
+    dct:title "Services" ;
+    rdfs:isDefinedBy : ;
+    void:inDataset :Dataset .
+
+<queries> a ldp:Container, sioc:Container ;
+    sioc:has_host <..> ;
+    dct:title "Queries" ;
+    rdfs:isDefinedBy : ;
+    void:inDataset :Dataset .
+
+<containers> a ldp:Container, sioc:Container ;
+    sioc:has_host <..> ;
+    dct:title "Containers" ;
+    rdfs:isDefinedBy : ;
+    void:inDataset :Dataset .
+
+<sparql> a foaf:Document ;
+    dct:title "SPARQL endpoint" ;
+    rdfs:isDefinedBy : ;
+    void:inDataset :Dataset .
+
+# RESOURCE CLASSES
+
+:Resource a owl:Class ;
+    rdfs:subClassOf foaf:Document, sioc:Item, lda:ItemEndpoint ,
+	[ a owl:Restriction ;
+		owl:onProperty void:inDataset ;
+		owl:hasValue :Dataset
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty lda:uriTemplate ;
+		owl:hasValue "/{path: .*}"
+	] ;
+    spin:constraint [ a gp:DescribeTemplate ] ;
+    rdfs:label "Resource" ;
+    rdfs:isDefinedBy : .
+
+:SPARQLResultResource a owl:Class ;
+    rdfs:subClassOf [ a owl:Restriction ;
+		owl:onProperty void:inDataset ;
+		owl:hasValue :Dataset
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty lda:uriTemplate ;
+		owl:hasValue "/sparql?query={query}"
+	] ;
+    rdfs:label "SPARQL result resource" ;
+    rdfs:isDefinedBy : .
+
+:OntologyDocResource a owl:Class ;
+    rdfs:subClassOf foaf:Document ,
+	[ a owl:Restriction ;
+		owl:onProperty void:inDataset ;
+		owl:hasValue :Dataset
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty lda:uriTemplate ;
+		owl:hasValue "/ontology"
+	] ;
+    spin:constraint [ a gp:DescribeTopicTemplate ] ;
+    rdfs:label "Ontology document resource" ;
+    rdfs:isDefinedBy : .
+
+:ResourcesPageListResource a owl:Class ;
+    rdfs:subClassOf foaf:Document, ldp:Page, lda:ListEndpoint ,
+	[ a owl:Restriction ;
+		owl:onProperty ldp:pageOf ;
+		owl:hasValue <resources>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty void:inDataset ;
+		owl:hasValue :Dataset
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty lda:uriTemplate ;
+		owl:hasValue "/resources?limit={limit: [0-9]+}&offset={offset: [0-9]+}"
+	] ;
+    spin:constraint [ a gp:DescribeResourcesTemplate ] ;
+    rdfs:label "Resources page list resource" ;
+    rdfs:isDefinedBy : .
+
+:InstancesPageListResource a owl:Class ;
+    rdfs:subClassOf foaf:Document, ldp:Page, lda:ListEndpoint ,
+	[ a owl:Restriction ;
+		owl:onProperty ldp:pageOf ;
+		owl:hasValue <instances>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty void:inDataset ;
+		owl:hasValue :Dataset
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty lda:uriTemplate ;
+		owl:hasValue "/instances?limit={limit: [0-9]+}&offset={offset: [0-9]+}"
+	] ;
+    spin:constraint [ a gp:DescribeInstancesTemplate ] ;
+    rdfs:label "Instances page list resource" ;
+    rdfs:isDefinedBy : .
+
+:OntologiesPageListResource a owl:Class ;
+    rdfs:subClassOf foaf:Document, ldp:Page, lda:ListEndpoint ,
+	[ a owl:Restriction ;
+		owl:onProperty ldp:pageOf ;
+		owl:hasValue <ontologies>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty void:inDataset ;
+		owl:hasValue :Dataset
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty lda:uriTemplate ;
+		owl:hasValue "/ontologies?limit={limit: [0-9]+}&offset={offset: [0-9]+}"
+	] ;
+    rdfs:label "Ontologies page list resource" ;
+    spin:constraint [ a gp:DescribeInstancesTemplate ;
+	    gp:type owl:Ontology
+	] ;
+    rdfs:isDefinedBy : .
+
+:ClassesPageListResource a owl:Class ;
+    rdfs:subClassOf foaf:Document, ldp:Page, lda:ListEndpoint ,
+	[ a owl:Restriction ;
+		owl:onProperty ldp:pageOf ;
+		owl:hasValue <classes>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty void:inDataset ;
+		owl:hasValue :Dataset
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty lda:uriTemplate ;
+		owl:hasValue "/classes?limit={limit: [0-9]+}&offset={offset: [0-9]+}"
+	] ;
+    rdfs:label "Classes page list resource" ;
+    spin:constraint [ a gp:DescribeInstancesTemplate ;
+	    gp:type owl:Class
+	] ;
+    rdfs:isDefinedBy : .
+
+:PropertiesPageListResource a owl:Class ;
+    rdfs:subClassOf foaf:Document, ldp:Page, lda:ListEndpoint ,
+	[ a owl:Restriction ;
+		owl:onProperty ldp:pageOf ;
+		owl:hasValue <properties>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty void:inDataset ;
+		owl:hasValue :Dataset
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty lda:uriTemplate ;
+		owl:hasValue "/properties?limit={limit: [0-9]+}&offset={offset: [0-9]+}"
+	] ;
+    rdfs:label "Properties page list resource" ;
+    spin:constraint [ a gp:DescribePropertiesTemplate ;
+	    gp:type owl:Ontology
+	] ;
+    rdfs:isDefinedBy : .
+
+:DatasetsPageListResource a owl:Class ;
+    rdfs:subClassOf foaf:Document, ldp:Page, lda:ListEndpoint ,
+	[ a owl:Restriction ;
+		owl:onProperty ldp:pageOf ;
+		owl:hasValue <datasets>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty void:inDataset ;
+		owl:hasValue :Dataset
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty lda:uriTemplate ;
+		owl:hasValue "/datasets?limit={limit: [0-9]+}&offset={offset: [0-9]+}"
+	] ;
+    rdfs:label "Datasets page list resource" ;
+    spin:constraint [ a gp:DescribeInstancesTemplate ;
+	    gp:type void:Dataset
+	] ;
+    rdfs:isDefinedBy : .
+
+:ServicesPageListResource a owl:Class ;
+    rdfs:subClassOf foaf:Document, ldp:Page, lda:ListEndpoint ,
+	[ a owl:Restriction ;
+		owl:onProperty ldp:pageOf ;
+		owl:hasValue <services>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty void:inDataset ;
+		owl:hasValue :Dataset
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty lda:uriTemplate ;
+		owl:hasValue "/services?limit={limit: [0-9]+}&offset={offset: [0-9]+}"
+	] ;
+    rdfs:label "Services page list resource" ;
+    spin:constraint [ a gp:DescribeInstancesTemplate ;
+	    gp:type sd:Service
+	] ;
+    rdfs:isDefinedBy : .
+
+:QueriesPageListResource a owl:Class ;
+    rdfs:subClassOf foaf:Document, ldp:Page, lda:ListEndpoint ,
+	[ a owl:Restriction ;
+		owl:onProperty ldp:pageOf ;
+		owl:hasValue <queries>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty void:inDataset ;
+		owl:hasValue :Dataset
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty lda:uriTemplate ;
+		owl:hasValue "/queries?limit={limit: [0-9]+}&offset={offset: [0-9]+}"
+	] ;
+    rdfs:label "Queries page list resource" ;
+    spin:constraint [ a gp:DescribeInstancesTemplate ;
+	    gp:type sp:Query
+	] ;
+    rdfs:isDefinedBy : .
+
+:ContainersPageResource a owl:Class ;
+    rdfs:subClassOf foaf:Document, ldp:Page, lda:ListEndpoint ,
+	[ a owl:Restriction ;
+		owl:onProperty ldp:pageOf ;
+		owl:hasValue <containers>
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty void:inDataset ;
+		owl:hasValue :Dataset
+	] ,
+	[ a owl:Restriction ;
+		owl:onProperty lda:uriTemplate ;
+		owl:hasValue "/containers?limit={limit: [0-9]+}&offset={offset: [0-9]+}"
+	];
+    rdfs:label "Containers page resource" ;
+    spin:constraint [ a gp:DescribeInstancesTemplate ;
+	    gp:type sioc:Container
+	] ;
+    rdfs:isDefinedBy : .

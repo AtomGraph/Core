@@ -16,8 +16,8 @@
  */
 package org.graphity.platform.model;
 
-import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.Resource;
 import java.util.List;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
@@ -37,17 +37,17 @@ public class LDPResourceBase extends LinkedDataResourceBase implements LDPResour
     /**
      * Constructs read-write LD resource from Jena's OntResource and JAX-RS context
      * 
-     * @param ontResource the current resource in the ontology
+     * @param resource the current resource in the ontology
      * @param uriInfo URI information
      * @param request current request
      * @param httpHeaders current request headers
      * @param variants representation variants
-     * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/ontology/OntResource.html">OntResource</a>
+     * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/rdf/model/Resource.html">Resource</a>
      */
-    public LDPResourceBase(OntResource ontResource,
+    public LDPResourceBase(Resource resource,
 	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants, CacheControl cacheControl)
     {
-	super(ontResource, uriInfo, request, httpHeaders, variants, cacheControl);
+	super(resource, uriInfo, request, httpHeaders, variants, cacheControl);
     }
 
     @Override

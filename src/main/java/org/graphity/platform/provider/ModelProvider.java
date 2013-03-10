@@ -119,7 +119,7 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
 	String syntax = null;
 	Lang lang = langFromMediaType(mediaType);
 	if (lang != null) syntax = lang.getName();
-	if (log.isDebugEnabled()) log.debug("Syntax used to load Model: {}", syntax);
+	if (log.isDebugEnabled()) log.debug("Syntax used to write Model: {}", syntax);
 
 	model.write(entityStream, syntax);
     }
