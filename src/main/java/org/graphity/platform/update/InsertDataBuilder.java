@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.graphity.platform.query;
+package org.graphity.platform.update;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -34,7 +34,7 @@ import org.topbraid.spin.vocabulary.SP;
  * @see <a href="http://spinrdf.org/sp.html">SPIN - SPARQL Syntax</a>
  * @see <a href="http://topbraid.org/spin/api/1.2.0/spin/apidocs/org/topbraid/spin/model/Query.html">SPIN Query</a>
  */
-public class InsertDataBuilder extends UpdateBuilder
+public class InsertDataBuilder extends UpdateBuilder implements InsertData
 {
     private InsertData insertData = null;
     

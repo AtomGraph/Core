@@ -20,7 +20,6 @@ import com.hp.hpl.jena.ontology.*;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.*;
-import com.hp.hpl.jena.sparql.engine.http.QueryExceptionHTTP;
 import com.hp.hpl.jena.util.LocationMapper;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.sun.jersey.api.core.ResourceConfig;
@@ -34,9 +33,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.*;
-import org.graphity.platform.query.InsertDataBuilder;
 import org.graphity.platform.query.QueryBuilder;
 import org.graphity.platform.query.SelectBuilder;
+import org.graphity.platform.update.InsertDataBuilder;
 import org.graphity.platform.util.DataManager;
 import org.graphity.platform.vocabulary.LDP;
 import org.graphity.platform.vocabulary.SD;
@@ -296,10 +295,15 @@ public class ResourceBase extends LDPResourceBase implements PageResource, OntRe
     @Override
     public Model describe()
     {
+	return describe(true);
+    }
+
+    public Model describe(boolean addPageContainer)
+    {
 	Model description = ModelFactory.createDefaultModel().
 		add(loadModel(getEndpoint(), getQuery()));
 
-	if (hasRDFType(LDP.Page))
+	if (addPageContainer && hasRDFType(LDP.Page))
 	{
 	    if (log.isDebugEnabled()) log.debug("Adding description of the ldp:Page");
 	    description.add(super.describe());
@@ -313,7 +317,7 @@ public class ResourceBase extends LDPResourceBase implements PageResource, OntRe
 
 	return description;
     }
-    
+
     public final com.hp.hpl.jena.rdf.model.Resource getDataset(OntClass ontClass)
     {
 	RDFNode hasValue = getRestrictionHasValue(ontClass, VoID.inDataset);

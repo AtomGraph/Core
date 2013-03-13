@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.graphity.platform.query;
+package org.graphity.platform.update;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
@@ -32,7 +32,6 @@ import org.topbraid.spin.vocabulary.SP;
  * SPARQL update builder based on SPIN RDF syntax
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
- * @see InsertDataBuilder
  * @see <a href="http://spinrdf.org/sp.html">SPIN - SPARQL Syntax</a>
  * @see <a href="http://topbraid.org/spin/api/1.2.0/spin/apidocs/org/topbraid/spin/model/Query.html">SPIN Query</a>
  */

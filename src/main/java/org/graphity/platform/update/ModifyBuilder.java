@@ -14,11 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.graphity.platform.query;
+package org.graphity.platform.update;
 
 import com.hp.hpl.jena.rdf.model.*;
 import com.hp.hpl.jena.vocabulary.RDF;
 import org.topbraid.spin.model.Element;
+import org.topbraid.spin.model.ElementList;
 import org.topbraid.spin.model.SPINFactory;
 import org.topbraid.spin.model.update.Modify;
 import org.topbraid.spin.model.update.Update;
@@ -28,7 +29,7 @@ import org.topbraid.spin.vocabulary.SP;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class ModifyBuilder extends UpdateBuilder
+public class ModifyBuilder extends UpdateBuilder implements Modify
 {
     private Modify modify = null;
 
@@ -54,9 +55,16 @@ public class ModifyBuilder extends UpdateBuilder
 	return fromModify((Modify)update);
     }
 
+    /*
     public static ModifyBuilder newInstance()
     {
-	return fromResource(ModelFactory.createDefaultModel().createResource().
+	return fromModify(ModelFactory.createDefaultModel());
+    }
+    */
+    
+    public static ModifyBuilder fromModify(Model model)
+    {
+	return fromResource(model.createResource().
 	    addProperty(RDF.type, SP.Modify));
     }
 
@@ -110,9 +118,10 @@ public class ModifyBuilder extends UpdateBuilder
 	return this;
     }
 
-    public ModifyBuilder where(RDFList elementList)
+    public ModifyBuilder where(ElementList elementList)
     {
-	if (getUpdate().getWhere() != null) throw new IllegalArgumentException("WHERE element already present in the query");
+	if (elementList == null) throw new IllegalArgumentException("WHERE element list cannot be null");
+	if (getWhere() != null) throw new IllegalArgumentException("WHERE element already present in the query");
 
 	addProperty(SP.where, elementList);
 	
@@ -123,6 +132,12 @@ public class ModifyBuilder extends UpdateBuilder
     public Modify getUpdate()
     {
 	return modify;
+    }
+
+    @Override
+    public ElementList getWhere()
+    {
+	return getUpdate().getWhere();
     }
 
 }
