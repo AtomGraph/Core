@@ -302,6 +302,7 @@ public class ResourceBase extends LDPResourceBase implements PageResource, OntRe
     {
 	Model description = ModelFactory.createDefaultModel().
 		add(loadModel(getEndpoint(), getQuery()));
+	if (log.isDebugEnabled()) log.debug("Loaded Model description with {} triples", description.size());
 
 	if (addPageContainer && hasRDFType(LDP.Page))
 	{
@@ -375,6 +376,11 @@ public class ResourceBase extends LDPResourceBase implements PageResource, OntRe
 	return qb;
     }
 
+    public Query getQuery(URI thisUri)
+    {
+	return getQuery(getMatchedOntClass(), thisUri);
+    }
+
     public Query getQuery(OntClass ontClass, URI thisUri)
     {
 	return getQuery(getTemplateCall(ontClass), thisUri);
@@ -394,9 +400,15 @@ public class ResourceBase extends LDPResourceBase implements PageResource, OntRe
 	if (call == null) throw new IllegalArgumentException("TemplateCall cannot be null");
 	String queryString = call.getQueryString();
 	queryString = queryString.replace("?this", "<" + thisUri.toString() + ">"); // binds ?this to URI of current resource
-	return QueryFactory.create(queryString);
+	Query arqQuery = QueryFactory.create(queryString);
+	
+	if (hasRDFType(LDP.Page))
+	{
+	    if (log.isDebugEnabled()) log.debug("OntResource is an ldp:Page, making QueryBuilder from Query: {}", arqQuery);
+	    return getQueryBuilder(ARQ2SPIN.parseQuery(arqQuery.toString(), getModel())).build();
+	}
 		
-	//return arqQuery;
+	return arqQuery;
     }
 
     public final OntClass matchOntClass(URI uri)
@@ -555,15 +567,7 @@ public class ResourceBase extends LDPResourceBase implements PageResource, OntRe
 
     public Query getQuery()
     {
-	Query query = getQuery(getTemplateCall(getMatchedOntClass()), getRealURI());
-	
-	if (hasRDFType(LDP.Page))
-	{
-	    if (log.isDebugEnabled()) log.debug("OntResource is an ldp:Page, making QueryBuilder from Query: {}", query);
-	    return getQueryBuilder(ARQ2SPIN.parseQuery(query.toString(), getModel())).build();
-	}
-
-	return query;
+	return getQuery(getRealURI());
     }
 
     public QueryBuilder getQueryBuilder()
