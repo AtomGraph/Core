@@ -32,6 +32,7 @@ APIs use different data models and serialization formats, and even if they use t
 directly mapped from one domain model to the other.
 
 ![API growth 2005-2012](http://blog.programmableweb.com/wp-content/api-growth-6k-600x343.png)
+
 _Source: The Programmable Web_
 
 As a result, you cannot have your faiblog entries reposted on Twitter or vica versa, unless there is a built-in
@@ -127,9 +128,8 @@ made generic either, as the data model mismatch discards the uniformity and flex
 Secondly, we can interpret Linked Data as an intersection of the RDF data model and [REST](http://en.wikipedia.org/wiki/Representational_state_transfer)
 architectural style, which is based on the generic and stateless HTTP protocol:
 
-> REST lets intermediate processing by constraining messages be self-descriptive: interaction is stateless between
-> requests, standard methods and media types are used to indicate semantics and exchange information, and responses
-> explicitly indicate cacheability.
+> REST lets intermediate processing by constraining messages be self-descriptive: interaction is stateless between requests, standard methods and media types are used to indicate semantics and exchange information, and responses explicitly indicate cacheability.
+
 _Fielding, Roy Thomas (2000), Architectural Styles and the Design of Network-based Software Architectures_
 
 Lastly, imperative programs that change their state.. Functional stateless programs...
