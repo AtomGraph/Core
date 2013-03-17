@@ -31,6 +31,8 @@ of modern APIs. Does that mean that any Web 2.0 API can talk to any other API? S
 APIs use different data models and serialization formats, and even if they use the same ones, the data cannot be
 directly mapped from one domain model to the other.
 
+![API growth 2005-2012](http://blog.programmableweb.com/wp-content/api-growth-6k-600x343.png)
+
 As a result, you cannot have your faiblog entries reposted on Twitter or vica versa, unless there is a built-in
 connector or 3rd party software that integrates this specific pair of services. If you run your own site or
 application, you need a connector for each of the services you want to integrate, and as it likely has its own
@@ -86,26 +88,28 @@ The nodes in the graph are either
 * literal values (that can only be in object position but can have a datatype or language type attached)
 
 RDF has its own standard query language called [SPARQL](http://www.w3.org/standards/techs/sparql) (just like the
-relational model has SQL), which operates on graph pattern matching. RDF is schema-less, and it's graph-shaped
-nature makes merging datasources natural and effortless (when was the last time you effortlessly merged
-relational databases?) Related reusable RDF terms are however often grouped into [ontologies](http://www.w3.org/standards/semanticweb/ontology)
-(semantic vocabularies).
+relational model has SQL), which operates on graph pattern matching. Related RDF terms are usually grouped into
+[ontologies](http://www.w3.org/standards/semanticweb/ontology) (semantic vocabularies).
 
 When published on the Web, RDF data (usually in conjunction with SPARQL endpoints) is called [Linked Data](http://www.w3.org/standards/semanticweb/data).
 RDF and Linked Data have the following advantages:
-* one
-* two
-* three
+* explicit global identifiers (URIs) allow linking databases at an unprecedented level of granularity
+* databases are schema-less and effortless to merge (when was the last time you effortlessly merged relational
+databases?) 
+* the vocabularies used to describe the data can be globally shared, extended, and reused
+* application logic can be moved to data, making them more generic, and the data -- more explicit and reusable
+* standard technologies and extensive tool support make the switching-costs negligible
 
 URIs can identify both informational and real-world resources, which means that RDF can be used to encode
 metadata about documents, systems, other data, as well as the real world (although there is a [special case](http://www.w3.org/TR/cooluris/#semweb)
 in Linked Data access, as real-world objects obviously cannot be retrieved as information).
 
-In other words, Linked Data is the native fabric of the machine-readable Web. It is currently the only standard
-approach to global integration for which the demand is increasing. In fact, Google and Facebook have both
-developed proprietary closed-wall platforms as alternatives to Linked Data: [Knowledge Graph](http://www.google.com/insidesearch/features/search/knowledge.html)
-and [Open Graph](http://developers.facebook.com/docs/concepts/opengraph/), respectively. If you're not using
-Linked Data yet, we strongly encourage you to do yourself a favor and start now!
+In other words, Linked Data is the native fabric of the machine-readable Web. It is the only standard solution to
+global data integration for which the demand is increasing, and the first one to transcend the decades-long data
+silos. In fact, Google and Facebook have both developed proprietary closed-wall platforms as alternatives to Linked
+Data: [Knowledge Graph](http://www.google.com/insidesearch/features/search/knowledge.html) and
+[Open Graph](http://developers.facebook.com/docs/concepts/opengraph/), respectively. If you're not using Linked Data
+yet, we strongly encourage you to do yourself a favor and start now!
 
 Generic Web applications
 ------------------------
