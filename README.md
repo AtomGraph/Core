@@ -82,16 +82,9 @@ We do not need to invent the uniform data model, as it has been around for almos
 well-standardized. It is the W3C [Resource Description Framework](http://www.w3.org/standards/techs/rdf), or RDF.
 
 The shape of RDF data model is a graph, or a network of nodes (by comparison, XML data model is tree-shaped).
-The graph is formed from statements that have a stable triple form: subject/property/object.
-The nodes in the graph are either
-* resources identified by [URI](http://en.wikipedia.org/wiki/Uniform_resource_identifier) references
-* anonymous resources (blank nodes)
-* predicates
-* literal values (that can only be in object position but can have a datatype or language type attached)
-
-RDF has its own standard query language called [SPARQL](http://www.w3.org/standards/techs/sparql) (just like the
-relational model has SQL), which operates on graph pattern matching. Related RDF terms are usually grouped into
-[ontologies](http://www.w3.org/standards/semanticweb/ontology) (semantic vocabularies).
+The graph is formed from statements that have a stable triple form. RDF has its own standard query language called
+[SPARQL](http://www.w3.org/standards/techs/sparql) (just like the relational model has SQL), which operates on
+graph pattern matching. Related RDF terms are usually grouped into [ontologies](http://www.w3.org/standards/semanticweb/ontology) (semantic vocabularies).
 
 When published on the Web, RDF data (usually in conjunction with SPARQL endpoints) is called [Linked Data](http://www.w3.org/standards/semanticweb/data).
 RDF and Linked Data have the following advantages:
@@ -125,14 +118,15 @@ that applications operating on different data models cannot be made generic on a
 applications that operate on Linked Data by mapping it onto intermediate models such as object-oriented cannot be
 made generic either, as the data model mismatch discards the uniformity and flexibility of RDF.
 
-Secondly, we can interpret Linked Data as an intersection of the RDF data model and [REST](http://en.wikipedia.org/wiki/Representational_state_transfer)
+Secondly, we can interpret Linked Data as an combination of the RDF data model and [REST](http://en.wikipedia.org/wiki/Representational_state_transfer)
 architectural style, which is based on the generic and stateless HTTP protocol:
 
 > REST lets intermediate processing by constraining messages be self-descriptive: interaction is stateless between requests, standard methods and media types are used to indicate semantics and exchange information, and responses explicitly indicate cacheability.
 
 _Fielding, Roy Thomas (2000), Architectural Styles and the Design of Network-based Software Architectures_
 
-Lastly, imperative programs that change their state.. Functional stateless programs...
+Lastly, we need to remember that imperative programs operate by changing state. By comparison, finite state
+machines...
 
 Templates
 ---------
