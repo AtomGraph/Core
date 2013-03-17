@@ -32,6 +32,7 @@ APIs use different data models and serialization formats, and even if they use t
 directly mapped from one domain model to the other.
 
 ![API growth 2005-2012](http://blog.programmableweb.com/wp-content/api-growth-6k-600x343.png)
+_Source: The Programmable Web_
 
 As a result, you cannot have your faiblog entries reposted on Twitter or vica versa, unless there is a built-in
 connector or 3rd party software that integrates this specific pair of services. If you run your own site or
@@ -114,19 +115,41 @@ yet, we strongly encourage you to do yourself a favor and start now!
 Generic Web applications
 ------------------------
 
-Resources
+For the first time, RDF and Linked Data enable an era of generic semantic Web applications. Generic applications
+operate on data independently of its domain (as long as it is provided in the uniform data model), and lay the
+background for the Semantic Web vision of intelligent agents.
+
+First, we need to establish that only applications natively operating on Linked Data can be made generic. It means
+that applications operating on different data models cannot be made generic on a global scale. Furthermore,
+applications that operate on Linked Data by mapping it onto intermediate models such as object-oriented cannot be
+made generic either, as the data model mismatch discards the uniformity and flexibility of RDF.
+
+Secondly, we can interpret Linked Data as an intersection of the RDF data model and [REST](http://en.wikipedia.org/wiki/Representational_state_transfer)
+architectural style, which is based on the generic and stateless HTTP protocol:
+
+> REST lets intermediate processing by constraining messages be self-descriptive: interaction is stateless between
+> requests, standard methods and media types are used to indicate semantics and exchange information, and responses
+> explicitly indicate cacheability.
+_Fielding, Roy Thomas (2000), Architectural Styles and the Design of Network-based Software Architectures_
+
+Lastly, imperative programs that change their state.. Functional stateless programs...
+
+Templates
+---------
+
+The components of Linked Data
+architecture are:
+* a _resource_, which is identified by a URI and has an RDF representation
+*
+Resources, representations
 State
 Graph
 Queries
 
-Templates / processors
+processors
 Finite state machines
 XSLT analogy
 Context resource
-
-
-
-
 
 Graphity
 ========
