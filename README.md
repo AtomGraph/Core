@@ -106,27 +106,26 @@ Data: [Knowledge Graph](http://www.google.com/insidesearch/features/search/knowl
 [Open Graph](http://developers.facebook.com/docs/concepts/opengraph/), respectively. If you're not using Linked Data
 yet, we strongly encourage you to do yourself a favor and start now!
 
-Generic Web applications
-------------------------
+Linked Data Platform
+--------------------
 
 For the first time, RDF and Linked Data enable an era of generic semantic Web applications. Generic applications
 operate on data independently of its domain (as long as it is provided in the uniform data model), and lay the
 background for the Semantic Web vision of intelligent agents.
 
-First, we need to establish that only applications natively operating on Linked Data can be made generic. It means
-that applications operating on different data models cannot be made generic on a global scale. Furthermore,
-applications that operate on Linked Data by mapping it onto intermediate models such as object-oriented cannot be
-made generic either, as the data model mismatch discards the uniformity and flexibility of RDF.
+First, we need to establish that only applications natively operating on RDF can be made generic on a global scale.
+It means that applications operating on different data models, including applications that operate on RDF by
+mapping it onto intermediate models such as object-oriented, cannot be made generic, as the data model mismatch
+discards the uniformity and flexibility of RDF.
 
-Secondly, we can interpret Linked Data as an combination of the RDF data model and [REST](http://en.wikipedia.org/wiki/Representational_state_transfer)
-architectural style, which is based on the generic and stateless HTTP protocol:
+Secondly, we need to interpret Linked Data as an application of the [REST](http://en.wikipedia.org/wiki/Representational_state_transfer)
+architectural style, which is the reason why the modern Web is so scalable. REST was developed in conjunction with
+HTTP and URI, the two specifications that define the generic interface used by all component interactions on the
+Web.
 
-> REST lets intermediate processing by constraining messages be self-descriptive: interaction is stateless between requests, standard methods and media types are used to indicate semantics and exchange information, and responses explicitly indicate cacheability.
-
-_Fielding, Roy Thomas (2000), Architectural Styles and the Design of Network-based Software Architectures_
-
-Lastly, we need to remember that imperative programs operate by changing state. By comparison, finite state
-machines...
+Linked Data, as a combination of RDF and REST, forms the prerequisites for generic Web applications. What is
+missing, however, is a specification of how exactly the HTTP methods map to operations on RDF data. The W3C is
+currently addressing this issue via the [Linked Data Platform](http://www.w3.org/2012/ldp/) effort.
 
 Templates
 ---------

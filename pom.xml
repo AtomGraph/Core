@@ -2,10 +2,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.graphity</groupId>
-    <artifactId>platform</artifactId>
     <version>1.0.7-SNAPSHOT</version>
 
-    <name>Graphity Platform</name>
+    <name>Graphity Server</name>
     <description>Generic Linked Data platform</description>
 
     <developers>
@@ -146,4 +145,5 @@
         </plugins>
     </build>
     <packaging>jar</packaging>
+    <artifactId>server</artifactId>
 </project>

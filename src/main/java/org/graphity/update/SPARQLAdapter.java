@@ -24,7 +24,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.update.UpdateFactory;
 import com.hp.hpl.jena.update.UpdateRequest;
 import java.io.ByteArrayOutputStream;
-import org.graphity.platform.update.UpdateProcessRemote;
+import org.graphity.server.update.UpdateProcessRemote;
 import org.graphity.query.QueryEngineHTTP;
 import org.openjena.riot.WebContent;
 import org.slf4j.Logger;
