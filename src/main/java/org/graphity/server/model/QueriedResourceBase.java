@@ -85,6 +85,21 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
 	return loadModel(getEndpoint(), getQuery());
     }
 
+    public Model describe(Model model)
+    {
+	return DataManager.get().loadModel(model, getQuery());
+    }
+
+    public Model loadModel(Model model, Query query)
+    {
+	return DataManager.get().loadModel(model, query);
+    }
+
+    public Model describe(Resource endpoint)
+    {
+	return loadModel(endpoint, getQuery());
+    }
+
     public Model loadModel(Resource endpoint, Query query)
     {
 	return DataManager.get().loadModel(endpoint.getURI(), query);
@@ -93,7 +108,12 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
     @Override
     public Query getQuery()
     {
-	return QueryFactory.create("DESCRIBE <" + getURI() + ">");
+	return getQuery(getURI());
+    }
+    
+    public Query getQuery(String uri)
+    {
+	return QueryFactory.create("DESCRIBE <" + uri + ">");
     }
     
     @Override

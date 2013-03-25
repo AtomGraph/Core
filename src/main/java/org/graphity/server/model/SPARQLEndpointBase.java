@@ -109,50 +109,57 @@ public class SPARQLEndpointBase extends QueriedResourceBase implements SPARQLEnd
 	return DataManager.get().loadResultSet(endpoint.getURI(), query); // .getResultSetRewindable()
     }
 
-    @Override
-    public Response query(@QueryParam("query") Query query)
+    public Response getResponse(ResultSetRewindable resultSet)
     {
-	if (query == null) throw new WebApplicationException(Response.Status.BAD_REQUEST);
+	EntityTag entityTag = new EntityTag(Long.toHexString(ResultSetUtils.hashResultSet(resultSet)));
+	resultSet.reset(); // ResultSet needs to be rewinded back to the begining
+	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(entityTag);
 
-	if (query.isSelectType())
+	if (rb != null)
 	{
-	    if (log.isDebugEnabled()) log.debug("SPARQL endpoint executing SELECT query: {}", query);
-	    if (config.getProperty(PROPERTY_QUERY_RESULT_LIMIT) != null)
-		query.setLimit(Long.parseLong(config.getProperty(PROPERTY_QUERY_RESULT_LIMIT).toString()));
-
-	    ResultSetRewindable resultSet = loadResultSetRewindable(getEndpoint(), query);
-	    EntityTag entityTag = new EntityTag(Long.toHexString(ResultSetUtils.hashResultSet(resultSet)));
-	    resultSet.reset();
-	    Response.ResponseBuilder rb = getRequest().evaluatePreconditions(entityTag);
-
-	    if (rb != null)
+	    if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
+	    return rb.build();
+	}
+	else
+	{
+	    Variant variant = getRequest().selectVariant(RESULT_SET_VARIANTS);
+	    if (variant == null)
 	    {
-		if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
-		return rb.build();
-	    }
+		if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants: {}", variant, RESULT_SET_VARIANTS);
+		return Response.notAcceptable(RESULT_SET_VARIANTS).build();
+	    }	
 	    else
 	    {
-		Variant variant = getRequest().selectVariant(RESULT_SET_VARIANTS);
-		if (variant == null)
-		{
-		    if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants: {}", variant, RESULT_SET_VARIANTS);
-		    return Response.notAcceptable(RESULT_SET_VARIANTS).build();
-		}	
-		else
-		{
-		    if (log.isTraceEnabled()) log.trace("Generating SPARQL results Response with Variant: {} and EntityTag: {}", variant, entityTag);
-		    return Response.ok(resultSet, variant).tag(entityTag).build(); // uses ResultSetWriter
-		}
+		if (log.isTraceEnabled()) log.trace("Generating SPARQL results Response with Variant: {} and EntityTag: {}", variant, entityTag);
+		return Response.ok(resultSet, variant).
+			tag(entityTag).
+			cacheControl(getCacheControl()).
+			build(); // uses ResultSetWriter
 	    }
-	}
+	}	
+    }
+    
+    @Override
+    public Response query(@QueryParam("query") Query queryParam)
+    {
+	if (queryParam == null) throw new WebApplicationException(Response.Status.BAD_REQUEST);
 
-	if (query.isConstructType() || query.isDescribeType())
+	if (queryParam.isSelectType())
 	{
-	    if (log.isDebugEnabled()) log.debug("SPARQL endpoint executing CONSTRUCT/DESCRIBE query: {}", query);
-	    return getResponse(loadModel(getEndpoint(), query));
+	    if (log.isDebugEnabled()) log.debug("SPARQL endpoint executing SELECT query: {}", queryParam);
+	    if (config.getProperty(PROPERTY_QUERY_RESULT_LIMIT) != null)
+		queryParam.setLimit(Long.parseLong(config.getProperty(PROPERTY_QUERY_RESULT_LIMIT).toString()));
+
+	    return getResponse(loadResultSetRewindable(getEndpoint(), queryParam));
 	}
 
-	if (log.isWarnEnabled()) log.warn("SPARQL endpoint received unknown type of query: {}", query);
+	if (queryParam.isConstructType() || queryParam.isDescribeType())
+	{
+	    if (log.isDebugEnabled()) log.debug("SPARQL endpoint executing CONSTRUCT/DESCRIBE query: {}", queryParam);
+	    return getResponse(loadModel(getEndpoint(), queryParam));
+	}
+
+	if (log.isWarnEnabled()) log.warn("SPARQL endpoint received unknown type of query: {}", queryParam);
 	throw new WebApplicationException(Response.Status.BAD_REQUEST);
     }
 
