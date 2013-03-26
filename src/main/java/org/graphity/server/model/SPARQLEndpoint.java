@@ -17,6 +17,7 @@
 package org.graphity.server.model;
 
 import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.rdf.model.Resource;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -31,7 +32,7 @@ import javax.ws.rs.core.Response;
  */
 @Path("/sparql")
 @Produces({org.graphity.server.MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", org.graphity.server.MediaType.TEXT_TURTLE + "; charset=UTF-8", org.graphity.server.MediaType.APPLICATION_SPARQL_RESULTS_XML + "; charset=UTF-8", org.graphity.server.MediaType.APPLICATION_SPARQL_RESULTS_JSON + "; charset=UTF-8"})
-public interface SPARQLEndpoint
+public interface SPARQLEndpoint extends Resource
 {
     /**
      * Handles SPARQL Protocol for RDF request and returns query result as response

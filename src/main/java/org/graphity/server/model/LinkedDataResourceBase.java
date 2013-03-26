@@ -26,7 +26,11 @@ import com.sun.jersey.api.core.ResourceContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,12 +51,10 @@ public class LinkedDataResourceBase implements LinkedDataResource
      */
     public static final String PROPERTY_CACHE_CONTROL = "org.graphity.server.cache-control";
 
-    @Context UriInfo uriInfo;
-    //@Context Request request;
-    //@Context HttpHeaders httpHeaders;
-    //private final List<Variant> variants;
     private final Resource resource;
+    private final SPARQLEndpointBase endpoint;
     private final CacheControl cacheControl;
+    @Context UriInfo uriInfo;
     @Context ResourceConfig resourceConfig;
     @Context ResourceContext resourceContext;
 
@@ -65,43 +67,34 @@ public class LinkedDataResourceBase implements LinkedDataResource
      * @param httpHeaders current request headers
      * @param variants representation variants
      */
-    public LinkedDataResourceBase(@Context UriInfo uriInfo, @Context ResourceConfig resourceConfig)
+    public LinkedDataResourceBase(@Context UriInfo uriInfo, @Context ResourceConfig resourceConfig, @Context ResourceContext resourceContext)
     {
 	this(ResourceFactory.createResource(uriInfo.getAbsolutePath().toString()),
-	    (resourceConfig.getProperty(PROPERTY_CACHE_CONTROL) == null) ? null : CacheControl.valueOf(resourceConfig.getProperty(PROPERTY_CACHE_CONTROL).toString()));
+		resourceContext.getResource(SPARQLEndpointBase.class),
+		(resourceConfig.getProperty(PROPERTY_CACHE_CONTROL) == null) ? null : CacheControl.valueOf(resourceConfig.getProperty(PROPERTY_CACHE_CONTROL).toString()));
     }
     
-    protected LinkedDataResourceBase(Resource resource, CacheControl cacheControl)
-    //public LinkedDataResourceBase(Resource resource,
-    //	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants, CacheControl cacheControl)
+    protected LinkedDataResourceBase(Resource resource, SPARQLEndpointBase endpoint, CacheControl cacheControl)
     {
-	if (resource == null) throw new IllegalArgumentException("Resource cannot be null");
-	//if (uriInfo == null) throw new IllegalArgumentException("UriInfo cannot be null");
-	//if (request == null) throw new IllegalArgumentException("Request cannot be null");
-	//if (httpHeaders == null) throw new IllegalArgumentException("HttpHeaders cannot be null");
-	//if (variants == null) throw new IllegalArgumentException("Variants cannot be null");
-	
+	if (resource == null) throw new IllegalArgumentException("Resource cannot be null");	
 	if (!resource.isURIResource()) throw new IllegalArgumentException("Resource must be URI Resource (not a blank node)");
+
 	this.resource = resource;
+	this.cacheControl = cacheControl;
+	this.endpoint = endpoint;
+	
 	if (log.isDebugEnabled())
 	{
 	    log.debug("Creating LinkedDataResource from Resource with URI: {}", resource.getURI());
 	    //log.debug("List of Variants: {}", variants);
 	}
-	
-	//this.uriInfo = uriInfo;
-	//this.request = request;
-	//this.httpHeaders = httpHeaders;
-	//this.variants = variants;
-	this.cacheControl = cacheControl;
     }
     
     @GET
     @Override
     public Response getResponse()
     {
-	SPARQLEndpointBase sparql = getResourceContext().getResource(SPARQLEndpointBase.class);
-	Model model = sparql.loadModel(getQuery());
+	Model model = getEndpoint().loadModel(getQuery());
 
 	if (model.isEmpty())
 	{
@@ -109,20 +102,15 @@ public class LinkedDataResourceBase implements LinkedDataResource
 	    throw new WebApplicationException(Response.Status.NOT_FOUND);
 	}
 	if (log.isDebugEnabled()) log.debug("Returning @GET Response with {} statements in Model", model.size());
-	return sparql.getResponseBuilder(model).
-		cacheControl(getCacheControl()).
-		build();
+	return getResponseBuilder(model).build();
 
     }
-   
-    /*
-    @Override
-    public Model describe()
+    
+    public ResponseBuilder getResponseBuilder(Model model)
     {
-	if (log.isDebugEnabled()) log.debug("Querying OntModel with default DESCRIBE <{}> Query", getURI());
-	return DataManager.get().loadModel(getModel(), getQuery());
+	return getEndpoint().getResponseBuilder(model).
+		cacheControl(getCacheControl());
     }
-    */
     
     public Query getQuery()
     {
@@ -139,17 +127,15 @@ public class LinkedDataResourceBase implements LinkedDataResource
     {
 	return getResource().getURI();
     }
-
-    /*
-    public final Request getRequest()
-    {
-	return request;
-    }
-    */
     
     public final Resource getResource()
     {
 	return resource;
+    }
+
+    public SPARQLEndpointBase getEndpoint()
+    {
+	return endpoint;
     }
 
     @Override
@@ -163,22 +149,14 @@ public class LinkedDataResourceBase implements LinkedDataResource
 	return uriInfo;
     }
 
-    /*
-    @Override
-    public List<Variant> getVariants()
-    {
-	return variants;
-    }
-
-    public final HttpHeaders getHttpHeaders()
-    {
-	return httpHeaders;
-    }
-    */
-
     public final CacheControl getCacheControl()
     {
 	return cacheControl;
+    }
+
+    public ResourceConfig getResourceConfig()
+    {
+	return resourceConfig;
     }
 
     public ResourceContext getResourceContext()
@@ -462,4 +440,16 @@ public class LinkedDataResourceBase implements LinkedDataResource
 	return getResource().asNode();
     }
 
+    @Override
+    public boolean equals(Object obj)
+    {
+	return getResource().equals(obj);
+    }
+
+    @Override
+    public int hashCode()
+    {
+	return getResource().hashCode();
+    }
+    
 }
