@@ -18,14 +18,15 @@ package org.graphity.server.model;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.*;
-import java.util.List;
+import com.sun.jersey.api.core.ResourceConfig;
+import com.sun.jersey.api.core.ResourceContext;
 import javax.ws.rs.GET;
+import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.*;
-import org.graphity.server.util.DataManager;
-import org.graphity.util.ModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,24 +36,25 @@ import org.slf4j.LoggerFactory;
  * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/rdf/model/Resource.html">Resource</a>
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
+@Path("{path: .*}")
 public class LinkedDataResourceBase implements LinkedDataResource
 {
     private static final Logger log = LoggerFactory.getLogger(LinkedDataResourceBase.class);
 
     /**
-     * RDF representation variants supported by default
+     * Configuration property for default Cache-Control header value (set in web.xml)
+     * 
      */
-    public static final List<Variant> VARIANTS = Variant.VariantListBuilder.newInstance().
-		mediaTypes(org.graphity.server.MediaType.APPLICATION_RDF_XML_TYPE,
-			org.graphity.server.MediaType.TEXT_TURTLE_TYPE).
-		add().build();
-    
-    private final UriInfo uriInfo;
-    private final Request request;
-    private final HttpHeaders httpHeaders;
-    private final List<Variant> variants;
+    public static final String PROPERTY_CACHE_CONTROL = "org.graphity.server.cache-control";
+
+    @Context UriInfo uriInfo;
+    //@Context Request request;
+    //@Context HttpHeaders httpHeaders;
+    //private final List<Variant> variants;
     private final Resource resource;
     private final CacheControl cacheControl;
+    @Context ResourceConfig resourceConfig;
+    @Context ResourceContext resourceContext;
 
     /** 
      * Constructs read-only LD resource from Jena's Resource and JAX-RS context
@@ -63,34 +65,43 @@ public class LinkedDataResourceBase implements LinkedDataResource
      * @param httpHeaders current request headers
      * @param variants representation variants
      */
-    public LinkedDataResourceBase(Resource resource,
-	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants, CacheControl cacheControl)
+    public LinkedDataResourceBase(@Context UriInfo uriInfo, @Context ResourceConfig resourceConfig)
+    {
+	this(ResourceFactory.createResource(uriInfo.getAbsolutePath().toString()),
+	    (resourceConfig.getProperty(PROPERTY_CACHE_CONTROL) == null) ? null : CacheControl.valueOf(resourceConfig.getProperty(PROPERTY_CACHE_CONTROL).toString()));
+    }
+    
+    protected LinkedDataResourceBase(Resource resource, CacheControl cacheControl)
+    //public LinkedDataResourceBase(Resource resource,
+    //	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants, CacheControl cacheControl)
     {
 	if (resource == null) throw new IllegalArgumentException("Resource cannot be null");
-	if (uriInfo == null) throw new IllegalArgumentException("UriInfo cannot be null");
-	if (request == null) throw new IllegalArgumentException("Request cannot be null");
-	if (httpHeaders == null) throw new IllegalArgumentException("HttpHeaders cannot be null");
-	if (variants == null) throw new IllegalArgumentException("Variants cannot be null");
+	//if (uriInfo == null) throw new IllegalArgumentException("UriInfo cannot be null");
+	//if (request == null) throw new IllegalArgumentException("Request cannot be null");
+	//if (httpHeaders == null) throw new IllegalArgumentException("HttpHeaders cannot be null");
+	//if (variants == null) throw new IllegalArgumentException("Variants cannot be null");
 	
 	if (!resource.isURIResource()) throw new IllegalArgumentException("Resource must be URI Resource (not a blank node)");
 	this.resource = resource;
 	if (log.isDebugEnabled())
 	{
 	    log.debug("Creating LinkedDataResource from Resource with URI: {}", resource.getURI());
-	    log.debug("List of Variants: {}", variants);
+	    //log.debug("List of Variants: {}", variants);
 	}
 	
-	this.uriInfo = uriInfo;
-	this.request = request;
-	this.httpHeaders = httpHeaders;
-	this.variants = variants;
+	//this.uriInfo = uriInfo;
+	//this.request = request;
+	//this.httpHeaders = httpHeaders;
+	//this.variants = variants;
 	this.cacheControl = cacheControl;
     }
-
-    public Response getResponse(Model model)
+    
+    @GET
+    @Override
+    public Response getResponse()
     {
-	// Content-Location http://www.w3.org/TR/chips/#cp5.2
-	// http://www.w3.org/wiki/HR14aCompromise
+	SPARQLEndpointBase sparql = getResourceContext().getResource(SPARQLEndpointBase.class);
+	Model model = sparql.loadModel(getQuery());
 
 	if (model.isEmpty())
 	{
@@ -98,60 +109,44 @@ public class LinkedDataResourceBase implements LinkedDataResource
 	    throw new WebApplicationException(Response.Status.NOT_FOUND);
 	}
 	if (log.isDebugEnabled()) log.debug("Returning @GET Response with {} statements in Model", model.size());
-	
-	EntityTag entityTag = new EntityTag(Long.toHexString(ModelUtils.hashModel(model)));
-	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(entityTag);
-	if (rb != null)
-	{
-	    if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
-	    return rb.build();
-	}
-	else
-	{
-	    Variant variant = getRequest().selectVariant(getVariants());
-	    if (variant == null)
-	    {
-		if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants: {}", variant, getVariants());
-		return Response.notAcceptable(getVariants()).build();
-	    }	
-	    else
-	    {
-		if (log.isTraceEnabled()) log.trace("Generating RDF Response with Variant: {} and EntityTag: {}", variant, entityTag);
-		return Response.ok(model, variant).
-			tag(entityTag).
-			cacheControl(getCacheControl()).
-			build(); // uses ModelXSLTWriter/ModelWriter
-	    }
-	}	
-    }
-    
-    @GET
-    @Override
-    public Response getResponse()
-    {
-	if (log.isDebugEnabled()) log.debug("Returning @GET Response for the default DESCRIBE Model");
-	return getResponse(getModel()); //return getResponse(describe());
+	return sparql.getResponseBuilder(model).
+		cacheControl(getCacheControl()).
+		build();
+
     }
    
+    /*
     @Override
     public Model describe()
     {
 	if (log.isDebugEnabled()) log.debug("Querying OntModel with default DESCRIBE <{}> Query", getURI());
-	return DataManager.get().loadModel(getModel(), QueryFactory.create("DESCRIBE <" + getURI() + ">"));
+	return DataManager.get().loadModel(getModel(), getQuery());
+    }
+    */
+    
+    public Query getQuery()
+    {
+	return getQuery(getURI());
     }
     
+    public Query getQuery(String uri)
+    {
+	return QueryFactory.create("DESCRIBE <" + uri + ">");
+    }
+
     @Override
     public final String getURI()
     {
 	return getResource().getURI();
     }
 
-    @Override
+    /*
     public final Request getRequest()
     {
 	return request;
     }
-
+    */
+    
     public final Resource getResource()
     {
 	return resource;
@@ -168,6 +163,7 @@ public class LinkedDataResourceBase implements LinkedDataResource
 	return uriInfo;
     }
 
+    /*
     @Override
     public List<Variant> getVariants()
     {
@@ -178,10 +174,16 @@ public class LinkedDataResourceBase implements LinkedDataResource
     {
 	return httpHeaders;
     }
+    */
 
     public final CacheControl getCacheControl()
     {
 	return cacheControl;
+    }
+
+    public ResourceContext getResourceContext()
+    {
+	return resourceContext;
     }
     
     @Override

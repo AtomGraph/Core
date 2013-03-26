@@ -49,10 +49,6 @@
 	    <enabled>true</enabled>
 	    </releases>
 	</repository>
-	<repository>
-	    <id>org.topbraid</id>
-	    <url>http://topquadrant.com/repository/spin</url>
-	</repository>
     </repositories>
 
     <dependencies>
@@ -73,16 +69,11 @@
             <version>1.10</version>
         </dependency>
         <dependency>
-            <groupId>com.sun.jersey.oauth</groupId>
-            <artifactId>oauth-signature</artifactId>
-            <version>1.1.1-ea</version>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>1.16</version>
         </dependency>
-        <dependency>
-            <groupId>com.sun.jersey.oauth</groupId>
-            <artifactId>oauth-client</artifactId>
-            <version>1.1.1-ea</version>
-        </dependency>
-        <dependency>
+	<dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-fuseki</artifactId>
             <version>0.2.3</version>
@@ -93,16 +84,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>net.sourceforge.saxon</groupId>
-            <artifactId>saxon</artifactId>
-            <version>9.1.0.8</version>
-        </dependency>
-	<dependency>
-	    <groupId>org.topbraid</groupId>
-	    <artifactId>spin</artifactId>
-	    <version>1.3.0</version>
-	</dependency>
     </dependencies>
 
     <build>

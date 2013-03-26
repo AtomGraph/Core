@@ -18,7 +18,7 @@ package org.graphity.server.model;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
-import java.util.List;
+import com.sun.jersey.api.core.ResourceConfig;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import org.slf4j.Logger;
@@ -44,10 +44,14 @@ public class LDPResourceBase extends LinkedDataResourceBase implements LDPResour
      * @param variants representation variants
      * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/rdf/model/Resource.html">Resource</a>
      */
-    public LDPResourceBase(Resource resource,
-	    UriInfo uriInfo, Request request, HttpHeaders httpHeaders, List<Variant> variants, CacheControl cacheControl)
+    public LDPResourceBase(@Context UriInfo uriInfo, @Context ResourceConfig resourceConfig)
     {
-	super(resource, uriInfo, request, httpHeaders, variants, cacheControl);
+	super(uriInfo, resourceConfig);
+    }
+
+    protected LDPResourceBase(Resource resource, CacheControl cacheControl)
+    {
+	super(resource, cacheControl);
     }
 
     @Override

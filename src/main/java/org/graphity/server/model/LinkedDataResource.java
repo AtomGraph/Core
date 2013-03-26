@@ -39,7 +39,7 @@ public interface LinkedDataResource extends Resource // OntResource
      * @return description of this resource
      */
 
-    Model describe();
+    //Model describe();
 
     /**
      * Handles GET request and returns response
@@ -55,7 +55,7 @@ public interface LinkedDataResource extends Resource // OntResource
      * @return current request for this resource
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/Request.html">Request</a>
      */
-    Request getRequest(); // Request can be injected
+    //Request getRequest(); // Request can be injected
 
     //UriInfo getUriInfo(); // Request can be injected
 
@@ -65,7 +65,7 @@ public interface LinkedDataResource extends Resource // OntResource
      * @return representation variants of this resource
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/Variant.html">Variant</a>
      */
-    List<Variant> getVariants();
+    //List<Variant> getVariants();
     
     //EntityTag getEntityTag();
 }

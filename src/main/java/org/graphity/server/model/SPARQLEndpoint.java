@@ -40,7 +40,7 @@ public interface SPARQLEndpoint
      * @return result response (in one of the representation variants)
      * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/Query.html">ARQ Query</a>
      */
-    @GET Response query(@QueryParam("query") Query query);
+    @GET Response query(@QueryParam("query") Query query); // @QueryParam("default-graph-uri") String uri @QueryParam("named-graph-uri") String graphUri
     
     // Context getServiceContext();
 }

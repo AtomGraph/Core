@@ -67,33 +67,40 @@ public class DataManager extends FileManager
 	this.context = context;
     }
 
+    public QueryExecution makeQueryExecution(String endpointURI, Query query, MultivaluedMap<String, String> params)
+    {
+	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, query);
+	if (query == null) throw new IllegalArgumentException("Query must be not null");
+
+	QueryEngineHTTP request = new QueryEngineHTTP(endpointURI, query);
+	if (params != null)
+	    for (Entry<String, List<String>> entry : params.entrySet())
+		if (!entry.getKey().equals("query")) // query param is handled separately
+		    for (String value : entry.getValue())
+		    {
+			if (log.isTraceEnabled()) log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
+			request.addParam(entry.getKey(), value);
+		    }
+	
+	return request;
+    }
+    
     public Model loadModel(String endpointURI, Query query, MultivaluedMap<String, String> params)
     {
 	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, query);
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
-	
-	if (!(query.isConstructType() || query.isDescribeType()))
-	    throw new QueryExecException("Query to load Model must be CONSTRUCT or DESCRIBE"); // return null;
 
-	QueryEngineHTTP request = new QueryEngineHTTP(endpointURI, query);
+	QueryExecution qex = makeQueryExecution(endpointURI, query, params);
 	try
 	{
-	    if (params != null)
-		for (Entry<String, List<String>> entry : params.entrySet())
-		    if (!entry.getKey().equals("query")) // query param is handled separately
-			for (String value : entry.getValue())
-			{
-			    if (log.isTraceEnabled()) log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
-			    request.addParam(entry.getKey(), value);
-			}
-	    if (query.isConstructType()) return request.execConstruct();
-	    if (query.isDescribeType()) return request.execDescribe();
+	    if (query.isConstructType()) return qex.execConstruct();
+	    if (query.isDescribeType()) return qex.execDescribe();
 
-	    return null;
+	    throw new QueryExecException("Query to load Model must be CONSTRUCT or DESCRIBE");
 	}
 	finally
 	{
-	    request.close();
+	    qex.close();
 	}
     }
     
@@ -107,16 +114,13 @@ public class DataManager extends FileManager
 	if (log.isDebugEnabled()) log.debug("Local Model Query: {}", query);
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
 	
-	if (!(query.isConstructType() || query.isDescribeType()))
-	    throw new QueryExecException("Query to load Model must be CONSTRUCT or DESCRIBE"); // return null;
-		
 	QueryExecution qex = QueryExecutionFactory.create(query, model);
 	try
 	{	
 	    if (query.isConstructType()) return qex.execConstruct();
 	    if (query.isDescribeType()) return qex.execDescribe();
 	
-	    return null;
+	    throw new QueryExecException("Query to load Model must be CONSTRUCT or DESCRIBE"); // return null;
 	}
 	finally
 	{
@@ -146,25 +150,16 @@ public class DataManager extends FileManager
 	if (log.isDebugEnabled()) log.debug("Remote service {} Query execution: {} ", endpointURI, query);
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
 
-	if (!query.isSelectType())
-	    throw new QueryExecException("Query to load ResultSet must be SELECT or ASK"); // return null
-
-	QueryEngineHTTP request = new QueryEngineHTTP(endpointURI, query);
+	QueryExecution qex = makeQueryExecution(endpointURI, query, params);
 	try
 	{
-	    if (params != null)
-		for (Entry<String, List<String>> entry : params.entrySet())
-		    if (!entry.getKey().equals("query")) // query param is handled separately
-			for (String value : entry.getValue())
-			{
-			    if (log.isTraceEnabled()) log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
-			    request.addParam(entry.getKey(), value);
-			}
-	    return ResultSetFactory.copyResults(request.execSelect());
+	    if (query.isSelectType()) return ResultSetFactory.copyResults(qex.execSelect());
+	    
+	    throw new QueryExecException("Query to load ResultSet must be SELECT");
 	}
 	finally
 	{
-	    request.close();
+	    qex.close();
 	}
     }
     
@@ -177,14 +172,13 @@ public class DataManager extends FileManager
     {
 	if (log.isDebugEnabled()) log.debug("Local Model Query: {}", query);
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
-
-	if (!query.isSelectType())
-	    throw new QueryExecException("Query to load ResultSet must be SELECT or ASK"); // return null
 	
 	QueryExecution qex = QueryExecutionFactory.create(query, model);
 	try
 	{
-	    return ResultSetFactory.copyResults(qex.execSelect());
+	    if (query.isSelectType()) return ResultSetFactory.copyResults(qex.execSelect());
+	    
+	    throw new QueryExecException("Query to load ResultSet must be SELECT");
 	}
 	finally
 	{

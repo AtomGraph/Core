@@ -24,7 +24,7 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
-import org.graphity.server.model.QueriedResourceBase;
+import org.graphity.server.model.LinkedDataResourceBase;
 import org.graphity.server.model.SPARQLEndpointBase;
 import org.graphity.server.provider.ModelProvider;
 import org.graphity.server.provider.QueryParamProvider;
@@ -32,7 +32,6 @@ import org.graphity.server.provider.ResultSetWriter;
 import org.openjena.riot.SysRIOT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.topbraid.spin.system.SPINModuleRegistry;
 
 /**
  * Graphity JAX-RS application base class.
@@ -51,6 +50,16 @@ public class Application extends javax.ws.rs.core.Application
     private Set<Class<?>> classes = new HashSet<Class<?>>();
     private Set<Object> singletons = new HashSet<Object>();
 
+    public Application()
+    {
+	classes.add(LinkedDataResourceBase.class); // handles all
+	classes.add(SPARQLEndpointBase.class); // handles /sparql queries
+
+	singletons.add(new ModelProvider());
+	singletons.add(new ResultSetWriter());
+	singletons.add(new QueryParamProvider(Query.class));
+    }
+
     /**
      * Initializes (post construction) DataManager, its LocationMapper and Locators
      * 
@@ -63,8 +72,9 @@ public class Application extends javax.ws.rs.core.Application
     @PostConstruct
     public void init()
     {
+	if (log.isDebugEnabled()) log.debug("Application.init() with ResourceConfig: {} and SerlvetContext: {}", getResourceConfig(), getServletContext());
+
 	SysRIOT.wireIntoJena(); // enable RIOT parser
-	SPINModuleRegistry.get().init(); // needs to be called before any SPIN-related code
 	// WARNING! ontology caching can cause concurrency/consistency problems
 	OntDocumentManager.getInstance().setCacheModels(false);
     }
@@ -78,10 +88,7 @@ public class Application extends javax.ws.rs.core.Application
      */
     @Override
     public Set<Class<?>> getClasses()
-    {
-	classes.add(QueriedResourceBase.class); // handles all
-	classes.add(SPARQLEndpointBase.class); // handles /sparql queries
-	
+    {	
         return classes;
     }
 
@@ -95,10 +102,6 @@ public class Application extends javax.ws.rs.core.Application
     @Override
     public Set<Object> getSingletons()
     {
-	singletons.add(new ModelProvider());
-	singletons.add(new ResultSetWriter());
-	singletons.add(new QueryParamProvider(Query.class));
-
 	return singletons;
     }
 
