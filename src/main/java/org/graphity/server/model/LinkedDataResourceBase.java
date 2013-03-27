@@ -391,17 +391,5 @@ public class LinkedDataResourceBase implements LinkedDataResource
     {
 	return getResource().asNode();
     }
-
-    @Override
-    public boolean equals(Object obj)
-    {
-	return getResource().equals(obj);
-    }
-
-    @Override
-    public int hashCode()
-    {
-	return getResource().hashCode();
-    }
     
 }
