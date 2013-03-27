@@ -61,26 +61,24 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
 	this.endpoint = endpoint;
     }
 
-    /*
-    private Model getModel()
+    public Model describe()
     {
 	return getEndpoint().loadModel(getQuery());
     }
-    */
     
     @GET
     @Override
     public Response getResponse()
     {
-	Model model = getEndpoint().loadModel(getQuery());
+	Model description = describe();
 
-	if (model.isEmpty())
+	if (description.isEmpty())
 	{
-	    if (log.isTraceEnabled()) log.trace("DESCRIBE Model is empty; returning 404 Not Found");
+	    if (log.isDebugEnabled()) log.debug("DESCRIBE Model is empty; returning 404 Not Found");
 	    throw new WebApplicationException(Response.Status.NOT_FOUND);
 	}
-	if (log.isDebugEnabled()) log.debug("Returning @GET Response with {} statements in Model", model.size());
-	return getResponseBuilder(model).build();
+	if (log.isDebugEnabled()) log.debug("Returning @GET Response with {} statements in Model", description.size());
+	return getResponseBuilder(description).build();
 
     }
     
