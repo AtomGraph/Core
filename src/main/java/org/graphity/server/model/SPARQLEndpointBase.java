@@ -28,8 +28,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.*;
 import org.graphity.server.util.DataManager;
 import org.graphity.util.ModelUtils;
 import org.graphity.util.ResultSetUtils;
@@ -79,23 +79,26 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     public static final String PROPERTY_QUERY_RESULT_LIMIT = "org.graphity.server.query.result-limit";
     
     private final Resource resource;
-    @Context UriInfo uriInfo;
-    @Context Request request;
-    @Context HttpHeaders httpHeaders;
-    @Context ResourceConfig resourceConfig;
+    private final Request request;
+    private final ResourceConfig resourceConfig;
 
-    public SPARQLEndpointBase(@Context ResourceConfig resourceConfig)
+    public SPARQLEndpointBase(@Context Request request, @Context ResourceConfig resourceConfig)
     {
 	this((resourceConfig.getProperty(PROPERTY_ENDPOINT_URI) == null) ?
 		null :
-		ResourceFactory.createResource(resourceConfig.getProperty(PROPERTY_ENDPOINT_URI).toString()));
+		ResourceFactory.createResource(resourceConfig.getProperty(PROPERTY_ENDPOINT_URI).toString()),
+	    request, resourceConfig);
     }
     
-    protected SPARQLEndpointBase(Resource endpoint)
+    protected SPARQLEndpointBase(Resource endpoint, Request request, ResourceConfig resourceConfig)
     {
 	if (endpoint == null) throw new IllegalArgumentException("Endpoint cannot be null");
-	
+	if (request == null) throw new IllegalArgumentException("Request cannot be null");
+	if (resourceConfig == null) throw new IllegalArgumentException("ResourceConfig cannot be null");
+
 	this.resource = endpoint;
+	this.request = request;
+	this.resourceConfig = resourceConfig;
 	if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase with endpoint: {}", endpoint);
     }
 
@@ -130,8 +133,31 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     }
 
     public ResponseBuilder getResponseBuilder(Model model)
+    {
+	return getResponseBuilder(model, MODEL_VARIANTS);
+    }
+    
+    public ResponseBuilder getResponseBuilder(Model model, List<Variant> variants)
+    {
+	return getResponseBuilder(new EntityTag(Long.toHexString(ModelUtils.hashModel(model))),
+		model, variants);
+    }
+    
+    public ResponseBuilder getResponseBuilder(ResultSetRewindable resultSet)
+    {
+	return getResponseBuilder(resultSet, RESULT_SET_VARIANTS);
+    }
+    
+    public ResponseBuilder getResponseBuilder(ResultSetRewindable resultSet, List<Variant> variants)
+    {
+	EntityTag entityTag = new EntityTag(Long.toHexString(ResultSetUtils.hashResultSet(resultSet)));
+	resultSet.reset(); // ResultSet needs to be rewinded back to the beginning
+	return getResponseBuilder(entityTag,
+		resultSet, variants);
+    }
+    
+    public ResponseBuilder getResponseBuilder(EntityTag entityTag, Object entity, List<Variant> variants)
     {	
-	EntityTag entityTag = new EntityTag(Long.toHexString(ModelUtils.hashModel(model)));
 	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(entityTag);
 	if (rb != null)
 	{
@@ -140,49 +166,21 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	}
 	else
 	{
-	    Variant variant = getRequest().selectVariant(MODEL_VARIANTS);
+	    Variant variant = getRequest().selectVariant(variants);
 	    if (variant == null)
 	    {
 		if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants: {}", variant, getVariants());
-		return Response.notAcceptable(MODEL_VARIANTS);
+		return Response.notAcceptable(variants);
 	    }	
 	    else
 	    {
 		if (log.isTraceEnabled()) log.trace("Generating RDF Response with Variant: {} and EntityTag: {}", variant, entityTag);
-		return Response.ok(model, variant).
-			tag(entityTag); // uses ModelXSLTWriter/ModelWriter
+		return Response.ok(entity, variant).
+			tag(entityTag);
 	    }
 	}	
     }
-
-    public ResponseBuilder getResponseBuilder(ResultSetRewindable resultSet)
-    {
-	EntityTag entityTag = new EntityTag(Long.toHexString(ResultSetUtils.hashResultSet(resultSet)));
-	resultSet.reset(); // ResultSet needs to be rewinded back to the beginning
-	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(entityTag);
-
-	if (rb != null)
-	{
-	    if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
-	    return rb;
-	}
-	else
-	{
-	    Variant variant = getRequest().selectVariant(RESULT_SET_VARIANTS);
-	    if (variant == null)
-	    {
-		if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants: {}", variant, RESULT_SET_VARIANTS);
-		return Response.notAcceptable(RESULT_SET_VARIANTS);
-	    }	
-	    else
-	    {
-		if (log.isTraceEnabled()) log.trace("Generating SPARQL results Response with Variant: {} and EntityTag: {}", variant, entityTag);
-		return Response.ok(resultSet, variant).
-			tag(entityTag); // uses ResultSetWriter
-	    }
-	}	
-    }
-
+    
     public ResultSetRewindable loadResultSetRewindable(Resource endpoint, Query query)
     {
 	if (log.isDebugEnabled()) log.debug("Loading ResultSet from SPARQL endpoint: {} using Query: {}", endpoint.getURI(), query);
@@ -232,19 +230,9 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	return resource;
     }
 
-    public HttpHeaders getHttpHeaders()
-    {
-	return httpHeaders;
-    }
-
     public Request getRequest()
     {
 	return request;
-    }
-
-    public UriInfo getUriInfo()
-    {
-	return uriInfo;
     }
 
     public ResourceConfig getResourceConfig()

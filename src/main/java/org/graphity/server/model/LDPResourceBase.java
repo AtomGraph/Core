@@ -45,14 +45,14 @@ public class LDPResourceBase extends LinkedDataResourceBase implements LDPResour
      * @param variants representation variants
      * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/rdf/model/Resource.html">Resource</a>
      */
-    public LDPResourceBase(@Context UriInfo uriInfo, @Context ResourceConfig resourceConfig, @Context ResourceContext resourceContext)
+    public LDPResourceBase(@Context UriInfo uriInfo, @Context ResourceConfig resourceConfig)
     {
-	super(uriInfo, resourceConfig, resourceContext);
+	super(uriInfo, resourceConfig);
     }
 
-    protected LDPResourceBase(Resource resource, SPARQLEndpointBase endpoint, CacheControl cacheControl)
+    protected LDPResourceBase(Resource resource, CacheControl cacheControl)
     {
-	super(resource, endpoint, cacheControl);
+	super(resource, cacheControl);
     }
 
     @Override

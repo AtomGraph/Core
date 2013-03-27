@@ -18,13 +18,9 @@ package org.graphity.server.model;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.*;
 import com.sun.jersey.api.core.ResourceConfig;
-import com.sun.jersey.api.core.ResourceContext;
 import javax.ws.rs.GET;
-import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
@@ -40,7 +36,6 @@ import org.slf4j.LoggerFactory;
  * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/rdf/model/Resource.html">Resource</a>
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-@Path("{path: .*}")
 public class LinkedDataResourceBase implements LinkedDataResource
 {
     private static final Logger log = LoggerFactory.getLogger(LinkedDataResourceBase.class);
@@ -52,11 +47,7 @@ public class LinkedDataResourceBase implements LinkedDataResource
     public static final String PROPERTY_CACHE_CONTROL = "org.graphity.server.cache-control";
 
     private final Resource resource;
-    private final SPARQLEndpointBase endpoint;
     private final CacheControl cacheControl;
-    @Context UriInfo uriInfo;
-    @Context ResourceConfig resourceConfig;
-    @Context ResourceContext resourceContext;
 
     /** 
      * Constructs read-only LD resource from Jena's Resource and JAX-RS context
@@ -67,61 +58,42 @@ public class LinkedDataResourceBase implements LinkedDataResource
      * @param httpHeaders current request headers
      * @param variants representation variants
      */
-    public LinkedDataResourceBase(@Context UriInfo uriInfo, @Context ResourceConfig resourceConfig, @Context ResourceContext resourceContext)
+    public LinkedDataResourceBase(@Context UriInfo uriInfo, @Context ResourceConfig resourceConfig)
     {
 	this(ResourceFactory.createResource(uriInfo.getAbsolutePath().toString()),
-		resourceContext.getResource(SPARQLEndpointBase.class),
 		(resourceConfig.getProperty(PROPERTY_CACHE_CONTROL) == null) ? null : CacheControl.valueOf(resourceConfig.getProperty(PROPERTY_CACHE_CONTROL).toString()));
     }
     
-    protected LinkedDataResourceBase(Resource resource, SPARQLEndpointBase endpoint, CacheControl cacheControl)
+    protected LinkedDataResourceBase(Resource resource, CacheControl cacheControl)
     {
-	if (resource == null) throw new IllegalArgumentException("Resource cannot be null");	
+	if (resource == null) throw new IllegalArgumentException("Resource cannot be null");
 	if (!resource.isURIResource()) throw new IllegalArgumentException("Resource must be URI Resource (not a blank node)");
 
 	this.resource = resource;
 	this.cacheControl = cacheControl;
-	this.endpoint = endpoint;
 	
-	if (log.isDebugEnabled())
-	{
-	    log.debug("Creating LinkedDataResource from Resource with URI: {}", resource.getURI());
-	    //log.debug("List of Variants: {}", variants);
-	}
-    }
-    
-    @GET
-    @Override
-    public Response getResponse()
-    {
-	Model model = getEndpoint().loadModel(getQuery());
-
-	if (model.isEmpty())
-	{
-	    if (log.isTraceEnabled()) log.trace("DESCRIBE Model is empty; returning 404 Not Found");
-	    throw new WebApplicationException(Response.Status.NOT_FOUND);
-	}
-	if (log.isDebugEnabled()) log.debug("Returning @GET Response with {} statements in Model", model.size());
-	return getResponseBuilder(model).build();
-
+	if (log.isDebugEnabled()) log.debug("Creating LinkedDataResource from Resource with URI: {}", resource.getURI());
     }
     
     public ResponseBuilder getResponseBuilder(Model model)
     {
-	return getEndpoint().getResponseBuilder(model).
-		cacheControl(getCacheControl());
-    }
-    
-    public Query getQuery()
-    {
-	return getQuery(getURI());
-    }
-    
-    public Query getQuery(String uri)
-    {
-	return QueryFactory.create("DESCRIBE <" + uri + ">");
+	return Response.ok(model);
     }
 
+    @GET
+    @Override
+    public Response getResponse()
+    {
+	if (getModel().isEmpty())
+	{
+	    if (log.isTraceEnabled()) log.trace("DESCRIBE Model is empty; returning 404 Not Found");
+	    throw new WebApplicationException(Response.Status.NOT_FOUND);
+	}
+	
+	if (log.isDebugEnabled()) log.debug("Returning @GET Response with {} statements in Model", getModel().size());
+	return getResponseBuilder(getModel()).build();
+    }
+    
     @Override
     public final String getURI()
     {
@@ -133,35 +105,15 @@ public class LinkedDataResourceBase implements LinkedDataResource
 	return resource;
     }
 
-    public SPARQLEndpointBase getEndpoint()
-    {
-	return endpoint;
-    }
-
     @Override
     public final Model getModel()
     {
 	return getResource().getModel();
     }
-    
-    public final UriInfo getUriInfo()
-    {
-	return uriInfo;
-    }
 
     public final CacheControl getCacheControl()
     {
 	return cacheControl;
-    }
-
-    public ResourceConfig getResourceConfig()
-    {
-	return resourceConfig;
-    }
-
-    public ResourceContext getResourceContext()
-    {
-	return resourceContext;
     }
     
     @Override
