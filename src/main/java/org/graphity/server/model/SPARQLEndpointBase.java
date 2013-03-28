@@ -31,6 +31,8 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.*;
 import org.graphity.server.util.DataManager;
+import org.graphity.server.vocabulary.GS;
+import org.graphity.server.vocabulary.VoID;
 import org.graphity.util.ModelUtils;
 import org.graphity.util.ResultSetUtils;
 import org.slf4j.Logger;
@@ -64,19 +66,6 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	variants.addAll(RESULT_SET_VARIANTS);
 	VARIANTS = variants;
     }
-
-    /**
-     * Configuration property for remote origin SPARQL endpoint (set in web.xml)
-     * 
-     */
-    public static final String PROPERTY_ENDPOINT_URI = "org.graphity.server.endpoint-uri";
-
-
-    /**
-     * Configuration property for maximum SELECT query results (set in web.xml)
-     * 
-     */
-    public static final String PROPERTY_QUERY_RESULT_LIMIT = "org.graphity.server.query.result-limit";
     
     private final Resource resource;
     private final Request request;
@@ -84,9 +73,9 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 
     public SPARQLEndpointBase(@Context Request request, @Context ResourceConfig resourceConfig)
     {
-	this((resourceConfig.getProperty(PROPERTY_ENDPOINT_URI) == null) ?
+	this((resourceConfig.getProperty(VoID.sparqlEndpoint.getURI()) == null) ?
 		null :
-		ResourceFactory.createResource(resourceConfig.getProperty(PROPERTY_ENDPOINT_URI).toString()),
+		ResourceFactory.createResource(resourceConfig.getProperty(VoID.sparqlEndpoint.getURI()).toString()),
 	    request, resourceConfig);
     }
     
@@ -117,8 +106,8 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	if (query.isSelectType())
 	{
 	    if (log.isDebugEnabled()) log.debug("SPARQL endpoint executing SELECT query: {}", query);
-	    if (getResourceConfig().getProperty(PROPERTY_QUERY_RESULT_LIMIT) != null)
-		query.setLimit(Long.parseLong(getResourceConfig().getProperty(PROPERTY_QUERY_RESULT_LIMIT).toString()));
+	    if (getResourceConfig().getProperty(GS.resultLimit.getURI()) != null)
+		query.setLimit(Long.parseLong(getResourceConfig().getProperty(GS.resultLimit.getURI()).toString()));
 
 	    return getResponseBuilder(loadResultSetRewindable(getEndpoint(), query));
 	}

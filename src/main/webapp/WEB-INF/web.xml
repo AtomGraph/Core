@@ -14,15 +14,15 @@
             <param-value>org.graphity.server.Application</param-value>
         </init-param>
         <init-param>
-            <param-name>org.graphity.server.endpoint-uri</param-name>
+            <param-name>http://rdfs.org/ns/void#sparqlEndpoint</param-name>
             <param-value>http://dydra.com/graphity/server/sparql</param-value>
         </init-param>
         <init-param>
-            <param-name>org.graphity.server.cache-control</param-name>
+            <param-name>http://server.graphity.org/ontology#cacheControl</param-name>
             <param-value>no-cache</param-value>
         </init-param>
         <init-param>
-            <param-name>org.graphity.server.query.result-limit</param-name>
+            <param-name>http://server.graphity.org/ontology#resultLimit</param-name>
             <param-value>100</param-value>
         </init-param>
     </filter>
