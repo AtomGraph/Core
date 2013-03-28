@@ -18,6 +18,7 @@ package org.graphity.server.util;
 
 import com.hp.hpl.jena.query.*;
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.sparql.engine.http.Service;
 import com.hp.hpl.jena.sparql.util.Context;
 import com.hp.hpl.jena.util.FileManager;
@@ -30,6 +31,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.apache.jena.fuseki.DatasetAccessor;
 import org.apache.jena.fuseki.http.DatasetAdapter;
 import org.graphity.query.QueryEngineHTTP;
+import org.graphity.server.model.SPARQLEndpoint;
 import org.graphity.update.DatasetGraphAccessorHTTP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -220,14 +222,44 @@ public class DataManager extends FileManager
     {
 	getServiceContextMap().put(endpointURI, context);
     }
-    
+
+    public void addServiceContext(Resource endpoint, Context context)
+    {
+	if (endpoint == null) throw new IllegalArgumentException("SPARQLEndpoint must be not null");
+	getServiceContextMap().put(endpoint.getURI(), context);
+    }
+
     public void addServiceContext(String endpointURI)
     {
 	addServiceContext(endpointURI, new Context());
+    }
+
+    public void addServiceContext(Resource endpoint)
+    {
+	if (endpoint == null) throw new IllegalArgumentException("SPARQLEndpoint must be not null");
+	addServiceContext(endpoint.getURI(), new Context());
     }
 
     public Context getServiceContext(String endpointURI)
     {
 	return getServiceContextMap().get(endpointURI);
     }
+    
+    public Context getServiceContext(Resource endpoint)
+    {
+	if (endpoint == null) throw new IllegalArgumentException("SPARQLEndpoint must be not null");
+	return getServiceContext(endpoint.getURI());
+    }
+    
+    public boolean hasServiceContext(String endpointURI)
+    {
+	return getServiceContextMap().get(endpointURI) != null;
+    }
+
+    public boolean hasServiceContext(Resource endpoint)
+    {
+	if (endpoint == null) throw new IllegalArgumentException("SPARQLEndpoint must be not null");
+	return hasServiceContext(endpoint.getURI());
+    }
+
 }

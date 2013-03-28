@@ -93,6 +93,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     protected SPARQLEndpointBase(Resource endpoint, Request request, ResourceConfig resourceConfig)
     {
 	if (endpoint == null) throw new IllegalArgumentException("Endpoint cannot be null");
+	if (!endpoint.isURIResource()) throw new IllegalArgumentException("Endpoint must be URI Resource (not a blank node)");
 	if (request == null) throw new IllegalArgumentException("Request cannot be null");
 	if (resourceConfig == null) throw new IllegalArgumentException("ResourceConfig cannot be null");
 
