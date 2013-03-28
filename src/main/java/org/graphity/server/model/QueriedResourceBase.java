@@ -78,8 +78,13 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
 	    throw new WebApplicationException(Response.Status.NOT_FOUND);
 	}
 	if (log.isDebugEnabled()) log.debug("Returning @GET Response with {} statements in Model", description.size());
-	return getResponseBuilder(description).build();
+	return getResponse(description);
 
+    }
+
+    public Response getResponse(Model model)
+    {
+	return getResponseBuilder(model).build();
     }
     
     @Override
