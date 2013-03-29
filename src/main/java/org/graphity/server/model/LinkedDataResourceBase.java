@@ -27,6 +27,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
+import org.graphity.server.vocabulary.GS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,12 +40,6 @@ import org.slf4j.LoggerFactory;
 public class LinkedDataResourceBase implements LinkedDataResource
 {
     private static final Logger log = LoggerFactory.getLogger(LinkedDataResourceBase.class);
-
-    /**
-     * Configuration property for default Cache-Control header value (set in web.xml)
-     * 
-     */
-    public static final String PROPERTY_CACHE_CONTROL = "org.graphity.server.cache-control";
 
     private final Resource resource;
     private final CacheControl cacheControl;
@@ -61,7 +56,9 @@ public class LinkedDataResourceBase implements LinkedDataResource
     public LinkedDataResourceBase(@Context UriInfo uriInfo, @Context ResourceConfig resourceConfig)
     {
 	this(ResourceFactory.createResource(uriInfo.getAbsolutePath().toString()),
-		(resourceConfig.getProperty(PROPERTY_CACHE_CONTROL) == null) ? null : CacheControl.valueOf(resourceConfig.getProperty(PROPERTY_CACHE_CONTROL).toString()));
+		(resourceConfig.getProperty(GS.cacheControl.getURI()) == null) ?
+		    null :
+		    CacheControl.valueOf(resourceConfig.getProperty(GS.cacheControl.getURI()).toString()));
     }
     
     protected LinkedDataResourceBase(Resource resource, CacheControl cacheControl)

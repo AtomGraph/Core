@@ -33,6 +33,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Variant;
+import org.graphity.server.vocabulary.GS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +52,9 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
     {
 	this(ResourceFactory.createResource(uriInfo.getAbsolutePath().toString()),
 		resourceContext.getResource(SPARQLEndpointBase.class),
-		(resourceConfig.getProperty(PROPERTY_CACHE_CONTROL) == null) ? null : CacheControl.valueOf(resourceConfig.getProperty(PROPERTY_CACHE_CONTROL).toString()));
+		(resourceConfig.getProperty(GS.cacheControl.getURI()) == null) ?
+		    null :
+		    CacheControl.valueOf(resourceConfig.getProperty(GS.cacheControl.getURI()).toString()));
     }
 
     protected QueriedResourceBase(Resource resource, SPARQLEndpointBase endpoint, CacheControl cacheControl)
