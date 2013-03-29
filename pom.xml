@@ -5,7 +5,7 @@
     <version>1.0.7-SNAPSHOT</version>
 
     <name>Graphity Server</name>
-    <description>Generic Linked Data platform</description>
+    <description>Generic Linked Data server</description>
 
     <developers>
 	<developer>
