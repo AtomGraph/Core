@@ -14,7 +14,6 @@
  *  limitations under the License.
  *
  */
-
 package org.graphity.update;
 
 import com.hp.hpl.jena.query.Query;
