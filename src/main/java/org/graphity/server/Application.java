@@ -27,6 +27,7 @@ import javax.ws.rs.core.Context;
 import org.graphity.server.model.QueriedResourceBase;
 import org.graphity.server.model.SPARQLEndpointBase;
 import org.graphity.server.provider.ModelProvider;
+import org.graphity.server.provider.QueryFormParamProvider;
 import org.graphity.server.provider.QueryParamProvider;
 import org.graphity.server.provider.ResultSetWriter;
 import org.openjena.riot.SysRIOT;
@@ -58,6 +59,7 @@ public class Application extends javax.ws.rs.core.Application
 	singletons.add(new ModelProvider());
 	singletons.add(new ResultSetWriter());
 	singletons.add(new QueryParamProvider(Query.class));
+	singletons.add(new QueryFormParamProvider(Query.class));
     }
 
     /**

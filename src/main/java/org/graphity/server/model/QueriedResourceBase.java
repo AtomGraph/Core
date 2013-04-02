@@ -71,7 +71,7 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
     
     @GET
     @Override
-    public Response getResponse()
+    public Response get()
     {
 	Model description = describe();
 

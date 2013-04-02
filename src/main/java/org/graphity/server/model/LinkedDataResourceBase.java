@@ -79,7 +79,7 @@ public class LinkedDataResourceBase implements LinkedDataResource
 
     @GET
     @Override
-    public Response getResponse()
+    public Response get()
     {
 	if (getModel().isEmpty())
 	{

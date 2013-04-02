@@ -44,6 +44,16 @@ public class MediaType extends javax.ws.rs.core.MediaType
     public final static String APPLICATION_SPARQL_RESULTS_JSON = "application/sparql-results+json";
     /** "application/sparql-results+json" */
     public final static MediaType APPLICATION_SPARQL_RESULTS_JSON_TYPE = new MediaType("application","sparql-results+json");
+
+    /** "application/sparql-query" */
+    public final static String APPLICATION_SPARQL_QUERY = "application/sparql-query";
+    /** "application/sparql-query" */
+    public final static MediaType APPLICATION_SPARQL_QUERY_TYPE = new MediaType("application","sparql-query");
+
+    /** "application/sparql-update" */
+    public final static String APPLICATION_SPARQL_UPDATE = "application/sparql-update";
+    /** "application/sparql-update" */
+    public final static MediaType APPLICATION_SPARQL_UPDATE_TYPE = new MediaType("application","sparql-update");
     
     public MediaType(String type, String subtype, Map<String, String> parameters)
     {

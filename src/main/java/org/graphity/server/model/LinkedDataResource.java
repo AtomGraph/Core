@@ -43,7 +43,7 @@ public interface LinkedDataResource extends Resource // OntResource
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/Response.html">Response</a>
      * @see <a href="http://tools.ietf.org/html/draft-ietf-httpbis-p2-semantics-21#section-5.3.1">Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content 5.3.1. GET</a>
      */
-    @GET Response getResponse();
+    @GET Response get();
 
     /**
      * Return current request

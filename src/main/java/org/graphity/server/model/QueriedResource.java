@@ -26,6 +26,6 @@ public interface QueriedResource
 {
     Query getQuery();
     
-    SPARQLEndpoint getEndpoint();
+    SPARQLQueryEndpoint getEndpoint();
 
 }

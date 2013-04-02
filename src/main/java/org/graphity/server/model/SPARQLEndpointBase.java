@@ -22,12 +22,10 @@ import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.rdf.model.*;
 import com.sun.jersey.api.core.ResourceConfig;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.*;
 import org.graphity.server.util.DataManager;
@@ -44,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 @Path("/sparql")
-public class SPARQLEndpointBase implements SPARQLEndpoint
+public class SPARQLEndpointBase implements SPARQLQueryEndpoint
 {
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointBase.class);
 
@@ -94,9 +92,22 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 
     @Override
     @GET
-    public Response query(@QueryParam("query") Query query)
+    public Response query(@QueryParam("query") Query query, @QueryParam("default-graph-uri") URI defaultGraphUri, @QueryParam("named-graph-uri") URI graphUri)
     {
 	return getResponseBuilder(query).build();
+    }
+
+    @Override
+    public Response queryEncoded(@FormParam("query") Query query, @FormParam("default-graph-uri") URI defaultGraphUri, @FormParam("named-graph-uri") URI graphUri)
+    {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    @POST
+    public Response queryDirectly(Query query, @QueryParam("default-graph-uri") URI defaultGraphUri, @QueryParam("named-graph-uri") URI graphUri)
+    {
+	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public ResponseBuilder getResponseBuilder(Query query)

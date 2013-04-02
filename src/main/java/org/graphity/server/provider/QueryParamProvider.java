@@ -39,11 +39,11 @@ import org.slf4j.LoggerFactory;
  * @see <a href="http://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/spi/inject/PerRequestTypeInjectableProvider.html">PerRequestTypeInjectableProvider</a>
  */
 @Provider
-public class QueryParamProvider extends PerRequestTypeInjectableProvider<QueryParam, Query> // implements InjectableProvider<QueryParam, Parameter>
+public class QueryParamProvider extends PerRequestTypeInjectableProvider<QueryParam, Query>
 {
     private static final Logger log = LoggerFactory.getLogger(QueryParamProvider.class);
     
-    @Context HttpContext hc = null;
+    @Context HttpContext httpContext;
 
     public QueryParamProvider(Type t)
     {
@@ -59,7 +59,7 @@ public class QueryParamProvider extends PerRequestTypeInjectableProvider<QueryPa
 	    @Override
 	    public Query getValue()
 	    {
-		String value = hc.getUriInfo().getQueryParameters().getFirst(paramName);
+		String value = getHttpContext().getUriInfo().getQueryParameters().getFirst(paramName);
 		if (value == null || value.isEmpty()) return null;
 		    
 		if (log.isTraceEnabled()) log.trace("Providing Injectable<Query> with @QueryParam({}) and value: {}", paramName, value);
@@ -75,4 +75,10 @@ public class QueryParamProvider extends PerRequestTypeInjectableProvider<QueryPa
 	    }
 	};
     }
+
+    public HttpContext getHttpContext()
+    {
+	return httpContext;
+    }
+
 } 

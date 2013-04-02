@@ -68,7 +68,7 @@ public class DataManager extends FileManager
 	this.context = context;
     }
 
-    public QueryExecution makeQueryExecution(String endpointURI, Query query, MultivaluedMap<String, String> params)
+    public QueryExecution sparqlService(String endpointURI, Query query, MultivaluedMap<String, String> params)
     {
 	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, query);
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
@@ -91,7 +91,7 @@ public class DataManager extends FileManager
 	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, query);
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
 
-	QueryExecution qex = makeQueryExecution(endpointURI, query, params);
+	QueryExecution qex = sparqlService(endpointURI, query, params);
 	try
 	{
 	    if (query.isConstructType()) return qex.execConstruct();
@@ -151,7 +151,7 @@ public class DataManager extends FileManager
 	if (log.isDebugEnabled()) log.debug("Remote service {} Query execution: {} ", endpointURI, query);
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
 
-	QueryExecution qex = makeQueryExecution(endpointURI, query, params);
+	QueryExecution qex = sparqlService(endpointURI, query, params);
 	try
 	{
 	    if (query.isSelectType()) return ResultSetFactory.copyResults(qex.execSelect());
@@ -190,7 +190,7 @@ public class DataManager extends FileManager
     // uses graph store protocol - expects /sparql service!
     public void putModel(String endpointURI, String graphURI, Model model)
     {
-	if (log.isDebugEnabled()) log.debug("PUTting Model to service {} with GRAPH URI {}", endpointURI, graphURI);
+	if (log.isDebugEnabled()) log.debug("PUTting Model to endpoint {} with GRAPH URI {}", endpointURI, graphURI);
 	
 	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(endpointURI));
 	accessor.putModel(graphURI, model);
@@ -198,7 +198,10 @@ public class DataManager extends FileManager
 
     public void putModel(String endpointURI, Model model)
     {
+	if (log.isDebugEnabled()) log.debug("PUTting Model to endpoint {} default graph", endpointURI);
 	
+	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(endpointURI));
+	accessor.putModel(model);
     }
 
     public Context getContext()

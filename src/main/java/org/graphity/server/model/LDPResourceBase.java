@@ -22,6 +22,7 @@ import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.api.core.ResourceContext;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
+import org.graphity.server.util.DataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,30 +32,20 @@ import org.slf4j.LoggerFactory;
  * @see LDPResource
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class LDPResourceBase extends LinkedDataResourceBase implements LDPResource
+public class LDPResourceBase extends QueriedResourceBase implements LDPResource
 {    
     private static final Logger log = LoggerFactory.getLogger(LDPResourceBase.class);
+
+    public LDPResourceBase(@Context UriInfo uriInfo, @Context ResourceConfig resourceConfig, @Context ResourceContext resourceContext)
+    {
+	super(uriInfo, resourceConfig, resourceContext);
+    }
+
+    protected LDPResourceBase(Resource resource, SPARQLEndpointBase endpoint, CacheControl cacheControl)
+    {
+	super(resource, endpoint, cacheControl);
+    }
     
-    /**
-     * Constructs read-write LD resource from Jena's OntResource and JAX-RS context
-     * 
-     * @param resource the current resource in the ontology
-     * @param uriInfo URI information
-     * @param request current request
-     * @param httpHeaders current request headers
-     * @param variants representation variants
-     * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/rdf/model/Resource.html">Resource</a>
-     */
-    public LDPResourceBase(@Context UriInfo uriInfo, @Context ResourceConfig resourceConfig)
-    {
-	super(uriInfo, resourceConfig);
-    }
-
-    protected LDPResourceBase(Resource resource, CacheControl cacheControl)
-    {
-	super(resource, cacheControl);
-    }
-
     @Override
     /**
      * @link <a href="http://lists.w3.org/Archives/Public/public-ldp-wg/2012Oct/0181.html">What is the document base URI of a POSTed document?</a>
@@ -70,15 +61,13 @@ public class LDPResourceBase extends LinkedDataResourceBase implements LDPResour
     }
 
     @Override
+    //@GET
     public Response put(Model model)
     {
-	throw new WebApplicationException(405);
+	//getUriInfo().
+	DataManager.get().putModel(getEndpoint().getURI(), model);
 	
-	// if (getService() != null) DataManager.get().putModel(endpointUri, getUriInfo().getAbsolutePath(), model);
-
-	//getOntResource().getOntModel().add(model);
-	
-	//return Response.created(getUriInfo().getAbsolutePath()).build();
+	return Response.ok().build();
     }
 
     @Override

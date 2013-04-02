@@ -18,10 +18,9 @@ package org.graphity.server.model;
 
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.rdf.model.Resource;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import java.net.URI;
+import javax.ws.rs.*;
+import org.graphity.server.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
@@ -31,8 +30,8 @@ import javax.ws.rs.core.Response;
  * @see <a href="http://www.w3.org/TR/rdf-sparql-protocol/">SPARQL Protocol for RDF</a>
  */
 @Path("/sparql")
-@Produces({org.graphity.server.MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", org.graphity.server.MediaType.TEXT_TURTLE + "; charset=UTF-8", org.graphity.server.MediaType.APPLICATION_SPARQL_RESULTS_XML + "; charset=UTF-8", org.graphity.server.MediaType.APPLICATION_SPARQL_RESULTS_JSON + "; charset=UTF-8"})
-public interface SPARQLEndpoint extends Resource
+@Produces({MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", MediaType.TEXT_TURTLE + "; charset=UTF-8", org.graphity.server.MediaType.APPLICATION_SPARQL_RESULTS_XML + "; charset=UTF-8", MediaType.APPLICATION_SPARQL_RESULTS_JSON + "; charset=UTF-8"})
+public interface SPARQLQueryEndpoint extends Resource
 {
     /**
      * Handles SPARQL Protocol for RDF request and returns query result as response
@@ -41,7 +40,11 @@ public interface SPARQLEndpoint extends Resource
      * @return result response (in one of the representation variants)
      * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/Query.html">ARQ Query</a>
      */
-    @GET Response query(@QueryParam("query") Query query); // @QueryParam("default-graph-uri") String uri @QueryParam("named-graph-uri") String graphUri
+    @GET Response query(@QueryParam("query") Query query, @QueryParam("default-graph-uri") URI defaultGraphUri, @QueryParam("named-graph-uri") URI graphUri);
+    
+    @POST @Consumes(MediaType.APPLICATION_FORM_URLENCODED) Response queryEncoded(@FormParam("query") Query query, @FormParam("default-graph-uri") URI defaultGraphUri, @FormParam("named-graph-uri") URI graphUri);
+    
+    @POST @Consumes(MediaType.APPLICATION_SPARQL_QUERY) Response queryDirectly(Query query, @QueryParam("default-graph-uri") URI defaultGraphUri, @QueryParam("named-graph-uri") URI graphUri);
     
     // Context getServiceContext();
 }
