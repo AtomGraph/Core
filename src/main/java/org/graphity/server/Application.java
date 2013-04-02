@@ -17,9 +17,13 @@
 package org.graphity.server;
 
 import com.hp.hpl.jena.ontology.OntDocumentManager;
+import com.hp.hpl.jena.query.ARQ;
 import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.sparql.engine.http.Service;
 import com.sun.jersey.api.core.ResourceConfig;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
@@ -30,6 +34,7 @@ import org.graphity.server.provider.ModelProvider;
 import org.graphity.server.provider.QueryFormParamProvider;
 import org.graphity.server.provider.QueryParamProvider;
 import org.graphity.server.provider.ResultSetWriter;
+import org.graphity.server.vocabulary.VoID;
 import org.openjena.riot.SysRIOT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,6 +84,24 @@ public class Application extends javax.ws.rs.core.Application
 	SysRIOT.wireIntoJena(); // enable RIOT parser
 	// WARNING! ontology caching can cause concurrency/consistency problems
 	OntDocumentManager.getInstance().setCacheModels(false);
+	
+	if (getResourceConfig().getProperty(VoID.sparqlEndpoint.getURI()) != null)
+	{
+	    String endpointURI = getResourceConfig().getProperty(VoID.sparqlEndpoint.getURI()).toString();
+	    String authUser = getResourceConfig().getProperty(Service.queryAuthUser.getSymbol()).toString();
+	    String authPwd = getResourceConfig().getProperty(Service.queryAuthPwd.getSymbol()).toString();
+	    if (authUser != null && authPwd != null)
+	    {
+		if (log.isDebugEnabled()) log.debug("Setting username/password credentials for SPARQL endpoint: {}", endpointURI);
+		com.hp.hpl.jena.sparql.util.Context queryContext = new com.hp.hpl.jena.sparql.util.Context();
+		queryContext.put(Service.queryAuthUser, authUser);
+		queryContext.put(Service.queryAuthPwd, authPwd);
+		Map<String,com.hp.hpl.jena.sparql.util.Context> serviceContext = new HashMap<String,com.hp.hpl.jena.sparql.util.Context>();
+
+		serviceContext.put(endpointURI, queryContext);
+		ARQ.getContext().put(Service.serviceContext, serviceContext);
+	    }
+	}	
     }
     
     /**
