@@ -517,4 +517,10 @@ public class SPARQLEndpointBase implements SPARQLQueryEndpoint
 	return getResource().asNode();
     }
 
+    @Override
+    public String toString()
+    {
+	return getResource().toString();
+    }
+
 }
