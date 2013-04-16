@@ -41,7 +41,7 @@ public class LDPResourceBase extends QueriedResourceBase implements LDPResource
 	super(uriInfo, resourceConfig, resourceContext);
     }
 
-    protected LDPResourceBase(Resource resource, SPARQLEndpointBase endpoint, CacheControl cacheControl)
+    protected LDPResourceBase(Resource resource, SPARQLEndpoint endpoint, CacheControl cacheControl)
     {
 	super(resource, endpoint, cacheControl);
     }

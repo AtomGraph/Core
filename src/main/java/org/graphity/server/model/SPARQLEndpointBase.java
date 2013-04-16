@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 @Path("/sparql")
-public class SPARQLEndpointBase implements SPARQLQueryEndpoint
+public class SPARQLEndpointBase implements SPARQLEndpoint
 {
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointBase.class);
 
@@ -90,26 +90,53 @@ public class SPARQLEndpointBase implements SPARQLQueryEndpoint
 	if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase with endpoint: {}", endpoint);
     }
 
+    // SPARQL Query
+
     @Override
     @GET
-    public Response query(@QueryParam("query") Query query, @QueryParam("default-graph-uri") URI defaultGraphUri, @QueryParam("named-graph-uri") URI graphUri)
+    public Response query(@QueryParam("query") Query query,
+	@QueryParam("default-graph-uri") URI defaultGraphUri, @QueryParam("named-graph-uri") URI graphUri)
     {
 	return getResponseBuilder(query).build();
     }
 
     @Override
-    public Response queryEncoded(@FormParam("query") Query query, @FormParam("default-graph-uri") URI defaultGraphUri, @FormParam("named-graph-uri") URI graphUri)
+    public Response queryEncoded(@FormParam("query") Query query,
+	@FormParam("default-graph-uri") URI defaultGraphUri, @FormParam("named-graph-uri") URI graphUri)
     {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     @POST
-    public Response queryDirectly(Query query, @QueryParam("default-graph-uri") URI defaultGraphUri, @QueryParam("named-graph-uri") URI graphUri)
+    public Response queryDirectly(Query query, @QueryParam("default-graph-uri") URI defaultGraphUri,
+	@QueryParam("named-graph-uri") URI graphUri)
     {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    // SPARQL Update
+
+    @Override
+    @POST
+    @Consumes(org.graphity.server.MediaType.APPLICATION_FORM_URLENCODED)
+    public Response update(@FormParam("update") String updateString,
+	@FormParam("using-graph-uri") String defaultGraphUri,
+	@FormParam("using-named-graph-uri") String graphUri)
+    {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    @POST
+    @Consumes(org.graphity.server.MediaType.APPLICATION_SPARQL_UPDATE)
+    public Response update(@QueryParam("using-graph-uri") String defaultGraphUri,
+	@QueryParam("using-named-graph-uri") String graphUri)
+    {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
     public ResponseBuilder getResponseBuilder(Query query)
     {
 	if (query == null) throw new WebApplicationException(Response.Status.BAD_REQUEST);
@@ -120,35 +147,39 @@ public class SPARQLEndpointBase implements SPARQLQueryEndpoint
 	    if (getResourceConfig().getProperty(GS.resultLimit.getURI()) != null)
 		query.setLimit(Long.parseLong(getResourceConfig().getProperty(GS.resultLimit.getURI()).toString()));
 
-	    return getResponseBuilder(loadResultSetRewindable(getEndpoint(), query));
+	    return getResponseBuilder(loadResultSetRewindable(getResource(), query));
 	}
 
 	if (query.isConstructType() || query.isDescribeType())
 	{
 	    if (log.isDebugEnabled()) log.debug("SPARQL endpoint executing CONSTRUCT/DESCRIBE query: {}", query);
-	    return getResponseBuilder(loadModel(getEndpoint(), query));
+	    return getResponseBuilder(loadModel(getResource(), query));
 	}
 
 	if (log.isWarnEnabled()) log.warn("SPARQL endpoint received unknown type of query: {}", query);
 	throw new WebApplicationException(Response.Status.BAD_REQUEST);
     }
 
+    @Override
     public ResponseBuilder getResponseBuilder(Model model)
     {
 	return getResponseBuilder(model, MODEL_VARIANTS);
     }
     
+    @Override
     public ResponseBuilder getResponseBuilder(Model model, List<Variant> variants)
     {
 	return getResponseBuilder(new EntityTag(Long.toHexString(ModelUtils.hashModel(model))),
 		model, variants);
     }
     
+    @Override
     public ResponseBuilder getResponseBuilder(ResultSetRewindable resultSet)
     {
 	return getResponseBuilder(resultSet, RESULT_SET_VARIANTS);
     }
     
+    @Override
     public ResponseBuilder getResponseBuilder(ResultSetRewindable resultSet, List<Variant> variants)
     {
 	EntityTag entityTag = new EntityTag(Long.toHexString(ResultSetUtils.hashResultSet(resultSet)));
@@ -157,6 +188,7 @@ public class SPARQLEndpointBase implements SPARQLQueryEndpoint
 		resultSet, variants);
     }
     
+    @Override
     public ResponseBuilder getResponseBuilder(EntityTag entityTag, Object entity, List<Variant> variants)
     {	
 	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(entityTag);
@@ -188,9 +220,10 @@ public class SPARQLEndpointBase implements SPARQLQueryEndpoint
 	return DataManager.get().loadResultSet(endpoint.getURI(), query); // .getResultSetRewindable()
     }
 
+    @Override
     public ResultSetRewindable loadResultSetRewindable(Query query)
     {
-	return loadResultSetRewindable(getEndpoint(), query);
+	return loadResultSetRewindable(getResource(), query);
     }
     
     public Model loadModel(Resource endpoint, Query query)
@@ -199,12 +232,13 @@ public class SPARQLEndpointBase implements SPARQLQueryEndpoint
 	return DataManager.get().loadModel(endpoint.getURI(), query);
     }
 
+    @Override
     public Model loadModel(Query query)
     {
-	return loadModel(getEndpoint(), query);
+	return loadModel(getResource(), query);
     }
 
-    public Resource getResource()
+    private Resource getResource()
     {
 	return resource;
     }
@@ -225,12 +259,7 @@ public class SPARQLEndpointBase implements SPARQLQueryEndpoint
     {
 	return VARIANTS;
     }
-
-    public Resource getEndpoint()
-    {
-	return resource;
-    }
-
+    
     public Request getRequest()
     {
 	return request;

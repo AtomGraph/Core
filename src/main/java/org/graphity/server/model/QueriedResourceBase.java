@@ -46,18 +46,18 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
 {
     private static final Logger log = LoggerFactory.getLogger(QueriedResourceBase.class);
     
-    private final SPARQLEndpointBase endpoint;
+    private final SPARQLEndpoint endpoint;
 
     public QueriedResourceBase(@Context UriInfo uriInfo, @Context ResourceConfig resourceConfig, @Context ResourceContext resourceContext)
     {
 	this(ResourceFactory.createResource(uriInfo.getAbsolutePath().toString()),
 		resourceContext.getResource(SPARQLEndpointBase.class),
-		(resourceConfig.getProperty(GS.cacheControl.getURI()) == null) ?
+		resourceConfig.getProperty(GS.cacheControl.getURI()) == null ?
 		    null :
 		    CacheControl.valueOf(resourceConfig.getProperty(GS.cacheControl.getURI()).toString()));
     }
 
-    protected QueriedResourceBase(Resource resource, SPARQLEndpointBase endpoint, CacheControl cacheControl)
+    protected QueriedResourceBase(Resource resource, SPARQLEndpoint endpoint, CacheControl cacheControl)
     {
 	super(resource, cacheControl);
 	if (endpoint == null) throw new IllegalArgumentException("SPARQL endpoint cannot be null");
@@ -115,7 +115,7 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
     }
 
     @Override
-    public SPARQLEndpointBase getEndpoint()
+    public SPARQLEndpoint getEndpoint()
     {
 	return endpoint;
     }

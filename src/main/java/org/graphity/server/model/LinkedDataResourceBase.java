@@ -97,7 +97,7 @@ public class LinkedDataResourceBase implements LinkedDataResource
 	return getResource().getURI();
     }
     
-    public final Resource getResource()
+    private Resource getResource()
     {
 	return resource;
     }

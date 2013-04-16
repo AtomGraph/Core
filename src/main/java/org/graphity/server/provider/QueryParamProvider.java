@@ -22,7 +22,6 @@ import com.sun.jersey.api.core.HttpContext;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
-import java.lang.reflect.Type;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
@@ -45,9 +44,9 @@ public class QueryParamProvider extends PerRequestTypeInjectableProvider<QueryPa
     
     @Context HttpContext httpContext;
 
-    public QueryParamProvider(Type t)
+    public QueryParamProvider()
     {
-	super(t);
+	super(Query.class);
     }
 
     @Override

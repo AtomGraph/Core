@@ -63,8 +63,8 @@ public class Application extends javax.ws.rs.core.Application
 
 	singletons.add(new ModelProvider());
 	singletons.add(new ResultSetWriter());
-	singletons.add(new QueryParamProvider(Query.class));
-	singletons.add(new QueryFormParamProvider(Query.class));
+	singletons.add(new QueryParamProvider());
+	singletons.add(new QueryFormParamProvider());
     }
 
     /**
@@ -80,28 +80,33 @@ public class Application extends javax.ws.rs.core.Application
     public void init()
     {
 	if (log.isDebugEnabled()) log.debug("Application.init() with ResourceConfig: {} and SerlvetContext: {}", getResourceConfig(), getServletContext());
-
 	SysRIOT.wireIntoJena(); // enable RIOT parser
 	// WARNING! ontology caching can cause concurrency/consistency problems
 	OntDocumentManager.getInstance().setCacheModels(false);
 	
-	if (getResourceConfig().getProperty(VoID.sparqlEndpoint.getURI()) != null)
-	{
-	    String endpointURI = getResourceConfig().getProperty(VoID.sparqlEndpoint.getURI()).toString();
-	    String authUser = getResourceConfig().getProperty(Service.queryAuthUser.getSymbol()).toString();
-	    String authPwd = getResourceConfig().getProperty(Service.queryAuthPwd.getSymbol()).toString();
-	    if (authUser != null && authPwd != null)
-	    {
-		if (log.isDebugEnabled()) log.debug("Setting username/password credentials for SPARQL endpoint: {}", endpointURI);
-		com.hp.hpl.jena.sparql.util.Context queryContext = new com.hp.hpl.jena.sparql.util.Context();
-		queryContext.put(Service.queryAuthUser, authUser);
-		queryContext.put(Service.queryAuthPwd, authPwd);
-		Map<String,com.hp.hpl.jena.sparql.util.Context> serviceContext = new HashMap<String,com.hp.hpl.jena.sparql.util.Context>();
+	if (getResourceConfig().getProperty(VoID.sparqlEndpoint.getURI()) == null)
+	    throw new IllegalArgumentException("No SPARQL endpoint URI specified in web.xml");
 
-		serviceContext.put(endpointURI, queryContext);
-		ARQ.getContext().put(Service.serviceContext, serviceContext);
-	    }
-	}	
+	String endpointURI = (String)getResourceConfig().getProperty(VoID.sparqlEndpoint.getURI());
+	String authUser = (String)getResourceConfig().getProperty(Service.queryAuthUser.getSymbol());
+	String authPwd = (String)getResourceConfig().getProperty(Service.queryAuthPwd.getSymbol());
+	if (authUser != null && authPwd != null) configureServiceContext(endpointURI, authUser, authPwd);
+    }
+
+    public void configureServiceContext(String endpointURI, String authUser, String authPwd)
+    {
+	if (endpointURI == null) throw new IllegalArgumentException("SPARQL endpoint URI cannot be null");
+	if (authUser == null) throw new IllegalArgumentException("SPARQL endpoint authentication username cannot be null");
+	if (authPwd == null) throw new IllegalArgumentException("SPARQL endpoint authentication password cannot be null");
+
+	if (log.isDebugEnabled()) log.debug("Setting username/password credentials for SPARQL endpoint: {}", endpointURI);
+	com.hp.hpl.jena.sparql.util.Context queryContext = new com.hp.hpl.jena.sparql.util.Context();
+	queryContext.put(Service.queryAuthUser, authUser);
+	queryContext.put(Service.queryAuthPwd, authPwd);
+	Map<String,com.hp.hpl.jena.sparql.util.Context> serviceContext = new HashMap<String,com.hp.hpl.jena.sparql.util.Context>();
+
+	serviceContext.put(endpointURI, queryContext);
+	ARQ.getContext().put(Service.serviceContext, serviceContext);
     }
     
     /**

@@ -22,11 +22,11 @@ import com.sun.jersey.api.core.HttpContext;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
-import java.lang.reflect.Type;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,15 +34,16 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
+@Provider
 public class QueryFormParamProvider extends PerRequestTypeInjectableProvider<FormParam, Query>
 {
     private static final Logger log = LoggerFactory.getLogger(QueryFormParamProvider.class);
     
     @Context HttpContext httpContext;
     
-    public QueryFormParamProvider(Type t)
+    public QueryFormParamProvider()
     {
-	super(t);
+	super(Query.class);
     }
 
     @Override
