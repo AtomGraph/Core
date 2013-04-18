@@ -18,7 +18,6 @@ package org.graphity.server;
 
 import com.hp.hpl.jena.ontology.OntDocumentManager;
 import com.hp.hpl.jena.query.ARQ;
-import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.sparql.engine.http.Service;
 import com.sun.jersey.api.core.ResourceConfig;
 import java.util.HashMap;
