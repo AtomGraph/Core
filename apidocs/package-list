@@ -1,0 +1,10 @@
+org.graphity.query
+org.graphity.server
+org.graphity.server.auth
+org.graphity.server.model
+org.graphity.server.provider
+org.graphity.server.update
+org.graphity.server.util
+org.graphity.server.vocabulary
+org.graphity.update
+org.graphity.util
