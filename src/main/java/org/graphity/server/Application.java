@@ -39,7 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Graphity JAX-RS application base class.
+ * Graphity Server JAX-RS application base class.
  * Can be extended or used as it is (needs to be registered in web.xml).
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
