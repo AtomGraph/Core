@@ -67,13 +67,14 @@ public class Application extends javax.ws.rs.core.Application
     }
 
     /**
-     * Initializes (post construction) DataManager, its LocationMapper and Locators
+     * Initializes (post construction) DataManager, its LocationMapper and Locators, and Context
      * 
      * @see org.graphity.util.manager.DataManager
      * @see org.graphity.util.locator
      * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/util/FileManager.html">FileManager</a>
      * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/util/LocationMapper.html">LocationMapper</a>
      * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/util/Locator.html">Locator</a>
+     * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/sparql/util/Context.html">Context</a>
      */
     @PostConstruct
     public void init()
@@ -92,6 +93,14 @@ public class Application extends javax.ws.rs.core.Application
 	if (authUser != null && authPwd != null) configureServiceContext(endpointURI, authUser, authPwd);
     }
 
+    /**
+     * Configures HTTP Basic authentication for SPARQL endpoint context
+     * 
+     * @param endpointURI the endpoint to be configured
+     * @param authUser username
+     * @param authPwd password
+     * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/sparql/util/Context.html">Context</a>
+     */
     public void configureServiceContext(String endpointURI, String authUser, String authPwd)
     {
 	if (endpointURI == null) throw new IllegalArgumentException("SPARQL endpoint URI cannot be null");
@@ -134,11 +143,21 @@ public class Application extends javax.ws.rs.core.Application
 	return singletons;
     }
 
+    /**
+     * Returns resource configuration
+     * 
+     * @return injected ResourceConfig
+     */
     public ResourceConfig getResourceConfig()
     {
 	return resourceConfig;
     }
 
+    /**
+     * Returns servlet context
+     * 
+     * @return injected ServletContext
+     */
     public ServletContext getServletContext()
     {
 	return servletContext;

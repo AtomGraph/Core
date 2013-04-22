@@ -21,6 +21,7 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.rdf.model.*;
+import com.hp.hpl.jena.update.UpdateRequest;
 import com.sun.jersey.api.core.ResourceConfig;
 import java.net.URI;
 import java.util.ArrayList;
@@ -120,9 +121,9 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     @Override
     @POST
     @Consumes(org.graphity.server.MediaType.APPLICATION_FORM_URLENCODED)
-    public Response update(@FormParam("update") String updateString,
-	@FormParam("using-graph-uri") String defaultGraphUri,
-	@FormParam("using-named-graph-uri") String graphUri)
+    public Response update(@FormParam("update") UpdateRequest update,
+	@FormParam("using-graph-uri") URI defaultGraphUri,
+	@FormParam("using-named-graph-uri") URI graphUri)
     {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -130,8 +131,8 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     @Override
     @POST
     @Consumes(org.graphity.server.MediaType.APPLICATION_SPARQL_UPDATE)
-    public Response update(@QueryParam("using-graph-uri") String defaultGraphUri,
-	@QueryParam("using-named-graph-uri") String graphUri)
+    public Response update(@QueryParam("using-graph-uri") URI defaultGraphUri,
+	@QueryParam("using-named-graph-uri") URI graphUri)
     {
 	throw new UnsupportedOperationException("Not supported yet.");
     }

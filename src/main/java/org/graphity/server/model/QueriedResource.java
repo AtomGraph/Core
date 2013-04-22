@@ -19,13 +19,27 @@ package org.graphity.server.model;
 import com.hp.hpl.jena.query.Query;
 
 /**
- *
+ * RDF resource, representation of which was queried from a SPARQL endpoint.
+ * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 public interface QueriedResource
 {
+    /**
+     * Returns SPARQL query that was used to retrieve the RDF representation (<code>DESCRIBE</code> or <code>CONSTRUCT</code>)
+     * 
+     * @return query object
+     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#describe">DESCRIBE</a>
+     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#construct">CONSTRUCT</a>
+     */
     Query getQuery();
     
+    /**
+     * Returns SPARQL query endpoint that the query was executed on.
+     * 
+     * @return endpoint resource
+     * @see SPARQLEndpoint
+     */
     SPARQLQueryEndpoint getEndpoint();
 
 }

@@ -24,26 +24,46 @@ import org.graphity.server.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
- * Generic SPARQL endpoint interface
+ * Generic SPARQL 1.1 Protocol for RDF query interface
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
- * @see <a href="http://www.w3.org/TR/rdf-sparql-protocol/">SPARQL Protocol for RDF</a>
+ * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/Query.html">ARQ Query</a>
+ * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/Response.html">JAX-RS Response</a>
+ * @see <a href="http://www.w3.org/TR/sparql11-protocol/">SPARQL Protocol for RDF</a>
  */
 @Path("/sparql")
 @Produces({MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", MediaType.TEXT_TURTLE + "; charset=UTF-8", org.graphity.server.MediaType.APPLICATION_SPARQL_RESULTS_XML + "; charset=UTF-8", MediaType.APPLICATION_SPARQL_RESULTS_JSON + "; charset=UTF-8"})
 public interface SPARQLQueryEndpoint extends Resource
 {
     /**
-     * Handles SPARQL Protocol for RDF request and returns query result as response
+     * Handles GET query request and returns result as response
      * 
-     * @param query the submitted SPARQL query or null
+     * @param query the submitted SPARQL query
      * @return result response (in one of the representation variants)
-     * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/Query.html">ARQ Query</a>
+     * @see <a href="http://www.w3.org/TR/sparql11-protocol/#query-via-get">2.1.1 query via GET</a>
      */
     @GET Response query(@QueryParam("query") Query query, @QueryParam("default-graph-uri") URI defaultGraphUri, @QueryParam("named-graph-uri") URI graphUri);
     
+    /**
+     * Handles encoded POST query request and returns result as response
+     * 
+     * @param query the submitted SPARQL query
+     * @param defaultGraphUri default graph URI
+     * @param graphUri named graph URI
+     * @return result response (in one of the representation variants)
+     * @see <a href="http://www.w3.org/TR/sparql11-protocol/#query-via-post-urlencoded">2.1.2 query via POST with URL-encoded parameters</a>
+     */
     @POST @Consumes(MediaType.APPLICATION_FORM_URLENCODED) Response queryEncoded(@FormParam("query") Query query, @FormParam("default-graph-uri") URI defaultGraphUri, @FormParam("named-graph-uri") URI graphUri);
     
+    /**
+     * Handles direct POST query request and returns result as response
+     * 
+     * @param query the submitted SPARQL query
+     * @param defaultGraphUri default graph URI
+     * @param graphUri named graph URI
+     * @return result response (in one of the representation variants)
+     * @see <a href="http://www.w3.org/TR/sparql11-protocol/#query-via-post-direct">2.1.3 query via POST directly</a>
+     */
     @POST @Consumes(MediaType.APPLICATION_SPARQL_QUERY) Response queryDirectly(Query query, @QueryParam("default-graph-uri") URI defaultGraphUri, @QueryParam("named-graph-uri") URI graphUri);
     
     // Context getServiceContext();

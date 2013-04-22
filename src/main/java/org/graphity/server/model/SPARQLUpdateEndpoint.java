@@ -16,6 +16,8 @@
  */
 package org.graphity.server.model;
 
+import com.hp.hpl.jena.update.UpdateRequest;
+import java.net.URI;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
@@ -24,12 +26,34 @@ import javax.ws.rs.core.Response;
 import org.graphity.server.MediaType;
 
 /**
- *
+ * Generic SPARQL 1.1 Protocol for RDF update interface
+ * 
  * @author Martynas Jusevičius <martynas@graphity.org>
+ * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/Response.html">JAX-RS Response</a>
+ * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/update/UpdateRequest.html">Jena UpdateRequest</a>
+ * @see <a href="http://www.w3.org/TR/sparql11-protocol/">SPARQL Protocol for RDF</a>
  */
 public interface SPARQLUpdateEndpoint
-{    
-    @POST @Consumes(MediaType.APPLICATION_FORM_URLENCODED) Response update(@FormParam("update") String updateString, @FormParam("using-graph-uri") String defaultGraphUri, @FormParam("using-named-graph-uri") String graphUri);
+{
+    /**
+     * Handles encoded POST update request and returns result as response
+     * 
+     * @param update update request (possibly multiple operations)
+     * @param defaultGraphUri default graph URI
+     * @param graphUri named graph URI
+     * @return success or failure response
+     * @see <a href="http://www.w3.org/TR/sparql11-protocol/#update-via-post-urlencoded">2.2.1 update via POST with URL-encoded parameters</a>
+     */
+    @POST @Consumes(MediaType.APPLICATION_FORM_URLENCODED) Response update(@FormParam("update") UpdateRequest update, @FormParam("using-graph-uri") URI defaultGraphUri, @FormParam("using-named-graph-uri") URI graphUri);
     
-    @POST @Consumes(MediaType.APPLICATION_SPARQL_UPDATE) Response update(@QueryParam("using-graph-uri") String defaultGraphUri, @QueryParam("using-named-graph-uri") String graphUri);
+    /**
+     * Handles direct POST update request and returns result as response
+     * 
+     * @param defaultGraphUri default graph URI
+     * @param graphUri named graph URI
+     * @return success or failure response
+     * @see <a href="http://www.w3.org/TR/sparql11-protocol/#update-via-post-direct">2.2.2 update via POST directly</a>
+     */
+    @POST @Consumes(MediaType.APPLICATION_SPARQL_UPDATE) Response update(@QueryParam("using-graph-uri") URI defaultGraphUri, @QueryParam("using-named-graph-uri") URI graphUri);
+
 }
