@@ -48,6 +48,16 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
     
     private final SPARQLEndpoint endpoint;
 
+    /**
+     * JAX-RS-compatible resource constructor with injected initialization objects
+     * 
+     * @param uriInfo URI information of the request
+     * @param resourceConfig webapp configuration
+     * @param resourceContext resource context
+     * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html">JAX-RS UriInfo</a>
+     * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceConfig.html">Jersey ResourceConfig</a>
+     * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceContext.html">Jersey ResourceContext</a>
+     */
     public QueriedResourceBase(@Context UriInfo uriInfo, @Context ResourceConfig resourceConfig, @Context ResourceContext resourceContext)
     {
 	this(ResourceFactory.createResource(uriInfo.getAbsolutePath().toString()),
@@ -57,6 +67,13 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
 		    CacheControl.valueOf(resourceConfig.getProperty(GS.cacheControl.getURI()).toString()));
     }
 
+    /**
+     * Protected constructor. Not suitable for JAX-RS but can be used when subclassing.
+     * 
+     * @param resource This resource as Jena RDF resource (must be URI resource, not a blank node)
+     * @param endpoint SPARQL endpoint of this resource
+     * @param cacheControl Cache control config of this resource
+     */
     protected QueriedResourceBase(Resource resource, SPARQLEndpoint endpoint, CacheControl cacheControl)
     {
 	super(resource, cacheControl);
@@ -64,11 +81,24 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
 	this.endpoint = endpoint;
     }
 
+    /**
+     * Returns RDF description of this resource.
+     * The description is the result of a query executed on the SPARQL endpoint of this resource.
+     * By default, the query is <code>DESCRIBE</code> with URI of this resource.
+     * 
+     * @return RDF description
+     * @see getQuery()
+     */
     public Model describe()
     {
 	return getEndpoint().loadModel(getQuery());
     }
     
+    /**
+     * Handles GET request and returns response with RDF description of this resource.
+     * 
+     * @return response with RDF description
+     */
     @GET
     @Override
     public Response get()
@@ -85,11 +115,23 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
 
     }
 
+    /**
+     * Builds response of an RDF model
+     * 
+     * @param model RDF model
+     * @return response with the representation of the model
+     */
     public Response getResponse(Model model)
     {
 	return getResponseBuilder(model).build();
     }
     
+    /**
+     * Creates response builder for an RDF model
+     * 
+     * @param model RDF model
+     * @return 
+     */
     @Override
     public ResponseBuilder getResponseBuilder(Model model)
     {

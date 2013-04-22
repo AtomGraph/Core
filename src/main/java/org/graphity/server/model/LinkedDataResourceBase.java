@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Base class of generic read-only Linked Data resources
  * 
- * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/rdf/model/Resource.html">Resource</a>
+ * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/rdf/model/Resource.html">Jena Resource</a>
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 public class LinkedDataResourceBase implements LinkedDataResource
@@ -45,13 +45,10 @@ public class LinkedDataResourceBase implements LinkedDataResource
     private final CacheControl cacheControl;
 
     /** 
-     * Constructs read-only LD resource from Jena's Resource and JAX-RS context
+     * JAX-RS-compatible resource constructor with injected initialization objects
      * 
-     * @param resource the current resource in the ontology
-     * @param uriInfo URI information
-     * @param request current request
-     * @param httpHeaders current request headers
-     * @param variants representation variants
+     * @param uriInfo URI information of the request
+     * @param resourceConfig webapp configuration
      */
     public LinkedDataResourceBase(@Context UriInfo uriInfo, @Context ResourceConfig resourceConfig)
     {
@@ -61,6 +58,12 @@ public class LinkedDataResourceBase implements LinkedDataResource
 		    CacheControl.valueOf(resourceConfig.getProperty(GS.cacheControl.getURI()).toString()));
     }
     
+    /**
+     * Protected constructor. Not suitable for JAX-RS but can be used when subclassing.
+     * 
+     * @param resource This resource as Jena RDF resource (must be URI resource, not a blank node)
+     * @param cacheControl Cache control config of this resource
+     */
     protected LinkedDataResourceBase(Resource resource, CacheControl cacheControl)
     {
 	if (resource == null) throw new IllegalArgumentException("Resource cannot be null");
@@ -72,11 +75,27 @@ public class LinkedDataResourceBase implements LinkedDataResource
 	if (log.isDebugEnabled()) log.debug("Creating LinkedDataResource from Resource with URI: {}", resource.getURI());
     }
     
+    /**
+     * Returns response builder initialized with the RDF model of this resource.
+     * Provider must be registered in the application to handle representation of the model.
+     * Content negotiation of the representation format should be carried out by the provider.
+     * 
+     * @param model RDF model of this resource
+     * @return response builder
+     * @see org.graphity.server.provider.ModelProvider
+     */
     public ResponseBuilder getResponseBuilder(Model model)
     {
 	return Response.ok(model);
     }
 
+    /**
+     * Handles GET request and returns response with RDF description of this resource.
+     * By default, the whole model of this resource is returned. If the description is empty, 404 Not Found is
+     * returned.
+     * 
+     * @return response with RDF description
+     */
     @GET
     @Override
     public Response get()
@@ -91,23 +110,43 @@ public class LinkedDataResourceBase implements LinkedDataResource
 	return getResponseBuilder(getModel()).build();
     }
     
+    /**
+     * Returns URI of this resource
+     * 
+     * @return URI of this resource
+     */
     @Override
     public final String getURI()
     {
 	return getResource().getURI();
     }
     
+    /**
+     * Returns this resource as Jena RDF resource
+     * 
+     * @return RDF resource
+     */
     private Resource getResource()
     {
 	return resource;
     }
 
+    /**
+     * Returns RDF model of this resource
+     * 
+     * @return RDF model of this resource
+     */
     @Override
     public final Model getModel()
     {
 	return getResource().getModel();
     }
 
+    /**
+     * Returns <code>Cache-Control</code> header configuration for this resource
+     * 
+     * @return cache control of this resource
+     */
     public final CacheControl getCacheControl()
     {
 	return cacheControl;

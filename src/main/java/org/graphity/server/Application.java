@@ -55,6 +55,9 @@ public class Application extends javax.ws.rs.core.Application
     private Set<Class<?>> classes = new HashSet<Class<?>>();
     private Set<Object> singletons = new HashSet<Object>();
 
+    /**
+     * Initializes root resource classes and provider singletons
+     */
     public Application()
     {
 	classes.add(QueriedResourceBase.class); // handles all
