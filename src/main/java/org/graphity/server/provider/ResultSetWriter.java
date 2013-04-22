@@ -32,12 +32,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Writes SPARQL result set to the response
+ * Writes SPARQL result set to the response.
+ * Needs to be registered in the application.
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
+ * @see org.graphity.server.Application
  * @see <a href="http://www.w3.org/TR/rdf-sparql-XMLres/">SPARQL Query Results XML Format</a>
- * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/ResultSet.html">ResultSet</a>
- * @see <a href="http://jsr311.java.net/nonav/javadoc/javax/ws/rs/ext/MessageBodyWriter.html">MessageBodyWriter</a>
+ * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/ResultSet.html">Jena ResultSet</a>
+ * @see <a href="http://jsr311.java.net/nonav/javadoc/javax/ws/rs/ext/MessageBodyWriter.html">JAX-RS MessageBodyWriter</a>
  */
 @Provider
 @Produces({org.graphity.server.MediaType.APPLICATION_SPARQL_RESULTS_XML, org.graphity.server.MediaType.APPLICATION_SPARQL_RESULTS_JSON})

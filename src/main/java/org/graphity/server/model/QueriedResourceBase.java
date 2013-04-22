@@ -139,23 +139,47 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
 		cacheControl(getCacheControl());
     }
 
+    /**
+     * Creates response builder for an RDF model using a list of representation variants
+     * 
+     * @param model RDF model
+     * @param variants list of representation variants
+     * @return response builder for the model
+     */
     public ResponseBuilder getResponseBuilder(Model model, List<Variant> variants)
     {
 	return getEndpoint().getResponseBuilder(model, variants).
 		cacheControl(getCacheControl());
     }
     
+    /**
+     * Returns query used to retrieve RDF description of this resource
+     * 
+     * @return query object
+     */
     @Override
     public Query getQuery()
     {
 	return getQuery(getURI());
     }
     
+    /**
+     * Given a resource URI, returns query that can be used to retrieve its RDF description
+     * 
+     * @param uri resource URI
+     * @return query object
+     */
     public Query getQuery(String uri)
     {
 	return QueryFactory.create("DESCRIBE <" + uri + ">");
     }
 
+    /**
+     * Returns SPARQL endpoint of this resource.
+     * Query is executed on this endpoint to retrieve RDF representation of this resource.
+     * 
+     * @return SPARQL endpoint resource
+     */
     @Override
     public SPARQLEndpoint getEndpoint()
     {

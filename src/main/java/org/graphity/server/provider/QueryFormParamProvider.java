@@ -31,9 +31,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Injects SPARQL query string parameter as query object.
+ * Needs to be registered in the application.
+ * 
  * @author Martynas Jusevičius <martynas@graphity.org>
- */
+ * @see org.graphity.server.Application
+ * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/FormParam.html">JAX-RS @FormParam</a>
+ * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/Query.html">Jena Query</a>
+ * @see <a href="http://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/spi/inject/PerRequestTypeInjectableProvider.html">PerRequestTypeInjectableProvider</a>
+*/
 @Provider
 public class QueryFormParamProvider extends PerRequestTypeInjectableProvider<FormParam, Query>
 {

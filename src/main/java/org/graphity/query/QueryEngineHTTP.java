@@ -25,8 +25,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Extends ARQ QueryEngineHTTP class in order to set authentication parameters stored in service context.
+ * This workaround should be incorporated into Jena's codebase starting with version 2.10.1.
+ * 
  * @author Martynas Jusevičius <martynas@graphity.org>
+ * @see <a href="https://issues.apache.org/jira/browse/JENA-405">JIRA Issue JENA-405</a>
  */
 public class QueryEngineHTTP extends com.hp.hpl.jena.sparql.engine.http.QueryEngineHTTP
 {

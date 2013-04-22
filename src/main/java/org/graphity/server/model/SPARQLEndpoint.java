@@ -30,9 +30,8 @@ import javax.ws.rs.core.Variant;
  * @author Martynas Jusevičius <martynas@graphity.org>
  * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/Response.ResponseBuilder.html">JAX-RS ResponseBuilder</a>
  * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/javax/ws/rs/core/Variant.html">JAX-RS Variant</a>
- * @see <a href="http://docs.oracle.com/javaee/6/tutorial/doc/gkqbq.html">JAX-RS Runtime Content Negotiation</a>
  * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/Query.html">ARQ Query</a>
- * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/ResultSet.html">ARQ ResultSet</a>
+ * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/ResultSetRewindable.html">ARQ ResultSetRewindable</a>
  * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/rdf/model/Model.html">Jena Model</a>
  */
 public interface SPARQLEndpoint extends SPARQLQueryEndpoint, SPARQLUpdateEndpoint

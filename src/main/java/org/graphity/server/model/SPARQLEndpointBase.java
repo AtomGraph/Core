@@ -41,22 +41,36 @@ import org.slf4j.LoggerFactory;
  * SPARQL endpoint resource, implementing SPARQL HTTP protocol
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
+ * @see <a href="http://docs.oracle.com/javaee/6/tutorial/doc/gkqbq.html">JAX-RS Runtime Content Negotiation</a>
  */
 @Path("/sparql")
 public class SPARQLEndpointBase implements SPARQLEndpoint
 {
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointBase.class);
 
+    /**
+     * Media types that can be used for representation of RDF model
+     * 
+     * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/rdf/model/Model.html">Jena Model</a>
+     */
     public static final List<Variant> MODEL_VARIANTS = Variant.VariantListBuilder.newInstance().
 		mediaTypes(org.graphity.server.MediaType.APPLICATION_RDF_XML_TYPE,
 			org.graphity.server.MediaType.TEXT_TURTLE_TYPE).
 		add().build();
 
+    /**
+     * Media types that can be used for representation of SPARQL result set
+     * 
+     * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/ResultSetRewindable.html">Jena ResultSetRewindable</a>
+     */
     public static final List<Variant> RESULT_SET_VARIANTS = Variant.VariantListBuilder.newInstance().
 			mediaTypes(org.graphity.server.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE,
 			    org.graphity.server.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE).
 			add().build();
 
+    /**
+     * All supported media types. Includes both model and result set representation formats.
+     */
     public static final List<Variant> VARIANTS;
     static
     {
@@ -70,6 +84,14 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     private final Request request;
     private final ResourceConfig resourceConfig;
 
+    /**
+     * JAX-RS-compatible resource constructor with injected initialization objects
+     * 
+     * @param request current request
+     * @param resourceConfig webapp configuration
+     * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/javax/ws/rs/core/Request.html">JAX-RS Request</a>
+     * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceConfig.html">Jersey ResourceConfig</a>
+     */
     public SPARQLEndpointBase(@Context Request request, @Context ResourceConfig resourceConfig)
     {
 	this((resourceConfig.getProperty(VoID.sparqlEndpoint.getURI()) == null) ?
@@ -78,6 +100,13 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	    request, resourceConfig);
     }
     
+    /**
+     * Protected constructor. Not suitable for JAX-RS but can be used when subclassing.
+     * 
+     * @param endpoint RDF resource of this endpoint (must be URI resource, not a blank node)
+     * @param request current request
+     * @param resourceConfig webapp configuration
+     */
     protected SPARQLEndpointBase(Resource endpoint, Request request, ResourceConfig resourceConfig)
     {
 	if (endpoint == null) throw new IllegalArgumentException("Endpoint cannot be null");
@@ -91,8 +120,16 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase with endpoint: {}", endpoint);
     }
 
-    // SPARQL Query
-
+    /**
+     * Implements SPARQL 1.1 Protocol query GET method.
+     * Query object is injected using a provider, which must be registered in the application.
+     * 
+     * @param query SPARQL query
+     * @param defaultGraphUri default graph URI
+     * @param graphUri named graph URI
+     * @return result response
+     * @see org.graphity.server.provider.QueryParamProvider
+     */
     @Override
     @GET
     public Response query(@QueryParam("query") Query query,
@@ -101,6 +138,16 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	return getResponseBuilder(query).build();
     }
 
+    /**
+     * Implements SPARQL 1.1 Protocol query encoded POST method.
+     * Query object is injected using a provider, which must be registered in the application.
+     * 
+     * @param query SPARQL query
+     * @param defaultGraphUri default graph URI
+     * @param graphUri named graph URI
+     * @return result response
+     * @see org.graphity.server.provider.QueryFormParamProvider
+     */
     @Override
     public Response queryEncoded(@FormParam("query") Query query,
 	@FormParam("default-graph-uri") URI defaultGraphUri, @FormParam("named-graph-uri") URI graphUri)
@@ -108,6 +155,15 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    /**
+     * Implements SPARQL 1.1 Protocol query direct POST method.
+     * Query object is injected using a provider, which must be registered in the application.
+     * 
+     * @param query SPARQL query
+     * @param defaultGraphUri default graph URI
+     * @param graphUri named graph URI
+     * @return result response
+     */
     @Override
     @POST
     public Response queryDirectly(Query query, @QueryParam("default-graph-uri") URI defaultGraphUri,
@@ -116,8 +172,15 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    // SPARQL Update
-
+    /**
+     * Implements SPARQL 1.1 Protocol update encoded POST method.
+     * Update object is injected using a provider, which must be registered in the application.
+     * 
+     * @param update SPARQL update (possibly multiple operations)
+     * @param defaultGraphUri default graph URI
+     * @param graphUri named graph URI
+     * @return response with success or failure
+     */
     @Override
     @POST
     @Consumes(org.graphity.server.MediaType.APPLICATION_FORM_URLENCODED)
@@ -128,6 +191,14 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    /**
+     * Implements SPARQL 1.1 Protocol update direct POST method.
+     * Update object is injected using a provider, which must be registered in the application.
+     * 
+     * @param defaultGraphUri default graph URI
+     * @param graphUri named graph URI
+     * @return response with success or failure
+     */
     @Override
     @POST
     @Consumes(org.graphity.server.MediaType.APPLICATION_SPARQL_UPDATE)
@@ -137,6 +208,13 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    /**
+     * Returns response builder for a SPARQL query.
+     * Contains the main SPARQL endpoint JAX-RS implementation logic.
+     * 
+     * @param query SPARQL query
+     * @return response builder
+     */
     @Override
     public ResponseBuilder getResponseBuilder(Query query)
     {

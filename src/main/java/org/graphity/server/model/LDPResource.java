@@ -36,7 +36,7 @@ public interface LDPResource extends LinkedDataResource
     /**
      * Handles POST methods with RDF request body and returns response
      * 
-     * @param model the RDF Model that was POSTed
+     * @param model the RDF payload
      * @return response to current request
      * @see <a href="http://tools.ietf.org/html/draft-ietf-httpbis-p2-semantics-21#section-5.3.3">Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content 5.3.3. POST</a>
      */
@@ -45,7 +45,7 @@ public interface LDPResource extends LinkedDataResource
     /**
      * Handles PUT methods with RDF request body and returns response
      * 
-     * @param model the RDF Model that was PUT
+     * @param model the RDF payload
      * @return response to current request
      * @see <a href="http://tools.ietf.org/html/draft-ietf-httpbis-p2-semantics-21#section-5.3.4">Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content 5.3.4. PUT</a>
      */

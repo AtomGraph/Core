@@ -29,10 +29,7 @@ import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
 import org.graphity.server.model.QueriedResourceBase;
 import org.graphity.server.model.SPARQLEndpointBase;
-import org.graphity.server.provider.ModelProvider;
-import org.graphity.server.provider.QueryFormParamProvider;
-import org.graphity.server.provider.QueryParamProvider;
-import org.graphity.server.provider.ResultSetWriter;
+import org.graphity.server.provider.*;
 import org.graphity.server.vocabulary.VoID;
 import org.openjena.riot.SysRIOT;
 import org.slf4j.Logger;
@@ -67,6 +64,7 @@ public class Application extends javax.ws.rs.core.Application
 	singletons.add(new ResultSetWriter());
 	singletons.add(new QueryParamProvider());
 	singletons.add(new QueryFormParamProvider());
+	singletons.add(new UpdateRequestQueryParamProvider());
     }
 
     /**
