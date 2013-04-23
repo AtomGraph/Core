@@ -38,8 +38,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Base class of generic read-only Linked Data resources with RDF representations queried from SPARQL endpoints.
+ * 
  * @author Martynas Jusevičius <martynas@graphity.org>
+ * @see SPARQLEndpoint
+ * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/Query.html">ARQ Query</a>
  */
 @Path("{path: .*}")
 public class QueriedResourceBase extends LinkedDataResourceBase implements QueriedResource
@@ -49,7 +52,8 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
     private final SPARQLEndpoint endpoint;
 
     /**
-     * JAX-RS-compatible resource constructor with injected initialization objects
+     * JAX-RS-compatible resource constructor with injected initialization objects.
+     * The URI of the resource being created is the absolute path of the current request URI.
      * 
      * @param uriInfo URI information of the request
      * @param resourceConfig webapp configuration
@@ -70,9 +74,9 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
     /**
      * Protected constructor. Not suitable for JAX-RS but can be used when subclassing.
      * 
-     * @param resource This resource as Jena RDF resource (must be URI resource, not a blank node)
+     * @param resource This resource as RDF resource (must be URI resource, not a blank node)
      * @param endpoint SPARQL endpoint of this resource
-     * @param cacheControl Cache control config of this resource
+     * @param cacheControl Cache control config
      */
     protected QueriedResourceBase(Resource resource, SPARQLEndpoint endpoint, CacheControl cacheControl)
     {

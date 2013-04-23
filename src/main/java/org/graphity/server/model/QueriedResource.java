@@ -22,6 +22,7 @@ import com.hp.hpl.jena.query.Query;
  * RDF resource, representation of which was queried from a SPARQL endpoint.
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
+ * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/Query.html">ARQ Query</a>
  */
 public interface QueriedResource
 {

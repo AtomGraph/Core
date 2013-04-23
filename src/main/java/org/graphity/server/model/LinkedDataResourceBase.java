@@ -45,10 +45,12 @@ public class LinkedDataResourceBase implements LinkedDataResource
     private final CacheControl cacheControl;
 
     /** 
-     * JAX-RS-compatible resource constructor with injected initialization objects
+     * JAX-RS-compatible resource constructor with injected initialization objects.
+     * The URI of the resource being created is the absolute path of the current request URI.
      * 
      * @param uriInfo URI information of the request
      * @param resourceConfig webapp configuration
+     * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html#getAbsolutePath()">JAX-RS UriInfo.getAbsolutePath()</a>
      */
     public LinkedDataResourceBase(@Context UriInfo uriInfo, @Context ResourceConfig resourceConfig)
     {

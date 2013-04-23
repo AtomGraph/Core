@@ -27,30 +27,48 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Base class of generic read-write Linked Data resources
+ * Base class of generic read-write Linked Data resources.
+ * RDF representations are queried from, and stored into, SPARQL endpoints.
  * 
- * @see LDPResource
  * @author Martynas Jusevičius <martynas@graphity.org>
+ * @see <a href="http://www.w3.org/TR/2013/WD-ldp-20130307/">Linked Data Platform 1.0</a>
  */
 public class LDPResourceBase extends QueriedResourceBase implements LDPResource
 {    
     private static final Logger log = LoggerFactory.getLogger(LDPResourceBase.class);
 
+    /**
+     * JAX-RS-compatible resource constructor with injected initialization objects.
+     * The URI of the resource being created is the absolute path of the current request URI.
+     * 
+     * @param uriInfo URI information of the request
+     * @param resourceConfig webapp configuration
+     * @param resourceContext resource context
+     */
     public LDPResourceBase(@Context UriInfo uriInfo, @Context ResourceConfig resourceConfig, @Context ResourceContext resourceContext)
     {
 	super(uriInfo, resourceConfig, resourceContext);
     }
 
+    /**
+     * Protected constructor. Not suitable for JAX-RS but can be used when subclassing.
+     * 
+     * @param resource this resource as RDF resource
+     * @param endpoint SPARQL endpoint of this resource
+     * @param cacheControl cache control config
+     */
     protected LDPResourceBase(Resource resource, SPARQLEndpoint endpoint, CacheControl cacheControl)
     {
 	super(resource, endpoint, cacheControl);
     }
-    
-    @Override
+
     /**
-     * @link <a href="http://lists.w3.org/Archives/Public/public-ldp-wg/2012Oct/0181.html">What is the document base URI of a POSTed document?</a>
+     * Handles POST method, stores the submitted RDF model in the SPARQL endpoint, and returns response.
      * 
+     * @param model RDF payload
+     * @return response
      */
+    @Override
     public Response post(Model model)
     {
 	throw new WebApplicationException(405);
@@ -60,16 +78,26 @@ public class LDPResourceBase extends QueriedResourceBase implements LDPResource
 	//return Response.created(null).build();
     }
 
+    /**
+     * Handles PUT method, stores the submitted RDF model in the SPARQL endpoint, and returns response.
+     * 
+     * @param model RDF payload
+     * @return response
+     */
     @Override
-    //@GET
     public Response put(Model model)
     {
-	//getUriInfo().
 	DataManager.get().putModel(getEndpoint().getURI(), model);
 	
 	return Response.ok().build();
     }
 
+    /**
+     * Handles DELETE method, deletes the RDF representation of this resource frrom the SPARQL endpoint, and
+     * returns response.
+     * 
+     * @return response
+     */
     @Override
     public Response delete()
     {
