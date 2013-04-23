@@ -42,12 +42,12 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius <martynas@graphity.org>
  * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/Application.html">JAX-RS Application</a>
  */
-public class Application extends javax.ws.rs.core.Application
+public class ApplicationBase extends javax.ws.rs.core.Application
 {
     @Context ResourceConfig resourceConfig;
     @Context ServletContext servletContext;
 
-    private static final Logger log = LoggerFactory.getLogger(Application.class);
+    private static final Logger log = LoggerFactory.getLogger(ApplicationBase.class);
 
     private Set<Class<?>> classes = new HashSet<Class<?>>();
     private Set<Object> singletons = new HashSet<Object>();
@@ -55,7 +55,7 @@ public class Application extends javax.ws.rs.core.Application
     /**
      * Initializes root resource classes and provider singletons
      */
-    public Application()
+    public ApplicationBase()
     {
 	classes.add(QueriedResourceBase.class); // handles all
 	classes.add(SPARQLEndpointBase.class); // handles /sparql queries
