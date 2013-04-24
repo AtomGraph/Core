@@ -22,7 +22,7 @@ import com.sun.jersey.api.core.HttpContext;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
@@ -41,21 +41,21 @@ import org.slf4j.LoggerFactory;
  * @see <a href="http://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/spi/inject/PerRequestTypeInjectableProvider.html">PerRequestTypeInjectableProvider</a>
  */
 @Provider
-public class UpdateRequestQueryParamProvider extends PerRequestTypeInjectableProvider<QueryParam, UpdateRequest>
+public class UpdateRequestFormParamProvider extends PerRequestTypeInjectableProvider<FormParam, UpdateRequest>
 {
-    private static final Logger log = LoggerFactory.getLogger(UpdateRequestQueryParamProvider.class);
+    private static final Logger log = LoggerFactory.getLogger(UpdateRequestFormParamProvider.class);
     
     @Context HttpContext httpContext;
     
-    public UpdateRequestQueryParamProvider()
+    public UpdateRequestFormParamProvider()
     {
 	super(UpdateRequest.class);
     }
 
     @Override
-    public Injectable<UpdateRequest> getInjectable(ComponentContext cc, QueryParam qp)
+    public Injectable<UpdateRequest> getInjectable(ComponentContext cc, FormParam fp)
     {
-	final String paramName = qp.value();
+	final String paramName = fp.value();
 	return new Injectable<UpdateRequest>()
 	{
 	    @Override
