@@ -63,7 +63,7 @@ public class LinkedDataResourceBase implements LinkedDataResource
     /**
      * Protected constructor. Not suitable for JAX-RS but can be used when subclassing.
      * 
-     * @param resource This resource as Jena RDF resource (must be URI resource, not a blank node)
+     * @param resource This resource as RDF resource (must be URI resource, not a blank node)
      * @param cacheControl Cache control config of this resource
      */
     protected LinkedDataResourceBase(Resource resource, CacheControl cacheControl)
