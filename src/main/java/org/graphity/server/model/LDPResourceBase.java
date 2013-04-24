@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius <martynas@graphity.org>
  * @see <a href="http://www.w3.org/TR/2013/WD-ldp-20130307/">Linked Data Platform 1.0</a>
  */
+@Path("{path: .*}")
 public class LDPResourceBase extends QueriedResourceBase implements LDPResource
 {    
     private static final Logger log = LoggerFactory.getLogger(LDPResourceBase.class);
@@ -87,6 +88,8 @@ public class LDPResourceBase extends QueriedResourceBase implements LDPResource
     @Override
     public Response put(Model model)
     {
+	// curl -X PUT -H "Content-Type: text/turtle" -d @vilnius-jug.ttl http://localhost:8080/
+	if (log.isDebugEnabled()) log.debug("PUT request with RDF payload: {} payload size(): {}", model, model.size());
 	DataManager.get().putModel(getEndpoint().getURI(), model);
 	
 	return Response.ok().build();
