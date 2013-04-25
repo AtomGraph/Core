@@ -298,23 +298,34 @@ public class DataManager extends FileManager
 	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
 	return accessor.getModel(graphURI);	
     }
+
+    /**
+     * Adds RDF model to the default graph on a remote SPARQL Graph Store.
+     * 
+     * @param graphStoreURI remote graph store URI
+     * @param model RDF model to be added
+     */
+    public void addModel(String graphStoreURI, Model model)
+    {
+	if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} default graph", graphStoreURI);
+
+	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
+	accessor.add(model);
+    }
     
     /**
-     * Stores RDF model into a named graph on a remote SPARQL Graph Store.
-     * Uses SPARQL Graph Store protocol.
+     * Adds RDF model to a named graph on a remote SPARQL Graph Store.
      * 
      * @param graphStoreURI remote graph store URI
      * @param graphURI named graph URI
-     * @param model RDF model to be stored
-     * @see org.graphity.update.DatasetGraphAccessorHTTP
-     * @see org.graphity.server.model.GraphStore
+     * @param model RDF model to be added
      */
-    public void putModel(String graphStoreURI, String graphURI, Model model)
+    public void addModel(String graphStoreURI, String graphURI, Model model)
     {
-	if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} with named graph URI {}", graphStoreURI, graphURI);
-	
+	if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} with named graph URI: {}", graphStoreURI, graphURI);
+
 	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
-	accessor.putModel(graphURI, model);
+	accessor.add(graphURI, model);
     }
 
     /**
@@ -323,8 +334,6 @@ public class DataManager extends FileManager
      * 
      * @param graphStoreURI remote graph store URI
      * @param model RDF model to be stored
-     * @see org.graphity.update.DatasetGraphAccessorHTTP
-     * @see org.graphity.server.model.GraphStore
      */
     public void putModel(String graphStoreURI, Model model)
     {
@@ -332,6 +341,22 @@ public class DataManager extends FileManager
 	
 	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
 	accessor.putModel(model);
+    }
+
+    /**
+     * Creates/replaces a named graph on a remote SPARQL Graph Store and stores RDF model.
+     * Uses SPARQL Graph Store protocol.
+     * 
+     * @param graphStoreURI remote graph store URI
+     * @param graphURI named graph URI
+     * @param model RDF model to be stored
+     */
+    public void putModel(String graphStoreURI, String graphURI, Model model)
+    {
+	if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} with named graph URI {}", graphStoreURI, graphURI);
+	
+	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
+	accessor.putModel(graphURI, model);
     }
 
     /**
@@ -366,7 +391,7 @@ public class DataManager extends FileManager
     /**
      * Returns SPARQL context
      * 
-     * @return 
+     * @return global context
      */
     public Context getContext()
     {

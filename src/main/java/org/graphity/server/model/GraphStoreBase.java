@@ -116,8 +116,27 @@ public class GraphStoreBase implements GraphStore
     public Response post(Model model, @QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
     {
 	if (!defaultGraph && graphUri == null) throw new WebApplicationException(Status.BAD_REQUEST);
+	if (log.isDebugEnabled()) log.debug("POST Graph Store request with RDF payload: {} payload size(): {}", model, model.size());
+	
+	if (model.isEmpty()) return Response.noContent().build();
+	
+	if (defaultGraph)
+	{
+	    if (log.isDebugEnabled()) log.debug("POST Model to default graph");
+	    DataManager.get().addModel(getURI(), model);
+	    return Response.ok().build();
+	}
+	else
+	{
+	    boolean existingGraph = DataManager.get().containsModel(getURI(), graphUri.toString());
 
-	throw new UnsupportedOperationException("Not supported yet.");
+	    // is this implemented correctly? The specification is not very clear.
+	    if (log.isDebugEnabled()) log.debug("POST Model to named graph with URI: {} Did it already exist? {}", graphUri, existingGraph);
+	    DataManager.get().addModel(getURI(), graphUri.toString(), model);
+	    
+	    if (existingGraph) return Response.ok().build();
+	    else return Response.created(graphUri).build();
+	}
     }
 
     @PUT
@@ -131,7 +150,6 @@ public class GraphStoreBase implements GraphStore
 	{
 	    if (log.isDebugEnabled()) log.debug("PUT Model to default graph");
 	    DataManager.get().putModel(getURI(), model);
-	    
 	    return Response.ok().build();
 	}
 	else
@@ -155,7 +173,7 @@ public class GraphStoreBase implements GraphStore
 	if (defaultGraph)
 	{
 	    DataManager.get().deleteDefault(getURI());
-	    if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store");
+	    if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store");	    
 	    return Response.noContent().build();
 	}
 	else
