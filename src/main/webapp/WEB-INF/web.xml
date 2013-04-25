@@ -25,6 +25,19 @@
             <param-name>http://server.graphity.org/ontology#resultLimit</param-name>
             <param-value>100</param-value>
         </init-param>
+	<!-- Graph Store -->
+        <init-param>
+            <param-name>http://server.graphity.org/ontology#sparqlGraphStore</param-name>
+            <param-value>http://dydra.com/graphity/server/service</param-value>
+        </init-param>
+	<init-param>
+            <param-name>http://jena.hpl.hp.com/Service#queryAuthUser</param-name>
+            <param-value>graphity</param-value>
+        </init-param>
+        <init-param>
+            <param-name>http://jena.hpl.hp.com/Service#queryAuthPwd</param-name>
+            <param-value>46bWLRPh6Lutmd7f</param-value>
+        </init-param>
     </filter>
     <filter-mapping>
 	<filter-name>index</filter-name>

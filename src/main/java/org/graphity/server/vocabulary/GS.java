@@ -17,6 +17,7 @@
 package org.graphity.server.vocabulary;
 
 import com.hp.hpl.jena.ontology.DatatypeProperty;
+import com.hp.hpl.jena.ontology.ObjectProperty;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -45,6 +46,8 @@ public class GS
     public static final Resource NAMESPACE = m_model.createResource( NS );
         
     // public static final OntClass Service = m_model.createClass( NS + "Service" );
+    
+    public static final ObjectProperty sparqlGraphStore = m_model.createObjectProperty( NS + "sparqlGraphStore" );
     
     public static final DatatypeProperty cacheControl = m_model.createDatatypeProperty( NS + "cacheControl" );
 

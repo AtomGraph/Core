@@ -254,37 +254,83 @@ public class DataManager extends FileManager
     }
 
     /**
-     * Stores RDF model into a named graph on a remote SPARQL endpoint.
+     * Checks whether Graph Store contains a certain named graph.
+     * 
+     * @param graphStoreURI remote graph store URI
+     * @param graphURI named graph URI
+     * @return true if graph store contains named graph, false otherwise
+     */
+    public boolean containsModel(String graphStoreURI, String graphURI)
+    {
+	if (log.isDebugEnabled()) log.debug("Checking if Graph Store {} contains GRAPH with URI {}", graphStoreURI, graphURI);
+
+	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
+	return accessor.containsModel(graphURI);
+    }
+    
+    /**
+     * Loads RDF model from the default graph on a remote SPARQL Graph Store.
+     * In comparison, <code>loadModel()</code> variants operate on SPARQL Protocol, but can be used for the
+     * same purpose.
+     * 
+     * @return RDF model of the default graph
+     */
+    public Model getModel(String graphStoreURI)
+    {
+	if (log.isDebugEnabled()) log.debug("GETting Model from Graph Store {} default graph", graphStoreURI);
+
+	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
+	return accessor.getModel();
+    }
+    
+    /**
+     * Loads RDF model from a named graph on a remote SPARQL Graph Store.
+     * In comparison, <code>loadModel()</code> variants operate on SPARQL Protocol, but can be used for the
+     * same purpose.
+     * 
+     * @param graphURI named graph URI
+     * @return RDF model of the named graph
+     */
+    public Model getModel(String graphStoreURI, String graphURI)
+    {
+	if (log.isDebugEnabled()) log.debug("GETting Model from Graph Store {} with named graph URI: {}", graphStoreURI, graphURI);
+
+	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
+	return accessor.getModel(graphURI);	
+    }
+    
+    /**
+     * Stores RDF model into a named graph on a remote SPARQL Graph Store.
      * Uses SPARQL Graph Store protocol.
      * 
-     * @param endpointURI remote endpoint URI
+     * @param graphStoreURI remote graph store URI
      * @param graphURI named graph URI
      * @param model RDF model to be stored
      * @see org.graphity.update.DatasetGraphAccessorHTTP
      * @see org.graphity.server.model.GraphStore
      */
-    public void putModel(String endpointURI, String graphURI, Model model)
+    public void putModel(String graphStoreURI, String graphURI, Model model)
     {
-	if (log.isDebugEnabled()) log.debug("PUTting Model to endpoint {} with GRAPH URI {}", endpointURI, graphURI);
+	if (log.isDebugEnabled()) log.debug("PUTting Model to Graph Store {} with named graph URI {}", graphStoreURI, graphURI);
 	
-	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(endpointURI));
+	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
 	accessor.putModel(graphURI, model);
     }
 
     /**
-     * Stores RDF model into the default graph on a remote SPARQL endpoint.
+     * Stores RDF model into the default graph on a remote SPARQL Graph Store.
      * Uses SPARQL Graph Store protocol.
      * 
-     * @param endpointURI remote endpoint URI
+     * @param graphStoreURI remote graph store URI
      * @param model RDF model to be stored
      * @see org.graphity.update.DatasetGraphAccessorHTTP
      * @see org.graphity.server.model.GraphStore
      */
-    public void putModel(String endpointURI, Model model)
+    public void putModel(String graphStoreURI, Model model)
     {
-	if (log.isDebugEnabled()) log.debug("PUTting Model to endpoint {} default graph", endpointURI);
+	if (log.isDebugEnabled()) log.debug("PUTting Model to Graph Store {} default graph", graphStoreURI);
 	
-	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(endpointURI));
+	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
 	accessor.putModel(model);
     }
 

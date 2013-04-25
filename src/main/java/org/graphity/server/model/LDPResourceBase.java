@@ -20,6 +20,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.api.core.ResourceContext;
+import java.net.URI;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import org.graphity.server.util.DataManager;
@@ -90,7 +91,24 @@ public class LDPResourceBase extends QueriedResourceBase implements LDPResource
     {
 	// curl -X PUT -H "Content-Type: text/turtle" -d @vilnius-jug.ttl http://localhost:8080/
 	if (log.isDebugEnabled()) log.debug("PUT request with RDF payload: {} payload size(): {}", model, model.size());
-	DataManager.get().putModel(getEndpoint().getURI(), model);
+	com.hp.hpl.jena.sparql.util.Context queryContext = DataManager.get().getServiceContext(getEndpoint());
+	String endpointURI = getEndpoint().getURI().replace("/sparql", "/service");
+	DataManager.get().addServiceContext(endpointURI, queryContext);
+	
+	//if (DataManager.get().)
+	DataManager.get().putModel(endpointURI, model);
+	
+	return Response.ok().build();
+    }
+
+    @Override
+    public Response put(Model model, @QueryParam("graph") URI graphUri)
+    {
+	com.hp.hpl.jena.sparql.util.Context queryContext = DataManager.get().getServiceContext(getEndpoint());
+	String endpointURI = getEndpoint().getURI().replace("/sparql", "/service");
+	DataManager.get().addServiceContext(endpointURI, queryContext);
+
+	DataManager.get().putModel(endpointURI, graphUri.toString(), model);
 	
 	return Response.ok().build();
     }

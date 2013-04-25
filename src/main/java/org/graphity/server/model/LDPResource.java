@@ -17,6 +17,7 @@
 package org.graphity.server.model;
 
 import com.hp.hpl.jena.rdf.model.Model;
+import java.net.URI;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import org.graphity.server.MediaType;
@@ -49,7 +50,9 @@ public interface LDPResource extends LinkedDataResource
      * @return response to current request
      * @see <a href="http://tools.ietf.org/html/draft-ietf-httpbis-p2-semantics-21#section-5.3.4">Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content 5.3.4. PUT</a>
      */
-    @PUT Response put(Model model);
+    @PUT Response put(Model model); // mandatory ?default parameter to indicate default graph?
+    
+    @PUT Response put(Model model, @QueryParam("graph") URI graphUri);
     
     /**
      * Handles DELETE methods

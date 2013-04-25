@@ -94,7 +94,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
      */
     public SPARQLEndpointBase(@Context Request request, @Context ResourceConfig resourceConfig)
     {
-	this((resourceConfig.getProperty(VoID.sparqlEndpoint.getURI()) == null) ?
+	this(resourceConfig.getProperty(VoID.sparqlEndpoint.getURI()) == null ?
 		null :
 		ResourceFactory.createResource(resourceConfig.getProperty(VoID.sparqlEndpoint.getURI()).toString()),
 	    request, resourceConfig);
@@ -302,7 +302,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     @Override
     public ResultSetRewindable loadResultSetRewindable(Query query)
     {
-	return loadResultSetRewindable(getResource(), query);
+	return loadResultSetRewindable(this, query);
     }
     
     public Model loadModel(Resource endpoint, Query query)
@@ -314,7 +314,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     @Override
     public Model loadModel(Query query)
     {
-	return loadModel(getResource(), query);
+	return loadModel(this, query);
     }
 
     private Resource getResource()

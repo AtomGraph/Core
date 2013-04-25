@@ -16,40 +16,413 @@
  */
 package org.graphity.server.model;
 
-import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.datatypes.RDFDatatype;
+import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.rdf.model.*;
+import com.sun.jersey.api.core.ResourceConfig;
 import java.net.URI;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import org.graphity.server.util.DataManager;
+import org.graphity.server.vocabulary.GS;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
+@Path("/service") // not standard
 public class GraphStoreBase implements GraphStore
 {
+    private static final Logger log = LoggerFactory.getLogger(GraphStoreBase.class);
 
+    private final Resource resource;
+
+    public GraphStoreBase(@Context ResourceConfig resourceConfig, @Context Request request)
+    {
+	this(resourceConfig.getProperty(GS.sparqlGraphStore.getURI()) == null ?
+		null :
+		ResourceFactory.createResource(resourceConfig.getProperty(GS.sparqlGraphStore.getURI()).toString()));
+	    //request, resourceConfig)
+    }
+
+    protected GraphStoreBase(Resource graphStore)
+    {
+	if (graphStore == null) throw new IllegalArgumentException("Graph store Resource cannot be null");
+	if (!graphStore.isURIResource()) throw new IllegalArgumentException("Graph store Resource must be URI Resource (not a blank node)");
+
+	this.resource = graphStore;
+    }
+    
+    @GET
     @Override
-    public Response get(@QueryParam("default") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
+    public Response get(@QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
+    {
+	if (!defaultGraph && graphUri == null) throw new WebApplicationException(Status.BAD_REQUEST);
+
+	if (defaultGraph)
+	{
+	    Model model = DataManager.get().getModel(getURI());
+	    if (log.isDebugEnabled()) log.debug("GET Graph Store Model from default graph, returning Model of size(): {}", model.size());
+	    return Response.ok(model).build();
+	}
+	else
+	{
+	    Model model = DataManager.get().getModel(getURI(), graphUri.toString());
+	    if (model == null)
+	    {
+		if (log.isDebugEnabled()) log.debug("GET Graph Store Model; named graph with URI: {} not found", graphUri);
+		return Response.status(Status.NOT_FOUND).build();
+	    }
+	    else
+	    {
+		if (log.isDebugEnabled()) log.debug("GET Graph Store Model; named graph with URI: {} found, returning Model of size(): {}", graphUri, model.size());
+		return Response.ok(model).build();
+	    }
+	}
+    }
+
+    @POST
+    @Override
+    public Response post(Model model, @QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
     {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @PUT
     @Override
-    public Response post(Model model, @QueryParam("default") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
+    public Response put(Model model, @QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
     {
-	throw new UnsupportedOperationException("Not supported yet.");
+	if (!defaultGraph && graphUri == null) throw new WebApplicationException(Status.BAD_REQUEST);
+	if (log.isDebugEnabled()) log.debug("PUT Graph Store request with RDF payload: {} payload size(): {}", model, model.size());
+	
+	if (defaultGraph)
+	{
+	    if (log.isDebugEnabled()) log.debug("PUT Model to default graph");
+	    DataManager.get().putModel(getURI(), model);
+	    
+	    return Response.ok().build();
+	}
+	else
+	{
+	    boolean existingGraph = DataManager.get().containsModel(getURI(), graphUri.toString());
+	    
+	    if (log.isDebugEnabled()) log.debug("PUT Model to named graph with URI: {} Did it already exist? {}", graphUri, existingGraph);
+	    DataManager.get().putModel(getURI(), graphUri.toString(), model);
+	    
+	    if (existingGraph) return Response.ok().build();
+	    else return Response.created(graphUri).build();
+	}	
     }
 
-    @Override
-    public Response put(Model model, @QueryParam("default") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
-    {
-	throw new UnsupportedOperationException("Not supported yet.");
-    }
-
+    @DELETE
     @Override
     public Response delete(@QueryParam("default") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
     {
 	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public Resource getResource()
+    {
+	return resource;
+    }
+
+    @Override
+    public String getURI()
+    {
+	return getResource().getURI();
+    }
+
+    @Override
+    public Model getModel()
+    {
+	return getResource().getModel();
+    }
+
+    @Override
+    public AnonId getId()
+    {
+	return getResource().getId();
+    }
+
+    @Override
+    public com.hp.hpl.jena.rdf.model.Resource inModel(Model model)
+    {
+	return getResource().inModel(model);
+    }
+
+    @Override
+    public boolean hasURI(String string)
+    {
+	return getResource().hasURI(string);
+    }
+
+    @Override
+    public String getNameSpace()
+    {
+	return getResource().getNameSpace();
+    }
+
+    @Override
+    public String getLocalName()
+    {
+	return getResource().getLocalName();
+    }
+
+    @Override
+    public Statement getRequiredProperty(Property prprt)
+    {
+	return getResource().getRequiredProperty(prprt);
+    }
+
+    @Override
+    public Statement getProperty(Property prprt)
+    {
+	return getResource().getProperty(prprt);
+    }
+
+    @Override
+    public StmtIterator listProperties(Property prprt)
+    {
+	return getResource().listProperties(prprt);
+    }
+
+    @Override
+    public StmtIterator listProperties()
+    {
+	return getResource().listProperties();
+    }
+
+    @Override
+    public com.hp.hpl.jena.rdf.model.Resource addLiteral(Property prprt, boolean bln)
+    {
+	return getResource().addLiteral(prprt, bln);
+    }
+
+    @Override
+    public com.hp.hpl.jena.rdf.model.Resource addLiteral(Property prprt, long l)
+    {
+	return getResource().addLiteral(prprt, l);
+    }
+
+    @Override
+    public com.hp.hpl.jena.rdf.model.Resource addLiteral(Property prprt, char c)
+    {
+	return getResource().addLiteral(prprt, c);
+    }
+
+    @Override
+    public com.hp.hpl.jena.rdf.model.Resource addLiteral(Property prprt, double d)
+    {
+	return getResource().addLiteral(prprt, d);
+    }
+
+    @Override
+    public com.hp.hpl.jena.rdf.model.Resource addLiteral(Property prprt, float f)
+    {
+	return getResource().addLiteral(prprt, f);
+    }
+
+    @Override
+    public com.hp.hpl.jena.rdf.model.Resource addLiteral(Property prprt, Object o)
+    {
+	return getResource().addLiteral(prprt, o);
+    }
+
+    @Override
+    public com.hp.hpl.jena.rdf.model.Resource addLiteral(Property prprt, Literal ltrl)
+    {
+	return getResource().addLiteral(prprt, ltrl);
+    }
+
+    @Override
+    public com.hp.hpl.jena.rdf.model.Resource addProperty(Property prprt, String string)
+    {
+	return getResource().addLiteral(prprt, string);
+    }
+
+    @Override
+    public com.hp.hpl.jena.rdf.model.Resource addProperty(Property prprt, String string, String string1)
+    {
+	return getResource().addProperty(prprt, string, string1);
+    }
+
+    @Override
+    public com.hp.hpl.jena.rdf.model.Resource addProperty(Property prprt, String string, RDFDatatype rdfd)
+    {
+	return getResource().addProperty(prprt, prprt);
+    }
+
+    @Override
+    public com.hp.hpl.jena.rdf.model.Resource addProperty(Property prprt, RDFNode rdfn)
+    {
+	return getResource().addProperty(prprt, rdfn);
+    }
+
+    @Override
+    public boolean hasProperty(Property prprt)
+    {
+	return getResource().hasProperty(prprt);
+    }
+
+    @Override
+    public boolean hasLiteral(Property prprt, boolean bln)
+    {
+	return getResource().hasLiteral(prprt, bln);
+    }
+
+    @Override
+    public boolean hasLiteral(Property prprt, long l)
+    {
+	return getResource().hasLiteral(prprt, l);
+    }
+
+    @Override
+    public boolean hasLiteral(Property prprt, char c)
+    {
+	return getResource().hasLiteral(prprt, c);
+    }
+
+    @Override
+    public boolean hasLiteral(Property prprt, double d)
+    {
+	return getResource().hasLiteral(prprt, d);
+    }
+
+    @Override
+    public boolean hasLiteral(Property prprt, float f)
+    {
+	return getResource().hasLiteral(prprt, f);
+    }
+
+    @Override
+    public boolean hasLiteral(Property prprt, Object o)
+    {
+	return getResource().hasLiteral(prprt, o);
+    }
+
+    @Override
+    public boolean hasProperty(Property prprt, String string)
+    {
+	return getResource().hasProperty(prprt, string);
+    }
+
+    @Override
+    public boolean hasProperty(Property prprt, String string, String string1)
+    {
+	return getResource().hasProperty(prprt, string, string1);
+    }
+
+    @Override
+    public boolean hasProperty(Property prprt, RDFNode rdfn)
+    {
+	return getResource().hasProperty(prprt, rdfn);
+    }
+
+    @Override
+    public com.hp.hpl.jena.rdf.model.Resource removeProperties()
+    {
+	return getResource().removeProperties();
+    }
+
+    @Override
+    public com.hp.hpl.jena.rdf.model.Resource removeAll(Property prprt)
+    {
+	return getResource().removeAll(prprt);
+    }
+
+    @Override
+    public com.hp.hpl.jena.rdf.model.Resource begin()
+    {
+	return getResource().begin();
+    }
+
+    @Override
+    public com.hp.hpl.jena.rdf.model.Resource abort()
+    {
+	return getResource().abort();
+    }
+
+    @Override
+    public com.hp.hpl.jena.rdf.model.Resource commit()
+    {
+	return getResource().commit();
+    }
+
+    @Override
+    public com.hp.hpl.jena.rdf.model.Resource getPropertyResourceValue(Property prprt)
+    {
+	return getResource().getPropertyResourceValue(prprt);
+    }
+
+    @Override
+    public boolean isAnon()
+    {
+	return getResource().isAnon();
+    }
+
+    @Override
+    public boolean isLiteral()
+    {
+	return getResource().isLiteral();
+    }
+
+    @Override
+    public boolean isURIResource()
+    {
+	return getResource().isURIResource();
+    }
+
+    @Override
+    public boolean isResource()
+    {
+	return getResource().isResource();
+    }
+
+    @Override
+    public <T extends RDFNode> T as(Class<T> type)
+    {
+	return getResource().as(type);
+    }
+
+    @Override
+    public <T extends RDFNode> boolean canAs(Class<T> type)
+    {
+	return getResource().canAs(type);
+    }
+
+    @Override
+    public Object visitWith(RDFVisitor rdfv)
+    {
+	return getResource().visitWith(rdfv);
+    }
+
+    @Override
+    public com.hp.hpl.jena.rdf.model.Resource asResource()
+    {
+	return getResource().asResource();
+    }
+
+    @Override
+    public Literal asLiteral()
+    {
+	return getResource().asLiteral();
+    }
+
+    @Override
+    public Node asNode()
+    {
+	return getResource().asNode();
+    }
+
+    @Override
+    public String toString()
+    {
+	return getResource().toString();
     }
     
 }

@@ -16,12 +16,10 @@
  */
 package org.graphity.server.model;
 
+import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.update.UpdateRequest;
 import java.net.URI;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import org.graphity.server.MediaType;
 
@@ -33,7 +31,8 @@ import org.graphity.server.MediaType;
  * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/update/UpdateRequest.html">Jena UpdateRequest</a>
  * @see <a href="http://www.w3.org/TR/sparql11-protocol/">SPARQL Protocol for RDF</a>
  */
-public interface SPARQLUpdateEndpoint
+@Path("/sparql")
+public interface SPARQLUpdateEndpoint extends Resource
 {
     /**
      * Handles encoded POST update request and returns result as response
