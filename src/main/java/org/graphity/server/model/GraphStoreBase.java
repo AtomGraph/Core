@@ -22,12 +22,12 @@ import com.hp.hpl.jena.rdf.model.*;
 import com.sun.jersey.api.core.ResourceConfig;
 import java.net.URI;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import org.graphity.server.util.DataManager;
 import org.graphity.server.vocabulary.GS;
+import org.graphity.util.ModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,21 +41,46 @@ public class GraphStoreBase implements GraphStore
     private static final Logger log = LoggerFactory.getLogger(GraphStoreBase.class);
 
     private final Resource resource;
+    private final Request request;
 
     public GraphStoreBase(@Context ResourceConfig resourceConfig, @Context Request request)
     {
 	this(resourceConfig.getProperty(GS.sparqlGraphStore.getURI()) == null ?
 		null :
-		ResourceFactory.createResource(resourceConfig.getProperty(GS.sparqlGraphStore.getURI()).toString()));
-	    //request, resourceConfig)
+		ResourceFactory.createResource(resourceConfig.getProperty(GS.sparqlGraphStore.getURI()).toString()),
+	    request);
     }
 
-    protected GraphStoreBase(Resource graphStore)
+    protected GraphStoreBase(Resource graphStore, Request request)
     {
 	if (graphStore == null) throw new IllegalArgumentException("Graph store Resource cannot be null");
 	if (!graphStore.isURIResource()) throw new IllegalArgumentException("Graph store Resource must be URI Resource (not a blank node)");
-
+	if (request == null) throw new IllegalArgumentException("Request cannot be null");
+	
 	this.resource = graphStore;
+	this.request = request;
+    }
+
+    public ResponseBuilder getResponseBuilder(Model model)
+    {
+	return getResponseBuilder(new EntityTag(Long.toHexString(ModelUtils.hashModel(model))),
+		model);
+    }
+
+    public ResponseBuilder getResponseBuilder(EntityTag entityTag, Object entity)
+    {
+	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(entityTag);
+	if (rb != null)
+	{
+	    if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
+	    return rb;
+	}
+	else
+	{
+	    if (log.isTraceEnabled()) log.trace("Generating RDF Response with EntityTag: {}", entityTag);
+	    return Response.ok(entity).
+		    tag(entityTag);
+	}
     }
     
     @GET
@@ -67,21 +92,21 @@ public class GraphStoreBase implements GraphStore
 	if (defaultGraph)
 	{
 	    Model model = DataManager.get().getModel(getURI());
-	    if (log.isDebugEnabled()) log.debug("GET Graph Store Model from default graph, returning Model of size(): {}", model.size());
-	    return Response.ok(model).build();
+	    if (log.isDebugEnabled()) log.debug("GET Graph Store default graph, returning Model of size(): {}", model.size());
+	    return getResponseBuilder(model).build();
 	}
 	else
 	{
 	    Model model = DataManager.get().getModel(getURI(), graphUri.toString());
 	    if (model == null)
 	    {
-		if (log.isDebugEnabled()) log.debug("GET Graph Store Model; named graph with URI: {} not found", graphUri);
+		if (log.isDebugEnabled()) log.debug("GET Graph Store named graph with URI: {} not found", graphUri);
 		return Response.status(Status.NOT_FOUND).build();
 	    }
 	    else
 	    {
-		if (log.isDebugEnabled()) log.debug("GET Graph Store Model; named graph with URI: {} found, returning Model of size(): {}", graphUri, model.size());
-		return Response.ok(model).build();
+		if (log.isDebugEnabled()) log.debug("GET Graph Store named graph with URI: {} found, returning Model of size(): {}", graphUri, model.size());
+		return getResponseBuilder(model).build();
 	    }
 	}
     }
@@ -90,6 +115,8 @@ public class GraphStoreBase implements GraphStore
     @Override
     public Response post(Model model, @QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
     {
+	if (!defaultGraph && graphUri == null) throw new WebApplicationException(Status.BAD_REQUEST);
+
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -121,9 +148,30 @@ public class GraphStoreBase implements GraphStore
 
     @DELETE
     @Override
-    public Response delete(@QueryParam("default") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
+    public Response delete(@QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
     {
-	throw new UnsupportedOperationException("Not supported yet.");
+	if (!defaultGraph && graphUri == null) throw new WebApplicationException(Status.BAD_REQUEST);
+	
+	if (defaultGraph)
+	{
+	    DataManager.get().deleteDefault(getURI());
+	    if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store");
+	    return Response.noContent().build();
+	}
+	else
+	{
+	    if (!DataManager.get().containsModel(getURI(), graphUri.toString()))
+	    {
+		if (log.isDebugEnabled()) log.debug("DELETE named graph with URI {}: not found", graphUri);
+		return Response.status(Status.NOT_FOUND).build();
+	    }
+	    else
+	    {
+		if (log.isDebugEnabled()) log.debug("DELETE named graph with URI: {}", graphUri);
+		DataManager.get().deleteModel(getURI(), graphUri.toString());
+		return Response.noContent().build();
+	    }
+	}
     }
 
     public Resource getResource()
@@ -141,6 +189,11 @@ public class GraphStoreBase implements GraphStore
     public Model getModel()
     {
 	return getResource().getModel();
+    }
+
+    public Request getRequest()
+    {
+	return request;
     }
 
     @Override

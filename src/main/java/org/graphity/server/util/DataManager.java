@@ -277,7 +277,7 @@ public class DataManager extends FileManager
      */
     public Model getModel(String graphStoreURI)
     {
-	if (log.isDebugEnabled()) log.debug("GETting Model from Graph Store {} default graph", graphStoreURI);
+	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} default graph", graphStoreURI);
 
 	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
 	return accessor.getModel();
@@ -293,7 +293,7 @@ public class DataManager extends FileManager
      */
     public Model getModel(String graphStoreURI, String graphURI)
     {
-	if (log.isDebugEnabled()) log.debug("GETting Model from Graph Store {} with named graph URI: {}", graphStoreURI, graphURI);
+	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} with named graph URI: {}", graphStoreURI, graphURI);
 
 	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
 	return accessor.getModel(graphURI);	
@@ -311,7 +311,7 @@ public class DataManager extends FileManager
      */
     public void putModel(String graphStoreURI, String graphURI, Model model)
     {
-	if (log.isDebugEnabled()) log.debug("PUTting Model to Graph Store {} with named graph URI {}", graphStoreURI, graphURI);
+	if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} with named graph URI {}", graphStoreURI, graphURI);
 	
 	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
 	accessor.putModel(graphURI, model);
@@ -328,12 +328,41 @@ public class DataManager extends FileManager
      */
     public void putModel(String graphStoreURI, Model model)
     {
-	if (log.isDebugEnabled()) log.debug("PUTting Model to Graph Store {} default graph", graphStoreURI);
+	if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} default graph", graphStoreURI);
 	
 	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
 	accessor.putModel(model);
     }
 
+    /**
+     * Deletes contents of the default graph on a remote SPARQL Graph Store.
+     * Uses SPARQL Graph Store protocol.
+     * 
+     * @param graphStoreURI remote graph store URI
+     */
+    public void deleteDefault(String graphStoreURI)
+    {
+	if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store {}", graphStoreURI);
+	
+	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
+	accessor.deleteDefault();
+    }
+
+    /**
+     * Deletes contents of a named graph on a remote SPARQL Graph Store.
+     * Uses SPARQL Graph Store protocol.
+     * 
+     * @param graphStoreURI remote graph store URI
+     * @param graphURI named graph URI
+     */
+    public void deleteModel(String graphStoreURI, String graphURI)
+    {
+	if (log.isDebugEnabled()) log.debug("DELETE named graph with URI {} from Graph Store {}", graphURI, graphStoreURI);
+	
+	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
+	accessor.deleteModel(graphURI);
+    }
+    
     /**
      * Returns SPARQL context
      * 
