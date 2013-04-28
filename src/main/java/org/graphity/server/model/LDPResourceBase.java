@@ -20,10 +20,8 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.api.core.ResourceContext;
-import java.net.URI;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
-import org.graphity.server.util.DataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,11 +71,8 @@ public class LDPResourceBase extends QueriedResourceBase implements LDPResource
     @Override
     public Response post(Model model)
     {
+	if (log.isWarnEnabled()) log.warn("POST request with RDF payload: {}. Graphity Server is read-only!  Only GET is supported");
 	throw new WebApplicationException(405);
-	
-	//getOntResource().getOntModel().add(model);
-	
-	//return Response.created(null).build();
     }
 
     /**
@@ -89,32 +84,12 @@ public class LDPResourceBase extends QueriedResourceBase implements LDPResource
     @Override
     public Response put(Model model)
     {
-	// curl -X PUT -H "Content-Type: text/turtle" -d @vilnius-jug.ttl http://localhost:8080/
-	if (log.isDebugEnabled()) log.debug("PUT request with RDF payload: {} payload size(): {}", model, model.size());
-	com.hp.hpl.jena.sparql.util.Context queryContext = DataManager.get().getServiceContext(getEndpoint());
-	String endpointURI = getEndpoint().getURI().replace("/sparql", "/service");
-	DataManager.get().addServiceContext(endpointURI, queryContext);
-	
-	//if (DataManager.get().)
-	DataManager.get().putModel(endpointURI, model);
-	
-	return Response.ok().build();
-    }
-
-    @Override
-    public Response put(Model model, @QueryParam("graph") URI graphUri)
-    {
-	com.hp.hpl.jena.sparql.util.Context queryContext = DataManager.get().getServiceContext(getEndpoint());
-	String endpointURI = getEndpoint().getURI().replace("/sparql", "/service");
-	DataManager.get().addServiceContext(endpointURI, queryContext);
-
-	DataManager.get().putModel(endpointURI, graphUri.toString(), model);
-	
-	return Response.ok().build();
+	if (log.isWarnEnabled()) log.warn("POST request with RDF payload: {}. Graphity Server is read-only!  Only GET is supported");
+	throw new WebApplicationException(405);
     }
 
     /**
-     * Handles DELETE method, deletes the RDF representation of this resource frrom the SPARQL endpoint, and
+     * Handles DELETE method, deletes the RDF representation of this resource from the SPARQL endpoint, and
      * returns response.
      * 
      * @return response
@@ -122,14 +97,8 @@ public class LDPResourceBase extends QueriedResourceBase implements LDPResource
     @Override
     public Response delete()
     {
+	if (log.isWarnEnabled()) log.warn("DELETE request with RDF payload: {}. Graphity Server is read-only! Only GET is supported");
 	throw new WebApplicationException(405);
-
-	// if (getService() != null) DataManager.get().deleteModel(endpointUri, getUriInfo().getAbsolutePath()
-	
-	//getOntResource().remove();
-	
-	//return Response.noContent().build(); // 204 No Content
-	// 410 Gone if provenance shows previous versions: http://www.w3.org/TR/chips/#cp4.2
     }
 
 }
