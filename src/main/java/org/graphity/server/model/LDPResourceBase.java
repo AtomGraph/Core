@@ -84,7 +84,7 @@ public class LDPResourceBase extends QueriedResourceBase implements LDPResource
     @Override
     public Response put(Model model)
     {
-	if (log.isWarnEnabled()) log.warn("POST request with RDF payload: {}. Graphity Server is read-only!  Only GET is supported");
+	if (log.isWarnEnabled()) log.warn("PUT request with RDF payload: {}. Graphity Server is read-only!  Only GET is supported");
 	throw new WebApplicationException(405);
     }
 
