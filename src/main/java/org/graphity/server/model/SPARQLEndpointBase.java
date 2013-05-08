@@ -38,7 +38,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * SPARQL endpoint resource, implementing SPARQL HTTP protocol
+ * SPARQL endpoint resource, providing SPARQL HTTP protocol proxy.
+ * This class does natively manage the RDF store. It forwards the requests to a remote SPARQL endpoint.
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  * @see <a href="http://docs.oracle.com/javaee/6/tutorial/doc/gkqbq.html">JAX-RS Runtime Content Negotiation</a>
@@ -85,7 +86,8 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     private final ResourceConfig resourceConfig;
 
     /**
-     * JAX-RS-compatible resource constructor with injected initialization objects
+     * JAX-RS-compatible resource constructor with injected initialization objects.
+     * Uses <code>void:sparqlEndpoint</code> parameter value from web.xml as endpoint URI.
      * 
      * @param request current request
      * @param resourceConfig webapp configuration
@@ -211,6 +213,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     /**
      * Returns response builder for a SPARQL query.
      * Contains the main SPARQL endpoint JAX-RS implementation logic.
+     * Uses <code>gs:resultLimit</code> parameter value from web.xml as <code>LIMIT</code> value on <code>SELECT</code> queries.
      * 
      * @param query SPARQL query
      * @return response builder

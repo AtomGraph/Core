@@ -47,6 +47,7 @@ public class LinkedDataResourceBase implements LinkedDataResource
     /** 
      * JAX-RS-compatible resource constructor with injected initialization objects.
      * The URI of the resource being created is the absolute path of the current request URI.
+     * Uses <code>gs:cacheControl</code> parameter value from web.xml as <code>Cache-Control</code> header value.
      * 
      * @param uriInfo URI information of the request
      * @param resourceConfig webapp configuration
