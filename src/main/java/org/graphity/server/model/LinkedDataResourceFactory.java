@@ -28,7 +28,7 @@ import javax.ws.rs.core.CacheControl;
 public class LinkedDataResourceFactory
 {
     /**
-     * Creates new SPARQL endpoint from explicit URI resource.
+     * Creates new Linked Data resource from explicit URI resource.
      * 
      * @param resource RDF resource
      * @return a new resource
@@ -39,7 +39,7 @@ public class LinkedDataResourceFactory
     }
 
     /**
-     * Creates new SPARQL endpoint from explicit URI resource.
+     * Creates new Linked Data resource from explicit URI resource. Provides cache control.
      * 
      * @param resource RDF resource
      * @param cacheControl cache control (null equals none)
