@@ -111,12 +111,13 @@ Linked Data Platform
 
 For the first time, RDF and Linked Data enable an era of generic semantic Web applications. Generic applications
 operate on data independently of its domain (as long as it is provided in the uniform data model), and lay the
-background for the Semantic Web vision of intelligent agents.
+background for the Semantic Web vision of intelligent agents. Given growing data volumes and domain specialization,
+genericness results in scalability and flexibility.
 
 First, we need to establish that only applications natively operating on RDF can be made generic on a global scale.
 It means that applications operating on different data models, including applications that operate on RDF by
-mapping it onto intermediate models such as object-oriented, cannot be made generic, as the data model mismatch
-discards the uniformity and flexibility of RDF.
+mapping it onto intermediate models such as object-oriented, cannot be made generic and scale, as the data model
+mismatch discards the uniformity and flexibility of RDF.
 
 Secondly, we need to interpret Linked Data as an application of the [REST](http://en.wikipedia.org/wiki/Representational_state_transfer)
 architectural style, which is the reason why the modern Web is so scalable. REST was developed in conjunction with
@@ -140,6 +141,7 @@ Graph
 Queries
 
 processors
+POWDER
 Finite state machines
 XSLT analogy
 Context resource

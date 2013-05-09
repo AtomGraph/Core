@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 * All rights reserved.
 *
 * @see org.openjena.fuseki.FusekiLib
-* {@link http://openjena.org}
+* {@link http://jena.apache.org}
 *
 * @author Martynas Jusevičius <martynas@graphity.org>
 * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/util/FileManager.html">Jena FileManager</a>
