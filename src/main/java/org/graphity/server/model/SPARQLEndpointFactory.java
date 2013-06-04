@@ -17,6 +17,7 @@
 package org.graphity.server.model;
 
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.sun.jersey.api.core.ResourceConfig;
 import javax.ws.rs.core.Request;
 import org.slf4j.Logger;
@@ -54,6 +55,19 @@ public class SPARQLEndpointFactory
     public static SPARQLEndpoint createEndpoint(Resource endpoint, Request request, ResourceConfig resourceConfig)
     {
 	return new SPARQLEndpointBase(endpoint, request, resourceConfig);
+    }
+
+    /**
+     * Creates new SPARQL endpoint from explicit URI string and request metadata.
+     * 
+     * @param endpointURI endpoint URI
+     * @param request request
+     * @param resourceConfig webapp configuration
+     * @return a new endpoint
+     */
+    public static SPARQLEndpoint createEndpoint(String endpointURI, Request request, ResourceConfig resourceConfig)
+    {
+	return new SPARQLEndpointBase(ResourceFactory.createResource(endpointURI), request, resourceConfig);
     }
 
 }

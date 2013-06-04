@@ -9,7 +9,7 @@
 
     <developers>
 	<developer>
-		<id>martynas</id>
+		<id>pumba_lt</id>
 		<email>martynas@graphity.org</email>
 		<roles>
 			<role>Developer</role>
@@ -130,6 +130,6 @@
 	    </plugin>
         </plugins>
     </build>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
     <artifactId>server</artifactId>
 </project>
