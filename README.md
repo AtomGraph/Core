@@ -1,20 +1,28 @@
-mm
+Lower-level Linked Data server application that serves as a base for [Graphity Client](https://github.com/Graphity/graphity-browser). It is implemented as a Java Web application (uses Maven).
 
 Features
 --------
 
-* interfaces and base classes for rapid building of Linked Data webapps
-* high- and low-level access to remote Linked Data resources and SPARQL endpoints
-* providers for input and output of RDF data, either raw or via XSLT transformations
-* behind-the-scenes access of non-Linked Data resources via GRDDL
-* mapping and resolution of URIs to known schemas/ontologies
-* HTTP caching & authentication
-* easy XSLT transformation and SPARQL query building
+Graphity Server provides features similar to that of [Pubby](http://wifo5-03.informatik.uni-mannheim.de/pubby/):
+* serving Linked Data from a SPARQL endpoint
+* HTTP Basic authentication for endpoints
 
-Used libraries
+For more advanced features and configuration, see [Graphity Client](https://github.com/Graphity/graphity-browser).
+
+Configuration
+-------------
+
+The Server is configured in [web.xml](../../blob/master/src/main/webapp/WEB-INF/web.xml)
+
+For developers
+--------------
+* low-level access to remote Linked Data resources and SPARQL endpoints
+* JAX-RS interfaces and implementations of a Linked Data platform (so far read-only)
+* JAX-RS providers for input and output of RDF data
+
+Dependencies
 --------------
 
 * [Apache Jena](http://jena.apache.org)
-* [TopBraid SPIN API](http://topbraid.org/spin/api/)
 * [Jersey](http://jersey.java.net)
 * [SL4J](http://www.slf4j.org)
