@@ -133,6 +133,11 @@ public class DataManager extends FileManager
 
 	    throw new QueryExecException("Query to load Model must be CONSTRUCT or DESCRIBE");
 	}
+	catch (Exception ex)
+	{
+	    if (log.isDebugEnabled()) log.debug("Remote query execution exception: {}", ex);
+	    throw ex;
+	}
 	finally
 	{
 	    qex.close();
@@ -177,6 +182,11 @@ public class DataManager extends FileManager
 	
 	    throw new QueryExecException("Query to load Model must be CONSTRUCT or DESCRIBE"); // return null;
 	}
+	catch (Exception ex)
+	{
+	    if (log.isDebugEnabled()) log.debug("Local query execution exception: {}", ex);
+	    throw ex;
+	}
 	finally
 	{
 	    qex.close();
@@ -204,6 +214,11 @@ public class DataManager extends FileManager
 	    if (query.isSelectType()) return ResultSetFactory.copyResults(qex.execSelect());
 	    
 	    throw new QueryExecException("Query to load ResultSet must be SELECT");
+	}
+	catch (Exception ex)
+	{
+	    if (log.isDebugEnabled()) log.debug("Remote query execution exception: {}", ex);
+	    throw ex;
 	}
 	finally
 	{
@@ -246,6 +261,11 @@ public class DataManager extends FileManager
 	    if (query.isSelectType()) return ResultSetFactory.copyResults(qex.execSelect());
 	    
 	    throw new QueryExecException("Query to load ResultSet must be SELECT");
+	}
+	catch (Exception ex)
+	{
+	    if (log.isDebugEnabled()) log.debug("Local query execution exception: {}", ex);
+	    throw ex;
 	}
 	finally
 	{

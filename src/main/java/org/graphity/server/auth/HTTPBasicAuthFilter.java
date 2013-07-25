@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 // http://pastie.org/1530248
+// http://anismiles.wordpress.com/2012/03/02/securing-versioning-and-auditing-rest-jax-rs-jersey-apis/
 // http://java.net/projects/jersey/sources/svn/content/trunk/jersey/samples/https-clientserver-grizzly/src/main/java/com/sun/jersey/samples/https_grizzly/auth/SecurityFilter.java
 public class HTTPBasicAuthFilter implements ResourceFilter, ContainerRequestFilter
 {
@@ -64,7 +65,7 @@ public class HTTPBasicAuthFilter implements ResourceFilter, ContainerRequestFilt
 	return cr;
     }
 
-    private void authenticate(ContainerRequest cr)
+    protected void authenticate(ContainerRequest cr)
     {
 	if (log.isInfoEnabled()) log.info("Authenticating request");
       
