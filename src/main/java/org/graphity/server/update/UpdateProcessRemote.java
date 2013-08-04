@@ -16,14 +16,19 @@
  */
 package org.graphity.server.update;
 
+import com.hp.hpl.jena.query.ARQ;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.sparql.ARQException;
+import com.hp.hpl.jena.sparql.engine.http.Service;
+import com.hp.hpl.jena.sparql.util.Context;
 import com.hp.hpl.jena.update.GraphStore;
 import com.hp.hpl.jena.update.UpdateRequest;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.api.client.filter.LoggingFilter;
+import java.util.Map;
 import org.openjena.riot.WebContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,12 +45,32 @@ public class UpdateProcessRemote extends com.hp.hpl.jena.sparql.modify.UpdatePro
     private final String endpointURI ;
     private String user = null ;
     private char[] password = null ;
+    private Context context = null;
 
-    public UpdateProcessRemote(UpdateRequest request, String endpointURI)
+    public UpdateProcessRemote(UpdateRequest request, String serviceURI)
     {
-	super(request, endpointURI);
+	super(request, serviceURI);
         this.request = request ;
-        this.endpointURI = endpointURI ;
+        this.endpointURI = serviceURI ;
+        this.context = new Context(ARQ.getContext()) ;
+	
+	Map<String, Context> serviceContextMap = (Map<String,Context>)context.get(Service.serviceContext);
+	if (serviceContextMap != null && serviceContextMap.containsKey(serviceURI))
+	{
+	    Context serviceContext = serviceContextMap.get(serviceURI);
+	    if (log.isDebugEnabled()) log.debug("Endpoint URI {} has SERVICE Context: {} ", serviceURI, serviceContext);
+
+	    String usr = serviceContext.getAsString(Service.queryAuthUser);
+	    String pwd = serviceContext.getAsString(Service.queryAuthPwd);
+	    
+	    if (usr != null || pwd != null)
+	    {
+		usr = usr==null?"":usr;
+		pwd = pwd==null?"":pwd;
+		if (log.isDebugEnabled()) log.debug("Setting basic HTTP authentication for endpoint URI {} with username: {} ", serviceURI, usr);
+		setBasicAuthentication(usr, pwd.toCharArray());
+	    }
+	}
     }
 
     @Override
@@ -60,41 +85,36 @@ public class UpdateProcessRemote extends com.hp.hpl.jena.sparql.modify.UpdatePro
         return null ;
     }
 
+    public Context getContext()
+    {
+	return context;
+    }
+
     @Override
     public void execute()
     {
 	Client client = Client.create();
 	WebResource wr = client.resource(endpointURI);
 	client.addFilter(new LoggingFilter(System.out));
-
-	/*
-	if (user != null || password != null)
-	    try
-	    {
-		StringBuilder x = new StringBuilder() ;
-		byte b[] = x.append(user).append(":").append(password).toString().getBytes("UTF-8") ;
-		String y = Base64.encodeBytes(b) ;
-		
-		if (log.isDebugEnabled()) log.debug("Authorization: Basic {}", y);
-		wr.header("Authorization", "Basic "+y);
-	    } catch (UnsupportedEncodingException ex)
-	    {
-		if (log.isWarnEnabled()) log.warn("Unsupported encoding", ex);
-	    }
-	*/
+	
+	if (user != null && password != null)
+	{
+	    if (log.isDebugEnabled()) log.debug("Setting HTTP Basic auth for endpoint {} with username {}", endpointURI, user);
+	    client.addFilter(new HTTPBasicAuthFilter(user, password.toString()));
+	}
 	
 	String reqStr = request.toString();
 
 	if (log.isDebugEnabled()) log.debug("Sending SPARQL request {} to endpoint {}", reqStr, endpointURI);
 	ClientResponse response =
-	wr.type(WebContent.contentTypeSPARQLUpdate).
-	accept(WebContent.contentTypeResultsXML).
-	post(ClientResponse.class, reqStr);
+	    wr.type(WebContent.contentTypeSPARQLUpdate).
+	    accept(WebContent.contentTypeResultsXML).
+	    post(ClientResponse.class, reqStr);
 	
 	if (log.isDebugEnabled()) log.debug("SPARQL endpoint response: {}", response);
     }
 
-    public void setBasicAuthentication(String user, char[] password)
+    public final void setBasicAuthentication(String user, char[] password)
     {
         this.user = user ;
         this.password = password ;

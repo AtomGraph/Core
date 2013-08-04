@@ -155,7 +155,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     public Response queryEncoded(@FormParam("query") Query query,
 	@FormParam("default-graph-uri") URI defaultGraphUri, @FormParam("named-graph-uri") URI graphUri)
     {
-	throw new UnsupportedOperationException("Not supported yet.");
+	return query(query, defaultGraphUri, graphUri);
     }
 
     /**
@@ -172,7 +172,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     public Response queryDirectly(Query query, @QueryParam("default-graph-uri") URI defaultGraphUri,
 	@QueryParam("named-graph-uri") URI graphUri)
     {
-	throw new UnsupportedOperationException("Not supported yet.");
+	return query(query, defaultGraphUri, graphUri);
     }
 
     /**
@@ -191,13 +191,22 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	@FormParam("using-graph-uri") URI defaultGraphUri,
 	@FormParam("using-named-graph-uri") URI graphUri)
     {
-	throw new UnsupportedOperationException("Not supported yet.");
+	try
+	{
+	    executeUpdateRequest(update);
+	    return Response.ok().build();
+	}
+	catch (Exception ex) // better handling needed!
+	{
+	    return Response.serverError().build();
+	}
     }
 
     /**
      * Implements SPARQL 1.1 Protocol update direct POST method.
      * Update object is injected using a provider, which must be registered in the application.
      * 
+     * @param update update request (possibly multiple operations)
      * @param defaultGraphUri default graph URI
      * @param graphUri named graph URI
      * @return response with success or failure
@@ -205,10 +214,10 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     @Override
     @POST
     @Consumes(org.graphity.server.MediaType.APPLICATION_SPARQL_UPDATE)
-    public Response update(@QueryParam("using-graph-uri") URI defaultGraphUri,
+    public Response updateDirectly(UpdateRequest update, @QueryParam("using-graph-uri") URI defaultGraphUri,
 	@QueryParam("using-named-graph-uri") URI graphUri)
     {
-	throw new UnsupportedOperationException("Not supported yet.");
+	return update(update, defaultGraphUri, graphUri);
     }
 
     /**
@@ -319,6 +328,18 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     public Model loadModel(Query query)
     {
 	return loadModel(this, query);
+    }
+
+    public void executeUpdateRequest(Resource endpoint, UpdateRequest updateRequest)
+    {
+	if (log.isDebugEnabled()) log.debug("Executing update on SPARQL endpoint: {} using UpdateRequest: {}", endpoint, updateRequest);
+	DataManager.get().executeUpdateRequest(endpoint.getURI(), updateRequest);
+    }
+
+    @Override
+    public void executeUpdateRequest(UpdateRequest updateRequest)
+    {
+	executeUpdateRequest(this, updateRequest);
     }
 
     private Resource getResource()

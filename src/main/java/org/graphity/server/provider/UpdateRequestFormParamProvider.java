@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * Needs to be registered in the application.
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
- * @see org.graphity.server.Application
+ * @see org.graphity.server.ApplicationBase
  * @see <a href="http://jsr311.java.net/nonav/javadoc/javax/ws/rs/QueryParam.html">JAX-RS @QueryParam</a>
  * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/update/UpdateRequest.html">Jena UpdateRequest</a>
  * @see <a href="http://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/spi/inject/PerRequestTypeInjectableProvider.html">PerRequestTypeInjectableProvider</a>
@@ -61,7 +61,7 @@ public class UpdateRequestFormParamProvider extends PerRequestTypeInjectableProv
 	    @Override
 	    public UpdateRequest getValue()
 	    {
-		String value = getHttpContext().getUriInfo().getQueryParameters().getFirst(paramName);
+		String value = getHttpContext().getRequest().getFormParameters().getFirst(paramName);
 		if (value == null || value.isEmpty()) return null;
 		    
 		if (log.isTraceEnabled()) log.trace("Providing Injectable<UpdateRequest> with @QueryParam({}) and value: {}", paramName, value);

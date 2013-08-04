@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * Needs to be registered in the application.
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
- * @see org.graphity.server.Application
+ * @see org.graphity.server.ApplicationBase
  * @see <a href="http://www.w3.org/TR/rdf-sparql-XMLres/">SPARQL Query Results XML Format</a>
  * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/ResultSet.html">Jena ResultSet</a>
  * @see <a href="http://jsr311.java.net/nonav/javadoc/javax/ws/rs/ext/MessageBodyWriter.html">JAX-RS MessageBodyWriter</a>

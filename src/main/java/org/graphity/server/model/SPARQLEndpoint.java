@@ -19,6 +19,7 @@ package org.graphity.server.model;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.update.UpdateRequest;
 import java.util.List;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -102,10 +103,18 @@ public interface SPARQLEndpoint extends SPARQLQueryEndpoint, SPARQLUpdateEndpoin
     /**
      * Loads RDF model from the endpoint by executing a SPARQL query (<pre>SELECT</pre>)
      * 
-     * @param query
+     * @param query SPARQL query
      * @return SPARQL result set
      * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#select">SELECT</a>
      */
     ResultSetRewindable loadResultSetRewindable(Query query);
+    
+    /**
+     * Execute SPARQL update request
+     * 
+     * @param updateRequest update request
+     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-update-20130321/">SPARQL 1.1 Update</a>
+     */
+    void executeUpdateRequest(UpdateRequest updateRequest);
 
 }

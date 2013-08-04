@@ -48,11 +48,12 @@ public interface SPARQLUpdateEndpoint extends Resource
     /**
      * Handles direct POST update request and returns result as response
      * 
+     * @param update update request (possibly multiple operations)
      * @param defaultGraphUri default graph URI
      * @param graphUri named graph URI
      * @return success or failure response
      * @see <a href="http://www.w3.org/TR/sparql11-protocol/#update-via-post-direct">2.2.2 update via POST directly</a>
      */
-    @POST @Consumes(MediaType.APPLICATION_SPARQL_UPDATE) Response update(@QueryParam("using-graph-uri") URI defaultGraphUri, @QueryParam("using-named-graph-uri") URI graphUri);
+    @POST @Consumes(MediaType.APPLICATION_SPARQL_UPDATE) Response updateDirectly(UpdateRequest update, @QueryParam("using-graph-uri") URI defaultGraphUri, @QueryParam("using-named-graph-uri") URI graphUri);
 
 }

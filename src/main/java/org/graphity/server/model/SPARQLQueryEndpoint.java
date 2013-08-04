@@ -65,6 +65,5 @@ public interface SPARQLQueryEndpoint extends Resource
      * @see <a href="http://www.w3.org/TR/sparql11-protocol/#query-via-post-direct">2.1.3 query via POST directly</a>
      */
     @POST @Consumes(MediaType.APPLICATION_SPARQL_QUERY) Response queryDirectly(Query query, @QueryParam("default-graph-uri") URI defaultGraphUri, @QueryParam("named-graph-uri") URI graphUri);
-    
-    // Context getServiceContext();
+   
 }

@@ -21,6 +21,8 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.sparql.engine.http.Service;
 import com.hp.hpl.jena.sparql.util.Context;
+import com.hp.hpl.jena.update.UpdateExecutionFactory;
+import com.hp.hpl.jena.update.UpdateRequest;
 import com.hp.hpl.jena.util.FileManager;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,6 +33,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.apache.jena.fuseki.DatasetAccessor;
 import org.apache.jena.fuseki.http.DatasetAdapter;
 import org.graphity.query.QueryEngineHTTP;
+import org.graphity.server.update.UpdateProcessRemote;
 import org.graphity.update.DatasetGraphAccessorHTTP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -227,7 +230,7 @@ public class DataManager extends FileManager
     }
     
     /**
-     * Loads result set from a remote SPARQL endpoint using a query and optional request parameters.
+     * Loads result set from a remote SPARQL endpoint using a query.
      * Only <code>SELECT</code> queries can be used with this method.
      * This is a convenience method for {@link loadResultSet(String,Query,MultivaluedMap<String, String>)} with
      * null request parameters.
@@ -271,6 +274,21 @@ public class DataManager extends FileManager
 	{
 	    qex.close();
 	}
+    }
+
+    /**
+     * Executes update request on a remote SPARQL endpoint.
+     * 
+     * @param endpointURI remote endpoint URI
+     * @param updateRequest update request
+     * @return query execution
+     */
+    public void executeUpdateRequest(String endpointURI, UpdateRequest updateRequest)
+    {
+	// UpdateExecutionFactory.createRemote(updateRequest, endpointURI);
+	// uses custom UpdateProcessRemote class with HTTP Basic authentication support
+	UpdateProcessRemote updateProcess = new UpdateProcessRemote(updateRequest, endpointURI);	
+	updateProcess.execute();
     }
 
     /**
@@ -509,6 +527,7 @@ public class DataManager extends FileManager
      * Returns service context of a SPARQL endpoint.
      * 
      * @param endpointURI endpoint URI
+     * @return context of the endpoint
      */
     public Context getServiceContext(String endpointURI)
     {
@@ -521,6 +540,7 @@ public class DataManager extends FileManager
      * Returns service context of a SPARQL endpoint.
      * 
      * @param endpoint endpoint resource (must be URI resource, not a blank node)
+     * @return context of the endpoint
      */    
     public Context getServiceContext(Resource endpoint)
     {
@@ -534,6 +554,7 @@ public class DataManager extends FileManager
      * Checks if SPARQL endpoint has service context.
      * 
      * @param endpoint endpoint URI
+     * @return true if endpoint URI is bound to a context, false otherwiese
      */    
     public boolean hasServiceContext(String endpointURI)
     {
@@ -544,10 +565,11 @@ public class DataManager extends FileManager
      * Checks if SPARQL endpoint has service context.
      * 
      * @param endpoint endpoint resource (must be URI resource, not a blank node)
+     * @return true if endpoint resource is bound to a context, false otherwiese
      */    
     public boolean hasServiceContext(Resource endpoint)
     {
 	return getServiceContext(endpoint) != null;
     }
-
+    
 }
