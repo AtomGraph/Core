@@ -43,8 +43,7 @@ public class UpdateProcessRemote extends com.hp.hpl.jena.sparql.modify.UpdatePro
     
     private final UpdateRequest request ;
     private final String endpointURI ;
-    private String user = null ;
-    private char[] password = null ;
+    private String user = null, password = null ;
     private Context context = null;
 
     public UpdateProcessRemote(UpdateRequest request, String serviceURI)
@@ -68,7 +67,7 @@ public class UpdateProcessRemote extends com.hp.hpl.jena.sparql.modify.UpdatePro
 		usr = usr==null?"":usr;
 		pwd = pwd==null?"":pwd;
 		if (log.isDebugEnabled()) log.debug("Setting basic HTTP authentication for endpoint URI {} with username: {} ", serviceURI, usr);
-		setBasicAuthentication(usr, pwd.toCharArray());
+		setBasicAuthentication(usr, pwd);
 	    }
 	}
     }
@@ -100,7 +99,7 @@ public class UpdateProcessRemote extends com.hp.hpl.jena.sparql.modify.UpdatePro
 	if (user != null && password != null)
 	{
 	    if (log.isDebugEnabled()) log.debug("Setting HTTP Basic auth for endpoint {} with username {}", endpointURI, user);
-	    client.addFilter(new HTTPBasicAuthFilter(user, password.toString()));
+	    client.addFilter(new HTTPBasicAuthFilter(user, password));
 	}
 	
 	String reqStr = request.toString();
@@ -114,7 +113,7 @@ public class UpdateProcessRemote extends com.hp.hpl.jena.sparql.modify.UpdatePro
 	if (log.isDebugEnabled()) log.debug("SPARQL endpoint response: {}", response);
     }
 
-    public final void setBasicAuthentication(String user, char[] password)
+    public final void setBasicAuthentication(String user, String password)
     {
         this.user = user ;
         this.password = password ;
