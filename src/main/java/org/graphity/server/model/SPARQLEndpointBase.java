@@ -196,9 +196,9 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	    executeUpdateRequest(update);
 	    return Response.ok().build();
 	}
-	catch (Exception ex) // better handling needed!
+	catch (Exception ex)
 	{
-	    return Response.serverError().build();
+	    throw new WebApplicationException(ex);
 	}
     }
 
