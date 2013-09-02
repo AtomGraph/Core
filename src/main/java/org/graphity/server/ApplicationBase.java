@@ -133,10 +133,20 @@ public class ApplicationBase extends javax.ws.rs.core.Application
 	com.hp.hpl.jena.sparql.util.Context queryContext = new com.hp.hpl.jena.sparql.util.Context();
 	queryContext.put(Service.queryAuthUser, authUser);
 	queryContext.put(Service.queryAuthPwd, authPwd);
-	Map<String,com.hp.hpl.jena.sparql.util.Context> serviceContext = new HashMap<String,com.hp.hpl.jena.sparql.util.Context>();
 
-	serviceContext.put(endpointURI, queryContext);
-	ARQ.getContext().put(Service.serviceContext, serviceContext);
+	if (ARQ.getContext().isDefined(Service.serviceContext))
+	{
+	    Map<String, com.hp.hpl.jena.sparql.util.Context> serviceContext = (Map<String, com.hp.hpl.jena.sparql.util.Context>) ARQ.getContext().get(Service.serviceContext);
+	    if (log.isDebugEnabled()) log.debug("Adding SPARQL endpoint {} to existing service Context: {}", endpointURI, serviceContext);
+	    serviceContext.put(endpointURI, queryContext);
+	}
+	else
+	{
+	    Map<String, com.hp.hpl.jena.sparql.util.Context> serviceContext = new HashMap<String,com.hp.hpl.jena.sparql.util.Context>();
+	    if (log.isDebugEnabled()) log.debug("Adding SPARQL endpoint {} to new service Context", endpointURI);
+	    serviceContext.put(endpointURI, queryContext);
+	    ARQ.getContext().put(Service.serviceContext, serviceContext);
+	}
     }
     
     /**

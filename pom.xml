@@ -130,6 +130,25 @@
 	    </plugin>
         </plugins>
     </build>
-    <packaging>jar</packaging>
+    <packaging>${packaging.type}</packaging>
     <artifactId>server</artifactId>
+    
+    <profiles>
+        <profile>
+            <id>standalone</id>
+            <properties>
+                <packaging.type>war</packaging.type>
+            </properties>
+        </profile>
+        <profile>
+            <id>dependency</id>
+            <properties>
+                <packaging.type>jar</packaging.type>
+            </properties>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+	</profile>
+    </profiles>
+
 </project>
