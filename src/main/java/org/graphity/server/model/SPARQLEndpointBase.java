@@ -305,7 +305,19 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	    }
 	}	
     }
-    
+        
+    public Model loadModel(Resource endpoint, Query query)
+    {
+	if (log.isDebugEnabled()) log.debug("Loading Model from SPARQL endpoint: {} using Query: {}", endpoint, query);
+	return DataManager.get().loadModel(endpoint.getURI(), query);
+    }
+
+    @Override
+    public Model loadModel(Query query)
+    {
+	return loadModel(this, query);
+    }
+
     public ResultSetRewindable loadResultSetRewindable(Resource endpoint, Query query)
     {
 	if (log.isDebugEnabled()) log.debug("Loading ResultSet from SPARQL endpoint: {} using Query: {}", endpoint.getURI(), query);
@@ -317,17 +329,17 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     {
 	return loadResultSetRewindable(this, query);
     }
-    
-    public Model loadModel(Resource endpoint, Query query)
+
+    public boolean ask(Resource endpoint, Query query)
     {
-	if (log.isDebugEnabled()) log.debug("Loading Model from SPARQL endpoint: {} using Query: {}", endpoint, query);
-	return DataManager.get().loadModel(endpoint.getURI(), query);
+	if (log.isDebugEnabled()) log.debug("Loading boolean result from SPARQL endpoint: {} using Query: {}", endpoint.getURI(), query);
+	return DataManager.get().ask(endpoint.getURI(), query);
     }
 
     @Override
-    public Model loadModel(Query query)
+    public boolean ask(Query query)
     {
-	return loadModel(this, query);
+	return ask(this, query);
     }
 
     public void executeUpdateRequest(Resource endpoint, UpdateRequest updateRequest)

@@ -21,7 +21,6 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.sparql.engine.http.Service;
 import com.hp.hpl.jena.sparql.util.Context;
-import com.hp.hpl.jena.update.UpdateExecutionFactory;
 import com.hp.hpl.jena.update.UpdateRequest;
 import com.hp.hpl.jena.util.FileManager;
 import java.util.HashMap;
@@ -263,6 +262,86 @@ public class DataManager extends FileManager
 	{
 	    if (query.isSelectType()) return ResultSetFactory.copyResults(qex.execSelect());
 	    
+	    throw new QueryExecException("Query to load ResultSet must be SELECT");
+	}
+	catch (Exception ex)
+	{
+	    if (log.isDebugEnabled()) log.debug("Local query execution exception: {}", ex);
+	    throw ex;
+	}
+	finally
+	{
+	    qex.close();
+	}
+    }
+
+    /**
+     * Returns boolean result from a remote SPARQL endpoint using a query and optional request parameters.
+     * Only <code>ASK</code> queries can be used with this method.
+     * 
+     * @param endpointURI remote endpoint URI
+     * @param query query object
+     * @param params name/value pairs of request parameters or null, if none
+     * @return boolean result
+     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#ask">ASK</a>
+     */
+    public boolean ask(String endpointURI, Query query, MultivaluedMap<String, String> params)
+    {
+	if (log.isDebugEnabled()) log.debug("Remote service {} Query execution: {} ", endpointURI, query);
+	if (query == null) throw new IllegalArgumentException("Query must be not null");
+
+	QueryExecution qex = sparqlService(endpointURI, query, params);
+	try
+	{
+	    if (query.isAskType()) return qex.execAsk();
+	    
+	    throw new QueryExecException("Query to load ResultSet must be ASK");
+	}
+	catch (Exception ex)
+	{
+	    if (log.isDebugEnabled()) log.debug("Remote query execution exception: {}", ex);
+	    throw ex;
+	}
+	finally
+	{
+	    qex.close();
+	}
+    }
+
+    /**
+     * Loads result set from a remote SPARQL endpoint using a query.
+     * Only <code>ASK</code> queries can be used with this method.
+     * This is a convenience method for {@link ask(String,Query,MultivaluedMap<String, String>)} with
+     * null request parameters.
+     * 
+     * @param endpointURI remote endpoint URI
+     * @param query query object
+     * @return boolean result
+     */
+    public boolean ask(String endpointURI, Query query)
+    {
+	return ask(endpointURI, query, null);
+    }
+
+    /**
+     * Returns boolean result from an RDF model using a SPARQL query.
+     * Only <code>ASK</code> queries can be used with this method.
+     *
+     * @param model the RDF model to be queried
+     * @param query query object
+     * @return boolean result
+     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#ask">ASK</a>
+     */
+    public boolean ask(Model model, Query query)
+    {
+	if (log.isDebugEnabled()) log.debug("Local Model Query: {}", query);
+	if (query == null) throw new IllegalArgumentException("Query must be not null");
+
+	QueryExecution qex = QueryExecutionFactory.create(query, model);
+	try
+	{
+	    if (query.isAskType()) return qex.execAsk();
+
 	    throw new QueryExecException("Query to load ResultSet must be SELECT");
 	}
 	catch (Exception ex)

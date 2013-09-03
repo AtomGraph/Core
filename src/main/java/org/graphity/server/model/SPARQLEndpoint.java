@@ -108,7 +108,16 @@ public interface SPARQLEndpoint extends SPARQLQueryEndpoint, SPARQLUpdateEndpoin
      * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#select">SELECT</a>
      */
     ResultSetRewindable loadResultSetRewindable(Query query);
-    
+
+    /**
+     * Asks boolean result from the endpoint by executing a SPARQL query (<pre>ASK</pre>)
+     * 
+     * @param query SPARQL query
+     * @return boolean result
+     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#ask">ASK</a>
+     */
+    boolean ask(Query query);
+
     /**
      * Execute SPARQL update request
      * 
