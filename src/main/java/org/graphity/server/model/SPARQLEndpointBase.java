@@ -317,7 +317,25 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     {
 	return loadModel(this, query);
     }
+    
+    @Override
+    public Model describe(Query query)
+    {
+	if (query == null) throw new IllegalArgumentException("Query must be not null");
+        if (!query.isDescribeType()) throw new IllegalArgumentException("Query must be DESCRIBE");
+        
+	return loadModel(this, query);
+    }
 
+    @Override
+    public Model construct(Query query)
+    {
+	if (query == null) throw new IllegalArgumentException("Query must be not null");
+        if (!query.isConstructType()) throw new IllegalArgumentException("Query must be CONSTRUCT");
+        
+	return loadModel(this, query);
+    }
+   
     public ResultSetRewindable loadResultSetRewindable(Resource endpoint, Query query)
     {
 	if (log.isDebugEnabled()) log.debug("Loading ResultSet from SPARQL endpoint: {} using Query: {}", endpoint.getURI(), query);
@@ -325,8 +343,11 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     }
 
     @Override
-    public ResultSetRewindable loadResultSetRewindable(Query query)
+    public ResultSetRewindable select(Query query)
     {
+	if (query == null) throw new IllegalArgumentException("Query must be not null");
+        if (!query.isSelectType()) throw new IllegalArgumentException("Query must be SELECT");
+        
 	return loadResultSetRewindable(this, query);
     }
 
@@ -339,6 +360,9 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     @Override
     public boolean ask(Query query)
     {
+	if (query == null) throw new IllegalArgumentException("Query must be not null");
+        if (!query.isAskType()) throw new IllegalArgumentException("Query must be ASK");
+        
 	return ask(this, query);
     }
 

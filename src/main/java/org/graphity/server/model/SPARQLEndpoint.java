@@ -89,7 +89,7 @@ public interface SPARQLEndpoint extends SPARQLQueryEndpoint, SPARQLUpdateEndpoin
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/EntityTag.html">EntityTag</a>
      */
     ResponseBuilder getResponseBuilder(EntityTag entityTag, Object entity, List<Variant> variants);
-    
+
     /**
      * Loads RDF model from the endpoint by executing a SPARQL query (<code>DESCRIBE</code> or <code>CONSTRUCT</code>)
      * 
@@ -99,7 +99,25 @@ public interface SPARQLEndpoint extends SPARQLQueryEndpoint, SPARQLUpdateEndpoin
      * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#construct">CONSTRUCT</a>
      */
     Model loadModel(Query query);
- 
+
+    /**
+     * Loads RDF model from the endpoint by executing a SPARQL query (<code>DESCRIBE</code>)
+     * 
+     * @param query SPARQL query
+     * @return RDF model
+     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#describe">DESCRIBE</a>
+     */
+    Model describe(Query query);
+
+    /**
+     * Loads RDF model from the endpoint by executing a SPARQL query (<code>CONSTRUCT</code>)
+     * 
+     * @param query SPARQL query
+     * @return RDF model
+     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#construct">CONSTRUCT</a>
+     */
+    Model construct(Query query);
+    
     /**
      * Loads RDF model from the endpoint by executing a SPARQL query (<pre>SELECT</pre>)
      * 
@@ -107,7 +125,7 @@ public interface SPARQLEndpoint extends SPARQLQueryEndpoint, SPARQLUpdateEndpoin
      * @return SPARQL result set
      * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#select">SELECT</a>
      */
-    ResultSetRewindable loadResultSetRewindable(Query query);
+    ResultSetRewindable select(Query query);
 
     /**
      * Asks boolean result from the endpoint by executing a SPARQL query (<pre>ASK</pre>)
