@@ -12,6 +12,7 @@ import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.ARQ;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.shared.JenaException;
 import com.hp.hpl.jena.sparql.engine.http.Service;
 import com.hp.hpl.jena.sparql.graph.GraphFactory;
 import com.hp.hpl.jena.sparql.util.Context;
@@ -40,6 +41,7 @@ import org.apache.jena.fuseki.http.DatasetGraphAccessor;
 import org.apache.jena.fuseki.http.HttpSC;
 import org.apache.jena.fuseki.migrate.UnmodifiableGraph;
 import org.openjena.atlas.io.IO;
+import org.openjena.atlas.lib.IRILib;
 import org.openjena.atlas.lib.Sink;
 import org.openjena.atlas.logging.Log;
 import org.openjena.atlas.web.TypedInputStream;
@@ -193,8 +195,11 @@ public class DatasetGraphAccessorHTTP implements DatasetGraphAccessor
     private String target(Node name)
     {
         if ( ! name.isURI() )
-            throw new FusekiException("Not a URI: "+name) ;
-        return remote+"?"+paramGraph+"="+name.getURI() ;
+            throw new JenaException("Not a URI: "+name) ;
+        String guri = name.getURI() ;
+        // Encode
+        guri = IRILib.encodeUriComponent(guri) ;
+        return remote+"?"+HttpNames.paramGraph+"="+guri ;
     }
 
     static private HttpParams httpParams = createHttpParams() ;
