@@ -18,7 +18,7 @@
 package org.graphity.server.model;
 
 import com.hp.hpl.jena.rdf.model.Resource;
-import javax.ws.rs.core.CacheControl;
+import com.sun.jersey.api.core.ResourceConfig;
 
 /**
  * A factory class for creating Linked Data resources.
@@ -42,12 +42,12 @@ public class LinkedDataResourceFactory
      * Creates new Linked Data resource from explicit URI resource. Provides cache control.
      * 
      * @param resource RDF resource
-     * @param cacheControl cache control (null equals none)
+     * @param resourceConfig resource config
      * @return a new resource
      */
-    public static LinkedDataResource createResource(Resource resource, CacheControl cacheControl)
+    public static LinkedDataResource createResource(Resource resource, ResourceConfig resourceConfig)
     {
-	return new LinkedDataResourceBase(resource, cacheControl);
+	return new LinkedDataResourceBase(resource, resourceConfig);
     }
 
 }

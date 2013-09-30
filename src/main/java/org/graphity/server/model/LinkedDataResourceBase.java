@@ -42,12 +42,11 @@ public class LinkedDataResourceBase implements LinkedDataResource
     private static final Logger log = LoggerFactory.getLogger(LinkedDataResourceBase.class);
 
     private final Resource resource;
-    private final CacheControl cacheControl;
+    private final ResourceConfig resourceConfig;
 
     /** 
      * JAX-RS-compatible resource constructor with injected initialization objects.
      * The URI of the resource being created is the absolute path of the current request URI.
-     * Uses <code>gs:cacheControl</code> parameter value from web.xml as <code>Cache-Control</code> header value.
      * 
      * @param uriInfo URI information of the request
      * @param resourceConfig webapp configuration
@@ -55,25 +54,23 @@ public class LinkedDataResourceBase implements LinkedDataResource
      */
     public LinkedDataResourceBase(@Context UriInfo uriInfo, @Context ResourceConfig resourceConfig)
     {
-	this(ResourceFactory.createResource(uriInfo.getAbsolutePath().toString()),
-		(resourceConfig.getProperty(GS.cacheControl.getURI()) == null) ?
-		    null :
-		    CacheControl.valueOf(resourceConfig.getProperty(GS.cacheControl.getURI()).toString()));
+	this(ResourceFactory.createResource(uriInfo.getAbsolutePath().toString()), resourceConfig);
     }
     
     /**
      * Protected constructor. Not suitable for JAX-RS but can be used when subclassing.
      * 
      * @param resource This resource as RDF resource (must be URI resource, not a blank node)
-     * @param cacheControl Cache control config of this resource
+     * @param resourceConfig Resource config of this resource
      */
-    protected LinkedDataResourceBase(Resource resource, CacheControl cacheControl)
+    protected LinkedDataResourceBase(Resource resource, ResourceConfig resourceConfig)
     {
 	if (resource == null) throw new IllegalArgumentException("Resource cannot be null");
 	if (!resource.isURIResource()) throw new IllegalArgumentException("Resource must be URI Resource (not a blank node)");
+	if (resourceConfig == null) throw new IllegalArgumentException("ResourceConfig cannot be null");
 
 	this.resource = resource;
-	this.cacheControl = cacheControl;
+	this.resourceConfig = resourceConfig;
 	
 	if (log.isDebugEnabled()) log.debug("Creating LinkedDataResource from Resource with URI: {}", resource.getURI());
     }
@@ -146,13 +143,25 @@ public class LinkedDataResourceBase implements LinkedDataResource
     }
 
     /**
+     * Returns configuration for this web application (including parameters specified in web.xml).
+     * 
+     * @return webapp configuration
+     */
+    public ResourceConfig getResourceConfig()
+    {
+	return resourceConfig;
+    }
+
+    /**
      * Returns <code>Cache-Control</code> header configuration for this resource
      * 
      * @return cache control of this resource
      */
-    public final CacheControl getCacheControl()
+    public CacheControl getCacheControl()
     {
-	return cacheControl;
+	if (getResourceConfig().getProperty(GS.cacheControl.getURI()) == null) return null;
+        
+        return CacheControl.valueOf(getResourceConfig().getProperty(GS.cacheControl.getURI()).toString());
     }
     
     @Override

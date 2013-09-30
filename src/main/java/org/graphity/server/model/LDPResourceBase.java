@@ -55,11 +55,11 @@ public class LDPResourceBase extends QueriedResourceBase implements LDPResource
      * 
      * @param resource this resource as RDF resource
      * @param endpoint SPARQL endpoint of this resource
-     * @param cacheControl cache control config
+     * @param resourceConfig resource config
      */
-    protected LDPResourceBase(Resource resource, SPARQLEndpoint endpoint, CacheControl cacheControl)
+    protected LDPResourceBase(Resource resource, SPARQLEndpoint endpoint, ResourceConfig resourceConfig)
     {
-	super(resource, endpoint, cacheControl);
+	super(resource, endpoint, resourceConfig);
     }
 
     /**

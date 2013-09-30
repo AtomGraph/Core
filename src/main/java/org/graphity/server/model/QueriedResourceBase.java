@@ -27,13 +27,11 @@ import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Variant;
-import org.graphity.server.vocabulary.GS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,10 +63,7 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
     public QueriedResourceBase(@Context UriInfo uriInfo, @Context ResourceConfig resourceConfig, @Context ResourceContext resourceContext)
     {
 	this(ResourceFactory.createResource(uriInfo.getAbsolutePath().toString()),
-		resourceContext.getResource(SPARQLEndpointBase.class),
-		resourceConfig.getProperty(GS.cacheControl.getURI()) == null ?
-		    null :
-		    CacheControl.valueOf(resourceConfig.getProperty(GS.cacheControl.getURI()).toString()));
+		resourceContext.getResource(SPARQLEndpointBase.class), resourceConfig);
     }
 
     /**
@@ -76,11 +71,11 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
      * 
      * @param resource This resource as RDF resource (must be URI resource, not a blank node)
      * @param endpoint SPARQL endpoint of this resource
-     * @param cacheControl Cache control config
+     * @param resourceConfig Resource config
      */
-    protected QueriedResourceBase(Resource resource, SPARQLEndpoint endpoint, CacheControl cacheControl)
+    protected QueriedResourceBase(Resource resource, SPARQLEndpoint endpoint, ResourceConfig resourceConfig)
     {
-	super(resource, cacheControl);
+	super(resource, resourceConfig);
 	if (endpoint == null) throw new IllegalArgumentException("SPARQL endpoint cannot be null");
 	this.endpoint = endpoint;
     }
