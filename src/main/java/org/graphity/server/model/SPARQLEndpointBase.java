@@ -19,6 +19,7 @@ package org.graphity.server.model;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.rdf.model.*;
 import com.hp.hpl.jena.update.UpdateRequest;
@@ -253,6 +254,12 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     }
 
     @Override
+    public EntityTag getEntityTag(Model model)
+    {
+        return new EntityTag(Long.toHexString(ModelUtils.hashModel(model)));
+    }
+    
+    @Override
     public ResponseBuilder getResponseBuilder(Model model)
     {
 	return getResponseBuilder(model, MODEL_VARIANTS);
@@ -261,8 +268,13 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     @Override
     public ResponseBuilder getResponseBuilder(Model model, List<Variant> variants)
     {
-	return getResponseBuilder(new EntityTag(Long.toHexString(ModelUtils.hashModel(model))),
-		model, variants);
+	return getResponseBuilder(getEntityTag(model), model, variants);
+    }
+    
+    @Override
+    public EntityTag getEntityTag(ResultSet resultSet)
+    {
+        return new EntityTag(Long.toHexString(ResultSetUtils.hashResultSet(resultSet)));
     }
     
     @Override
@@ -274,10 +286,8 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     @Override
     public ResponseBuilder getResponseBuilder(ResultSetRewindable resultSet, List<Variant> variants)
     {
-	EntityTag entityTag = new EntityTag(Long.toHexString(ResultSetUtils.hashResultSet(resultSet)));
 	resultSet.reset(); // ResultSet needs to be rewinded back to the beginning
-	return getResponseBuilder(entityTag,
-		resultSet, variants);
+	return getResponseBuilder(getEntityTag(resultSet), resultSet, variants);
     }
     
     @Override

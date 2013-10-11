@@ -17,6 +17,7 @@
 package org.graphity.server.model;
 
 import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.update.UpdateRequest;
@@ -37,6 +38,22 @@ import javax.ws.rs.core.Variant;
  */
 public interface SPARQLEndpoint extends SPARQLQueryEndpoint, SPARQLUpdateEndpoint
 {
+    /**
+     * Returns <code>ETag</code> response header value (usually a hash string) for supplied model
+     * 
+     * @param model response model
+     * @return entity tag object for the model
+     */
+    EntityTag getEntityTag(Model model);
+
+    /**
+     * Returns <code>ETag</code> response header value (usually a hash string) for supplied result set
+     * 
+     * @param resultSet response result set
+     * @return entity tag object for the model
+     */
+    EntityTag getEntityTag(ResultSet resultSet);
+
     /**
      * Executes query and returns response builder initialized with its result
      * 
