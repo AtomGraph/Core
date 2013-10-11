@@ -6,7 +6,7 @@ Features
 Graphity Server provides features similar to that of [Pubby](http://wifo5-03.informatik.uni-mannheim.de/pubby/):
 * serving Linked Data from a SPARQL endpoint
 * HTTP Basic authentication for endpoints
-
+ 
 For more advanced features and configuration, see [Graphity Client](https://github.com/Graphity/graphity-browser).
 
 Configuration
