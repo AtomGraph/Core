@@ -20,6 +20,10 @@ For developers
 * JAX-RS interfaces and implementations of a Linked Data platform (so far read-only)
 * JAX-RS providers for input and output of RDF data
 
+Documentation
+-------------
+* [JavaDoc](http://graphity.github.io/graphity-ldp/apidocs/)
+
 Dependencies
 --------------
 
