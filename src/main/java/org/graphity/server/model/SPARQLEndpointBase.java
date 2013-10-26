@@ -286,8 +286,10 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     @Override
     public ResponseBuilder getResponseBuilder(ResultSetRewindable resultSet, List<Variant> variants)
     {
+        resultSet.reset();
+        EntityTag entityTag = getEntityTag(resultSet);
 	resultSet.reset(); // ResultSet needs to be rewinded back to the beginning
-	return getResponseBuilder(getEntityTag(resultSet), resultSet, variants);
+	return getResponseBuilder(entityTag, resultSet, variants);
     }
     
     @Override
