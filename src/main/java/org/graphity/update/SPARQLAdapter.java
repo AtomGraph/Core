@@ -60,7 +60,7 @@ public class SPARQLAdapter implements org.apache.jena.fuseki.DatasetAccessor
     
     /**
      * Adds RDF Model to the default graph.
-     * @param	data	RDF Model
+     * @param model	RDF Model
      */
     @Override
     public void add(Model model)

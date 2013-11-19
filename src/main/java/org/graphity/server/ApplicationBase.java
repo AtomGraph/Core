@@ -53,8 +53,8 @@ public class ApplicationBase extends javax.ws.rs.core.Application
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationBase.class);
 
-    private Set<Class<?>> classes = new HashSet<Class<?>>();
-    private Set<Object> singletons = new HashSet<Object>();
+    private final Set<Class<?>> classes = new HashSet<>();
+    private final Set<Object> singletons = new HashSet<>();
 
     /**
      * Initializes root resource classes and provider singletons
@@ -142,7 +142,7 @@ public class ApplicationBase extends javax.ws.rs.core.Application
 	}
 	else
 	{
-	    Map<String, com.hp.hpl.jena.sparql.util.Context> serviceContext = new HashMap<String,com.hp.hpl.jena.sparql.util.Context>();
+	    Map<String, com.hp.hpl.jena.sparql.util.Context> serviceContext = new HashMap<>();
 	    if (log.isDebugEnabled()) log.debug("Adding SPARQL endpoint {} to new service Context", endpointURI);
 	    serviceContext.put(endpointURI, queryContext);
 	    ARQ.getContext().put(Service.serviceContext, serviceContext);

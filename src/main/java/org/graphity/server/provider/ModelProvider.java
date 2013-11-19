@@ -59,7 +59,7 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
      * @see org.graphity.ldp.MediaType
      * @see <a href="http://jena.apache.org/documentation/javadoc/arq/org/openjena/riot/lang/package-summary.html">RIOT</a>
      */
-    public static final Map<String, Lang> LANGS = new HashMap<String, Lang>();
+    public static final Map<String, Lang> LANGS = new HashMap<>();
     static
     {
         LANGS.put(MediaType.APPLICATION_RDF_XML, Lang.RDFXML);

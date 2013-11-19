@@ -76,7 +76,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     public static final List<Variant> VARIANTS;
     static
     {
-	List<Variant> variants = new ArrayList<Variant>();
+	List<Variant> variants = new ArrayList<>();
 	variants.addAll(MODEL_VARIANTS);
 	variants.addAll(RESULT_SET_VARIANTS);
 	VARIANTS = variants;

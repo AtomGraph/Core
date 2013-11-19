@@ -16,7 +16,6 @@
  */
 package org.graphity.server.provider;
 
-import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.update.UpdateFactory;
 import com.hp.hpl.jena.update.UpdateRequest;
 import java.io.IOException;

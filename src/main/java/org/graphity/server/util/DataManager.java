@@ -59,18 +59,21 @@ public class DataManager extends FileManager
 
     private static final Logger log = LoggerFactory.getLogger(DataManager.class);
 
-    private Context context;
+    private final Context context;
 
     /**
      * Returns global data manager
      * 
      * @return singleton instance
      */
-    public static DataManager get() {
-        if (s_instance == null) {
+    public static DataManager get()
+    {
+        if (s_instance == null)
+        {
             s_instance = new DataManager(FileManager.get(), ARQ.getContext());
 	    if (log.isDebugEnabled()) log.debug("new DataManager({}): {}", FileManager.get(), s_instance);
         }
+        
         return s_instance;
     }
 
@@ -135,7 +138,7 @@ public class DataManager extends FileManager
 
 	    throw new QueryExecException("Query to load Model must be CONSTRUCT or DESCRIBE");
 	}
-	catch (Exception ex)
+	catch (QueryExecException ex)
 	{
 	    if (log.isDebugEnabled()) log.debug("Remote query execution exception: {}", ex);
 	    throw ex;
@@ -184,7 +187,7 @@ public class DataManager extends FileManager
 	
 	    throw new QueryExecException("Query to load Model must be CONSTRUCT or DESCRIBE"); // return null;
 	}
-	catch (Exception ex)
+	catch (QueryExecException ex)
 	{
 	    if (log.isDebugEnabled()) log.debug("Local query execution exception: {}", ex);
 	    throw ex;
@@ -217,7 +220,7 @@ public class DataManager extends FileManager
 	    
 	    throw new QueryExecException("Query to load ResultSet must be SELECT");
 	}
-	catch (Exception ex)
+	catch (QueryExecException ex)
 	{
 	    if (log.isDebugEnabled()) log.debug("Remote query execution exception: {}", ex);
 	    throw ex;
@@ -264,7 +267,7 @@ public class DataManager extends FileManager
 	    
 	    throw new QueryExecException("Query to load ResultSet must be SELECT");
 	}
-	catch (Exception ex)
+	catch (QueryExecException ex)
 	{
 	    if (log.isDebugEnabled()) log.debug("Local query execution exception: {}", ex);
 	    throw ex;
@@ -297,7 +300,7 @@ public class DataManager extends FileManager
 	    
 	    throw new QueryExecException("Query to load ResultSet must be ASK");
 	}
-	catch (Exception ex)
+	catch (QueryExecException ex)
 	{
 	    if (log.isDebugEnabled()) log.debug("Remote query execution exception: {}", ex);
 	    throw ex;
@@ -344,7 +347,7 @@ public class DataManager extends FileManager
 
 	    throw new QueryExecException("Query to load ResultSet must be SELECT");
 	}
-	catch (Exception ex)
+	catch (QueryExecException ex)
 	{
 	    if (log.isDebugEnabled()) log.debug("Local query execution exception: {}", ex);
 	    throw ex;
@@ -360,7 +363,6 @@ public class DataManager extends FileManager
      * 
      * @param endpointURI remote endpoint URI
      * @param updateRequest update request
-     * @return query execution
      */
     public void executeUpdateRequest(String endpointURI, UpdateRequest updateRequest)
     {
@@ -390,6 +392,7 @@ public class DataManager extends FileManager
      * In comparison, <code>loadModel()</code> variants operate on SPARQL Protocol, but can be used for the
      * same purpose.
      * 
+     * @param graphStoreURI Graph Store URI
      * @return RDF model of the default graph
      */
     public Model getModel(String graphStoreURI)
@@ -405,6 +408,7 @@ public class DataManager extends FileManager
      * In comparison, <code>loadModel()</code> variants operate on SPARQL Protocol, but can be used for the
      * same purpose.
      * 
+     * @param graphStoreURI Graph Store URI
      * @param graphURI named graph URI
      * @return RDF model of the named graph
      */
@@ -548,7 +552,7 @@ public class DataManager extends FileManager
     {
 	if (!getContext().isDefined(Service.serviceContext))
 	{
-	    Map<String,Context> serviceContext = new HashMap<String,Context>();
+	    Map<String,Context> serviceContext = new HashMap<>();
 	    getContext().put(Service.serviceContext, serviceContext);
 	}
 	
@@ -571,7 +575,7 @@ public class DataManager extends FileManager
     /**
      * Adds service context for a SPARQL endpoint.
      * 
-     * @param endpointURI endpoint resource (must be URI resource, not a blank node)
+     * @param endpoint endpoint resource (must be URI resource, not a blank node)
      * @param context context
      */
     public void addServiceContext(Resource endpoint, Context context)
@@ -632,7 +636,7 @@ public class DataManager extends FileManager
     /**
      * Checks if SPARQL endpoint has service context.
      * 
-     * @param endpoint endpoint URI
+     * @param endpointURI endpoint URI
      * @return true if endpoint URI is bound to a context, false otherwiese
      */    
     public boolean hasServiceContext(String endpointURI)
