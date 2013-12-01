@@ -14,7 +14,7 @@
             <param-value>org.graphity.server.ApplicationBase</param-value>
         </init-param>
         <init-param>
-            <param-name>http://rdfs.org/ns/void#sparqlEndpoint</param-name>
+            <param-name>http://server.graphity.org/ontology#endpoint</param-name>
             <param-value>http://dydra.com/graphity/server/sparql</param-value>
         </init-param>
         <init-param>
@@ -35,30 +35,4 @@
             30
         </session-timeout>
     </session-config>
-    
-    <!--
-    <security-constraint>
-	<web-resource-collection>
-	    <web-resource-name>Administration</web-resource-name>
-	    <url-pattern>/admin/*</url-pattern>
-	    <http-method>GET</http-method>
-	    <http-method>POST</http-method>
-	    <http-method>HEAD</http-method>
-	    <http-method>PUT</http-method>
-	    <http-method>OPTIONS</http-method>
-	    <http-method>TRACE</http-method>
-	    <http-method>DELETE</http-method>
-	</web-resource-collection>
-	<auth-constraint>
-	    <role-name>admin</role-name>
-	</auth-constraint>
-    </security-constraint>
-    <login-config>
-	<auth-method>BASIC</auth-method>
-	<realm-name>jaxrs</realm-name>
-    </login-config>
-    <security-role>
-	<role-name>admin</role-name>
-    </security-role>
-    -->
 </web-app>

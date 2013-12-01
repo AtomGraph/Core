@@ -20,6 +20,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.sun.jersey.api.core.ResourceConfig;
 import javax.ws.rs.core.Request;
+import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,13 +36,14 @@ public class SPARQLEndpointFactory
     /**
      * Creates new SPARQL endpoint from application configuration and request metadata.
      * 
+     * @param uriInfo URI information of the request
      * @param request request
      * @param resourceConfig webapp configuration
      * @return a new endpoint
      */
-    public static SPARQLEndpoint createEndpoint(Request request, ResourceConfig resourceConfig)
+    public static SPARQLEndpoint createEndpoint(UriInfo uriInfo, Request request, ResourceConfig resourceConfig)
     {
-	return new SPARQLEndpointBase(request, resourceConfig);
+	return new SPARQLEndpointBase(uriInfo, request, resourceConfig);
     }
     
     /**

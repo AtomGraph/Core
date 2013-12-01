@@ -20,6 +20,7 @@ package org.graphity.server.model;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.sun.jersey.api.core.ResourceConfig;
 import javax.ws.rs.core.Request;
+import javax.ws.rs.core.UriInfo;
 
 /**
  * A Factory class for creating new SPARQL Graph Store proxies.
@@ -32,13 +33,14 @@ public class GraphStoreFactory
     /**
      * Creates new GraphStore from application configuration.
      * 
+     * @param uriInfo URI information of the request
      * @param request current request
      * @param resourceConfig webapp configuration
      * @return graph store instance
      */
-    public static GraphStore createGraphStore(Request request, ResourceConfig resourceConfig)
+    public static GraphStore createGraphStore(UriInfo uriInfo, Request request, ResourceConfig resourceConfig)
     {
-	return new GraphStoreBase(request, resourceConfig);
+	return new GraphStoreBase(uriInfo, request, resourceConfig);
     }
     
     /**
@@ -46,11 +48,12 @@ public class GraphStoreFactory
      * 
      * @param graphStore remote graph store resource
      * @param request current request
+     * @param resourceConfig webapp configuration
      * @return graph store instance
      */
-    public static GraphStore createGraphStore(Resource graphStore, Request request)
+    public static GraphStore createGraphStore(Resource graphStore, Request request, ResourceConfig resourceConfig)
     {
-	return new GraphStoreBase(graphStore, request);
+	return new GraphStoreBase(graphStore, request, resourceConfig);
     }
 
 }

@@ -27,12 +27,12 @@ import com.sun.jersey.api.core.ResourceConfig;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import javax.naming.ConfigurationException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.*;
 import org.graphity.server.util.DataManager;
 import org.graphity.server.vocabulary.GS;
-import org.graphity.server.vocabulary.VoID;
 import org.graphity.util.ModelUtils;
 import org.graphity.util.ResultSetUtils;
 import org.slf4j.Logger;
@@ -88,19 +88,20 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 
     /**
      * JAX-RS-compatible resource constructor with injected initialization objects.
-     * Uses <code>void:sparqlEndpoint</code> parameter value from web.xml as endpoint URI.
      * 
+     * @param uriInfo URI information of the request
      * @param request current request
      * @param resourceConfig webapp configuration
      * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/javax/ws/rs/core/Request.html">JAX-RS Request</a>
      * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceConfig.html">Jersey ResourceConfig</a>
      */
-    public SPARQLEndpointBase(@Context Request request, @Context ResourceConfig resourceConfig)
+    public SPARQLEndpointBase(@Context UriInfo uriInfo, @Context Request request, @Context ResourceConfig resourceConfig)
     {
-	this(resourceConfig.getProperty(VoID.sparqlEndpoint.getURI()) == null ?
-		null :
-		ResourceFactory.createResource(resourceConfig.getProperty(VoID.sparqlEndpoint.getURI()).toString()),
-	    request, resourceConfig);
+	this(ResourceFactory.createResource(uriInfo.getBaseUriBuilder().
+                path(SPARQLEndpointBase.class).
+                build().
+                toString()),
+            request, resourceConfig);
     }
     
     /**
@@ -234,25 +235,46 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     {
 	if (query == null) throw new WebApplicationException(Response.Status.BAD_REQUEST);
 
-	if (query.isSelectType())
-	{
-	    if (log.isDebugEnabled()) log.debug("SPARQL endpoint executing SELECT query: {}", query);
-	    if (getResourceConfig().getProperty(GS.resultLimit.getURI()) != null)
-		query.setLimit(Long.parseLong(getResourceConfig().getProperty(GS.resultLimit.getURI()).toString()));
+        if (query.isSelectType())
+        {
+            if (log.isDebugEnabled()) log.debug("SPARQL endpoint executing SELECT query: {}", query);
+            if (getResourceConfig().getProperty(GS.resultLimit.getURI()) != null)
+                query.setLimit(Long.parseLong(getResourceConfig().getProperty(GS.resultLimit.getURI()).toString()));
 
-	    return getResponseBuilder(loadResultSetRewindable(getResource(), query));
-	}
+            return getResponseBuilder(loadResultSetRewindable(getRemoteEndpoint(), query));
+        }
 
-	if (query.isConstructType() || query.isDescribeType())
-	{
-	    if (log.isDebugEnabled()) log.debug("SPARQL endpoint executing CONSTRUCT/DESCRIBE query: {}", query);
-	    return getResponseBuilder(loadModel(getResource(), query));
-	}
-
+        if (query.isConstructType() || query.isDescribeType())
+        {
+            if (log.isDebugEnabled()) log.debug("SPARQL endpoint executing CONSTRUCT/DESCRIBE query: {}", query);
+            return getResponseBuilder(loadModel(getRemoteEndpoint(), query));
+        }
+        
 	if (log.isWarnEnabled()) log.warn("SPARQL endpoint received unknown type of query: {}", query);
 	throw new WebApplicationException(Response.Status.BAD_REQUEST);
     }
 
+    /**
+     * Returns configured SPARQL endpoint resource.
+     * Uses <code>gs:endpoint</code> parameter value from web.xml as endpoint URI.
+     * 
+     * @return endpoint resource
+     */
+    public Resource getRemoteEndpoint()
+    {
+        try
+        {
+            Object endpointUri = getResourceConfig().getProperty(GS.endpoint.getURI());
+            if (endpointUri == null) throw new ConfigurationException("SPARQL endpoint not configured (gs:endpoint not set in web.xml)");
+            return ResourceFactory.createResource(endpointUri.toString());
+            }
+        catch (ConfigurationException ex)
+        {
+            if (log.isErrorEnabled()) log.warn("SPARQL endpoint configuration error", ex);
+            throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);            
+        }
+    }
+    
     @Override
     public EntityTag getEntityTag(Model model)
     {

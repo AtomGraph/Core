@@ -32,7 +32,6 @@ import org.graphity.server.model.QueriedResourceBase;
 import org.graphity.server.model.SPARQLEndpointBase;
 import org.graphity.server.provider.*;
 import org.graphity.server.vocabulary.GS;
-import org.graphity.server.vocabulary.VoID;
 import org.openjena.riot.SysRIOT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,20 +89,17 @@ public class ApplicationBase extends javax.ws.rs.core.Application
 	SysRIOT.wireIntoJena(); // enable RIOT parser
 	// WARNING! ontology caching can cause concurrency/consistency problems
 	OntDocumentManager.getInstance().setCacheModels(false);
-	
-	if (getResourceConfig().getProperty(VoID.sparqlEndpoint.getURI()) == null)
-	    throw new IllegalArgumentException("No SPARQL endpoint URI specified in web.xml");
 
 	{
-	    String endpointURI = (String)getResourceConfig().getProperty(VoID.sparqlEndpoint.getURI());
+	    String endpointURI = (String)getResourceConfig().getProperty(GS.endpoint.getURI());
 	    String authUser = (String)getResourceConfig().getProperty(Service.queryAuthUser.getSymbol());
 	    String authPwd = (String)getResourceConfig().getProperty(Service.queryAuthPwd.getSymbol());
 	    if (authUser != null && authPwd != null) configureServiceContext(endpointURI, authUser, authPwd);
 	}
 	
-	if (getResourceConfig().getProperty(GS.sparqlGraphStore.getURI()) != null)
+	if (getResourceConfig().getProperty(GS.graphStore.getURI()) != null)
 	{
-	    String graphStoreURI = (String)getResourceConfig().getProperty(GS.sparqlGraphStore.getURI());
+	    String graphStoreURI = (String)getResourceConfig().getProperty(GS.graphStore.getURI());
 	    // reuses SPARQL query endpoint authentication properties -- not ideal
 	    String authUser = (String)getResourceConfig().getProperty(Service.queryAuthUser.getSymbol());
 	    String authPwd = (String)getResourceConfig().getProperty(Service.queryAuthPwd.getSymbol());

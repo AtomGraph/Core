@@ -21,6 +21,7 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.*;
 import com.sun.jersey.api.core.ResourceConfig;
 import java.net.URI;
+import javax.naming.ConfigurationException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -44,16 +45,18 @@ public class GraphStoreBase implements GraphStore
 
     private final Resource resource;
     private final Request request;
+    private final ResourceConfig resourceConfig;
 
-    public GraphStoreBase(@Context Request request, @Context ResourceConfig resourceConfig)
+    public GraphStoreBase(@Context UriInfo uriInfo, @Context Request request, @Context ResourceConfig resourceConfig)
     {
-	this(resourceConfig.getProperty(GS.sparqlGraphStore.getURI()) == null ?
-		null :
-		ResourceFactory.createResource(resourceConfig.getProperty(GS.sparqlGraphStore.getURI()).toString()),
-	    request);
+	this(ResourceFactory.createResource(uriInfo.getBaseUriBuilder().
+                path(GraphStoreBase.class).
+                build().
+                toString()),
+	    request, resourceConfig);
     }
 
-    protected GraphStoreBase(Resource graphStore, Request request)
+    protected GraphStoreBase(Resource graphStore, Request request, ResourceConfig resourceConfig)
     {
 	if (graphStore == null) throw new IllegalArgumentException("Graph store Resource cannot be null");
 	if (!graphStore.isURIResource()) throw new IllegalArgumentException("Graph store Resource must be URI Resource (not a blank node)");
@@ -61,6 +64,7 @@ public class GraphStoreBase implements GraphStore
 	
 	this.resource = graphStore;
 	this.request = request;
+        this.resourceConfig = resourceConfig;
     }
 
     public ResponseBuilder getResponseBuilder(Model model)
@@ -84,6 +88,26 @@ public class GraphStoreBase implements GraphStore
 		    tag(entityTag);
 	}
     }
+
+     /**
+     * Returns configured Graph Store resource.
+     * 
+     * @return endpoint resource
+     */
+    public Resource getRemoteStore()
+    {
+        try
+        {
+            Object storeUri = getResourceConfig().getProperty(GS.graphStore.getURI());
+            if (storeUri == null) throw new ConfigurationException("Graph Store not configured (gs:graphStore not set in web.xml)");
+            return ResourceFactory.createResource(storeUri.toString());
+        }
+        catch (ConfigurationException ex)
+        {
+            if (log.isErrorEnabled()) log.warn("SPARQL endpoint configuration error", ex);
+            throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);            
+        }
+    }
     
     @GET
     @Override
@@ -93,7 +117,7 @@ public class GraphStoreBase implements GraphStore
 
 	if (defaultGraph)
 	{
-	    Model model = DataManager.get().getModel(getURI());
+	    Model model = DataManager.get().getModel(getRemoteStore().getURI());
 	    if (log.isDebugEnabled()) log.debug("GET Graph Store default graph, returning Model of size(): {}", model.size());
 	    return getResponseBuilder(model).build();
 	}
@@ -214,6 +238,11 @@ public class GraphStoreBase implements GraphStore
     public Request getRequest()
     {
 	return request;
+    }
+
+    public ResourceConfig getResourceConfig()
+    {
+        return resourceConfig;
     }
 
     @Override
