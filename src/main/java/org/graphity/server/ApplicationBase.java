@@ -90,6 +90,7 @@ public class ApplicationBase extends javax.ws.rs.core.Application
 	// WARNING! ontology caching can cause concurrency/consistency problems
 	OntDocumentManager.getInstance().setCacheModels(false);
 
+	if (getResourceConfig().getProperty(GS.endpoint.getURI()) != null)
 	{
 	    String endpointURI = (String)getResourceConfig().getProperty(GS.endpoint.getURI());
 	    String authUser = (String)getResourceConfig().getProperty(Service.queryAuthUser.getSymbol());

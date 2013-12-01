@@ -61,6 +61,7 @@ public class GraphStoreBase implements GraphStore
 	if (graphStore == null) throw new IllegalArgumentException("Graph store Resource cannot be null");
 	if (!graphStore.isURIResource()) throw new IllegalArgumentException("Graph store Resource must be URI Resource (not a blank node)");
 	if (request == null) throw new IllegalArgumentException("Request cannot be null");
+	if (resourceConfig == null) throw new IllegalArgumentException("ResourceConfig cannot be null");
 	
 	this.resource = graphStore;
 	this.request = request;
