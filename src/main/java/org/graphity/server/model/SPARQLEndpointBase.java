@@ -256,15 +256,26 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 
     /**
      * Returns configured SPARQL endpoint resource.
-     * Uses <code>gs:endpoint</code> parameter value from web.xml as endpoint URI.
      * 
      * @return endpoint resource
      */
     public Resource getRemoteEndpoint()
     {
+        return getRemoteEndpoint(getResourceConfig());
+    }
+
+    /**
+     * Returns SPARQL endpoint resource for supplied webapp configuration.
+     * Uses <code>gs:endpoint</code> parameter value from web.xml as endpoint URI.
+     * 
+     * @param resourceConfig webapp config
+     * @return endpoint resource
+     */
+    public Resource getRemoteEndpoint(ResourceConfig resourceConfig)
+    {
         try
         {
-            Object endpointUri = getResourceConfig().getProperty(GS.endpoint.getURI());
+            Object endpointUri = resourceConfig.getProperty(GS.endpoint.getURI());
             if (endpointUri == null) throw new ConfigurationException("SPARQL endpoint not configured (gs:endpoint not set in web.xml)");
             return ResourceFactory.createResource(endpointUri.toString());
         }

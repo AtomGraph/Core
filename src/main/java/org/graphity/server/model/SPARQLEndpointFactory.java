@@ -67,9 +67,11 @@ public class SPARQLEndpointFactory
      * @param resourceConfig webapp configuration
      * @return a new endpoint
      */
+    /*
     public static SPARQLEndpoint createEndpoint(String endpointURI, Request request, ResourceConfig resourceConfig)
     {
 	return new SPARQLEndpointBase(ResourceFactory.createResource(endpointURI), request, resourceConfig);
     }
+    */
 
 }

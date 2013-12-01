@@ -97,9 +97,21 @@ public class GraphStoreBase implements GraphStore
      */
     public Resource getRemoteStore()
     {
+        return getRemoteStore(getResourceConfig());
+    }
+
+     /**
+     * Returns Graph Store for supplied webapp configuration.
+     * Uses <code>gs:graphStore</code> parameter value from web.xml as graph store URI.
+     * 
+     * @param resourceConfig webapp config
+     * @return graph store resource
+     */
+    public Resource getRemoteStore(ResourceConfig resourceConfig)
+    {
         try
         {
-            Object storeUri = getResourceConfig().getProperty(GS.graphStore.getURI());
+            Object storeUri = resourceConfig.getProperty(GS.graphStore.getURI());
             if (storeUri == null) throw new ConfigurationException("Graph Store not configured (gs:graphStore not set in web.xml)");
             return ResourceFactory.createResource(storeUri.toString());
         }
