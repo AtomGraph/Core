@@ -92,7 +92,7 @@ public class GraphStoreBase implements GraphStore
      /**
      * Returns configured Graph Store resource.
      * 
-     * @return endpoint resource
+     * @return graph store resource
      */
     public Resource getRemoteStore()
     {
@@ -123,7 +123,7 @@ public class GraphStoreBase implements GraphStore
 	}
 	else
 	{
-	    Model model = DataManager.get().getModel(getURI(), graphUri.toString());
+	    Model model = DataManager.get().getModel(getRemoteStore().getURI(), graphUri.toString());
 	    if (model == null)
 	    {
 		if (log.isDebugEnabled()) log.debug("GET Graph Store named graph with URI: {} not found", graphUri);
@@ -149,16 +149,16 @@ public class GraphStoreBase implements GraphStore
 	if (defaultGraph)
 	{
 	    if (log.isDebugEnabled()) log.debug("POST Model to default graph");
-	    DataManager.get().addModel(getURI(), model);
+	    DataManager.get().addModel(getRemoteStore().getURI(), model);
 	    return Response.ok().build();
 	}
 	else
 	{
-	    boolean existingGraph = DataManager.get().containsModel(getURI(), graphUri.toString());
+	    boolean existingGraph = DataManager.get().containsModel(getRemoteStore().getURI(), graphUri.toString());
 
 	    // is this implemented correctly? The specification is not very clear.
 	    if (log.isDebugEnabled()) log.debug("POST Model to named graph with URI: {} Did it already exist? {}", graphUri, existingGraph);
-	    DataManager.get().addModel(getURI(), graphUri.toString(), model);
+	    DataManager.get().addModel(getRemoteStore().getURI(), graphUri.toString(), model);
 	    
 	    if (existingGraph) return Response.ok().build();
 	    else return Response.created(graphUri).build();
@@ -175,15 +175,15 @@ public class GraphStoreBase implements GraphStore
 	if (defaultGraph)
 	{
 	    if (log.isDebugEnabled()) log.debug("PUT Model to default graph");
-	    DataManager.get().putModel(getURI(), model);
+	    DataManager.get().putModel(getRemoteStore().getURI(), model);
 	    return Response.ok().build();
 	}
 	else
 	{
-	    boolean existingGraph = DataManager.get().containsModel(getURI(), graphUri.toString());
+	    boolean existingGraph = DataManager.get().containsModel(getRemoteStore().getURI(), graphUri.toString());
 	    
 	    if (log.isDebugEnabled()) log.debug("PUT Model to named graph with URI: {} Did it already exist? {}", graphUri, existingGraph);
-	    DataManager.get().putModel(getURI(), graphUri.toString(), model);
+	    DataManager.get().putModel(getRemoteStore().getURI(), graphUri.toString(), model);
 	    
 	    if (existingGraph) return Response.ok().build();
 	    else return Response.created(graphUri).build();
@@ -198,13 +198,13 @@ public class GraphStoreBase implements GraphStore
 	
 	if (defaultGraph)
 	{
-	    DataManager.get().deleteDefault(getURI());
+	    DataManager.get().deleteDefault(getRemoteStore().getURI());
 	    if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store");	    
 	    return Response.noContent().build();
 	}
 	else
 	{
-	    if (!DataManager.get().containsModel(getURI(), graphUri.toString()))
+	    if (!DataManager.get().containsModel(getRemoteStore().getURI(), graphUri.toString()))
 	    {
 		if (log.isDebugEnabled()) log.debug("DELETE named graph with URI {}: not found", graphUri);
 		return Response.status(Status.NOT_FOUND).build();
@@ -212,7 +212,7 @@ public class GraphStoreBase implements GraphStore
 	    else
 	    {
 		if (log.isDebugEnabled()) log.debug("DELETE named graph with URI: {}", graphUri);
-		DataManager.get().deleteModel(getURI(), graphUri.toString());
+		DataManager.get().deleteModel(getRemoteStore().getURI(), graphUri.toString());
 		return Response.noContent().build();
 	    }
 	}

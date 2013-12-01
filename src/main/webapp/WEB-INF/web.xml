@@ -18,6 +18,10 @@
             <param-value>http://dydra.com/graphity/server/sparql</param-value>
         </init-param>
         <init-param>
+            <param-name>http://server.graphity.org/ontology#graphStore</param-name>
+            <param-value>http://dydra.com/graphity/server/service</param-value>
+        </init-param>
+        <init-param>
             <param-name>http://server.graphity.org/ontology#cacheControl</param-name>
             <param-value>no-cache</param-value>
         </init-param>

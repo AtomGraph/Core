@@ -62,7 +62,7 @@ public class ApplicationBase extends javax.ws.rs.core.Application
     {
 	classes.add(QueriedResourceBase.class); // handles all
 	classes.add(SPARQLEndpointBase.class); // handles /sparql queries
-	classes.add(GraphStoreBase.class); // handles /service updates
+	classes.add(GraphStoreBase.class); // handles /service requests
 
 	singletons.add(new ModelProvider());
 	singletons.add(new ResultSetWriter());

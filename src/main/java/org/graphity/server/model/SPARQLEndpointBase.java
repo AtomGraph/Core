@@ -267,7 +267,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
             Object endpointUri = getResourceConfig().getProperty(GS.endpoint.getURI());
             if (endpointUri == null) throw new ConfigurationException("SPARQL endpoint not configured (gs:endpoint not set in web.xml)");
             return ResourceFactory.createResource(endpointUri.toString());
-            }
+        }
         catch (ConfigurationException ex)
         {
             if (log.isErrorEnabled()) log.warn("SPARQL endpoint configuration error", ex);
@@ -349,7 +349,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     @Override
     public Model loadModel(Query query)
     {
-	return loadModel(this, query);
+	return loadModel(getRemoteEndpoint(), query);
     }
     
     @Override
@@ -358,7 +358,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
         if (!query.isDescribeType()) throw new IllegalArgumentException("Query must be DESCRIBE");
         
-	return loadModel(this, query);
+	return loadModel(getRemoteEndpoint(), query);
     }
 
     @Override
@@ -367,7 +367,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
         if (!query.isConstructType()) throw new IllegalArgumentException("Query must be CONSTRUCT");
         
-	return loadModel(this, query);
+	return loadModel(getRemoteEndpoint(), query);
     }
    
     public ResultSetRewindable loadResultSetRewindable(Resource endpoint, Query query)
@@ -382,7 +382,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
         if (!query.isSelectType()) throw new IllegalArgumentException("Query must be SELECT");
         
-	return loadResultSetRewindable(this, query);
+	return loadResultSetRewindable(getRemoteEndpoint(), query);
     }
 
     public boolean ask(Resource endpoint, Query query)
@@ -397,7 +397,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
         if (!query.isAskType()) throw new IllegalArgumentException("Query must be ASK");
         
-	return ask(this, query);
+	return ask(getRemoteEndpoint(), query);
     }
 
     public void executeUpdateRequest(Resource endpoint, UpdateRequest updateRequest)
@@ -409,7 +409,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     @Override
     public void executeUpdateRequest(UpdateRequest updateRequest)
     {
-	executeUpdateRequest(this, updateRequest);
+	executeUpdateRequest(getRemoteEndpoint(), updateRequest);
     }
 
     private Resource getResource()
