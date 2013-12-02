@@ -19,6 +19,7 @@ package org.graphity.server.model;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.*;
+import com.hp.hpl.jena.sparql.engine.http.Service;
 import com.sun.jersey.api.core.ResourceConfig;
 import java.net.URI;
 import javax.naming.ConfigurationException;
@@ -113,6 +114,11 @@ public class GraphStoreBase implements GraphStore
         {
             Object storeUri = resourceConfig.getProperty(GS.graphStore.getURI());
             if (storeUri == null) throw new ConfigurationException("Graph Store not configured (gs:graphStore not set in web.xml)");
+	    String authUser = (String)resourceConfig.getProperty(Service.queryAuthUser.getSymbol());
+	    String authPwd = (String)resourceConfig.getProperty(Service.queryAuthPwd.getSymbol());
+	    if (authUser != null && authPwd != null)
+                DataManager.get().putAuthContext(storeUri.toString(), authUser, authPwd);
+
             return ResourceFactory.createResource(storeUri.toString());
         }
         catch (ConfigurationException ex)

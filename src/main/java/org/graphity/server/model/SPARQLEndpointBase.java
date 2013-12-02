@@ -22,6 +22,7 @@ import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.rdf.model.*;
+import com.hp.hpl.jena.sparql.engine.http.Service;
 import com.hp.hpl.jena.update.UpdateRequest;
 import com.sun.jersey.api.core.ResourceConfig;
 import java.net.URI;
@@ -277,6 +278,11 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
         {
             Object endpointUri = resourceConfig.getProperty(GS.endpoint.getURI());
             if (endpointUri == null) throw new ConfigurationException("SPARQL endpoint not configured (gs:endpoint not set in web.xml)");
+	    String authUser = (String)resourceConfig.getProperty(Service.queryAuthUser.getSymbol());
+	    String authPwd = (String)resourceConfig.getProperty(Service.queryAuthPwd.getSymbol());
+	    if (authUser != null && authPwd != null)
+                DataManager.get().putAuthContext(endpointUri.toString(), authUser, authPwd);
+
             return ResourceFactory.createResource(endpointUri.toString());
         }
         catch (ConfigurationException ex)

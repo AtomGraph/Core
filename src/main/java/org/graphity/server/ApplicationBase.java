@@ -17,12 +17,8 @@
 package org.graphity.server;
 
 import com.hp.hpl.jena.ontology.OntDocumentManager;
-import com.hp.hpl.jena.query.ARQ;
-import com.hp.hpl.jena.sparql.engine.http.Service;
 import com.sun.jersey.api.core.ResourceConfig;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
@@ -31,7 +27,6 @@ import org.graphity.server.model.GraphStoreBase;
 import org.graphity.server.model.QueriedResourceBase;
 import org.graphity.server.model.SPARQLEndpointBase;
 import org.graphity.server.provider.*;
-import org.graphity.server.vocabulary.GS;
 import org.openjena.riot.SysRIOT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,61 +84,6 @@ public class ApplicationBase extends javax.ws.rs.core.Application
 	SysRIOT.wireIntoJena(); // enable RIOT parser
 	// WARNING! ontology caching can cause concurrency/consistency problems
 	OntDocumentManager.getInstance().setCacheModels(false);
-
-	if (getResourceConfig().getProperty(GS.endpoint.getURI()) != null)
-	{
-	    String endpointURI = (String)getResourceConfig().getProperty(GS.endpoint.getURI());
-	    String authUser = (String)getResourceConfig().getProperty(Service.queryAuthUser.getSymbol());
-	    String authPwd = (String)getResourceConfig().getProperty(Service.queryAuthPwd.getSymbol());
-	    if (authUser != null && authPwd != null) configureServiceContext(endpointURI, authUser, authPwd);
-	}
-	
-	if (getResourceConfig().getProperty(GS.graphStore.getURI()) != null)
-	{
-	    String graphStoreURI = (String)getResourceConfig().getProperty(GS.graphStore.getURI());
-	    // reuses SPARQL query endpoint authentication properties -- not ideal
-	    String authUser = (String)getResourceConfig().getProperty(Service.queryAuthUser.getSymbol());
-	    String authPwd = (String)getResourceConfig().getProperty(Service.queryAuthPwd.getSymbol());
-	    if (authUser != null && authPwd != null) configureServiceContext(graphStoreURI, authUser, authPwd);
-	}
-	else
-	{
-	    if (log.isWarnEnabled()) log.warn("No SPARQL Graph Store URI specified in web.xml. The server will be read-only.");
-	}
-    }
-
-    /**
-     * Configures HTTP Basic authentication for SPARQL endpoint context
-     * 
-     * @param endpointURI the endpoint to be configured
-     * @param authUser username
-     * @param authPwd password
-     * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/sparql/util/Context.html">Context</a>
-     */
-    public void configureServiceContext(String endpointURI, String authUser, String authPwd)
-    {
-	if (endpointURI == null) throw new IllegalArgumentException("SPARQL endpoint URI cannot be null");
-	if (authUser == null) throw new IllegalArgumentException("SPARQL endpoint authentication username cannot be null");
-	if (authPwd == null) throw new IllegalArgumentException("SPARQL endpoint authentication password cannot be null");
-
-	if (log.isDebugEnabled()) log.debug("Setting username/password credentials for SPARQL endpoint: {}", endpointURI);
-	com.hp.hpl.jena.sparql.util.Context queryContext = new com.hp.hpl.jena.sparql.util.Context();
-	queryContext.put(Service.queryAuthUser, authUser);
-	queryContext.put(Service.queryAuthPwd, authPwd);
-
-	if (ARQ.getContext().isDefined(Service.serviceContext))
-	{
-	    Map<String, com.hp.hpl.jena.sparql.util.Context> serviceContext = (Map<String, com.hp.hpl.jena.sparql.util.Context>) ARQ.getContext().get(Service.serviceContext);
-	    if (log.isDebugEnabled()) log.debug("Adding SPARQL endpoint {} to existing service Context: {}", endpointURI, serviceContext);
-	    serviceContext.put(endpointURI, queryContext);
-	}
-	else
-	{
-	    Map<String, com.hp.hpl.jena.sparql.util.Context> serviceContext = new HashMap<>();
-	    if (log.isDebugEnabled()) log.debug("Adding SPARQL endpoint {} to new service Context", endpointURI);
-	    serviceContext.put(endpointURI, queryContext);
-	    ARQ.getContext().put(Service.serviceContext, serviceContext);
-	}
     }
     
     /**

@@ -619,6 +619,14 @@ public class DataManager extends FileManager
 	return getServiceContextMap().get(endpointURI);
     }
     
+    public Context putServiceContext(String endpointURI, Context context)
+    {
+	if (endpointURI == null) throw new IllegalArgumentException("Endpoint URI must be not null");
+	if (context == null) throw new IllegalArgumentException("Context must be not null");
+
+        return getServiceContextMap().put(endpointURI, context);
+    }
+    
     /**
      * Returns service context of a SPARQL endpoint.
      * 
@@ -654,5 +662,28 @@ public class DataManager extends FileManager
     {
 	return getServiceContext(endpoint) != null;
     }
-    
+
+    /**
+     * Configures HTTP Basic authentication for SPARQL service context
+     * 
+     * @param endpointURI the endpoint to be configured
+     * @param authUser username
+     * @param authPwd password
+     * @return service context
+     * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/sparql/util/Context.html">Context</a>
+     */
+    public Context putAuthContext(String endpointURI, String authUser, String authPwd)
+    {
+	if (endpointURI == null) throw new IllegalArgumentException("SPARQL endpoint URI cannot be null");
+	if (authUser == null) throw new IllegalArgumentException("SPARQL endpoint authentication username cannot be null");
+	if (authPwd == null) throw new IllegalArgumentException("SPARQL endpoint authentication password cannot be null");
+
+	if (log.isDebugEnabled()) log.debug("Setting username/password credentials for SPARQL endpoint: {}", endpointURI);
+	com.hp.hpl.jena.sparql.util.Context queryContext = new com.hp.hpl.jena.sparql.util.Context();
+	queryContext.put(Service.queryAuthUser, authUser);
+	queryContext.put(Service.queryAuthPwd, authPwd);
+
+        return putServiceContext(endpointURI, queryContext);
+    }
+
 }
