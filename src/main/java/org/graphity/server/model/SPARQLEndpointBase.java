@@ -403,31 +403,20 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	return loadResultSetRewindable(query);
     }
 
-    public boolean ask(Resource endpoint, Query query)
-    {
-	if (log.isDebugEnabled()) log.debug("Loading boolean result from SPARQL endpoint: {} using Query: {}", endpoint.getURI(), query);
-	return DataManager.get().ask(endpoint.getURI(), query);
-    }
-
     @Override
     public boolean ask(Query query)
     {
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
         if (!query.isAskType()) throw new IllegalArgumentException("Query must be ASK");
         
-	return ask(getRemoteEndpoint(), query);
-    }
-
-    public void executeUpdateRequest(Resource endpoint, UpdateRequest updateRequest)
-    {
-	if (log.isDebugEnabled()) log.debug("Executing update on SPARQL endpoint: {} using UpdateRequest: {}", endpoint, updateRequest);
-	DataManager.get().executeUpdateRequest(endpoint.getURI(), updateRequest);
+	return DataManager.get().ask(getRemoteEndpoint().getURI(), query);
     }
 
     @Override
     public void executeUpdateRequest(UpdateRequest updateRequest)
     {
-	executeUpdateRequest(getRemoteEndpoint(), updateRequest);
+	if (log.isDebugEnabled()) log.debug("Executing update on SPARQL endpoint: {} using UpdateRequest: {}", getRemoteEndpoint(), updateRequest);
+	DataManager.get().executeUpdateRequest(getRemoteEndpoint().getURI(), updateRequest);
     }
 
     private Resource getResource()
