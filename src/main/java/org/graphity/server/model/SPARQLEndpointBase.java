@@ -242,13 +242,13 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
             if (getResourceConfig().getProperty(GS.resultLimit.getURI()) != null)
                 query.setLimit(Long.parseLong(getResourceConfig().getProperty(GS.resultLimit.getURI()).toString()));
 
-            return getResponseBuilder(loadResultSetRewindable(getRemoteEndpoint(), query));
+            return getResponseBuilder(loadResultSetRewindable(query));
         }
 
         if (query.isConstructType() || query.isDescribeType())
         {
             if (log.isDebugEnabled()) log.debug("SPARQL endpoint executing CONSTRUCT/DESCRIBE query: {}", query);
-            return getResponseBuilder(loadModel(getRemoteEndpoint(), query));
+            return getResponseBuilder(loadModel(query));
         }
         
 	if (log.isWarnEnabled()) log.warn("SPARQL endpoint received unknown type of query: {}", query);
@@ -362,17 +362,12 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	    }
 	}	
     }
-        
-    public Model loadModel(Resource endpoint, Query query)
-    {
-	if (log.isDebugEnabled()) log.debug("Loading Model from SPARQL endpoint: {} using Query: {}", endpoint, query);
-	return DataManager.get().loadModel(endpoint.getURI(), query);
-    }
 
     @Override
     public Model loadModel(Query query)
     {
-	return loadModel(getRemoteEndpoint(), query);
+	if (log.isDebugEnabled()) log.debug("Loading Model from SPARQL endpoint: {} using Query: {}", getRemoteEndpoint(), query);
+	return DataManager.get().loadModel(getRemoteEndpoint().getURI(), query);
     }
     
     @Override
@@ -381,7 +376,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
         if (!query.isDescribeType()) throw new IllegalArgumentException("Query must be DESCRIBE");
         
-	return loadModel(getRemoteEndpoint(), query);
+	return loadModel(query);
     }
 
     @Override
@@ -390,13 +385,13 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
         if (!query.isConstructType()) throw new IllegalArgumentException("Query must be CONSTRUCT");
         
-	return loadModel(getRemoteEndpoint(), query);
+	return loadModel(query);
     }
    
-    public ResultSetRewindable loadResultSetRewindable(Resource endpoint, Query query)
+    public ResultSetRewindable loadResultSetRewindable(Query query)
     {
-	if (log.isDebugEnabled()) log.debug("Loading ResultSet from SPARQL endpoint: {} using Query: {}", endpoint.getURI(), query);
-	return DataManager.get().loadResultSet(endpoint.getURI(), query); // .getResultSetRewindable()
+	if (log.isDebugEnabled()) log.debug("Loading ResultSet from SPARQL endpoint: {} using Query: {}", getRemoteEndpoint().getURI(), query);
+	return DataManager.get().loadResultSet(getRemoteEndpoint().getURI(), query); // .getResultSetRewindable()
     }
 
     @Override
@@ -405,7 +400,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
         if (!query.isSelectType()) throw new IllegalArgumentException("Query must be SELECT");
         
-	return loadResultSetRewindable(getRemoteEndpoint(), query);
+	return loadResultSetRewindable(query);
     }
 
     public boolean ask(Resource endpoint, Query query)
