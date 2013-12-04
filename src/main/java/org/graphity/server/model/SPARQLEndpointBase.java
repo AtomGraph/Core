@@ -116,7 +116,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     protected SPARQLEndpointBase(Resource endpoint, Request request, ResourceConfig resourceConfig)
     {
 	if (endpoint == null) throw new IllegalArgumentException("Endpoint cannot be null");
-	if (!endpoint.isURIResource()) throw new IllegalArgumentException("Endpoint must be URI Resource (not a blank node)");
+	//if (!endpoint.isURIResource()) throw new IllegalArgumentException("Endpoint must be URI Resource (not a blank node)");
 	if (request == null) throw new IllegalArgumentException("Request cannot be null");
 	if (resourceConfig == null) throw new IllegalArgumentException("ResourceConfig cannot be null");
 
@@ -262,7 +262,17 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
      */
     public Resource getRemoteEndpoint()
     {
-        return getRemoteEndpoint(getResourceConfig());
+        try
+        {
+            Resource endpoint = getRemoteEndpoint(getResourceConfig());
+            if (endpoint == null) throw new ConfigurationException("SPARQL endpoint not configured (gs:endpoint not set in web.xml)");
+            return endpoint;
+        }
+        catch (ConfigurationException ex)
+        {
+            if (log.isErrorEnabled()) log.warn("SPARQL endpoint configuration error", ex);
+            throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);            
+        }        
     }
 
     /**
@@ -274,22 +284,18 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
      */
     public Resource getRemoteEndpoint(ResourceConfig resourceConfig)
     {
-        try
+        Object endpointUri = resourceConfig.getProperty(GS.endpoint.getURI());
+        if (endpointUri != null)
         {
-            Object endpointUri = resourceConfig.getProperty(GS.endpoint.getURI());
-            if (endpointUri == null) throw new ConfigurationException("SPARQL endpoint not configured (gs:endpoint not set in web.xml)");
-	    String authUser = (String)resourceConfig.getProperty(Service.queryAuthUser.getSymbol());
-	    String authPwd = (String)resourceConfig.getProperty(Service.queryAuthPwd.getSymbol());
-	    if (authUser != null && authPwd != null)
+            String authUser = (String)resourceConfig.getProperty(Service.queryAuthUser.getSymbol());
+            String authPwd = (String)resourceConfig.getProperty(Service.queryAuthPwd.getSymbol());
+            if (authUser != null && authPwd != null)
                 DataManager.get().putAuthContext(endpointUri.toString(), authUser, authPwd);
 
             return ResourceFactory.createResource(endpointUri.toString());
         }
-        catch (ConfigurationException ex)
-        {
-            if (log.isErrorEnabled()) log.warn("SPARQL endpoint configuration error", ex);
-            throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);            
-        }
+        
+        return null;
     }
     
     @Override

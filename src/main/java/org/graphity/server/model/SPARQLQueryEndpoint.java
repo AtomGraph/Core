@@ -39,6 +39,8 @@ public interface SPARQLQueryEndpoint extends Resource
      * Handles GET query request and returns result as response
      * 
      * @param query the submitted SPARQL query
+     * @param defaultGraphUri default graph URI
+     * @param graphUri named graph URI
      * @return result response (in one of the representation variants)
      * @see <a href="http://www.w3.org/TR/sparql11-protocol/#query-via-get">2.1.1 query via GET</a>
      */

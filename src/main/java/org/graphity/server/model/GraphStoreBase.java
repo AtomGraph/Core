@@ -98,7 +98,17 @@ public class GraphStoreBase implements GraphStore
      */
     public Resource getRemoteStore()
     {
-        return getRemoteStore(getResourceConfig());
+        try
+        {
+            Resource graphStore = getRemoteStore(getResourceConfig());
+            if (graphStore == null) throw new ConfigurationException("Graph Store not configured (gs:graphStore not set in web.xml)");
+            return graphStore;
+        }
+        catch (ConfigurationException ex)
+        {
+            if (log.isErrorEnabled()) log.warn("Graph Store configuration error", ex);
+            throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);            
+        }
     }
 
      /**
@@ -110,22 +120,18 @@ public class GraphStoreBase implements GraphStore
      */
     public Resource getRemoteStore(ResourceConfig resourceConfig)
     {
-        try
+        Object storeUri = resourceConfig.getProperty(GS.graphStore.getURI());
+        if (storeUri != null)
         {
-            Object storeUri = resourceConfig.getProperty(GS.graphStore.getURI());
-            if (storeUri == null) throw new ConfigurationException("Graph Store not configured (gs:graphStore not set in web.xml)");
-	    String authUser = (String)resourceConfig.getProperty(Service.queryAuthUser.getSymbol());
-	    String authPwd = (String)resourceConfig.getProperty(Service.queryAuthPwd.getSymbol());
-	    if (authUser != null && authPwd != null)
+            String authUser = (String)resourceConfig.getProperty(Service.queryAuthUser.getSymbol());
+            String authPwd = (String)resourceConfig.getProperty(Service.queryAuthPwd.getSymbol());
+            if (authUser != null && authPwd != null)
                 DataManager.get().putAuthContext(storeUri.toString(), authUser, authPwd);
 
             return ResourceFactory.createResource(storeUri.toString());
         }
-        catch (ConfigurationException ex)
-        {
-            if (log.isErrorEnabled()) log.warn("SPARQL endpoint configuration error", ex);
-            throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);            
-        }
+        
+        return null;
     }
     
     @GET
