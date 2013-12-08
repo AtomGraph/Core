@@ -18,22 +18,24 @@ package org.graphity.server.provider;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.shared.NoReaderForLangException;
+import com.hp.hpl.jena.shared.NoWriterForLangException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.Produces;
+import java.util.Iterator;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
-import org.graphity.server.MediaType;
-import org.openjena.riot.Lang;
+import org.apache.jena.atlas.web.ContentType;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFLanguages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,32 +50,38 @@ import org.slf4j.LoggerFactory;
  * @see <a href="http://jsr311.java.net/nonav/javadoc/javax/ws/rs/ext/MessageBodyWriter.html">JAX-RS MessageBodyWriter</a>
  */
 @Provider
-@Consumes({MediaType.APPLICATION_RDF_XML, MediaType.TEXT_TURTLE, MediaType.TEXT_PLAIN})
-@Produces({MediaType.APPLICATION_RDF_XML, MediaType.TEXT_TURTLE, MediaType.TEXT_PLAIN})
+//@Consumes({MediaType.APPLICATION_RDF_XML, MediaType.TEXT_TURTLE, MediaType.TEXT_PLAIN})
+//@Produces({MediaType.APPLICATION_RDF_XML, MediaType.TEXT_TURTLE, MediaType.TEXT_PLAIN})
 public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWriter<Model>
-{
-    
-    /**
-     * Supported RDF syntaxes
-     * 
-     * @see org.graphity.ldp.MediaType
-     * @see <a href="http://jena.apache.org/documentation/javadoc/arq/org/openjena/riot/lang/package-summary.html">RIOT</a>
-     */
-    public static final Map<String, Lang> LANGS = new HashMap<>();
-    static
-    {
-        LANGS.put(MediaType.APPLICATION_RDF_XML, Lang.RDFXML);
-        LANGS.put(MediaType.TEXT_TURTLE, Lang.TURTLE);
-        LANGS.put(MediaType.TEXT_PLAIN, Lang.TURTLE);
-    }    
+{    
     private static final Logger log = LoggerFactory.getLogger(ModelProvider.class);
 
+    public Lang getCompatibleLang(MediaType mediaType)
+    {
+        Iterator<Lang> it = RDFLanguages.getRegisteredLanguages().iterator();
+        
+        while (it.hasNext())
+        {
+            Lang lang = it.next();
+            ContentType ct = lang.getContentType();
+            if (MediaType.valueOf(ct.getContentType()).isCompatible(mediaType)) return lang;
+        }
+        
+        return null;
+    }
+    
+    public boolean isMediaTypeCompatible(MediaType mediaType)
+    {
+        return getCompatibleLang(mediaType) != null;
+    }
+    
     // READER
     
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, javax.ws.rs.core.MediaType mediaType)
     {
-        return type == Model.class;
+        return type == Model.class && RDFLanguages.contentTypeToLang(mediaType.toString()) != null;
+        //&& isMediaTypeCompatible(mediaType);
     }
 
     @Override
@@ -81,30 +89,29 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     {
 	if (log.isTraceEnabled()) log.trace("Reading Model with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
 	
-	Model model = ModelFactory.createDefaultModel();
-	
-	String syntax = null;
-	Lang lang = langFromMediaType(mediaType);
-	if (lang != null) syntax = lang.getName();
+	Model model = ModelFactory.createDefaultModel();	
+
+        Lang lang = RDFLanguages.contentTypeToLang(mediaType.toString());
+        if (lang == null)
+        {
+            Throwable ex = new NoReaderForLangException("Media type not supported");
+            if (log.isErrorEnabled()) log.error("MediaType {} not supported by Jena", mediaType);
+            throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);
+        }
+	String syntax = lang.getName();
 	if (log.isDebugEnabled()) log.debug("Syntax used to read Model: {}", syntax);
 
 	// extract base URI from httpHeaders?
 	return model.read(entityStream, null, syntax);
     }
     
-    public static Lang langFromMediaType(javax.ws.rs.core.MediaType mediaType)
-    { 
-        if (mediaType == null) return null;
-	if (log.isTraceEnabled()) log.trace("langFromMediaType({}): {}", mediaType.getType() + "/" + mediaType.getSubtype(), LANGS.get(mediaType.getType() + "/" + mediaType.getSubtype()));
-        return LANGS.get(mediaType.getType() + "/" + mediaType.getSubtype());
-    }
-
     // WRITER
     
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, javax.ws.rs.core.MediaType mediaType)
     {
-        return Model.class.isAssignableFrom(type);
+        return Model.class.isAssignableFrom(type) && RDFLanguages.contentTypeToLang(mediaType.toString()) != null;
+                //&& isMediaTypeCompatible(mediaType);
     }
 
     @Override
@@ -117,9 +124,15 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     public void writeTo(Model model, Class<?> type, Type genericType, Annotation[] annotations, javax.ws.rs.core.MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException
     {
 	if (log.isTraceEnabled()) log.trace("Writing Model with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
-	String syntax = null;
-	Lang lang = langFromMediaType(mediaType);
-	if (lang != null) syntax = lang.getName();
+
+        Lang lang = RDFLanguages.contentTypeToLang(mediaType.toString());
+        if (lang == null)
+        {
+            Throwable ex = new NoWriterForLangException("Media type not supported");
+            if (log.isErrorEnabled()) log.error("MediaType {} not supported by Jena", mediaType);
+            throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);
+        }
+	String syntax = lang.getName();
 	if (log.isDebugEnabled()) log.debug("Syntax used to write Model: {}", syntax);
 
 	model.write(entityStream, syntax);

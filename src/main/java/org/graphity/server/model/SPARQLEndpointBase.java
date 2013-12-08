@@ -34,7 +34,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.*;
 import org.graphity.server.util.DataManager;
 import org.graphity.server.vocabulary.GS;
-import org.graphity.util.ModelUtils;
 import org.graphity.util.ResultSetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -196,7 +195,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     {
 	try
 	{
-	    executeUpdateRequest(update);
+	    update(update);
 	    return Response.ok().build();
 	}
 	catch (Exception ex)
@@ -231,7 +230,6 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
      * @param query SPARQL query
      * @return response builder
      */
-    @Override
     public ResponseBuilder getResponseBuilder(Query query)
     {
 	if (query == null) throw new WebApplicationException(Response.Status.BAD_REQUEST);
@@ -297,38 +295,30 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
         
         return null;
     }
-    
-    @Override
-    public EntityTag getEntityTag(Model model)
-    {
-        return new EntityTag(Long.toHexString(ModelUtils.hashModel(model)));
-    }
-    
-    @Override
+
+    /**
+     * Returns response builder for a given RDF model.
+     * 
+     * @param model RDF model
+     * @return response builder
+     */
     public ResponseBuilder getResponseBuilder(Model model)
     {
-	return getResponseBuilder(model, MODEL_VARIANTS);
+        return ModelResponse.fromRequest(getRequest()).
+                getResponseBuilder(model);
+                //cacheControl(getCacheControl()).
     }
     
-    @Override
-    public ResponseBuilder getResponseBuilder(Model model, List<Variant> variants)
-    {
-	return getResponseBuilder(getEntityTag(model), model, variants);
-    }
-    
-    @Override
     public EntityTag getEntityTag(ResultSet resultSet)
     {
         return new EntityTag(Long.toHexString(ResultSetUtils.hashResultSet(resultSet)));
     }
     
-    @Override
     public ResponseBuilder getResponseBuilder(ResultSetRewindable resultSet)
     {
 	return getResponseBuilder(resultSet, RESULT_SET_VARIANTS);
     }
     
-    @Override
     public ResponseBuilder getResponseBuilder(ResultSetRewindable resultSet, List<Variant> variants)
     {
         resultSet.reset();
@@ -337,7 +327,6 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	return getResponseBuilder(entityTag, resultSet, variants);
     }
     
-    @Override
     public ResponseBuilder getResponseBuilder(EntityTag entityTag, Object entity, List<Variant> variants)
     {	
 	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(entityTag);
@@ -413,7 +402,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     }
 
     @Override
-    public void executeUpdateRequest(UpdateRequest updateRequest)
+    public void update(UpdateRequest updateRequest)
     {
 	if (log.isDebugEnabled()) log.debug("Executing update on SPARQL endpoint: {} using UpdateRequest: {}", getRemoteEndpoint(), updateRequest);
 	DataManager.get().executeUpdateRequest(getRemoteEndpoint().getURI(), updateRequest);

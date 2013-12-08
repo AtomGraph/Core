@@ -21,6 +21,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.sparql.engine.http.Service;
 import com.hp.hpl.jena.sparql.util.Context;
+import com.hp.hpl.jena.update.UpdateExecutionFactory;
 import com.hp.hpl.jena.update.UpdateRequest;
 import com.hp.hpl.jena.util.FileManager;
 import java.util.HashMap;
@@ -29,11 +30,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.ws.rs.core.MultivaluedMap;
-import org.apache.jena.fuseki.DatasetAccessor;
-import org.apache.jena.fuseki.http.DatasetAdapter;
+import org.apache.jena.atlas.web.auth.HttpAuthenticator;
+import org.apache.jena.atlas.web.auth.PreemptiveBasicAuthenticator;
+import org.apache.jena.atlas.web.auth.SimpleAuthenticator;
 import org.graphity.query.QueryEngineHTTP;
-import org.graphity.server.update.UpdateProcessRemote;
-import org.graphity.update.DatasetGraphAccessorHTTP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -368,8 +368,9 @@ public class DataManager extends FileManager
     {
 	// UpdateExecutionFactory.createRemote(updateRequest, endpointURI);
 	// uses custom UpdateProcessRemote class with HTTP Basic authentication support
-	UpdateProcessRemote updateProcess = new UpdateProcessRemote(updateRequest, endpointURI);	
-	updateProcess.execute();
+	//UpdateProcessRemote updateProcess = new UpdateProcessRemote(updateRequest, endpointURI);	
+	//updateProcess.execute();
+        UpdateExecutionFactory.createRemote(updateRequest, endpointURI, getContext()).execute();
     }
 
     /**
@@ -382,9 +383,7 @@ public class DataManager extends FileManager
     public boolean containsModel(String graphStoreURI, String graphURI)
     {
 	if (log.isDebugEnabled()) log.debug("Checking if Graph Store {} contains GRAPH with URI {}", graphStoreURI, graphURI);
-
-	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
-	return accessor.containsModel(graphURI);
+        return getDatasetAccessor(graphStoreURI).containsModel(graphURI);
     }
     
     /**
@@ -398,9 +397,7 @@ public class DataManager extends FileManager
     public Model getModel(String graphStoreURI)
     {
 	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} default graph", graphStoreURI);
-
-	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
-	return accessor.getModel();
+        return getDatasetAccessor(graphStoreURI).getModel();
     }
     
     /**
@@ -415,9 +412,7 @@ public class DataManager extends FileManager
     public Model getModel(String graphStoreURI, String graphURI)
     {
 	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} with named graph URI: {}", graphStoreURI, graphURI);
-
-	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
-	return accessor.getModel(graphURI);	
+	return getDatasetAccessor(graphStoreURI).getModel(graphURI);	
     }
 
     /**
@@ -429,9 +424,7 @@ public class DataManager extends FileManager
     public void addModel(String graphStoreURI, Model model)
     {
 	if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} default graph", graphStoreURI);
-
-	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
-	accessor.add(model);
+	getDatasetAccessor(graphStoreURI).add(model);
     }
     
     /**
@@ -444,9 +437,7 @@ public class DataManager extends FileManager
     public void addModel(String graphStoreURI, String graphURI, Model model)
     {
 	if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} with named graph URI: {}", graphStoreURI, graphURI);
-
-	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
-	accessor.add(graphURI, model);
+	getDatasetAccessor(graphStoreURI).add(graphURI, model);
     }
 
     /**
@@ -459,9 +450,7 @@ public class DataManager extends FileManager
     public void putModel(String graphStoreURI, Model model)
     {
 	if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} default graph", graphStoreURI);
-	
-	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
-	accessor.putModel(model);
+	getDatasetAccessor(graphStoreURI).putModel(model);
     }
 
     /**
@@ -475,9 +464,7 @@ public class DataManager extends FileManager
     public void putModel(String graphStoreURI, String graphURI, Model model)
     {
 	if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} with named graph URI {}", graphStoreURI, graphURI);
-	
-	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
-	accessor.putModel(graphURI, model);
+	getDatasetAccessor(graphStoreURI).putModel(graphURI, model);
     }
 
     /**
@@ -489,9 +476,7 @@ public class DataManager extends FileManager
     public void deleteDefault(String graphStoreURI)
     {
 	if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store {}", graphStoreURI);
-	
-	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
-	accessor.deleteDefault();
+	getDatasetAccessor(graphStoreURI).deleteDefault();
     }
 
     /**
@@ -504,9 +489,43 @@ public class DataManager extends FileManager
     public void deleteModel(String graphStoreURI, String graphURI)
     {
 	if (log.isDebugEnabled()) log.debug("DELETE named graph with URI {} from Graph Store {}", graphURI, graphStoreURI);
-	
-	DatasetAccessor accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
-	accessor.deleteModel(graphURI);
+        getDatasetAccessor(graphStoreURI).deleteModel(graphURI);
+    }
+
+    public DatasetAccessor getDatasetAccessor(String graphStoreURI)
+    {
+	DatasetAccessor accessor;
+        HttpAuthenticator authenticator = getHttpAuthenticator(graphStoreURI);
+        if (authenticator != null) accessor = DatasetAccessorFactory.createHTTP(graphStoreURI, authenticator);
+        else accessor = DatasetAccessorFactory.createHTTP(graphStoreURI);
+        return accessor;
+    }
+    
+    public HttpAuthenticator getHttpAuthenticator(String endpointURI)
+    {
+        Context serviceContext = getServiceContext(endpointURI);
+        if (serviceContext == null) return null;
+        
+        return getHttpAuthenticator(serviceContext);
+    }
+    
+    public HttpAuthenticator getHttpAuthenticator(Context serviceContext)
+    {
+        if (serviceContext == null) throw new IllegalArgumentException("Contect cannot be null");
+
+        String usr = serviceContext.getAsString(Service.queryAuthUser);
+        String pwd = serviceContext.getAsString(Service.queryAuthPwd);
+
+        if (usr != null || pwd != null)
+        {
+            usr = usr==null?"":usr;
+            pwd = pwd==null?"":pwd;
+
+            if (log.isDebugEnabled()) log.debug("Creating HTTP authenticator for Context {} with username: {} ", serviceContext, usr);
+            return new PreemptiveBasicAuthenticator(new SimpleAuthenticator(usr, pwd.toCharArray()));
+        }
+
+        return null;
     }
     
     /**
@@ -645,7 +664,7 @@ public class DataManager extends FileManager
      * Checks if SPARQL endpoint has service context.
      * 
      * @param endpointURI endpoint URI
-     * @return true if endpoint URI is bound to a context, false otherwiese
+     * @return true if endpoint URI is bound to a context, false otherwise
      */    
     public boolean hasServiceContext(String endpointURI)
     {
@@ -656,7 +675,7 @@ public class DataManager extends FileManager
      * Checks if SPARQL endpoint has service context.
      * 
      * @param endpoint endpoint resource (must be URI resource, not a blank node)
-     * @return true if endpoint resource is bound to a context, false otherwiese
+     * @return true if endpoint resource is bound to a context, false otherwise
      */    
     public boolean hasServiceContext(Resource endpoint)
     {
@@ -679,7 +698,7 @@ public class DataManager extends FileManager
 	if (authPwd == null) throw new IllegalArgumentException("SPARQL endpoint authentication password cannot be null");
 
 	if (log.isDebugEnabled()) log.debug("Setting username/password credentials for SPARQL endpoint: {}", endpointURI);
-	com.hp.hpl.jena.sparql.util.Context queryContext = new com.hp.hpl.jena.sparql.util.Context();
+	Context queryContext = new Context();
 	queryContext.put(Service.queryAuthUser, authUser);
 	queryContext.put(Service.queryAuthPwd, authPwd);
 

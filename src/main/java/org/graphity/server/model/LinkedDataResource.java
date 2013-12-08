@@ -18,7 +18,6 @@ package org.graphity.server.model;
 
 import com.hp.hpl.jena.rdf.model.Resource;
 import javax.ws.rs.GET;
-import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
 /**
@@ -26,7 +25,7 @@ import javax.ws.rs.core.Response;
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-@Produces({org.graphity.server.MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", org.graphity.server.MediaType.TEXT_TURTLE + "; charset=UTF-8"})
+//@Produces({org.graphity.server.MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", org.graphity.server.MediaType.TEXT_TURTLE + "; charset=UTF-8"})
 public interface LinkedDataResource extends Resource
 {
 

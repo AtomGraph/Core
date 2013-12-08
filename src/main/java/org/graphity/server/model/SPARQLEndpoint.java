@@ -38,74 +38,6 @@ import javax.ws.rs.core.Variant;
  */
 public interface SPARQLEndpoint extends SPARQLQueryEndpoint, SPARQLUpdateEndpoint
 {
-    /**
-     * Returns <code>ETag</code> response header value (usually a hash string) for supplied model
-     * 
-     * @param model response model
-     * @return entity tag object for the model
-     */
-    EntityTag getEntityTag(Model model);
-
-    /**
-     * Returns <code>ETag</code> response header value (usually a hash string) for supplied result set
-     * 
-     * @param resultSet response result set
-     * @return entity tag object for the model
-     */
-    EntityTag getEntityTag(ResultSet resultSet);
-
-    /**
-     * Executes query and returns response builder initialized with its result
-     * 
-     * @param query SPARQL query object
-     * @return response builder for the query result
-     */
-    ResponseBuilder getResponseBuilder(Query query);
-    
-    /**
-     * Returns response builder initialized with RDF model
-     * 
-     * @param model RDF model
-     * @return response builder for the model
-     */
-    ResponseBuilder getResponseBuilder(Model model);
-    
-    /**
-     * Returns response builder initialized with RDF model and representation variants
-     * 
-     * @param model RDF model
-     * @param variants list of representation variants
-     * @return response builder for the model
-     */
-    ResponseBuilder getResponseBuilder(Model model, List<Variant> variants);
-    
-    /**
-     * Returns response builder initialized with SPARQL result set
-     * 
-     * @param resultSet SPARQL result set
-     * @return response builder for the result set
-     */
-    ResponseBuilder getResponseBuilder(ResultSetRewindable resultSet);
-    
-    /**
-     * Returns response builder initialized with SPARQL result set and representation variants
-     * 
-     * @param resultSet SPARQL result set
-     * @param variants list of representation variants
-     * @return response builder for the result set
-     */
-    ResponseBuilder getResponseBuilder(ResultSetRewindable resultSet, List<Variant> variants);
-    
-    /**
-     * Returns response builder initialized with entity tag, response entity, and representation variants
-     * 
-     * @param entityTag ETag value of the response entity
-     * @param entity response entity
-     * @param variants list of representation variants
-     * @return response builder for the entity
-     * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/EntityTag.html">EntityTag</a>
-     */
-    ResponseBuilder getResponseBuilder(EntityTag entityTag, Object entity, List<Variant> variants);
 
     /**
      * Loads RDF model from the endpoint by executing a SPARQL query (<code>DESCRIBE</code> or <code>CONSTRUCT</code>)
@@ -159,6 +91,6 @@ public interface SPARQLEndpoint extends SPARQLQueryEndpoint, SPARQLUpdateEndpoin
      * @param updateRequest update request
      * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-update-20130321/">SPARQL 1.1 Update</a>
      */
-    void executeUpdateRequest(UpdateRequest updateRequest);
+    void update(UpdateRequest updateRequest);
 
 }

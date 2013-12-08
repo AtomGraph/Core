@@ -24,6 +24,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
@@ -42,51 +43,42 @@ public class LinkedDataResourceBase implements LinkedDataResource
     private static final Logger log = LoggerFactory.getLogger(LinkedDataResourceBase.class);
 
     private final Resource resource;
+    private final Request request;
     private final ResourceConfig resourceConfig;
 
     /** 
      * JAX-RS-compatible resource constructor with injected initialization objects.
      * The URI of the resource being created is the absolute path of the current request URI.
      * 
-     * @param uriInfo URI information of the request
+     * @param uriInfo URI information of the 
+     * @param request current request
      * @param resourceConfig webapp configuration
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html#getAbsolutePath()">JAX-RS UriInfo.getAbsolutePath()</a>
      */
-    public LinkedDataResourceBase(@Context UriInfo uriInfo, @Context ResourceConfig resourceConfig)
+    public LinkedDataResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ResourceConfig resourceConfig)
     {
-	this(ResourceFactory.createResource(uriInfo.getAbsolutePath().toString()), resourceConfig);
+	this(ResourceFactory.createResource(uriInfo.getAbsolutePath().toString()), request, resourceConfig);
     }
     
     /**
      * Protected constructor. Not suitable for JAX-RS but can be used when subclassing.
      * 
      * @param resource This resource as RDF resource (must be URI resource, not a blank node)
+     * @param request current request
      * @param resourceConfig Resource config of this resource
      */
-    protected LinkedDataResourceBase(Resource resource, ResourceConfig resourceConfig)
+    protected LinkedDataResourceBase(Resource resource, Request request, ResourceConfig resourceConfig)
     {
 	if (resource == null) throw new IllegalArgumentException("Resource cannot be null");
+	if (request == null) throw new IllegalArgumentException("Request cannot be null");
 	if (!resource.isURIResource()) throw new IllegalArgumentException("Resource must be URI Resource (not a blank node)");
 	if (resourceConfig == null) throw new IllegalArgumentException("ResourceConfig cannot be null");
 
 	this.resource = resource;
+        this.request = request;
 	this.resourceConfig = resourceConfig;
 	
 	if (log.isDebugEnabled()) log.debug("Creating LinkedDataResource from Resource with URI: {}", resource.getURI());
-    }
-    
-    /**
-     * Returns response builder initialized with the RDF model of this resource.
-     * Provider must be registered in the application to handle representation of the model.
-     * Content negotiation of the representation format should be carried out by the provider.
-     * 
-     * @param model RDF model of this resource
-     * @return response builder
-     * @see org.graphity.server.provider.ModelProvider
-     */
-    public ResponseBuilder getResponseBuilder(Model model)
-    {
-	return Response.ok(model);
     }
 
     /**
@@ -107,7 +99,31 @@ public class LinkedDataResourceBase implements LinkedDataResource
 	}
 	
 	if (log.isDebugEnabled()) log.debug("Returning @GET Response with {} statements in Model", getModel().size());
-	return getResponseBuilder(getModel()).build();
+	return getResponse(getModel());
+    }
+
+    /**
+     * Returns response for the given RDF model.
+     * 
+     * @param model RDF model
+     * @return response object
+     */
+    public Response getResponse(Model model)
+    {
+        return getResponseBuilder(model).build();
+    }
+
+    /**
+     * Returns response builder for the given RDF model.
+     * 
+     * @param model RDF model
+     * @return response builder
+     */
+    public ResponseBuilder getResponseBuilder(Model model)
+    {
+        return ModelResponse.fromRequest(getRequest()).
+                getResponseBuilder(model).
+                cacheControl(getCacheControl());
     }
     
     /**
@@ -140,6 +156,16 @@ public class LinkedDataResourceBase implements LinkedDataResource
     public final Model getModel()
     {
 	return getResource().getModel();
+    }
+
+    /**
+     * Returns current request.
+     * 
+     * @return request object
+     */
+    public Request getRequest()
+    {
+	return request;
     }
 
     /**

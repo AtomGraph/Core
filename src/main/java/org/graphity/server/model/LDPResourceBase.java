@@ -42,12 +42,13 @@ public class LDPResourceBase extends QueriedResourceBase implements LDPResource
      * The URI of the resource being created is the absolute path of the current request URI.
      * 
      * @param uriInfo URI information of the request
+     * @param request current request
      * @param resourceConfig webapp configuration
      * @param resourceContext resource context
      */
-    public LDPResourceBase(@Context UriInfo uriInfo, @Context ResourceConfig resourceConfig, @Context ResourceContext resourceContext)
+    public LDPResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ResourceConfig resourceConfig, @Context ResourceContext resourceContext)
     {
-	super(uriInfo, resourceConfig, resourceContext);
+	super(uriInfo, request, resourceConfig, resourceContext);
     }
 
     /**
@@ -55,11 +56,12 @@ public class LDPResourceBase extends QueriedResourceBase implements LDPResource
      * 
      * @param resource this resource as RDF resource
      * @param endpoint SPARQL endpoint of this resource
+     * @param request current request
      * @param resourceConfig resource config
      */
-    protected LDPResourceBase(Resource resource, SPARQLEndpoint endpoint, ResourceConfig resourceConfig)
+    protected LDPResourceBase(Resource resource, SPARQLEndpoint endpoint, Request request, ResourceConfig resourceConfig)
     {
-	super(resource, endpoint, resourceConfig);
+	super(resource, endpoint, request, resourceConfig);
     }
 
     /**

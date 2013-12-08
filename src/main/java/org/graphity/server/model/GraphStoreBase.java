@@ -25,11 +25,9 @@ import java.net.URI;
 import javax.naming.ConfigurationException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import org.graphity.server.util.DataManager;
 import org.graphity.server.vocabulary.GS;
-import org.graphity.util.ModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,28 +67,20 @@ public class GraphStoreBase implements GraphStore
         this.resourceConfig = resourceConfig;
     }
 
-    public ResponseBuilder getResponseBuilder(Model model)
+    /**
+     * Returns response for a given RDF model.
+     * 
+     * @param model RDF model
+     * @return response object
+     */
+    public Response getResponse(Model model)
     {
-	return getResponseBuilder(new EntityTag(Long.toHexString(ModelUtils.hashModel(model))),
-		model);
+        return ModelResponse.fromRequest(getRequest()).
+                getResponseBuilder(model).
+                //cacheControl(getCacheControl()).
+                build();
     }
-
-    public ResponseBuilder getResponseBuilder(EntityTag entityTag, Object entity)
-    {
-	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(entityTag);
-	if (rb != null)
-	{
-	    if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
-	    return rb;
-	}
-	else
-	{
-	    if (log.isTraceEnabled()) log.trace("Generating RDF Response with EntityTag: {}", entityTag);
-	    return Response.ok(entity).
-		    tag(entityTag);
-	}
-    }
-
+    
      /**
      * Returns configured Graph Store resource.
      * 
@@ -144,7 +134,7 @@ public class GraphStoreBase implements GraphStore
 	{
 	    Model model = DataManager.get().getModel(getRemoteStore().getURI());
 	    if (log.isDebugEnabled()) log.debug("GET Graph Store default graph, returning Model of size(): {}", model.size());
-	    return getResponseBuilder(model).build();
+	    return getResponse(model);
 	}
 	else
 	{
@@ -157,7 +147,7 @@ public class GraphStoreBase implements GraphStore
 	    else
 	    {
 		if (log.isDebugEnabled()) log.debug("GET Graph Store named graph with URI: {} found, returning Model of size(): {}", graphUri, model.size());
-		return getResponseBuilder(model).build();
+		return getResponse(model);
 	    }
 	}
     }

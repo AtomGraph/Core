@@ -23,15 +23,13 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.api.core.ResourceContext;
-import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.core.Variant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,28 +52,30 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
      * The URI of the resource being created is the absolute path of the current request URI.
      * 
      * @param uriInfo URI information of the request
+     * @param request current request
      * @param resourceConfig webapp configuration
      * @param resourceContext resource context
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html">JAX-RS UriInfo</a>
      * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceConfig.html">Jersey ResourceConfig</a>
      * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceContext.html">Jersey ResourceContext</a>
      */
-    public QueriedResourceBase(@Context UriInfo uriInfo, @Context ResourceConfig resourceConfig, @Context ResourceContext resourceContext)
+    public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ResourceConfig resourceConfig, @Context ResourceContext resourceContext)
     {
 	this(ResourceFactory.createResource(uriInfo.getAbsolutePath().toString()),
-		resourceContext.getResource(SPARQLEndpointBase.class), resourceConfig);
+		resourceContext.getResource(SPARQLEndpointBase.class), request, resourceConfig);
     }
 
     /**
      * Protected constructor. Not suitable for JAX-RS but can be used when subclassing.
      * 
      * @param resource This resource as RDF resource (must be URI resource, not a blank node)
+     * @param request current request
      * @param endpoint SPARQL endpoint of this resource
      * @param resourceConfig Resource config
      */
-    protected QueriedResourceBase(Resource resource, SPARQLEndpoint endpoint, ResourceConfig resourceConfig)
+    protected QueriedResourceBase(Resource resource, SPARQLEndpoint endpoint, Request request, ResourceConfig resourceConfig)
     {
-	super(resource, resourceConfig);
+	super(resource, request, resourceConfig);
 	if (endpoint == null) throw new IllegalArgumentException("SPARQL endpoint cannot be null");
 	this.endpoint = endpoint;
     }
@@ -111,44 +111,6 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
 	}
 	if (log.isDebugEnabled()) log.debug("Returning @GET Response with {} statements in Model", description.size());
 	return getResponse(description);
-
-    }
-
-    /**
-     * Builds response of an RDF model
-     * 
-     * @param model RDF model
-     * @return response with the representation of the model
-     */
-    public Response getResponse(Model model)
-    {
-	return getResponseBuilder(model).build();
-    }
-    
-    /**
-     * Creates response builder for an RDF model
-     * 
-     * @param model RDF model
-     * @return 
-     */
-    @Override
-    public ResponseBuilder getResponseBuilder(Model model)
-    {
-	return getEndpoint().getResponseBuilder(model).
-		cacheControl(getCacheControl());
-    }
-
-    /**
-     * Creates response builder for an RDF model using a list of representation variants
-     * 
-     * @param model RDF model
-     * @param variants list of representation variants
-     * @return response builder for the model
-     */
-    public ResponseBuilder getResponseBuilder(Model model, List<Variant> variants)
-    {
-	return getEndpoint().getResponseBuilder(model, variants).
-		cacheControl(getCacheControl());
     }
     
     /**

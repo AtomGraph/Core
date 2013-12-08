@@ -16,9 +16,6 @@
  */
 package org.graphity.server.update;
 
-import com.hp.hpl.jena.query.ARQ;
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.sparql.ARQException;
 import com.hp.hpl.jena.sparql.engine.http.Service;
 import com.hp.hpl.jena.sparql.util.Context;
 import com.hp.hpl.jena.update.GraphStore;
@@ -29,7 +26,7 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.api.client.filter.LoggingFilter;
 import java.util.Map;
-import org.openjena.riot.WebContent;
+import org.apache.jena.riot.WebContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,14 +41,13 @@ public class UpdateProcessRemote extends com.hp.hpl.jena.sparql.modify.UpdatePro
     private final UpdateRequest request ;
     private final String endpointURI ;
     private String user = null, password = null ;
-    private Context context = null;
 
-    public UpdateProcessRemote(UpdateRequest request, String serviceURI)
+    public UpdateProcessRemote(UpdateRequest request, String serviceURI, Context context)
     {
-	super(request, serviceURI);
+	super(request, serviceURI, context);
         this.request = request ;
         this.endpointURI = serviceURI ;
-        this.context = new Context(ARQ.getContext()) ;
+        //this.context = new Context(ARQ.getContext()) ;
 	
 	Map<String, Context> serviceContextMap = (Map<String,Context>)context.get(Service.serviceContext);
 	if (serviceContextMap != null && serviceContextMap.containsKey(serviceURI))
@@ -73,20 +69,9 @@ public class UpdateProcessRemote extends com.hp.hpl.jena.sparql.modify.UpdatePro
     }
 
     @Override
-    public void setInitialBinding(QuerySolution binding)
-    {
-        throw new ARQException("Initial bindings for a remote update execution request not supported") ;
-    }
-
-    @Override
     public GraphStore getGraphStore()
     {
         return null ;
-    }
-
-    public Context getContext()
-    {
-	return context;
     }
 
     @Override
