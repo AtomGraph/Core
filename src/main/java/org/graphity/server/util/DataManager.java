@@ -493,17 +493,27 @@ public class DataManager extends FileManager
         getDatasetAccessor(graphStoreURI).deleteModel(graphURI);
     }
 
+    /**
+     * Returns dataset accessor for a given graph store URI.
+     * 
+     * @param graphStoreURI graph store URI
+     * @return accessor
+     */
     public DatasetAccessor getDatasetAccessor(String graphStoreURI)
     {
-	DatasetAccessor accessor;
         HttpAuthenticator authenticator = getHttpAuthenticator(graphStoreURI);
-        //if (authenticator != null) accessor = DatasetAccessorFactory.createHTTP(graphStoreURI, authenticator);
-        //else accessor = DatasetAccessorFactory.createHTTP(graphStoreURI);
-        if (authenticator != null) accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
-        else accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI, authenticator));
-        return accessor;
+        //if (authenticator != null) return DatasetAccessorFactory.createHTTP(graphStoreURI, authenticator);
+        //else return DatasetAccessorFactory.createHTTP(graphStoreURI);
+        if (authenticator != null) return new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI, authenticator));
+        else return new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
     }
     
+    /**
+     * Returns authenticator (used by Jena) for a given endpoint or graph store URI.
+     * 
+     * @param endpointURI endpoint or graph store URI
+     * @return authenticator
+     */
     public HttpAuthenticator getHttpAuthenticator(String endpointURI)
     {
         Context serviceContext = getServiceContext(endpointURI);
@@ -512,6 +522,12 @@ public class DataManager extends FileManager
         return getHttpAuthenticator(serviceContext);
     }
     
+    /**
+     * Converts context with username/password credentials into authenticator (used by Jena).
+     * 
+     * @param serviceContext authentication context
+     * @return authenticator
+     */
     public HttpAuthenticator getHttpAuthenticator(Context serviceContext)
     {
         if (serviceContext == null) throw new IllegalArgumentException("Contect cannot be null");
@@ -688,7 +704,7 @@ public class DataManager extends FileManager
     /**
      * Configures HTTP Basic authentication for SPARQL service context
      * 
-     * @param endpointURI the endpoint to be configured
+     * @param endpointURI endpoint or graph store URI
      * @param authUser username
      * @param authPwd password
      * @return service context
