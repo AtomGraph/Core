@@ -17,14 +17,9 @@
 package org.graphity.server.model;
 
 import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.update.UpdateRequest;
-import java.util.List;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Variant;
 
 /**
  * Extended SPARQL endpoint interface, includes query and update as well as JAX-RS helper methods.

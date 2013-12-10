@@ -33,6 +33,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.apache.jena.atlas.web.auth.HttpAuthenticator;
 import org.apache.jena.atlas.web.auth.PreemptiveBasicAuthenticator;
 import org.apache.jena.atlas.web.auth.SimpleAuthenticator;
+import org.apache.jena.web.DatasetAdapter;
 import org.graphity.query.QueryEngineHTTP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -496,8 +497,10 @@ public class DataManager extends FileManager
     {
 	DatasetAccessor accessor;
         HttpAuthenticator authenticator = getHttpAuthenticator(graphStoreURI);
-        if (authenticator != null) accessor = DatasetAccessorFactory.createHTTP(graphStoreURI, authenticator);
-        else accessor = DatasetAccessorFactory.createHTTP(graphStoreURI);
+        //if (authenticator != null) accessor = DatasetAccessorFactory.createHTTP(graphStoreURI, authenticator);
+        //else accessor = DatasetAccessorFactory.createHTTP(graphStoreURI);
+        if (authenticator != null) accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
+        else accessor = new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI, authenticator));
         return accessor;
     }
     

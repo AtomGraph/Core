@@ -20,14 +20,22 @@ import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.*;
 import com.sun.jersey.api.core.ResourceConfig;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Variant;
+import org.apache.jena.atlas.web.ContentType;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFLanguages;
 import org.graphity.server.vocabulary.GS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,10 +130,40 @@ public class LinkedDataResourceBase implements LinkedDataResource
     public ResponseBuilder getResponseBuilder(Model model)
     {
         return ModelResponse.fromRequest(getRequest()).
-                getResponseBuilder(model).
+                getResponseBuilder(model, getVariants()).
                 cacheControl(getCacheControl());
     }
-    
+
+    /**
+     * Builds a list of acceptable response variants/
+     * 
+     * @return supported variants
+     */
+    public List<Variant> getVariants()
+    {
+        List<Variant> variants = new ArrayList<>();
+        Iterator<Lang> it = RDFLanguages.getRegisteredLanguages().iterator();
+        
+        // RDF/XML as the default one - the first one gets selected by selectVariant()
+        variants.add(new Variant(new MediaType(Lang.RDFXML.getContentType().getType(),
+                Lang.RDFXML.getContentType().getSubType()),
+            null, null));
+
+        while (it.hasNext())
+        {
+            Lang lang = it.next();
+            if (!lang.equals(Lang.RDFNULL) && !lang.equals(Lang.RDFXML))
+            {
+                ContentType ct = lang.getContentType();
+                //List<String> altTypes = lang.getAltContentTypes();
+                MediaType mediaType = new MediaType(ct.getType(), ct.getSubType()); // MediaType.valueOf(ct.getContentType()
+                variants.add(new Variant(mediaType, null, null));
+            }
+        }
+        
+        return variants;
+    }
+
     /**
      * Returns URI of this resource
      * 

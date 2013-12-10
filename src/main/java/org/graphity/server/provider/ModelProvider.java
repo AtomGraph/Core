@@ -25,7 +25,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.Iterator;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -33,7 +32,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
-import org.apache.jena.atlas.web.ContentType;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFLanguages;
 import org.slf4j.Logger;
@@ -55,37 +53,17 @@ import org.slf4j.LoggerFactory;
 public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWriter<Model>
 {    
     private static final Logger log = LoggerFactory.getLogger(ModelProvider.class);
-
-    public Lang getCompatibleLang(MediaType mediaType)
-    {
-        Iterator<Lang> it = RDFLanguages.getRegisteredLanguages().iterator();
-        
-        while (it.hasNext())
-        {
-            Lang lang = it.next();
-            ContentType ct = lang.getContentType();
-            if (MediaType.valueOf(ct.getContentType()).isCompatible(mediaType)) return lang;
-        }
-        
-        return null;
-    }
-    
-    public boolean isMediaTypeCompatible(MediaType mediaType)
-    {
-        return getCompatibleLang(mediaType) != null;
-    }
     
     // READER
     
     @Override
-    public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, javax.ws.rs.core.MediaType mediaType)
+    public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
         return type == Model.class && RDFLanguages.contentTypeToLang(mediaType.toString()) != null;
-        //&& isMediaTypeCompatible(mediaType);
     }
 
     @Override
-    public Model readFrom(Class<Model> type, Type genericType, Annotation[] annotations, javax.ws.rs.core.MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException, WebApplicationException
+    public Model readFrom(Class<Model> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException, WebApplicationException
     {
 	if (log.isTraceEnabled()) log.trace("Reading Model with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
 	
@@ -108,20 +86,19 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     // WRITER
     
     @Override
-    public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, javax.ws.rs.core.MediaType mediaType)
+    public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
         return Model.class.isAssignableFrom(type) && RDFLanguages.contentTypeToLang(mediaType.toString()) != null;
-                //&& isMediaTypeCompatible(mediaType);
     }
 
     @Override
-    public long getSize(Model model, Class<?> type, Type genericType, Annotation[] annotations, javax.ws.rs.core.MediaType mediaType)
+    public long getSize(Model model, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
 	return -1;
     }
 
     @Override
-    public void writeTo(Model model, Class<?> type, Type genericType, Annotation[] annotations, javax.ws.rs.core.MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException
+    public void writeTo(Model model, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException
     {
 	if (log.isTraceEnabled()) log.trace("Writing Model with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
 

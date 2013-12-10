@@ -22,10 +22,16 @@ import com.hp.hpl.jena.rdf.model.*;
 import com.hp.hpl.jena.sparql.engine.http.Service;
 import com.sun.jersey.api.core.ResourceConfig;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import javax.naming.ConfigurationException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
+import org.apache.jena.atlas.web.ContentType;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFLanguages;
 import org.graphity.server.util.DataManager;
 import org.graphity.server.vocabulary.GS;
 import org.slf4j.Logger;
@@ -76,11 +82,41 @@ public class GraphStoreBase implements GraphStore
     public Response getResponse(Model model)
     {
         return ModelResponse.fromRequest(getRequest()).
-                getResponseBuilder(model).
+                getResponseBuilder(model, getVariants()).
                 //cacheControl(getCacheControl()).
                 build();
     }
     
+    /**
+     * Builds a list of acceptable response variants/
+     * 
+     * @return supported variants
+     */
+    public List<Variant> getVariants()
+    {
+        List<Variant> variants = new ArrayList<>();
+        Iterator<Lang> it = RDFLanguages.getRegisteredLanguages().iterator();
+        
+        // RDF/XML as the default one - the first one gets selected by selectVariant()
+        variants.add(new Variant(new MediaType(Lang.RDFXML.getContentType().getType(),
+                Lang.RDFXML.getContentType().getSubType()),
+            null, null));
+
+        while (it.hasNext())
+        {
+            Lang lang = it.next();
+            if (!lang.equals(Lang.RDFNULL) && !lang.equals(Lang.RDFXML))
+            {
+                ContentType ct = lang.getContentType();
+                //List<String> altTypes = lang.getAltContentTypes();
+                MediaType mediaType = new MediaType(ct.getType(), ct.getSubType()); // MediaType.valueOf(ct.getContentType()
+                variants.add(new Variant(mediaType, null, null));
+            }
+        }
+        
+        return variants;
+    }
+
      /**
      * Returns configured Graph Store resource.
      * 

@@ -27,11 +27,15 @@ import com.hp.hpl.jena.update.UpdateRequest;
 import com.sun.jersey.api.core.ResourceConfig;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import javax.naming.ConfigurationException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.*;
+import org.apache.jena.atlas.web.ContentType;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFLanguages;
 import org.graphity.server.util.DataManager;
 import org.graphity.server.vocabulary.GS;
 import org.graphity.util.ResultSetUtils;
@@ -55,10 +59,12 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
      * 
      * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/rdf/model/Model.html">Jena Model</a>
      */
+    /*
     public static final List<Variant> MODEL_VARIANTS = Variant.VariantListBuilder.newInstance().
 		mediaTypes(org.graphity.server.MediaType.APPLICATION_RDF_XML_TYPE,
 			org.graphity.server.MediaType.TEXT_TURTLE_TYPE).
 		add().build();
+    */
 
     /**
      * Media types that can be used for representation of SPARQL result set
@@ -73,6 +79,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     /**
      * All supported media types. Includes both model and result set representation formats.
      */
+    /*
     public static final List<Variant> VARIANTS;
     static
     {
@@ -81,6 +88,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	variants.addAll(RESULT_SET_VARIANTS);
 	VARIANTS = variants;
     }
+    */
     
     private final Resource resource;
     private final Request request;
@@ -305,10 +313,40 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     public ResponseBuilder getResponseBuilder(Model model)
     {
         return ModelResponse.fromRequest(getRequest()).
-                getResponseBuilder(model);
+                getResponseBuilder(model, getVariants());
                 //cacheControl(getCacheControl()).
     }
     
+    /**
+     * Builds a list of acceptable response variants/
+     * 
+     * @return supported variants
+     */
+    public List<Variant> getVariants()
+    {
+        List<Variant> variants = new ArrayList<>();
+        Iterator<Lang> it = RDFLanguages.getRegisteredLanguages().iterator();
+        
+        // RDF/XML as the default one - the first one gets selected by selectVariant()
+        variants.add(new Variant(new MediaType(Lang.RDFXML.getContentType().getType(),
+                Lang.RDFXML.getContentType().getSubType()),
+            null, null));
+
+        while (it.hasNext())
+        {
+            Lang lang = it.next();
+            if (!lang.equals(Lang.RDFNULL) && !lang.equals(Lang.RDFXML))
+            {
+                ContentType ct = lang.getContentType();
+                //List<String> altTypes = lang.getAltContentTypes();
+                MediaType mediaType = new MediaType(ct.getType(), ct.getSubType()); // MediaType.valueOf(ct.getContentType()
+                variants.add(new Variant(mediaType, null, null));
+            }
+        }
+        
+        return variants;
+    }
+
     public EntityTag getEntityTag(ResultSet resultSet)
     {
         return new EntityTag(Long.toHexString(ResultSetUtils.hashResultSet(resultSet)));
@@ -340,7 +378,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	    Variant variant = getRequest().selectVariant(variants);
 	    if (variant == null)
 	    {
-		if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants: {}", variant, getVariants());
+		if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants: {}", variant, variants);
 		return Response.notAcceptable(variants);
 	    }	
 	    else
@@ -425,10 +463,12 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	return getResource().getModel();
     }
 
+    /*
     public List<Variant> getVariants()
     {
 	return VARIANTS;
     }
+    */
     
     public Request getRequest()
     {

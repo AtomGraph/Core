@@ -34,21 +34,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Encapsulates the content negotiation logic used to build HTTP response from RDF model.
+ * 
  * @author Martynas
  */
-public class ModelResponse // extends Response
+public class ModelResponse // extends ResponseBuilder
 {
     private static final Logger log = LoggerFactory.getLogger(ModelResponse.class);
 
     private final Request request;
-    //private final CacheControl cacheControl;
+    //private final ResponseBuilder responseBuilder;
     
+    /**
+     * Builds model response from request.
+     * 
+     * @param request current request
+     */
     protected ModelResponse(Request request)
     {
 	if (request == null) throw new IllegalArgumentException("Request cannot be null");
         this.request = request;
-        //this.cacheControl = cacheControl;
+        //this.responseBuilder = ResponseBuilder.newInstance();
     }
 
     public Request getRequest()
@@ -67,6 +73,7 @@ public class ModelResponse // extends Response
      * @param model RDF model
      * @return response with the representation of the model
      */
+    /*
     public Response getResponse(Model model)
     {
 	return getResponseBuilder(model).build();
@@ -76,6 +83,7 @@ public class ModelResponse // extends Response
     {
 	return getResponseBuilder(model, getVariants());
     }
+    */
     
     public Response.ResponseBuilder getResponseBuilder(Model model, List<Variant> variants)
     {
@@ -95,7 +103,7 @@ public class ModelResponse // extends Response
 	    Variant variant = getRequest().selectVariant(variants);
 	    if (variant == null)
 	    {
-		if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants: {}", variant, getVariants());
+		if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants: {}", variant, variants);
 		return Response.notAcceptable(variants);
 	    }	
 	    else
@@ -107,6 +115,7 @@ public class ModelResponse // extends Response
 	}	
     }
 
+    /*
     // http://stackoverflow.com/questions/5647570/content-type-when-accept-header-is-empty-or-unknown-jax-rs
     public List<Variant> getVariants()
     {
@@ -132,10 +141,131 @@ public class ModelResponse // extends Response
         
         return variants;
     }
-
+    */
+    
     public EntityTag getEntityTag(Model model)
     {
         return new EntityTag(Long.toHexString(ModelUtils.hashModel(model)));
     }
 
+    /*
+    public ResponseBuilder getResponseBuilder()
+    {
+        return responseBuilder;
+    }
+
+    @Override
+    public Response build()
+    {
+        return getResponseBuilder().build();
+    }
+
+    @Override
+    public ResponseBuilder clone()
+    {
+        return getResponseBuilder().clone();
+    }
+
+    @Override
+    public ResponseBuilder status(int i)
+    {
+        return getResponseBuilder().status(i);
+    }
+
+    @Override
+    public ResponseBuilder entity(Object o)
+    {
+        return getResponseBuilder().entity(o);
+    }
+
+    @Override
+    public ResponseBuilder type(MediaType mt)
+    {
+        return getResponseBuilder().type(mt);
+    }
+
+    @Override
+    public ResponseBuilder type(String string)
+    {
+        return getResponseBuilder().type(string);
+    }
+
+    @Override
+    public ResponseBuilder variant(Variant vrnt)
+    {
+        return getResponseBuilder().variant(vrnt);
+    }
+
+    @Override
+    public ResponseBuilder variants(List<Variant> list)
+    {
+        return getResponseBuilder().variants(list);
+    }
+
+    @Override
+    public ResponseBuilder language(String string)
+    {
+        return getResponseBuilder().language(string);
+    }
+
+    @Override
+    public ResponseBuilder language(Locale locale)
+    {
+        return getResponseBuilder().language(locale);
+    }
+
+    @Override
+    public ResponseBuilder location(URI uri)
+    {
+        return getResponseBuilder().location(uri);
+    }
+
+    @Override
+    public ResponseBuilder contentLocation(URI uri)
+    {
+        return getResponseBuilder().contentLocation(uri);
+    }
+
+    @Override
+    public ResponseBuilder tag(EntityTag et)
+    {
+        return getResponseBuilder().tag(et);
+    }
+
+    @Override
+    public ResponseBuilder tag(String string)
+    {
+        return getResponseBuilder().tag(string);
+    }
+
+    @Override
+    public ResponseBuilder lastModified(Date date)
+    {
+        return getResponseBuilder().lastModified(date);
+    }
+
+    @Override
+    public ResponseBuilder cacheControl(CacheControl cc)
+    {
+        return getResponseBuilder().cacheControl(cc);
+    }
+
+    @Override
+    public ResponseBuilder expires(Date date)
+    {
+        return getResponseBuilder().expires(date);
+    }
+
+    @Override
+    public ResponseBuilder header(String string, Object o)
+    {
+        return getResponseBuilder().header(string, o);
+    }
+
+    @Override
+    public ResponseBuilder cookie(NewCookie... ncs)
+    {
+        return getResponseBuilder().cookie(ncs);
+    }
+    */
 }
