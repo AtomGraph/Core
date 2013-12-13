@@ -16,6 +16,7 @@
  */
 package org.graphity.server.model;
 
+import com.hp.hpl.jena.query.DatasetAccessor;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 import java.net.URI;
@@ -31,7 +32,7 @@ import javax.ws.rs.core.Response;
  */
 //@Produces({MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", MediaType.TEXT_TURTLE + "; charset=UTF-8"})
 //@Consumes({MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", MediaType.TEXT_TURTLE + "; charset=UTF-8"})
-public interface GraphStore extends Resource
+public interface GraphStore extends Resource, DatasetAccessor
 {
     /**
      * Handles GET query request and returns result as response

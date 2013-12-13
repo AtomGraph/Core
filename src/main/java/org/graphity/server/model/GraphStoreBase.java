@@ -168,13 +168,13 @@ public class GraphStoreBase implements GraphStore
 
 	if (defaultGraph)
 	{
-	    Model model = DataManager.get().getModel(getRemoteStore().getURI());
-	    if (log.isDebugEnabled()) log.debug("GET Graph Store default graph, returning Model of size(): {}", model.size());
+	    Model model = getModel();
+            if (log.isDebugEnabled()) log.debug("GET Graph Store default graph, returning Model of size(): {}", model.size());
 	    return getResponse(model);
 	}
 	else
 	{
-	    Model model = DataManager.get().getModel(getRemoteStore().getURI(), graphUri.toString());
+	    Model model = getModel(graphUri.toString());
 	    if (model == null)
 	    {
 		if (log.isDebugEnabled()) log.debug("GET Graph Store named graph with URI: {} not found", graphUri);
@@ -200,16 +200,16 @@ public class GraphStoreBase implements GraphStore
 	if (defaultGraph)
 	{
 	    if (log.isDebugEnabled()) log.debug("POST Model to default graph");
-	    DataManager.get().addModel(getRemoteStore().getURI(), model);
+	    add(model);
 	    return Response.ok().build();
 	}
 	else
 	{
-	    boolean existingGraph = DataManager.get().containsModel(getRemoteStore().getURI(), graphUri.toString());
+	    boolean existingGraph = containsModel(graphUri.toString());
 
 	    // is this implemented correctly? The specification is not very clear.
 	    if (log.isDebugEnabled()) log.debug("POST Model to named graph with URI: {} Did it already exist? {}", graphUri, existingGraph);
-	    DataManager.get().addModel(getRemoteStore().getURI(), graphUri.toString(), model);
+	    add(graphUri.toString(), model);
 	    
 	    if (existingGraph) return Response.ok().build();
 	    else return Response.created(graphUri).build();
@@ -226,15 +226,15 @@ public class GraphStoreBase implements GraphStore
 	if (defaultGraph)
 	{
 	    if (log.isDebugEnabled()) log.debug("PUT Model to default graph");
-	    DataManager.get().putModel(getRemoteStore().getURI(), model);
+	    putModel(model);
 	    return Response.ok().build();
 	}
 	else
 	{
-	    boolean existingGraph = DataManager.get().containsModel(getRemoteStore().getURI(), graphUri.toString());
+	    boolean existingGraph = containsModel(graphUri.toString());
 	    
 	    if (log.isDebugEnabled()) log.debug("PUT Model to named graph with URI: {} Did it already exist? {}", graphUri, existingGraph);
-	    DataManager.get().putModel(getRemoteStore().getURI(), graphUri.toString(), model);
+	    putModel(graphUri.toString(), model);
 	    
 	    if (existingGraph) return Response.ok().build();
 	    else return Response.created(graphUri).build();
@@ -249,13 +249,13 @@ public class GraphStoreBase implements GraphStore
 	
 	if (defaultGraph)
 	{
-	    DataManager.get().deleteDefault(getRemoteStore().getURI());
+	    deleteDefault();
 	    if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store");	    
 	    return Response.noContent().build();
 	}
 	else
 	{
-	    if (!DataManager.get().containsModel(getRemoteStore().getURI(), graphUri.toString()))
+	    if (!containsModel(graphUri.toString()))
 	    {
 		if (log.isDebugEnabled()) log.debug("DELETE named graph with URI {}: not found", graphUri);
 		return Response.status(Status.NOT_FOUND).build();
@@ -263,7 +263,7 @@ public class GraphStoreBase implements GraphStore
 	    else
 	    {
 		if (log.isDebugEnabled()) log.debug("DELETE named graph with URI: {}", graphUri);
-		DataManager.get().deleteModel(getRemoteStore().getURI(), graphUri.toString());
+		deleteModel(graphUri.toString());
 		return Response.noContent().build();
 	    }
 	}
@@ -576,6 +576,54 @@ public class GraphStoreBase implements GraphStore
     public String toString()
     {
 	return getResource().toString();
+    }
+
+    @Override
+    public Model getModel(String uri)
+    {
+        return DataManager.get().getModel(getRemoteStore().getURI(), uri);
+    }
+
+    @Override
+    public boolean containsModel(String uri)
+    {
+        return DataManager.get().containsModel(getRemoteStore().getURI(), uri);
+    }
+
+    @Override
+    public void putModel(Model model)
+    {
+        DataManager.get().putModel(getRemoteStore().getURI(), model);
+    }
+
+    @Override
+    public void putModel(String uri, Model model)
+    {
+        DataManager.get().putModel(getRemoteStore().getURI(), uri, model);
+    }
+
+    @Override
+    public void deleteDefault()
+    {
+        DataManager.get().deleteDefault(getRemoteStore().getURI());
+    }
+
+    @Override
+    public void deleteModel(String uri)
+    {
+        DataManager.get().deleteModel(getRemoteStore().getURI(), uri);
+    }
+
+    @Override
+    public void add(Model model)
+    {
+        DataManager.get().addModel(getRemoteStore().getURI(), model);
+    }
+
+    @Override
+    public void add(String uri, Model model)
+    {
+        DataManager.get().addModel(getRemoteStore().getURI(), uri, model);
     }
     
 }

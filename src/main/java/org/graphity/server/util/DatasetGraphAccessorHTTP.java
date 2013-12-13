@@ -228,11 +228,11 @@ public class DatasetGraphAccessorHTTP implements DatasetGraphAccessor
     private static HttpEntity graphToHttpEntity(final Graph graph) {
             ByteArrayOutputStream out = new ByteArrayOutputStream() ;
             Model model = ModelFactory.createModelForGraph(graph) ;
-            model.write(out, WebContent.langNTriples) ;
+            model.write(out, Lang.RDFXML.getName()); //model.write(out, WebContent.langNTriples) ;
             byte[] bytes = out.toByteArray() ;
             ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray()) ;
             InputStreamEntity reqEntity = new InputStreamEntity(in, bytes.length) ;
-            reqEntity.setContentType(WebContent.contentTypeNTriples) ;
+            reqEntity.setContentType(Lang.RDFXML.getContentType().getContentType()); //reqEntity.setContentType(WebContent.contentTypeNTriples) ;
             reqEntity.setContentEncoding("UTF-8") ;
             HttpEntity entity = reqEntity ;
             return entity;
