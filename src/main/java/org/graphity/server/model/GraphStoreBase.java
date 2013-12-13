@@ -48,7 +48,7 @@ public class GraphStoreBase implements GraphStore
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreBase.class);
 
-    private final Resource resource;
+    private final Resource resource, remote;
     private final Request request;
     private final ResourceConfig resourceConfig;
 
@@ -71,6 +71,7 @@ public class GraphStoreBase implements GraphStore
 	this.resource = graphStore;
 	this.request = request;
         this.resourceConfig = resourceConfig;
+        remote = getRemoteStore(resourceConfig);
     }
 
     /**
@@ -119,22 +120,13 @@ public class GraphStoreBase implements GraphStore
 
      /**
      * Returns configured Graph Store resource.
+     * This graph store is a proxy for the remote one.
      * 
      * @return graph store resource
      */
     public Resource getRemoteStore()
     {
-        try
-        {
-            Resource graphStore = getRemoteStore(getResourceConfig());
-            if (graphStore == null) throw new ConfigurationException("Graph Store not configured (gs:graphStore not set in web.xml)");
-            return graphStore;
-        }
-        catch (ConfigurationException ex)
-        {
-            if (log.isErrorEnabled()) log.warn("Graph Store configuration error", ex);
-            throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);            
-        }
+        return remote;
     }
 
      /**
@@ -144,11 +136,13 @@ public class GraphStoreBase implements GraphStore
      * @param resourceConfig webapp config
      * @return graph store resource
      */
-    public Resource getRemoteStore(ResourceConfig resourceConfig)
+    public final Resource getRemoteStore(ResourceConfig resourceConfig)
     {
-        Object storeUri = resourceConfig.getProperty(GS.graphStore.getURI());
-        if (storeUri != null)
+        try
         {
+            Object storeUri = resourceConfig.getProperty(GS.graphStore.getURI());
+            if (storeUri == null) throw new ConfigurationException("Graph Store not configured (gs:graphStore not set in web.xml)");
+
             String authUser = (String)resourceConfig.getProperty(Service.queryAuthUser.getSymbol());
             String authPwd = (String)resourceConfig.getProperty(Service.queryAuthPwd.getSymbol());
             if (authUser != null && authPwd != null)
@@ -156,8 +150,11 @@ public class GraphStoreBase implements GraphStore
 
             return ResourceFactory.createResource(storeUri.toString());
         }
-        
-        return null;
+        catch (ConfigurationException ex)
+        {
+            if (log.isErrorEnabled()) log.warn("Graph Store configuration error", ex);
+            throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);            
+        }                
     }
     
     @GET
