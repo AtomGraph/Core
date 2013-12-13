@@ -55,18 +55,6 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointBase.class);
 
     /**
-     * Media types that can be used for representation of RDF model
-     * 
-     * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/rdf/model/Model.html">Jena Model</a>
-     */
-    /*
-    public static final List<Variant> MODEL_VARIANTS = Variant.VariantListBuilder.newInstance().
-		mediaTypes(org.graphity.server.MediaType.APPLICATION_RDF_XML_TYPE,
-			org.graphity.server.MediaType.TEXT_TURTLE_TYPE).
-		add().build();
-    */
-
-    /**
      * Media types that can be used for representation of SPARQL result set
      * 
      * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/ResultSetRewindable.html">Jena ResultSetRewindable</a>
@@ -90,7 +78,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     }
     */
     
-    private final Resource resource, remote;
+    private final Resource resource;
     private final Request request;
     private final ResourceConfig resourceConfig;
 
@@ -130,9 +118,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	this.resource = endpoint;
 	this.request = request;
 	this.resourceConfig = resourceConfig;
-	if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase with endpoint: {}", endpoint);
-        
-        remote = getRemoteEndpoint(resourceConfig);
+	if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase with endpoint: {}", endpoint);        
     }
 
     /**
@@ -271,7 +257,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
      */
     public Resource getRemoteEndpoint()
     {
-        return remote;
+        return getRemoteEndpoint(getResourceConfig());
     }
 
     /**
@@ -281,7 +267,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
      * @param resourceConfig webapp config
      * @return endpoint resource
      */
-    public final Resource getRemoteEndpoint(ResourceConfig resourceConfig)
+    public Resource getRemoteEndpoint(ResourceConfig resourceConfig)
     {
         if (resourceConfig == null) throw new IllegalArgumentException("ResourceConfig cannot be null");
 

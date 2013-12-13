@@ -48,7 +48,7 @@ public class GraphStoreBase implements GraphStore
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreBase.class);
 
-    private final Resource resource, remote;
+    private final Resource resource;
     private final Request request;
     private final ResourceConfig resourceConfig;
 
@@ -71,7 +71,6 @@ public class GraphStoreBase implements GraphStore
 	this.resource = graphStore;
 	this.request = request;
         this.resourceConfig = resourceConfig;
-        remote = getRemoteStore(resourceConfig);
     }
 
     /**
@@ -126,7 +125,7 @@ public class GraphStoreBase implements GraphStore
      */
     public Resource getRemoteStore()
     {
-        return remote;
+        return getRemoteStore(getResourceConfig());
     }
 
      /**
@@ -136,7 +135,7 @@ public class GraphStoreBase implements GraphStore
      * @param resourceConfig webapp config
      * @return graph store resource
      */
-    public final Resource getRemoteStore(ResourceConfig resourceConfig)
+    public Resource getRemoteStore(ResourceConfig resourceConfig)
     {
         try
         {
