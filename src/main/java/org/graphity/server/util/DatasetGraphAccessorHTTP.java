@@ -59,7 +59,7 @@ public class DatasetGraphAccessorHTTP implements DatasetGraphAccessor
     private HttpAuthenticator authenticator;
 
     /** Format used to send a graph to the server */ 
-    private static RDFFormat sendLang = RDFFormat.RDFXML_PLAIN ;
+    private static RDFFormat sendLang = RDFFormat.NTRIPLES_UTF8; //RDFFormat.RDFXML_PLAIN ;
 
     /** 
      * Create a DatasetUpdater for the remote URL 
@@ -225,14 +225,15 @@ public class DatasetGraphAccessorHTTP implements DatasetGraphAccessor
         return httpParams$;
     }
     
-    private static HttpEntity graphToHttpEntity(final Graph graph) {
+    private HttpEntity graphToHttpEntity(final Graph graph) {
             ByteArrayOutputStream out = new ByteArrayOutputStream() ;
             Model model = ModelFactory.createModelForGraph(graph) ;
-            model.write(out, Lang.RDFXML.getName()); //model.write(out, WebContent.langNTriples) ;
+            model.write(out, getSendLang().getName()); //model.write(out, WebContent.langNTriples) ;
             byte[] bytes = out.toByteArray() ;
             ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray()) ;
             InputStreamEntity reqEntity = new InputStreamEntity(in, bytes.length) ;
-            reqEntity.setContentType(Lang.RDFXML.getContentType().getContentType()); //reqEntity.setContentType(WebContent.contentTypeNTriples) ;
+            //reqEntity.setContentType(getSendLang().getContentType().getContentType());
+            reqEntity.setContentType(getSendLang().getAltContentTypes().get(0)) ;
             reqEntity.setContentEncoding("UTF-8") ;
             HttpEntity entity = reqEntity ;
             return entity;
@@ -251,5 +252,11 @@ public class DatasetGraphAccessorHTTP implements DatasetGraphAccessor
         entity.setContentType(ct) ;
         return entity ;
         */
-    }        
+    }
+    
+    public Lang getSendLang()
+    {
+        return sendLang.getLang();
+    }
+    
 }
