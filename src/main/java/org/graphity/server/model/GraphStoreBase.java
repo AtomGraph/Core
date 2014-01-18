@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 @Path("/service") // not standard
-public class GraphStoreBase implements GraphStore
+public class GraphStoreBase implements GraphStore, HTTPProxy
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreBase.class);
 
@@ -123,9 +123,10 @@ public class GraphStoreBase implements GraphStore
      * 
      * @return graph store resource
      */
-    public Resource getRemoteStore()
+    @Override
+    public Resource getOrigin()
     {
-        return getRemoteStore(getResourceConfig());
+        return getOrigin(getResourceConfig());
     }
 
      /**
@@ -135,7 +136,7 @@ public class GraphStoreBase implements GraphStore
      * @param resourceConfig webapp config
      * @return graph store resource
      */
-    public Resource getRemoteStore(ResourceConfig resourceConfig)
+    public Resource getOrigin(ResourceConfig resourceConfig)
     {
         try
         {
@@ -577,49 +578,49 @@ public class GraphStoreBase implements GraphStore
     @Override
     public Model getModel(String uri)
     {
-        return DataManager.get().getModel(getRemoteStore().getURI(), uri);
+        return DataManager.get().getModel(getOrigin().getURI(), uri);
     }
 
     @Override
     public boolean containsModel(String uri)
     {
-        return DataManager.get().containsModel(getRemoteStore().getURI(), uri);
+        return DataManager.get().containsModel(getOrigin().getURI(), uri);
     }
 
     @Override
     public void putModel(Model model)
     {
-        DataManager.get().putModel(getRemoteStore().getURI(), model);
+        DataManager.get().putModel(getOrigin().getURI(), model);
     }
 
     @Override
     public void putModel(String uri, Model model)
     {
-        DataManager.get().putModel(getRemoteStore().getURI(), uri, model);
+        DataManager.get().putModel(getOrigin().getURI(), uri, model);
     }
 
     @Override
     public void deleteDefault()
     {
-        DataManager.get().deleteDefault(getRemoteStore().getURI());
+        DataManager.get().deleteDefault(getOrigin().getURI());
     }
 
     @Override
     public void deleteModel(String uri)
     {
-        DataManager.get().deleteModel(getRemoteStore().getURI(), uri);
+        DataManager.get().deleteModel(getOrigin().getURI(), uri);
     }
 
     @Override
     public void add(Model model)
     {
-        DataManager.get().addModel(getRemoteStore().getURI(), model);
+        DataManager.get().addModel(getOrigin().getURI(), model);
     }
 
     @Override
     public void add(String uri, Model model)
     {
-        DataManager.get().addModel(getRemoteStore().getURI(), uri, model);
+        DataManager.get().addModel(getOrigin().getURI(), uri, model);
     }
     
 }

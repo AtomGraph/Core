@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * @see <a href="http://docs.oracle.com/javaee/6/tutorial/doc/gkqbq.html">JAX-RS Runtime Content Negotiation</a>
  */
 @Path("/sparql")
-public class SPARQLEndpointBase implements SPARQLEndpoint
+public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
 {
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointBase.class);
 
@@ -63,20 +63,6 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 			mediaTypes(org.graphity.server.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE,
 			    org.graphity.server.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE).
 			add().build();
-
-    /**
-     * All supported media types. Includes both model and result set representation formats.
-     */
-    /*
-    public static final List<Variant> VARIANTS;
-    static
-    {
-	List<Variant> variants = new ArrayList<>();
-	variants.addAll(MODEL_VARIANTS);
-	variants.addAll(RESULT_SET_VARIANTS);
-	VARIANTS = variants;
-    }
-    */
     
     private final Resource resource;
     private final Request request;
@@ -255,9 +241,10 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
      * 
      * @return endpoint resource
      */
-    public Resource getRemoteEndpoint()
+    @Override
+    public Resource getOrigin()
     {
-        return getRemoteEndpoint(getResourceConfig());
+        return getOrigin(getResourceConfig());
     }
 
     /**
@@ -267,7 +254,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
      * @param resourceConfig webapp config
      * @return endpoint resource
      */
-    public Resource getRemoteEndpoint(ResourceConfig resourceConfig)
+    public Resource getOrigin(ResourceConfig resourceConfig)
     {
         if (resourceConfig == null) throw new IllegalArgumentException("ResourceConfig cannot be null");
 
@@ -379,8 +366,8 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
     @Override
     public Model loadModel(Query query)
     {
-	if (log.isDebugEnabled()) log.debug("Loading Model from SPARQL endpoint: {} using Query: {}", getRemoteEndpoint(), query);
-	return DataManager.get().loadModel(getRemoteEndpoint().getURI(), query);
+	if (log.isDebugEnabled()) log.debug("Loading Model from SPARQL endpoint: {} using Query: {}", getOrigin(), query);
+	return DataManager.get().loadModel(getOrigin().getURI(), query);
     }
     
     @Override
@@ -403,8 +390,8 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
    
     public ResultSetRewindable loadResultSetRewindable(Query query)
     {
-	if (log.isDebugEnabled()) log.debug("Loading ResultSet from SPARQL endpoint: {} using Query: {}", getRemoteEndpoint().getURI(), query);
-	return DataManager.get().loadResultSet(getRemoteEndpoint().getURI(), query); // .getResultSetRewindable()
+	if (log.isDebugEnabled()) log.debug("Loading ResultSet from SPARQL endpoint: {} using Query: {}", getOrigin().getURI(), query);
+	return DataManager.get().loadResultSet(getOrigin().getURI(), query); // .getResultSetRewindable()
     }
 
     @Override
@@ -422,14 +409,14 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
         if (!query.isAskType()) throw new IllegalArgumentException("Query must be ASK");
         
-	return DataManager.get().ask(getRemoteEndpoint().getURI(), query);
+	return DataManager.get().ask(getOrigin().getURI(), query);
     }
 
     @Override
     public void update(UpdateRequest updateRequest)
     {
-	if (log.isDebugEnabled()) log.debug("Executing update on SPARQL endpoint: {} using UpdateRequest: {}", getRemoteEndpoint(), updateRequest);
-	DataManager.get().executeUpdateRequest(getRemoteEndpoint().getURI(), updateRequest);
+	if (log.isDebugEnabled()) log.debug("Executing update on SPARQL endpoint: {} using UpdateRequest: {}", getOrigin(), updateRequest);
+	DataManager.get().executeUpdateRequest(getOrigin().getURI(), updateRequest);
     }
 
     private Resource getResource()
@@ -449,13 +436,6 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
 	return getResource().getModel();
     }
 
-    /*
-    public List<Variant> getVariants()
-    {
-	return VARIANTS;
-    }
-    */
-    
     public Request getRequest()
     {
 	return request;
