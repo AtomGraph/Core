@@ -16,16 +16,11 @@
  */
 package org.graphity.server.model;
 
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.sun.jersey.api.core.ResourceConfig;
-import com.sun.jersey.api.core.ResourceContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
@@ -41,11 +36,11 @@ import org.slf4j.LoggerFactory;
  * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/Query.html">ARQ Query</a>
  */
 @Path("{path: .*}")
-public class QueriedResourceBase extends LinkedDataResourceBase implements QueriedResource
+public class QueriedResourceBase extends LinkedDataResourceBase //implements QueriedResource
 {
     private static final Logger log = LoggerFactory.getLogger(QueriedResourceBase.class);
     
-    private final SPARQLEndpoint endpoint;
+    private final Model description;
 
     /**
      * JAX-RS-compatible resource constructor with injected initialization objects.
@@ -54,15 +49,16 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
      * @param uriInfo URI information of the request
      * @param request current request
      * @param resourceConfig webapp configuration
-     * @param resourceContext resource context
+     * @param description description of this resource
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html">JAX-RS UriInfo</a>
      * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceConfig.html">Jersey ResourceConfig</a>
      * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceContext.html">Jersey ResourceContext</a>
      */
-    public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ResourceConfig resourceConfig, @Context ResourceContext resourceContext)
+    public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ResourceConfig resourceConfig,
+            @Context Model description)
     {
-	this(ResourceFactory.createResource(uriInfo.getAbsolutePath().toString()),
-		resourceContext.getResource(SPARQLEndpointBase.class), request, resourceConfig);
+	this(description.createResource(uriInfo.getAbsolutePath().toString()), request, resourceConfig,
+                description);
     }
 
     /**
@@ -70,14 +66,15 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
      * 
      * @param resource This resource as RDF resource (must be URI resource, not a blank node)
      * @param request current request
-     * @param endpoint SPARQL endpoint of this resource
      * @param resourceConfig Resource config
+     * @param description description of this resource
      */
-    protected QueriedResourceBase(Resource resource, SPARQLEndpoint endpoint, Request request, ResourceConfig resourceConfig)
+    protected QueriedResourceBase(Resource resource, Request request, ResourceConfig resourceConfig,
+            Model description)
     {
 	super(resource, request, resourceConfig);
-	if (endpoint == null) throw new IllegalArgumentException("SPARQL endpoint cannot be null");
-	this.endpoint = endpoint;
+	if (description == null) throw new IllegalArgumentException("Resource description Model cannot be null");
+        this.description = description;
     }
 
     /**
@@ -88,9 +85,9 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
      * @return RDF description
      * @see getQuery()
      */
-    public Model describe()
+    public Model getDescription()
     {
-	return getEndpoint().loadModel(getQuery());
+	return description;
     }
     
     /**
@@ -102,49 +99,7 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
     @Override
     public Response get()
     {
-	Model description = describe();
-
-	if (description.isEmpty())
-	{
-	    if (log.isDebugEnabled()) log.debug("DESCRIBE Model is empty; returning 404 Not Found");
-	    throw new WebApplicationException(Response.Status.NOT_FOUND);
-	}
 	if (log.isDebugEnabled()) log.debug("Returning @GET Response with {} statements in Model", description.size());
-	return getResponse(description);
+	return getResponse(getDescription());
     }
-    
-    /**
-     * Returns query used to retrieve RDF description of this resource
-     * 
-     * @return query object
-     */
-    @Override
-    public Query getQuery()
-    {
-	return getQuery(getURI());
-    }
-    
-    /**
-     * Given a resource URI, returns query that can be used to retrieve its RDF description
-     * 
-     * @param uri resource URI
-     * @return query object
-     */
-    public Query getQuery(String uri)
-    {
-	return QueryFactory.create("DESCRIBE <" + uri + ">");
-    }
-
-    /**
-     * Returns SPARQL endpoint of this resource.
-     * Query is executed on this endpoint to retrieve RDF representation of this resource.
-     * 
-     * @return SPARQL endpoint resource
-     */
-    @Override
-    public SPARQLEndpoint getEndpoint()
-    {
-	return endpoint;
-    }
-
 }

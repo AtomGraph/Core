@@ -19,7 +19,6 @@ package org.graphity.server.model;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.sun.jersey.api.core.ResourceConfig;
-import com.sun.jersey.api.core.ResourceContext;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import org.slf4j.Logger;
@@ -44,24 +43,26 @@ public class LDPResourceBase extends QueriedResourceBase implements LDPResource
      * @param uriInfo URI information of the request
      * @param request current request
      * @param resourceConfig webapp configuration
-     * @param resourceContext resource context
+     * @param description description of this resource
      */
-    public LDPResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ResourceConfig resourceConfig, @Context ResourceContext resourceContext)
+    public LDPResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ResourceConfig resourceConfig,
+            @Context Model description)
     {
-	super(uriInfo, request, resourceConfig, resourceContext);
+	super(uriInfo, request, resourceConfig, description);
     }
 
     /**
      * Protected constructor. Not suitable for JAX-RS but can be used when subclassing.
      * 
      * @param resource this resource as RDF resource
-     * @param endpoint SPARQL endpoint of this resource
      * @param request current request
      * @param resourceConfig resource config
+     * @param description description of this resource
      */
-    protected LDPResourceBase(Resource resource, SPARQLEndpoint endpoint, Request request, ResourceConfig resourceConfig)
+    protected LDPResourceBase(Resource resource, Request request, ResourceConfig resourceConfig,
+            Model description)
     {
-	super(resource, endpoint, request, resourceConfig);
+	super(resource, request, resourceConfig, description);
     }
 
     /**
