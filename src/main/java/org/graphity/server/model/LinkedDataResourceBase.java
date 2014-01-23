@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import javax.ws.rs.GET;
+import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
@@ -46,6 +47,7 @@ import org.slf4j.LoggerFactory;
  * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/rdf/model/Resource.html">Jena Resource</a>
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
+@Path("{path: .*}")
 public class LinkedDataResourceBase implements LinkedDataResource
 {
     private static final Logger log = LoggerFactory.getLogger(LinkedDataResourceBase.class);
@@ -61,11 +63,13 @@ public class LinkedDataResourceBase implements LinkedDataResource
      * @param uriInfo URI information of the 
      * @param request current request
      * @param resourceConfig webapp configuration
+     * @param description description of this resource
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html#getAbsolutePath()">JAX-RS UriInfo.getAbsolutePath()</a>
      */
-    public LinkedDataResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ResourceConfig resourceConfig)
+    public LinkedDataResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ResourceConfig resourceConfig,
+            @Context Model description)
     {
-	this(ResourceFactory.createResource(uriInfo.getAbsolutePath().toString()), request, resourceConfig);
+	this(description.createResource(uriInfo.getAbsolutePath().toString()), request, resourceConfig);
     }
     
     /**
@@ -100,14 +104,47 @@ public class LinkedDataResourceBase implements LinkedDataResource
     @Override
     public Response get()
     {
-	if (getModel().isEmpty())
-	{
-	    if (log.isTraceEnabled()) log.trace("DESCRIBE Model is empty; returning 404 Not Found");
-	    throw new WebApplicationException(Response.Status.NOT_FOUND);
-	}
-	
 	if (log.isDebugEnabled()) log.debug("Returning @GET Response with {} statements in Model", getModel().size());
 	return getResponse(getModel());
+    }
+
+    /**
+     * Handles POST method, stores the submitted RDF model in the SPARQL endpoint, and returns response.
+     * 
+     * @param model RDF payload
+     * @return response
+     */
+    @Override
+    public Response post(Model model)
+    {
+	if (log.isWarnEnabled()) log.warn("POST request with RDF payload: {}. Graphity Server is read-only!  Only GET is supported");
+	throw new WebApplicationException(405);
+    }
+
+    /**
+     * Handles PUT method, stores the submitted RDF model in the SPARQL endpoint, and returns response.
+     * 
+     * @param model RDF payload
+     * @return response
+     */
+    @Override
+    public Response put(Model model)
+    {
+	if (log.isWarnEnabled()) log.warn("PUT request with RDF payload: {}. Graphity Server is read-only!  Only GET is supported");
+	throw new WebApplicationException(405);
+    }
+
+    /**
+     * Handles DELETE method, deletes the RDF representation of this resource from the SPARQL endpoint, and
+     * returns response.
+     * 
+     * @return response
+     */
+    @Override
+    public Response delete()
+    {
+	if (log.isWarnEnabled()) log.warn("DELETE request with RDF payload: {}. Graphity Server is read-only! Only GET is supported");
+	throw new WebApplicationException(405);
     }
 
     /**

@@ -16,8 +16,12 @@
  */
 package org.graphity.server.model;
 
+import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.core.Response;
 
 /**
@@ -25,7 +29,6 @@ import javax.ws.rs.core.Response;
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-//@Produces({org.graphity.server.MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", org.graphity.server.MediaType.TEXT_TURTLE + "; charset=UTF-8"})
 public interface LinkedDataResource extends Resource
 {
 
@@ -37,5 +40,31 @@ public interface LinkedDataResource extends Resource
      * @see <a href="http://tools.ietf.org/html/draft-ietf-httpbis-p2-semantics-21#section-5.3.1">Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content 5.3.1. GET</a>
      */
     @GET Response get();
+
+    /**
+     * Handles POST methods with RDF request body and returns response
+     * 
+     * @param model the RDF payload
+     * @return response to current request
+     * @see <a href="http://tools.ietf.org/html/draft-ietf-httpbis-p2-semantics-21#section-5.3.3">Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content 5.3.3. POST</a>
+     */
+    @POST Response post(Model model);
+
+    /**
+     * Handles PUT methods with RDF request body and returns response
+     * 
+     * @param model the RDF payload
+     * @return response to current request
+     * @see <a href="http://tools.ietf.org/html/draft-ietf-httpbis-p2-semantics-21#section-5.3.4">Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content 5.3.4. PUT</a>
+     */
+    @PUT Response put(Model model);
+    
+    /**
+     * Handles DELETE methods
+     * 
+     * @return response to current request
+     * @see <a href="http://tools.ietf.org/html/draft-ietf-httpbis-p2-semantics-21#section-5.3.5">Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content 5.3.5. DELETE</a>
+     */
+    @DELETE Response delete();
 
 }

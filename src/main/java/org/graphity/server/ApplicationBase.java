@@ -24,7 +24,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
 import org.graphity.server.model.GraphStoreBase;
-import org.graphity.server.model.QueriedResourceBase;
+import org.graphity.server.model.LinkedDataResourceBase;
 import org.graphity.server.model.SPARQLEndpointBase;
 import org.graphity.server.provider.*;
 import org.slf4j.Logger;
@@ -54,7 +54,7 @@ public class ApplicationBase extends javax.ws.rs.core.Application
      */
     public ApplicationBase()
     {
-	classes.add(QueriedResourceBase.class); // handles all
+	classes.add(LinkedDataResourceBase.class); // handles all
 	classes.add(SPARQLEndpointBase.class); // handles /sparql queries
 	classes.add(GraphStoreBase.class); // handles /service requests
 

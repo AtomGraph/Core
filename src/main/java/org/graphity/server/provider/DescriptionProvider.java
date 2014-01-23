@@ -29,7 +29,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.ContextResolver;
-import org.graphity.server.model.QueriedResourceBase;
 import org.graphity.server.model.SPARQLEndpoint;
 import org.graphity.server.model.SPARQLEndpointBase;
 import org.slf4j.Logger;
