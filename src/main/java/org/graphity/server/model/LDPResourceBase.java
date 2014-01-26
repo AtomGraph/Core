@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * @see <a href="http://www.w3.org/TR/2013/WD-ldp-20130307/">Linked Data Platform 1.0</a>
  */
 @Path("{path: .*}")
-public class LDPResourceBase extends QueriedResourceBase implements LDPResource
+public class LDPResourceBase extends LinkedDataResourceBase implements LDPResource
 {    
     private static final Logger log = LoggerFactory.getLogger(LDPResourceBase.class);
 
@@ -48,20 +48,19 @@ public class LDPResourceBase extends QueriedResourceBase implements LDPResource
      */
     public LDPResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ResourceConfig resourceConfig, @Context ResourceContext resourceContext)
     {
-	super(uriInfo, request, resourceConfig, resourceContext);
+	super(uriInfo, request, resourceConfig);
     }
 
     /**
      * Protected constructor. Not suitable for JAX-RS but can be used when subclassing.
      * 
      * @param resource this resource as RDF resource
-     * @param endpoint SPARQL endpoint of this resource
      * @param request current request
      * @param resourceConfig resource config
      */
-    protected LDPResourceBase(Resource resource, SPARQLEndpoint endpoint, Request request, ResourceConfig resourceConfig)
+    protected LDPResourceBase(Resource resource, Request request, ResourceConfig resourceConfig)
     {
-	super(resource, endpoint, request, resourceConfig);
+	super(resource, request, resourceConfig);
     }
 
     /**
@@ -70,7 +69,6 @@ public class LDPResourceBase extends QueriedResourceBase implements LDPResource
      * @param model RDF payload
      * @return response
      */
-    @Override
     public Response post(Model model)
     {
 	if (log.isWarnEnabled()) log.warn("POST request with RDF payload: {}. Graphity Server is read-only!  Only GET is supported");
@@ -83,7 +81,6 @@ public class LDPResourceBase extends QueriedResourceBase implements LDPResource
      * @param model RDF payload
      * @return response
      */
-    @Override
     public Response put(Model model)
     {
 	if (log.isWarnEnabled()) log.warn("PUT request with RDF payload: {}. Graphity Server is read-only!  Only GET is supported");
@@ -96,7 +93,6 @@ public class LDPResourceBase extends QueriedResourceBase implements LDPResource
      * 
      * @return response
      */
-    @Override
     public Response delete()
     {
 	if (log.isWarnEnabled()) log.warn("DELETE request with RDF payload: {}. Graphity Server is read-only! Only GET is supported");
