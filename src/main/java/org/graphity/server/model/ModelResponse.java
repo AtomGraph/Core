@@ -18,17 +18,11 @@
 package org.graphity.server.model;
 
 import com.hp.hpl.jena.rdf.model.Model;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Variant;
-import org.apache.jena.atlas.web.ContentType;
-import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.RDFLanguages;
 import org.graphity.util.ModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
