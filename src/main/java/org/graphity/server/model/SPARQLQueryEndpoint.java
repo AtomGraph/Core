@@ -18,6 +18,7 @@ package org.graphity.server.model;
 
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.update.UpdateRequest;
 import java.net.URI;
 import javax.ws.rs.*;
 import org.graphity.server.MediaType;
@@ -32,7 +33,6 @@ import javax.ws.rs.core.Response;
  * @see <a href="http://www.w3.org/TR/sparql11-protocol/">SPARQL Protocol for RDF</a>
  */
 @Path("/sparql")
-//@Produces({MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", MediaType.TEXT_TURTLE + "; charset=UTF-8", org.graphity.server.MediaType.APPLICATION_SPARQL_RESULTS_XML + "; charset=UTF-8", MediaType.APPLICATION_SPARQL_RESULTS_JSON + "; charset=UTF-8"})
 public interface SPARQLQueryEndpoint extends Resource
 {
     /**
@@ -44,19 +44,21 @@ public interface SPARQLQueryEndpoint extends Resource
      * @return result response (in one of the representation variants)
      * @see <a href="http://www.w3.org/TR/sparql11-protocol/#query-via-get">2.1.1 query via GET</a>
      */
-    @GET Response query(@QueryParam("query") Query query, @QueryParam("default-graph-uri") URI defaultGraphUri, @QueryParam("named-graph-uri") URI graphUri);
+    @GET Response get(@QueryParam("query") Query query, @QueryParam("default-graph-uri") URI defaultGraphUri, @QueryParam("named-graph-uri") URI graphUri);
     
     /**
      * Handles encoded POST query request and returns result as response
      * 
      * @param query the submitted SPARQL query
+     * @param update update request (possibly multiple operations)
      * @param defaultGraphUri default graph URI
      * @param graphUri named graph URI
      * @return result response (in one of the representation variants)
      * @see <a href="http://www.w3.org/TR/sparql11-protocol/#query-via-post-urlencoded">2.1.2 query via POST with URL-encoded parameters</a>
      */
-    @POST @Consumes(MediaType.APPLICATION_FORM_URLENCODED) Response queryEncoded(@FormParam("query") Query query, @FormParam("default-graph-uri") URI defaultGraphUri, @FormParam("named-graph-uri") URI graphUri);
-    
+    //@POST @Consumes(MediaType.APPLICATION_FORM_URLENCODED) Response post(@FormParam("query") Query query, @FormParam("update") UpdateRequest update, @FormParam("default-graph-uri") URI defaultGraphUri, @FormParam("named-graph-uri") URI graphUri);
+    @POST @Consumes(MediaType.APPLICATION_FORM_URLENCODED) Response post(@FormParam("query") String queryString, @FormParam("update") String updateString, @FormParam("using-graph-uri") URI defaultGraphUri, @FormParam("using-named-graph-uri") URI graphUri);
+
     /**
      * Handles direct POST query request and returns result as response
      * 
@@ -66,6 +68,6 @@ public interface SPARQLQueryEndpoint extends Resource
      * @return result response (in one of the representation variants)
      * @see <a href="http://www.w3.org/TR/sparql11-protocol/#query-via-post-direct">2.1.3 query via POST directly</a>
      */
-    @POST @Consumes(MediaType.APPLICATION_SPARQL_QUERY) Response queryDirectly(Query query, @QueryParam("default-graph-uri") URI defaultGraphUri, @QueryParam("named-graph-uri") URI graphUri);
+    @POST @Consumes(MediaType.APPLICATION_SPARQL_QUERY) Response post(Query query, @QueryParam("default-graph-uri") URI defaultGraphUri, @QueryParam("named-graph-uri") URI graphUri);
    
 }

@@ -62,9 +62,7 @@ public class ApplicationBase extends javax.ws.rs.core.Application
 	singletons.add(new ModelProvider());
 	singletons.add(new ResultSetWriter());
 	singletons.add(new QueryParamProvider());
-	singletons.add(new QueryFormParamProvider());
 	singletons.add(new UpdateRequestReader());
-	singletons.add(new UpdateRequestFormParamProvider());
     }
 
     /**

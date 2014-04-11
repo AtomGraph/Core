@@ -61,6 +61,7 @@ public class QueryFormParamProvider extends PerRequestTypeInjectableProvider<For
 	    @Override
 	    public Query getValue()
 	    {
+                // request InputStream is empty at this point; as a result the value is always null :(
 		String value = getHttpContext().getRequest().getFormParameters().getFirst(paramName);
 		if (value == null || value.isEmpty()) return null;
 		    

@@ -19,10 +19,12 @@ package org.graphity.server.model;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.rdf.model.*;
 import com.hp.hpl.jena.sparql.engine.http.Service;
+import com.hp.hpl.jena.update.UpdateFactory;
 import com.hp.hpl.jena.update.UpdateRequest;
 import com.sun.jersey.api.core.ResourceConfig;
 import java.net.URI;
@@ -119,7 +121,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
      */
     @Override
     @GET
-    public Response query(@QueryParam("query") Query query,
+    public Response get(@QueryParam("query") Query query,
 	@QueryParam("default-graph-uri") URI defaultGraphUri, @QueryParam("named-graph-uri") URI graphUri)
     {
 	return getResponseBuilder(query).build();
@@ -135,13 +137,16 @@ public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
      * @return result response
      * @see org.graphity.server.provider.QueryFormParamProvider
      */
+    /*
     @Override
-    public Response queryEncoded(@FormParam("query") Query query,
+    @POST
+    public Response post(@FormParam("query") Query query,
 	@FormParam("default-graph-uri") URI defaultGraphUri, @FormParam("named-graph-uri") URI graphUri)
     {
-	return query(query, defaultGraphUri, graphUri);
+	return get(query, defaultGraphUri, graphUri);
     }
-
+    */
+    
     /**
      * Implements SPARQL 1.1 Protocol query direct POST method.
      * Query object is injected using a provider, which must be registered in the application.
@@ -153,17 +158,19 @@ public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
      */
     @Override
     @POST
-    public Response queryDirectly(Query query, @QueryParam("default-graph-uri") URI defaultGraphUri,
+    @Consumes(org.graphity.server.MediaType.APPLICATION_SPARQL_QUERY)
+    public Response post(Query query, @QueryParam("default-graph-uri") URI defaultGraphUri,
 	@QueryParam("named-graph-uri") URI graphUri)
     {
-	return query(query, defaultGraphUri, graphUri);
+	return get(query, defaultGraphUri, graphUri);
     }
-
+    
     /**
      * Implements SPARQL 1.1 Protocol update encoded POST method.
      * Update object is injected using a provider, which must be registered in the application.
      * 
-     * @param update SPARQL update (possibly multiple operations)
+     * @param queryString
+     * @param updateString SPARQL update (possibly multiple operations)
      * @param defaultGraphUri default graph URI
      * @param graphUri named graph URI
      * @return response with success or failure
@@ -171,6 +178,29 @@ public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
     @Override
     @POST
     @Consumes(org.graphity.server.MediaType.APPLICATION_FORM_URLENCODED)
+    /*
+    public Response post(@FormParam("query") Query query, @FormParam("update") UpdateRequest update,
+	@FormParam("using-graph-uri") URI defaultGraphUri,
+	@FormParam("using-named-graph-uri") URI graphUri)
+    */
+    public Response post(@FormParam("query") String queryString, @FormParam("update") String updateString,
+	@FormParam("using-graph-uri") URI defaultGraphUri,
+	@FormParam("using-named-graph-uri") URI graphUri)
+    {
+	try
+	{
+            if (queryString != null) return get(QueryFactory.create(queryString), defaultGraphUri, graphUri);
+            if (updateString != null) update(UpdateFactory.create(updateString));
+            
+	    return Response.ok().build();
+	}
+	catch (Exception ex)
+	{
+	    throw new WebApplicationException(ex);
+	}
+    }
+
+    /*
     public Response update(@FormParam("update") UpdateRequest update,
 	@FormParam("using-graph-uri") URI defaultGraphUri,
 	@FormParam("using-named-graph-uri") URI graphUri)
@@ -185,7 +215,8 @@ public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
 	    throw new WebApplicationException(ex);
 	}
     }
-
+    */
+    
     /**
      * Implements SPARQL 1.1 Protocol update direct POST method.
      * Update object is injected using a provider, which must be registered in the application.
@@ -198,10 +229,11 @@ public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
     @Override
     @POST
     @Consumes(org.graphity.server.MediaType.APPLICATION_SPARQL_UPDATE)
-    public Response updateDirectly(UpdateRequest update, @QueryParam("using-graph-uri") URI defaultGraphUri,
+    public Response post(UpdateRequest update, @QueryParam("using-graph-uri") URI defaultGraphUri,
 	@QueryParam("using-named-graph-uri") URI graphUri)
     {
-	return update(update, defaultGraphUri, graphUri);
+	//return post(null, update, defaultGraphUri, graphUri);
+        return null;
     }
 
     /**
