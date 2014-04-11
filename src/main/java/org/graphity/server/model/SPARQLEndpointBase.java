@@ -126,26 +126,6 @@ public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
     {
 	return getResponseBuilder(query).build();
     }
-
-    /**
-     * Implements SPARQL 1.1 Protocol query encoded POST method.
-     * Query object is injected using a provider, which must be registered in the application.
-     * 
-     * @param query SPARQL query
-     * @param defaultGraphUri default graph URI
-     * @param graphUri named graph URI
-     * @return result response
-     * @see org.graphity.server.provider.QueryFormParamProvider
-     */
-    /*
-    @Override
-    @POST
-    public Response post(@FormParam("query") Query query,
-	@FormParam("default-graph-uri") URI defaultGraphUri, @FormParam("named-graph-uri") URI graphUri)
-    {
-	return get(query, defaultGraphUri, graphUri);
-    }
-    */
     
     /**
      * Implements SPARQL 1.1 Protocol query direct POST method.
@@ -166,8 +146,8 @@ public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
     }
     
     /**
-     * Implements SPARQL 1.1 Protocol update encoded POST method.
-     * Update object is injected using a provider, which must be registered in the application.
+     * Implements SPARQL 1.1 Protocol encoded POST method.
+     * Query or update object are injected as form parameters.
      * 
      * @param queryString
      * @param updateString SPARQL update (possibly multiple operations)
@@ -178,44 +158,15 @@ public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
     @Override
     @POST
     @Consumes(org.graphity.server.MediaType.APPLICATION_FORM_URLENCODED)
-    /*
-    public Response post(@FormParam("query") Query query, @FormParam("update") UpdateRequest update,
-	@FormParam("using-graph-uri") URI defaultGraphUri,
-	@FormParam("using-named-graph-uri") URI graphUri)
-    */
     public Response post(@FormParam("query") String queryString, @FormParam("update") String updateString,
 	@FormParam("using-graph-uri") URI defaultGraphUri,
 	@FormParam("using-named-graph-uri") URI graphUri)
     {
-	try
-	{
-            if (queryString != null) return get(QueryFactory.create(queryString), defaultGraphUri, graphUri);
-            if (updateString != null) update(UpdateFactory.create(updateString));
-            
-	    return Response.ok().build();
-	}
-	catch (Exception ex)
-	{
-	    throw new WebApplicationException(ex);
-	}
-    }
+        if (queryString != null) return get(QueryFactory.create(queryString), defaultGraphUri, graphUri);
+        if (updateString != null) return post(UpdateFactory.create(updateString), defaultGraphUri, graphUri);
 
-    /*
-    public Response update(@FormParam("update") UpdateRequest update,
-	@FormParam("using-graph-uri") URI defaultGraphUri,
-	@FormParam("using-named-graph-uri") URI graphUri)
-    {
-	try
-	{
-	    update(update);
-	    return Response.ok().build();
-	}
-	catch (Exception ex)
-	{
-	    throw new WebApplicationException(ex);
-	}
+        throw new WebApplicationException(Response.Status.BAD_REQUEST);
     }
-    */
     
     /**
      * Implements SPARQL 1.1 Protocol update direct POST method.
@@ -232,8 +183,9 @@ public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
     public Response post(UpdateRequest update, @QueryParam("using-graph-uri") URI defaultGraphUri,
 	@QueryParam("using-named-graph-uri") URI graphUri)
     {
-	//return post(null, update, defaultGraphUri, graphUri);
-        return null;
+	update(update);
+
+        return Response.ok().build();
     }
 
     /**
@@ -456,7 +408,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
 	return resource;
     }
 
-   @Override
+    @Override
     public String getURI()
     {
 	return getResource().getURI();
