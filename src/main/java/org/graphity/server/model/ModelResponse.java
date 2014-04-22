@@ -22,6 +22,7 @@ import java.util.List;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Variant;
 import org.graphity.util.ModelUtils;
 import org.slf4j.Logger;
@@ -73,39 +74,37 @@ public class ModelResponse // extends ResponseBuilder
 	return getResponseBuilder(model).build();
     }
 
-    public Response.ResponseBuilder getResponseBuilder(Model model)
+    public ResponseBuilder getResponseBuilder(Model model)
     {
 	return getResponseBuilder(model, getVariants());
     }
     */
     
-    public Response.ResponseBuilder getResponseBuilder(Model model, List<Variant> variants)
+    public ResponseBuilder getResponseBuilder(Model model, List<Variant> variants)
     {
 	return getResponseBuilder(getEntityTag(model), model, variants);
     }
 
-    public Response.ResponseBuilder getResponseBuilder(EntityTag entityTag, Object entity, List<Variant> variants)
+    public ResponseBuilder getResponseBuilder(EntityTag entityTag, Object entity, List<Variant> variants)
     {	
-	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(entityTag);
+        Variant variant = getRequest().selectVariant(variants);
+        if (variant == null)
+        {
+            if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants: {}", variant, variants);
+            return Response.notAcceptable(variants);
+        }
+
+        ResponseBuilder rb = getRequest().evaluatePreconditions(entityTag);
 	if (rb != null)
 	{
 	    if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
-	    return rb;
+	    return rb.variant(variant); // Jersey doesn't seem to set "Vary" header
 	}
 	else
 	{
-	    Variant variant = getRequest().selectVariant(variants);
-	    if (variant == null)
-	    {
-		if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants: {}", variant, variants);
-		return Response.notAcceptable(variants);
-	    }	
-	    else
-	    {
-		if (log.isTraceEnabled()) log.trace("Generating RDF Response with Variant: {} and EntityTag: {}", variant, entityTag);
-		return Response.ok(entity, variant).
-			tag(entityTag);
-	    }
+            if (log.isTraceEnabled()) log.trace("Generating RDF Response with Variant: {} and EntityTag: {}", variant, entityTag);
+            return Response.ok(entity, variant).
+                    tag(entityTag);
 	}	
     }
 

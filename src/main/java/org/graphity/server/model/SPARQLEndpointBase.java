@@ -324,26 +324,24 @@ public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
     
     public ResponseBuilder getResponseBuilder(EntityTag entityTag, Object entity, List<Variant> variants)
     {	
-	Response.ResponseBuilder rb = getRequest().evaluatePreconditions(entityTag);
+        Variant variant = getRequest().selectVariant(variants);
+        if (variant == null)
+        {
+            if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants: {}", variant, variants);
+            return Response.notAcceptable(variants);
+        }
+
+        ResponseBuilder rb = getRequest().evaluatePreconditions(entityTag);
 	if (rb != null)
 	{
 	    if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
-	    return rb;
+	    return rb.variant(variant); // Jersey doesn't seem to set "Vary" header
 	}
 	else
 	{
-	    Variant variant = getRequest().selectVariant(variants);
-	    if (variant == null)
-	    {
-		if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants: {}", variant, variants);
-		return Response.notAcceptable(variants);
-	    }	
-	    else
-	    {
-		if (log.isTraceEnabled()) log.trace("Generating RDF Response with Variant: {} and EntityTag: {}", variant, entityTag);
-		return Response.ok(entity, variant).
-			tag(entityTag);
-	    }
+            if (log.isTraceEnabled()) log.trace("Generating RDF Response with Variant: {} and EntityTag: {}", variant, entityTag);
+            return Response.ok(entity, variant).
+                    tag(entityTag);
 	}	
     }
 
