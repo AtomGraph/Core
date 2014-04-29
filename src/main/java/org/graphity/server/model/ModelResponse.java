@@ -38,7 +38,6 @@ public class ModelResponse // extends ResponseBuilder
     private static final Logger log = LoggerFactory.getLogger(ModelResponse.class);
 
     private final Request request;
-    //private final ResponseBuilder responseBuilder;
     
     /**
      * Builds model response from request.
@@ -82,11 +81,6 @@ public class ModelResponse // extends ResponseBuilder
     
     public ResponseBuilder getResponseBuilder(Model model, List<Variant> variants)
     {
-	return getResponseBuilder(getEntityTag(model), model, variants);
-    }
-
-    public ResponseBuilder getResponseBuilder(EntityTag entityTag, Object entity, List<Variant> variants)
-    {	
         Variant variant = getRequest().selectVariant(variants);
         if (variant == null)
         {
@@ -94,6 +88,7 @@ public class ModelResponse // extends ResponseBuilder
             return Response.notAcceptable(variants);
         }
 
+        EntityTag entityTag = getEntityTag(model, variant);
         ResponseBuilder rb = getRequest().evaluatePreconditions(entityTag);
 	if (rb != null)
 	{
@@ -103,7 +98,7 @@ public class ModelResponse // extends ResponseBuilder
 	else
 	{
             if (log.isTraceEnabled()) log.trace("Generating RDF Response with Variant: {} and EntityTag: {}", variant, entityTag);
-            return Response.ok(entity, variant).
+            return Response.ok(model, variant).
                     tag(entityTag);
 	}	
     }
@@ -136,9 +131,14 @@ public class ModelResponse // extends ResponseBuilder
     }
     */
     
-    public EntityTag getEntityTag(Model model)
+    public long getModelVariantHash(Model model, Variant variant)
     {
-        return new EntityTag(Long.toHexString(ModelUtils.hashModel(model)));
+        return ModelUtils.hashModel(model) + variant.hashCode();
+    }
+    
+    public EntityTag getEntityTag(Model model, Variant variant)
+    {
+        return new EntityTag(Long.toHexString(getModelVariantHash(model, variant)));
     }
 
     /*
