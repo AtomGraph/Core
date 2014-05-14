@@ -59,30 +59,11 @@ import org.slf4j.LoggerFactory;
 
 public class DataManager extends FileManager
 {
-    //private static DataManager s_instance = null;
 
     private static final Logger log = LoggerFactory.getLogger(DataManager.class);
 
     private final Context context;
     private final ResourceConfig resourceConfig;
-
-    /**
-     * Returns global data manager
-     * 
-     * @return singleton instance
-     */
-    /*
-    public static DataManager get()
-    {
-        if (s_instance == null)
-        {
-            s_instance = new DataManager(FileManager.get(), ARQ.getContext());
-	    if (log.isDebugEnabled()) log.debug("new DataManager({}): {}", FileManager.get(), s_instance);
-        }
-        
-        return s_instance;
-    }
-    */
     
     /**
      * Creates data manager from file manager and SPARQL context.
