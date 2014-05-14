@@ -18,7 +18,7 @@
 package org.graphity.server.provider;
 
 import com.hp.hpl.jena.query.ARQ;
-import com.hp.hpl.jena.util.FileManager;
+import com.hp.hpl.jena.util.LocationMapper;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
@@ -73,12 +73,12 @@ public class DataManagerProvider extends PerRequestTypeInjectableProvider<Contex
 
     public DataManager getDataManager()
     {
-        return getDataManager(getResourceConfig());
+        return getDataManager(LocationMapper.get(), ARQ.getContext(), getResourceConfig());
     }
     
-    public DataManager getDataManager(ResourceConfig resourceConfig)
+    public DataManager getDataManager(LocationMapper mapper, com.hp.hpl.jena.sparql.util.Context context, ResourceConfig resourceConfig)
     {
-        return new DataManager(FileManager.get(), ARQ.getContext(), getResourceConfig());
+        return new DataManager(mapper, context, resourceConfig);
     }
     
 }

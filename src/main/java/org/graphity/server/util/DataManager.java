@@ -25,6 +25,7 @@ import com.hp.hpl.jena.sparql.util.Context;
 import com.hp.hpl.jena.update.UpdateExecutionFactory;
 import com.hp.hpl.jena.update.UpdateRequest;
 import com.hp.hpl.jena.util.FileManager;
+import com.hp.hpl.jena.util.LocationMapper;
 import com.sun.jersey.api.core.ResourceConfig;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -85,13 +86,13 @@ public class DataManager extends FileManager
     
     /**
      * Creates data manager from file manager and SPARQL context.
-     * @param fMgr file manager
+     * @param mapper location mapper
      * @param context SPARQL context
      * @param resourceConfig config of this webapp
      */
-    public DataManager(FileManager fMgr, Context context, ResourceConfig resourceConfig)
+    public DataManager(LocationMapper mapper, Context context, ResourceConfig resourceConfig)
     {
-	super(fMgr);
+	super(mapper);
 	this.context = context;
         this.resourceConfig = resourceConfig;
     }
