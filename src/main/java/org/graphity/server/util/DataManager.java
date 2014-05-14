@@ -19,11 +19,13 @@ package org.graphity.server.util;
 import com.hp.hpl.jena.query.*;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.sparql.engine.http.QueryEngineHTTP;
 import com.hp.hpl.jena.sparql.engine.http.Service;
 import com.hp.hpl.jena.sparql.util.Context;
 import com.hp.hpl.jena.update.UpdateExecutionFactory;
 import com.hp.hpl.jena.update.UpdateRequest;
 import com.hp.hpl.jena.util.FileManager;
+import com.sun.jersey.api.core.ResourceConfig;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -34,7 +36,7 @@ import org.apache.jena.atlas.web.auth.HttpAuthenticator;
 import org.apache.jena.atlas.web.auth.PreemptiveBasicAuthenticator;
 import org.apache.jena.atlas.web.auth.SimpleAuthenticator;
 import org.apache.jena.web.DatasetAdapter;
-import org.graphity.query.QueryEngineHTTP;
+import org.graphity.server.vocabulary.GS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,17 +58,19 @@ import org.slf4j.LoggerFactory;
 
 public class DataManager extends FileManager
 {
-    private static DataManager s_instance = null;
+    //private static DataManager s_instance = null;
 
     private static final Logger log = LoggerFactory.getLogger(DataManager.class);
 
     private final Context context;
+    private final ResourceConfig resourceConfig;
 
     /**
      * Returns global data manager
      * 
      * @return singleton instance
      */
+    /*
     public static DataManager get()
     {
         if (s_instance == null)
@@ -77,16 +81,19 @@ public class DataManager extends FileManager
         
         return s_instance;
     }
-
+    */
+    
     /**
      * Creates data manager from file manager and SPARQL context.
      * @param fMgr file manager
      * @param context SPARQL context
+     * @param resourceConfig config of this webapp
      */
-    public DataManager(FileManager fMgr, Context context)
+    public DataManager(FileManager fMgr, Context context, ResourceConfig resourceConfig)
     {
 	super(fMgr);
 	this.context = context;
+        this.resourceConfig = resourceConfig;
     }
 
     /**
@@ -102,7 +109,7 @@ public class DataManager extends FileManager
 	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, query);
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
 
-	QueryEngineHTTP request = new QueryEngineHTTP(endpointURI, query);
+	QueryEngineHTTP request = new QueryEngineHTTP(endpointURI, query, getHttpAuthenticator(endpointURI));
 	if (params != null)
 	    for (Entry<String, List<String>> entry : params.entrySet())
 		if (!entry.getKey().equals("query")) // query param is handled separately
@@ -367,11 +374,7 @@ public class DataManager extends FileManager
      */
     public void executeUpdateRequest(String endpointURI, UpdateRequest updateRequest)
     {
-	// UpdateExecutionFactory.createRemote(updateRequest, endpointURI);
-	// uses custom UpdateProcessRemote class with HTTP Basic authentication support
-	//UpdateProcessRemote updateProcess = new UpdateProcessRemote(updateRequest, endpointURI);	
-	//updateProcess.execute();
-        UpdateExecutionFactory.createRemote(updateRequest, endpointURI, getContext()).execute();
+        UpdateExecutionFactory.createRemote(updateRequest, endpointURI, getHttpAuthenticator(endpointURI)).execute();
     }
 
     /**
@@ -502,8 +505,7 @@ public class DataManager extends FileManager
     public DatasetAccessor getDatasetAccessor(String graphStoreURI)
     {
         HttpAuthenticator authenticator = getHttpAuthenticator(graphStoreURI);
-        //if (authenticator != null) return DatasetAccessorFactory.createHTTP(graphStoreURI, authenticator);
-        //else return DatasetAccessorFactory.createHTTP(graphStoreURI);
+
         if (authenticator != null) return new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI, authenticator));
         else return new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
     }
@@ -530,7 +532,7 @@ public class DataManager extends FileManager
      */
     public HttpAuthenticator getHttpAuthenticator(Context serviceContext)
     {
-        if (serviceContext == null) throw new IllegalArgumentException("Contect cannot be null");
+        if (serviceContext == null) throw new IllegalArgumentException("Context cannot be null");
 
         String usr = serviceContext.getAsString(Service.queryAuthUser);
         String pwd = serviceContext.getAsString(Service.queryAuthPwd);
@@ -540,8 +542,18 @@ public class DataManager extends FileManager
             usr = usr==null?"":usr;
             pwd = pwd==null?"":pwd;
 
-            if (log.isDebugEnabled()) log.debug("Creating HTTP authenticator for Context {} with username: {} ", serviceContext, usr);
-            return new PreemptiveBasicAuthenticator(new SimpleAuthenticator(usr, pwd.toCharArray()));
+            if (getResourceConfig() != null && getResourceConfig().getProperty(GS.preemptiveAuth.getURI()) != null)
+            {
+                boolean preemptive = Boolean.parseBoolean(getResourceConfig().getProperty(GS.preemptiveAuth.getURI()).toString());
+                if (preemptive)
+                {
+                    if (log.isDebugEnabled()) log.debug("Creating PreemptiveBasicAuthenticator for Context {} with username: {} ", serviceContext, usr);
+                    return new PreemptiveBasicAuthenticator(new SimpleAuthenticator(usr, pwd.toCharArray()));
+                }
+            }
+
+            if (log.isDebugEnabled()) log.debug("Creating SimpleAuthenticator for Context {} with username: {} ", serviceContext, usr);
+            return new SimpleAuthenticator(usr, pwd.toCharArray());
         }
 
         return null;
@@ -724,4 +736,9 @@ public class DataManager extends FileManager
         return putServiceContext(endpointURI, queryContext);
     }
 
+    public ResourceConfig getResourceConfig()
+    {
+        return resourceConfig;
+    }
+    
 }

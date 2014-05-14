@@ -27,7 +27,6 @@ import org.graphity.server.model.GraphStoreBase;
 import org.graphity.server.model.QueriedResourceBase;
 import org.graphity.server.model.SPARQLEndpointBase;
 import org.graphity.server.provider.*;
-import org.openjena.riot.SysRIOT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +62,7 @@ public class ApplicationBase extends javax.ws.rs.core.Application
 	singletons.add(new ResultSetWriter());
 	singletons.add(new QueryParamProvider());
 	singletons.add(new UpdateRequestReader());
+        singletons.add(new DataManagerProvider());
     }
 
     /**
@@ -79,7 +79,6 @@ public class ApplicationBase extends javax.ws.rs.core.Application
     public void init()
     {
 	if (log.isDebugEnabled()) log.debug("Application.init() with ResourceConfig: {} and SerlvetContext: {}", getResourceConfig(), getServletContext());
-	SysRIOT.wireIntoJena(); // enable RIOT parser
 	// WARNING! ontology caching can cause concurrency/consistency problems
 	OntDocumentManager.getInstance().setCacheModels(false);
     }

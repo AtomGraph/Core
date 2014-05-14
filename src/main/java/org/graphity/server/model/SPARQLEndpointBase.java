@@ -67,25 +67,27 @@ public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
 			add().build();
     
     private final Resource resource;
+    private final DataManager dataManager;
     private final Request request;
     private final ResourceConfig resourceConfig;
 
     /**
      * JAX-RS-compatible resource constructor with injected initialization objects.
      * 
+     * @param dataManager RDF data manager for this endpoint
      * @param uriInfo URI information of the request
      * @param request current request
      * @param resourceConfig webapp configuration
      * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/javax/ws/rs/core/Request.html">JAX-RS Request</a>
      * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceConfig.html">Jersey ResourceConfig</a>
      */
-    public SPARQLEndpointBase(@Context UriInfo uriInfo, @Context Request request, @Context ResourceConfig resourceConfig)
+    public SPARQLEndpointBase(@Context DataManager dataManager, @Context UriInfo uriInfo, @Context Request request, @Context ResourceConfig resourceConfig)
     {
 	this(ResourceFactory.createResource(uriInfo.getBaseUriBuilder().
                 path(SPARQLEndpointBase.class).
                 build().
                 toString()),
-            request, resourceConfig);
+            dataManager, request, resourceConfig);
     }
     
     /**
@@ -93,10 +95,11 @@ public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
      * Not suitable for JAX-RS but can be used when subclassing.
      * 
      * @param endpoint RDF resource of this endpoint (must be URI resource, not a blank node)
+     * @param dataManager
      * @param request current request
      * @param resourceConfig webapp configuration
      */
-    protected SPARQLEndpointBase(Resource endpoint, Request request, ResourceConfig resourceConfig)
+    protected SPARQLEndpointBase(Resource endpoint, DataManager dataManager, Request request, ResourceConfig resourceConfig)
     {
 	if (endpoint == null) throw new IllegalArgumentException("Endpoint cannot be null");
 	//if (!endpoint.isURIResource()) throw new IllegalArgumentException("Endpoint must be URI Resource (not a blank node)");
@@ -104,6 +107,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
 	if (resourceConfig == null) throw new IllegalArgumentException("ResourceConfig cannot be null");
 
 	this.resource = endpoint;
+        this.dataManager = dataManager;
 	this.request = request;
 	this.resourceConfig = resourceConfig;
 	if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase with endpoint: {}", endpoint);        
@@ -250,7 +254,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
             String authUser = (String)resourceConfig.getProperty(Service.queryAuthUser.getSymbol());
             String authPwd = (String)resourceConfig.getProperty(Service.queryAuthPwd.getSymbol());
             if (authUser != null && authPwd != null)
-                DataManager.get().putAuthContext(endpointUri.toString(), authUser, authPwd);
+                getDataManager().putAuthContext(endpointUri.toString(), authUser, authPwd);
 
             return ResourceFactory.createResource(endpointUri.toString());
         }
@@ -349,7 +353,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
     public Model loadModel(Query query)
     {
 	if (log.isDebugEnabled()) log.debug("Loading Model from SPARQL endpoint: {} using Query: {}", getOrigin(), query);
-	return DataManager.get().loadModel(getOrigin().getURI(), query);
+	return getDataManager().loadModel(getOrigin().getURI(), query);
     }
     
     @Override
@@ -373,7 +377,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
     public ResultSetRewindable loadResultSetRewindable(Query query)
     {
 	if (log.isDebugEnabled()) log.debug("Loading ResultSet from SPARQL endpoint: {} using Query: {}", getOrigin().getURI(), query);
-	return DataManager.get().loadResultSet(getOrigin().getURI(), query); // .getResultSetRewindable()
+	return getDataManager().loadResultSet(getOrigin().getURI(), query); // .getResultSetRewindable()
     }
 
     @Override
@@ -391,14 +395,29 @@ public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
         if (!query.isAskType()) throw new IllegalArgumentException("Query must be ASK");
         
-	return DataManager.get().ask(getOrigin().getURI(), query);
+	return getDataManager().ask(getOrigin().getURI(), query);
     }
 
     @Override
     public void update(UpdateRequest updateRequest)
     {
 	if (log.isDebugEnabled()) log.debug("Executing update on SPARQL endpoint: {} using UpdateRequest: {}", getOrigin(), updateRequest);
-	DataManager.get().executeUpdateRequest(getOrigin().getURI(), updateRequest);
+	getDataManager().executeUpdateRequest(getOrigin().getURI(), updateRequest);
+    }
+
+    public DataManager getDataManager()
+    {
+        return dataManager;
+    }
+
+    public Request getRequest()
+    {
+	return request;
+    }
+
+    public ResourceConfig getResourceConfig()
+    {
+	return resourceConfig;
     }
 
     private Resource getResource()
@@ -416,16 +435,6 @@ public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
     public Model getModel()
     {
 	return getResource().getModel();
-    }
-
-    public Request getRequest()
-    {
-	return request;
-    }
-
-    public ResourceConfig getResourceConfig()
-    {
-	return resourceConfig;
     }
 
     @Override

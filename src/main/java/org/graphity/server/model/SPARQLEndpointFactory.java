@@ -17,10 +17,10 @@
 package org.graphity.server.model;
 
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.sun.jersey.api.core.ResourceConfig;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
+import org.graphity.server.util.DataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,42 +36,30 @@ public class SPARQLEndpointFactory
     /**
      * Creates new SPARQL endpoint from application configuration and request metadata.
      * 
+     * @param dataManager RDF data manager for this endpoint
      * @param uriInfo URI information of the request
      * @param request request
      * @param resourceConfig webapp configuration
      * @return a new endpoint
      */
-    public static SPARQLEndpoint createEndpoint(UriInfo uriInfo, Request request, ResourceConfig resourceConfig)
+    public static SPARQLEndpoint createEndpoint(DataManager dataManager, UriInfo uriInfo, Request request, ResourceConfig resourceConfig)
     {
-	return new SPARQLEndpointBase(uriInfo, request, resourceConfig);
+	return new SPARQLEndpointBase(dataManager, uriInfo, request, resourceConfig);
     }
     
     /**
      * Creates new SPARQL endpoint from explicit URI resource and request metadata.
      * 
      * @param endpoint endpoint resource
+     * @param dataManager RDF data manager for this endpoint
      * @param request request
      * @param resourceConfig webapp configuration
      * @return a new endpoint
      */
-    public static SPARQLEndpoint createEndpoint(Resource endpoint, Request request, ResourceConfig resourceConfig)
+    public static SPARQLEndpoint createEndpoint(Resource endpoint, DataManager dataManager,
+            Request request, ResourceConfig resourceConfig)
     {
-	return new SPARQLEndpointBase(endpoint, request, resourceConfig);
+	return new SPARQLEndpointBase(endpoint, dataManager, request, resourceConfig);
     }
-
-    /**
-     * Creates new SPARQL endpoint from explicit URI string and request metadata.
-     * 
-     * @param endpointURI endpoint URI
-     * @param request request
-     * @param resourceConfig webapp configuration
-     * @return a new endpoint
-     */
-    /*
-    public static SPARQLEndpoint createEndpoint(String endpointURI, Request request, ResourceConfig resourceConfig)
-    {
-	return new SPARQLEndpointBase(ResourceFactory.createResource(endpointURI), request, resourceConfig);
-    }
-    */
 
 }

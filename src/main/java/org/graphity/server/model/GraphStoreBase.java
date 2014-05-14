@@ -49,19 +49,20 @@ public class GraphStoreBase implements GraphStore, HTTPProxy
     private static final Logger log = LoggerFactory.getLogger(GraphStoreBase.class);
 
     private final Resource resource;
+    private final DataManager dataManager;
     private final Request request;
     private final ResourceConfig resourceConfig;
 
-    public GraphStoreBase(@Context UriInfo uriInfo, @Context Request request, @Context ResourceConfig resourceConfig)
+    public GraphStoreBase(@Context DataManager dataManager, @Context UriInfo uriInfo, @Context Request request, @Context ResourceConfig resourceConfig)
     {
 	this(ResourceFactory.createResource(uriInfo.getBaseUriBuilder().
                 path(GraphStoreBase.class).
                 build().
                 toString()),
-	    request, resourceConfig);
+	    dataManager, request, resourceConfig);
     }
 
-    protected GraphStoreBase(Resource graphStore, Request request, ResourceConfig resourceConfig)
+    protected GraphStoreBase(Resource graphStore, DataManager dataManager, Request request, ResourceConfig resourceConfig)
     {
 	if (graphStore == null) throw new IllegalArgumentException("Graph store Resource cannot be null");
 	if (!graphStore.isURIResource()) throw new IllegalArgumentException("Graph store Resource must be URI Resource (not a blank node)");
@@ -69,6 +70,7 @@ public class GraphStoreBase implements GraphStore, HTTPProxy
 	if (resourceConfig == null) throw new IllegalArgumentException("ResourceConfig cannot be null");
 	
 	this.resource = graphStore;
+        this.dataManager = dataManager;
 	this.request = request;
         this.resourceConfig = resourceConfig;
     }
@@ -146,7 +148,7 @@ public class GraphStoreBase implements GraphStore, HTTPProxy
             String authUser = (String)resourceConfig.getProperty(Service.queryAuthUser.getSymbol());
             String authPwd = (String)resourceConfig.getProperty(Service.queryAuthPwd.getSymbol());
             if (authUser != null && authPwd != null)
-                DataManager.get().putAuthContext(storeUri.toString(), authUser, authPwd);
+                getDataManager().putAuthContext(storeUri.toString(), authUser, authPwd);
 
             return ResourceFactory.createResource(storeUri.toString());
         }
@@ -266,6 +268,21 @@ public class GraphStoreBase implements GraphStore, HTTPProxy
 	}
     }
 
+    public DataManager getDataManager()
+    {
+        return dataManager;
+    }
+
+    public Request getRequest()
+    {
+	return request;
+    }
+
+    public ResourceConfig getResourceConfig()
+    {
+        return resourceConfig;
+    }
+
     public Resource getResource()
     {
 	return resource;
@@ -281,16 +298,6 @@ public class GraphStoreBase implements GraphStore, HTTPProxy
     public Model getModel()
     {
 	return getResource().getModel();
-    }
-
-    public Request getRequest()
-    {
-	return request;
-    }
-
-    public ResourceConfig getResourceConfig()
-    {
-        return resourceConfig;
     }
 
     @Override
@@ -578,49 +585,49 @@ public class GraphStoreBase implements GraphStore, HTTPProxy
     @Override
     public Model getModel(String uri)
     {
-        return DataManager.get().getModel(getOrigin().getURI(), uri);
+        return getDataManager().getModel(getOrigin().getURI(), uri);
     }
 
     @Override
     public boolean containsModel(String uri)
     {
-        return DataManager.get().containsModel(getOrigin().getURI(), uri);
+        return getDataManager().containsModel(getOrigin().getURI(), uri);
     }
 
     @Override
     public void putModel(Model model)
     {
-        DataManager.get().putModel(getOrigin().getURI(), model);
+        getDataManager().putModel(getOrigin().getURI(), model);
     }
 
     @Override
     public void putModel(String uri, Model model)
     {
-        DataManager.get().putModel(getOrigin().getURI(), uri, model);
+        getDataManager().putModel(getOrigin().getURI(), uri, model);
     }
 
     @Override
     public void deleteDefault()
     {
-        DataManager.get().deleteDefault(getOrigin().getURI());
+        getDataManager().deleteDefault(getOrigin().getURI());
     }
 
     @Override
     public void deleteModel(String uri)
     {
-        DataManager.get().deleteModel(getOrigin().getURI(), uri);
+        getDataManager().deleteModel(getOrigin().getURI(), uri);
     }
 
     @Override
     public void add(Model model)
     {
-        DataManager.get().addModel(getOrigin().getURI(), model);
+        getDataManager().addModel(getOrigin().getURI(), model);
     }
 
     @Override
     public void add(String uri, Model model)
     {
-        DataManager.get().addModel(getOrigin().getURI(), uri, model);
+        getDataManager().addModel(getOrigin().getURI(), uri, model);
     }
     
 }

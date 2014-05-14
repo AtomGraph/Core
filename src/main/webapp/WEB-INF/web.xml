@@ -15,14 +15,13 @@
         </init-param>
         <init-param>
             <param-name>http://server.graphity.org/ontology#endpoint</param-name>
-            <param-value>http://dydra.com/graphity/server/sparql</param-value>
+            <param-value>http://graphity.dydra.com/graphity/server/sparql</param-value>
         </init-param>
         <init-param>
             <param-name>http://server.graphity.org/ontology#graphStore</param-name>
-            <param-value>http://dydra.com/graphity/server/service</param-value>
+            <param-value>http://graphity.dydra.com/graphity/server/service</param-value>
         </init-param>
-        <!--
-	<init-param>
+        <init-param>
             <param-name>http://jena.hpl.hp.com/Service#queryAuthUser</param-name>
             <param-value>username</param-value>
         </init-param>
@@ -30,7 +29,10 @@
             <param-name>http://jena.hpl.hp.com/Service#queryAuthPwd</param-name>
             <param-value>password</param-value>
         </init-param>
-        -->
+        <init-param>
+            <param-name>http://server.graphity.org/ontology#preemptiveAuth</param-name>
+            <param-value>true</param-value>
+        </init-param>
         <init-param>
             <param-name>http://server.graphity.org/ontology#cacheControl</param-name>
             <param-value>no-cache</param-value>

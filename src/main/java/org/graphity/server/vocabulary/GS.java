@@ -55,4 +55,6 @@ public class GS
 
     public static final DatatypeProperty resultLimit = m_model.createDatatypeProperty( NS + "resultLimit" );
 
+    public static final DatatypeProperty preemptiveAuth = m_model.createDatatypeProperty( NS + "preemptiveAuth" );
+
 }
