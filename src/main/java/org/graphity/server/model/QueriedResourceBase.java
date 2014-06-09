@@ -23,6 +23,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.api.core.ResourceContext;
+import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
@@ -53,16 +54,16 @@ public class QueriedResourceBase extends LDPResourceBase implements QueriedResou
      * 
      * @param uriInfo URI information of the request
      * @param request current request
-     * @param resourceConfig webapp configuration
+     * @param servletContext webapp context
      * @param resourceContext resource context
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html">JAX-RS UriInfo</a>
-     * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceConfig.html">Jersey ResourceConfig</a>
+     * @see <a href="http://docs.oracle.com/javaee/7/api/javax/servlet/ServletContext.html">ServletContext</a>
      * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceContext.html">Jersey ResourceContext</a>
      */
-    public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ResourceConfig resourceConfig, @Context ResourceContext resourceContext)
+    public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletContext servletContext, @Context ResourceContext resourceContext)
     {
 	this(ResourceFactory.createResource(uriInfo.getAbsolutePath().toString()),
-		resourceContext.getResource(SPARQLEndpointBase.class), request, resourceConfig);
+		resourceContext.getResource(SPARQLEndpointBase.class), request, servletContext);
     }
 
     /**
@@ -71,11 +72,11 @@ public class QueriedResourceBase extends LDPResourceBase implements QueriedResou
      * @param resource This resource as RDF resource (must be URI resource, not a blank node)
      * @param request current request
      * @param endpoint SPARQL endpoint of this resource
-     * @param resourceConfig Resource config
+     * @param servletContext webapp context
      */
-    protected QueriedResourceBase(Resource resource, SPARQLEndpoint endpoint, Request request, ResourceConfig resourceConfig)
+    protected QueriedResourceBase(Resource resource, SPARQLEndpoint endpoint, Request request, ServletContext servletContext)
     {
-	super(resource, request, resourceConfig);
+	super(resource, request, servletContext);
 	if (endpoint == null) throw new IllegalArgumentException("SPARQL endpoint cannot be null");
 	this.endpoint = endpoint;
     }

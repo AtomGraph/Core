@@ -18,7 +18,7 @@
 package org.graphity.server.model;
 
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.sun.jersey.api.core.ResourceConfig;
+import javax.servlet.ServletContext;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
 import org.graphity.server.util.DataManager;
@@ -37,12 +37,12 @@ public class GraphStoreFactory
      * @param dataManager RDF data manager for this graph store
      * @param uriInfo URI information of the request
      * @param request current request
-     * @param resourceConfig webapp configuration
+     * @param servletContext webapp context
      * @return graph store instance
      */
-    public static GraphStore createGraphStore(DataManager dataManager, UriInfo uriInfo, Request request, ResourceConfig resourceConfig)
+    public static GraphStore createGraphStore(DataManager dataManager, UriInfo uriInfo, Request request, ServletContext servletContext)
     {
-	return new GraphStoreBase(dataManager, uriInfo, request, resourceConfig);
+	return new GraphStoreBase(dataManager, uriInfo, request, servletContext);
     }
     
     /**
@@ -51,13 +51,13 @@ public class GraphStoreFactory
      * @param graphStore remote graph store resource
      * @param dataManager RDF data manager for this graph store
      * @param request current request
-     * @param resourceConfig webapp configuration
+     * @param servletContext webapp context
      * @return graph store instance
      */
     public static GraphStore createGraphStore(Resource graphStore, DataManager dataManager,
-            Request request, ResourceConfig resourceConfig)
+            Request request, ServletContext servletContext)
     {
-	return new GraphStoreBase(graphStore, dataManager, request, resourceConfig);
+	return new GraphStoreBase(graphStore, dataManager, request, servletContext);
     }
 
 }

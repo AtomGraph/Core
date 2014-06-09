@@ -26,12 +26,12 @@ import com.hp.hpl.jena.rdf.model.*;
 import com.hp.hpl.jena.sparql.engine.http.Service;
 import com.hp.hpl.jena.update.UpdateFactory;
 import com.hp.hpl.jena.update.UpdateRequest;
-import com.sun.jersey.api.core.ResourceConfig;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import javax.naming.ConfigurationException;
+import javax.servlet.ServletContext;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.*;
@@ -69,7 +69,7 @@ public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
     private final Resource resource;
     private final DataManager dataManager;
     private final Request request;
-    private final ResourceConfig resourceConfig;
+    private final ServletContext servletContext;
 
     /**
      * JAX-RS-compatible resource constructor with injected initialization objects.
@@ -77,17 +77,17 @@ public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
      * @param dataManager RDF data manager for this endpoint
      * @param uriInfo URI information of the request
      * @param request current request
-     * @param resourceConfig webapp configuration
+     * @param servletContext webapp context
      * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/javax/ws/rs/core/Request.html">JAX-RS Request</a>
-     * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceConfig.html">Jersey ResourceConfig</a>
+     * @see <a href="http://docs.oracle.com/javaee/7/api/javax/servlet/ServletContext.html">ServletContext</a>
      */
-    public SPARQLEndpointBase(@Context DataManager dataManager, @Context UriInfo uriInfo, @Context Request request, @Context ResourceConfig resourceConfig)
+    public SPARQLEndpointBase(@Context DataManager dataManager, @Context UriInfo uriInfo, @Context Request request, @Context ServletContext servletContext)
     {
 	this(ResourceFactory.createResource(uriInfo.getBaseUriBuilder().
                 path(SPARQLEndpointBase.class).
                 build().
                 toString()),
-            dataManager, request, resourceConfig);
+            dataManager, request, servletContext);
     }
     
     /**
@@ -95,21 +95,21 @@ public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
      * Not suitable for JAX-RS but can be used when subclassing.
      * 
      * @param endpoint RDF resource of this endpoint (must be URI resource, not a blank node)
-     * @param dataManager
+     * @param dataManager data manager
      * @param request current request
-     * @param resourceConfig webapp configuration
+     * @param servletContext webapp context
      */
-    protected SPARQLEndpointBase(Resource endpoint, DataManager dataManager, Request request, ResourceConfig resourceConfig)
+    protected SPARQLEndpointBase(Resource endpoint, DataManager dataManager, Request request, ServletContext servletContext)
     {
 	if (endpoint == null) throw new IllegalArgumentException("Endpoint cannot be null");
 	//if (!endpoint.isURIResource()) throw new IllegalArgumentException("Endpoint must be URI Resource (not a blank node)");
 	if (request == null) throw new IllegalArgumentException("Request cannot be null");
-	if (resourceConfig == null) throw new IllegalArgumentException("ResourceConfig cannot be null");
+	if (servletContext == null) throw new IllegalArgumentException("ServletContext cannot be null");
 
 	this.resource = endpoint;
         this.dataManager = dataManager;
 	this.request = request;
-	this.resourceConfig = resourceConfig;
+	this.servletContext = servletContext;
 	if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase with endpoint: {}", endpoint);        
     }
 
@@ -207,8 +207,8 @@ public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
         if (query.isSelectType())
         {
             if (log.isDebugEnabled()) log.debug("SPARQL endpoint executing SELECT query: {}", query);
-            if (getResourceConfig().getProperty(GS.resultLimit.getURI()) != null)
-                query.setLimit(Long.parseLong(getResourceConfig().getProperty(GS.resultLimit.getURI()).toString()));
+            if (getServletContext().getInitParameter(GS.resultLimit.getURI()) != null)
+                query.setLimit(Long.parseLong(getServletContext().getInitParameter(GS.resultLimit.getURI()).toString()));
 
             return getResponseBuilder(loadResultSetRewindable(query));
         }
@@ -232,27 +232,27 @@ public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
     @Override
     public Resource getOrigin()
     {
-        return getOrigin(getResourceConfig());
+        return getOrigin(getServletContext());
     }
 
     /**
-     * Returns SPARQL endpoint resource for supplied webapp configuration.
-     * Uses <code>gs:endpoint</code> parameter value from web.xml as endpoint URI.
+     * Returns SPARQL endpoint resource for supplied webapp context configuration.
+     * Uses <code>gs:endpoint</code> context parameter value as endpoint URI.
      * 
-     * @param resourceConfig webapp config
+     * @param servletContext context config
      * @return endpoint resource
      */
-    public Resource getOrigin(ResourceConfig resourceConfig)
+    public Resource getOrigin(ServletContext servletContext)
     {
-        if (resourceConfig == null) throw new IllegalArgumentException("ResourceConfig cannot be null");
+        if (servletContext == null) throw new IllegalArgumentException("ServletContext cannot be null");
 
         try
         {
-            Object endpointUri = resourceConfig.getProperty(GS.endpoint.getURI());
+            Object endpointUri = servletContext.getInitParameter(GS.endpoint.getURI());
             if (endpointUri == null) throw new ConfigurationException("SPARQL endpoint not configured (gs:endpoint not set in web.xml)");
 
-            String authUser = (String)resourceConfig.getProperty(Service.queryAuthUser.getSymbol());
-            String authPwd = (String)resourceConfig.getProperty(Service.queryAuthPwd.getSymbol());
+            String authUser = (String)servletContext.getInitParameter(Service.queryAuthUser.getSymbol());
+            String authPwd = (String)servletContext.getInitParameter(Service.queryAuthPwd.getSymbol());
             if (authUser != null && authPwd != null)
                 getDataManager().putAuthContext(endpointUri.toString(), authUser, authPwd);
 
@@ -415,9 +415,9 @@ public class SPARQLEndpointBase implements SPARQLEndpoint, HTTPProxy
 	return request;
     }
 
-    public ResourceConfig getResourceConfig()
+    public ServletContext getServletContext()
     {
-	return resourceConfig;
+	return servletContext;
     }
 
     private Resource getResource()

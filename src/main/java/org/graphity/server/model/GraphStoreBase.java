@@ -20,12 +20,12 @@ import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.*;
 import com.hp.hpl.jena.sparql.engine.http.Service;
-import com.sun.jersey.api.core.ResourceConfig;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import javax.naming.ConfigurationException;
+import javax.servlet.ServletContext;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
@@ -51,28 +51,28 @@ public class GraphStoreBase implements GraphStore, HTTPProxy
     private final Resource resource;
     private final DataManager dataManager;
     private final Request request;
-    private final ResourceConfig resourceConfig;
+    private final ServletContext servletContext;
 
-    public GraphStoreBase(@Context DataManager dataManager, @Context UriInfo uriInfo, @Context Request request, @Context ResourceConfig resourceConfig)
+    public GraphStoreBase(@Context DataManager dataManager, @Context UriInfo uriInfo, @Context Request request, @Context ServletContext servletContext)
     {
 	this(ResourceFactory.createResource(uriInfo.getBaseUriBuilder().
                 path(GraphStoreBase.class).
                 build().
                 toString()),
-	    dataManager, request, resourceConfig);
+	    dataManager, request, servletContext);
     }
 
-    protected GraphStoreBase(Resource graphStore, DataManager dataManager, Request request, ResourceConfig resourceConfig)
+    protected GraphStoreBase(Resource graphStore, DataManager dataManager, Request request, ServletContext servletContext)
     {
 	if (graphStore == null) throw new IllegalArgumentException("Graph store Resource cannot be null");
 	if (!graphStore.isURIResource()) throw new IllegalArgumentException("Graph store Resource must be URI Resource (not a blank node)");
 	if (request == null) throw new IllegalArgumentException("Request cannot be null");
-	if (resourceConfig == null) throw new IllegalArgumentException("ResourceConfig cannot be null");
+	if (servletContext == null) throw new IllegalArgumentException("ServletContext cannot be null");
 	
 	this.resource = graphStore;
         this.dataManager = dataManager;
 	this.request = request;
-        this.resourceConfig = resourceConfig;
+        this.servletContext = servletContext;
     }
 
     /**
@@ -128,25 +128,25 @@ public class GraphStoreBase implements GraphStore, HTTPProxy
     @Override
     public Resource getOrigin()
     {
-        return getOrigin(getResourceConfig());
+        return getOrigin(getServletContext());
     }
 
      /**
-     * Returns Graph Store for supplied webapp configuration.
-     * Uses <code>gs:graphStore</code> parameter value from web.xml as graph store URI.
+     * Returns Graph Store for supplied webapp context configuration.
+     * Uses <code>gs:graphStore</code> context parameter value from web.xml as graph store URI.
      * 
-     * @param resourceConfig webapp config
+     * @param servletContext webapp context
      * @return graph store resource
      */
-    public Resource getOrigin(ResourceConfig resourceConfig)
+    public Resource getOrigin(ServletContext servletContext)
     {
         try
         {
-            Object storeUri = resourceConfig.getProperty(GS.graphStore.getURI());
+            Object storeUri = servletContext.getInitParameter(GS.graphStore.getURI());
             if (storeUri == null) throw new ConfigurationException("Graph Store not configured (gs:graphStore not set in web.xml)");
 
-            String authUser = (String)resourceConfig.getProperty(Service.queryAuthUser.getSymbol());
-            String authPwd = (String)resourceConfig.getProperty(Service.queryAuthPwd.getSymbol());
+            String authUser = (String)servletContext.getInitParameter(Service.queryAuthUser.getSymbol());
+            String authPwd = (String)servletContext.getInitParameter(Service.queryAuthPwd.getSymbol());
             if (authUser != null && authPwd != null)
                 getDataManager().putAuthContext(storeUri.toString(), authUser, authPwd);
 
@@ -278,9 +278,9 @@ public class GraphStoreBase implements GraphStore, HTTPProxy
 	return request;
     }
 
-    public ResourceConfig getResourceConfig()
+    public ServletContext getServletContext()
     {
-        return resourceConfig;
+        return servletContext;
     }
 
     public Resource getResource()

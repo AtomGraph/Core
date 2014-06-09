@@ -26,12 +26,12 @@ import com.hp.hpl.jena.update.UpdateExecutionFactory;
 import com.hp.hpl.jena.update.UpdateRequest;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.util.LocationMapper;
-import com.sun.jersey.api.core.ResourceConfig;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import javax.servlet.ServletContext;
 import javax.ws.rs.core.MultivaluedMap;
 import org.apache.jena.atlas.web.auth.HttpAuthenticator;
 import org.apache.jena.atlas.web.auth.PreemptiveBasicAuthenticator;
@@ -63,19 +63,19 @@ public class DataManager extends FileManager
     private static final Logger log = LoggerFactory.getLogger(DataManager.class);
 
     private final Context context;
-    private final ResourceConfig resourceConfig;
+    private final ServletContext servletContext;
     
     /**
      * Creates data manager from file manager and SPARQL context.
      * @param mapper location mapper
      * @param context SPARQL context
-     * @param resourceConfig config of this webapp
+     * @param servletContext webapp context
      */
-    public DataManager(LocationMapper mapper, Context context, ResourceConfig resourceConfig)
+    public DataManager(LocationMapper mapper, Context context, ServletContext servletContext)
     {
 	super(mapper);
 	this.context = context;
-        this.resourceConfig = resourceConfig;
+        this.servletContext = servletContext;
     }
 
     /**
@@ -524,9 +524,9 @@ public class DataManager extends FileManager
             usr = usr==null?"":usr;
             pwd = pwd==null?"":pwd;
 
-            if (getResourceConfig() != null && getResourceConfig().getProperty(GS.preemptiveAuth.getURI()) != null)
+            if (getServletContext() != null && getServletContext().getInitParameter(GS.preemptiveAuth.getURI()) != null)
             {
-                boolean preemptive = Boolean.parseBoolean(getResourceConfig().getProperty(GS.preemptiveAuth.getURI()).toString());
+                boolean preemptive = Boolean.parseBoolean(getServletContext().getInitParameter(GS.preemptiveAuth.getURI()).toString());
                 if (preemptive)
                 {
                     if (log.isDebugEnabled()) log.debug("Creating PreemptiveBasicAuthenticator for Context {} with username: {} ", serviceContext, usr);
@@ -718,9 +718,9 @@ public class DataManager extends FileManager
         return putServiceContext(endpointURI, queryContext);
     }
 
-    public ResourceConfig getResourceConfig()
+    public ServletContext getServletContext()
     {
-        return resourceConfig;
+        return servletContext;
     }
     
 }

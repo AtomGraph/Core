@@ -18,7 +18,7 @@
 package org.graphity.server.model;
 
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.sun.jersey.api.core.ResourceConfig;
+import javax.servlet.ServletContext;
 import javax.ws.rs.core.Request;
 
 /**
@@ -46,12 +46,12 @@ public class LinkedDataResourceFactory
      * 
      * @param resource RDF resource
      * @param request request object
-     * @param resourceConfig resource config
+     * @param servletContext webapp context
      * @return a new resource
      */
-    public static LinkedDataResource createResource(Resource resource, Request request, ResourceConfig resourceConfig)
+    public static LinkedDataResource createResource(Resource resource, Request request, ServletContext servletContext)
     {
-	return new LinkedDataResourceBase(resource, request, resourceConfig);
+	return new LinkedDataResourceBase(resource, request, servletContext);
     }
 
 }

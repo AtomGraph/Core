@@ -18,8 +18,8 @@ package org.graphity.server.model;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.api.core.ResourceContext;
+import javax.servlet.ServletContext;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import org.slf4j.Logger;
@@ -43,12 +43,12 @@ public class LDPResourceBase extends LinkedDataResourceBase implements LDPResour
      * 
      * @param uriInfo URI information of the request
      * @param request current request
-     * @param resourceConfig webapp configuration
+     * @param servletContext webapp context
      * @param resourceContext resource context
      */
-    public LDPResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ResourceConfig resourceConfig, @Context ResourceContext resourceContext)
+    public LDPResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletContext servletContext, @Context ResourceContext resourceContext)
     {
-	super(uriInfo, request, resourceConfig);
+	super(uriInfo, request, servletContext);
     }
 
     /**
@@ -56,11 +56,11 @@ public class LDPResourceBase extends LinkedDataResourceBase implements LDPResour
      * 
      * @param resource this resource as RDF resource
      * @param request current request
-     * @param resourceConfig resource config
+     * @param servletContext webapp context
      */
-    protected LDPResourceBase(Resource resource, Request request, ResourceConfig resourceConfig)
+    protected LDPResourceBase(Resource resource, Request request, ServletContext servletContext)
     {
-	super(resource, request, resourceConfig);
+	super(resource, request, servletContext);
     }
 
     /**

@@ -17,7 +17,6 @@
 package org.graphity.server;
 
 import com.hp.hpl.jena.ontology.OntDocumentManager;
-import com.sun.jersey.api.core.ResourceConfig;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.PostConstruct;
@@ -41,7 +40,6 @@ import org.slf4j.LoggerFactory;
  */
 public class ApplicationBase extends javax.ws.rs.core.Application
 {
-    @Context ResourceConfig resourceConfig;
     @Context ServletContext servletContext;
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationBase.class);
@@ -78,7 +76,7 @@ public class ApplicationBase extends javax.ws.rs.core.Application
     @PostConstruct
     public void init()
     {
-	if (log.isDebugEnabled()) log.debug("Application.init() with ResourceConfig: {} and SerlvetContext: {}", getResourceConfig(), getServletContext());
+	if (log.isDebugEnabled()) log.debug("Application.init() with SerlvetContext: {}", getServletContext());
 	// WARNING! ontology caching can cause concurrency/consistency problems
 	OntDocumentManager.getInstance().setCacheModels(false);
     }
@@ -107,16 +105,6 @@ public class ApplicationBase extends javax.ws.rs.core.Application
     public Set<Object> getSingletons()
     {
 	return singletons;
-    }
-
-    /**
-     * Returns resource configuration
-     * 
-     * @return injected ResourceConfig
-     */
-    public ResourceConfig getResourceConfig()
-    {
-	return resourceConfig;
     }
 
     /**

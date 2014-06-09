@@ -19,10 +19,10 @@ package org.graphity.server.model;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.*;
-import com.sun.jersey.api.core.ResourceConfig;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
@@ -52,7 +52,7 @@ public class LinkedDataResourceBase implements LinkedDataResource
 
     private final Resource resource;
     private final Request request;
-    private final ResourceConfig resourceConfig;
+    private final ServletContext servletContext;
 
     /** 
      * JAX-RS-compatible resource constructor with injected initialization objects.
@@ -60,12 +60,12 @@ public class LinkedDataResourceBase implements LinkedDataResource
      * 
      * @param uriInfo URI information of the 
      * @param request current request
-     * @param resourceConfig webapp configuration
+     * @param servletContext webapp context
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html#getAbsolutePath()">JAX-RS UriInfo.getAbsolutePath()</a>
      */
-    public LinkedDataResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ResourceConfig resourceConfig)
+    public LinkedDataResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletContext servletContext)
     {
-	this(ResourceFactory.createResource(uriInfo.getAbsolutePath().toString()), request, resourceConfig);
+	this(ResourceFactory.createResource(uriInfo.getAbsolutePath().toString()), request, servletContext);
     }
     
     /**
@@ -73,18 +73,18 @@ public class LinkedDataResourceBase implements LinkedDataResource
      * 
      * @param resource This resource as RDF resource (must be URI resource, not a blank node)
      * @param request current request
-     * @param resourceConfig Resource config of this resource
+     * @param servletContext webapp context
      */
-    protected LinkedDataResourceBase(Resource resource, Request request, ResourceConfig resourceConfig)
+    protected LinkedDataResourceBase(Resource resource, Request request, ServletContext servletContext)
     {
 	if (resource == null) throw new IllegalArgumentException("Resource cannot be null");
 	if (request == null) throw new IllegalArgumentException("Request cannot be null");
 	if (!resource.isURIResource()) throw new IllegalArgumentException("Resource must be URI Resource (not a blank node)");
-	if (resourceConfig == null) throw new IllegalArgumentException("ResourceConfig cannot be null");
+	if (servletContext == null) throw new IllegalArgumentException("ServletContext cannot be null");
 
 	this.resource = resource;
         this.request = request;
-	this.resourceConfig = resourceConfig;
+	this.servletContext = servletContext;
 	
 	if (log.isDebugEnabled()) log.debug("Creating LinkedDataResource from Resource with URI: {}", resource.getURI());
     }
@@ -207,13 +207,13 @@ public class LinkedDataResourceBase implements LinkedDataResource
     }
 
     /**
-     * Returns configuration for this web application (including parameters specified in web.xml).
+     * Returns context for this web application (including parameters specified in web.xml).
      * 
-     * @return webapp configuration
+     * @return webapp context
      */
-    public ResourceConfig getResourceConfig()
+    public ServletContext getServletContext()
     {
-	return resourceConfig;
+	return servletContext;
     }
 
     /**
@@ -223,9 +223,9 @@ public class LinkedDataResourceBase implements LinkedDataResource
      */
     public CacheControl getCacheControl()
     {
-	if (getResourceConfig().getProperty(GS.cacheControl.getURI()) == null) return null;
+	if (getServletContext().getInitParameter(GS.cacheControl.getURI()) == null) return null;
         
-        return CacheControl.valueOf(getResourceConfig().getProperty(GS.cacheControl.getURI()).toString());
+        return CacheControl.valueOf(getServletContext().getInitParameter(GS.cacheControl.getURI()).toString());
     }
     
     @Override

@@ -17,7 +17,7 @@
 package org.graphity.server.model;
 
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.sun.jersey.api.core.ResourceConfig;
+import javax.servlet.ServletContext;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
 import org.graphity.server.util.DataManager;
@@ -39,12 +39,12 @@ public class SPARQLEndpointFactory
      * @param dataManager RDF data manager for this endpoint
      * @param uriInfo URI information of the request
      * @param request request
-     * @param resourceConfig webapp configuration
+     * @param servletContext webapp context
      * @return a new endpoint
      */
-    public static SPARQLEndpoint createEndpoint(DataManager dataManager, UriInfo uriInfo, Request request, ResourceConfig resourceConfig)
+    public static SPARQLEndpoint createEndpoint(DataManager dataManager, UriInfo uriInfo, Request request, ServletContext servletContext)
     {
-	return new SPARQLEndpointBase(dataManager, uriInfo, request, resourceConfig);
+	return new SPARQLEndpointBase(dataManager, uriInfo, request, servletContext);
     }
     
     /**
@@ -53,13 +53,13 @@ public class SPARQLEndpointFactory
      * @param endpoint endpoint resource
      * @param dataManager RDF data manager for this endpoint
      * @param request request
-     * @param resourceConfig webapp configuration
+     * @param servletContext webapp context
      * @return a new endpoint
      */
     public static SPARQLEndpoint createEndpoint(Resource endpoint, DataManager dataManager,
-            Request request, ResourceConfig resourceConfig)
+            Request request, ServletContext servletContext)
     {
-	return new SPARQLEndpointBase(endpoint, dataManager, request, resourceConfig);
+	return new SPARQLEndpointBase(endpoint, dataManager, request, servletContext);
     }
 
 }

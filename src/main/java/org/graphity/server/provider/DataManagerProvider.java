@@ -19,10 +19,10 @@ package org.graphity.server.provider;
 
 import com.hp.hpl.jena.query.ARQ;
 import com.hp.hpl.jena.util.LocationMapper;
-import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
+import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
@@ -41,11 +41,11 @@ public class DataManagerProvider extends PerRequestTypeInjectableProvider<Contex
     private static final Logger log = LoggerFactory.getLogger(DataManagerProvider.class);
 
     @Context UriInfo uriInfo;
-    @Context ResourceConfig resourceConfig;
+    @Context ServletContext servletContext;
 
-    public ResourceConfig getResourceConfig()
+    public ServletContext getServletContext()
     {
-	return resourceConfig;
+	return servletContext;
     }
 
     public UriInfo getUriInfo()
@@ -73,12 +73,12 @@ public class DataManagerProvider extends PerRequestTypeInjectableProvider<Contex
 
     public DataManager getDataManager()
     {
-        return getDataManager(LocationMapper.get(), ARQ.getContext(), getResourceConfig());
+        return getDataManager(LocationMapper.get(), ARQ.getContext(), getServletContext());
     }
     
-    public DataManager getDataManager(LocationMapper mapper, com.hp.hpl.jena.sparql.util.Context context, ResourceConfig resourceConfig)
+    public DataManager getDataManager(LocationMapper mapper, com.hp.hpl.jena.sparql.util.Context context, ServletContext servletContext)
     {
-        return new DataManager(mapper, context, resourceConfig);
+        return new DataManager(mapper, context, servletContext);
     }
     
 }
