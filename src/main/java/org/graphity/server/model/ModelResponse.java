@@ -19,6 +19,7 @@ package org.graphity.server.model;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import java.util.List;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
@@ -85,7 +86,7 @@ public class ModelResponse // extends ResponseBuilder
         if (variant == null)
         {
             if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants: {}", variant, variants);
-            return Response.notAcceptable(variants);
+            throw new WebApplicationException(Response.status(Response.Status.NOT_ACCEPTABLE).build());
         }
 
         EntityTag entityTag = getEntityTag(model, variant);
