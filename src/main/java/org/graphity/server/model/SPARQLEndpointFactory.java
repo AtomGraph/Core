@@ -36,30 +36,31 @@ public class SPARQLEndpointFactory
     /**
      * Creates new SPARQL endpoint from application configuration and request metadata.
      * 
-     * @param dataManager RDF data manager for this endpoint
      * @param uriInfo URI information of the request
      * @param request request
      * @param servletContext webapp context
+     * @param dataManager RDF data manager for this endpoint
      * @return a new endpoint
      */
-    public static SPARQLEndpoint createEndpoint(DataManager dataManager, UriInfo uriInfo, Request request, ServletContext servletContext)
+    public static SPARQLEndpoint createProxyEndpoint(UriInfo uriInfo, Request request, ServletContext servletContext,
+            DataManager dataManager)
     {
-	return new SPARQLEndpointBase(dataManager, uriInfo, request, servletContext);
+	return new SPARQLEndpointProxyBase(uriInfo, request, servletContext, dataManager);
     }
     
     /**
      * Creates new SPARQL endpoint from explicit URI resource and request metadata.
      * 
      * @param endpoint endpoint resource
-     * @param dataManager RDF data manager for this endpoint
      * @param request request
      * @param servletContext webapp context
+     * @param dataManager RDF data manager for this endpoint
      * @return a new endpoint
      */
-    public static SPARQLEndpoint createEndpoint(Resource endpoint, DataManager dataManager,
-            Request request, ServletContext servletContext)
+    public static SPARQLEndpoint createProxyEndpoint(Resource endpoint, Request request, ServletContext servletContext,
+        DataManager dataManager)
     {
-	return new SPARQLEndpointBase(endpoint, dataManager, request, servletContext);
+	return new SPARQLEndpointProxyBase(endpoint, request, servletContext, dataManager);
     }
 
 }

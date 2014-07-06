@@ -74,6 +74,8 @@ public class DataManager extends FileManager
     public DataManager(LocationMapper mapper, Context context, ServletContext servletContext)
     {
 	super(mapper);
+	if (context == null) throw new IllegalArgumentException("Context cannot be null");
+	if (servletContext == null) throw new IllegalArgumentException("ServletContext cannot be null");
 	this.context = context;
         this.servletContext = servletContext;
     }
@@ -189,6 +191,40 @@ public class DataManager extends FileManager
     }
 
     /**
+     * Loads RDF model from an RDF dataset using a SPARQL query.
+     * Only <code>DESCRIBE</code> and <code>CONSTRUCT</code> queries can be used with this method.
+     * 
+     * @param dataset the RDF dataset to be queried
+     * @param query query object
+     * @return result RDF model
+     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#describe">DESCRIBE</a>
+     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#construct">CONSTRUCT</a>
+     */
+    public Model loadModel(Dataset dataset, Query query)
+    {
+	if (log.isDebugEnabled()) log.debug("Local Dataset Query: {}", query);
+	if (query == null) throw new IllegalArgumentException("Query must be not null");
+	
+	QueryExecution qex = QueryExecutionFactory.create(query, dataset);
+	try
+	{	
+	    if (query.isConstructType()) return qex.execConstruct();
+	    if (query.isDescribeType()) return qex.execDescribe();
+	
+	    throw new QueryExecException("Query to load Model must be CONSTRUCT or DESCRIBE"); // return null;
+	}
+	catch (QueryExecException ex)
+	{
+	    if (log.isDebugEnabled()) log.debug("Local query execution exception: {}", ex);
+	    throw ex;
+	}
+	finally
+	{
+	    qex.close();
+	}
+    }
+
+    /**
      * Loads result set from a remote SPARQL endpoint using a query and optional request parameters.
      * Only <code>SELECT</code> queries can be used with this method.
      * 
@@ -269,6 +305,38 @@ public class DataManager extends FileManager
     }
 
     /**
+     * Loads result set from an RDF dataset using a SPARQL query.
+     * Only <code>SELECT</code> queries can be used with this method.
+     * 
+     * @param dataset the RDF dataset to be queried
+     * @param query query object
+     * @return result set
+     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#select">SELECT</a>
+     */
+    public ResultSetRewindable loadResultSet(Dataset dataset, Query query)
+    {
+	if (log.isDebugEnabled()) log.debug("Local Dataset Query: {}", query);
+	if (query == null) throw new IllegalArgumentException("Query must be not null");
+	
+	QueryExecution qex = QueryExecutionFactory.create(query, dataset);
+	try
+	{
+	    if (query.isSelectType()) return ResultSetFactory.copyResults(qex.execSelect());
+	    
+	    throw new QueryExecException("Query to load ResultSet must be SELECT");
+	}
+	catch (QueryExecException ex)
+	{
+	    if (log.isDebugEnabled()) log.debug("Local query execution exception: {}", ex);
+	    throw ex;
+	}
+	finally
+	{
+	    qex.close();
+	}
+    }
+
+    /**
      * Returns boolean result from a remote SPARQL endpoint using a query and optional request parameters.
      * Only <code>ASK</code> queries can be used with this method.
      * 
@@ -331,6 +399,38 @@ public class DataManager extends FileManager
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
 
 	QueryExecution qex = QueryExecutionFactory.create(query, model);
+	try
+	{
+	    if (query.isAskType()) return qex.execAsk();
+
+	    throw new QueryExecException("Query to load ResultSet must be SELECT");
+	}
+	catch (QueryExecException ex)
+	{
+	    if (log.isDebugEnabled()) log.debug("Local query execution exception: {}", ex);
+	    throw ex;
+	}
+	finally
+	{
+	    qex.close();
+	}
+    }
+
+    /**
+     * Returns boolean result from an RDF dataset using a SPARQL query.
+     * Only <code>ASK</code> queries can be used with this method.
+     *
+     * @param dataset the RDF dataset to be queried
+     * @param query query object
+     * @return boolean result
+     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#ask">ASK</a>
+     */
+    public boolean ask(Dataset dataset, Query query)
+    {
+	if (log.isDebugEnabled()) log.debug("Local Dataset Query: {}", query);
+	if (query == null) throw new IllegalArgumentException("Query must be not null");
+
+	QueryExecution qex = QueryExecutionFactory.create(query, dataset);
 	try
 	{
 	    if (query.isAskType()) return qex.execAsk();

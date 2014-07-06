@@ -24,7 +24,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
  * 
  * @author Martynas
  */
-public interface HTTPProxy
+public interface SPARQLEndpointProxy extends SPARQLEndpoint
 {
 
     public Resource getOrigin();
