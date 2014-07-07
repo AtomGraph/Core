@@ -21,7 +21,7 @@ package org.graphity.server.model;
  *
  * @author Martynas
  */
-public interface SPARQLEndpointProxy extends SPARQLEndpoint, HTTPProxy
+public interface GraphStoreProxy extends GraphStore, HTTPProxy
 {
     
 }

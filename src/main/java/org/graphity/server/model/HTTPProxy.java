@@ -17,11 +17,16 @@
 
 package org.graphity.server.model;
 
+import com.hp.hpl.jena.rdf.model.Resource;
+
 /**
- *
+ * Interface for classes acting as HTTP proxies for remote origin servers.
+ * 
  * @author Martynas
  */
-public interface SPARQLEndpointProxy extends SPARQLEndpoint, HTTPProxy
+public interface HTTPProxy
 {
+
+    public Resource getOrigin();
     
 }

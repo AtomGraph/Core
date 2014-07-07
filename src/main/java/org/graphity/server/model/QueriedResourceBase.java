@@ -62,7 +62,7 @@ public class QueriedResourceBase extends LDPResourceBase implements QueriedResou
     public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletContext servletContext, @Context ResourceContext resourceContext)
     {
 	this(ResourceFactory.createResource(uriInfo.getAbsolutePath().toString()),
-		resourceContext.getResource(SPARQLEndpointBase.class), request, servletContext);
+		request, servletContext, resourceContext.getResource(SPARQLEndpointProxyBase.class));
     }
 
     /**
@@ -73,7 +73,7 @@ public class QueriedResourceBase extends LDPResourceBase implements QueriedResou
      * @param endpoint SPARQL endpoint of this resource
      * @param servletContext webapp context
      */
-    protected QueriedResourceBase(Resource resource, SPARQLEndpoint endpoint, Request request, ServletContext servletContext)
+    protected QueriedResourceBase(Resource resource, Request request, ServletContext servletContext, SPARQLEndpoint endpoint)
     {
 	super(resource, request, servletContext);
 	if (endpoint == null) throw new IllegalArgumentException("SPARQL endpoint cannot be null");

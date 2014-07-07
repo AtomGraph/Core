@@ -50,9 +50,10 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
 
     public SPARQLEndpointProxyBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletContext servletContext, @Context DataManager dataManager)
     {
-        super(uriInfo, request, servletContext);
-	if (dataManager == null) throw new IllegalArgumentException("DataManager cannot be null");
-        this.dataManager = dataManager;
+        this(ResourceFactory.createResource(uriInfo.getBaseUriBuilder().
+                path(SPARQLEndpointProxyBase.class).
+                build().
+                toString()), request, servletContext, dataManager);
     }
 
     protected SPARQLEndpointProxyBase(Resource endpoint, Request request, ServletContext servletContext, DataManager dataManager)

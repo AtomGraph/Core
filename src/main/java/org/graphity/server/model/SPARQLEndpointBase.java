@@ -65,24 +65,6 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     private final Resource resource;
     private final Request request;
     private final ServletContext servletContext;
-
-    /**
-     * JAX-RS-compatible resource constructor with injected initialization objects.
-     * 
-     * @param uriInfo URI information of the request
-     * @param request current request
-     * @param servletContext webapp context
-     * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/javax/ws/rs/core/Request.html">JAX-RS Request</a>
-     * @see <a href="http://docs.oracle.com/javaee/7/api/javax/servlet/ServletContext.html">ServletContext</a>
-     */
-    public SPARQLEndpointBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletContext servletContext)
-    {
-	this(ResourceFactory.createResource(uriInfo.getBaseUriBuilder().
-                path(SPARQLEndpointBase.class).
-                build().
-                toString()),
-            request, servletContext);
-    }
     
     /**
      * Protected constructor with explicit endpoint resource.

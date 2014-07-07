@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 @Path("/service") // not standard
-public class GraphStoreBase implements GraphStore, SPARQLEndpointProxy
+public class GraphStoreBase implements GraphStore, HTTPProxy
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreBase.class);
 
