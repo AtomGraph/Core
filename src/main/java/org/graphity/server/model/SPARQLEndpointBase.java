@@ -62,7 +62,7 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
 			    org.graphity.server.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE).
 			add().build();
     
-    private final Resource resource;
+    //private final Resource resource;
     private final Request request;
     private final ServletContext servletContext;
     
@@ -74,17 +74,17 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
      * @param request current request
      * @param servletContext webapp context
      */
-    protected SPARQLEndpointBase(Resource endpoint, Request request, ServletContext servletContext)
+    protected SPARQLEndpointBase(Request request, ServletContext servletContext)
     {
-	if (endpoint == null) throw new IllegalArgumentException("Endpoint cannot be null");
+	//if (endpoint == null) throw new IllegalArgumentException("Endpoint cannot be null");
 	//if (!endpoint.isURIResource()) throw new IllegalArgumentException("Endpoint must be URI Resource (not a blank node)");
 	if (request == null) throw new IllegalArgumentException("Request cannot be null");
 	if (servletContext == null) throw new IllegalArgumentException("ServletContext cannot be null");
 
-	this.resource = endpoint;
+	//this.resource = endpoint;
 	this.request = request;
 	this.servletContext = servletContext;
-	if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase with endpoint: {}", endpoint);        
+	if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase with endpoint");        
     }
 
     /**
@@ -312,6 +312,7 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
 	return servletContext;
     }
 
+    /*
     private Resource getResource()
     {
 	return resource;
@@ -611,4 +612,6 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
 	return getResource().toString();
     }
 
+    */
+    
 }

@@ -24,7 +24,6 @@ import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
 import org.graphity.server.model.GraphStoreProxyBase;
 import org.graphity.server.model.QueriedResourceBase;
-import org.graphity.server.model.SPARQLEndpointProxyBase;
 import org.graphity.server.provider.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +52,7 @@ public class ApplicationBase extends javax.ws.rs.core.Application
     public ApplicationBase()
     {
 	classes.add(QueriedResourceBase.class); // handles all
-	classes.add(SPARQLEndpointProxyBase.class); // handles /sparql queries
+	//classes.add(SPARQLEndpointProxyBase.class); // handles /sparql queries
 	classes.add(GraphStoreProxyBase.class); // handles /service requests
 
 	singletons.add(new ModelProvider());
@@ -61,6 +60,7 @@ public class ApplicationBase extends javax.ws.rs.core.Application
 	singletons.add(new QueryParamProvider());
 	singletons.add(new UpdateRequestReader());
         singletons.add(new DataManagerProvider());
+        singletons.add(new SPARQLEndpointProxyProvider());
     }
 
     /**

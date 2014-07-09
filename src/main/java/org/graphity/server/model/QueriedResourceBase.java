@@ -21,7 +21,6 @@ import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
-import com.sun.jersey.api.core.ResourceContext;
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -40,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * @see SPARQLEndpoint
  * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/Query.html">ARQ Query</a>
  */
-@Path("{path: .*}")
+@Path("/")
 public class QueriedResourceBase extends LDPResourceBase implements QueriedResource
 {
     private static final Logger log = LoggerFactory.getLogger(QueriedResourceBase.class);
@@ -59,10 +58,11 @@ public class QueriedResourceBase extends LDPResourceBase implements QueriedResou
      * @see <a href="http://docs.oracle.com/javaee/7/api/javax/servlet/ServletContext.html">ServletContext</a>
      * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceContext.html">Jersey ResourceContext</a>
      */
-    public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletContext servletContext, @Context ResourceContext resourceContext)
+    public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletContext servletContext,
+            @Context SPARQLEndpoint endpoint)
     {
 	this(ResourceFactory.createResource(uriInfo.getAbsolutePath().toString()),
-		request, servletContext, resourceContext.getResource(SPARQLEndpointProxyBase.class));
+		request, servletContext, endpoint);
     }
 
     /**
@@ -78,6 +78,18 @@ public class QueriedResourceBase extends LDPResourceBase implements QueriedResou
 	super(resource, request, servletContext);
 	if (endpoint == null) throw new IllegalArgumentException("SPARQL endpoint cannot be null");
 	this.endpoint = endpoint;
+    }
+
+    @Path("{path: .+}")
+    public Object getResource()
+    {
+        return this;
+    }
+
+    @Path("sparql")
+    public Object getSPARQLProxyResource()
+    {
+        return getSPARQLEndpoint();
     }
 
     /**

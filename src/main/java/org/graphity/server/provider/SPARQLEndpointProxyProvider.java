@@ -14,78 +14,78 @@
  *  limitations under the License.
  *
  */
-
 package org.graphity.server.provider;
 
-import com.hp.hpl.jena.query.ARQ;
-import com.hp.hpl.jena.util.LocationMapper;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
+import javax.ws.rs.ext.Providers;
+import org.graphity.server.model.SPARQLEndpoint;
+import org.graphity.server.model.SPARQLEndpointFactory;
 import org.graphity.server.util.DataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Martynas
+ * @author Martynas Jusevičius <martynas@graphity.org>
  */
 @Provider
-public class DataManagerProvider extends PerRequestTypeInjectableProvider<Context, DataManager> implements ContextResolver<DataManager>
+public class SPARQLEndpointProxyProvider extends PerRequestTypeInjectableProvider<Context, SPARQLEndpoint>
 {
+    private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointProxyProvider.class);
 
-    private static final Logger log = LoggerFactory.getLogger(DataManagerProvider.class);
-
-    @Context UriInfo uriInfo;
+    @Context Providers providers;
     @Context ServletContext servletContext;
+    @Context Request request;
+    
+    public SPARQLEndpointProxyProvider()
+    {
+	super(SPARQLEndpoint.class);
+    }
+
+    public Request getRequest()
+    {
+	return request;
+    }
 
     public ServletContext getServletContext()
     {
 	return servletContext;
     }
 
-    public UriInfo getUriInfo()
+    public Providers getProviders()
     {
-	return uriInfo;
-    }
-
-    public DataManagerProvider()
-    {
-        super(DataManager.class);
-    }
-
-    @Override
-    public Injectable<DataManager> getInjectable(ComponentContext cc, Context a)
-    {
-	return new Injectable<DataManager>()
-	{
-	    @Override
-	    public DataManager getValue()
-	    {
-		return getDataManager();
-	    }
-	};
+        return providers;
     }
 
     public DataManager getDataManager()
     {
-        return getDataManager(LocationMapper.get(), ARQ.getContext(), getServletContext());
-    }
-    
-    public DataManager getDataManager(LocationMapper mapper, com.hp.hpl.jena.sparql.util.Context context, ServletContext servletContext)
-    {
-        return new DataManager(mapper, context, servletContext);
+	ContextResolver<DataManager> cr = getProviders().getContextResolver(DataManager.class, null);
+	return cr.getContext(DataManager.class);
     }
 
     @Override
-    public DataManager getContext(Class<?> type)
+    public Injectable<SPARQLEndpoint> getInjectable(ComponentContext cc, Context context)
     {
-        return getDataManager();
+	return new Injectable<SPARQLEndpoint>()
+	{
+	    @Override
+	    public SPARQLEndpoint getValue()
+	    {
+		return getSPARQLEndpoint();
+	    }
+	};
+    }
+
+    public SPARQLEndpoint getSPARQLEndpoint()
+    {
+        return SPARQLEndpointFactory.createProxy(getRequest(), getServletContext(), getDataManager());
     }
     
 }

@@ -19,7 +19,6 @@ package org.graphity.server.model;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.update.UpdateRequest;
 import java.net.URI;
 import javax.ws.rs.Consumes;
@@ -42,7 +41,7 @@ import org.graphity.server.MediaType;
  * 
  */
 @Path("/sparql")
-public interface SPARQLEndpoint extends Resource
+public interface SPARQLEndpoint // extends Resource
 {
 
     /**

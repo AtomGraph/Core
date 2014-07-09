@@ -16,10 +16,8 @@
  */
 package org.graphity.server.model;
 
-import com.hp.hpl.jena.rdf.model.Resource;
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Request;
-import javax.ws.rs.core.UriInfo;
 import org.graphity.server.util.DataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,11 +40,13 @@ public class SPARQLEndpointFactory
      * @param dataManager RDF data manager for this endpoint
      * @return a new endpoint
      */
+    /*
     public static SPARQLEndpointProxy createProxy(UriInfo uriInfo, Request request, ServletContext servletContext,
             DataManager dataManager)
     {
 	return new SPARQLEndpointProxyBase(uriInfo, request, servletContext, dataManager);
     }
+    */
     
     /**
      * Creates new SPARQL endpoint from explicit URI resource and request metadata.
@@ -57,10 +57,10 @@ public class SPARQLEndpointFactory
      * @param dataManager RDF data manager for this endpoint
      * @return a new endpoint
      */
-    public static SPARQLEndpointProxy createProxy(Resource endpoint, Request request, ServletContext servletContext,
+    public static SPARQLEndpointProxy createProxy(Request request, ServletContext servletContext,
         DataManager dataManager)
     {
-	return new SPARQLEndpointProxyBase(endpoint, request, servletContext, dataManager);
+	return new SPARQLEndpointProxyBase(request, servletContext, dataManager);
     }
 
 }
