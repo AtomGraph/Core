@@ -69,6 +69,7 @@ public class LDPResourceBase extends LinkedDataResourceBase implements LDPResour
      * @param model RDF payload
      * @return response
      */
+    @Override
     public Response post(Model model)
     {
 	if (log.isWarnEnabled()) log.warn("POST request with RDF payload: {}. Graphity Server is read-only!  Only GET is supported");
@@ -81,6 +82,7 @@ public class LDPResourceBase extends LinkedDataResourceBase implements LDPResour
      * @param model RDF payload
      * @return response
      */
+    @Override
     public Response put(Model model)
     {
 	if (log.isWarnEnabled()) log.warn("PUT request with RDF payload: {}. Graphity Server is read-only!  Only GET is supported");
@@ -93,6 +95,7 @@ public class LDPResourceBase extends LinkedDataResourceBase implements LDPResour
      * 
      * @return response
      */
+    @Override
     public Response delete()
     {
 	if (log.isWarnEnabled()) log.warn("DELETE request with RDF payload: {}. Graphity Server is read-only! Only GET is supported");

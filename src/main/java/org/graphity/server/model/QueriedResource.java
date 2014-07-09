@@ -41,6 +41,6 @@ public interface QueriedResource
      * @return endpoint resource
      * @see SPARQLEndpoint
      */
-    SPARQLEndpoint getEndpoint();
+    SPARQLEndpoint getSPARQLEndpoint();
 
 }

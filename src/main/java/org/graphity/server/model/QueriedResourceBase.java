@@ -62,7 +62,7 @@ public class QueriedResourceBase extends LDPResourceBase implements QueriedResou
     public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletContext servletContext, @Context ResourceContext resourceContext)
     {
 	this(ResourceFactory.createResource(uriInfo.getAbsolutePath().toString()),
-		request, servletContext, resourceContext.getResource(SPARQLEndpointProxyBase.class));
+		request, servletContext, resourceContext.getResource(SPARQLEndpointProxy.class));
     }
 
     /**
@@ -90,7 +90,7 @@ public class QueriedResourceBase extends LDPResourceBase implements QueriedResou
      */
     public Model describe()
     {
-	return getEndpoint().loadModel(getQuery());
+	return getSPARQLEndpoint().loadModel(getQuery());
     }
     
     /**
@@ -142,7 +142,7 @@ public class QueriedResourceBase extends LDPResourceBase implements QueriedResou
      * @return SPARQL endpoint resource
      */
     @Override
-    public SPARQLEndpoint getEndpoint()
+    public SPARQLEndpoint getSPARQLEndpoint()
     {
 	return endpoint;
     }
