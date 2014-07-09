@@ -42,7 +42,7 @@ public class SPARQLEndpointFactory
      * @param dataManager RDF data manager for this endpoint
      * @return a new endpoint
      */
-    public static SPARQLEndpointProxy createEndpointProxy(UriInfo uriInfo, Request request, ServletContext servletContext,
+    public static SPARQLEndpointProxy createProxy(UriInfo uriInfo, Request request, ServletContext servletContext,
             DataManager dataManager)
     {
 	return new SPARQLEndpointProxyBase(uriInfo, request, servletContext, dataManager);
@@ -57,7 +57,7 @@ public class SPARQLEndpointFactory
      * @param dataManager RDF data manager for this endpoint
      * @return a new endpoint
      */
-    public static SPARQLEndpointProxy createEndpointProxy(Resource endpoint, Request request, ServletContext servletContext,
+    public static SPARQLEndpointProxy createProxy(Resource endpoint, Request request, ServletContext servletContext,
         DataManager dataManager)
     {
 	return new SPARQLEndpointProxyBase(endpoint, request, servletContext, dataManager);
