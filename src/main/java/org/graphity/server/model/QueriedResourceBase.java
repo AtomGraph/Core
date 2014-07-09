@@ -62,7 +62,7 @@ public class QueriedResourceBase extends LDPResourceBase implements QueriedResou
     public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletContext servletContext, @Context ResourceContext resourceContext)
     {
 	this(ResourceFactory.createResource(uriInfo.getAbsolutePath().toString()),
-		request, servletContext, resourceContext.getResource(SPARQLEndpointProxy.class));
+		request, servletContext, resourceContext.getResource(SPARQLEndpointProxyBase.class));
     }
 
     /**

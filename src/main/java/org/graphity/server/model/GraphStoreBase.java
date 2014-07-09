@@ -19,12 +19,10 @@ package org.graphity.server.model;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.*;
-import com.hp.hpl.jena.sparql.engine.http.Service;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import javax.naming.ConfigurationException;
 import javax.servlet.ServletContext;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
@@ -32,8 +30,6 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.jena.atlas.web.ContentType;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFLanguages;
-import org.graphity.server.util.DataManager;
-import org.graphity.server.vocabulary.GS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,25 +40,24 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 @Path("/service") // not standard
-public class GraphStoreBase implements GraphStore, HTTPProxy
+public abstract class GraphStoreBase implements GraphStore
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreBase.class);
 
     private final Resource resource;
-    private final DataManager dataManager;
     private final Request request;
     private final ServletContext servletContext;
 
-    public GraphStoreBase(@Context DataManager dataManager, @Context UriInfo uriInfo, @Context Request request, @Context ServletContext servletContext)
+    public GraphStoreBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletContext servletContext)
     {
 	this(ResourceFactory.createResource(uriInfo.getBaseUriBuilder().
                 path(GraphStoreBase.class).
                 build().
                 toString()),
-	    dataManager, request, servletContext);
+	    request, servletContext);
     }
 
-    protected GraphStoreBase(Resource graphStore, DataManager dataManager, Request request, ServletContext servletContext)
+    protected GraphStoreBase(Resource graphStore, Request request, ServletContext servletContext)
     {
 	if (graphStore == null) throw new IllegalArgumentException("Graph store Resource cannot be null");
 	if (!graphStore.isURIResource()) throw new IllegalArgumentException("Graph store Resource must be URI Resource (not a blank node)");
@@ -70,7 +65,6 @@ public class GraphStoreBase implements GraphStore, HTTPProxy
 	if (servletContext == null) throw new IllegalArgumentException("ServletContext cannot be null");
 	
 	this.resource = graphStore;
-        this.dataManager = dataManager;
 	this.request = request;
         this.servletContext = servletContext;
     }
@@ -117,46 +111,6 @@ public class GraphStoreBase implements GraphStore, HTTPProxy
         }
         
         return variants;
-    }
-
-     /**
-     * Returns configured Graph Store resource.
-     * This graph store is a proxy for the remote one.
-     * 
-     * @return graph store resource
-     */
-    @Override
-    public Resource getOrigin()
-    {
-        return getOrigin(getServletContext());
-    }
-
-     /**
-     * Returns Graph Store for supplied webapp context configuration.
-     * Uses <code>gs:graphStore</code> context parameter value from web.xml as graph store URI.
-     * 
-     * @param servletContext webapp context
-     * @return graph store resource
-     */
-    public Resource getOrigin(ServletContext servletContext)
-    {
-        try
-        {
-            Object storeUri = servletContext.getInitParameter(GS.graphStore.getURI());
-            if (storeUri == null) throw new ConfigurationException("Graph Store not configured (gs:graphStore not set in web.xml)");
-
-            String authUser = (String)servletContext.getInitParameter(Service.queryAuthUser.getSymbol());
-            String authPwd = (String)servletContext.getInitParameter(Service.queryAuthPwd.getSymbol());
-            if (authUser != null && authPwd != null)
-                getDataManager().putAuthContext(storeUri.toString(), authUser, authPwd);
-
-            return ResourceFactory.createResource(storeUri.toString());
-        }
-        catch (ConfigurationException ex)
-        {
-            if (log.isErrorEnabled()) log.warn("Graph Store configuration error", ex);
-            throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);            
-        }                
     }
     
     @GET
@@ -266,11 +220,6 @@ public class GraphStoreBase implements GraphStore, HTTPProxy
 		return Response.noContent().build();
 	    }
 	}
-    }
-
-    public DataManager getDataManager()
-    {
-        return dataManager;
     }
 
     public Request getRequest()
@@ -580,54 +529,6 @@ public class GraphStoreBase implements GraphStore, HTTPProxy
     public String toString()
     {
 	return getResource().toString();
-    }
-
-    @Override
-    public Model getModel(String uri)
-    {
-        return getDataManager().getModel(getOrigin().getURI(), uri);
-    }
-
-    @Override
-    public boolean containsModel(String uri)
-    {
-        return getDataManager().containsModel(getOrigin().getURI(), uri);
-    }
-
-    @Override
-    public void putModel(Model model)
-    {
-        getDataManager().putModel(getOrigin().getURI(), model);
-    }
-
-    @Override
-    public void putModel(String uri, Model model)
-    {
-        getDataManager().putModel(getOrigin().getURI(), uri, model);
-    }
-
-    @Override
-    public void deleteDefault()
-    {
-        getDataManager().deleteDefault(getOrigin().getURI());
-    }
-
-    @Override
-    public void deleteModel(String uri)
-    {
-        getDataManager().deleteModel(getOrigin().getURI(), uri);
-    }
-
-    @Override
-    public void add(Model model)
-    {
-        getDataManager().addModel(getOrigin().getURI(), model);
-    }
-
-    @Override
-    public void add(String uri, Model model)
-    {
-        getDataManager().addModel(getOrigin().getURI(), uri, model);
     }
     
 }

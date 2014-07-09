@@ -22,7 +22,7 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
-import org.graphity.server.model.GraphStoreBase;
+import org.graphity.server.model.GraphStoreProxyBase;
 import org.graphity.server.model.QueriedResourceBase;
 import org.graphity.server.model.SPARQLEndpointProxyBase;
 import org.graphity.server.provider.*;
@@ -54,7 +54,7 @@ public class ApplicationBase extends javax.ws.rs.core.Application
     {
 	classes.add(QueriedResourceBase.class); // handles all
 	classes.add(SPARQLEndpointProxyBase.class); // handles /sparql queries
-	classes.add(GraphStoreBase.class); // handles /service requests
+	classes.add(GraphStoreProxyBase.class); // handles /service requests
 
 	singletons.add(new ModelProvider());
 	singletons.add(new ResultSetWriter());

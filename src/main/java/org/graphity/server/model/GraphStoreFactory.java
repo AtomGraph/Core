@@ -40,9 +40,9 @@ public class GraphStoreFactory
      * @param servletContext webapp context
      * @return graph store instance
      */
-    public static GraphStore createGraphStore(DataManager dataManager, UriInfo uriInfo, Request request, ServletContext servletContext)
+    public static GraphStoreProxy createGraphStoreProxy(UriInfo uriInfo, Request request, ServletContext servletContext, DataManager dataManager)
     {
-	return new GraphStoreBase(dataManager, uriInfo, request, servletContext);
+	return new GraphStoreProxyBase(uriInfo, request, servletContext, dataManager);
     }
     
     /**
@@ -54,10 +54,10 @@ public class GraphStoreFactory
      * @param servletContext webapp context
      * @return graph store instance
      */
-    public static GraphStore createGraphStore(Resource graphStore, DataManager dataManager,
-            Request request, ServletContext servletContext)
+    public static GraphStoreProxy createGraphStoreProxy(Resource graphStore,
+            Request request, ServletContext servletContext, DataManager dataManager)
     {
-	return new GraphStoreBase(graphStore, dataManager, request, servletContext);
+	return new GraphStoreProxyBase(graphStore, request, servletContext, dataManager);
     }
 
 }
