@@ -23,6 +23,7 @@ import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.sparql.engine.http.Service;
 import javax.naming.ConfigurationException;
 import javax.servlet.ServletContext;
+import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
@@ -37,6 +38,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas
  */
+@Path("/service") // not standard
 public class GraphStoreProxyBase extends GraphStoreBase implements GraphStoreProxy
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreProxyBase.class);
@@ -46,7 +48,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
     public GraphStoreProxyBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletContext servletContext, @Context DataManager dataManager)
     {
         this(ResourceFactory.createResource(uriInfo.getBaseUriBuilder().
-                path(SPARQLEndpointProxyBase.class).
+                path(GraphStoreProxyBase.class).
                 build().
                 toString()), request, servletContext, dataManager);
     }

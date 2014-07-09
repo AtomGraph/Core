@@ -39,7 +39,6 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-@Path("/service") // not standard
 public abstract class GraphStoreBase implements GraphStore
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreBase.class);
@@ -47,16 +46,7 @@ public abstract class GraphStoreBase implements GraphStore
     private final Resource resource;
     private final Request request;
     private final ServletContext servletContext;
-
-    public GraphStoreBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletContext servletContext)
-    {
-	this(ResourceFactory.createResource(uriInfo.getBaseUriBuilder().
-                path(GraphStoreBase.class).
-                build().
-                toString()),
-	    request, servletContext);
-    }
-
+    
     protected GraphStoreBase(Resource graphStore, Request request, ServletContext servletContext)
     {
 	if (graphStore == null) throw new IllegalArgumentException("Graph store Resource cannot be null");
