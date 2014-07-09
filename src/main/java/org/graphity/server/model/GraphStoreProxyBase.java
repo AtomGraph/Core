@@ -99,7 +99,13 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
             throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);            
         }                
     }
-    
+
+    @Override
+    public Model getModel()
+    {
+	return getDataManager().getModel(getOrigin().getURI());
+    }
+
     @Override
     public Model getModel(String uri)
     {
