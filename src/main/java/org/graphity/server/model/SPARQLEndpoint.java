@@ -41,7 +41,7 @@ import org.graphity.server.MediaType;
  * 
  */
 @Path("/sparql")
-public interface SPARQLEndpoint // extends Resource
+public interface SPARQLEndpoint
 {
 
     /**

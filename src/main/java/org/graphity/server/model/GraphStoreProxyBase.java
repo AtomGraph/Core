@@ -28,7 +28,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import org.graphity.server.util.DataManager;
 import org.graphity.server.vocabulary.GS;
 import org.slf4j.Logger;
@@ -45,17 +44,18 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
 
     private final DataManager dataManager;
 
-    public GraphStoreProxyBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletContext servletContext, @Context DataManager dataManager)
+    /*
+    public GraphStoreProxyBase(@Context Request request, @Context ServletContext servletContext,
+            @Context DataManager dataManager)
     {
-        this(ResourceFactory.createResource(uriInfo.getBaseUriBuilder().
-                path(GraphStoreProxyBase.class).
-                build().
-                toString()), request, servletContext, dataManager);
+        this(request, servletContext, dataManager);
     }
-
-    protected GraphStoreProxyBase(Resource endpoint, Request request, ServletContext servletContext, DataManager dataManager)
+    */
+    
+    public GraphStoreProxyBase(@Context Request request, @Context ServletContext servletContext,
+            @Context DataManager dataManager)
     {
-        super(endpoint, request, servletContext);
+        super(request, servletContext);
 	if (dataManager == null) throw new IllegalArgumentException("DataManager cannot be null");
         this.dataManager = dataManager;
     }

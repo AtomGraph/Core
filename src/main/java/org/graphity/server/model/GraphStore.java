@@ -32,7 +32,7 @@ import javax.ws.rs.core.Response;
  */
 //@Produces({MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", MediaType.TEXT_TURTLE + "; charset=UTF-8"})
 //@Consumes({MediaType.APPLICATION_RDF_XML + "; charset=UTF-8", MediaType.TEXT_TURTLE + "; charset=UTF-8"})
-public interface GraphStore extends Resource, DatasetAccessor
+public interface GraphStore extends DatasetAccessor
 {
     /**
      * Handles GET query request and returns result as response

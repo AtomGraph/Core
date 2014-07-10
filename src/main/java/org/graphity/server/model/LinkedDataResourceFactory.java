@@ -17,10 +17,6 @@
 
 package org.graphity.server.model;
 
-import com.hp.hpl.jena.rdf.model.Resource;
-import javax.servlet.ServletContext;
-import javax.ws.rs.core.Request;
-
 /**
  * A factory class for creating Linked Data resources.
  * 
@@ -49,9 +45,9 @@ public class LinkedDataResourceFactory
      * @param servletContext webapp context
      * @return a new resource
      */
-    public static LinkedDataResource createResource(Resource resource, Request request, ServletContext servletContext)
+    public static LinkedDataResource create(String uri, SPARQLEndpoint endpoint)
     {
-	return new LinkedDataResourceBase(resource, request, servletContext);
+	return new QueriedResourceBase(uri, endpoint);
     }
 
 }

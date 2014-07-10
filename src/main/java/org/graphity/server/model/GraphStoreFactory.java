@@ -17,10 +17,8 @@
 
 package org.graphity.server.model;
 
-import com.hp.hpl.jena.rdf.model.Resource;
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Request;
-import javax.ws.rs.core.UriInfo;
 import org.graphity.server.util.DataManager;
 
 /**
@@ -40,10 +38,12 @@ public class GraphStoreFactory
      * @param servletContext webapp context
      * @return graph store instance
      */
+    /*
     public static GraphStoreProxy createGraphStoreProxy(UriInfo uriInfo, Request request, ServletContext servletContext, DataManager dataManager)
     {
 	return new GraphStoreProxyBase(uriInfo, request, servletContext, dataManager);
     }
+    */
     
     /**
      * Creates new GraphStore from explicit URI resource.
@@ -54,10 +54,9 @@ public class GraphStoreFactory
      * @param servletContext webapp context
      * @return graph store instance
      */
-    public static GraphStoreProxy createGraphStoreProxy(Resource graphStore,
-            Request request, ServletContext servletContext, DataManager dataManager)
+    public static GraphStoreProxy createProxy(Request request, ServletContext servletContext, DataManager dataManager)
     {
-	return new GraphStoreProxyBase(graphStore, request, servletContext, dataManager);
+	return new GraphStoreProxyBase(request, servletContext, dataManager);
     }
 
 }

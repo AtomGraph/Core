@@ -16,15 +16,11 @@
  */
 package org.graphity.server.model;
 
-import com.hp.hpl.jena.datatypes.RDFDatatype;
-import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import javax.servlet.ServletContext;
-import javax.ws.rs.GET;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -46,13 +42,13 @@ import org.slf4j.LoggerFactory;
  * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/rdf/model/Resource.html">Jena Resource</a>
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class LinkedDataResourceBase implements LinkedDataResource
+public abstract class LinkedDataResourceBase implements LinkedDataResource
 {
     private static final Logger log = LoggerFactory.getLogger(LinkedDataResourceBase.class);
 
-    private final Resource resource;
-    private final Request request;
-    private final ServletContext servletContext;
+    private final String uri;
+    private @Context Request request;
+    private @Context ServletContext servletContext;
 
     /** 
      * JAX-RS-compatible resource constructor with injected initialization objects.
@@ -63,9 +59,9 @@ public class LinkedDataResourceBase implements LinkedDataResource
      * @param servletContext webapp context
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html#getAbsolutePath()">JAX-RS UriInfo.getAbsolutePath()</a>
      */
-    public LinkedDataResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletContext servletContext)
+    public LinkedDataResourceBase(@Context UriInfo uriInfo)
     {
-	this(ResourceFactory.createResource(uriInfo.getAbsolutePath().toString()), request, servletContext);
+	this(uriInfo.getAbsolutePath().toString());
     }
     
     /**
@@ -75,18 +71,18 @@ public class LinkedDataResourceBase implements LinkedDataResource
      * @param request current request
      * @param servletContext webapp context
      */
-    protected LinkedDataResourceBase(Resource resource, Request request, ServletContext servletContext)
+    protected LinkedDataResourceBase(String uri)
     {
-	if (resource == null) throw new IllegalArgumentException("Resource cannot be null");
-	if (request == null) throw new IllegalArgumentException("Request cannot be null");
-	if (!resource.isURIResource()) throw new IllegalArgumentException("Resource must be URI Resource (not a blank node)");
-	if (servletContext == null) throw new IllegalArgumentException("ServletContext cannot be null");
+	if (uri == null) throw new IllegalArgumentException("URI cannot be null");
+	//if (request == null) throw new IllegalArgumentException("Request cannot be null");
+	//if (!resource.isURIResource()) throw new IllegalArgumentException("Resource must be URI Resource (not a blank node)");
+	//if (servletContext == null) throw new IllegalArgumentException("ServletContext cannot be null");
 
-	this.resource = resource;
-        this.request = request;
-	this.servletContext = servletContext;
+	this.uri = uri;
+        //this.request = request;
+	//this.servletContext = servletContext;
 	
-	if (log.isDebugEnabled()) log.debug("Creating LinkedDataResource from Resource with URI: {}", resource.getURI());
+	if (log.isDebugEnabled()) log.debug("Creating LinkedDataResource from Resource with URI: {}", uri);
     }
 
     /**
@@ -96,6 +92,7 @@ public class LinkedDataResourceBase implements LinkedDataResource
      * 
      * @return response with RDF description
      */
+    /*
     @GET
     @Override
     public Response get()
@@ -109,7 +106,8 @@ public class LinkedDataResourceBase implements LinkedDataResource
 	if (log.isDebugEnabled()) log.debug("Returning @GET Response with {} statements in Model", getModel().size());
 	return getResponse(getModel());
     }
-
+    */
+    
     /**
      * Returns response for the given RDF model.
      * 
@@ -170,9 +168,9 @@ public class LinkedDataResourceBase implements LinkedDataResource
      * @return URI of this resource
      */
     @Override
-    public final String getURI()
+    public String getURI()
     {
-	return getResource().getURI();
+	return uri;
     }
     
     /**
@@ -180,22 +178,26 @@ public class LinkedDataResourceBase implements LinkedDataResource
      * 
      * @return RDF resource
      */
+    /*
     private Resource getResource()
     {
-	return resource;
+	return uri;
     }
-
+    */
+    
     /**
      * Returns RDF model of this resource
      * 
      * @return RDF model of this resource
      */
+    /*
     @Override
     public final Model getModel()
     {
 	return getResource().getModel();
     }
-
+    */
+    
     /**
      * Returns current request.
      * 
@@ -227,7 +229,8 @@ public class LinkedDataResourceBase implements LinkedDataResource
         
         return CacheControl.valueOf(getServletContext().getInitParameter(GS.cacheControl.getURI()).toString());
     }
-    
+
+    /*
     @Override
     public AnonId getId()
     {
@@ -509,5 +512,6 @@ public class LinkedDataResourceBase implements LinkedDataResource
     {
 	return getResource().toString();
     }
-
+    */
+    
 }

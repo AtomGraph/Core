@@ -16,8 +16,6 @@
  */
 package org.graphity.server.model;
 
-import com.hp.hpl.jena.datatypes.RDFDatatype;
-import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.*;
 import java.net.URI;
 import java.util.ArrayList;
@@ -43,22 +41,22 @@ public abstract class GraphStoreBase implements GraphStore
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreBase.class);
 
-    private final Resource resource;
+    //private final String uri;
     private final Request request;
     private final ServletContext servletContext;
     
-    protected GraphStoreBase(Resource graphStore, Request request, ServletContext servletContext)
+    protected GraphStoreBase(Request request, ServletContext servletContext)
     {
-	if (graphStore == null) throw new IllegalArgumentException("Graph store Resource cannot be null");
-	if (!graphStore.isURIResource()) throw new IllegalArgumentException("Graph store Resource must be URI Resource (not a blank node)");
+	//if (uri == null) throw new IllegalArgumentException("URI cannot be null");
+	//if (!graphStore.isURIResource()) throw new IllegalArgumentException("Graph store Resource must be URI Resource (not a blank node)");
 	if (request == null) throw new IllegalArgumentException("Request cannot be null");
 	if (servletContext == null) throw new IllegalArgumentException("ServletContext cannot be null");
 	
-	this.resource = graphStore;
+	//this.uri = uri;
 	this.request = request;
         this.servletContext = servletContext;
     }
-
+    
     /**
      * Returns response for a given RDF model.
      * 
@@ -222,6 +220,7 @@ public abstract class GraphStoreBase implements GraphStore
         return servletContext;
     }
 
+    /*
     public Resource getResource()
     {
 	return resource;
@@ -520,5 +519,6 @@ public abstract class GraphStoreBase implements GraphStore
     {
 	return getResource().toString();
     }
+    */
     
 }

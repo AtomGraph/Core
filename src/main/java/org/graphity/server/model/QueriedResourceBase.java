@@ -19,14 +19,10 @@ package org.graphity.server.model;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.ResourceFactory;
-import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
@@ -39,8 +35,8 @@ import org.slf4j.LoggerFactory;
  * @see SPARQLEndpoint
  * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/Query.html">ARQ Query</a>
  */
-@Path("/")
-public class QueriedResourceBase extends LDPResourceBase implements QueriedResource
+@Path("{path: .*}")
+public class QueriedResourceBase extends LinkedDataResourceBase implements QueriedResource
 {
     private static final Logger log = LoggerFactory.getLogger(QueriedResourceBase.class);
     
@@ -58,11 +54,9 @@ public class QueriedResourceBase extends LDPResourceBase implements QueriedResou
      * @see <a href="http://docs.oracle.com/javaee/7/api/javax/servlet/ServletContext.html">ServletContext</a>
      * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceContext.html">Jersey ResourceContext</a>
      */
-    public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletContext servletContext,
-            @Context SPARQLEndpoint endpoint)
+    public QueriedResourceBase(@Context UriInfo uriInfo, @Context SPARQLEndpoint endpoint)
     {
-	this(ResourceFactory.createResource(uriInfo.getAbsolutePath().toString()),
-		request, servletContext, endpoint);
+	this(uriInfo.getAbsolutePath().toString(), endpoint);
     }
 
     /**
@@ -73,23 +67,11 @@ public class QueriedResourceBase extends LDPResourceBase implements QueriedResou
      * @param endpoint SPARQL endpoint of this resource
      * @param servletContext webapp context
      */
-    protected QueriedResourceBase(Resource resource, Request request, ServletContext servletContext, SPARQLEndpoint endpoint)
+    protected QueriedResourceBase(String uri, SPARQLEndpoint endpoint)
     {
-	super(resource, request, servletContext);
-	if (endpoint == null) throw new IllegalArgumentException("SPARQL endpoint cannot be null");
+	super(uri);
+	if (endpoint == null) throw new IllegalArgumentException("SPARQLEndpoint cannot be null");
 	this.endpoint = endpoint;
-    }
-
-    @Path("{path: .+}")
-    public Object getResource()
-    {
-        return this;
-    }
-
-    @Path("sparql")
-    public Object getSPARQLProxyResource()
-    {
-        return getSPARQLEndpoint();
     }
 
     /**
@@ -124,7 +106,46 @@ public class QueriedResourceBase extends LDPResourceBase implements QueriedResou
 	if (log.isDebugEnabled()) log.debug("Returning @GET Response with {} statements in Model", description.size());
 	return getResponse(description);
     }
-    
+
+    /**
+     * Handles POST method, stores the submitted RDF model in the SPARQL endpoint, and returns response.
+     * 
+     * @param model RDF payload
+     * @return response
+     */
+    @Override
+    public Response post(Model model)
+    {
+	if (log.isWarnEnabled()) log.warn("POST request with RDF payload: {}. Graphity Server is read-only!  Only GET is supported");
+	throw new WebApplicationException(405);
+    }
+
+    /**
+     * Handles PUT method, stores the submitted RDF model in the SPARQL endpoint, and returns response.
+     * 
+     * @param model RDF payload
+     * @return response
+     */
+    @Override
+    public Response put(Model model)
+    {
+	if (log.isWarnEnabled()) log.warn("PUT request with RDF payload: {}. Graphity Server is read-only!  Only GET is supported");
+	throw new WebApplicationException(405);
+    }
+
+    /**
+     * Handles DELETE method, deletes the RDF representation of this resource from the SPARQL endpoint, and
+     * returns response.
+     * 
+     * @return response
+     */
+    @Override
+    public Response delete()
+    {
+	if (log.isWarnEnabled()) log.warn("DELETE request with RDF payload: {}. Graphity Server is read-only! Only GET is supported");
+	throw new WebApplicationException(405);
+    }
+
     /**
      * Returns query used to retrieve RDF description of this resource
      * 
