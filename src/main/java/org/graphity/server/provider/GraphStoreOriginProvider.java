@@ -17,8 +17,6 @@
 
 package org.graphity.server.provider;
 
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.sparql.engine.http.Service;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
@@ -101,7 +99,7 @@ public class GraphStoreOriginProvider extends PerRequestTypeInjectableProvider<C
      * @param servletContext webapp context
      * @return graph store resource
      */
-    public Resource getOrigin(ServletContext servletContext)
+    public GraphStoreOrigin getGraphStoreOrigin(ServletContext servletContext)
     {
         try
         {
@@ -113,7 +111,7 @@ public class GraphStoreOriginProvider extends PerRequestTypeInjectableProvider<C
             if (authUser != null && authPwd != null)
                 getDataManager().putAuthContext(storeUri.toString(), authUser, authPwd);
 
-            return ResourceFactory.createResource(storeUri.toString());
+            return new GraphStoreOriginBase(storeUri.toString());
         }
         catch (ConfigurationException ex)
         {
