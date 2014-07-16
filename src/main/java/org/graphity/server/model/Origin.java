@@ -17,16 +17,13 @@
 
 package org.graphity.server.model;
 
-import com.hp.hpl.jena.rdf.model.Resource;
-
 /**
- * Interface for classes acting as HTTP proxies for remote origin servers.
- * 
+ *
  * @author Martynas
  */
-public interface HTTPProxy
+public interface Origin
 {
-
-    public Resource getOrigin();
+    
+    public String getURI();
     
 }

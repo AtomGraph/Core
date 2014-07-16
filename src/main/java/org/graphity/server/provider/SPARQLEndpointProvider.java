@@ -27,6 +27,7 @@ import javax.ws.rs.ext.Provider;
 import javax.ws.rs.ext.Providers;
 import org.graphity.server.model.SPARQLEndpoint;
 import org.graphity.server.model.SPARQLEndpointFactory;
+import org.graphity.server.model.SPARQLEndpointOrigin;
 import org.graphity.server.util.DataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,6 +71,12 @@ public class SPARQLEndpointProvider extends PerRequestTypeInjectableProvider<Con
 	return cr.getContext(DataManager.class);
     }
 
+    public SPARQLEndpointOrigin getSPARQLEndpointOrigin()
+    {
+	ContextResolver<SPARQLEndpointOrigin> cr = getProviders().getContextResolver(SPARQLEndpointOrigin.class, null);
+	return cr.getContext(SPARQLEndpointOrigin.class);
+    }
+
     @Override
     public Injectable<SPARQLEndpoint> getInjectable(ComponentContext cc, Context context)
     {
@@ -85,7 +92,7 @@ public class SPARQLEndpointProvider extends PerRequestTypeInjectableProvider<Con
 
     public SPARQLEndpoint getSPARQLEndpoint()
     {
-        return SPARQLEndpointFactory.createProxy(getRequest(), getServletContext(), getDataManager());
+        return SPARQLEndpointFactory.createProxy(getRequest(), getServletContext(), getSPARQLEndpointOrigin(), getDataManager());
     }
-    
+
 }

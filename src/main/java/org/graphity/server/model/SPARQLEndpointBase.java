@@ -82,7 +82,7 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
 	//this.resource = endpoint;
 	this.request = request;
 	this.servletContext = servletContext;
-	if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase with endpoint");        
+	if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase");        
     }
     
     /**

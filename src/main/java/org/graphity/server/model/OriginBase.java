@@ -21,7 +21,20 @@ package org.graphity.server.model;
  *
  * @author Martynas
  */
-public interface GraphStoreProxy extends GraphStore, HTTPProxy
+public class OriginBase implements Origin
 {
+    
+    private final String uri;
+    
+    public OriginBase(String uri)
+    {
+        this.uri = uri;
+    }
+    
+    @Override
+    public String getURI()
+    {
+        return uri;
+    }
     
 }

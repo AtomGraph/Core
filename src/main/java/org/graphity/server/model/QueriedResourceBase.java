@@ -73,7 +73,7 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
 	if (endpoint == null) throw new IllegalArgumentException("SPARQLEndpoint cannot be null");
 	this.endpoint = endpoint;
     }
-
+    
     /**
      * Returns RDF description of this resource.
      * The description is the result of a query executed on the SPARQL endpoint of this resource.
@@ -175,6 +175,7 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
      * @return SPARQL endpoint resource
      */
     @Override
+    @Path("/sparql")
     public SPARQLEndpoint getSPARQLEndpoint()
     {
 	return endpoint;

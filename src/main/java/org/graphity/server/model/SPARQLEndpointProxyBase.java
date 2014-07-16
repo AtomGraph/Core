@@ -20,18 +20,10 @@ package org.graphity.server.model;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.ResourceFactory;
-import com.hp.hpl.jena.sparql.engine.http.Service;
 import com.hp.hpl.jena.update.UpdateRequest;
-import javax.naming.ConfigurationException;
 import javax.servlet.ServletContext;
-import javax.ws.rs.Path;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
 import org.graphity.server.util.DataManager;
-import org.graphity.server.vocabulary.GS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,11 +31,12 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas
  */
-@Path("/sparql")
-public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQLEndpointProxy
+//@Path("/sparql")
+public class SPARQLEndpointProxyBase extends SPARQLEndpointBase
 {
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointProxyBase.class);
 
+    private final Origin origin;
     private final DataManager dataManager;
 
     /*
@@ -56,10 +49,12 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
     }
     */
     
-    protected SPARQLEndpointProxyBase(Request request, ServletContext servletContext, DataManager dataManager)
+    protected SPARQLEndpointProxyBase(Request request, ServletContext servletContext, SPARQLEndpointOrigin origin, DataManager dataManager)
     {
         super(request, servletContext);
+	if (origin == null) throw new IllegalArgumentException("Origin cannot be null");
 	if (dataManager == null) throw new IllegalArgumentException("DataManager cannot be null");
+        this.origin = origin;
         this.dataManager = dataManager;
     }
     
@@ -69,40 +64,10 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
      * 
      * @return endpoint resource
      */
-    @Override
-    public Resource getOrigin()
+    public Origin getOrigin()
     {
-        return getOrigin(getServletContext());
-    }
-
-    /**
-     * Returns SPARQL endpoint resource for supplied webapp context configuration.
-     * Uses <code>gs:endpoint</code> context parameter value as endpoint URI.
-     * 
-     * @param servletContext context config
-     * @return endpoint resource
-     */
-    public Resource getOrigin(ServletContext servletContext)
-    {
-        if (servletContext == null) throw new IllegalArgumentException("ServletContext cannot be null");
-
-        try
-        {
-            Object endpointUri = servletContext.getInitParameter(GS.endpoint.getURI());
-            if (endpointUri == null) throw new ConfigurationException("SPARQL endpoint not configured (gs:endpoint not set in web.xml)");
-
-            String authUser = (String)servletContext.getInitParameter(Service.queryAuthUser.getSymbol());
-            String authPwd = (String)servletContext.getInitParameter(Service.queryAuthPwd.getSymbol());
-            if (authUser != null && authPwd != null)
-                getDataManager().putAuthContext(endpointUri.toString(), authUser, authPwd);
-
-            return ResourceFactory.createResource(endpointUri.toString());
-        }
-        catch (ConfigurationException ex)
-        {
-            if (log.isErrorEnabled()) log.warn("SPARQL endpoint configuration error", ex);
-            throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);            
-        }
+        //return getOrigin(getServletContext());
+        return origin;
     }
 
     @Override

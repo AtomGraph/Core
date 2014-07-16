@@ -54,9 +54,9 @@ public class GraphStoreFactory
      * @param servletContext webapp context
      * @return graph store instance
      */
-    public static GraphStoreProxy createProxy(Request request, ServletContext servletContext, DataManager dataManager)
+    public static GraphStore createProxy(Request request, ServletContext servletContext, GraphStoreOrigin origin, DataManager dataManager)
     {
-	return new GraphStoreProxyBase(request, servletContext, dataManager);
+	return new GraphStoreProxyBase(request, servletContext, origin, dataManager);
     }
 
 }
