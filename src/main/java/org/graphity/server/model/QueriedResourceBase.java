@@ -175,7 +175,6 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
      * @return SPARQL endpoint resource
      */
     @Override
-    @Path("/sparql")
     public SPARQLEndpoint getSPARQLEndpoint()
     {
 	return endpoint;

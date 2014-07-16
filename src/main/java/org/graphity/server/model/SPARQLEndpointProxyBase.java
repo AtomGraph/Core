@@ -22,6 +22,7 @@ import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.update.UpdateRequest;
 import javax.servlet.ServletContext;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.Request;
 import org.graphity.server.util.DataManager;
 import org.slf4j.Logger;
@@ -31,7 +32,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas
  */
-//@Path("/sparql")
+@Path("/sparql")
 public class SPARQLEndpointProxyBase extends SPARQLEndpointBase
 {
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointProxyBase.class);
