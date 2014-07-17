@@ -15,7 +15,7 @@
  *
  */
 
-package org.graphity.server.model;
+package org.graphity.server.model.impl;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import java.util.List;

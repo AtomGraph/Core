@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.graphity.server.model;
+package org.graphity.server.model.impl;
 
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
@@ -25,6 +25,8 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import org.graphity.server.model.QueriedResource;
+import org.graphity.server.model.SPARQLEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

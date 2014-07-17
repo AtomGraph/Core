@@ -15,7 +15,7 @@
  *
  */
 
-package org.graphity.server.model;
+package org.graphity.server.model.impl;
 
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.ResultSetRewindable;
@@ -23,7 +23,10 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.update.UpdateRequest;
 import javax.servlet.ServletContext;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
+import org.graphity.server.model.Origin;
+import org.graphity.server.model.SPARQLEndpointOrigin;
 import org.graphity.server.util.DataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,18 +42,8 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase
 
     private final Origin origin;
     private final DataManager dataManager;
-
-    /*
-    public SPARQLEndpointProxyBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletContext servletContext, @Context DataManager dataManager)
-    {
-        this(ResourceFactory.createResource(uriInfo.getBaseUriBuilder().
-                path(SPARQLEndpointProxyBase.class).
-                build().
-                toString()), request, servletContext, dataManager);
-    }
-    */
     
-    protected SPARQLEndpointProxyBase(Request request, ServletContext servletContext, SPARQLEndpointOrigin origin, DataManager dataManager)
+    public SPARQLEndpointProxyBase(@Context Request request, @Context ServletContext servletContext, @Context SPARQLEndpointOrigin origin, @Context DataManager dataManager)
     {
         super(request, servletContext);
 	if (origin == null) throw new IllegalArgumentException("Origin cannot be null");

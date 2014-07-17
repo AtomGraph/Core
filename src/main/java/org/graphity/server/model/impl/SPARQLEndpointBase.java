@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.graphity.server.model;
+package org.graphity.server.model.impl;
 
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
@@ -34,6 +34,7 @@ import javax.ws.rs.core.*;
 import org.apache.jena.atlas.web.ContentType;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFLanguages;
+import org.graphity.server.model.SPARQLEndpoint;
 import org.graphity.server.vocabulary.GS;
 import org.graphity.util.ResultSetUtils;
 import org.slf4j.Logger;
@@ -60,7 +61,6 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
 			    org.graphity.server.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE).
 			add().build();
     
-    //private final Resource resource;
     private final Request request;
     private final ServletContext servletContext;
     
@@ -72,14 +72,11 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
      * @param request current request
      * @param servletContext webapp context
      */
-    protected SPARQLEndpointBase(Request request, ServletContext servletContext)
+    public SPARQLEndpointBase(@Context Request request, @Context ServletContext servletContext)
     {
-	//if (endpoint == null) throw new IllegalArgumentException("Endpoint cannot be null");
-	//if (!endpoint.isURIResource()) throw new IllegalArgumentException("Endpoint must be URI Resource (not a blank node)");
 	if (request == null) throw new IllegalArgumentException("Request cannot be null");
 	if (servletContext == null) throw new IllegalArgumentException("ServletContext cannot be null");
 
-	//this.resource = endpoint;
 	this.request = request;
 	this.servletContext = servletContext;
 	if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase");        

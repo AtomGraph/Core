@@ -15,7 +15,9 @@
  *
  */
 
-package org.graphity.server.model;
+package org.graphity.server.model.impl;
+
+import org.graphity.server.model.SPARQLEndpointOrigin;
 
 /**
  *

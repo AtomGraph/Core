@@ -29,7 +29,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Providers;
 import org.graphity.server.model.GraphStoreOrigin;
-import org.graphity.server.model.GraphStoreOriginBase;
+import org.graphity.server.model.impl.GraphStoreOriginBase;
 import org.graphity.server.util.DataManager;
 import org.graphity.server.vocabulary.GS;
 import org.slf4j.Logger;

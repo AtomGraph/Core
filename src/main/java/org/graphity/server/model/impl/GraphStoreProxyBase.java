@@ -15,13 +15,15 @@
  *
  */
 
-package org.graphity.server.model;
+package org.graphity.server.model.impl;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import javax.servlet.ServletContext;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
+import org.graphity.server.model.GraphStoreOrigin;
+import org.graphity.server.model.Origin;
 import org.graphity.server.util.DataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,14 +39,6 @@ public class GraphStoreProxyBase extends GraphStoreBase
 
     private final Origin origin;
     private final DataManager dataManager;
-
-    /*
-    public GraphStoreProxyBase(@Context Request request, @Context ServletContext servletContext,
-            @Context DataManager dataManager)
-    {
-        this(request, servletContext, dataManager);
-    }
-    */
     
     public GraphStoreProxyBase(@Context Request request, @Context ServletContext servletContext,
             @Context GraphStoreOrigin origin, @Context DataManager dataManager)

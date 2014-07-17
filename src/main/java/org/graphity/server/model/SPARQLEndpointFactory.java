@@ -16,6 +16,7 @@
  */
 package org.graphity.server.model;
 
+import org.graphity.server.model.impl.SPARQLEndpointProxyBase;
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Request;
 import org.graphity.server.util.DataManager;
