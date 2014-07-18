@@ -26,6 +26,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import org.graphity.server.model.Origin;
+import org.graphity.server.model.Proxy;
 import org.graphity.server.model.SPARQLEndpointOrigin;
 import org.graphity.server.util.DataManager;
 import org.slf4j.Logger;
@@ -36,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * @author Martynas
  */
 @Path("/sparql")
-public class SPARQLEndpointProxyBase extends SPARQLEndpointBase
+public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements Proxy
 {
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointProxyBase.class);
 

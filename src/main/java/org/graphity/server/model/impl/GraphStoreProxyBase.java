@@ -24,6 +24,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import org.graphity.server.model.GraphStoreOrigin;
 import org.graphity.server.model.Origin;
+import org.graphity.server.model.Proxy;
 import org.graphity.server.util.DataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author Martynas
  */
 @Path("/service") // not standard
-public class GraphStoreProxyBase extends GraphStoreBase
+public class GraphStoreProxyBase extends GraphStoreBase implements Proxy
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreProxyBase.class);
 
