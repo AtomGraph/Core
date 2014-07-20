@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas
  */
-public class GraphStoreProvider extends PerRequestTypeInjectableProvider<Context, GraphStore>
+public class GraphStoreProvider extends PerRequestTypeInjectableProvider<Context, GraphStore> implements ContextResolver<GraphStore>
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreProvider.class);
     
@@ -92,6 +92,12 @@ public class GraphStoreProvider extends PerRequestTypeInjectableProvider<Context
     public GraphStore getGraphStore()
     {
         return GraphStoreFactory.createProxy(getRequest(), getServletContext(), getGraphStoreOrigin(), getDataManager());
+    }
+
+    @Override
+    public GraphStore getContext(Class<?> type)
+    {
+        return getGraphStore();
     }
 
 }

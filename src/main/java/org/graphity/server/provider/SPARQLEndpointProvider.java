@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 @Provider
-public class SPARQLEndpointProvider extends PerRequestTypeInjectableProvider<Context, SPARQLEndpoint>
+public class SPARQLEndpointProvider extends PerRequestTypeInjectableProvider<Context, SPARQLEndpoint> implements ContextResolver<SPARQLEndpoint>
 {
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointProvider.class);
 
@@ -93,6 +93,12 @@ public class SPARQLEndpointProvider extends PerRequestTypeInjectableProvider<Con
     public SPARQLEndpoint getSPARQLEndpoint()
     {
         return SPARQLEndpointFactory.createProxy(getRequest(), getServletContext(), getSPARQLEndpointOrigin(), getDataManager());
+    }
+
+    @Override
+    public SPARQLEndpoint getContext(Class<?> type)
+    {
+        return getSPARQLEndpoint();
     }
 
 }
