@@ -69,7 +69,7 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
     @Override
     public Model loadModel(Query query)
     {
-	if (log.isDebugEnabled()) log.debug("Loading Model from SPARQL endpoint: {} using Query: {}", getOrigin(), query);
+	if (log.isDebugEnabled()) log.debug("Loading Model from SPARQL endpoint: {} using Query: {}", getOrigin().getURI(), query);
 	return getDataManager().loadModel(getOrigin().getURI(), query);
     }
 
