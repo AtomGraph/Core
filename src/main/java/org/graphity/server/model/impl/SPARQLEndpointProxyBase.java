@@ -62,7 +62,6 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
     @Override
     public Origin getOrigin()
     {
-        //return getOrigin(getServletContext());
         return origin;
     }
 
