@@ -203,7 +203,8 @@ public class DataManager extends FileManager
     public Model loadModel(Dataset dataset, Query query)
     {
 	if (log.isDebugEnabled()) log.debug("Local Dataset Query: {}", query);
-	if (query == null) throw new IllegalArgumentException("Query must be not null");
+	if (dataset == null) throw new IllegalArgumentException("Dataset must be not null");
+        if (query == null) throw new IllegalArgumentException("Query must be not null");
 	
 	QueryExecution qex = QueryExecutionFactory.create(query, dataset);
 	try
@@ -316,7 +317,8 @@ public class DataManager extends FileManager
     public ResultSetRewindable loadResultSet(Dataset dataset, Query query)
     {
 	if (log.isDebugEnabled()) log.debug("Local Dataset Query: {}", query);
-	if (query == null) throw new IllegalArgumentException("Query must be not null");
+	if (dataset == null) throw new IllegalArgumentException("Dataset must be not null");
+        if (query == null) throw new IllegalArgumentException("Query must be not null");
 	
 	QueryExecution qex = QueryExecutionFactory.create(query, dataset);
 	try
@@ -428,7 +430,8 @@ public class DataManager extends FileManager
     public boolean ask(Dataset dataset, Query query)
     {
 	if (log.isDebugEnabled()) log.debug("Local Dataset Query: {}", query);
-	if (query == null) throw new IllegalArgumentException("Query must be not null");
+	if (dataset == null) throw new IllegalArgumentException("Dataset must be not null");
+        if (query == null) throw new IllegalArgumentException("Query must be not null");
 
 	QueryExecution qex = QueryExecutionFactory.create(query, dataset);
 	try
