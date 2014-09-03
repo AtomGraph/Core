@@ -27,11 +27,12 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ContextResolver;
+import javax.ws.rs.ext.Provider;
 import javax.ws.rs.ext.Providers;
 import org.graphity.server.model.SPARQLEndpointOrigin;
 import org.graphity.server.model.impl.SPARQLEndpointOriginBase;
 import org.graphity.server.util.DataManager;
-import org.graphity.server.vocabulary.GS;
+import org.graphity.server.vocabulary.SD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +40,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas
  */
+@Provider
 public class SPARQLEndpointOriginProvider extends PerRequestTypeInjectableProvider<Context, SPARQLEndpointOrigin> implements ContextResolver<SPARQLEndpointOrigin>
 {
     
@@ -89,7 +91,7 @@ public class SPARQLEndpointOriginProvider extends PerRequestTypeInjectableProvid
 
     public SPARQLEndpointOrigin getSPARQLEndpointOrigin()
     {
-        return getSPARQLEndpointOrigin(getServletContext());
+        return getSPARQLEndpointOrigin(getServletContext(), SD.endpoint.getURI());
     }
     
     /**
@@ -99,14 +101,15 @@ public class SPARQLEndpointOriginProvider extends PerRequestTypeInjectableProvid
      * @param servletContext context config
      * @return endpoint resource
      */
-    public SPARQLEndpointOrigin getSPARQLEndpointOrigin(ServletContext servletContext)
+    public SPARQLEndpointOrigin getSPARQLEndpointOrigin(ServletContext servletContext, String property)
     {
         if (servletContext == null) throw new IllegalArgumentException("ServletContext cannot be null");
+        if (property == null) throw new IllegalArgumentException("Property cannot be null");
 
         try
         {
-            Object endpointUri = servletContext.getInitParameter(GS.endpoint.getURI());
-            if (endpointUri == null) throw new ConfigurationException("SPARQL endpoint not configured (gs:endpoint not set in web.xml)");
+            Object endpointUri = servletContext.getInitParameter(property);
+            if (endpointUri == null) throw new ConfigurationException("SPARQL endpoint not configured ('" + property + "' not set in web.xml)");
 
             String authUser = (String)servletContext.getInitParameter(Service.queryAuthUser.getSymbol());
             String authPwd = (String)servletContext.getInitParameter(Service.queryAuthPwd.getSymbol());

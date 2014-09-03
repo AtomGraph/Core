@@ -24,6 +24,7 @@ import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.ext.ContextResolver;
+import javax.ws.rs.ext.Provider;
 import javax.ws.rs.ext.Providers;
 import org.graphity.server.model.GraphStore;
 import org.graphity.server.model.GraphStoreFactory;
@@ -36,6 +37,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas
  */
+@Provider
 public class GraphStoreProvider extends PerRequestTypeInjectableProvider<Context, GraphStore> implements ContextResolver<GraphStore>
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreProvider.class);

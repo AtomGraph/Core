@@ -27,6 +27,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ContextResolver;
+import javax.ws.rs.ext.Provider;
 import javax.ws.rs.ext.Providers;
 import org.graphity.server.model.GraphStoreOrigin;
 import org.graphity.server.model.impl.GraphStoreOriginBase;
@@ -39,6 +40,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas
  */
+@Provider
 public class GraphStoreOriginProvider extends PerRequestTypeInjectableProvider<Context, GraphStoreOrigin> implements ContextResolver<GraphStoreOrigin>
 {
     
@@ -89,7 +91,7 @@ public class GraphStoreOriginProvider extends PerRequestTypeInjectableProvider<C
     
     public GraphStoreOrigin getGraphStoreOrigin()
     {
-        return getGraphStoreOrigin(getServletContext());
+        return getGraphStoreOrigin(getServletContext(), GS.graphStore.getURI());
     }
     
      /**
@@ -99,12 +101,15 @@ public class GraphStoreOriginProvider extends PerRequestTypeInjectableProvider<C
      * @param servletContext webapp context
      * @return graph store resource
      */
-    public GraphStoreOrigin getGraphStoreOrigin(ServletContext servletContext)
+    public GraphStoreOrigin getGraphStoreOrigin(ServletContext servletContext, String property)
     {
+        if (servletContext == null) throw new IllegalArgumentException("ServletContext cannot be null");
+        if (property == null) throw new IllegalArgumentException("Property cannot be null");
+
         try
         {
-            Object storeUri = servletContext.getInitParameter(GS.graphStore.getURI());
-            if (storeUri == null) throw new ConfigurationException("Graph Store not configured (gs:graphStore not set in web.xml)");
+            Object storeUri = servletContext.getInitParameter(property);
+            if (storeUri == null) throw new ConfigurationException("Graph Store not configured ('" + property + "' not set in web.xml)");
 
             String authUser = (String)servletContext.getInitParameter(Service.queryAuthUser.getSymbol());
             String authPwd = (String)servletContext.getInitParameter(Service.queryAuthPwd.getSymbol());
