@@ -31,23 +31,6 @@ import org.slf4j.LoggerFactory;
 public class SPARQLEndpointFactory
 {
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointFactory.class);
-
-    /**
-     * Creates new SPARQL endpoint from application configuration and request metadata.
-     * 
-     * @param uriInfo URI information of the request
-     * @param request request
-     * @param servletContext webapp context
-     * @param dataManager RDF data manager for this endpoint
-     * @return a new endpoint
-     */
-    /*
-    public static SPARQLEndpointProxy createProxy(UriInfo uriInfo, Request request, ServletContext servletContext,
-            DataManager dataManager)
-    {
-	return new SPARQLEndpointProxyBase(uriInfo, request, servletContext, dataManager);
-    }
-    */
     
     /**
      * Creates new SPARQL endpoint from explicit URI resource and request metadata.

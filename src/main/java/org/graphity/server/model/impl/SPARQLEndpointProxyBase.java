@@ -47,8 +47,8 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
     public SPARQLEndpointProxyBase(@Context Request request, @Context ServletContext servletContext, @Context SPARQLEndpointOrigin origin, @Context DataManager dataManager)
     {
         super(request, servletContext);
-	if (origin == null) throw new IllegalArgumentException("Origin cannot be null");
-	if (dataManager == null) throw new IllegalArgumentException("DataManager cannot be null");
+        if (origin == null) throw new IllegalArgumentException("SPARQLEndpointOrigin cannot be null");
+        if (dataManager == null) throw new IllegalArgumentException("DataManager cannot be null");
         this.origin = origin;
         this.dataManager = dataManager;
     }

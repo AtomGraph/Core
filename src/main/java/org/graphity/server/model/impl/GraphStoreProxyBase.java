@@ -45,8 +45,8 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
             @Context GraphStoreOrigin origin, @Context DataManager dataManager)
     {
         super(request, servletContext);
-	if (origin == null) throw new IllegalArgumentException("Origin cannot be null");
-	if (dataManager == null) throw new IllegalArgumentException("DataManager cannot be null");
+        if (origin == null) throw new IllegalArgumentException("GraphStoreOrigin cannot be null");
+        if (dataManager == null) throw new IllegalArgumentException("DataManager cannot be null");
         this.origin = origin;
         this.dataManager = dataManager;
     }

@@ -6,14 +6,17 @@
     id="graphity-server" version="3.0">
     <display-name>Graphity Server</display-name>
     <description>Generic Linked Data server</description>
+    <!--
     <context-param>
-        <param-name>http://server.graphity.org/ontology#endpoint</param-name>
+        <param-name>http://www.w3.org/ns/sparql-service-description#endpoint</param-name>
         <param-value>http://graphity.dydra.com/graphity/server/sparql</param-value>
     </context-param>
     <context-param>
         <param-name>http://server.graphity.org/ontology#graphStore</param-name>
         <param-value>http://graphity.dydra.com/graphity/server/service</param-value>
     </context-param>
+    -->
+    <!--
     <context-param>
         <param-name>http://jena.hpl.hp.com/Service#queryAuthUser</param-name>
         <param-value>username</param-value>
@@ -22,6 +25,7 @@
         <param-name>http://jena.hpl.hp.com/Service#queryAuthPwd</param-name>
         <param-value>password</param-value>
     </context-param>
+    -->
     <context-param>
         <param-name>http://server.graphity.org/ontology#preemptiveAuth</param-name>
         <param-value>true</param-value>

@@ -44,10 +44,8 @@ public class GS
     
     /** <p>The namespace of the vocabulary as a resource</p> */
     public static final Resource NAMESPACE = m_model.createResource( NS );
-        
-    // public static final OntClass Service = m_model.createClass( NS + "Service" );
 
-    public static final ObjectProperty endpoint = m_model.createObjectProperty( NS + "endpoint" );
+    //public static final ObjectProperty endpoint = m_model.createObjectProperty( NS + "endpoint" );
 
     public static final ObjectProperty graphStore = m_model.createObjectProperty( NS + "graphStore" );
     

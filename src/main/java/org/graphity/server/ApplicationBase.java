@@ -16,12 +16,8 @@
  */
 package org.graphity.server;
 
-import com.hp.hpl.jena.ontology.OntDocumentManager;
 import java.util.HashSet;
 import java.util.Set;
-import javax.annotation.PostConstruct;
-import javax.servlet.ServletContext;
-import javax.ws.rs.core.Context;
 import org.graphity.server.model.impl.GraphStoreProxyBase;
 import org.graphity.server.model.impl.QueriedResourceBase;
 import org.graphity.server.model.impl.SPARQLEndpointProxyBase;
@@ -40,7 +36,6 @@ import org.slf4j.LoggerFactory;
  */
 public class ApplicationBase extends javax.ws.rs.core.Application
 {
-    @Context ServletContext servletContext;
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationBase.class);
 
@@ -64,24 +59,6 @@ public class ApplicationBase extends javax.ws.rs.core.Application
         singletons.add(new SPARQLEndpointOriginProvider());
         singletons.add(new GraphStoreOriginProvider());
         singletons.add(new SPARQLEndpointProvider());
-    }
-
-    /**
-     * Initializes (post construction) DataManager, its LocationMapper and Locators, and Context
-     * 
-     * @see org.graphity.util.manager.DataManager
-     * @see org.graphity.util.locator
-     * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/util/FileManager.html">FileManager</a>
-     * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/util/LocationMapper.html">LocationMapper</a>
-     * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/util/Locator.html">Locator</a>
-     * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/sparql/util/Context.html">Context</a>
-     */
-    @PostConstruct
-    public void init()
-    {
-	if (log.isDebugEnabled()) log.debug("Application.init() with SerlvetContext: {}", getServletContext());
-	// WARNING! ontology caching can cause concurrency/consistency problems
-	OntDocumentManager.getInstance().setCacheModels(false);
     }
     
     /**
@@ -108,16 +85,6 @@ public class ApplicationBase extends javax.ws.rs.core.Application
     public Set<Object> getSingletons()
     {
 	return singletons;
-    }
-
-    /**
-     * Returns servlet context
-     * 
-     * @return injected ServletContext
-     */
-    public ServletContext getServletContext()
-    {
-	return servletContext;
     }
 
 }
