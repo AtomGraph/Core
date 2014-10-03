@@ -27,26 +27,13 @@ import org.graphity.server.model.impl.QueriedResourceBase;
  */
 public class LinkedDataResourceFactory
 {
-    /**
-     * Creates new Linked Data resource from explicit URI resource.
-     * 
-     * @param resource RDF resource
-     * @return a new resource
-     */
-    /*
-    public static LinkedDataResource createResource(Resource resource)
-    {
-	return new LinkedDataResourceBase(resource, null);
-    }
-    */
 
     /**
-     * Creates new Linked Data resource from explicit URI resource. Provides cache control.
+     * Creates new Linked Data resource backed by a SPARQL endpoint.
      * 
-     * @param resource RDF resource
-     * @param request request object
-     * @param servletContext webapp context
-     * @return a new resource
+     * @param uriInfo URI information of the current request
+     * @param endpoint SPARQL endpoint backing the application
+     * @return a new Linked Data resource
      */
     public static LinkedDataResource create(UriInfo uriInfo, SPARQLEndpoint endpoint)
     {

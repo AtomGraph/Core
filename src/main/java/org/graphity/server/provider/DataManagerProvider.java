@@ -32,8 +32,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author Martynas
+ * JAX-RS provider for data manager class.
+ * Needs to be registered in the application.
+ * 
+ * @author Martynas Jusevičius <martynas@graphity.org>
+ * @see org.graphity.server.util.DataManager
  */
 @Provider
 public class DataManagerProvider extends PerRequestTypeInjectableProvider<Context, DataManager> implements ContextResolver<DataManager>

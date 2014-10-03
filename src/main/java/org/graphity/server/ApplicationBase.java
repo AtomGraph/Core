@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Graphity Server JAX-RS application base class.
- * Can be extended or used as it is (needs to be registered in web.xml).
+ * Can be extended or used as it is (needs to be configured in web.xml).
  * Needs to register JAX-RS root resource classes and providers.
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>

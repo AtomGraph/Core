@@ -56,8 +56,6 @@ public abstract class LinkedDataResourceBase implements LinkedDataResource
      * The URI of the resource being created is the absolute path of the current request URI.
      * 
      * @param uriInfo URI information of the 
-     * @param request current request
-     * @param servletContext webapp context
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html#getAbsolutePath()">JAX-RS UriInfo.getAbsolutePath()</a>
      */
     public LinkedDataResourceBase(@Context UriInfo uriInfo)
@@ -68,46 +66,15 @@ public abstract class LinkedDataResourceBase implements LinkedDataResource
     /**
      * Protected constructor. Not suitable for JAX-RS but can be used when subclassing.
      * 
-     * @param resource This resource as RDF resource (must be URI resource, not a blank node)
-     * @param request current request
-     * @param servletContext webapp context
+     * @param uri URI string of this resource
      */
     protected LinkedDataResourceBase(String uri)
     {
 	if (uri == null) throw new IllegalArgumentException("URI cannot be null");
-	//if (request == null) throw new IllegalArgumentException("Request cannot be null");
-	//if (!resource.isURIResource()) throw new IllegalArgumentException("Resource must be URI Resource (not a blank node)");
-	//if (servletContext == null) throw new IllegalArgumentException("ServletContext cannot be null");
 
-	this.uri = uri;
-        //this.request = request;
-	//this.servletContext = servletContext;
-	
+	this.uri = uri;	
 	if (log.isDebugEnabled()) log.debug("Creating LinkedDataResource from Resource with URI: {}", uri);
     }
-
-    /**
-     * Handles GET request and returns response with RDF description of this resource.
-     * By default, the whole model of this resource is returned. If the description is empty, 404 Not Found is
-     * returned.
-     * 
-     * @return response with RDF description
-     */
-    /*
-    @GET
-    @Override
-    public Response get()
-    {
-	if (getModel().isEmpty())
-	{
-	    if (log.isTraceEnabled()) log.trace("DESCRIBE Model is empty; returning 404 Not Found");
-	    throw new WebApplicationException(Response.Status.NOT_FOUND);
-	}
-	
-	if (log.isDebugEnabled()) log.debug("Returning @GET Response with {} statements in Model", getModel().size());
-	return getResponse(getModel());
-    }
-    */
     
     /**
      * Returns response for the given RDF model.
@@ -134,7 +101,7 @@ public abstract class LinkedDataResourceBase implements LinkedDataResource
     }
 
     /**
-     * Builds a list of acceptable response variants/
+     * Builds a list of acceptable response variants
      * 
      * @return supported variants
      */
@@ -173,31 +140,6 @@ public abstract class LinkedDataResourceBase implements LinkedDataResource
     {
 	return uri;
     }
-    
-    /**
-     * Returns this resource as Jena RDF resource
-     * 
-     * @return RDF resource
-     */
-    /*
-    private Resource getResource()
-    {
-	return uri;
-    }
-    */
-    
-    /**
-     * Returns RDF model of this resource
-     * 
-     * @return RDF model of this resource
-     */
-    /*
-    @Override
-    public final Model getModel()
-    {
-	return getResource().getModel();
-    }
-    */
     
     /**
      * Returns current request.

@@ -18,8 +18,9 @@
 package org.graphity.server.model;
 
 /**
- *
- * @author Martynas
+ * A class representing SPARQL endpoint origin resource when the application works as a proxy.
+ * 
+ * @author Martynas Jusevičius <martynas@graphity.org>
  */
 public interface SPARQLEndpointOrigin extends Origin
 {

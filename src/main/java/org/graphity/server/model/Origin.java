@@ -18,12 +18,19 @@
 package org.graphity.server.model;
 
 /**
- *
- * @author Martynas
+ * A class representing the origin resource when the application works as an HTTP proxy.
+ * 
+ * @author Martynas Jusevičius <martynas@graphity.org>
+ * @see Proxy
  */
 public interface Origin
 {
     
+    /**
+     * Returns the URI of origin resource.
+     * 
+     * @return origin URI
+     */
     public String getURI();
     
 }

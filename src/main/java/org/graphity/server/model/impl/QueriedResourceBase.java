@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * Base class of generic read-only Linked Data resources with RDF representations queried from SPARQL endpoints.
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
- * @see SPARQLEndpoint
+ * @see org.graphity.server.model.SPARQLEndpoint
  * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/Query.html">ARQ Query</a>
  */
 @Path("{path: .*}")
@@ -49,9 +49,7 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
      * The URI of the resource being created is the absolute path of the current request URI.
      * 
      * @param uriInfo URI information of the request
-     * @param request current request
-     * @param servletContext webapp context
-     * @param resourceContext resource context
+     * @param endpoint SPARQL endpoint backing this resource
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html">JAX-RS UriInfo</a>
      * @see <a href="http://docs.oracle.com/javaee/7/api/javax/servlet/ServletContext.html">ServletContext</a>
      * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceContext.html">Jersey ResourceContext</a>
@@ -64,10 +62,8 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
     /**
      * Protected constructor. Not suitable for JAX-RS but can be used when subclassing.
      * 
-     * @param resource This resource as RDF resource (must be URI resource, not a blank node)
-     * @param request current request
-     * @param endpoint SPARQL endpoint of this resource
-     * @param servletContext webapp context
+     * @param uri URI of this resource
+     * @param endpoint SPARQL endpoint backing this resource
      */
     protected QueriedResourceBase(String uri, SPARQLEndpoint endpoint)
     {

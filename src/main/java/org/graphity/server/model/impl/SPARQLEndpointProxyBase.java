@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Martynas
+ * @author Martynas Jusevičius <martynas@graphity.org>
  */
 @Path("/sparql")
 public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQLEndpointProxy
@@ -53,12 +53,6 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
         this.dataManager = dataManager;
     }
     
-    /**
-     * Returns configured SPARQL endpoint resource.
-     * This endpoint is a proxy for the remote endpoint.
-     * 
-     * @return endpoint resource
-     */
     @Override
     public Origin getOrigin()
     {

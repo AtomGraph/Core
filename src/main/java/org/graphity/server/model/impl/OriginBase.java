@@ -20,8 +20,9 @@ package org.graphity.server.model.impl;
 import org.graphity.server.model.Origin;
 
 /**
- *
- * @author Martynas
+ * Base class for origin implementation.
+ * 
+ * @author Martynas Jusevičius <martynas@graphity.org>
  */
 public class OriginBase implements Origin
 {

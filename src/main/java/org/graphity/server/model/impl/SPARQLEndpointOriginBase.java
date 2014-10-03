@@ -21,7 +21,7 @@ import org.graphity.server.model.SPARQLEndpointOrigin;
 
 /**
  *
- * @author Martynas
+ * @author Martynas Jusevičius <martynas@graphity.org>
  */
 public class SPARQLEndpointOriginBase extends OriginBase implements SPARQLEndpointOrigin
 {

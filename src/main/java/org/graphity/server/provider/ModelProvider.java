@@ -38,11 +38,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Reads RDF from request body or writes RDF to response.
+ * JAX-RS provider for reading RDF model from request and writing it to response.
  * Needs to be registered in the application.
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
- * @see org.graphity.server.ApplicationBase
  * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/rdf/model/Model.html">Jena Model</a>
  * @see <a href="http://jsr311.java.net/nonav/javadoc/javax/ws/rs/ext/MessageBodyReader.html">JAX-RS MessageBodyReader</a>
  * @see <a href="http://jsr311.java.net/nonav/javadoc/javax/ws/rs/ext/MessageBodyWriter.html">JAX-RS MessageBodyWriter</a>

@@ -17,7 +17,8 @@
 package org.graphity.server.auth;
 
 /**
- *
+ * Exception that can be thrown when authentication fails.
+ * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 public class AuthenticationException extends RuntimeException

@@ -23,36 +23,21 @@ import javax.ws.rs.core.Request;
 import org.graphity.server.util.DataManager;
 
 /**
- * A Factory class for creating new SPARQL Graph Store proxies.
+ * A factory class for creating new SPARQL Graph Store proxies.
  * Provides static convenience methods.
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 public class GraphStoreFactory
 {
-    /**
-     * Creates new GraphStore from application configuration.
-     * 
-     * @param dataManager RDF data manager for this graph store
-     * @param uriInfo URI information of the request
-     * @param request current request
-     * @param servletContext webapp context
-     * @return graph store instance
-     */
-    /*
-    public static GraphStoreProxy createGraphStoreProxy(UriInfo uriInfo, Request request, ServletContext servletContext, DataManager dataManager)
-    {
-	return new GraphStoreProxyBase(uriInfo, request, servletContext, dataManager);
-    }
-    */
     
     /**
      * Creates new GraphStore from explicit URI resource.
      * 
-     * @param graphStore remote graph store resource
-     * @param dataManager RDF data manager for this graph store
      * @param request current request
-     * @param servletContext webapp context
+     * @param servletContext servlet context
+     * @param origin remote graph store origin
+     * @param dataManager RDF data manager for this graph store
      * @return graph store instance
      */
     public static GraphStore createProxy(Request request, ServletContext servletContext, GraphStoreOrigin origin, DataManager dataManager)

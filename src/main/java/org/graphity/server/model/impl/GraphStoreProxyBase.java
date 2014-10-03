@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Martynas
+ * @author Martynas Jusevičius <martynas@graphity.org>
  */
 @Path("/service") // not standard
 public class GraphStoreProxyBase extends GraphStoreBase implements GraphStoreProxy

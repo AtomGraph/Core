@@ -33,10 +33,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Proxy implementation of SPARQL Graph Store.
- * This class does not natively manage the RDF store. It forwards the requests to a remote Graph Store service.
+ * Base class for SPARQL Graph Stores.
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
+ * @see org.graphity.server.model.GraphStore
  */
 public abstract class GraphStoreBase implements GraphStore
 {

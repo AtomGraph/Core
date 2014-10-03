@@ -33,8 +33,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * JAX-RS provider for SPARQL endpoint.
+ * Needs to be registered in the application.
+ * 
  * @author Martynas Jusevičius <martynas@graphity.org>
+ * @see org.graphity.server.model.SPARQLEndpoint
  */
 @Provider
 public class SPARQLEndpointProvider extends PerRequestTypeInjectableProvider<Context, SPARQLEndpoint> implements ContextResolver<SPARQLEndpoint>

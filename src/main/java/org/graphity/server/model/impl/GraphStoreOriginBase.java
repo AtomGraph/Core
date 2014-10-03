@@ -21,7 +21,7 @@ import org.graphity.server.model.GraphStoreOrigin;
 
 /**
  *
- * @author Martynas
+ * @author Martynas Jusevičius <martynas@graphity.org>
  */
 public class GraphStoreOriginBase extends OriginBase implements GraphStoreOrigin
 {

@@ -37,8 +37,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author Martynas
+ * JAX-RS provider for SPARQL endpoint origin.
+ * Needs to be registered in the application.
+ * 
+ * @author Martynas Jusevičius <martynas@graphity.org>
+ * @see org.graphity.server.model.SPARQLEndpointOrigin
  */
 @Provider
 public class SPARQLEndpointOriginProvider extends PerRequestTypeInjectableProvider<Context, SPARQLEndpointOrigin> implements ContextResolver<SPARQLEndpointOrigin>
@@ -89,17 +92,23 @@ public class SPARQLEndpointOriginProvider extends PerRequestTypeInjectableProvid
         return getSPARQLEndpointOrigin();
     }
 
+    /**
+     * Returns configured SPARQL endpoint origin.
+     * Uses <code>sd:endpoint</code> context parameter value as endpoint URI.
+     * 
+     * @return configured origin
+     */
     public SPARQLEndpointOrigin getSPARQLEndpointOrigin()
     {
         return getSPARQLEndpointOrigin(getServletContext(), SD.endpoint.getURI());
     }
     
     /**
-     * Returns SPARQL endpoint resource for supplied webapp context configuration.
-     * Uses <code>gs:endpoint</code> context parameter value as endpoint URI.
+     * Returns SPARQL endpoint origin for supplied webapp context configuration.
      * 
      * @param servletContext context config
-     * @return endpoint resource
+     * @param property configuration property string
+     * @return endpoint origin
      */
     public SPARQLEndpointOrigin getSPARQLEndpointOrigin(ServletContext servletContext, String property)
     {

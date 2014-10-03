@@ -32,11 +32,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Reads SPARQL Update from request body.
+ * JAX-RS provider for reading SPARQL Update from request body.
  * Needs to be registered in the application.
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
- * @see org.graphity.server.ApplicationBase
  * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/update/UpdateRequest.html">Jena UpdateRequest</a>
  * @see <a href="http://jsr311.java.net/nonav/javadoc/javax/ws/rs/ext/MessageBodyReader.html">JAX-RS MessageBodyReader</a>
  */

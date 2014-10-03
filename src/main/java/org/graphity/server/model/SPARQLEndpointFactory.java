@@ -35,9 +35,9 @@ public class SPARQLEndpointFactory
     /**
      * Creates new SPARQL endpoint from explicit URI resource and request metadata.
      * 
-     * @param endpoint endpoint resource
      * @param request request
      * @param servletContext webapp context
+     * @param origin proxy origin
      * @param dataManager RDF data manager for this endpoint
      * @return a new endpoint
      */

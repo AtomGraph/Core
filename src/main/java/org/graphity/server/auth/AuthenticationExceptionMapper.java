@@ -23,7 +23,8 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 /**
- *
+ * Maps authentication exception to response.
+ * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 @Provider

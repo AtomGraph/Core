@@ -37,8 +37,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author Martynas
+ * JAX-RS provider for graph store origin.
+ * Needs to be registered in the application.
+ * 
+ * @author Martynas Jusevičius <martynas@graphity.org>
+ * @see org.graphity.server.model.GraphStoreOrigin
  */
 @Provider
 public class GraphStoreOriginProvider extends PerRequestTypeInjectableProvider<Context, GraphStoreOrigin> implements ContextResolver<GraphStoreOrigin>
@@ -88,18 +91,24 @@ public class GraphStoreOriginProvider extends PerRequestTypeInjectableProvider<C
     {
         return getGraphStoreOrigin();
     }
-    
+
+    /**
+     * Returns configured Graph Store origin.
+     * Uses <code>gs:graphStore</code> context parameter value from web.xml as graph store URI.
+     * 
+     * @return graph store origin
+     */
     public GraphStoreOrigin getGraphStoreOrigin()
     {
         return getGraphStoreOrigin(getServletContext(), GS.graphStore.getURI());
     }
     
      /**
-     * Returns Graph Store for supplied webapp context configuration.
-     * Uses <code>gs:graphStore</code> context parameter value from web.xml as graph store URI.
+     * Returns Graph Store origin for supplied webapp context configuration.
      * 
      * @param servletContext webapp context
-     * @return graph store resource
+     * @param property configuration property string
+     * @return graph store origin
      */
     public GraphStoreOrigin getGraphStoreOrigin(ServletContext servletContext, String property)
     {

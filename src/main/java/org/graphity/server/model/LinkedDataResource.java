@@ -24,7 +24,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.core.Response;
 
 /**
- * Read-only Linked Data resource. Supports HTTP content negotiation.
+ * Read-write Linked Data resource.
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  */

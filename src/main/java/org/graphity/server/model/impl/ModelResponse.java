@@ -32,7 +32,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Encapsulates the content negotiation logic used to build HTTP response from RDF model.
  * 
- * @author Martynas
+ * @author Martynas Jusevičius <martynas@graphity.org>
+ * @see com.hp.hpl.jena.rdf.model.Model
+ * @see javax.ws.rs.core.Variant
  */
 public class ModelResponse // extends ResponseBuilder
 {
@@ -49,7 +51,6 @@ public class ModelResponse // extends ResponseBuilder
     {
 	if (request == null) throw new IllegalArgumentException("Request cannot be null");
         this.request = request;
-        //this.responseBuilder = ResponseBuilder.newInstance();
     }
 
     public Request getRequest()
@@ -61,25 +62,14 @@ public class ModelResponse // extends ResponseBuilder
     {
 	return new ModelResponse(request);
     }
-
+    
     /**
-     * Builds response of an RDF model
+     * Returns response builder for RDF model.
      * 
      * @param model RDF model
-     * @return response with the representation of the model
+     * @param variants supported response variants
+     * @return 
      */
-    /*
-    public Response getResponse(Model model)
-    {
-	return getResponseBuilder(model).build();
-    }
-
-    public ResponseBuilder getResponseBuilder(Model model)
-    {
-	return getResponseBuilder(model, getVariants());
-    }
-    */
-    
     public ResponseBuilder getResponseBuilder(Model model, List<Variant> variants)
     {
         Variant variant = getRequest().selectVariant(variants);
@@ -103,163 +93,29 @@ public class ModelResponse // extends ResponseBuilder
                     tag(entityTag);
 	}	
     }
-
-    /*
-    // http://stackoverflow.com/questions/5647570/content-type-when-accept-header-is-empty-or-unknown-jax-rs
-    public List<Variant> getVariants()
-    {
-        List<Variant> variants = new ArrayList<>();
-        Iterator<Lang> it = RDFLanguages.getRegisteredLanguages().iterator();
-        
-        // RDF/XML as the default one - the first one gets selected by selectVariant()
-        variants.add(new Variant(new MediaType(Lang.RDFXML.getContentType().getType(),
-                Lang.RDFXML.getContentType().getSubType()),
-            null, null));
-
-        while (it.hasNext())
-        {
-            Lang lang = it.next();
-            if (!lang.equals(Lang.RDFNULL) && !lang.equals(Lang.RDFXML))
-            {
-                ContentType ct = lang.getContentType();
-                //List<String> altTypes = lang.getAltContentTypes();
-                MediaType mediaType = new MediaType(ct.getType(), ct.getSubType()); // MediaType.valueOf(ct.getContentType()
-                variants.add(new Variant(mediaType, null, null));
-            }
-        }
-        
-        return variants;
-    }
-    */
     
+    /**
+     * Calculates hash for an RDF model and a given response variant.
+     * 
+     * @param model RDF model
+     * @param variant response variant
+     * @return hash code
+     */
     public long getModelVariantHash(Model model, Variant variant)
     {
         return ModelUtils.hashModel(model) + variant.hashCode();
     }
     
+    /**
+     * Calculates ETag for an RDF model and a given response variant.
+     * 
+     * @param model RDF model
+     * @param variant response variant
+     * @return entity tag object
+     */
     public EntityTag getEntityTag(Model model, Variant variant)
     {
         return new EntityTag(Long.toHexString(getModelVariantHash(model, variant)));
     }
-
-    /*
-    public ResponseBuilder getResponseBuilder()
-    {
-        return responseBuilder;
-    }
-
-    @Override
-    public Response build()
-    {
-        return getResponseBuilder().build();
-    }
-
-    @Override
-    public ResponseBuilder clone()
-    {
-        return getResponseBuilder().clone();
-    }
-
-    @Override
-    public ResponseBuilder status(int i)
-    {
-        return getResponseBuilder().status(i);
-    }
-
-    @Override
-    public ResponseBuilder entity(Object o)
-    {
-        return getResponseBuilder().entity(o);
-    }
-
-    @Override
-    public ResponseBuilder type(MediaType mt)
-    {
-        return getResponseBuilder().type(mt);
-    }
-
-    @Override
-    public ResponseBuilder type(String string)
-    {
-        return getResponseBuilder().type(string);
-    }
-
-    @Override
-    public ResponseBuilder variant(Variant vrnt)
-    {
-        return getResponseBuilder().variant(vrnt);
-    }
-
-    @Override
-    public ResponseBuilder variants(List<Variant> list)
-    {
-        return getResponseBuilder().variants(list);
-    }
-
-    @Override
-    public ResponseBuilder language(String string)
-    {
-        return getResponseBuilder().language(string);
-    }
-
-    @Override
-    public ResponseBuilder language(Locale locale)
-    {
-        return getResponseBuilder().language(locale);
-    }
-
-    @Override
-    public ResponseBuilder location(URI uri)
-    {
-        return getResponseBuilder().location(uri);
-    }
-
-    @Override
-    public ResponseBuilder contentLocation(URI uri)
-    {
-        return getResponseBuilder().contentLocation(uri);
-    }
-
-    @Override
-    public ResponseBuilder tag(EntityTag et)
-    {
-        return getResponseBuilder().tag(et);
-    }
-
-    @Override
-    public ResponseBuilder tag(String string)
-    {
-        return getResponseBuilder().tag(string);
-    }
-
-    @Override
-    public ResponseBuilder lastModified(Date date)
-    {
-        return getResponseBuilder().lastModified(date);
-    }
-
-    @Override
-    public ResponseBuilder cacheControl(CacheControl cc)
-    {
-        return getResponseBuilder().cacheControl(cc);
-    }
-
-    @Override
-    public ResponseBuilder expires(Date date)
-    {
-        return getResponseBuilder().expires(date);
-    }
-
-    @Override
-    public ResponseBuilder header(String string, Object o)
-    {
-        return getResponseBuilder().header(string, o);
-    }
-
-    @Override
-    public ResponseBuilder cookie(NewCookie... ncs)
-    {
-        return getResponseBuilder().cookie(ncs);
-    }
-    */
+    
 }
