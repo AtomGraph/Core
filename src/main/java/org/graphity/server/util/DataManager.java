@@ -47,9 +47,6 @@ import org.slf4j.LoggerFactory;
 * (c) Copyright 2010 Epimorphics Ltd.
 * All rights reserved.
 *
-* @see org.openjena.fuseki.FusekiLib
-* {@link http://jena.apache.org}
-*
 * @author Martynas Jusevičius <martynas@graphity.org>
 * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/util/FileManager.html">Jena FileManager</a>
 * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/sparql/util/Context.html">ARQ Context</a>

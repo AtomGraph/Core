@@ -49,16 +49,6 @@ import org.slf4j.LoggerFactory;
 public abstract class SPARQLEndpointBase implements SPARQLEndpoint
 {
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointBase.class);
-
-    /**
-     * Media types that can be used for representation of SPARQL result set
-     * 
-     * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/ResultSetRewindable.html">Jena ResultSetRewindable</a>
-     */
-    public static final List<Variant> RESULT_SET_VARIANTS = Variant.VariantListBuilder.newInstance().
-			mediaTypes(org.graphity.server.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE,
-			    org.graphity.server.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE).
-			add().build();
     
     private final Request request;
     private final ServletContext servletContext;

@@ -75,6 +75,10 @@ public class DataManagerProvider extends PerRequestTypeInjectableProvider<Contex
 	};
     }
 
+    /**
+     * Returns default data manager instance.
+     * @return data manager instance
+     */
     public DataManager getDataManager()
     {
         return getDataManager(LocationMapper.get(), ARQ.getContext(), getServletContext());
