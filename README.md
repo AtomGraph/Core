@@ -22,7 +22,7 @@ For developers
 
 Documentation
 -------------
-* [JavaDoc](http://graphity.github.io/graphity-ldp/apidocs/)
+* [JavaDoc](http://graphity.github.io/graphity-server/apidocs/)
 
 Dependencies
 --------------

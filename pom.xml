@@ -36,9 +36,9 @@
     </properties>
  
     <scm>
-	<url>https://github.com/Graphity/graphity-ldp</url>
-	<connection>scm:git:git://github.com/Graphity/graphity-ldp.git</connection>
-	<developerConnection>scm:git:git@github.com:pumba-lt/graphity-ldp.git</developerConnection>
+	<url>https://github.com/Graphity/graphity-server</url>
+	<connection>scm:git:git://github.com/Graphity/graphity-server.git</connection>
+	<developerConnection>scm:git:git@github.com:pumba-lt/graphity-server.git</developerConnection>
     </scm>
 
     <repositories>
