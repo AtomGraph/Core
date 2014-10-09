@@ -11,7 +11,7 @@
         <param-value>http://graphity.dydra.com/graphity/server/sparql</param-value>
     </context-param>
     <context-param>
-        <param-name>http://server.graphity.org/ontology#graphStore</param-name>
+        <param-name>http://graphity.org/gs#graphStore</param-name>
         <param-value>http://graphity.dydra.com/graphity/server/service</param-value>
     </context-param>
     <!--
@@ -25,15 +25,15 @@
     </context-param>
     -->
     <context-param>
-        <param-name>http://server.graphity.org/ontology#preemptiveAuth</param-name>
+        <param-name>http://graphity.org/gs#preemptiveAuth</param-name>
         <param-value>true</param-value>
     </context-param>
     <context-param>
-        <param-name>http://server.graphity.org/ontology#cacheControl</param-name>
+        <param-name>http://graphity.org/gs#cacheControl</param-name>
         <param-value>no-cache</param-value>
     </context-param>
     <context-param>
-        <param-name>http://server.graphity.org/ontology#resultLimit</param-name>
+        <param-name>http://graphity.org/gs#resultLimit</param-name>
         <param-value>100</param-value>
     </context-param>
     <filter>
