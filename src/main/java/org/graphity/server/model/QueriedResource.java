@@ -17,6 +17,7 @@
 package org.graphity.server.model;
 
 import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.rdf.model.Model;
 
 /**
  * RDF resource, representation of which was queried from a SPARQL endpoint.
@@ -43,4 +44,11 @@ public interface QueriedResource
      */
     SPARQLEndpoint getSPARQLEndpoint();
 
+    /**
+     * Returns RDF description of this resource. It is retrieved by executing the query on the SPARQL endpoint.
+     * 
+     * @return description RDF model
+     */
+    Model describe();
+    
 }
