@@ -80,6 +80,7 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
      * @return RDF description
      * @see getQuery()
      */
+    @Override
     public Model describe()
     {
 	return getSPARQLEndpoint().loadModel(getQuery());
