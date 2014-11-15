@@ -77,6 +77,11 @@ public class DataManager extends FileManager
         this.servletContext = servletContext;
     }
 
+    public QueryEngineHTTP sparqlService(String endpointURI, Query query, MultivaluedMap<String, String> params)
+    {
+        return sparqlService(endpointURI, query, params, getHttpAuthenticator(endpointURI));
+    }
+
     /**
      * Creates remote SPARQL execution based on a query and optional request parameters
      * 
@@ -85,12 +90,13 @@ public class DataManager extends FileManager
      * @param params name/value pairs of request parameters or null, if none
      * @return query execution
      */
-    public QueryExecution sparqlService(String endpointURI, Query query, MultivaluedMap<String, String> params)
+    public QueryEngineHTTP sparqlService(String endpointURI, Query query, MultivaluedMap<String, String> params, HttpAuthenticator httpAuthenticator)
     {
+	if (endpointURI == null) throw new IllegalArgumentException("Endpoint URI must be not null");
+        if (query == null) throw new IllegalArgumentException("Query must be not null");
 	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, query);
-	if (query == null) throw new IllegalArgumentException("Query must be not null");
 
-	QueryEngineHTTP request = new QueryEngineHTTP(endpointURI, query, getHttpAuthenticator(endpointURI));
+	QueryEngineHTTP request = new QueryEngineHTTP(endpointURI, query, httpAuthenticator);
 	if (params != null)
 	    for (Entry<String, List<String>> entry : params.entrySet())
 		if (!entry.getKey().equals("query")) // query param is handled separately
