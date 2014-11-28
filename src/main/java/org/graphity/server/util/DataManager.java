@@ -88,6 +88,7 @@ public class DataManager extends FileManager
      * @param endpointURI remote endpoint URI
      * @param query query object
      * @param params name/value pairs of request parameters or null, if none
+     * @param httpAuthenticator HTTP authenticator
      * @return query execution
      */
     public QueryEngineHTTP sparqlService(String endpointURI, Query query, MultivaluedMap<String, String> params, HttpAuthenticator httpAuthenticator)
