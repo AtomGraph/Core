@@ -18,6 +18,7 @@
 package org.graphity.server.model.impl;
 
 import org.graphity.server.model.GraphStoreOrigin;
+import org.graphity.server.util.DataManager;
 
 /**
  *
@@ -26,9 +27,17 @@ import org.graphity.server.model.GraphStoreOrigin;
 public class GraphStoreOriginBase extends OriginBase implements GraphStoreOrigin
 {
 
-    public GraphStoreOriginBase(String uri)
+    public GraphStoreOriginBase(String uri, String authUser, String authPwd, DataManager dataManager)
     {
         super(uri);
+        
+        if (dataManager != null && authUser != null && authPwd != null)
+            dataManager.putAuthContext(uri, authUser, authPwd);
+    }
+    
+    public GraphStoreOriginBase(String uri)
+    {
+        this(uri, null, null, null);
     }
     
 }

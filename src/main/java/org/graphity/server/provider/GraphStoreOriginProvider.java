@@ -17,6 +17,7 @@
 
 package org.graphity.server.provider;
 
+import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.sparql.engine.http.Service;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
@@ -100,38 +101,37 @@ public class GraphStoreOriginProvider extends PerRequestTypeInjectableProvider<C
      */
     public GraphStoreOrigin getGraphStoreOrigin()
     {
-        return getGraphStoreOrigin(getServletContext(), GS.graphStore.getURI());
+        GraphStoreOrigin origin = getGraphStoreOrigin(GS.graphStore);
+        
+        if (origin == null)
+        {
+            if (log.isErrorEnabled()) log.error("SPARQL Graph Store not configured (gs:graphStore not set)");
+            throw new WebApplicationException(new ConfigurationException("SPARQL Graph Store not configured (gs:graphStore not set)"), Response.Status.INTERNAL_SERVER_ERROR);
+        }
+        
+        return origin;
     }
     
      /**
      * Returns Graph Store origin for supplied webapp context configuration.
      * 
-     * @param servletContext webapp context
      * @param property configuration property string
      * @return graph store origin
      */
-    public GraphStoreOrigin getGraphStoreOrigin(ServletContext servletContext, String property)
+    public GraphStoreOrigin getGraphStoreOrigin(Property property)
     {
-        if (servletContext == null) throw new IllegalArgumentException("ServletContext cannot be null");
         if (property == null) throw new IllegalArgumentException("Property cannot be null");
 
-        try
+        Object storeURI = getServletContext().getInitParameter(property.getURI());
+        if (storeURI != null)
         {
-            Object storeUri = servletContext.getInitParameter(property);
-            if (storeUri == null) throw new ConfigurationException("Graph Store not configured ('" + property + "' not set in web.xml)");
-
-            String authUser = (String)servletContext.getInitParameter(Service.queryAuthUser.getSymbol());
-            String authPwd = (String)servletContext.getInitParameter(Service.queryAuthPwd.getSymbol());
-            if (authUser != null && authPwd != null)
-                getDataManager().putAuthContext(storeUri.toString(), authUser, authPwd);
-
-            return new GraphStoreOriginBase(storeUri.toString());
+            return new GraphStoreOriginBase(storeURI.toString(),
+                (String)getServletContext().getInitParameter(Service.queryAuthUser.getSymbol()),
+                (String)getServletContext().getInitParameter(Service.queryAuthPwd.getSymbol()),
+                getDataManager());
         }
-        catch (ConfigurationException ex)
-        {
-            if (log.isErrorEnabled()) log.warn("Graph Store configuration error", ex);
-            throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);            
-        }                
+
+        return null;
     }
 
 }

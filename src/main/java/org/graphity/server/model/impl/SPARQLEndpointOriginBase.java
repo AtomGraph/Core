@@ -18,6 +18,7 @@
 package org.graphity.server.model.impl;
 
 import org.graphity.server.model.SPARQLEndpointOrigin;
+import org.graphity.server.util.DataManager;
 
 /**
  *
@@ -26,9 +27,17 @@ import org.graphity.server.model.SPARQLEndpointOrigin;
 public class SPARQLEndpointOriginBase extends OriginBase implements SPARQLEndpointOrigin
 {
 
-    public SPARQLEndpointOriginBase(String uri)
+    public SPARQLEndpointOriginBase(String uri, String authUser, String authPwd, DataManager dataManager)
     {
         super(uri);
+        
+        if (dataManager != null && authUser != null && authPwd != null)
+            dataManager.putAuthContext(uri, authUser, authPwd);
+    }
+    
+    public SPARQLEndpointOriginBase(String uri)
+    {
+        this(uri, null, null, null);
     }
     
 }

@@ -17,6 +17,7 @@
 
 package org.graphity.server.provider;
 
+import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.sparql.engine.http.Service;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
@@ -100,38 +101,35 @@ public class SPARQLEndpointOriginProvider extends PerRequestTypeInjectableProvid
      */
     public SPARQLEndpointOrigin getSPARQLEndpointOrigin()
     {
-        return getSPARQLEndpointOrigin(getServletContext(), SD.endpoint.getURI());
+        SPARQLEndpointOrigin origin = getSPARQLEndpointOrigin(SD.endpoint);
+        
+        if (origin == null)
+        {
+            if (log.isErrorEnabled()) log.error("SPARQL endpoint not configured (sd:endpoint not set in web.xml)");
+            throw new WebApplicationException(new ConfigurationException("SPARQL endpoint not configured (sd:endpoint not set in web.xml)"), Response.Status.INTERNAL_SERVER_ERROR);
+        }
+
+        return origin;
     }
     
     /**
      * Returns SPARQL endpoint origin for supplied webapp context configuration.
      * 
-     * @param servletContext context config
-     * @param property configuration property string
+     * @param property configuration property
      * @return endpoint origin
      */
-    public SPARQLEndpointOrigin getSPARQLEndpointOrigin(ServletContext servletContext, String property)
+    public SPARQLEndpointOrigin getSPARQLEndpointOrigin(Property property)
     {
-        if (servletContext == null) throw new IllegalArgumentException("ServletContext cannot be null");
         if (property == null) throw new IllegalArgumentException("Property cannot be null");
 
-        try
-        {
-            Object endpointUri = servletContext.getInitParameter(property);
-            if (endpointUri == null) throw new ConfigurationException("SPARQL endpoint not configured ('" + property + "' not set in web.xml)");
+        Object endpointURI = getServletContext().getInitParameter(property.getURI());
+        if (endpointURI != null)
+            return new SPARQLEndpointOriginBase(endpointURI.toString(),
+                    (String)getServletContext().getInitParameter(Service.queryAuthUser.getSymbol()),
+                    (String)getServletContext().getInitParameter(Service.queryAuthPwd.getSymbol()),
+                    getDataManager());
 
-            String authUser = (String)servletContext.getInitParameter(Service.queryAuthUser.getSymbol());
-            String authPwd = (String)servletContext.getInitParameter(Service.queryAuthPwd.getSymbol());
-            if (authUser != null && authPwd != null)
-                getDataManager().putAuthContext(endpointUri.toString(), authUser, authPwd);
-
-            return new SPARQLEndpointOriginBase(endpointUri.toString());
-        }
-        catch (ConfigurationException ex)
-        {
-            if (log.isErrorEnabled()) log.warn("SPARQL endpoint configuration error", ex);
-            throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);            
-        }
+        return null;
     }
 
 }
