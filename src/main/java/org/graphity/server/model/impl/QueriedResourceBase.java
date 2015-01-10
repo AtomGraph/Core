@@ -19,10 +19,12 @@ package org.graphity.server.model.impl;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.Model;
+import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.graphity.server.model.QueriedResource;
@@ -49,25 +51,17 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
      * The URI of the resource being created is the absolute path of the current request URI.
      * 
      * @param uriInfo URI information of the request
+     * @param request current request object
+     * @param servletContext webapp context
      * @param endpoint SPARQL endpoint backing this resource
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html">JAX-RS UriInfo</a>
      * @see <a href="http://docs.oracle.com/javaee/7/api/javax/servlet/ServletContext.html">ServletContext</a>
      * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceContext.html">Jersey ResourceContext</a>
      */
-    public QueriedResourceBase(@Context UriInfo uriInfo, @Context SPARQLEndpoint endpoint)
+    public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletContext servletContext,
+            @Context SPARQLEndpoint endpoint)
     {
-	this(uriInfo.getAbsolutePath().toString(), endpoint);
-    }
-
-    /**
-     * Protected constructor. Not suitable for JAX-RS but can be used when subclassing.
-     * 
-     * @param uri URI of this resource
-     * @param endpoint SPARQL endpoint backing this resource
-     */
-    protected QueriedResourceBase(String uri, SPARQLEndpoint endpoint)
-    {
-	super(uri);
+	super(uriInfo, request, servletContext);
 	if (endpoint == null) throw new IllegalArgumentException("SPARQLEndpoint cannot be null");
 	this.endpoint = endpoint;
     }

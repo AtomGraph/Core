@@ -27,7 +27,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class GS
+public final class GS
 {
     /** <p>The RDF model that holds the vocabulary terms</p> */
     private static OntModel m_model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, null);

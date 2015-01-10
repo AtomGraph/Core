@@ -47,35 +47,30 @@ public abstract class LinkedDataResourceBase implements LinkedDataResource
 {
     private static final Logger log = LoggerFactory.getLogger(LinkedDataResourceBase.class);
 
-    private final String uri;
-    private @Context Request request;
-    private @Context ServletContext servletContext;
+    private final UriInfo uriInfo;
+    private final Request request;
+    private final ServletContext servletContext;
 
     /** 
      * JAX-RS-compatible resource constructor with injected initialization objects.
      * The URI of the resource being created is the absolute path of the current request URI.
      * 
-     * @param uriInfo URI information of the 
+     * @param uriInfo URI information of the request
+     * @param request current request object
+     * @param servletContext webapp context
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html#getAbsolutePath()">JAX-RS UriInfo.getAbsolutePath()</a>
      */
-    public LinkedDataResourceBase(@Context UriInfo uriInfo)
+    public LinkedDataResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletContext servletContext)
     {
-	this(uriInfo.getAbsolutePath().toString());
-    }
-    
-    /**
-     * Protected constructor. Not suitable for JAX-RS but can be used when subclassing.
-     * 
-     * @param uri URI string of this resource
-     */
-    protected LinkedDataResourceBase(String uri)
-    {
-	if (uri == null) throw new IllegalArgumentException("URI cannot be null");
+	if (uriInfo == null) throw new IllegalArgumentException("UriInfo cannot be null");
+	if (request == null) throw new IllegalArgumentException("Request cannot be null");
+	if (servletContext == null) throw new IllegalArgumentException("ServletContext cannot be null");
 
-	this.uri = uri;	
-	if (log.isDebugEnabled()) log.debug("Creating LinkedDataResource from Resource with URI: {}", uri);
+        this.uriInfo = uriInfo;
+        this.request = request;
+        this.servletContext = servletContext;
     }
-    
+        
     /**
      * Returns response for the given RDF model.
      * 
@@ -97,7 +92,7 @@ public abstract class LinkedDataResourceBase implements LinkedDataResource
     {
         return ModelResponse.fromRequest(getRequest()).
                 getResponseBuilder(model, getVariants()).
-                cacheControl(getCacheControl());
+                cacheControl(getCacheControl(GS.cacheControl));
     }
 
     /**
@@ -138,9 +133,19 @@ public abstract class LinkedDataResourceBase implements LinkedDataResource
     @Override
     public String getURI()
     {
-	return uri;
+	return getUriInfo().getAbsolutePath().toString();
     }
-    
+
+    /**
+     * Returns URI information.
+     * 
+     * @return URI info object
+     */
+    public UriInfo getUriInfo()
+    {
+	return uriInfo;
+    }
+
     /**
      * Returns current request.
      * 
@@ -164,13 +169,16 @@ public abstract class LinkedDataResourceBase implements LinkedDataResource
     /**
      * Returns <code>Cache-Control</code> header configuration for this resource
      * 
+     * @param property cache control property
      * @return cache control of this resource
      */
-    public CacheControl getCacheControl()
+    public CacheControl getCacheControl(Property property)
     {
-	if (getServletContext().getInitParameter(GS.cacheControl.getURI()) == null) return null;
+	if (property == null) throw new IllegalArgumentException("Property cannot be null");
+
+        if (getServletContext().getInitParameter(property.getURI()) == null) return null;
         
-        return CacheControl.valueOf(getServletContext().getInitParameter(GS.cacheControl.getURI()).toString());
+        return CacheControl.valueOf(getServletContext().getInitParameter(property.getURI()).toString());
     }
     
 }
