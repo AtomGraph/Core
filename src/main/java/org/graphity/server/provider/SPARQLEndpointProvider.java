@@ -95,9 +95,14 @@ public class SPARQLEndpointProvider extends PerRequestTypeInjectableProvider<Con
 
     public SPARQLEndpoint getSPARQLEndpoint()
     {
-        return SPARQLEndpointFactory.createProxy(getRequest(), getServletContext(), getSPARQLEndpointOrigin(), getDataManager());
+        return getSPARQLEndpoint(getRequest(), getServletContext(), getSPARQLEndpointOrigin(), getDataManager());
     }
 
+    public SPARQLEndpoint getSPARQLEndpoint(Request request, ServletContext servletContext, SPARQLEndpointOrigin origin, DataManager dataManager)
+    {
+        return SPARQLEndpointFactory.createProxy(request, servletContext, origin, dataManager);
+    }
+    
     @Override
     public SPARQLEndpoint getContext(Class<?> type)
     {

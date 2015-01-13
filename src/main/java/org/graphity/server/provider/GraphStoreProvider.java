@@ -99,6 +99,11 @@ public class GraphStoreProvider extends PerRequestTypeInjectableProvider<Context
         return GraphStoreFactory.createProxy(getRequest(), getServletContext(), getGraphStoreOrigin(), getDataManager());
     }
 
+    public GraphStore getGraphStore(Request request, ServletContext servletContext, GraphStoreOrigin origin, DataManager dataManager)
+    {
+        return GraphStoreFactory.createProxy(request, servletContext, origin, dataManager);
+    }
+    
     @Override
     public GraphStore getContext(Class<?> type)
     {
