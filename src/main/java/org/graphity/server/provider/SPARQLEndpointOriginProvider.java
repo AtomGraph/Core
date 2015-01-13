@@ -101,7 +101,7 @@ public class SPARQLEndpointOriginProvider extends PerRequestTypeInjectableProvid
      */
     public SPARQLEndpointOrigin getSPARQLEndpointOrigin()
     {
-        SPARQLEndpointOrigin origin = getSPARQLEndpointOrigin(SD.endpoint);
+        SPARQLEndpointOrigin origin = getSPARQLEndpointOrigin(SD.endpoint, getDataManager());
         
         if (origin == null)
         {
@@ -116,18 +116,20 @@ public class SPARQLEndpointOriginProvider extends PerRequestTypeInjectableProvid
      * Returns SPARQL endpoint origin for supplied webapp context configuration.
      * 
      * @param property configuration property
+     * @param dataManager dataManager
      * @return endpoint origin
      */
-    public SPARQLEndpointOrigin getSPARQLEndpointOrigin(Property property)
+    public SPARQLEndpointOrigin getSPARQLEndpointOrigin(Property property, DataManager dataManager)
     {
         if (property == null) throw new IllegalArgumentException("Property cannot be null");
+        if (dataManager == null) throw new IllegalArgumentException("DataManager cannot be null");
 
         Object endpointURI = getServletContext().getInitParameter(property.getURI());
         if (endpointURI != null)
             return new SPARQLEndpointOriginBase(endpointURI.toString(),
                     (String)getServletContext().getInitParameter(Service.queryAuthUser.getSymbol()),
                     (String)getServletContext().getInitParameter(Service.queryAuthPwd.getSymbol()),
-                    getDataManager());
+                    dataManager);
 
         return null;
     }

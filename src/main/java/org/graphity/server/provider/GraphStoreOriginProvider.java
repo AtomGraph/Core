@@ -101,7 +101,7 @@ public class GraphStoreOriginProvider extends PerRequestTypeInjectableProvider<C
      */
     public GraphStoreOrigin getGraphStoreOrigin()
     {
-        GraphStoreOrigin origin = getGraphStoreOrigin(GS.graphStore);
+        GraphStoreOrigin origin = getGraphStoreOrigin(GS.graphStore, getDataManager());
         
         if (origin == null)
         {
@@ -116,9 +116,10 @@ public class GraphStoreOriginProvider extends PerRequestTypeInjectableProvider<C
      * Returns Graph Store origin for supplied webapp context configuration.
      * 
      * @param property configuration property string
+     * @param dataManager data manager
      * @return graph store origin
      */
-    public GraphStoreOrigin getGraphStoreOrigin(Property property)
+    public GraphStoreOrigin getGraphStoreOrigin(Property property, DataManager dataManager)
     {
         if (property == null) throw new IllegalArgumentException("Property cannot be null");
 
@@ -128,7 +129,7 @@ public class GraphStoreOriginProvider extends PerRequestTypeInjectableProvider<C
             return new GraphStoreOriginBase(storeURI.toString(),
                 (String)getServletContext().getInitParameter(Service.queryAuthUser.getSymbol()),
                 (String)getServletContext().getInitParameter(Service.queryAuthPwd.getSymbol()),
-                getDataManager());
+                dataManager);
         }
 
         return null;
