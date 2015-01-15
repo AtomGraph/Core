@@ -16,8 +16,8 @@
  */
 package org.graphity.server.model;
 
+import javax.servlet.ServletConfig;
 import org.graphity.server.model.impl.SPARQLEndpointProxyBase;
-import javax.servlet.ServletContext;
 import javax.ws.rs.core.Request;
 import org.graphity.server.util.DataManager;
 import org.slf4j.Logger;
@@ -36,14 +36,14 @@ public class SPARQLEndpointFactory
      * Creates new SPARQL endpoint from explicit URI resource and request metadata.
      * 
      * @param request request
-     * @param servletContext webapp context
+     * @param servletConfig filter config
      * @param origin proxy origin
      * @param dataManager RDF data manager for this endpoint
      * @return a new endpoint
      */
-    public static SPARQLEndpoint createProxy(Request request, ServletContext servletContext, SPARQLEndpointOrigin origin, DataManager dataManager)
+    public static SPARQLEndpoint createProxy(Request request, ServletConfig servletConfig, SPARQLEndpointOrigin origin, DataManager dataManager)
     {
-	return new SPARQLEndpointProxyBase(request, servletContext, origin, dataManager);
+	return new SPARQLEndpointProxyBase(request, servletConfig, origin, dataManager);
     }
 
 }

@@ -18,6 +18,8 @@ package org.graphity.server;
 
 import java.util.HashSet;
 import java.util.Set;
+import javax.servlet.ServletConfig;
+import javax.ws.rs.core.Context;
 import org.graphity.server.model.impl.GraphStoreProxyBase;
 import org.graphity.server.model.impl.QueriedResourceBase;
 import org.graphity.server.model.impl.SPARQLEndpointProxyBase;
@@ -42,11 +44,18 @@ public class ApplicationBase extends javax.ws.rs.core.Application
     private final Set<Class<?>> classes = new HashSet<>();
     private final Set<Object> singletons = new HashSet<>();
 
+    private final ServletConfig servletConfig;
+
     /**
      * Initializes root resource classes and provider singletons
+     * 
+     * @param servletConfig filter config
      */
-    public ApplicationBase()
+    public ApplicationBase(@Context ServletConfig servletConfig)
     {
+        if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
+        this.servletConfig = servletConfig;
+
 	classes.add(QueriedResourceBase.class); // handles all
 	classes.add(SPARQLEndpointProxyBase.class); // handles /sparql queries
 	classes.add(GraphStoreProxyBase.class); // handles /service requests
@@ -85,6 +94,16 @@ public class ApplicationBase extends javax.ws.rs.core.Application
     public Set<Object> getSingletons()
     {
 	return singletons;
+    }
+
+    /**
+     * Returns filter config
+     * 
+     * @return filter config
+     */
+    public ServletConfig getServletConfig()
+    {
+	return servletConfig;
     }
 
 }

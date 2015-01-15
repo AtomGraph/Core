@@ -18,7 +18,7 @@
 package org.graphity.server.model.impl;
 
 import com.hp.hpl.jena.rdf.model.Model;
-import javax.servlet.ServletContext;
+import javax.servlet.ServletConfig;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
@@ -41,10 +41,10 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
     private final Origin origin;
     private final DataManager dataManager;
     
-    public GraphStoreProxyBase(@Context Request request, @Context ServletContext servletContext,
+    public GraphStoreProxyBase(@Context Request request, @Context ServletConfig servletConfig,
             @Context GraphStoreOrigin origin, @Context DataManager dataManager)
     {
-        super(request, servletContext);
+        super(request, servletConfig);
         if (origin == null) throw new IllegalArgumentException("GraphStoreOrigin cannot be null");
         if (dataManager == null) throw new IllegalArgumentException("DataManager cannot be null");
         this.origin = origin;
@@ -61,7 +61,6 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
     public Origin getOrigin()
     {
         return origin;
-        //return getOrigin(getServletContext());
     }
 
     @Override

@@ -23,7 +23,7 @@ import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
 import javax.naming.ConfigurationException;
-import javax.servlet.ServletContext;
+import javax.servlet.ServletConfig;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
@@ -50,7 +50,7 @@ public class SPARQLEndpointOriginProvider extends PerRequestTypeInjectableProvid
     
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointOriginProvider.class);
 
-    @Context ServletContext servletContext;
+    @Context ServletConfig servletConfig;
     @Context Providers providers;
 
     public SPARQLEndpointOriginProvider()
@@ -58,9 +58,9 @@ public class SPARQLEndpointOriginProvider extends PerRequestTypeInjectableProvid
 	super(SPARQLEndpointOrigin.class);
     }
 
-    public ServletContext getServletContext()
+    public ServletConfig getServletConfig()
     {
-        return servletContext;
+        return servletConfig;
     }
 
     public Providers getProviders()
@@ -124,11 +124,11 @@ public class SPARQLEndpointOriginProvider extends PerRequestTypeInjectableProvid
         if (property == null) throw new IllegalArgumentException("Property cannot be null");
         if (dataManager == null) throw new IllegalArgumentException("DataManager cannot be null");
 
-        Object endpointURI = getServletContext().getInitParameter(property.getURI());
+        Object endpointURI = getServletConfig().getInitParameter(property.getURI());
         if (endpointURI != null)
             return new SPARQLEndpointOriginBase(endpointURI.toString(),
-                    (String)getServletContext().getInitParameter(Service.queryAuthUser.getSymbol()),
-                    (String)getServletContext().getInitParameter(Service.queryAuthPwd.getSymbol()),
+                    (String)getServletConfig().getInitParameter(Service.queryAuthUser.getSymbol()),
+                    (String)getServletConfig().getInitParameter(Service.queryAuthPwd.getSymbol()),
                     dataManager);
 
         return null;

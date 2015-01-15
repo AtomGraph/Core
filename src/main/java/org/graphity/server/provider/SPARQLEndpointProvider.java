@@ -19,7 +19,7 @@ package org.graphity.server.provider;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
-import javax.servlet.ServletContext;
+import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.ext.ContextResolver;
@@ -45,7 +45,7 @@ public class SPARQLEndpointProvider extends PerRequestTypeInjectableProvider<Con
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointProvider.class);
 
     @Context Request request;
-    @Context ServletContext servletContext;
+    @Context ServletConfig filtertConfig;
     @Context Providers providers;
     
     public SPARQLEndpointProvider()
@@ -63,9 +63,9 @@ public class SPARQLEndpointProvider extends PerRequestTypeInjectableProvider<Con
         return request;
     }
 
-    public ServletContext getServletContext()
+    public ServletConfig getServletConfig()
     {
-        return servletContext;
+        return filtertConfig;
     }
 
     public DataManager getDataManager()
@@ -95,12 +95,12 @@ public class SPARQLEndpointProvider extends PerRequestTypeInjectableProvider<Con
 
     public SPARQLEndpoint getSPARQLEndpoint()
     {
-        return getSPARQLEndpoint(getRequest(), getServletContext(), getSPARQLEndpointOrigin(), getDataManager());
+        return getSPARQLEndpoint(getRequest(), getServletConfig(), getSPARQLEndpointOrigin(), getDataManager());
     }
 
-    public SPARQLEndpoint getSPARQLEndpoint(Request request, ServletContext servletContext, SPARQLEndpointOrigin origin, DataManager dataManager)
+    public SPARQLEndpoint getSPARQLEndpoint(Request request, ServletConfig servletConfig, SPARQLEndpointOrigin origin, DataManager dataManager)
     {
-        return SPARQLEndpointFactory.createProxy(request, servletContext, origin, dataManager);
+        return SPARQLEndpointFactory.createProxy(request, servletConfig, origin, dataManager);
     }
     
     @Override

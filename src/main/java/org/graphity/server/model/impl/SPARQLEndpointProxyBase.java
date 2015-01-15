@@ -21,7 +21,7 @@ import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.update.UpdateRequest;
-import javax.servlet.ServletContext;
+import javax.servlet.ServletConfig;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
@@ -44,9 +44,9 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
     private final Origin origin;
     private final DataManager dataManager;
     
-    public SPARQLEndpointProxyBase(@Context Request request, @Context ServletContext servletContext, @Context SPARQLEndpointOrigin origin, @Context DataManager dataManager)
+    public SPARQLEndpointProxyBase(@Context Request request, @Context ServletConfig servletConfig, @Context SPARQLEndpointOrigin origin, @Context DataManager dataManager)
     {
-        super(request, servletContext);
+        super(request, servletConfig);
         if (origin == null) throw new IllegalArgumentException("SPARQLEndpointOrigin cannot be null");
         if (dataManager == null) throw new IllegalArgumentException("DataManager cannot be null");
         this.origin = origin;

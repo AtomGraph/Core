@@ -17,7 +17,7 @@
 
 package org.graphity.server.model;
 
-import javax.servlet.ServletContext;
+import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
 import org.graphity.server.model.impl.QueriedResourceBase;
@@ -35,14 +35,14 @@ public class LinkedDataResourceFactory
      * 
      * @param uriInfo URI information of the current request
      * @param request current request object
-     * @param servletContext webapp context
+     * @param servletConfig webapp context
      * @param endpoint SPARQL endpoint backing the application
      * @return a new Linked Data resource
      */
-    public static LinkedDataResource create(UriInfo uriInfo, Request request, ServletContext servletContext,
+    public static LinkedDataResource create(UriInfo uriInfo, Request request, ServletConfig servletConfig,
             SPARQLEndpoint endpoint)
     {
-	return new QueriedResourceBase(uriInfo, request, servletContext, endpoint);
+	return new QueriedResourceBase(uriInfo, request, servletConfig, endpoint);
     }
 
 }

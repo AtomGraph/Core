@@ -23,7 +23,7 @@ import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
 import javax.naming.ConfigurationException;
-import javax.servlet.ServletContext;
+import javax.servlet.ServletConfig;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
@@ -50,7 +50,7 @@ public class GraphStoreOriginProvider extends PerRequestTypeInjectableProvider<C
     
     private static final Logger log = LoggerFactory.getLogger(GraphStoreOriginProvider.class);
 
-    @Context ServletContext servletContext;
+    @Context ServletConfig filerConfig;
     @Context Providers providers;
 
     public GraphStoreOriginProvider()
@@ -58,9 +58,9 @@ public class GraphStoreOriginProvider extends PerRequestTypeInjectableProvider<C
 	super(GraphStoreOrigin.class);
     }
 
-    public ServletContext getServletContext()
+    public ServletConfig getServletConfig()
     {
-        return servletContext;
+        return filerConfig;
     }
 
     public Providers getProviders()
@@ -123,12 +123,12 @@ public class GraphStoreOriginProvider extends PerRequestTypeInjectableProvider<C
     {
         if (property == null) throw new IllegalArgumentException("Property cannot be null");
 
-        Object storeURI = getServletContext().getInitParameter(property.getURI());
+        Object storeURI = getServletConfig().getInitParameter(property.getURI());
         if (storeURI != null)
         {
             return new GraphStoreOriginBase(storeURI.toString(),
-                (String)getServletContext().getInitParameter(Service.queryAuthUser.getSymbol()),
-                (String)getServletContext().getInitParameter(Service.queryAuthPwd.getSymbol()),
+                (String)getServletConfig().getInitParameter(Service.queryAuthUser.getSymbol()),
+                (String)getServletConfig().getInitParameter(Service.queryAuthPwd.getSymbol()),
                 dataManager);
         }
 

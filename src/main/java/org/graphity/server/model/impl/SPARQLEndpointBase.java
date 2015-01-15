@@ -27,7 +27,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import javax.servlet.ServletContext;
+import javax.servlet.ServletConfig;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.*;
@@ -51,22 +51,22 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointBase.class);
     
     private final Request request;
-    private final ServletContext servletContext;
+    private final ServletConfig servletConfig;
     
     /**
      * Protected constructor with explicit endpoint resource.
      * Not suitable for JAX-RS but can be used when subclassing.
      * 
      * @param request current request
-     * @param servletContext webapp context
+     * @param servletConfig webapp context
      */
-    public SPARQLEndpointBase(@Context Request request, @Context ServletContext servletContext)
+    public SPARQLEndpointBase(@Context Request request, @Context ServletConfig servletConfig)
     {
 	if (request == null) throw new IllegalArgumentException("Request cannot be null");
-	if (servletContext == null) throw new IllegalArgumentException("ServletContext cannot be null");
+	if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
 
 	this.request = request;
-	this.servletContext = servletContext;
+	this.servletConfig = servletConfig;
 	if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase");        
     }
     
@@ -164,8 +164,8 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
         if (query.isSelectType())
         {
             if (log.isDebugEnabled()) log.debug("SPARQL endpoint executing SELECT query: {}", query);
-            if (getServletContext().getInitParameter(GS.resultLimit.getURI()) != null)
-                query.setLimit(Long.parseLong(getServletContext().getInitParameter(GS.resultLimit.getURI()).toString()));
+            if (getServletConfig().getInitParameter(GS.resultLimit.getURI()) != null)
+                query.setLimit(Long.parseLong(getServletConfig().getInitParameter(GS.resultLimit.getURI()).toString()));
 
             return getResponseBuilder(select(query));
         }
@@ -290,9 +290,9 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
 	return request;
     }
 
-    public ServletContext getServletContext()
+    public ServletConfig getServletConfig()
     {
-	return servletContext;
+	return servletConfig;
     }
     
 }

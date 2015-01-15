@@ -20,7 +20,7 @@ package org.graphity.server.provider;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
-import javax.servlet.ServletContext;
+import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.ext.ContextResolver;
@@ -46,7 +46,7 @@ public class GraphStoreProvider extends PerRequestTypeInjectableProvider<Context
     private static final Logger log = LoggerFactory.getLogger(GraphStoreProvider.class);
     
     @Context Request request;
-    @Context ServletContext servletContext;
+    @Context ServletConfig servletConfig;
     @Context Providers providers;
     
     public GraphStoreProvider()
@@ -59,9 +59,9 @@ public class GraphStoreProvider extends PerRequestTypeInjectableProvider<Context
         return request;
     }
 
-    public ServletContext getServletContext()
+    public ServletConfig getServletConfig()
     {
-        return servletContext;
+        return servletConfig;
     }
     
     public Providers getProviders()
@@ -96,12 +96,12 @@ public class GraphStoreProvider extends PerRequestTypeInjectableProvider<Context
 
     public GraphStore getGraphStore()
     {
-        return GraphStoreFactory.createProxy(getRequest(), getServletContext(), getGraphStoreOrigin(), getDataManager());
+        return GraphStoreFactory.createProxy(getRequest(), getServletConfig(), getGraphStoreOrigin(), getDataManager());
     }
 
-    public GraphStore getGraphStore(Request request, ServletContext servletContext, GraphStoreOrigin origin, DataManager dataManager)
+    public GraphStore getGraphStore(Request request, ServletConfig servletConfig, GraphStoreOrigin origin, DataManager dataManager)
     {
-        return GraphStoreFactory.createProxy(request, servletContext, origin, dataManager);
+        return GraphStoreFactory.createProxy(request, servletConfig, origin, dataManager);
     }
     
     @Override

@@ -22,7 +22,7 @@ import com.hp.hpl.jena.util.LocationMapper;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
-import javax.servlet.ServletContext;
+import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.ContextResolver;
@@ -45,11 +45,11 @@ public class DataManagerProvider extends PerRequestTypeInjectableProvider<Contex
     private static final Logger log = LoggerFactory.getLogger(DataManagerProvider.class);
 
     @Context UriInfo uriInfo;
-    @Context ServletContext servletContext;
+    @Context ServletConfig servletConfig;
 
-    public ServletContext getServletContext()
+    public ServletConfig getServletConfig()
     {
-	return servletContext;
+	return servletConfig;
     }
 
     public UriInfo getUriInfo()
@@ -81,12 +81,12 @@ public class DataManagerProvider extends PerRequestTypeInjectableProvider<Contex
      */
     public DataManager getDataManager()
     {
-        return getDataManager(LocationMapper.get(), ARQ.getContext(), getServletContext());
+        return getDataManager(LocationMapper.get(), ARQ.getContext(), getServletConfig());
     }
     
-    public DataManager getDataManager(LocationMapper mapper, com.hp.hpl.jena.sparql.util.Context context, ServletContext servletContext)
+    public DataManager getDataManager(LocationMapper mapper, com.hp.hpl.jena.sparql.util.Context context, ServletConfig servletConfig)
     {
-        return new DataManager(mapper, context, servletContext);
+        return new DataManager(mapper, context, servletConfig);
     }
 
     @Override

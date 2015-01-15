@@ -19,7 +19,7 @@ package org.graphity.server.model.impl;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.Model;
-import javax.servlet.ServletContext;
+import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
@@ -52,16 +52,16 @@ public class QueriedResourceBase extends LinkedDataResourceBase implements Queri
      * 
      * @param uriInfo URI information of the request
      * @param request current request object
-     * @param servletContext webapp context
+     * @param servletConfig webapp context
      * @param endpoint SPARQL endpoint backing this resource
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html">JAX-RS UriInfo</a>
      * @see <a href="http://docs.oracle.com/javaee/7/api/javax/servlet/ServletContext.html">ServletContext</a>
      * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceContext.html">Jersey ResourceContext</a>
      */
-    public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletContext servletContext,
+    public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletConfig servletConfig,
             @Context SPARQLEndpoint endpoint)
     {
-	super(uriInfo, request, servletContext);
+	super(uriInfo, request, servletConfig);
 	if (endpoint == null) throw new IllegalArgumentException("SPARQLEndpoint cannot be null");
 	this.endpoint = endpoint;
     }

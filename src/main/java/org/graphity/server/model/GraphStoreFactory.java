@@ -17,8 +17,8 @@
 
 package org.graphity.server.model;
 
+import javax.servlet.ServletConfig;
 import org.graphity.server.model.impl.GraphStoreProxyBase;
-import javax.servlet.ServletContext;
 import javax.ws.rs.core.Request;
 import org.graphity.server.util.DataManager;
 
@@ -35,14 +35,14 @@ public class GraphStoreFactory
      * Creates new GraphStore from explicit URI resource.
      * 
      * @param request current request
-     * @param servletContext servlet context
+     * @param servletConfig servlet config
      * @param origin remote graph store origin
      * @param dataManager RDF data manager for this graph store
      * @return graph store instance
      */
-    public static GraphStore createProxy(Request request, ServletContext servletContext, GraphStoreOrigin origin, DataManager dataManager)
+    public static GraphStore createProxy(Request request, ServletConfig servletConfig, GraphStoreOrigin origin, DataManager dataManager)
     {
-	return new GraphStoreProxyBase(request, servletContext, origin, dataManager);
+	return new GraphStoreProxyBase(request, servletConfig, origin, dataManager);
     }
 
 }

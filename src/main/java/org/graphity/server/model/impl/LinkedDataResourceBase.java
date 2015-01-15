@@ -20,7 +20,7 @@ import com.hp.hpl.jena.rdf.model.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import javax.servlet.ServletContext;
+import javax.servlet.ServletConfig;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -49,7 +49,7 @@ public abstract class LinkedDataResourceBase implements LinkedDataResource
 
     private final UriInfo uriInfo;
     private final Request request;
-    private final ServletContext servletContext;
+    private final ServletConfig servletConfig;
 
     /** 
      * JAX-RS-compatible resource constructor with injected initialization objects.
@@ -57,18 +57,18 @@ public abstract class LinkedDataResourceBase implements LinkedDataResource
      * 
      * @param uriInfo URI information of the request
      * @param request current request object
-     * @param servletContext webapp context
+     * @param servletConfig webapp context
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html#getAbsolutePath()">JAX-RS UriInfo.getAbsolutePath()</a>
      */
-    public LinkedDataResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletContext servletContext)
+    public LinkedDataResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletConfig servletConfig)
     {
 	if (uriInfo == null) throw new IllegalArgumentException("UriInfo cannot be null");
 	if (request == null) throw new IllegalArgumentException("Request cannot be null");
-	if (servletContext == null) throw new IllegalArgumentException("ServletContext cannot be null");
+	if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
 
         this.uriInfo = uriInfo;
         this.request = request;
-        this.servletContext = servletContext;
+        this.servletConfig = servletConfig;
     }
         
     /**
@@ -157,13 +157,13 @@ public abstract class LinkedDataResourceBase implements LinkedDataResource
     }
 
     /**
-     * Returns context for this web application (including parameters specified in web.xml).
+     * Returns config for this servlet (including parameters specified in web.xml).
      * 
      * @return webapp context
      */
-    public ServletContext getServletContext()
+    public ServletConfig getServletConfig()
     {
-	return servletContext;
+	return servletConfig;
     }
 
     /**
@@ -176,9 +176,9 @@ public abstract class LinkedDataResourceBase implements LinkedDataResource
     {
 	if (property == null) throw new IllegalArgumentException("Property cannot be null");
 
-        if (getServletContext().getInitParameter(property.getURI()) == null) return null;
+        if (getServletConfig().getInitParameter(property.getURI()) == null) return null;
         
-        return CacheControl.valueOf(getServletContext().getInitParameter(property.getURI()).toString());
+        return CacheControl.valueOf(getServletConfig().getInitParameter(property.getURI()).toString());
     }
     
 }

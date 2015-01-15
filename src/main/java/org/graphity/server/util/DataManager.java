@@ -31,7 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import javax.servlet.ServletContext;
+import javax.servlet.ServletConfig;
 import javax.ws.rs.core.MultivaluedMap;
 import org.apache.jena.atlas.web.auth.HttpAuthenticator;
 import org.apache.jena.atlas.web.auth.PreemptiveBasicAuthenticator;
@@ -60,21 +60,21 @@ public class DataManager extends FileManager
     private static final Logger log = LoggerFactory.getLogger(DataManager.class);
 
     private final Context context;
-    private final ServletContext servletContext;
+    private final ServletConfig servletConfig;
     
     /**
      * Creates data manager from file manager and SPARQL context.
      * @param mapper location mapper
      * @param context SPARQL context
-     * @param servletContext webapp context
+     * @param servletConfig webapp context
      */
-    public DataManager(LocationMapper mapper, Context context, ServletContext servletContext)
+    public DataManager(LocationMapper mapper, Context context, ServletConfig servletConfig)
     {
 	super(mapper);
 	if (context == null) throw new IllegalArgumentException("Context cannot be null");
-	if (servletContext == null) throw new IllegalArgumentException("ServletContext cannot be null");
+	if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
 	this.context = context;
-        this.servletContext = servletContext;
+        this.servletConfig = servletConfig;
     }
 
     public QueryEngineHTTP sparqlService(String endpointURI, Query query, MultivaluedMap<String, String> params)
@@ -631,9 +631,9 @@ public class DataManager extends FileManager
             usr = usr==null?"":usr;
             pwd = pwd==null?"":pwd;
 
-            if (getServletContext() != null && getServletContext().getInitParameter(GS.preemptiveAuth.getURI()) != null)
+            if (getServletConfig() != null && getServletConfig().getInitParameter(GS.preemptiveAuth.getURI()) != null)
             {
-                boolean preemptive = Boolean.parseBoolean(getServletContext().getInitParameter(GS.preemptiveAuth.getURI()).toString());
+                boolean preemptive = Boolean.parseBoolean(getServletConfig().getInitParameter(GS.preemptiveAuth.getURI()).toString());
                 if (preemptive)
                 {
                     if (log.isDebugEnabled()) log.debug("Creating PreemptiveBasicAuthenticator for Context {} with username: {} ", serviceContext, usr);
@@ -825,9 +825,9 @@ public class DataManager extends FileManager
         return putServiceContext(endpointURI, queryContext);
     }
 
-    public ServletContext getServletContext()
+    public ServletConfig getServletConfig()
     {
-        return servletContext;
+        return servletConfig;
     }
     
 }

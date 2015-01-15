@@ -21,7 +21,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import javax.servlet.ServletContext;
+import javax.servlet.ServletConfig;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
@@ -43,15 +43,15 @@ public abstract class GraphStoreBase implements GraphStore
     private static final Logger log = LoggerFactory.getLogger(GraphStoreBase.class);
 
     private final Request request;
-    private final ServletContext servletContext;
+    private final ServletConfig servletConfig;
     
-    public GraphStoreBase(@Context Request request, @Context ServletContext servletContext)
+    public GraphStoreBase(@Context Request request, @Context ServletConfig servletConfig)
     {
 	if (request == null) throw new IllegalArgumentException("Request cannot be null");
-	if (servletContext == null) throw new IllegalArgumentException("ServletContext cannot be null");
+	if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
 	
 	this.request = request;
-        this.servletContext = servletContext;
+        this.servletConfig = servletConfig;
     }
     
     /**
@@ -212,9 +212,9 @@ public abstract class GraphStoreBase implements GraphStore
 	return request;
     }
 
-    public ServletContext getServletContext()
+    public ServletConfig getServletConfig()
     {
-        return servletContext;
+        return servletConfig;
     }
     
 }
