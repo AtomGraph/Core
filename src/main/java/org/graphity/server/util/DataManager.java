@@ -18,6 +18,7 @@ package org.graphity.server.util;
 
 import com.hp.hpl.jena.query.*;
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.sparql.engine.http.QueryEngineHTTP;
 import com.hp.hpl.jena.sparql.engine.http.Service;
@@ -79,7 +80,7 @@ public class DataManager extends FileManager
 
     public QueryEngineHTTP sparqlService(String endpointURI, Query query, MultivaluedMap<String, String> params)
     {
-        return sparqlService(endpointURI, query, params, getHttpAuthenticator(endpointURI));
+        return sparqlService(endpointURI, query, params, getHttpAuthenticator(getServiceContext(endpointURI)));
     }
 
     /**
@@ -463,9 +464,9 @@ public class DataManager extends FileManager
      */
     public void executeUpdateRequest(String endpointURI, UpdateRequest updateRequest)
     {
-        UpdateExecutionFactory.createRemote(updateRequest, endpointURI, getHttpAuthenticator(endpointURI)).execute();
+        UpdateExecutionFactory.createRemote(updateRequest, endpointURI, getHttpAuthenticator(getServiceContext(endpointURI))).execute();
     }
-
+    
     /**
      * Checks whether Graph Store contains a certain named graph.
      * 
@@ -593,7 +594,7 @@ public class DataManager extends FileManager
      */
     public DatasetAccessor getDatasetAccessor(String graphStoreURI)
     {
-        HttpAuthenticator authenticator = getHttpAuthenticator(graphStoreURI);
+        HttpAuthenticator authenticator = getHttpAuthenticator(getServiceContext(graphStoreURI));
 
         if (authenticator != null) return new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI, authenticator));
         else return new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
@@ -602,24 +603,25 @@ public class DataManager extends FileManager
     /**
      * Returns authenticator (used by Jena) for a given endpoint or graph store URI.
      * 
-     * @param endpointURI endpoint or graph store URI
+     * @param serviceContext
      * @return authenticator
      */
-    public HttpAuthenticator getHttpAuthenticator(String endpointURI)
+    public HttpAuthenticator getHttpAuthenticator(Context serviceContext)
     {
-        Context serviceContext = getServiceContext(endpointURI);
-        if (serviceContext == null) return null;
+        if (serviceContext != null)
+            return getHttpAuthenticator(serviceContext, usePreemptiveAuth(GS.preemptiveAuth));
         
-        return getHttpAuthenticator(serviceContext);
+        return null;
     }
     
     /**
      * Converts context with username/password credentials into authenticator (used by Jena).
      * 
      * @param serviceContext authentication context
+     * @param preemptive
      * @return authenticator
      */
-    public HttpAuthenticator getHttpAuthenticator(Context serviceContext)
+    public HttpAuthenticator getHttpAuthenticator(Context serviceContext, boolean preemptive)
     {
         if (serviceContext == null) throw new IllegalArgumentException("Context cannot be null");
 
@@ -631,21 +633,27 @@ public class DataManager extends FileManager
             usr = usr==null?"":usr;
             pwd = pwd==null?"":pwd;
 
-            if (getServletConfig() != null && getServletConfig().getInitParameter(GS.preemptiveAuth.getURI()) != null)
+            if (preemptive)
             {
-                boolean preemptive = Boolean.parseBoolean(getServletConfig().getInitParameter(GS.preemptiveAuth.getURI()).toString());
-                if (preemptive)
-                {
-                    if (log.isDebugEnabled()) log.debug("Creating PreemptiveBasicAuthenticator for Context {} with username: {} ", serviceContext, usr);
-                    return new PreemptiveBasicAuthenticator(new SimpleAuthenticator(usr, pwd.toCharArray()));
-                }
+                if (log.isDebugEnabled()) log.debug("Creating PreemptiveBasicAuthenticator for Context {} with username: {} ", serviceContext, usr);
+                return new PreemptiveBasicAuthenticator(new SimpleAuthenticator(usr, pwd.toCharArray()));
             }
-
-            if (log.isDebugEnabled()) log.debug("Creating SimpleAuthenticator for Context {} with username: {} ", serviceContext, usr);
-            return new SimpleAuthenticator(usr, pwd.toCharArray());
+            else
+            {
+                if (log.isDebugEnabled()) log.debug("Creating SimpleAuthenticator for Context {} with username: {} ", serviceContext, usr);
+                return new SimpleAuthenticator(usr, pwd.toCharArray());
+            }
         }
 
         return null;
+    }
+
+    public boolean usePreemptiveAuth(Property property)
+    {
+        if (getServletConfig() != null && getServletConfig().getInitParameter(property.getURI()) != null)
+            return Boolean.parseBoolean(getServletConfig().getInitParameter(property.getURI()).toString());
+        
+        return false;
     }
     
     /**

@@ -18,16 +18,12 @@ package org.graphity.server.model.impl;
 
 import com.hp.hpl.jena.rdf.model.*;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
-import org.apache.jena.atlas.web.ContentType;
-import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.RDFLanguages;
+import javax.ws.rs.core.Variant.VariantListBuilder;
 import org.graphity.server.model.GraphStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,35 +63,41 @@ public abstract class GraphStoreBase implements GraphStore
                 //cacheControl(getCacheControl()).
                 build();
     }
-    
+
     /**
-     * Builds a list of acceptable response variants/
+     * Builds a list of acceptable response variants
      * 
      * @return supported variants
      */
     public List<Variant> getVariants()
     {
-        List<Variant> variants = new ArrayList<>();
-        Iterator<Lang> it = RDFLanguages.getRegisteredLanguages().iterator();
-        
-        // RDF/XML as the default one - the first one gets selected by selectVariant()
-        variants.add(new Variant(new MediaType(Lang.RDFXML.getContentType().getType(),
-                Lang.RDFXML.getContentType().getSubType()),
-            null, null));
-
-        while (it.hasNext())
-        {
-            Lang lang = it.next();
-            if (!lang.equals(Lang.RDFNULL) && !lang.equals(Lang.RDFXML))
-            {
-                ContentType ct = lang.getContentType();
-                //List<String> altTypes = lang.getAltContentTypes();
-                MediaType mediaType = new MediaType(ct.getType(), ct.getSubType()); // MediaType.valueOf(ct.getContentType()
-                variants.add(new Variant(mediaType, null, null));
-            }
-        }
-        
+        List<Variant> variants = getVariantListBuilder().add().build();
+        variants.add(0, new Variant(org.graphity.server.MediaType.APPLICATION_RDF_XML_TYPE, null, null));
         return variants;
+    }
+
+    /**
+     * Returns Variant list builder with media types supported by Jena.
+     * 
+     * @return variant list builder
+     */
+    public VariantListBuilder getVariantListBuilder()
+    {
+        return getVariantListBuilder(org.graphity.server.MediaType.getRegistered());
+    }
+    
+    /**
+     * Produces a Variant builder from a list of media types.
+     * 
+     * @param mediaTypes list of supported media types
+     * @return variant builder
+     */    
+    public VariantListBuilder getVariantListBuilder(List<MediaType> mediaTypes)
+    {
+        MediaType[] mediaTypeArray = new MediaType[mediaTypes.size()];
+        mediaTypes.toArray(mediaTypeArray);
+        
+        return Variant.VariantListBuilder.newInstance().mediaTypes(mediaTypeArray);
     }
     
     @GET

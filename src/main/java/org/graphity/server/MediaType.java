@@ -16,7 +16,13 @@
  */
 package org.graphity.server;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import org.apache.jena.atlas.web.ContentType;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFLanguages;
 
 /**
  * Extends standard JAX-RS media type with RDF media types
@@ -26,14 +32,29 @@ import java.util.Map;
 public class MediaType extends javax.ws.rs.core.MediaType
 {
     /** "application/rdf+xml" */
-    public final static String APPLICATION_RDF_XML = "application/rdf+xml";
+    public final static String APPLICATION_RDF_XML = Lang.RDFXML.getContentType().getContentType();
     /** "application/rdf+xml" */
-    public final static MediaType APPLICATION_RDF_XML_TYPE = new MediaType("application","rdf+xml");
+    public final static MediaType APPLICATION_RDF_XML_TYPE = new MediaType(Lang.RDFXML.getContentType().getType(), Lang.RDFXML.getContentType().getSubType());
 
     /** "text/turtle" */
-    public final static String TEXT_TURTLE = "text/turtle";
+    public final static String TEXT_TURTLE = Lang.TURTLE.getContentType().getContentType();
     /** "text/turtle" */
-    public final static MediaType TEXT_TURTLE_TYPE = new MediaType("text","turtle");
+    public final static MediaType TEXT_TURTLE_TYPE = new MediaType(Lang.TURTLE.getContentType().getType(), Lang.TURTLE.getContentType().getSubType());
+
+    /** "text/trig" */
+    public final static String TEXT_TRIG = Lang.TRIG.getContentType().getContentType();
+    /** "text/trig" */
+    public final static MediaType TEXT_TRIG_TYPE = new MediaType(Lang.TRIG.getContentType().getType(), Lang.TRIG.getContentType().getSubType());
+
+    /** "application/n-triples" */
+    public final static String TEXT_NTRIPLES = Lang.NTRIPLES.getContentType().getContentType();
+    /** "application/n-triples" */
+    public final static MediaType TEXT_NTRIPLES_TYPE = new MediaType(Lang.NTRIPLES.getContentType().getType(), Lang.NTRIPLES.getContentType().getSubType());
+
+    /** "application/n-quads" */
+    public final static String TEXT_NQUADS = Lang.NTRIPLES.getContentType().getContentType();
+    /** "application/n-quads" */
+    public final static MediaType TEXT_NQUADS_TYPE = new MediaType(Lang.NQUADS.getContentType().getType(), Lang.NQUADS.getContentType().getSubType());
 
     /** "application/sparql-results+xml" */
     public final static String APPLICATION_SPARQL_RESULTS_XML = "application/sparql-results+xml";
@@ -55,6 +76,11 @@ public class MediaType extends javax.ws.rs.core.MediaType
     /** "application/sparql-update" */
     public final static MediaType APPLICATION_SPARQL_UPDATE_TYPE = new MediaType("application","sparql-update");
     
+    /** "application/ld+json" */
+    public final static String APPLICATION_LD_JSON = "application/ld+json";
+    /** "application/ld+json" */
+    public final static MediaType APPLICATION_LD_JSON_TYPE = new MediaType("application","ld+json");
+    
     public MediaType(String type, String subtype, Map<String, String> parameters)
     {
 	super(type, subtype, parameters);
@@ -68,6 +94,24 @@ public class MediaType extends javax.ws.rs.core.MediaType
     public MediaType()
     {
         super();
+    }
+
+    public static List<javax.ws.rs.core.MediaType> getRegistered()
+    {
+        List<javax.ws.rs.core.MediaType> mediaTypes = new ArrayList<>();
+        
+        Iterator<Lang> it = RDFLanguages.getRegisteredLanguages().iterator();
+        while (it.hasNext())
+        {
+            Lang lang = it.next();
+            if (!lang.equals(Lang.RDFNULL))
+            {
+                ContentType ct = lang.getContentType();
+                mediaTypes.add(new javax.ws.rs.core.MediaType(ct.getType(), ct.getSubType()));
+            }
+        }
+
+        return mediaTypes;
     }
 
 }
