@@ -96,7 +96,15 @@ public class MediaType extends javax.ws.rs.core.MediaType
         super();
     }
 
-    public static List<javax.ws.rs.core.MediaType> getRegistered()
+    public static javax.ws.rs.core.MediaType[] getRegistered()
+    {
+        List<javax.ws.rs.core.MediaType> list = getRegisteredList();
+        javax.ws.rs.core.MediaType[] array = new javax.ws.rs.core.MediaType[list.size()];
+        list.toArray(array);
+        return array;
+    }
+    
+    public static List<javax.ws.rs.core.MediaType> getRegisteredList()
     {
         List<javax.ws.rs.core.MediaType> mediaTypes = new ArrayList<>();
         

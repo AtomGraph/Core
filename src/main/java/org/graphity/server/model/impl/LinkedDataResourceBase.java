@@ -18,6 +18,7 @@ package org.graphity.server.model.impl;
 
 import com.hp.hpl.jena.rdf.model.*;
 import java.util.List;
+import java.util.Locale;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
@@ -26,8 +27,6 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.core.Variant;
-import javax.ws.rs.core.Variant.VariantListBuilder;
 import org.graphity.server.model.LinkedDataResource;
 import org.graphity.server.vocabulary.GS;
 import org.slf4j.Logger;
@@ -87,46 +86,29 @@ public abstract class LinkedDataResourceBase implements LinkedDataResource
     public ResponseBuilder getResponseBuilder(Model model)
     {
         return ModelResponse.fromRequest(getRequest()).
-                getResponseBuilder(model, getVariants()).
+                getResponseBuilder(model, getMediaTypes(), getLanguages(), getEncodings()).
                 cacheControl(getCacheControl(GS.cacheControl));
     }
-
-    /**
-     * Builds a list of acceptable response variants
-     * 
-     * @return supported variants
-     */
-    public List<Variant> getVariants()
+    
+    public MediaType[] getMediaTypes()
     {
-        List<Variant> variants = getVariantListBuilder().add().build();
-        variants.add(0, new Variant(org.graphity.server.MediaType.APPLICATION_RDF_XML_TYPE, null, null));
-        return variants;
-    }
-
-    /**
-     * Returns Variant list builder with media types supported by Jena.
-     * 
-     * @return variant list builder
-     */
-    public VariantListBuilder getVariantListBuilder()
-    {
-        return getVariantListBuilder(org.graphity.server.MediaType.getRegistered());
+        List<MediaType> list = org.graphity.server.MediaType.getRegisteredList();
+        list.add(0, org.graphity.server.MediaType.APPLICATION_RDF_XML_TYPE); // first one becomes default
+        javax.ws.rs.core.MediaType[] array = new javax.ws.rs.core.MediaType[list.size()];
+        list.toArray(array);
+        return array;
     }
     
-    /**
-     * Produces a Variant builder from a list of media types.
-     * 
-     * @param mediaTypes list of supported media types
-     * @return variant builder
-     */    
-    public VariantListBuilder getVariantListBuilder(List<MediaType> mediaTypes)
+    public Locale[] getLanguages()
     {
-        MediaType[] mediaTypeArray = new MediaType[mediaTypes.size()];
-        mediaTypes.toArray(mediaTypeArray);
-        
-        return Variant.VariantListBuilder.newInstance().mediaTypes(mediaTypeArray);
+        return new Locale[]{};
     }
-    
+
+    public String[] getEncodings()
+    {
+        return new String[]{};
+    }
+
     /**
      * Returns URI of this resource
      * 

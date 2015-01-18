@@ -25,6 +25,7 @@ import com.hp.hpl.jena.update.UpdateFactory;
 import com.hp.hpl.jena.update.UpdateRequest;
 import java.net.URI;
 import java.util.List;
+import java.util.Locale;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -176,7 +177,18 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     }
 
     /**
-     * Returns response builder for a given RDF model.
+     * Returns response for the given RDF model.
+     * 
+     * @param model RDF model
+     * @return response object
+     */
+    public Response getResponse(Model model)
+    {
+        return getResponseBuilder(model).build();
+    }
+
+    /**
+     * Returns response builder for the given RDF model.
      * 
      * @param model RDF model
      * @return response builder
@@ -184,44 +196,26 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     public ResponseBuilder getResponseBuilder(Model model)
     {
         return ModelResponse.fromRequest(getRequest()).
-                getResponseBuilder(model, getVariants());
-                //cacheControl(getCacheControl()).
+                getResponseBuilder(model, getMediaTypes(), getLanguages(), getEncodings());
     }
     
-    /**
-     * Builds a list of acceptable response variants
-     * 
-     * @return supported variants
-     */
-    public List<Variant> getVariants()
+    public MediaType[] getMediaTypes()
     {
-        List<Variant> variants = getVariantListBuilder().add().build();
-        variants.add(0, new Variant(org.graphity.server.MediaType.APPLICATION_RDF_XML_TYPE, null, null));
-        return variants;
+        List<MediaType> list = org.graphity.server.MediaType.getRegisteredList();
+        list.add(0, org.graphity.server.MediaType.APPLICATION_RDF_XML_TYPE); // first one becomes default
+        javax.ws.rs.core.MediaType[] array = new javax.ws.rs.core.MediaType[list.size()];
+        list.toArray(array);
+        return array;
+    }
+    
+    public Locale[] getLanguages()
+    {
+        return new Locale[]{};
     }
 
-    /**
-     * Returns Variant list builder with media types supported by Jena.
-     * 
-     * @return variant list builder
-     */
-    public Variant.VariantListBuilder getVariantListBuilder()
+    public String[] getEncodings()
     {
-        return getVariantListBuilder(org.graphity.server.MediaType.getRegistered());
-    }
-    
-    /**
-     * Produces a Variant builder from a list of media types.
-     * 
-     * @param mediaTypes list of supported media types
-     * @return variant builder
-     */    
-    public Variant.VariantListBuilder getVariantListBuilder(List<MediaType> mediaTypes)
-    {
-        MediaType[] mediaTypeArray = new MediaType[mediaTypes.size()];
-        mediaTypes.toArray(mediaTypeArray);
-        
-        return Variant.VariantListBuilder.newInstance().mediaTypes(mediaTypeArray);
+        return new String[]{};
     }
 
     public EntityTag getEntityTag(ResultSet resultSet)

@@ -19,11 +19,12 @@ package org.graphity.server.model.impl;
 import com.hp.hpl.jena.rdf.model.*;
 import java.net.URI;
 import java.util.List;
+import java.util.Locale;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.Variant.VariantListBuilder;
 import org.graphity.server.model.GraphStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,53 +52,45 @@ public abstract class GraphStoreBase implements GraphStore
     }
     
     /**
-     * Returns response for a given RDF model.
+     * Returns response for the given RDF model.
      * 
      * @param model RDF model
      * @return response object
      */
     public Response getResponse(Model model)
     {
+        return getResponseBuilder(model).build();
+    }
+
+    /**
+     * Returns response builder for the given RDF model.
+     * 
+     * @param model RDF model
+     * @return response builder
+     */
+    public ResponseBuilder getResponseBuilder(Model model)
+    {
         return ModelResponse.fromRequest(getRequest()).
-                getResponseBuilder(model, getVariants()).
-                //cacheControl(getCacheControl()).
-                build();
-    }
-
-    /**
-     * Builds a list of acceptable response variants
-     * 
-     * @return supported variants
-     */
-    public List<Variant> getVariants()
-    {
-        List<Variant> variants = getVariantListBuilder().add().build();
-        variants.add(0, new Variant(org.graphity.server.MediaType.APPLICATION_RDF_XML_TYPE, null, null));
-        return variants;
-    }
-
-    /**
-     * Returns Variant list builder with media types supported by Jena.
-     * 
-     * @return variant list builder
-     */
-    public VariantListBuilder getVariantListBuilder()
-    {
-        return getVariantListBuilder(org.graphity.server.MediaType.getRegistered());
+                getResponseBuilder(model, getMediaTypes(), getLanguages(), getEncodings());
     }
     
-    /**
-     * Produces a Variant builder from a list of media types.
-     * 
-     * @param mediaTypes list of supported media types
-     * @return variant builder
-     */    
-    public VariantListBuilder getVariantListBuilder(List<MediaType> mediaTypes)
+    public MediaType[] getMediaTypes()
     {
-        MediaType[] mediaTypeArray = new MediaType[mediaTypes.size()];
-        mediaTypes.toArray(mediaTypeArray);
-        
-        return Variant.VariantListBuilder.newInstance().mediaTypes(mediaTypeArray);
+        List<MediaType> list = org.graphity.server.MediaType.getRegisteredList();
+        list.add(0, org.graphity.server.MediaType.APPLICATION_RDF_XML_TYPE); // first one becomes default
+        javax.ws.rs.core.MediaType[] array = new javax.ws.rs.core.MediaType[list.size()];
+        list.toArray(array);
+        return array;
+    }
+    
+    public Locale[] getLanguages()
+    {
+        return new Locale[]{};
+    }
+
+    public String[] getEncodings()
+    {
+        return new String[]{};
     }
     
     @GET

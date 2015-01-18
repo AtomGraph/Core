@@ -19,8 +19,10 @@ package org.graphity.server.model.impl;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import java.util.List;
+import java.util.Locale;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.EntityTag;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -72,6 +74,8 @@ public class ModelResponse // extends ResponseBuilder
      */
     public ResponseBuilder getResponseBuilder(Model model, List<Variant> variants)
     {
+	if (variants == null) throw new IllegalArgumentException("List<Variant> cannot be null");
+
         Variant variant = getRequest().selectVariant(variants);
         if (variant == null)
         {
@@ -94,6 +98,45 @@ public class ModelResponse // extends ResponseBuilder
 	}	
     }
     
+    public ResponseBuilder getResponseBuilder(Model model, Locale[] languages, String[] encodings)
+    {
+        return getResponseBuilder(model, getVariants(org.graphity.server.MediaType.getRegistered(), languages, encodings));
+    }
+    
+    public ResponseBuilder getResponseBuilder(Model model, MediaType[] mediaTypes, Locale[] languages, String[] encodings)
+    {
+        return getResponseBuilder(model, getVariants(mediaTypes, languages, encodings));
+    }
+    
+    /**
+     * Builds a list of acceptable response variants
+     * 
+     * @param mediaTypes
+     * @param languages
+     * @param encodings
+     * @return supported variants
+     */
+    public List<Variant> getVariants(MediaType[] mediaTypes, Locale[] languages, String[] encodings)
+    {
+        return getVariantListBuilder(mediaTypes, languages, encodings).add().build();
+    }
+    
+    /**
+     * Produces a Variant builder from a list of media types.
+     * 
+     * @param mediaTypes
+     * @param languages
+     * @param encodings
+     * @return variant builder
+     */    
+    public Variant.VariantListBuilder getVariantListBuilder(MediaType[] mediaTypes, Locale[] languages, String[] encodings)
+    {        
+        return Variant.VariantListBuilder.newInstance().
+                mediaTypes(mediaTypes).
+                languages(languages).
+                encodings(encodings);
+    }
+    
     /**
      * Calculates hash for an RDF model and a given response variant.
      * 
@@ -103,6 +146,9 @@ public class ModelResponse // extends ResponseBuilder
      */
     public long getModelVariantHash(Model model, Variant variant)
     {
+	if (model == null) throw new IllegalArgumentException("Model cannot be null");
+	if (variant == null) throw new IllegalArgumentException("Variant cannot be null");
+        
         return ModelUtils.hashModel(model) + variant.hashCode();
     }
     
