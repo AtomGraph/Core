@@ -21,7 +21,6 @@ import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.update.UpdateRequest;
 import java.net.URI;
-import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -29,7 +28,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Variant;
 import org.graphity.server.MediaType;
 
 /**
@@ -52,10 +50,8 @@ public interface SPARQLEndpoint
      * @see <a href="http://www.w3.org/TR/sparql11-protocol/#query-success">SPARQL 1.1 Protocol. 2.1.6 Success Responses</a>
      * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/ResultSetRewindable.html">Jena ResultSetRewindable</a>
      */
-    public static final List<Variant> RESULT_SET_VARIANTS = Variant.VariantListBuilder.newInstance().
-			mediaTypes(org.graphity.server.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE,
-			    org.graphity.server.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE).
-			add().build();
+    public static final javax.ws.rs.core.MediaType[] RESULT_SET_MEDIA_TYPES = new javax.ws.rs.core.MediaType[]{org.graphity.server.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE,
+			    org.graphity.server.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE};
 
     /**
      * Handles GET query request and returns result as response

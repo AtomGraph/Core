@@ -17,6 +17,7 @@
 package org.graphity.server.model.impl;
 
 import com.hp.hpl.jena.rdf.model.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import javax.servlet.ServletConfig;
@@ -27,6 +28,7 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Variant;
 import org.graphity.server.model.LinkedDataResource;
 import org.graphity.server.vocabulary.GS;
 import org.slf4j.Logger;
@@ -85,28 +87,57 @@ public abstract class LinkedDataResourceBase implements LinkedDataResource
      */
     public ResponseBuilder getResponseBuilder(Model model)
     {
-        return ModelResponse.fromRequest(getRequest()).
-                getResponseBuilder(model, getMediaTypes(), getLanguages(), getEncodings()).
+        return org.graphity.server.model.impl.Response.fromRequest(getRequest()).
+                getResponseBuilder(model, getVariants()).
                 cacheControl(getCacheControl(GS.cacheControl));
     }
     
-    public MediaType[] getMediaTypes()
+    /**
+     * Builds a list of acceptable response variants
+     * 
+     * @return supported variants
+     */
+    public List<Variant> getVariants()
     {
-        List<MediaType> list = org.graphity.server.MediaType.getRegisteredList();
-        list.add(0, org.graphity.server.MediaType.APPLICATION_RDF_XML_TYPE); // first one becomes default
-        javax.ws.rs.core.MediaType[] array = new javax.ws.rs.core.MediaType[list.size()];
-        list.toArray(array);
-        return array;
+        return getVariantListBuilder().add().build();
     }
     
-    public Locale[] getLanguages()
+    public Variant.VariantListBuilder getVariantListBuilder()
     {
-        return new Locale[]{};
+        return getVariantListBuilder(getMediaTypes(), getLanguages(), getEncodings());
+    }
+    
+    /**
+     * Produces a Variant builder from a list of media types.
+     * 
+     * @param mediaTypes
+     * @param languages
+     * @param encodings
+     * @return variant builder
+     */    
+    public Variant.VariantListBuilder getVariantListBuilder(List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings)
+    {        
+        return Variant.VariantListBuilder.newInstance().
+                mediaTypes(org.graphity.server.model.impl.Response.mediaTypeListToArray(mediaTypes)).
+                languages(org.graphity.server.model.impl.Response.localeListToArray(languages)).
+                encodings(org.graphity.server.model.impl.Response.stringListToArray(encodings));
+    }
+    
+    public List<MediaType> getMediaTypes()
+    {
+        List<MediaType> list = org.graphity.server.MediaType.getRegistered();
+        list.add(0, org.graphity.server.MediaType.APPLICATION_RDF_XML_TYPE); // first one becomes default
+        return list;
+    }
+    
+    public List<Locale> getLanguages()
+    {
+        return new ArrayList<>();
     }
 
-    public String[] getEncodings()
+    public List<String> getEncodings()
     {
-        return new String[]{};
+        return new ArrayList<>();
     }
 
     /**

@@ -32,7 +32,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import javax.servlet.ServletConfig;
 import javax.ws.rs.core.MultivaluedMap;
 import org.apache.jena.atlas.web.auth.HttpAuthenticator;
 import org.apache.jena.atlas.web.auth.PreemptiveBasicAuthenticator;
@@ -61,21 +60,21 @@ public class DataManager extends FileManager
     private static final Logger log = LoggerFactory.getLogger(DataManager.class);
 
     private final Context context;
-    private final ServletConfig servletConfig;
+    private final boolean preemptiveAuth;
     
     /**
      * Creates data manager from file manager and SPARQL context.
+     * 
      * @param mapper location mapper
      * @param context SPARQL context
-     * @param servletConfig webapp context
+     * @param preemptiveAuth if true, preemptive HTTP authentication will be used
      */
-    public DataManager(LocationMapper mapper, Context context, ServletConfig servletConfig)
+    public DataManager(LocationMapper mapper, Context context, boolean preemptiveAuth)
     {
 	super(mapper);
 	if (context == null) throw new IllegalArgumentException("Context cannot be null");
-	if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
 	this.context = context;
-        this.servletConfig = servletConfig;
+        this.preemptiveAuth = preemptiveAuth;
     }
 
     public QueryEngineHTTP sparqlService(String endpointURI, Query query, MultivaluedMap<String, String> params)
@@ -650,10 +649,7 @@ public class DataManager extends FileManager
 
     public boolean usePreemptiveAuth(Property property)
     {
-        if (getServletConfig() != null && getServletConfig().getInitParameter(property.getURI()) != null)
-            return Boolean.parseBoolean(getServletConfig().getInitParameter(property.getURI()).toString());
-        
-        return false;
+        return preemptiveAuth;
     }
     
     /**
@@ -831,11 +827,6 @@ public class DataManager extends FileManager
 	queryContext.put(Service.queryAuthPwd, authPwd);
 
         return putServiceContext(endpointURI, queryContext);
-    }
-
-    public ServletConfig getServletConfig()
-    {
-        return servletConfig;
     }
     
 }

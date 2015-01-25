@@ -17,6 +17,8 @@
 
 package org.graphity.server.model.impl;
 
+import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.rdf.model.Model;
 import java.util.List;
 import java.util.Locale;
@@ -24,10 +26,10 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Variant;
 import org.graphity.util.ModelUtils;
+import org.graphity.util.ResultSetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,9 +40,9 @@ import org.slf4j.LoggerFactory;
  * @see com.hp.hpl.jena.rdf.model.Model
  * @see javax.ws.rs.core.Variant
  */
-public class ModelResponse // extends ResponseBuilder
+public class Response // extends ResponseBuilder
 {
-    private static final Logger log = LoggerFactory.getLogger(ModelResponse.class);
+    private static final Logger log = LoggerFactory.getLogger(Response.class);
 
     private final Request request;
     
@@ -49,7 +51,7 @@ public class ModelResponse // extends ResponseBuilder
      * 
      * @param request current request
      */
-    protected ModelResponse(Request request)
+    protected Response(Request request)
     {
 	if (request == null) throw new IllegalArgumentException("Request cannot be null");
         this.request = request;
@@ -60,9 +62,36 @@ public class ModelResponse // extends ResponseBuilder
         return request;
     }
     
-    public static ModelResponse fromRequest(Request request)
+    public static Response fromRequest(Request request)
     {
-	return new ModelResponse(request);
+	return new Response(request);
+    }
+
+    public static MediaType[] mediaTypeListToArray(List<MediaType> list)
+    {
+        if (list == null) throw new IllegalArgumentException("List cannot be null");
+        
+        MediaType[] array = new MediaType[list.size()];
+        list.toArray(array);
+        return array;
+    }
+
+    public static Locale[] localeListToArray(List<Locale> list)
+    {
+        if (list == null) throw new IllegalArgumentException("List cannot be null");
+        
+        Locale[] array = new Locale[list.size()];
+        list.toArray(array);
+        return array;
+    }
+
+    public static String[] stringListToArray(List<String> list)
+    {
+        if (list == null) throw new IllegalArgumentException("List cannot be null");
+        
+        String[] array = new String[list.size()];
+        list.toArray(array);
+        return array;
     }
     
     /**
@@ -80,10 +109,36 @@ public class ModelResponse // extends ResponseBuilder
         if (variant == null)
         {
             if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants: {}", variant, variants);
-            throw new WebApplicationException(Response.status(Response.Status.NOT_ACCEPTABLE).build());
+            throw new WebApplicationException(javax.ws.rs.core.Response.status(javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE).build());
         }
 
-        EntityTag entityTag = getEntityTag(model, variant);
+        return getResponseBuilder(model, getEntityTag(model, variant), variant);
+    }
+
+    public ResponseBuilder getResponseBuilder(ResultSetRewindable resultSet, List<Variant> variants)
+    {
+	if (resultSet == null) throw new IllegalArgumentException("ResultSetRewindable cannot be null");        
+	if (variants == null) throw new IllegalArgumentException("List<Variant> cannot be null");
+        
+        Variant variant = getRequest().selectVariant(variants);
+        if (variant == null)
+        {
+            if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants: {}", variant, variants);
+            return javax.ws.rs.core.Response.notAcceptable(variants);
+        }
+
+        resultSet.reset();
+        EntityTag entityTag = getEntityTag(resultSet, variant);        
+	resultSet.reset(); // ResultSet needs to be rewinded back to the beginning
+        return getResponseBuilder(resultSet, entityTag, variant);
+    }
+
+    public ResponseBuilder getResponseBuilder(Object entity, EntityTag entityTag, Variant variant)
+    {
+	if (entity == null) throw new IllegalArgumentException("Object cannot be null");
+	if (entityTag == null) throw new IllegalArgumentException("EntityTag cannot be null");
+	if (variant == null) throw new IllegalArgumentException("Variant cannot be null");
+
         ResponseBuilder rb = getRequest().evaluatePreconditions(entityTag);
 	if (rb != null)
 	{
@@ -93,50 +148,11 @@ public class ModelResponse // extends ResponseBuilder
 	else
 	{
             if (log.isTraceEnabled()) log.trace("Generating RDF Response with Variant: {} and EntityTag: {}", variant, entityTag);
-            return Response.ok(model, variant).
+            return javax.ws.rs.core.Response.ok(entity, variant).
                     tag(entityTag);
 	}	
     }
-    
-    public ResponseBuilder getResponseBuilder(Model model, Locale[] languages, String[] encodings)
-    {
-        return getResponseBuilder(model, getVariants(org.graphity.server.MediaType.getRegistered(), languages, encodings));
-    }
-    
-    public ResponseBuilder getResponseBuilder(Model model, MediaType[] mediaTypes, Locale[] languages, String[] encodings)
-    {
-        return getResponseBuilder(model, getVariants(mediaTypes, languages, encodings));
-    }
-    
-    /**
-     * Builds a list of acceptable response variants
-     * 
-     * @param mediaTypes
-     * @param languages
-     * @param encodings
-     * @return supported variants
-     */
-    public List<Variant> getVariants(MediaType[] mediaTypes, Locale[] languages, String[] encodings)
-    {
-        return getVariantListBuilder(mediaTypes, languages, encodings).add().build();
-    }
-    
-    /**
-     * Produces a Variant builder from a list of media types.
-     * 
-     * @param mediaTypes
-     * @param languages
-     * @param encodings
-     * @return variant builder
-     */    
-    public Variant.VariantListBuilder getVariantListBuilder(MediaType[] mediaTypes, Locale[] languages, String[] encodings)
-    {        
-        return Variant.VariantListBuilder.newInstance().
-                mediaTypes(mediaTypes).
-                languages(languages).
-                encodings(encodings);
-    }
-    
+        
     /**
      * Calculates hash for an RDF model and a given response variant.
      * 
@@ -151,6 +167,14 @@ public class ModelResponse // extends ResponseBuilder
         
         return ModelUtils.hashModel(model) + variant.hashCode();
     }
+
+    public long getResultSetVariantHash(ResultSet resultSet, Variant variant)
+    {
+	if (resultSet == null) throw new IllegalArgumentException("ResultSet cannot be null");
+	if (variant == null) throw new IllegalArgumentException("Variant cannot be null");
+
+        return ResultSetUtils.hashResultSet(resultSet) + variant.hashCode();
+    }
     
     /**
      * Calculates ETag for an RDF model and a given response variant.
@@ -164,4 +188,9 @@ public class ModelResponse // extends ResponseBuilder
         return new EntityTag(Long.toHexString(getModelVariantHash(model, variant)));
     }
     
+    public EntityTag getEntityTag(ResultSet resultSet, Variant variant)
+    {
+        return new EntityTag(Long.toHexString(getResultSetVariantHash(resultSet, variant)));
+    }
+
 }

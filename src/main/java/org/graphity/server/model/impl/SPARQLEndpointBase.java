@@ -18,21 +18,22 @@ package org.graphity.server.model.impl;
 
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.rdf.model.*;
 import com.hp.hpl.jena.update.UpdateFactory;
 import com.hp.hpl.jena.update.UpdateRequest;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.*;
 import org.graphity.server.model.SPARQLEndpoint;
 import org.graphity.server.vocabulary.GS;
-import org.graphity.util.ResultSetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -195,73 +196,65 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
      */
     public ResponseBuilder getResponseBuilder(Model model)
     {
-        return ModelResponse.fromRequest(getRequest()).
-                getResponseBuilder(model, getMediaTypes(), getLanguages(), getEncodings());
-    }
-    
-    public MediaType[] getMediaTypes()
-    {
-        List<MediaType> list = org.graphity.server.MediaType.getRegisteredList();
-        list.add(0, org.graphity.server.MediaType.APPLICATION_RDF_XML_TYPE); // first one becomes default
-        javax.ws.rs.core.MediaType[] array = new javax.ws.rs.core.MediaType[list.size()];
-        list.toArray(array);
-        return array;
-    }
-    
-    public Locale[] getLanguages()
-    {
-        return new Locale[]{};
-    }
-
-    public String[] getEncodings()
-    {
-        return new String[]{};
-    }
-
-    public EntityTag getEntityTag(ResultSet resultSet)
-    {
-        return new EntityTag(Long.toHexString(ResultSetUtils.hashResultSet(resultSet)));
+        return org.graphity.server.model.impl.Response.fromRequest(getRequest()).
+                getResponseBuilder(model, getVariants(getModelMediaTypes()));
     }
     
     public ResponseBuilder getResponseBuilder(ResultSetRewindable resultSet)
     {
-	return getResponseBuilder(resultSet, RESULT_SET_VARIANTS);
+	return org.graphity.server.model.impl.Response.fromRequest(getRequest()).
+                getResponseBuilder(resultSet, getVariants(getResultSetMediaTypes()));
     }
     
-    public ResponseBuilder getResponseBuilder(ResultSetRewindable resultSet, List<Variant> variants)
+    /**
+     * Builds a list of acceptable response variants
+     * 
+     * @param mediaTypes
+     * @return supported variants
+     */
+    public List<Variant> getVariants(List<MediaType> mediaTypes)
     {
-        resultSet.reset();
-        EntityTag entityTag = getEntityTag(resultSet);
-	resultSet.reset(); // ResultSet needs to be rewinded back to the beginning
-	return getResponseBuilder(entityTag, resultSet, variants);
+        return getVariantListBuilder(mediaTypes, getLanguages(), getEncodings()).add().build();
     }
     
-    public ResponseBuilder getResponseBuilder(EntityTag entityTag, Object entity, List<Variant> variants)
-    {	
-        Variant variant = getRequest().selectVariant(variants);
-        if (variant == null)
-        {
-            if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants: {}", variant, variants);
-            return Response.notAcceptable(variants);
-        }
-
-        ResponseBuilder rb = getRequest().evaluatePreconditions(entityTag);
-	if (rb != null)
-	{
-	    if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
-	    return rb.variant(variant); // Jersey doesn't seem to set "Vary" header
-	}
-	else
-	{
-            if (log.isTraceEnabled()) log.trace("Generating RDF Response with Variant: {} and EntityTag: {}", variant, entityTag);
-            return Response.ok(entity, variant).
-                    tag(entityTag);
-	}	
+    /**
+     * Produces a Variant builder from a list of media types.
+     * 
+     * @param mediaTypes
+     * @param languages
+     * @param encodings
+     * @return variant builder
+     */    
+    public Variant.VariantListBuilder getVariantListBuilder(List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings)
+    {        
+        return Variant.VariantListBuilder.newInstance().
+                mediaTypes(org.graphity.server.model.impl.Response.mediaTypeListToArray(mediaTypes)).
+                languages(org.graphity.server.model.impl.Response.localeListToArray(languages)).
+                encodings(org.graphity.server.model.impl.Response.stringListToArray(encodings));
+    }
+    
+    public List<MediaType> getModelMediaTypes()
+    {
+        List<MediaType> list = org.graphity.server.MediaType.getRegistered();
+        list.add(0, org.graphity.server.MediaType.APPLICATION_RDF_XML_TYPE); // first one becomes default
+        return list;
+    }
+    
+    public List<MediaType> getResultSetMediaTypes()
+    {
+        return Arrays.asList(RESULT_SET_MEDIA_TYPES);
+    }
+    
+    public List<Locale> getLanguages()
+    {
+        return new ArrayList<>();
     }
 
-    /*
-    */
-    
+    public List<String> getEncodings()
+    {
+        return new ArrayList<>();
+    }
+        
     @Override
     public Model describe(Query query)
     {
