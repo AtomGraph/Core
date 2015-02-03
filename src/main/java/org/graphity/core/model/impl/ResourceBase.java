@@ -40,9 +40,9 @@ import org.slf4j.LoggerFactory;
  * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/rdf/model/Resource.html">Jena Resource</a>
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public abstract class LinkedDataResourceBase implements Resource
+public abstract class ResourceBase implements Resource
 {
-    private static final Logger log = LoggerFactory.getLogger(LinkedDataResourceBase.class);
+    private static final Logger log = LoggerFactory.getLogger(ResourceBase.class);
 
     private final UriInfo uriInfo;
     private final Request request;
@@ -57,7 +57,7 @@ public abstract class LinkedDataResourceBase implements Resource
      * @param servletConfig webapp context
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html#getAbsolutePath()">JAX-RS UriInfo.getAbsolutePath()</a>
      */
-    public LinkedDataResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletConfig servletConfig)
+    public ResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletConfig servletConfig)
     {
 	if (uriInfo == null) throw new IllegalArgumentException("UriInfo cannot be null");
 	if (request == null) throw new IllegalArgumentException("Request cannot be null");

@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/Query.html">ARQ Query</a>
  */
 @Path("{path: .*}")
-public class QueriedResourceBase extends LinkedDataResourceBase implements QueriedResource
+public class QueriedResourceBase extends ResourceBase implements QueriedResource
 {
     private static final Logger log = LoggerFactory.getLogger(QueriedResourceBase.class);
     
