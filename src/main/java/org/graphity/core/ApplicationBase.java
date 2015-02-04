@@ -104,9 +104,9 @@ public class ApplicationBase extends javax.ws.rs.core.Application
     }
 
     /**
-     * Returns filter config
+     * Returns servlet configuration.
      * 
-     * @return filter config
+     * @return servlet config
      */
     public ServletConfig getServletConfig()
     {

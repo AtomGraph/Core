@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Base class for SPARQL Graph Stores.
+ * Base class of SPARQL Graph Stores.
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  * @see org.graphity.server.model.GraphStore
@@ -44,6 +44,12 @@ public abstract class GraphStoreBase implements GraphStore
     private final Request request;
     private final ServletConfig servletConfig;
     
+    /**
+     * Constructs Graph Store from request metadata.
+     * 
+     * @param request request
+     * @param servletConfig servlet config
+     */
     public GraphStoreBase(@Context Request request, @Context ServletConfig servletConfig)
     {
 	if (request == null) throw new IllegalArgumentException("Request cannot be null");
@@ -77,7 +83,7 @@ public abstract class GraphStoreBase implements GraphStore
     }
     
     /**
-     * Builds a list of acceptable response variants
+     * Builds a list of acceptable response variants.
      * 
      * @return supported variants
      */
@@ -86,17 +92,22 @@ public abstract class GraphStoreBase implements GraphStore
         return getVariantListBuilder().add().build();
     }
     
+    /**
+     * Returns a builder object for supported response variants.
+     * 
+     * @return variant builder
+     */
     public Variant.VariantListBuilder getVariantListBuilder()
     {
         return getVariantListBuilder(getMediaTypes(), getLanguages(), getEncodings());
     }
     
     /**
-     * Produces a Variant builder from a list of media types.
+     * Produces a Variant builder from a combination of media types, locales, and encodings.
      * 
-     * @param mediaTypes
-     * @param languages
-     * @param encodings
+     * @param mediaTypes supported media types
+     * @param languages supported languages
+     * @param encodings supported encodings
      * @return variant builder
      */    
     public Variant.VariantListBuilder getVariantListBuilder(List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings)
@@ -107,6 +118,11 @@ public abstract class GraphStoreBase implements GraphStore
                 encodings(org.graphity.core.model.impl.Response.stringListToArray(encodings));
     }
     
+    /**
+     * Returns a list of supported media types.
+     * 
+     * @return list of media types
+     */
     public List<MediaType> getMediaTypes()
     {
         List<MediaType> list = org.graphity.core.MediaType.getRegistered();
@@ -114,16 +130,34 @@ public abstract class GraphStoreBase implements GraphStore
         return list;
     }
     
+    /**
+     * Returns a list of supported languages.
+     * 
+     * @return list of languages
+     */
     public List<Locale> getLanguages()
     {
         return new ArrayList<>();
     }
 
+    /**
+     * Returns a list of supported HTTP encodings.
+     * Note: this is different from content encodings such as UTF-8.
+     * 
+     * @return list of encodings
+     */
     public List<String> getEncodings()
     {
         return new ArrayList<>();
     }
     
+    /**
+     * Implements GET method of SPARQL Graph Store Protocol.
+     * 
+     * @param defaultGraph true if default graph is requested
+     * @param graphUri named graph URI
+     * @return response
+     */
     @GET
     @Override
     public Response get(@QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
@@ -152,6 +186,14 @@ public abstract class GraphStoreBase implements GraphStore
 	}
     }
 
+    /**
+     * Implements POST method of SPARQL Graph Store Protocol.
+     * 
+     * @param model RDF request body
+     * @param defaultGraph true if default graph is requested
+     * @param graphUri named graph URI
+     * @return response
+     */
     @POST
     @Override
     public Response post(Model model, @QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
@@ -180,6 +222,14 @@ public abstract class GraphStoreBase implements GraphStore
 	}
     }
 
+    /**
+     * Implements PUT method of SPARQL Graph Store Protocol.
+     * 
+     * @param model RDF request body
+     * @param defaultGraph true if default graph is requested
+     * @param graphUri named graph URI
+     * @return response
+     */    
     @PUT
     @Override
     public Response put(Model model, @QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
@@ -205,6 +255,13 @@ public abstract class GraphStoreBase implements GraphStore
 	}	
     }
 
+    /**
+     * Implements DELETE method of SPARQL Graph Store Protocol.
+     * 
+     * @param defaultGraph true if default graph is requested
+     * @param graphUri named graph URI
+     * @return response
+     */
     @DELETE
     @Override
     public Response delete(@QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)

@@ -26,6 +26,7 @@ import org.apache.jena.riot.RDFLanguages;
 
 /**
  * Extends standard JAX-RS media type with RDF media types
+ * 
  * @see <a href="http://jackson.codehaus.org/javadoc/jax-rs/1.0/javax/ws/rs/core/MediaType.html">javax.ws.rs.core.MediaType</a>
  * @author Martynas Jusevičius <martynas@graphity.org>
  */

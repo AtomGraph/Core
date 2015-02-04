@@ -33,10 +33,10 @@ public class SPARQLEndpointFactory
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointFactory.class);
     
     /**
-     * Creates new SPARQL endpoint from explicit URI resource and request metadata.
+     * Creates new SPARQL endpoint from request metadata.
      * 
      * @param request request
-     * @param servletConfig filter config
+     * @param servletConfig servlet config
      * @param origin proxy origin
      * @param dataManager RDF data manager for this endpoint
      * @return a new endpoint

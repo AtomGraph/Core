@@ -30,7 +30,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Proxy implementation of Graph Store.
+ * This class forwards requests to a remote origin.
+ * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 @Path("/service") // not standard
@@ -41,6 +43,14 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
     private final Origin origin;
     private final DataManager dataManager;
     
+    /**
+     * Constructs Graph Store proxy from request metadata and origin.
+     * 
+     * @param request request
+     * @param servletConfig servlet config
+     * @param origin graph store origin
+     * @param dataManager data manager
+     */
     public GraphStoreProxyBase(@Context Request request, @Context ServletConfig servletConfig,
             @Context GraphStoreOrigin origin, @Context DataManager dataManager)
     {

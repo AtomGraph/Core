@@ -49,7 +49,7 @@ public abstract class ResourceBase implements Resource
     private final ServletConfig servletConfig;
 
     /** 
-     * JAX-RS-compatible resource constructor with injected initialization objects.
+     * JAX-RS-compatible resource constructor with injected request metadata.
      * The URI of the resource being created is the absolute path of the current request URI.
      * 
      * @param uriInfo URI information of the request

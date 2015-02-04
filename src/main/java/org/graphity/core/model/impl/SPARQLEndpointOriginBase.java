@@ -21,12 +21,21 @@ import org.graphity.core.model.SPARQLEndpointOrigin;
 import org.graphity.core.util.DataManager;
 
 /**
- *
+ * Base class of SPARQL Graph Store origins.
+ * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 public class SPARQLEndpointOriginBase extends OriginBase implements SPARQLEndpointOrigin
 {
 
+    /**
+     * Constructs SPARQL endpoint origin from URI and HTTP authentication credentials.
+     * 
+     * @param uri origin URI
+     * @param authUser authentication username
+     * @param authPwd authentication password
+     * @param dataManager data manager
+     */
     public SPARQLEndpointOriginBase(String uri, String authUser, String authPwd, DataManager dataManager)
     {
         super(uri);
@@ -35,6 +44,11 @@ public class SPARQLEndpointOriginBase extends OriginBase implements SPARQLEndpoi
             dataManager.putAuthContext(uri, authUser, authPwd);
     }
     
+    /**
+     * Constructs SPARQL endpoint origin from URI.
+     * 
+     * @param uri origin URI
+     */
     public SPARQLEndpointOriginBase(String uri)
     {
         this(uri, null, null, null);

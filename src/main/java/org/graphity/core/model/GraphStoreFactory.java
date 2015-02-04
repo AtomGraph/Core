@@ -32,7 +32,7 @@ public class GraphStoreFactory
 {
     
     /**
-     * Creates new GraphStore from explicit URI resource.
+     * Creates new GraphStore from request metadata.
      * 
      * @param request current request
      * @param servletConfig servlet config

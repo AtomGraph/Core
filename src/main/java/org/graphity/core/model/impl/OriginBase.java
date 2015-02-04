@@ -21,6 +21,7 @@ import org.graphity.core.model.Origin;
 
 /**
  * Base class for origin implementation.
+ * Origins are used to indicate remote SPARQL and Graph Store endpoints.
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
@@ -29,6 +30,11 @@ public class OriginBase implements Origin
     
     private final String uri;
     
+    /**
+     * Constructs origin from URI.
+     * 
+     * @param uri 
+     */
     public OriginBase(String uri)
     {
         this.uri = uri;

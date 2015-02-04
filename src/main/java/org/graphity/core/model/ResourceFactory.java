@@ -35,7 +35,7 @@ public class ResourceFactory
      * 
      * @param uriInfo URI information of the current request
      * @param request current request object
-     * @param servletConfig webapp context
+     * @param servletConfig servlet config
      * @param endpoint SPARQL endpoint backing the application
      * @return a new Linked Data resource
      */

@@ -33,7 +33,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Proxy implementation of SPARQL endpoint.
+ * This class forwards requests to a remote origin.
+ * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
 @Path("/sparql")
@@ -44,6 +46,14 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
     private final Origin origin;
     private final DataManager dataManager;
     
+    /**
+     * Constructs SPARQL endpoint proxy from request metadata and origin.
+     * 
+     * @param request
+     * @param servletConfig
+     * @param origin
+     * @param dataManager 
+     */
     public SPARQLEndpointProxyBase(@Context Request request, @Context ServletConfig servletConfig, @Context SPARQLEndpointOrigin origin, @Context DataManager dataManager)
     {
         super(request, servletConfig);

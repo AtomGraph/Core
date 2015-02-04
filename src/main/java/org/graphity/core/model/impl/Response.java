@@ -99,7 +99,7 @@ public class Response // extends ResponseBuilder
      * 
      * @param model RDF model
      * @param variants supported response variants
-     * @return 
+     * @return response builder
      */
     public ResponseBuilder getResponseBuilder(Model model, List<Variant> variants)
     {
@@ -115,6 +115,13 @@ public class Response // extends ResponseBuilder
         return getResponseBuilder(model, getEntityTag(model, variant), variant);
     }
 
+    /**
+     * Returns response builder for SPARQL result set.
+     * 
+     * @param resultSet result set
+     * @param variants supported response variants
+     * @return response builder
+     */    
     public ResponseBuilder getResponseBuilder(ResultSetRewindable resultSet, List<Variant> variants)
     {
 	if (resultSet == null) throw new IllegalArgumentException("ResultSetRewindable cannot be null");        
@@ -133,6 +140,13 @@ public class Response // extends ResponseBuilder
         return getResponseBuilder(resultSet, entityTag, variant);
     }
 
+    /**
+     * Returns generic response builder.
+     * 
+     * @param entity response entity
+     * @param variants supported response variants
+     * @return response builder
+     */        
     public ResponseBuilder getResponseBuilder(Object entity, EntityTag entityTag, Variant variant)
     {
 	if (entity == null) throw new IllegalArgumentException("Object cannot be null");
@@ -168,6 +182,13 @@ public class Response // extends ResponseBuilder
         return ModelUtils.hashModel(model) + variant.hashCode();
     }
 
+    /**
+     * Calculates hash for a SPARQL result set and a given response variant.
+     * 
+     * @param resultSet result set
+     * @param variant response variant
+     * @return hash code
+     */    
     public long getResultSetVariantHash(ResultSet resultSet, Variant variant)
     {
 	if (resultSet == null) throw new IllegalArgumentException("ResultSet cannot be null");
@@ -187,7 +208,14 @@ public class Response // extends ResponseBuilder
     {
         return new EntityTag(Long.toHexString(getModelVariantHash(model, variant)));
     }
-    
+
+    /**
+     * Calculates ETag for a SPARQL result set and a given response variant.
+     * 
+     * @param resultSet result set
+     * @param variant response variant
+     * @return entity tag object
+     */    
     public EntityTag getEntityTag(ResultSet resultSet, Variant variant)
     {
         return new EntityTag(Long.toHexString(getResultSetVariantHash(resultSet, variant)));

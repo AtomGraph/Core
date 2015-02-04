@@ -38,7 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Base class for SPARQL endpoints.
+ * Base class of SPARQL endpoints.
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  * @see org.graphity.server.model.SPARQLEndpoint
@@ -51,11 +51,10 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     private final ServletConfig servletConfig;
     
     /**
-     * Protected constructor with explicit endpoint resource.
-     * Not suitable for JAX-RS but can be used when subclassing.
+     * Constructs SPARQL endpoint from request metadata.
      * 
      * @param request current request
-     * @param servletConfig webapp context
+     * @param servletConfig servlet config
      */
     public SPARQLEndpointBase(@Context Request request, @Context ServletConfig servletConfig)
     {
@@ -199,7 +198,13 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
         return org.graphity.core.model.impl.Response.fromRequest(getRequest()).
                 getResponseBuilder(model, getVariants(getModelMediaTypes()));
     }
-    
+
+    /**
+     * Returns response builder for the given SPARQL result set.
+     * 
+     * @param resultSet result set
+     * @return response builder
+     */
     public ResponseBuilder getResponseBuilder(ResultSetRewindable resultSet)
     {
 	return org.graphity.core.model.impl.Response.fromRequest(getRequest()).
@@ -233,6 +238,11 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
                 encodings(org.graphity.core.model.impl.Response.stringListToArray(encodings));
     }
     
+    /**
+     * Returns supported RDF media types.
+     * 
+     * @return list of media types
+     */
     public List<MediaType> getModelMediaTypes()
     {
         List<MediaType> list = org.graphity.core.MediaType.getRegistered();
@@ -240,21 +250,44 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
         return list;
     }
     
+    /**
+     * Returns supported SPARQL result set media types.
+     * 
+     * @return list of media types
+     */
     public List<MediaType> getResultSetMediaTypes()
     {
         return Arrays.asList(RESULT_SET_MEDIA_TYPES);
     }
     
+    /**
+     * Returns supported languages.
+     * 
+     * @return list of languages
+    */
     public List<Locale> getLanguages()
     {
         return new ArrayList<>();
     }
 
+    /**
+     * Returns supported HTTP encodings.
+     * Note: this is different from content encodings such as UTF-8.
+     * 
+     * @return list of encodings
+     */
     public List<String> getEncodings()
     {
         return new ArrayList<>();
     }
-        
+
+    /**
+     * Convenience method for <pre>DESCRIBE</pre> queries.
+     * 
+     * @link #loadModel(query)
+     * @param query
+     * @return RDF model
+     */
     @Override
     public Model describe(Query query)
     {
@@ -264,6 +297,13 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
 	return loadModel(query);
     }
 
+    /**
+     * Convenience method for <pre>CONSTRUCT</pre> queries.
+     * 
+     * @link #loadModel(query)
+     * @param query
+     * @return RDF model
+     */
     @Override
     public Model construct(Query query)
     {
