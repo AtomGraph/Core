@@ -2,7 +2,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.graphity</groupId>
+    <artifactId>core</artifactId>
     <version>1.1.1-SNAPSHOT</version>
+    <packaging>${packaging.type}</packaging>
 
     <name>Graphity Core</name>
     <description>Generic Linked Data server</description>
@@ -36,9 +38,9 @@
     </properties>
  
     <scm>
-	<url>https://github.com/Graphity/graphity-server</url>
-	<connection>scm:git:git://github.com/Graphity/graphity-server.git</connection>
-	<developerConnection>scm:git:git@github.com:pumba-lt/graphity-server.git</developerConnection>
+	<url>https://github.com/Graphity/graphity-core</url>
+	<connection>scm:git:git://github.com/Graphity/graphity-core.git</connection>
+	<developerConnection>scm:git:git@github.com:pumba-lt/graphity-core.git</developerConnection>
     </scm>
 
     <repositories>
@@ -129,10 +131,7 @@
 		    </configuration>
 	    </plugin>
         </plugins>
-    </build>
-    <packaging>${packaging.type}</packaging>
-    <artifactId>server</artifactId>
-    
+    </build>    
     <profiles>
         <profile>
             <id>standalone</id>

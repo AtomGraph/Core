@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * Base class of SPARQL endpoints.
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
- * @see org.graphity.server.model.SPARQLEndpoint
+ * @see org.graphity.core.model.SPARQLEndpoint
  */
 public abstract class SPARQLEndpointBase implements SPARQLEndpoint
 {
@@ -74,7 +74,7 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
      * @param defaultGraphUri default graph URI
      * @param graphUri named graph URI
      * @return result response
-     * @see org.graphity.server.provider.QueryParamProvider
+     * @see org.graphity.core.provider.QueryParamProvider
      */
     @Override
     @GET

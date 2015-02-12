@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * Base class of SPARQL Graph Stores.
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
- * @see org.graphity.server.model.GraphStore
+ * @see org.graphity.core.model.GraphStore
  */
 public abstract class GraphStoreBase implements GraphStore
 {

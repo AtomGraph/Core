@@ -81,7 +81,7 @@ public class ApplicationBase extends javax.ws.rs.core.Application
      * Provides JAX-RS root resource classes.
      * 
      * @return set of root resource classes
-     * @see org.graphity.server.model
+     * @see org.graphity.core.model
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/Application.html#getClasses()">Application.getClasses()</a>
      */
     @Override
@@ -94,7 +94,7 @@ public class ApplicationBase extends javax.ws.rs.core.Application
      * Provides JAX-RS singleton objects (e.g. resources or Providers)
      * 
      * @return set of singleton objects
-     * @see org.graphity.server.provider
+     * @see org.graphity.core.provider
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/Application.html#getSingletons()">Application.getSingletons()</a>
      */
     @Override

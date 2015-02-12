@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * Needs to be registered in the application.
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
- * @see org.graphity.server.util.DataManager
+ * @see org.graphity.core.util.DataManager
  */
 @Provider
 public class DataManagerProvider extends PerRequestTypeInjectableProvider<Context, DataManager> implements ContextResolver<DataManager>

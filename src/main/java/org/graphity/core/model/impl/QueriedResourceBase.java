@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * Base class of generic read-only Linked Data resources with RDF representations queried from SPARQL endpoints.
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
- * @see org.graphity.server.model.SPARQLEndpoint
+ * @see org.graphity.core.model.SPARQLEndpoint
  * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/Query.html">ARQ Query</a>
  */
 @Path("{path: .*}")
