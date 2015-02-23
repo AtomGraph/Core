@@ -83,7 +83,12 @@ public class DataManagerProvider extends PerRequestTypeInjectableProvider<Contex
      */
     public DataManager getDataManager()
     {
-        return getDataManager(LocationMapper.get(), ARQ.getContext(), getServletConfig());
+        return getDataManager(getServletConfig());
+    }
+
+    public DataManager getDataManager(ServletConfig servletConfig)
+    {
+        return getDataManager(LocationMapper.get(), ARQ.getContext(), servletConfig);
     }
     
     public boolean getPreemptiveAuth(ServletConfig servletConfig, Property property)
@@ -101,7 +106,7 @@ public class DataManagerProvider extends PerRequestTypeInjectableProvider<Contex
     {
 	if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
         
-        return getDataManager(mapper, context, getPreemptiveAuth(getServletConfig(), G.preemptiveAuth));
+        return getDataManager(mapper, context, getPreemptiveAuth(servletConfig, G.preemptiveAuth));
     }
 
     public DataManager getDataManager(LocationMapper mapper, com.hp.hpl.jena.sparql.util.Context context, boolean preemptiveAuth)
