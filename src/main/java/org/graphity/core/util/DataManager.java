@@ -16,11 +16,12 @@
  */
 package org.graphity.core.util;
 
+import org.graphity.core.util.jena.DatasetGraphAccessorHTTP;
+import org.graphity.core.util.jena.QueryEngineHTTP;
 import com.hp.hpl.jena.query.*;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.sparql.engine.http.QueryEngineHTTP;
 import com.hp.hpl.jena.sparql.engine.http.Service;
 import com.hp.hpl.jena.sparql.util.Context;
 import com.hp.hpl.jena.update.UpdateExecutionFactory;

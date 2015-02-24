@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.graphity.core.util;
+package org.graphity.core.util.jena;
 
 
 import org.apache.http.HttpEntity ;

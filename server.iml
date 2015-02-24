@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_7" inherit-compiler-output="false">
+    <output url="file://$MODULE_DIR$/target/classes" />
+    <output-test url="file://$MODULE_DIR$/target/test-classes" />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/target" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" scope="TEST" name="Maven: junit:junit:4.8.2" level="project" />
+    <orderEntry type="library" name="Maven: com.sun.jersey:jersey-server:1.16" level="project" />
+    <orderEntry type="library" name="Maven: asm:asm:3.1" level="project" />
+    <orderEntry type="library" name="Maven: com.sun.jersey:jersey-core:1.16" level="project" />
+    <orderEntry type="library" name="Maven: com.sun.jersey:jersey-servlet:1.10" level="project" />
+    <orderEntry type="library" name="Maven: com.sun.jersey:jersey-client:1.16" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.jena:jena-fuseki:1.0.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.jena:jena-arq:2.11.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.jena:jena-core:2.11.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.jena:jena-iri:1.0.0" level="project" />
+    <orderEntry type="library" name="Maven: xerces:xercesImpl:2.11.0" level="project" />
+    <orderEntry type="library" name="Maven: xml-apis:xml-apis:1.4.01" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.jena:jena-tdb:1.0.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.jena:jena-text:1.0.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.lucene:lucene-core:4.3.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.lucene:lucene-analyzers-common:4.3.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.lucene:lucene-queryparser:4.3.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.lucene:lucene-queries:4.3.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.lucene:lucene-sandbox:4.3.1" level="project" />
+    <orderEntry type="library" name="Maven: jakarta-regexp:jakarta-regexp:1.4" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.solr:solr-solrj:4.3.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.zookeeper:zookeeper:3.4.5" level="project" />
+    <orderEntry type="library" name="Maven: commons-io:commons-io:2.1" level="project" />
+    <orderEntry type="library" name="Maven: org.noggit:noggit:0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpmime:4.2.3" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: org.codehaus.woodstox:wstx-asl:3.2.7" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.jena:jena-spatial:1.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.lucene:lucene-spatial:4.3.1" level="project" />
+    <orderEntry type="library" name="Maven: com.spatial4j:spatial4j:0.3" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpclient:4.2.3" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpcore:4.2.2" level="project" />
+    <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.6" level="project" />
+    <orderEntry type="library" name="Maven: commons-fileupload:commons-fileupload:1.2.2" level="project" />
+    <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-server:8.1.11.v20130520" level="project" />
+    <orderEntry type="library" name="Maven: org.eclipse.jetty.orbit:javax.servlet:3.0.0.v201112011016" level="project" />
+    <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-continuation:8.1.11.v20130520" level="project" />
+    <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-http:8.1.11.v20130520" level="project" />
+    <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-io:8.1.11.v20130520" level="project" />
+    <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-servlet:8.1.11.v20130520" level="project" />
+    <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-servlets:8.1.11.v20130520" level="project" />
+    <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-client:8.1.11.v20130520" level="project" />
+    <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-xml:8.1.11.v20130520" level="project" />
+    <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-security:8.1.11.v20130520" level="project" />
+    <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-util:8.1.11.v20130520" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.velocity:velocity:1.7" level="project" />
+    <orderEntry type="library" name="Maven: commons-collections:commons-collections:3.2.1" level="project" />
+    <orderEntry type="library" name="Maven: commons-lang:commons-lang:2.4" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.6.4" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-log4j12:1.6.4" level="project" />
+    <orderEntry type="library" name="Maven: log4j:log4j:1.2.16" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:jcl-over-slf4j:1.6.4" level="project" />
+  </component>
+</module>
