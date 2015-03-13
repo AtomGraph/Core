@@ -20,6 +20,7 @@ import com.hp.hpl.jena.rdf.model.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import javax.annotation.PostConstruct;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
@@ -47,6 +48,7 @@ public abstract class ResourceBase implements Resource
     private final UriInfo uriInfo;
     private final Request request;
     private final ServletConfig servletConfig;
+    private CacheControl cacheControl;
 
     /** 
      * JAX-RS-compatible resource constructor with injected request metadata.
@@ -67,7 +69,16 @@ public abstract class ResourceBase implements Resource
         this.request = request;
         this.servletConfig = servletConfig;
     }
-        
+
+    /**
+     * Post-construct initialization. Subclasses need to call super.init() first, just like with super() constructor.
+     */
+    @PostConstruct
+    public void init()
+    {
+        this.cacheControl = getCacheControl(G.cacheControl);        
+    }
+    
     /**
      * Returns response for the given RDF model.
      * 
@@ -89,7 +100,7 @@ public abstract class ResourceBase implements Resource
     {
         return org.graphity.core.model.impl.Response.fromRequest(getRequest()).
                 getResponseBuilder(model, getVariants()).
-                cacheControl(getCacheControl(G.cacheControl));
+                cacheControl(getCacheControl());
     }
     
     /**
@@ -179,6 +190,16 @@ public abstract class ResourceBase implements Resource
     public ServletConfig getServletConfig()
     {
 	return servletConfig;
+    }
+
+    /**
+     * Returns <pre>Cache-Control</pre> header value.
+     * 
+     * @return cache control object
+     */
+    public CacheControl getCacheControl()
+    {
+        return cacheControl;
     }
 
     /**
