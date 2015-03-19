@@ -8,17 +8,18 @@
 
     <name>Graphity Core</name>
     <description>Generic Linked Data server</description>
-
+    <url>https://github.com/Graphity/graphity-core</url>
+        
     <developers>
 	<developer>
-		<id>pumba_lt</id>
+		<id>pumba-lt</id>
 		<email>martynas@graphity.org</email>
 		<roles>
 			<role>Developer</role>
 			<role>Founder</role>
 		</roles>
 		<organization>Graphity</organization>
-		<organizationUrl>http://graphity.org</organizationUrl>
+		<organizationUrl>http://graphityhq.com</organizationUrl>
 	</developer>
     </developers>
     
