@@ -232,8 +232,7 @@ public class DatasetGraphAccessorHTTP implements DatasetGraphAccessor
             byte[] bytes = out.toByteArray() ;
             ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray()) ;
             InputStreamEntity reqEntity = new InputStreamEntity(in, bytes.length) ;
-            //reqEntity.setContentType(getSendLang().getContentType().getContentType());
-            reqEntity.setContentType(getSendLang().getAltContentTypes().get(0)) ;
+            reqEntity.setContentType(getSendLang().getContentType().getContentType());
             reqEntity.setContentEncoding("UTF-8") ;
             HttpEntity entity = reqEntity ;
             return entity;
