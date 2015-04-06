@@ -1,18 +1,18 @@
-Lower-level Linked Data server application that serves as a base for [Graphity Client](https://github.com/Graphity/graphity-browser). It is implemented as a Java Web application (uses Maven).
+Lower-level Linked Data server application that serves as a base for [Graphity Processor](https://github.com/Graphity/graphity-processor). It is implemented as a Java Web application (uses Maven).
 
 Features
 --------
 
-Graphity Server provides features similar to that of [Pubby](http://wifo5-03.informatik.uni-mannheim.de/pubby/):
+Graphity Core provides features similar to that of [Pubby](http://wifo5-03.informatik.uni-mannheim.de/pubby/):
 * serving Linked Data from a SPARQL endpoint
 * HTTP Basic authentication for endpoints
  
-For more advanced features and configuration, see [Graphity Client](https://github.com/Graphity/graphity-browser).
+For more advanced features and configuration, see [Graphity Processor](https://github.com/Graphity/graphity-processor).
 
 Configuration
 -------------
 
-The Server is configured in [web.xml](../../blob/master/src/main/webapp/WEB-INF/web.xml)
+The Core is configured in [web.xml](../../blob/master/src/main/webapp/WEB-INF/web.xml)
 
 For developers
 --------------
@@ -22,7 +22,7 @@ For developers
 
 Documentation
 -------------
-* [JavaDoc](http://graphity.github.io/graphity-server/apidocs/)
+* [JavaDoc](http://graphity.github.io/graphity-core/apidocs/)
 
 Dependencies
 --------------
