@@ -76,7 +76,8 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
 	String syntax = lang.getName();
 	if (log.isDebugEnabled()) log.debug("Syntax used to read Model: {}", syntax);
 
-	// extract base URI from httpHeaders?
+	// extract base URI from httpHeaders? extract charset from MediaType
+        //mediaType.getParameters().containsKey("charset")
 	return model.read(entityStream, null, syntax);
     }
     
@@ -85,7 +86,8 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-        return Model.class.isAssignableFrom(type) && RDFLanguages.contentTypeToLang(mediaType.toString()) != null;
+        MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
+        return Model.class.isAssignableFrom(type) && RDFLanguages.contentTypeToLang(formatType.toString()) != null;
     }
 
     @Override
@@ -99,11 +101,12 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     {
 	if (log.isTraceEnabled()) log.trace("Writing Model with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
 
-        Lang lang = RDFLanguages.contentTypeToLang(mediaType.toString());
+        MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param        
+        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
         if (lang == null)
         {
             Throwable ex = new NoWriterForLangException("Media type not supported");
-            if (log.isErrorEnabled()) log.error("MediaType {} not supported by Jena", mediaType);
+            if (log.isErrorEnabled()) log.error("MediaType {} not supported by Jena", formatType);
             throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);
         }
 	String syntax = lang.getName();

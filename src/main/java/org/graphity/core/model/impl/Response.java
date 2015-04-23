@@ -144,7 +144,8 @@ public class Response // extends ResponseBuilder
      * Returns generic response builder.
      * 
      * @param entity response entity
-     * @param variants supported response variants
+     * @param entityTag entity tag
+     * @param variant response variant
      * @return response builder
      */        
     public ResponseBuilder getResponseBuilder(Object entity, EntityTag entityTag, Variant variant)

@@ -15,11 +15,11 @@
         </init-param>
         <init-param>
             <param-name>http://www.w3.org/ns/sparql-service-description#endpoint</param-name>
-            <param-value>http://graphity.dydra.com/graphity/server/sparql</param-value>
+            <param-value>http://graphity.dydra.com/graphity/core/sparql</param-value>
         </init-param>
         <init-param>
             <param-name>http://graphity.org/g#graphStore</param-name>
-            <param-value>http://graphity.dydra.com/graphity/server/service</param-value>
+            <param-value>http://graphity.dydra.com/graphity/core/service</param-value>
         </init-param>
         <!--
         <init-param>

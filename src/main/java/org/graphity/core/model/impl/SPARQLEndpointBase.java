@@ -25,8 +25,11 @@ import com.hp.hpl.jena.update.UpdateRequest;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -39,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Base class of SPARQL endpoints.
+ * Unfortunately cannot extend ResourceBase because of clashing JAX-RS method annotations.
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  * @see org.graphity.core.model.SPARQLEndpoint
@@ -245,8 +249,20 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
      */
     public List<MediaType> getModelMediaTypes()
     {
-        List<MediaType> list = org.graphity.core.MediaType.getRegistered();
-        list.add(0, org.graphity.core.MediaType.APPLICATION_RDF_XML_TYPE); // first one becomes default
+        List<MediaType> list = new ArrayList<>();
+        Map<String, String> utf8Param = new HashMap<>();
+        utf8Param.put("charset", "UTF-8");
+        
+        Iterator<MediaType> it = org.graphity.core.MediaType.getRegistered().iterator();
+        while (it.hasNext())
+        {
+            MediaType registered = it.next();
+            list.add(new MediaType(registered.getType(), registered.getSubtype(), utf8Param));
+        }
+        
+        MediaType rdfXml = new MediaType(org.graphity.core.MediaType.APPLICATION_RDF_XML_TYPE.getType(), org.graphity.core.MediaType.APPLICATION_RDF_XML_TYPE.getSubtype(), utf8Param);
+        list.add(0, rdfXml); // first one becomes default
+        
         return list;
     }
     
@@ -257,7 +273,12 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
      */
     public List<MediaType> getResultSetMediaTypes()
     {
-        return Arrays.asList(RESULT_SET_MEDIA_TYPES);
+        List<MediaType> list = Arrays.asList(RESULT_SET_MEDIA_TYPES);
+
+        Iterator<MediaType> it = list.iterator();
+        while (it.hasNext()) it.next().getParameters().put("charset", "UTF-8");
+
+        return list;
     }
     
     /**
