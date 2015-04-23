@@ -273,10 +273,16 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
      */
     public List<MediaType> getResultSetMediaTypes()
     {
-        List<MediaType> list = Arrays.asList(RESULT_SET_MEDIA_TYPES);
+        List<MediaType> list = new ArrayList<>();
+        Map<String, String> utf8Param = new HashMap<>();
+        utf8Param.put("charset", "UTF-8");
 
-        Iterator<MediaType> it = list.iterator();
-        while (it.hasNext()) it.next().getParameters().put("charset", "UTF-8");
+        Iterator<MediaType> it = Arrays.asList(RESULT_SET_MEDIA_TYPES).iterator();
+        while (it.hasNext())
+        {
+            MediaType registered = it.next();
+            list.add(new MediaType(registered.getType(), registered.getSubtype(), utf8Param));
+        }
 
         return list;
     }
