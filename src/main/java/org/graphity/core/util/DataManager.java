@@ -149,7 +149,7 @@ public class DataManager extends FileManager
     /**
      * Loads RDF model from a remote SPARQL endpoint using a query and optional request parameters.
      * Only <code>DESCRIBE</code> and <code>CONSTRUCT</code> queries can be used with this method.
-     * This is a convenience method for {@link loadModel(String,Query,MultivaluedMap<String, String>)}
+     * This is a convenience method for {@link #loadModel(String,Query,MultivaluedMap<String, String>)}
      * with null request parameters.
      * 
      * @param endpointURI remote endpoint URI
@@ -266,7 +266,7 @@ public class DataManager extends FileManager
     /**
      * Loads result set from a remote SPARQL endpoint using a query.
      * Only <code>SELECT</code> queries can be used with this method.
-     * This is a convenience method for {@link loadResultSet(String,Query,MultivaluedMap<String, String>)} with
+     * This is a convenience method for {@link #loadResultSet(String,Query,MultivaluedMap<String, String>)} with
      * null request parameters.
      * 
      * @param endpointURI remote endpoint URI
@@ -379,7 +379,7 @@ public class DataManager extends FileManager
     /**
      * Loads result set from a remote SPARQL endpoint using a query.
      * Only <code>ASK</code> queries can be used with this method.
-     * This is a convenience method for {@link ask(String,Query,MultivaluedMap<String, String>)} with
+     * This is a convenience method for {@link #ask(String,Query,MultivaluedMap<String, String>)} with
      * null request parameters.
      * 
      * @param endpointURI remote endpoint URI
