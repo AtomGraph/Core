@@ -81,7 +81,12 @@ public class MediaType extends javax.ws.rs.core.MediaType
     public final static String APPLICATION_LD_JSON = "application/ld+json";
     /** "application/ld+json" */
     public final static MediaType APPLICATION_LD_JSON_TYPE = new MediaType("application","ld+json");
-    
+
+    /** "application/rdf+x-www-form-urlencoded" */
+    public final static String APPLICATION_RDF_URLENCODED = "application/rdf+x-www-form-urlencoded";
+    /** "application/rdf+x-www-form-urlencoded" */
+    public final static MediaType APPLICATION_RDF_URLENCODED_TYPE = new MediaType("application","application/rdf+x-www-form-urlencoded");
+
     public MediaType(String type, String subtype, Map<String, String> parameters)
     {
 	super(type, subtype, parameters);

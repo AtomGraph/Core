@@ -28,14 +28,22 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
+import org.apache.jena.riot.IO_Jena;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.LangBuilder;
+import org.apache.jena.riot.RDFLanguages;
+import org.apache.jena.riot.RDFParserRegistry;
+import org.apache.jena.riot.ReaderRIOTFactory;
 import org.graphity.core.model.impl.GraphStoreProxyBase;
 import org.graphity.core.model.impl.QueriedResourceBase;
 import org.graphity.core.model.impl.SPARQLEndpointProxyBase;
+import org.graphity.core.riot.lang.RDFPostReaderAdapter;
+import org.graphity.core.riot.lang.RDFPostReaderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Graphity Server JAX-RS application base class.
+ * Graphity Core JAX-RS application base class.
  * Can be extended or used as it is (needs to be configured in web.xml).
  * Needs to register JAX-RS root resource classes and providers.
  * 
@@ -62,6 +70,14 @@ public class ApplicationBase extends javax.ws.rs.core.Application
     {
         if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
         this.servletConfig = servletConfig;
+
+        // add RDF/POST serialization
+        Lang lang = LangBuilder.create("RDF/POST", MediaType.APPLICATION_RDF_URLENCODED).
+                addFileExtensions("rpo").build() ;
+        RDFLanguages.register(lang) ;
+        ReaderRIOTFactory factory = new RDFPostReaderFactory();
+        RDFParserRegistry.registerLangTriples(lang, factory);
+        IO_Jena.registerForModelRead("RDF/POST", RDFPostReaderAdapter.class) ;
 
 	classes.add(QueriedResourceBase.class); // handles all
 	classes.add(SPARQLEndpointProxyBase.class); // handles /sparql queries
