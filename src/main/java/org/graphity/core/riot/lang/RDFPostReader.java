@@ -16,27 +16,37 @@
 
 package org.graphity.core.riot.lang;
 
+import org.graphity.core.riot.RDFLanguages;
 import com.hp.hpl.jena.datatypes.BaseDatatype;
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.rdf.model.AnonId;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.sparql.core.Quad;
 import com.hp.hpl.jena.sparql.util.Context;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import org.apache.jena.atlas.AtlasException;
 import org.apache.jena.atlas.io.PeekReader;
-import org.apache.jena.atlas.lib.Tuple;
+import org.apache.jena.atlas.iterator.PeekIterator;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.ReaderRIOTBase;
+import org.apache.jena.riot.RiotParseException;
+import org.apache.jena.riot.system.ErrorHandler;
+import org.apache.jena.riot.system.ParserProfile;
+import org.apache.jena.riot.system.RiotLib;
 import org.apache.jena.riot.system.StreamRDF;
-import org.apache.jena.riot.system.StreamRDFBase;
+import org.apache.jena.riot.tokens.Token;
+import org.apache.jena.riot.tokens.TokenType;
+import static org.apache.jena.riot.tokens.TokenType.DIRECTIVE;
+import static org.apache.jena.riot.tokens.TokenType.EOF;
+import static org.apache.jena.riot.tokens.TokenType.IRI;
+import static org.apache.jena.riot.tokens.TokenType.NODE;
+import static org.apache.jena.riot.tokens.TokenType.PREFIXED_NAME;
 import org.apache.jena.riot.tokens.Tokenizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,11 +61,11 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class RDFPostReader extends ReaderRIOTBase implements StreamRDF // implements ReaderRIOT
+public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // implements ReaderRIOT
 {    
     private static final Logger log = LoggerFactory.getLogger(RDFPostReader.class);
 
-    private static final StreamRDF streamRDF = new StreamRDFBase();
+    //private static final StreamRDF streamRDF = new StreamRDFBase();
 
     public static final String RDF =            "rdf";
     
@@ -212,9 +222,11 @@ public class RDFPostReader extends ReaderRIOTBase implements StreamRDF // implem
     @Override
     public void read(InputStream in, String baseURI, Lang lang, StreamRDF output, Context context)
     {
+        Tokenizer tokens = new TokenizerRDFPost(PeekReader.makeUTF8(in));  
+        
         try
         {
-            Tokenizer tokenizer = new TokenizerRDFPost(PeekReader.makeUTF8(in));
+            runParser(tokens, RiotLib.profile(RDFLanguages.RDFPOST, baseURI), output);
         }
         /*
         catch (IOException ex)
@@ -224,52 +236,305 @@ public class RDFPostReader extends ReaderRIOTBase implements StreamRDF // implem
         */
         finally
         {
-            finish();
+            //finish();
+            tokens.close();
         }
         
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
-    public void start()
+    protected void runParser(Tokenizer tokens, ParserProfile profile, StreamRDF dest)
     {
-        streamRDF.start();
+        PeekIterator<Token> peekIter = new PeekIterator<>(tokens);
+
+        if (moreTokens(peekIter))
+        {
+            Token t = peekToken(tokens, peekIter) ;
+            if ( lookingAt(tokens, peekIter, DIRECTIVE) && !t.getImage().equals(TokenizerRDFPost.RDF))
+                exception(peekToken(tokens, peekIter), "RDF/POST needs to start with 'rdf' query param (found '" + peekToken(tokens, peekIter) + "')") ;
+            nextToken(tokens, peekIter);
+       }
+            
+        while (moreTokens(peekIter)) {
+            Token t = peekToken(tokens, peekIter) ;
+            if ( lookingAt(tokens, peekIter, DIRECTIVE) &&
+                    (t.getImage().equals(DEF_NS_DECL) || t.getImage().equals(NS_DECL)))
+            {
+                directive(tokens, peekIter, profile, dest) ;
+                continue ;
+            }
+
+            triples(tokens, peekIter, profile) ;
+
+            //oneTopLevelElement() ;
+
+            if ( lookingAt(tokens, peekIter, EOF) )
+                break ;
+        }
+    }
+        
+    private Token tokenEOF = null ;
+    
+    protected final Token peekToken(Tokenizer tokens, PeekIterator<Token> peekIter)
+    {
+        // Avoid repeating.
+        if ( eof(tokens, peekIter) ) return tokenEOF ;
+        return peekIter.peek() ;
+    }
+    
+    protected final boolean eof(Tokenizer tokens, PeekIterator<Token> peekIter)
+    {
+        if ( tokenEOF != null )
+            return true ;
+        
+        if ( ! moreTokens(peekIter) )
+        {
+            tokenEOF = new Token(tokens.getLine(), tokens.getColumn()) ;
+            tokenEOF.setType(EOF) ;
+            return true ;
+        }
+        return false ;
+    }
+    
+    protected final boolean moreTokens(PeekIterator<Token> peekIter) 
+    {
+        return peekIter.hasNext() ;
+    }
+    
+    protected final boolean lookingAt(Tokenizer tokens, PeekIterator<Token> peekIter, TokenType tokenType)
+    {
+        if ( eof(tokens, peekIter) )
+            return tokenType == EOF ;
+        if ( tokenType == NODE )
+            return peekToken(tokens, peekIter).isNode() ;
+        return peekToken(tokens, peekIter).hasType(tokenType) ;
+    }
+    
+    protected long currLine = -1 ;
+    protected long currCol = -1 ;
+    
+    protected final Token nextToken(Tokenizer tokens, PeekIterator<Token> peekIter)
+    {
+        if ( eof(tokens, peekIter) )
+            return tokenEOF ;
+        
+        // Tokenizer errors appear here!
+        try {
+            Token t = peekIter.next() ;
+            currLine = t.getLine() ;
+            currCol = t.getColumn() ;
+            return t ;
+        } catch (RiotParseException ex)
+        {
+            // Intercept to log it.
+            raiseException(ex) ;
+            throw ex ;
+        }
+        catch (AtlasException ex)
+        {
+            // Bad I/O
+            RiotParseException ex2 = new RiotParseException(ex.getMessage(), -1, -1) ;
+            raiseException(ex2) ;
+            throw ex2 ;
+        }
+    }
+    
+    protected final void directive(Tokenizer tokens, PeekIterator<Token> peekIter, ParserProfile profile, StreamRDF dest)
+    {
+        // It's a directive ...
+        Token t = peekToken(tokens, peekIter) ;
+        String x = t.getImage() ;
+        nextToken(tokens, peekIter) ;
+
+        if ( x.equals(TokenizerRDFPost.DEF_NS_DECL) ) {
+            directiveBase(tokens, peekIter, profile, dest) ;
+            return ;
+        }
+
+        if ( x.equals(TokenizerRDFPost.NS_DECL) ) {
+            directiveNSDecl(tokens, peekIter, profile, dest);
+            return ;
+        }
+        
+        exception(t, "Unrecognized directive: %s", x) ;
     }
 
-    @Override
-    public void triple(Triple triple)
+    protected final void directiveBase(Tokenizer tokens, PeekIterator<Token> peekIter, ParserProfile profile, StreamRDF dest)
     {
-        streamRDF.triple(triple);
+        Token token = peekToken(tokens, peekIter) ;
+        if ( !lookingAt(tokens, peekIter, IRI) )
+            exception(token, "@base requires an IRI (found '" + token + "')") ;
+        String baseStr = token.getImage() ;
+        org.apache.jena.iri.IRI baseIRI = profile.makeIRI(baseStr, currLine, currCol) ;
+        emitBase(baseIRI.toString(), dest);
+        nextToken(tokens, peekIter);
+        profile.getPrologue().setBaseURI(baseIRI) ;
+    }
+    
+    protected void emitBase(String baseStr, StreamRDF dest)
+    { 
+        dest.base(baseStr);
+    }
+    
+    protected final void directiveNSDecl(Tokenizer tokens, PeekIterator<Token> peekIter, ParserProfile profile, StreamRDF dest)
+    {
+        // Raw - unresolved prefix name.
+        if ( !lookingAt(tokens, peekIter, PREFIXED_NAME) )
+            exception(peekToken(tokens, peekIter), "@prefix or PREFIX requires a prefix (found '" + peekToken(tokens, peekIter) + "')") ;
+        //Token temp = peekToken(tokens, peekIter);
+        //if ( peekToken(tokens, peekIter).getImage2().length() != 0 )
+        //    exception(peekToken(tokens, peekIter), "@prefix or PREFIX requires a prefix with no suffix (found '" + peekToken(tokens, peekIter) + "')") ;
+        String prefix = peekToken(tokens, peekIter).getImage() ;
+        nextToken(tokens, peekIter) ;
+        if ( !(lookingAt(tokens, peekIter, DIRECTIVE) && peekToken(tokens, peekIter).getImage().equals(DEF_NS_DECL)))
+            exception(peekToken(tokens, peekIter), "@prefix requires an IRI (found '" + peekToken(tokens, peekIter) + "')") ;
+        nextToken(tokens, peekIter) ;
+        if ( !lookingAt(tokens, peekIter, IRI) )
+            exception(peekToken(tokens, peekIter), "@prefix requires an IRI (found '" + peekToken(tokens, peekIter) + "')") ;
+        String iriStr = peekToken(tokens, peekIter).getImage() ;
+        org.apache.jena.iri.IRI iri = profile.makeIRI(iriStr, currLine, currCol) ;
+        profile.getPrologue().getPrefixMap().add(prefix, iri) ;
+        emitPrefix(prefix, iri.toString(), dest) ;
+        nextToken(tokens, peekIter) ;
+    }
+    
+    private void emitPrefix(String prefix, String iriStr, StreamRDF dest)
+    {
+        dest.prefix(prefix, iriStr) ; 
+    }
+    
+    protected void triples(Tokenizer tokens, PeekIterator<Token> peekIter, ParserProfile profile)
+    {
+        // Looking at a node.
+        Node subject = node(tokens, peekIter, profile) ;
+        if ( subject == null )
+            exception(peekToken(tokens, peekIter), "Not recognized: expected node: %s", peekToken(tokens, peekIter).text()) ;
+
+        nextToken(tokens, peekIter) ;
+        predicateObjectList(tokens, peekIter, subject, profile) ;
+        //expectEndOfTriples() ;
+    }
+    
+    protected void predicateObjectList(Tokenizer tokens, PeekIterator<Token> peekIter, Node subject) {
+        predicateObjectItem(tokens, peekIter, subject) ;
+
+        /*
+        for (;;) {
+            if ( !lookingAt(SEMICOLON) )
+                break ;
+            // predicatelist continues - move over all ";"
+            while (lookingAt(SEMICOLON))
+                nextToken(tokens, peekIter) ;
+            if ( !peekPredicate() )
+                // Trailing (pointless) SEMICOLONs, no following
+                // predicate/object list.
+                break ;
+            predicateObjectItem(tokens, peekIter, subject) ;
+        }
+        */
+    }
+    
+    protected void predicateObjectItem(Tokenizer tokens, PeekIterator<Token> peekIter, Node subject, ParserProfile profile)
+    {
+        Node predicate = predicate(tokens, peekIter, profile) ;
+        nextToken(tokens, peekIter) ;
+        //objectList(tokens, peekIter, subject, predicate) ;
+    }
+    
+    protected final Node predicate(Tokenizer tokens, PeekIterator<Token> peekIter, ParserProfile profile)
+    {
+        if ( !lookingAt(tokens, peekIter, DIRECTIVE))
+            exception(peekToken(tokens, peekIter), "Expected RDF/POST directive (found '" + peekToken(tokens, peekIter) + "')") ;
+        
+        Token t = peekToken(tokens, peekIter) ;
+        String image = t.getImage() ;        
+        if ( !image.equals(URI_PRED) && !image.equals(DEF_NS_PRED) && !image.equals(NS_PRED))
+            exception(peekToken(tokens, peekIter), "Expected RDF predicate directive 'su'/'sv'/'sn' (found '" + peekToken(tokens, peekIter) + "')") ;
+
+        /*
+        if ( t.hasType(TokenType.KEYWORD) ) {
+            boolean strict = profile.isStrictMode() ;
+            Token tErr = peekToken() ;
+            String image = peekToken().getImage() ;
+            if ( image.equals(KW_A) )
+                return NodeConst.nodeRDFType ;
+            if ( !strict && image.equals(KW_SAME_AS) )
+                return nodeSameAs ;
+            if ( !strict && image.equals(KW_LOG_IMPLIES) )
+                return NodeConst.nodeRDFType ;
+            exception(tErr, "Unrecognized: " + image) ;
+        }
+        */
+        
+        Node n = node(tokens, peekIter, profile) ;
+        if ( n == null || !n.isURI() )
+            exception(t, "Expected IRI for predicate: got: %s", t) ;
+        return n ;
+
+        
+        //return null;
+    }
+    
+    protected final Node node(Tokenizer tokens, PeekIterator<Token> peekIter, ParserProfile profile)
+    {
+        if ( !lookingAt(tokens, peekIter, DIRECTIVE))
+            exception(peekToken(tokens, peekIter), "Expected RDF node (found '" + peekToken(tokens, peekIter) + "')") ;
+
+        /*
+        Token t = peekToken(tokens, peekIter) ;
+        String image = t.getImage() ;        
+        if ( !image.equals(URI_PRED) && !image.equals(DEF_NS_PRED) && !image.equals(NS_PRED))
+            exception(peekToken(tokens, peekIter), "Expected RDF predicate directive 'su'/'sv'/'sn' (found '" + peekToken(tokens, peekIter) + "')") ;
+        */
+        nextToken(tokens, peekIter) ; // move to the real value
+        
+        // Token to Node
+        return tokenAsNode(peekToken(tokens, peekIter), profile) ;
+    }
+    
+    protected final Node tokenAsNode(Token token, ParserProfile profile)
+    {
+        return profile.create(null, token) ; // return profile.create(currentGraph, token) ;
+    }
+    
+    /*
+    protected final void predicateObjectList(Node subject) {
+        predicateObjectItem(subject) ;
+
+        for (;;) {
+            if ( !lookingAt(SEMICOLON) )
+                break ;
+            // predicatelist continues - move over all ";"
+            while (lookingAt(SEMICOLON))
+                nextToken() ;
+            if ( !peekPredicate() )
+                // Trailing (pointless) SEMICOLONs, no following
+                // predicate/object list.
+                break ;
+            predicateObjectItem(subject) ;
+        }
+    }
+    */
+    
+    protected final void exception(Token token, String msg, Object... args)
+    { 
+        if ( token != null )
+            exceptionDirect(String.format(msg, args), token.getLine(), token.getColumn()) ;
+        else
+            exceptionDirect(String.format(msg, args), -1, -1) ;
     }
 
-    @Override
-    public void quad(Quad quad)
-    {
-        streamRDF.quad(quad);
+    protected final void exceptionDirect(String msg, long line, long col)
+    { 
+        raiseException(new RiotParseException(msg, line, col)) ;
     }
-
-    @Override
-    public void tuple(Tuple<Node> tuple)
-    {
-        streamRDF.tuple(tuple);
-    }
-
-    @Override
-    public void base(String base)
-    {
-        streamRDF.base(base);
-    }
-
-    @Override
-    public void prefix(String prefix, String iri)
-    {
-        streamRDF.prefix(prefix, iri);
-    }
-
-    @Override
-    public void finish()
-    {
-        streamRDF.finish();
-    }
+    
+    protected final void raiseException(RiotParseException ex)
+    { 
+        ErrorHandler errorHandler = null; // profile.getHandler() ; 
+        if ( errorHandler != null )
+            errorHandler.fatal(ex.getOriginalMessage(), ex.getLine(), ex.getCol()) ;
+        throw ex ;
+    }    
 
 }

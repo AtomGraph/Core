@@ -19,9 +19,11 @@ package org.graphity.core.riot.lang;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import org.apache.jena.atlas.io.PeekReader;
+import org.apache.jena.riot.RiotParseException;
 import org.apache.jena.riot.tokens.Token;
 import org.apache.jena.riot.tokens.TokenType;
 import org.apache.jena.riot.tokens.Tokenizer;
+import static org.graphity.core.riot.lang.TokenizerText.Checking;
 
 /**
  *
@@ -54,52 +56,83 @@ public class TokenizerRDFPost extends TokenizerText implements Tokenizer
 
     public static final String TYPE =           "lt";
     public static final String LANG =           "ll";
-    
+        
     private final StringBuilder stringBuilder = new StringBuilder(200);    
-    private Token token = null;    
-    //private final PeekReader reader;
-    //private boolean finished = false ;    
+    private Token token, directive = null;    
     
     public TokenizerRDFPost(PeekReader reader)
     {
-        //this.reader = reader;
         super(reader);
     }
     
     @Override
     protected Token parseToken()
     {
-        token = new Token(getLine(), getColumn()) ;
+        token = new Token(getLine(), getColumn());
 
         try
         {
-            String keyOrValue = readKeyOrValue();
+            int ch = getReader().peekChar();            
+            if (ch == CH_EQUALS || ch == CH_AMPERSAND) getReader().readChar();
 
-            int ch = getReader().peekChar();
-            
-            if (ch == CH_EQUALS)
-            {
-                getReader().readChar();
-
-                switch (keyOrValue)
+            if (directive != null)
+                switch (directive.getImage())
                 {
-                    case BLANK_SUBJ:
-                    case BLANK_OBJ:
-                        token.setImage(readKeyOrValue());
+                    case DEF_NS_DECL: // v
+                        token.setImage(readUntilDelimiter());
+                        token.setType(TokenType.IRI);
+                        if ( Checking ) checkURI(token.getImage());
+                        directive = null;
+                        return token;
+                    case NS_DECL: // n
+                    case DEF_NS_SUBJ: // sv
+                    case DEF_NS_PRED: // pv
+                    case DEF_NS_OBJ: // ov
+                        token.setImage(readUntilDelimiter());
+                        token.setType(TokenType.PREFIXED_NAME) ;
+                        directive = null;
+                        return token;
+                    case BLANK_SUBJ: // sb
+                    case BLANK_OBJ: // ob
+                        token.setImage(readUntilDelimiter());
                         token.setType(TokenType.BNODE);
                         if ( Checking ) checkBlankNode(token.getImage());
+                        directive = token;
                         return token;
-                    case URI_SUBJ:
-                    case URI_PRED:
-                    case URI_OBJ:
-                        token.setImage(readKeyOrValue()) ;
-                        token.setType(TokenType.IRI) ;
-                        if ( Checking ) checkURI(token.getImage());
+                    case LITERAL_OBJ: // ol
+                        token.setImage(readUntilDelimiter());
+
+                        //Token next = peek();
+
+                        token.setType(TokenType.STRING);
+                        directive = token;
                         return token;
                 }
+                
+            String key = readUntilDelimiter();
+            switch (key) // key switch
+            {
+                case RDF:
+                    getReader().readChar(); //  read '=' preceding the empty value
+                    token.setImage(key);
+                    token.setType(TokenType.DIRECTIVE);
+                    directive = token;
+                    return token;
+                case DEF_NS_DECL: // v
+                case NS_DECL: // n
+                case DEF_NS_SUBJ: // "v
+                case DEF_NS_PRED: // pv
+                case DEF_NS_OBJ: // ov
+                case BLANK_SUBJ: // sb
+                case BLANK_OBJ: // ob
+                case URI_SUBJ: // su
+                case URI_PRED: // pu
+                case URI_OBJ: // ou
+                    token.setImage(key);
+                    token.setType(TokenType.DIRECTIVE);
+                    directive = token;
+                    return token;
             }
-            
-            if (ch == CH_AMPERSAND) getReader().readChar();
 
             return token;
         }
@@ -111,24 +144,30 @@ public class TokenizerRDFPost extends TokenizerText implements Tokenizer
         return token;
     }
 
-    private String readKeyOrValue() throws UnsupportedEncodingException
+    protected String readUntilDelimiter() throws UnsupportedEncodingException
     {
         stringBuilder.setLength(0);
 
-        int ch;
-        do ch = getReader().readChar();
-        while (ch != CH_EQUALS && ch != CH_AMPERSAND);
+        for (;;)
+        {
+            int ch = getReader().peekChar();
+            if (ch == CH_EQUALS || ch == CH_AMPERSAND) break;
+            
+            stringBuilder.append((char)getReader().readChar());
+        }
        
         return URLDecoder.decode(stringBuilder.toString(), "UTF-8");
     }
-    
-    @Override
-    public void remove() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
+    private void exception(String message, Object... args) {
+        exception$(message, getReader().getLineNum(), getReader().getColNum(), args) ;
     }
 
-    @Override
-    public void close() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private static void exception(PeekReader reader, String message, Object... args) {
+        exception$(message, reader.getLineNum(), reader.getColNum(), args) ;
+    }
+
+    private static void exception$(String message, long line, long col, Object... args) {
+        throw new RiotParseException(String.format(message, args), line, col) ;
     }
 }
