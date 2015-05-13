@@ -415,8 +415,9 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
         //expectEndOfTriples() ;
     }
     
-    protected void predicateObjectList(Tokenizer tokens, PeekIterator<Token> peekIter, Node subject) {
-        predicateObjectItem(tokens, peekIter, subject) ;
+    protected void predicateObjectList(Tokenizer tokens, PeekIterator<Token> peekIter, Node subject, ParserProfile profile)
+    {
+        predicateObjectItem(tokens, peekIter, subject, profile) ;
 
         /*
         for (;;) {
@@ -445,11 +446,19 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
     {
         if ( !lookingAt(tokens, peekIter, DIRECTIVE))
             exception(peekToken(tokens, peekIter), "Expected RDF/POST directive (found '" + peekToken(tokens, peekIter) + "')") ;
+
+        // pred is expected, but there is no &pv=, &pn=, or &pu= ahead: skip to the next subj (&sb=, &su=, &sv=, &sn=).
         
         Token t = peekToken(tokens, peekIter) ;
         String image = t.getImage() ;        
         if ( !image.equals(URI_PRED) && !image.equals(DEF_NS_PRED) && !image.equals(NS_PRED))
-            exception(peekToken(tokens, peekIter), "Expected RDF predicate directive 'su'/'sv'/'sn' (found '" + peekToken(tokens, peekIter) + "')") ;
+            //exception(peekToken(tokens, peekIter), "Expected RDF predicate directive 'pu'/'pv'/'pn' (found '" + peekToken(tokens, peekIter) + "')") ;
+            while (!(t.hasType(DIRECTIVE) &&
+                    (image.equals(BLANK_SUBJ) || image.equals(URI_SUBJ) || image.equals(DEF_NS_SUBJ) || image.equals(NS_SUBJ))))
+            {
+                t = nextToken(tokens, peekIter);
+                image = t.getImage();
+            }
 
         /*
         if ( t.hasType(TokenType.KEYWORD) ) {
@@ -479,6 +488,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
     {
         if ( !lookingAt(tokens, peekIter, DIRECTIVE))
             exception(peekToken(tokens, peekIter), "Expected RDF node (found '" + peekToken(tokens, peekIter) + "')") ;
+        nextToken(tokens, peekIter) ; // move to the real value
 
         /*
         Token t = peekToken(tokens, peekIter) ;
@@ -486,7 +496,6 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
         if ( !image.equals(URI_PRED) && !image.equals(DEF_NS_PRED) && !image.equals(NS_PRED))
             exception(peekToken(tokens, peekIter), "Expected RDF predicate directive 'su'/'sv'/'sn' (found '" + peekToken(tokens, peekIter) + "')") ;
         */
-        nextToken(tokens, peekIter) ; // move to the real value
         
         // Token to Node
         return tokenAsNode(peekToken(tokens, peekIter), profile) ;

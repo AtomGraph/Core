@@ -58,7 +58,8 @@ public class TokenizerRDFPost extends TokenizerText implements Tokenizer
     public static final String LANG =           "ll";
         
     private final StringBuilder stringBuilder = new StringBuilder(200);    
-    private Token token, directive = null;    
+    private Token token = null;    
+    private String key = null;
     
     public TokenizerRDFPost(PeekReader reader)
     {
@@ -75,49 +76,61 @@ public class TokenizerRDFPost extends TokenizerText implements Tokenizer
             int ch = getReader().peekChar();            
             if (ch == CH_EQUALS || ch == CH_AMPERSAND) getReader().readChar();
 
-            if (directive != null)
-                switch (directive.getImage())
+            if (key != null)
+                switch (key)
                 {
                     case DEF_NS_DECL: // v
-                        token.setImage(readUntilDelimiter());
                         token.setType(TokenType.IRI);
+                        token.setImage(readUntilDelimiter()); // namespace URI
                         if ( Checking ) checkURI(token.getImage());
-                        directive = null;
+                        key = null;
                         return token;
                     case NS_DECL: // n
+                        token.setType(TokenType.PREFIXED_NAME) ;
+                        token.setImage(readUntilDelimiter()); // namespace prefix
+                        key = null;
+                        return token;
+                    case NS_SUBJ: // sn
+                    case NS_PRED: // pn
+                    case NS_OBJ: // on
+                        token.setType(TokenType.PREFIXED_NAME) ;
+                        token.setImage(readUntilDelimiter()); // prefix
+                        //key = null;
+                        //break;
                     case DEF_NS_SUBJ: // sv
                     case DEF_NS_PRED: // pv
                     case DEF_NS_OBJ: // ov
-                        token.setImage(readUntilDelimiter());
-                        token.setType(TokenType.PREFIXED_NAME) ;
-                        directive = null;
+                        if (key.equals(NS_SUBJ) || key.equals(NS_PRED) || key.equals(NS_OBJ))
+                            token.setImage2(readUntilDelimiter()); // suffix
+                        else
+                        {
+                            token.setType(TokenType.IRI) ;
+                            token.setImage(readUntilDelimiter());  // relative URI?
+                        }
+                        key = null;
                         return token;
                     case BLANK_SUBJ: // sb
                     case BLANK_OBJ: // ob
-                        token.setImage(readUntilDelimiter());
                         token.setType(TokenType.BNODE);
+                        token.setImage(readUntilDelimiter());
                         if ( Checking ) checkBlankNode(token.getImage());
-                        directive = token;
+                        key = null; // = token;
                         return token;
                     case LITERAL_OBJ: // ol
+                        token.setType(TokenType.STRING);
                         token.setImage(readUntilDelimiter());
 
                         //Token next = peek();
 
-                        token.setType(TokenType.STRING);
-                        directive = token;
+                        key = null; // token;
                         return token;
                 }
                 
-            String key = readUntilDelimiter();
+            key = readUntilDelimiter();
             switch (key) // key switch
             {
                 case RDF:
                     getReader().readChar(); //  read '=' preceding the empty value
-                    token.setImage(key);
-                    token.setType(TokenType.DIRECTIVE);
-                    directive = token;
-                    return token;
                 case DEF_NS_DECL: // v
                 case NS_DECL: // n
                 case DEF_NS_SUBJ: // "v
@@ -130,7 +143,6 @@ public class TokenizerRDFPost extends TokenizerText implements Tokenizer
                 case URI_OBJ: // ou
                     token.setImage(key);
                     token.setType(TokenType.DIRECTIVE);
-                    directive = token;
                     return token;
             }
 
