@@ -19,6 +19,7 @@ package org.graphity.core.riot.lang;
 import org.graphity.core.riot.RDFLanguages;
 import com.hp.hpl.jena.datatypes.BaseDatatype;
 import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.rdf.model.AnonId;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -264,11 +265,11 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
                 continue ;
             }
 
-            triples(tokens, peekIter, profile) ;
+            triples(tokens, peekIter, profile, dest) ;
 
             //oneTopLevelElement() ;
 
-            if ( lookingAt(tokens, peekIter, EOF) )
+            if ( lookingAt(tokens, peekIter, EOF))
                 break ;
         }
     }
@@ -380,17 +381,17 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
     {
         // Raw - unresolved prefix name.
         if ( !lookingAt(tokens, peekIter, PREFIXED_NAME) )
-            exception(peekToken(tokens, peekIter), "@prefix or PREFIX requires a prefix (found '" + peekToken(tokens, peekIter) + "')") ;
+            exception(peekToken(tokens, peekIter), "'n' requires a prefix (found '" + peekToken(tokens, peekIter) + "')") ;
         //Token temp = peekToken(tokens, peekIter);
         //if ( peekToken(tokens, peekIter).getImage2().length() != 0 )
         //    exception(peekToken(tokens, peekIter), "@prefix or PREFIX requires a prefix with no suffix (found '" + peekToken(tokens, peekIter) + "')") ;
         String prefix = peekToken(tokens, peekIter).getImage() ;
         nextToken(tokens, peekIter) ;
         if ( !(lookingAt(tokens, peekIter, DIRECTIVE) && peekToken(tokens, peekIter).getImage().equals(DEF_NS_DECL)))
-            exception(peekToken(tokens, peekIter), "@prefix requires an IRI (found '" + peekToken(tokens, peekIter) + "')") ;
+            exception(peekToken(tokens, peekIter), "'n' requires a following 'v' (found '" + peekToken(tokens, peekIter) + "')") ;
         nextToken(tokens, peekIter) ;
         if ( !lookingAt(tokens, peekIter, IRI) )
-            exception(peekToken(tokens, peekIter), "@prefix requires an IRI (found '" + peekToken(tokens, peekIter) + "')") ;
+            exception(peekToken(tokens, peekIter), "'v' requires a IRI (found '" + peekToken(tokens, peekIter) + "')") ;
         String iriStr = peekToken(tokens, peekIter).getImage() ;
         org.apache.jena.iri.IRI iri = profile.makeIRI(iriStr, currLine, currCol) ;
         profile.getPrologue().getPrefixMap().add(prefix, iri) ;
@@ -403,7 +404,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
         dest.prefix(prefix, iriStr) ; 
     }
     
-    protected void triples(Tokenizer tokens, PeekIterator<Token> peekIter, ParserProfile profile)
+    protected void triples(Tokenizer tokens, PeekIterator<Token> peekIter, ParserProfile profile, StreamRDF dest)
     {
         // Looking at a node.
         Node subject = node(tokens, peekIter, profile) ;
@@ -411,38 +412,42 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
             exception(peekToken(tokens, peekIter), "Not recognized: expected node: %s", peekToken(tokens, peekIter).text()) ;
 
         nextToken(tokens, peekIter) ;
-        predicateObjectList(tokens, peekIter, subject, profile) ;
+        predicateObjectList(tokens, peekIter, profile, dest, subject) ;
         //expectEndOfTriples() ;
     }
     
-    protected void predicateObjectList(Tokenizer tokens, PeekIterator<Token> peekIter, Node subject, ParserProfile profile)
+    protected void predicateObjectList(Tokenizer tokens, PeekIterator<Token> peekIter, ParserProfile profile, StreamRDF dest, Node subject)
     {
-        predicateObjectItem(tokens, peekIter, subject, profile) ;
+        predicateObjectItem(tokens, peekIter, profile, dest, subject) ;
 
-        /*
-        for (;;) {
-            if ( !lookingAt(SEMICOLON) )
+        for (;;)
+        {
+            if ( !lookingAt(tokens, peekIter, DIRECTIVE) )
                 break ;
-            // predicatelist continues - move over all ";"
-            while (lookingAt(SEMICOLON))
-                nextToken(tokens, peekIter) ;
+            Token t = peekToken(tokens, peekIter) ;
+            String image = t.getImage() ;
+            if (!image.startsWith("p"))
+                break;
+
+            /*
+            Token t = nextToken(tokens, peekIter) ;
             if ( !peekPredicate() )
                 // Trailing (pointless) SEMICOLONs, no following
                 // predicate/object list.
                 break ;
-            predicateObjectItem(tokens, peekIter, subject) ;
+            */
+            predicateObjectItem(tokens, peekIter, profile, dest, subject) ;            
         }
-        */
     }
     
-    protected void predicateObjectItem(Tokenizer tokens, PeekIterator<Token> peekIter, Node subject, ParserProfile profile)
+    protected void predicateObjectItem(Tokenizer tokens, PeekIterator<Token> peekIter, ParserProfile profile, StreamRDF dest, Node subject)
     {
         Node predicate = predicate(tokens, peekIter, profile) ;
-        nextToken(tokens, peekIter) ;
-        //objectList(tokens, peekIter, subject, predicate) ;
+        nextToken(tokens, peekIter) ; // skip ob??
+        objectList(tokens, peekIter, profile, dest, subject, predicate) ;
     }
     
-    protected final Node predicate(Tokenizer tokens, PeekIterator<Token> peekIter, ParserProfile profile)
+    protected Node predicate(Tokenizer tokens, PeekIterator<Token> peekIter, ParserProfile profile)
     {
         if ( !lookingAt(tokens, peekIter, DIRECTIVE))
             exception(peekToken(tokens, peekIter), "Expected RDF/POST directive (found '" + peekToken(tokens, peekIter) + "')") ;
@@ -450,16 +455,35 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
         // pred is expected, but there is no &pv=, &pn=, or &pu= ahead: skip to the next subj (&sb=, &su=, &sv=, &sn=).
         
         Token t = peekToken(tokens, peekIter) ;
-        String image = t.getImage() ;        
-        if ( !image.equals(URI_PRED) && !image.equals(DEF_NS_PRED) && !image.equals(NS_PRED))
+        String image = t.getImage() ;
+        if ( !image.startsWith("p")) // DIRECTIVE?
             //exception(peekToken(tokens, peekIter), "Expected RDF predicate directive 'pu'/'pv'/'pn' (found '" + peekToken(tokens, peekIter) + "')") ;
-            while (!(t.hasType(DIRECTIVE) &&
-                    (image.equals(BLANK_SUBJ) || image.equals(URI_SUBJ) || image.equals(DEF_NS_SUBJ) || image.equals(NS_SUBJ))))
+            while (!(t.hasType(DIRECTIVE) && image.startsWith("s")))
             {
-                t = nextToken(tokens, peekIter);
+                t = nextToken(tokens, peekIter); // too much?
                 image = t.getImage();
             }
-
+        
+        if (image.equals(NS_PRED)) // pn
+        {
+            nextToken(tokens, peekIter); // skip pn
+            
+            if ( !lookingAt(tokens, peekIter, PREFIXED_NAME) && peekToken(tokens, peekIter).getImage() != null)
+                exception(peekToken(tokens, peekIter), "'pn' requires a prefix (found '" + peekToken(tokens, peekIter) + "')") ;
+            Token prefixToken = nextToken(tokens, peekIter);
+            
+            if (!(lookingAt(tokens, peekIter, DIRECTIVE) && peekToken(tokens, peekIter).getImage().equals(DEF_NS_PRED)))
+                exception(peekToken(tokens, peekIter), "Expected 'pv' (found '" + peekToken(tokens, peekIter) + "')") ;
+            nextToken(tokens, peekIter); // skip pv
+            
+            if ( !lookingAt(tokens, peekIter, PREFIXED_NAME) && peekToken(tokens, peekIter).getImage2() != null)
+                exception(peekToken(tokens, peekIter), "'pn' requires a prefix (found '" + peekToken(tokens, peekIter) + "')") ;
+            Token prefixedName = peekToken(tokens, peekIter); // nextToken(tokens, peekIter);
+            
+            prefixedName.setImage(prefixToken.getImage()); // set prefix // nextToken(tokens, peekIter)
+            return tokenAsNode(profile, prefixedName);
+        }
+            
         /*
         if ( t.hasType(TokenType.KEYWORD) ) {
             boolean strict = profile.isStrictMode() ;
@@ -487,7 +511,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
     protected final Node node(Tokenizer tokens, PeekIterator<Token> peekIter, ParserProfile profile)
     {
         if ( !lookingAt(tokens, peekIter, DIRECTIVE))
-            exception(peekToken(tokens, peekIter), "Expected RDF node (found '" + peekToken(tokens, peekIter) + "')") ;
+            exception(peekToken(tokens, peekIter), "Expected RDF/POST directive (found '" + peekToken(tokens, peekIter) + "')") ;
         nextToken(tokens, peekIter) ; // move to the real value
 
         /*
@@ -498,10 +522,90 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
         */
         
         // Token to Node
-        return tokenAsNode(peekToken(tokens, peekIter), profile) ;
+        return tokenAsNode(profile, peekToken(tokens, peekIter)) ;
     }
     
-    protected final Node tokenAsNode(Token token, ParserProfile profile)
+    /*
+    protected final void predicateObjectItem(Tokenizer tokens, PeekIterator<Token> peekIter, ParserProfile profile, Node subject)
+    {
+        Node predicate = predicate(tokens, peekIter, profile) ;
+        nextToken(tokens, peekIter) ;
+        objectList(tokens, peekIter, profile, subject, predicate) ;
+    }
+    */
+    
+    protected final void objectList(Tokenizer tokens, PeekIterator<Token> peekIter, ParserProfile profile, StreamRDF dest, Node subject, Node predicate)
+    {
+        // obj is expected, but there is no &ob=, &ov=, &on=, &ou=, or &ol= ahead: skip to the next pred (&pu=, &pv=, or &pn=) or subj (&sb=, &su=, &sv=, &sn=), whichever comes first.
+
+        Token t = peekToken(tokens, peekIter) ;
+        String image = t.getImage() ;
+        if ( !image.startsWith("o"))
+            while (!(t.hasType(DIRECTIVE) && (image.startsWith("s") || image.startsWith("p"))))
+            {
+                t = nextToken(tokens, peekIter);
+                image = t.getImage();
+            }
+
+        for (;;) {
+            Node object = triplesNode(tokens, peekIter, profile, subject, predicate) ;
+            emitTriple(profile, dest, subject, predicate, object) ;
+
+            if ( !moreTokens(peekIter) )
+                break ;
+ 
+            if ( !lookingAt(tokens, peekIter, DIRECTIVE) )
+                break ;
+            // list continues - move over the directive
+            t = peekToken(tokens, peekIter) ;
+            
+            image = t.getImage() ;
+            if (!image.startsWith("o"))
+                break;
+        }
+    }
+    
+    protected final Node triplesNode(Tokenizer tokens, PeekIterator<Token> peekIter, ParserProfile profile, Node subject, Node predicate)
+    {
+        //if ( lookingAt(NODE) ) {
+            Node n = node(tokens, peekIter, profile) ;
+            nextToken(tokens, peekIter) ;
+            return n ;
+        //}
+
+        /*
+        // Special words.
+        if ( lookingAt(TokenType.KEYWORD) ) {
+            Token tErr = peekToken() ;
+            // Location independent node words
+            String image = peekToken().getImage() ;
+            nextToken() ;
+            if ( image.equals(KW_TRUE) )
+                return NodeConst.nodeTrue ;
+            if ( image.equals(KW_FALSE) )
+                return NodeConst.nodeFalse ;
+            if ( image.equals(KW_A) )
+                exception(tErr, "Keyword 'a' not legal at this point") ;
+
+            exception(tErr, "Unrecognized keyword: " + image) ;
+        }
+
+        return triplesNodeCompound() ;
+        */
+    }
+    
+    protected final void emitTriple(ParserProfile profile, StreamRDF dest, Node subject, Node predicate, Node object)
+    {
+        emit(profile, dest, subject, predicate, object) ;
+    }
+    
+    protected void emit(ParserProfile profile, StreamRDF dest, Node subject, Node predicate, Node object)
+    {
+        Triple t = profile.createTriple(subject, predicate, object, currLine, currCol) ;
+        dest.triple(t) ;
+    }
+    
+    protected final Node tokenAsNode(ParserProfile profile, Token token)
     {
         return profile.create(null, token) ; // return profile.create(currentGraph, token) ;
     }

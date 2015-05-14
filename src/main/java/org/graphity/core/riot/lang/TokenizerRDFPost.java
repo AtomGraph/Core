@@ -59,7 +59,7 @@ public class TokenizerRDFPost extends TokenizerText implements Tokenizer
         
     private final StringBuilder stringBuilder = new StringBuilder(200);    
     private Token token = null;    
-    private String key = null;
+    private String key, prevKey = null;
     
     public TokenizerRDFPost(PeekReader reader)
     {
@@ -70,7 +70,8 @@ public class TokenizerRDFPost extends TokenizerText implements Tokenizer
     protected Token parseToken()
     {
         token = new Token(getLine(), getColumn());
-
+        String suffixOrIri = null;
+        
         try
         {
             int ch = getReader().peekChar();            
@@ -83,11 +84,13 @@ public class TokenizerRDFPost extends TokenizerText implements Tokenizer
                         token.setType(TokenType.IRI);
                         token.setImage(readUntilDelimiter()); // namespace URI
                         if ( Checking ) checkURI(token.getImage());
+                        prevKey = key;
                         key = null;
                         return token;
                     case NS_DECL: // n
                         token.setType(TokenType.PREFIXED_NAME) ;
                         token.setImage(readUntilDelimiter()); // namespace prefix
+                        prevKey = key;
                         key = null;
                         return token;
                     case NS_SUBJ: // sn
@@ -95,18 +98,40 @@ public class TokenizerRDFPost extends TokenizerText implements Tokenizer
                     case NS_OBJ: // on
                         token.setType(TokenType.PREFIXED_NAME) ;
                         token.setImage(readUntilDelimiter()); // prefix
-                        //key = null;
-                        //break;
+                        prevKey = key;
+                        key = null;
+                        return token;
                     case DEF_NS_SUBJ: // sv
-                    case DEF_NS_PRED: // pv
-                    case DEF_NS_OBJ: // ov
-                        if (key.equals(NS_SUBJ) || key.equals(NS_PRED) || key.equals(NS_OBJ))
-                            token.setImage2(readUntilDelimiter()); // suffix
+                        if (prevKey != null && prevKey.equals(NS_SUBJ))
+                            token.setType(TokenType.PREFIXED_NAME) ;
                         else
-                        {
                             token.setType(TokenType.IRI) ;
-                            token.setImage(readUntilDelimiter());  // relative URI?
-                        }
+                        suffixOrIri = readUntilDelimiter();
+                        token.setImage(suffixOrIri);  // relative URI
+                        token.setImage2(suffixOrIri); // suffix
+                        prevKey = key;
+                        key = null;
+                        return token;
+                    case DEF_NS_PRED: // pv
+                        if (prevKey != null && prevKey.equals(NS_PRED))
+                            token.setType(TokenType.PREFIXED_NAME) ;
+                        else
+                            token.setType(TokenType.IRI) ;
+                        suffixOrIri = readUntilDelimiter();
+                        token.setImage(suffixOrIri);  // relative URI
+                        token.setImage2(suffixOrIri); // suffix
+                        prevKey = key;
+                        key = null;
+                        return token;
+                    case DEF_NS_OBJ: // ov
+                        if (prevKey != null && prevKey.equals(NS_OBJ))
+                            token.setType(TokenType.PREFIXED_NAME) ;
+                        else
+                            token.setType(TokenType.IRI) ;
+                        suffixOrIri = readUntilDelimiter();
+                        token.setImage(suffixOrIri);  // relative URI?
+                        token.setImage2(suffixOrIri); // suffix
+                        prevKey = key;
                         key = null;
                         return token;
                     case BLANK_SUBJ: // sb
@@ -114,18 +139,17 @@ public class TokenizerRDFPost extends TokenizerText implements Tokenizer
                         token.setType(TokenType.BNODE);
                         token.setImage(readUntilDelimiter());
                         if ( Checking ) checkBlankNode(token.getImage());
-                        key = null; // = token;
+                        prevKey = key;
+                        key = null;
                         return token;
                     case LITERAL_OBJ: // ol
                         token.setType(TokenType.STRING);
                         token.setImage(readUntilDelimiter());
-
-                        //Token next = peek();
-
-                        key = null; // token;
+                        prevKey = key;
+                        key = null;
                         return token;
                 }
-                
+            
             key = readUntilDelimiter();
             switch (key) // key switch
             {
@@ -133,14 +157,20 @@ public class TokenizerRDFPost extends TokenizerText implements Tokenizer
                     getReader().readChar(); //  read '=' preceding the empty value
                 case DEF_NS_DECL: // v
                 case NS_DECL: // n
-                case DEF_NS_SUBJ: // "v
-                case DEF_NS_PRED: // pv
-                case DEF_NS_OBJ: // ov
                 case BLANK_SUBJ: // sb
-                case BLANK_OBJ: // ob
                 case URI_SUBJ: // su
+                case DEF_NS_SUBJ: // sv
+                case NS_SUBJ: // sn
                 case URI_PRED: // pu
-                case URI_OBJ: // ou
+                case DEF_NS_PRED: // pv
+                case NS_PRED: // pn
+                case BLANK_OBJ: // ob
+                case URI_OBJ: // ou                    
+                case DEF_NS_OBJ: // ov
+                case NS_OBJ: // on
+                case LITERAL_OBJ: // ol
+                case TYPE: // lt
+                case LANG: // ll
                     token.setImage(key);
                     token.setType(TokenType.DIRECTIVE);
                     return token;
