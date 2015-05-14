@@ -19,6 +19,7 @@ package org.graphity.core.riot.lang;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import org.apache.jena.atlas.io.PeekReader;
+import org.apache.jena.atlas.lib.Chars;
 import org.apache.jena.riot.RiotParseException;
 import org.apache.jena.riot.tokens.Token;
 import org.apache.jena.riot.tokens.TokenType;
@@ -148,6 +149,18 @@ public class TokenizerRDFPost extends TokenizerText implements Tokenizer
                         prevKey = key;
                         key = null;
                         return token;
+                    case TYPE: // lt
+                        token.setType(TokenType.IRI); // token.setType(TokenType.LITERAL_DT);
+                        token.setImage(readUntilDelimiter());
+                        prevKey = key;
+                        key = null;
+                        return token;
+                    case LANG: // ll                        
+                        token.setType(TokenType.LITERAL_LANG);
+                        token.setImage2(readUntilDelimiter());
+                        prevKey = key;
+                        key = null;
+                        return token;
                 }
             
             key = readUntilDelimiter();
@@ -193,7 +206,7 @@ public class TokenizerRDFPost extends TokenizerText implements Tokenizer
         for (;;)
         {
             int ch = getReader().peekChar();
-            if (ch == CH_EQUALS || ch == CH_AMPERSAND) break;
+            if (ch  == Chars.EOF || ch == CH_EQUALS || ch == CH_AMPERSAND) break;
             
             stringBuilder.append((char)getReader().readChar());
         }
