@@ -391,16 +391,11 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
             if ( !lookingAt(tokens, peekIter, DIRECTIVE) ||
                 peekToken(tokens, peekIter).getImage() == null ||
                     !peekToken(tokens, peekIter).getImage().startsWith("p"))
-                while (moreTokens(peekIter))
-                {
-                    if (lookingAt(tokens, peekIter, DIRECTIVE) &&
-                            peekToken(tokens, peekIter).getImage() != null &&
-                            peekToken(tokens, peekIter).getImage().startsWith("s"))
-                        return; // return to subject
-                    
-                    nextToken(tokens, peekIter);  // subject not seen yet - move on
-                }
-            
+            {
+                skipToSubject(tokens, peekIter);
+                return; // return to subject
+            }
+
             if (lookingAt(tokens, peekIter, EOF))
                 return;
             
@@ -408,9 +403,24 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
         }
     }
     
+    protected void skipToSubject(Tokenizer tokens, PeekIterator<Token> peekIter)
+    {
+        while (moreTokens(peekIter))
+        {
+            if (lookingAt(tokens, peekIter, DIRECTIVE) &&
+                    peekToken(tokens, peekIter).getImage() != null &&
+                    peekToken(tokens, peekIter).getImage().startsWith("s"))
+                return; // return to subject
+
+            nextToken(tokens, peekIter);  // subject not seen yet - move on
+        }
+    }
+    
     protected void predicateObjectItem(Tokenizer tokens, PeekIterator<Token> peekIter, ParserProfile profile, StreamRDF dest, Node subject)
     {        
         Node predicate = predicate(tokens, peekIter, profile) ;
+        if (predicate == null) return; // if predicateNS() failed to find pv
+        
         nextToken(tokens, peekIter) ;
         objectList(tokens, peekIter, profile, dest, subject, predicate) ;
     }
@@ -441,8 +451,18 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
             exception(peekToken(tokens, peekIter), "'pn' requires a prefix (found '" + peekToken(tokens, peekIter) + "')") ;
         Token prefixToken = nextToken(tokens, peekIter);
 
+        if ( !lookingAt(tokens, peekIter, DIRECTIVE) ||
+            peekToken(tokens, peekIter).getImage() == null ||
+                !peekToken(tokens, peekIter).getImage().equals(DEF_NS_PRED))
+        {
+            skipToSubject(tokens, peekIter);
+            return null;
+        }
+        /*
         if (!(lookingAt(tokens, peekIter, DIRECTIVE) && peekToken(tokens, peekIter).getImage().equals(DEF_NS_PRED)))
             exception(peekToken(tokens, peekIter), "Expected 'pv' (found '" + peekToken(tokens, peekIter) + "')") ;
+        */
+
         nextToken(tokens, peekIter); // skip pv
 
         if ( !lookingAt(tokens, peekIter, PREFIXED_NAME) && peekToken(tokens, peekIter).getImage2() != null)
