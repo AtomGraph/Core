@@ -459,7 +459,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
 
         if ( !lookingAt(tokens, peekIter, PREFIXED_NAME) && peekToken(tokens, peekIter).getImage2() != null)
             exception(peekToken(tokens, peekIter), "'pn' requires a prefix (found '" + peekToken(tokens, peekIter) + "')") ;
-        Token prefixedName = peekToken(tokens, peekIter); // nextToken(tokens, peekIter);
+        Token prefixedName = peekToken(tokens, peekIter);
 
         prefixedName.setImage(prefixToken.getImage()); // set prefix // nextToken(tokens, peekIter)
         return tokenAsNode(profile, prefixedName);
@@ -501,7 +501,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
         }
     }
     
-    protected final Node object(Tokenizer tokens, PeekIterator<Token> peekIter, ParserProfile profile, Node subject, Node predicate)
+    protected Node object(Tokenizer tokens, PeekIterator<Token> peekIter, ParserProfile profile, Node subject, Node predicate)
     {
         if ( !lookingAt(tokens, peekIter, DIRECTIVE))
             exception(peekToken(tokens, peekIter), "Expected RDF/POST directive (found '" + peekToken(tokens, peekIter) + "')") ;
@@ -528,6 +528,14 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
         // ol - a special case which checks for following lt and ll
         if (lookingAt(tokens, peekIter, DIRECTIVE) && peekToken(tokens, peekIter).getImage().equals(LITERAL_OBJ))
             return objectLiteral(tokens, peekIter, profile);
+
+        // on - a special case which checks for following ov
+        if (lookingAt(tokens, peekIter, DIRECTIVE) && peekToken(tokens, peekIter).getImage().equals(NS_OBJ))
+        {
+            Node n = objectNS(tokens, peekIter, profile);
+            nextToken(tokens, peekIter) ; // skip what?
+            return n ;
+        }
         
         Node n = node(tokens, peekIter, profile) ;
         nextToken(tokens, peekIter) ; // skip what?
@@ -626,6 +634,29 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
             exception(peekToken(tokens, peekIter), "'ll' requires a language string (found '" + peekToken(tokens, peekIter) + "')") ;
      
         return nextToken(tokens, peekIter);        
+    }
+
+    protected Node objectNS(Tokenizer tokens, PeekIterator<Token> peekIter, ParserProfile profile)
+    {
+        if ( !lookingAt(tokens, peekIter, DIRECTIVE))
+            exception(peekToken(tokens, peekIter), "Expected RDF/POST directive (found '" + peekToken(tokens, peekIter) + "')") ;            
+        nextToken(tokens, peekIter); // skip on
+
+        if ( !lookingAt(tokens, peekIter, PREFIXED_NAME) && peekToken(tokens, peekIter).getImage() != null)
+            exception(peekToken(tokens, peekIter), "'on' requires a prefix (found '" + peekToken(tokens, peekIter) + "')") ;
+        Token prefixToken = nextToken(tokens, peekIter);
+
+        // the only difference from predicateNS() is DEF_NS_OBJ!!
+        if (!(lookingAt(tokens, peekIter, DIRECTIVE) && peekToken(tokens, peekIter).getImage().equals(DEF_NS_OBJ)))
+            exception(peekToken(tokens, peekIter), "Expected 'ov' (found '" + peekToken(tokens, peekIter) + "')") ;
+        nextToken(tokens, peekIter); // skip pv
+
+        if ( !lookingAt(tokens, peekIter, PREFIXED_NAME) && peekToken(tokens, peekIter).getImage2() != null)
+            exception(peekToken(tokens, peekIter), "'on' requires a prefix (found '" + peekToken(tokens, peekIter) + "')") ;
+        Token prefixedName = peekToken(tokens, peekIter); // nextToken(tokens, peekIter);
+
+        prefixedName.setImage(prefixToken.getImage());
+        return tokenAsNode(profile, prefixedName);
     }
     
     protected final void emitTriple(ParserProfile profile, StreamRDF dest, Node subject, Node predicate, Node object)

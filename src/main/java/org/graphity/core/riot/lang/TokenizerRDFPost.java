@@ -82,6 +82,9 @@ public class TokenizerRDFPost extends TokenizerText implements Tokenizer
                 switch (key)
                 {
                     case DEF_NS_DECL: // v
+                    case URI_SUBJ: // su
+                    case URI_PRED: // pu
+                    case URI_OBJ: // ou
                         token.setType(TokenType.IRI);
                         token.setImage(readUntilDelimiter()); // namespace URI
                         if ( Checking ) checkURI(token.getImage());
