@@ -167,6 +167,7 @@ public class TokenizerRDFPost extends TokenizerText implements Tokenizer
                 }
             
             key = readUntilDelimiter();
+            token.setImage(key);
             switch (key) // key switch
             {
                 case RDF:
@@ -187,7 +188,6 @@ public class TokenizerRDFPost extends TokenizerText implements Tokenizer
                 case LITERAL_OBJ: // ol
                 case TYPE: // lt
                 case LANG: // ll
-                    token.setImage(key);
                     token.setType(TokenType.DIRECTIVE);
                     return token;
             }

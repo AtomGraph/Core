@@ -386,15 +386,6 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
     {
         for (;;)
         {
-            /*
-            if ( !lookingAt(tokens, peekIter, DIRECTIVE) )
-                break ;
-            Token t = peekToken(tokens, peekIter) ;
-            String image = t.getImage() ;
-            if (!image.startsWith("p"))
-                break;
-            */
-
             // pred is expected, but there is no &pv=, &pn=, or &pu= ahead: skip to the next subj (&sb=, &su=, &sv=, &sn=).
 
             if ( !lookingAt(tokens, peekIter, DIRECTIVE) ||
@@ -402,13 +393,16 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
                     !peekToken(tokens, peekIter).getImage().startsWith("p"))
                 while (moreTokens(peekIter))
                 {
-                    if (!(lookingAt(tokens, peekIter, DIRECTIVE) &&
-                            peekToken(tokens, peekIter).getImage() != null && peekToken(tokens, peekIter).getImage().startsWith("s")))
-                        nextToken(tokens, peekIter);  // subject not seen yet - move on
-                    else 
+                    if (lookingAt(tokens, peekIter, DIRECTIVE) &&
+                            peekToken(tokens, peekIter).getImage() != null &&
+                            peekToken(tokens, peekIter).getImage().startsWith("s"))
                         return; // return to subject
+                    
+                    nextToken(tokens, peekIter);  // subject not seen yet - move on
                 }
             
+            if (lookingAt(tokens, peekIter, EOF))
+                return;
             
             predicateObjectItem(tokens, peekIter, profile, dest, subject) ;            
         }
