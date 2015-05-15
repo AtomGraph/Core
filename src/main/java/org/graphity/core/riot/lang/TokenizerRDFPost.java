@@ -192,7 +192,7 @@ public class TokenizerRDFPost extends TokenizerText implements Tokenizer
                     return token;
             }
 
-            return token;
+            //exception("Failed to find an RDF/POST directive: %c(%d;0x%04X)", ch, ch, ch) ;
         }
         catch (UnsupportedEncodingException ex)
         {

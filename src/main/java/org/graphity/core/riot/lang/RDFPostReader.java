@@ -209,7 +209,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
         */
         finally
         {
-            //finish();
+            output.finish();
             tokens.close();
         }
     }
@@ -236,8 +236,6 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
             }
 
             triples(tokens, peekIter, profile, dest) ;
-
-            //oneTopLevelElement() ;
 
             if ( lookingAt(tokens, peekIter, EOF))
                 break ;
@@ -352,9 +350,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
         // Raw - unresolved prefix name.
         if ( !lookingAt(tokens, peekIter, PREFIXED_NAME) )
             exception(peekToken(tokens, peekIter), "'n' requires a prefix (found '" + peekToken(tokens, peekIter) + "')") ;
-        //Token temp = peekToken(tokens, peekIter);
-        //if ( peekToken(tokens, peekIter).getImage2().length() != 0 )
-        //    exception(peekToken(tokens, peekIter), "@prefix or PREFIX requires a prefix with no suffix (found '" + peekToken(tokens, peekIter) + "')") ;
+
         String prefix = peekToken(tokens, peekIter).getImage() ;
         nextToken(tokens, peekIter) ;
         if ( !(lookingAt(tokens, peekIter, DIRECTIVE) && peekToken(tokens, peekIter).getImage().equals(DEF_NS_DECL)))
@@ -388,30 +384,38 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
     
     protected void predicateObjectList(Tokenizer tokens, PeekIterator<Token> peekIter, ParserProfile profile, StreamRDF dest, Node subject)
     {
-        //predicateObjectItem(tokens, peekIter, profile, dest, subject) ;
-
         for (;;)
         {
+            /*
             if ( !lookingAt(tokens, peekIter, DIRECTIVE) )
                 break ;
             Token t = peekToken(tokens, peekIter) ;
             String image = t.getImage() ;
             if (!image.startsWith("p"))
                 break;
-
-            /*
-            Token t = nextToken(tokens, peekIter) ;
-            if ( !peekPredicate() )
-                // Trailing (pointless) SEMICOLONs, no following
-                // predicate/object list.
-                break ;
             */
+
+            // pred is expected, but there is no &pv=, &pn=, or &pu= ahead: skip to the next subj (&sb=, &su=, &sv=, &sn=).
+
+            if ( !lookingAt(tokens, peekIter, DIRECTIVE) ||
+                peekToken(tokens, peekIter).getImage() == null ||
+                    !peekToken(tokens, peekIter).getImage().startsWith("p"))
+                while (moreTokens(peekIter))
+                {
+                    if (!(lookingAt(tokens, peekIter, DIRECTIVE) &&
+                            peekToken(tokens, peekIter).getImage() != null && peekToken(tokens, peekIter).getImage().startsWith("s")))
+                        nextToken(tokens, peekIter);  // subject not seen yet - move on
+                    else 
+                        return; // return to subject
+                }
+            
+            
             predicateObjectItem(tokens, peekIter, profile, dest, subject) ;            
         }
     }
     
     protected void predicateObjectItem(Tokenizer tokens, PeekIterator<Token> peekIter, ParserProfile profile, StreamRDF dest, Node subject)
-    {
+    {        
         Node predicate = predicate(tokens, peekIter, profile) ;
         nextToken(tokens, peekIter) ;
         objectList(tokens, peekIter, profile, dest, subject, predicate) ;
@@ -421,20 +425,10 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
     {
         if ( !lookingAt(tokens, peekIter, DIRECTIVE))
             exception(peekToken(tokens, peekIter), "Expected RDF/POST directive (found '" + peekToken(tokens, peekIter) + "')") ;
-
-        // pred is expected, but there is no &pv=, &pn=, or &pu= ahead: skip to the next subj (&sb=, &su=, &sv=, &sn=).
         
         Token t = peekToken(tokens, peekIter) ;
-        String image = t.getImage() ;
-        if ( !image.startsWith("p")) // DIRECTIVE?
-            //exception(peekToken(tokens, peekIter), "Expected RDF predicate directive 'pu'/'pv'/'pn' (found '" + peekToken(tokens, peekIter) + "')") ;
-            while (!(t.hasType(DIRECTIVE) && image.startsWith("s")))
-            {
-                t = nextToken(tokens, peekIter); // too much?
-                image = t.getImage();
-            }
         
-        if (image.equals(NS_PRED)) // pn is a special case - requires following pv
+        if (t.getImage().equals(NS_PRED)) // pn is a special case - requires following pv
             return predicateNS(tokens, peekIter, profile);
         
         Node n = node(tokens, peekIter, profile) ;
@@ -527,7 +521,11 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
         
         // ol - a special case which checks for following lt and ll
         if (lookingAt(tokens, peekIter, DIRECTIVE) && peekToken(tokens, peekIter).getImage().equals(LITERAL_OBJ))
-            return objectLiteral(tokens, peekIter, profile);
+        {
+            Node n = objectLiteral(tokens, peekIter, profile);
+            nextToken(tokens, peekIter) ; // skip what?
+            return n ;
+        }
 
         // on - a special case which checks for following ov
         if (lookingAt(tokens, peekIter, DIRECTIVE) && peekToken(tokens, peekIter).getImage().equals(NS_OBJ))
@@ -592,7 +590,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
 
         if ( !lookingAt(tokens, peekIter, STRING))
             exception(peekToken(tokens, peekIter), "'ol' requires a string (found '" + peekToken(tokens, peekIter) + "')") ;
-        Token literal = nextToken(tokens, peekIter); // string
+        Token literal = peekToken(tokens, peekIter); // nextToken(tokens, peekIter);
 
         // type
         if (lookingAt(tokens, peekIter, DIRECTIVE) && peekToken(tokens, peekIter).getImage().equals(TYPE))
@@ -621,7 +619,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
         if ( !lookingAt(tokens, peekIter, IRI))
             exception(peekToken(tokens, peekIter), "'lt' requires a URI (found '" + peekToken(tokens, peekIter) + "')") ;
      
-        return nextToken(tokens, peekIter);        
+        return nextToken(tokens, peekIter);
     }
 
     public Token lang(Tokenizer tokens, PeekIterator<Token> peekIter)
