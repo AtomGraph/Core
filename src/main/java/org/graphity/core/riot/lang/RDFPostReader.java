@@ -527,11 +527,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
         
         // ol - a special case which checks for following lt and ll
         if (lookingAt(tokens, peekIter, DIRECTIVE) && peekToken(tokens, peekIter).getImage().equals(LITERAL_OBJ))
-        {
-            Node n = objectLiteral(tokens, peekIter, profile);
-            nextToken(tokens, peekIter) ; // skip what?
-            return n ;
-        }
+            return objectLiteral(tokens, peekIter, profile);
 
         // on - a special case which checks for following ov
         if (lookingAt(tokens, peekIter, DIRECTIVE) && peekToken(tokens, peekIter).getImage().equals(NS_OBJ))
@@ -620,14 +616,16 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
 
         if ( !lookingAt(tokens, peekIter, STRING))
             exception(peekToken(tokens, peekIter), "'ol' requires a string (found '" + peekToken(tokens, peekIter) + "')") ;
-        Token literal = peekToken(tokens, peekIter); // nextToken(tokens, peekIter);
-
+        Token literal = nextToken(tokens, peekIter); // nextToken(tokens, peekIter);
+        Node literalNode = tokenAsNode(profile, literal);
+        
         // type
         if (lookingAt(tokens, peekIter, DIRECTIVE) && peekToken(tokens, peekIter).getImage().equals(TYPE))
         {
             Token tokenDT = type(tokens, peekIter);
             literal.setType(LITERAL_DT);
             literal.setSubToken2(tokenDT);
+            return tokenAsNode(profile, literal);
         }
         // lang
         if (lookingAt(tokens, peekIter, DIRECTIVE) && peekToken(tokens, peekIter).getImage().equals(LANG))
@@ -635,9 +633,10 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
             Token tokenLang = lang(tokens, peekIter);
             literal.setType(LITERAL_LANG);
             literal.setImage2(tokenLang.getImage2());
+            return tokenAsNode(profile, literal);
         }
         
-        return tokenAsNode(profile, literal);
+        return literalNode;
     }
 
     protected void skipToSubjectOrPredicateOrNonLiteralObject(Tokenizer tokens, PeekIterator<Token> peekIter)
@@ -665,7 +664,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
         if ( !lookingAt(tokens, peekIter, IRI))
             exception(peekToken(tokens, peekIter), "'lt' requires a URI (found '" + peekToken(tokens, peekIter) + "')") ;
      
-        return nextToken(tokens, peekIter);
+        return nextToken(tokens, peekIter); // nextToken
     }
 
     public Token lang(Tokenizer tokens, PeekIterator<Token> peekIter)
