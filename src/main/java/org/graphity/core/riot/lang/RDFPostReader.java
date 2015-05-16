@@ -458,10 +458,6 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
             skipToSubject(tokens, peekIter);
             return null;
         }
-        /*
-        if (!(lookingAt(tokens, peekIter, DIRECTIVE) && peekToken(tokens, peekIter).getImage().equals(DEF_NS_PRED)))
-            exception(peekToken(tokens, peekIter), "Expected 'pv' (found '" + peekToken(tokens, peekIter) + "')") ;
-        */
 
         nextToken(tokens, peekIter); // skip pv
 
@@ -522,10 +518,8 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
         
         if ( !image.startsWith("o"))
         {
-            if (image.equals(TYPE)) // lt
+            if (image.equals(TYPE) || image.equals(LANG)) // lt or ll
                 return objectLiteral(tokens, peekIter, profile);
-            //if (image.equals(LANG)) // lt
-            //    return objectLiteral(tokens, peekIter, profile);
 
             skipToSubjectOrPredicate(tokens, peekIter);
             return null;
@@ -541,12 +535,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
 
         // on - a special case which checks for following ov
         if (lookingAt(tokens, peekIter, DIRECTIVE) && peekToken(tokens, peekIter).getImage().equals(NS_OBJ))
-        {
             return objectNS(tokens, peekIter, profile);            
-            //Node n = objectNS(tokens, peekIter, profile);
-            //nextToken(tokens, peekIter) ; // skip what?
-            //return n ;
-        }
         
         Node n = node(tokens, peekIter, profile) ;
         nextToken(tokens, peekIter) ; // skip what?
@@ -574,41 +563,55 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
         if ( !lookingAt(tokens, peekIter, DIRECTIVE))
             exception(peekToken(tokens, peekIter), "Expected RDF/POST directive (found '" + peekToken(tokens, peekIter) + "')") ;
         
-        if (!peekToken(tokens, peekIter).getImage().equals(LITERAL_OBJ)) // ol
+        if (!peekToken(tokens, peekIter).getImage().equals(LITERAL_OBJ)) // not ol
         {
             // type
-            if (peekToken(tokens, peekIter).getImage().equals(TYPE)) //peekToken(tokens, peekIter).getImage().equals(LANG))
+            if (lookingAt(tokens, peekIter, DIRECTIVE) && peekToken(tokens, peekIter).getImage().equals(TYPE)) // peekToken(tokens, peekIter).getImage().equals(LANG))
             {
+                nextToken(tokens, peekIter);
+
+                if ( !lookingAt(tokens, peekIter, IRI))
+                    exception(peekToken(tokens, peekIter), "'lt' requires a URI (found '" + peekToken(tokens, peekIter) + "')") ;
                 Token dtIriToken = nextToken(tokens, peekIter);
-
+                
                 if (!(lookingAt(tokens, peekIter, DIRECTIVE) && peekToken(tokens, peekIter).getImage().equals(LITERAL_OBJ)))
-                    exception(peekToken(tokens, peekIter), "Expected 'ol' (found '" + peekToken(tokens, peekIter) + "')") ;
-
+                {
+                    skipToSubjectOrPredicateOrNonLiteralObject(tokens, peekIter);
+                    return null;
+                }
                 nextToken(tokens, peekIter); // skip ol
 
                 if ( !lookingAt(tokens, peekIter, STRING))
                     exception(peekToken(tokens, peekIter), "'ol' requires a node (found '" + peekToken(tokens, peekIter) + "')") ;
                 Token literal = peekToken(tokens, peekIter);
 
+                literal.setType(LITERAL_DT);                
                 literal.setSubToken2(dtIriToken);
                 return tokenAsNode(profile, literal);
             }
             
             // lang
-            if (peekToken(tokens, peekIter).getImage().equals(LANG))
+            if (lookingAt(tokens, peekIter, DIRECTIVE) && peekToken(tokens, peekIter).getImage().equals(LANG))
             {
+                nextToken(tokens, peekIter);
+
+                if ( !lookingAt(tokens, peekIter, LITERAL_LANG))
+                    exception(peekToken(tokens, peekIter), "'ol' requires a node (found '" + peekToken(tokens, peekIter) + "')") ;
                 Token langToken = nextToken(tokens, peekIter);
 
                 if (!(lookingAt(tokens, peekIter, DIRECTIVE) && peekToken(tokens, peekIter).getImage().equals(LITERAL_OBJ)))
-                    exception(peekToken(tokens, peekIter), "Expected 'ol' (found '" + peekToken(tokens, peekIter) + "')") ;
-
+                {
+                    skipToSubjectOrPredicateOrNonLiteralObject(tokens, peekIter);
+                    return null;
+                }
                 nextToken(tokens, peekIter); // skip ol
 
                 if ( !lookingAt(tokens, peekIter, STRING))
                     exception(peekToken(tokens, peekIter), "'ol' requires a node (found '" + peekToken(tokens, peekIter) + "')") ;
                 Token literal = peekToken(tokens, peekIter);
 
-                literal.setImage2(langToken.getImage());
+                literal.setType(LITERAL_LANG);
+                literal.setImage2(langToken.getImage2());
                 return tokenAsNode(profile, literal);
             }            
         }
@@ -635,6 +638,22 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
         }
         
         return tokenAsNode(profile, literal);
+    }
+
+    protected void skipToSubjectOrPredicateOrNonLiteralObject(Tokenizer tokens, PeekIterator<Token> peekIter)
+    {
+        while (moreTokens(peekIter))
+        {
+            if (lookingAt(tokens, peekIter, DIRECTIVE) &&
+                peekToken(tokens, peekIter).getImage() != null &&
+                    (peekToken(tokens, peekIter).getImage().startsWith("s") ||
+                    peekToken(tokens, peekIter).getImage().startsWith("p") ||
+                    (peekToken(tokens, peekIter).getImage().startsWith("o") &&
+                        !peekToken(tokens, peekIter).getImage().equals(LITERAL_OBJ))))
+                return; // return to subject or predicate
+
+            nextToken(tokens, peekIter);  // subject or predicate not seen yet - move on
+        }
     }
     
     public Token type(Tokenizer tokens, PeekIterator<Token> peekIter)
