@@ -527,16 +527,8 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
             //if (image.equals(LANG)) // lt
             //    return objectLiteral(tokens, peekIter, profile);
 
-            while (moreTokens(peekIter))
-            {
-                if (lookingAt(tokens, peekIter, DIRECTIVE) &&
-                        peekToken(tokens, peekIter).getImage() != null &&
-                        (peekToken(tokens, peekIter).getImage().startsWith("s") ||
-                            peekToken(tokens, peekIter).getImage().startsWith("p")))
-                    return null; // return to predicate
-
-                nextToken(tokens, peekIter);  // subject or predicate not seen yet - move on
-            }            
+            skipToSubjectOrPredicate(tokens, peekIter);
+            return null;
         }
         
         // ol - a special case which checks for following lt and ll
@@ -550,14 +542,29 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
         // on - a special case which checks for following ov
         if (lookingAt(tokens, peekIter, DIRECTIVE) && peekToken(tokens, peekIter).getImage().equals(NS_OBJ))
         {
-            Node n = objectNS(tokens, peekIter, profile);
-            nextToken(tokens, peekIter) ; // skip what?
-            return n ;
+            return objectNS(tokens, peekIter, profile);            
+            //Node n = objectNS(tokens, peekIter, profile);
+            //nextToken(tokens, peekIter) ; // skip what?
+            //return n ;
         }
         
         Node n = node(tokens, peekIter, profile) ;
         nextToken(tokens, peekIter) ; // skip what?
         return n ;
+    }
+
+    protected void skipToSubjectOrPredicate(Tokenizer tokens, PeekIterator<Token> peekIter)
+    {
+        while (moreTokens(peekIter))
+        {
+            if (lookingAt(tokens, peekIter, DIRECTIVE) &&
+                    peekToken(tokens, peekIter).getImage() != null &&
+                    (peekToken(tokens, peekIter).getImage().startsWith("s") ||
+                        peekToken(tokens, peekIter).getImage().startsWith("p")))
+                return; // return to subject or predicate
+
+            nextToken(tokens, peekIter);  // subject or predicate not seen yet - move on
+        }
     }
 
     public Node objectLiteral(Tokenizer tokens, PeekIterator<Token> peekIter, ParserProfile profile)
@@ -663,11 +670,16 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
         if ( !lookingAt(tokens, peekIter, PREFIXED_NAME) && peekToken(tokens, peekIter).getImage() != null)
             exception(peekToken(tokens, peekIter), "'on' requires a prefix (found '" + peekToken(tokens, peekIter) + "')") ;
         Token prefixToken = nextToken(tokens, peekIter);
+        
+        if ( !lookingAt(tokens, peekIter, DIRECTIVE) ||
+            peekToken(tokens, peekIter).getImage() == null ||
+                !peekToken(tokens, peekIter).getImage().equals(DEF_NS_OBJ))
+        {
+            skipToSubjectOrPredicate(tokens, peekIter); // skipToSubject(tokens, peekIter);
+            return null;
+        }
 
-        // the only difference from predicateNS() is DEF_NS_OBJ!!
-        if (!(lookingAt(tokens, peekIter, DIRECTIVE) && peekToken(tokens, peekIter).getImage().equals(DEF_NS_OBJ)))
-            exception(peekToken(tokens, peekIter), "Expected 'ov' (found '" + peekToken(tokens, peekIter) + "')") ;
-        nextToken(tokens, peekIter); // skip pv
+        nextToken(tokens, peekIter); // skip ov
 
         if ( !lookingAt(tokens, peekIter, PREFIXED_NAME) && peekToken(tokens, peekIter).getImage2() != null)
             exception(peekToken(tokens, peekIter), "'on' requires a prefix (found '" + peekToken(tokens, peekIter) + "')") ;
