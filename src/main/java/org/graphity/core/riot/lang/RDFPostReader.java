@@ -495,6 +495,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
         for (;;)
         {
             Node object = object(tokens, peekIter, profile, subject, predicate) ;
+            if (object == null) return; // if object() failed to find o*
             emitTriple(profile, dest, subject, predicate, object) ;
 
             if ( !moreTokens(peekIter) )
@@ -525,12 +526,17 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
                 return objectLiteral(tokens, peekIter, profile);
             //if (image.equals(LANG)) // lt
             //    return objectLiteral(tokens, peekIter, profile);
-            
-            while (!(t.hasType(DIRECTIVE) && (image.startsWith("s") || image.startsWith("p"))))
+
+            while (moreTokens(peekIter))
             {
-                t = nextToken(tokens, peekIter);
-                image = t.getImage();
-            }
+                if (lookingAt(tokens, peekIter, DIRECTIVE) &&
+                        peekToken(tokens, peekIter).getImage() != null &&
+                        (peekToken(tokens, peekIter).getImage().startsWith("s") ||
+                            peekToken(tokens, peekIter).getImage().startsWith("p")))
+                    return null; // return to predicate
+
+                nextToken(tokens, peekIter);  // subject or predicate not seen yet - move on
+            }            
         }
         
         // ol - a special case which checks for following lt and ll
