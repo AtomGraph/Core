@@ -228,6 +228,11 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
 	return model;
     }
 
+    public boolean skippingEmptyLiterals()
+    {
+        return true;
+    }
+    
     @Override
     public void read(InputStream in, String baseURI, Lang lang, StreamRDF output, Context context)
     {
@@ -617,6 +622,9 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
                     exception(peekToken(tokens, peekIter), "'ol' requires a node (found '" + peekToken(tokens, peekIter) + "')") ;
                 Token literal = peekToken(tokens, peekIter);
 
+                if (literal.getImage().isEmpty() && skippingEmptyLiterals())
+                    return null;
+                
                 literal.setType(LITERAL_DT);                
                 literal.setSubToken2(dtIriToken);
                 return tokenAsNode(profile, literal);
@@ -642,6 +650,9 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
                     exception(peekToken(tokens, peekIter), "'ol' requires a node (found '" + peekToken(tokens, peekIter) + "')") ;
                 Token literal = peekToken(tokens, peekIter);
 
+                if (literal.getImage().isEmpty() && skippingEmptyLiterals())
+                    return null;
+                
                 literal.setType(LITERAL_LANG);
                 literal.setImage2(langToken.getImage2());
                 return tokenAsNode(profile, literal);
@@ -653,6 +664,10 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
         if ( !lookingAt(tokens, peekIter, STRING))
             exception(peekToken(tokens, peekIter), "'ol' requires a string (found '" + peekToken(tokens, peekIter) + "')") ;
         Token literal = nextToken(tokens, peekIter); // nextToken(tokens, peekIter);
+
+        if (literal.getImage().isEmpty() && skippingEmptyLiterals())
+            return null;
+        
         Node literalNode = tokenAsNode(profile, literal);
         
         // type
