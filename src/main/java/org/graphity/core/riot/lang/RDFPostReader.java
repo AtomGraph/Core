@@ -28,8 +28,11 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.sparql.util.Context;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.jena.atlas.AtlasException;
 import org.apache.jena.atlas.io.PeekReader;
@@ -63,6 +66,39 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
 {    
     private static final Logger log = LoggerFactory.getLogger(RDFPostReader.class);
     
+    public Model parse(String body, String charsetName) throws URISyntaxException
+    {
+        List<String> keys = new ArrayList<>(), values = new ArrayList<>();
+
+	String[] params = body.split("&");
+
+	for (String param : params)
+	{
+	    if (log.isTraceEnabled()) log.trace("Parameter: {}", param);
+	    
+	    String[] array = param.split("=");
+	    String key = null;
+	    String value = null;
+
+	    try
+	    {
+		key = URLDecoder.decode(array[0], charsetName);
+		if (array.length > 1) value = URLDecoder.decode(array[1], charsetName);
+	    } catch (UnsupportedEncodingException ex)
+	    {
+		if (log.isWarnEnabled()) log.warn("Unsupported encoding", ex);
+	    }
+
+            if (value != null) // && key != null
+            {
+                keys.add(key);
+                values.add(value);
+            }
+	}
+
+        return parse(keys, values);
+    }
+
     public Model parse(List<String> k, List<String> v) throws URISyntaxException
     {
 	Model model = ModelFactory.createDefaultModel();
