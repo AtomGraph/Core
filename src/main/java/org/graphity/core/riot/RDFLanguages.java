@@ -32,6 +32,15 @@ public class RDFLanguages extends org.apache.jena.riot.RDFLanguages
     public static final Lang RDFPOST = LangBuilder.create(strLangRDFPOST, MediaType.APPLICATION_RDF_URLENCODED).
             addAltContentTypes(MediaType.APPLICATION_FORM_URLENCODED).
             addFileExtensions("rpo").
-            build() ;
+            build();
+
+    // JSON-LD support is built-in in later Jena versions
+    
+    public static final String strLangJSONLD    = "JSON-LD" ;
+    
+    public static final Lang JSONLD = LangBuilder.create(strLangJSONLD, MediaType.APPLICATION_LD_JSON).
+            addAltNames("JSONLD").
+            addFileExtensions("jsonld").
+            build();
 
 }
