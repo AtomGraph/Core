@@ -228,7 +228,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
 	return model;
     }
 
-    public boolean skippingEmptyLiterals()
+    public boolean skipEmptyLiterals()
     {
         return true;
     }
@@ -533,7 +533,10 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
         {
             Node object = object(tokens, peekIter, profile, subject, predicate) ;
             if (object == null) return; // if object() failed to find o*
-            emitTriple(profile, dest, subject, predicate, object) ;
+
+            // do not emit empty literals. Override skippingEmptyLiterals() to change this behaviour
+            if (!(object.isLiteral() && object.getLiteralLexicalForm().isEmpty() && skipEmptyLiterals()))
+                emitTriple(profile, dest, subject, predicate, object) ;
 
             if ( !moreTokens(peekIter) )
                 break ;
@@ -621,9 +624,6 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
                 if ( !lookingAt(tokens, peekIter, STRING))
                     exception(peekToken(tokens, peekIter), "'ol' requires a node (found '" + peekToken(tokens, peekIter) + "')") ;
                 Token literal = peekToken(tokens, peekIter);
-
-                if (literal.getImage().isEmpty() && skippingEmptyLiterals())
-                    return null;
                 
                 literal.setType(LITERAL_DT);                
                 literal.setSubToken2(dtIriToken);
@@ -649,9 +649,6 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
                 if ( !lookingAt(tokens, peekIter, STRING))
                     exception(peekToken(tokens, peekIter), "'ol' requires a node (found '" + peekToken(tokens, peekIter) + "')") ;
                 Token literal = peekToken(tokens, peekIter);
-
-                if (literal.getImage().isEmpty() && skippingEmptyLiterals())
-                    return null;
                 
                 literal.setType(LITERAL_LANG);
                 literal.setImage2(langToken.getImage2());
@@ -664,9 +661,6 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
         if ( !lookingAt(tokens, peekIter, STRING))
             exception(peekToken(tokens, peekIter), "'ol' requires a string (found '" + peekToken(tokens, peekIter) + "')") ;
         Token literal = nextToken(tokens, peekIter); // nextToken(tokens, peekIter);
-
-        if (literal.getImage().isEmpty() && skippingEmptyLiterals())
-            return null;
         
         Node literalNode = tokenAsNode(profile, literal);
         
