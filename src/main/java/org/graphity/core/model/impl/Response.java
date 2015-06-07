@@ -93,6 +93,22 @@ public class Response // extends ResponseBuilder
         list.toArray(array);
         return array;
     }
+
+    /**
+     * Produces a Variant builder from a list of media types.
+     * 
+     * @param mediaTypes
+     * @param languages
+     * @param encodings
+     * @return variant builder
+     */    
+    public Variant.VariantListBuilder getVariantListBuilder(List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings)
+    {        
+        return Variant.VariantListBuilder.newInstance().
+                mediaTypes(mediaTypeListToArray(mediaTypes)).
+                languages(localeListToArray(languages)).
+                encodings(stringListToArray(encodings));
+    }
     
     /**
      * Returns response builder for RDF model.

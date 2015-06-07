@@ -51,6 +51,7 @@ public abstract class ResourceBase implements Resource
     private final UriInfo uriInfo;
     private final Request request;
     private final ServletConfig servletConfig;
+    private final org.graphity.core.model.impl.Response response;
     private CacheControl cacheControl;
 
     /** 
@@ -71,6 +72,7 @@ public abstract class ResourceBase implements Resource
         this.uriInfo = uriInfo;
         this.request = request;
         this.servletConfig = servletConfig;
+        this.response = org.graphity.core.model.impl.Response.fromRequest(request);
     }
 
     /**
@@ -118,7 +120,7 @@ public abstract class ResourceBase implements Resource
     
     public Variant.VariantListBuilder getVariantListBuilder()
     {
-        return getVariantListBuilder(getMediaTypes(), getLanguages(), getEncodings());
+        return getResponse().getVariantListBuilder(getMediaTypes(), getLanguages(), getEncodings());
     }
     
     /**
@@ -128,7 +130,8 @@ public abstract class ResourceBase implements Resource
      * @param languages
      * @param encodings
      * @return variant builder
-     */    
+     */
+    /*
     public Variant.VariantListBuilder getVariantListBuilder(List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings)
     {        
         return Variant.VariantListBuilder.newInstance().
@@ -136,6 +139,7 @@ public abstract class ResourceBase implements Resource
                 languages(org.graphity.core.model.impl.Response.localeListToArray(languages)).
                 encodings(org.graphity.core.model.impl.Response.stringListToArray(encodings));
     }
+    */
     
     public List<MediaType> getMediaTypes()
     {
@@ -207,6 +211,11 @@ public abstract class ResourceBase implements Resource
 	return servletConfig;
     }
 
+    public org.graphity.core.model.impl.Response getResponse()
+    {
+        return response;
+    }
+    
     /**
      * Returns <pre>Cache-Control</pre> header value.
      * 

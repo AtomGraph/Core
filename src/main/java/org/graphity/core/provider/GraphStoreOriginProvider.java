@@ -50,7 +50,7 @@ public class GraphStoreOriginProvider extends PerRequestTypeInjectableProvider<C
     
     private static final Logger log = LoggerFactory.getLogger(GraphStoreOriginProvider.class);
 
-    @Context ServletConfig filerConfig;
+    @Context ServletConfig servletConfig;
     @Context Providers providers;
 
     public GraphStoreOriginProvider()
@@ -60,7 +60,7 @@ public class GraphStoreOriginProvider extends PerRequestTypeInjectableProvider<C
 
     public ServletConfig getServletConfig()
     {
-        return filerConfig;
+        return servletConfig;
     }
 
     public Providers getProviders()
