@@ -45,7 +45,7 @@ public class SPARQLEndpointProvider extends PerRequestTypeInjectableProvider<Con
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointProvider.class);
 
     @Context Request request;
-    @Context ServletConfig filtertConfig;
+    @Context ServletConfig servletConfig;
     @Context Providers providers;
     
     public SPARQLEndpointProvider()
@@ -65,7 +65,7 @@ public class SPARQLEndpointProvider extends PerRequestTypeInjectableProvider<Con
 
     public ServletConfig getServletConfig()
     {
-        return filtertConfig;
+        return servletConfig;
     }
 
     public DataManager getDataManager()
