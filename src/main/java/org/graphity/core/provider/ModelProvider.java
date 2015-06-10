@@ -50,13 +50,19 @@ import org.slf4j.LoggerFactory;
 public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWriter<Model>
 {    
     private static final Logger log = LoggerFactory.getLogger(ModelProvider.class);
+
+    public boolean isRDFMediaType(MediaType mediaType)
+    {
+        MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
+        return RDFLanguages.contentTypeToLang(formatType.toString()) != null;        
+    }
     
     // READER
     
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-        return type == Model.class && RDFLanguages.contentTypeToLang(mediaType.toString()) != null;
+        return type == Model.class && isRDFMediaType(mediaType);
     }
 
     @Override
@@ -66,7 +72,8 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
 	
 	Model model = ModelFactory.createDefaultModel();	
 
-        Lang lang = RDFLanguages.contentTypeToLang(mediaType.toString());
+        MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param        
+        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
         if (lang == null)
         {
             Throwable ex = new NoReaderForLangException("Media type not supported");
@@ -86,8 +93,7 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-        MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
-        return Model.class.isAssignableFrom(type) && RDFLanguages.contentTypeToLang(formatType.toString()) != null;
+        return Model.class.isAssignableFrom(type) && isRDFMediaType(mediaType);
     }
 
     @Override
