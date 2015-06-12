@@ -20,6 +20,7 @@ package org.graphity.core.model;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
+import org.graphity.core.MediaTypes;
 import org.graphity.core.model.impl.QueriedResourceBase;
 
 /**
@@ -36,13 +37,14 @@ public class ResourceFactory
      * @param uriInfo URI information of the current request
      * @param request current request object
      * @param servletConfig servlet config
+     * @param mediaTypes supported media types
      * @param endpoint SPARQL endpoint backing the application
      * @return a new Linked Data resource
      */
-    public static Resource create(UriInfo uriInfo, Request request, ServletConfig servletConfig,
+    public static Resource create(UriInfo uriInfo, Request request, ServletConfig servletConfig, MediaTypes mediaTypes,
             SPARQLEndpoint endpoint)
     {
-	return new QueriedResourceBase(uriInfo, request, servletConfig, endpoint);
+	return new QueriedResourceBase(uriInfo, request, servletConfig, mediaTypes, endpoint);
     }
 
 }

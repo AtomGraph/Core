@@ -27,6 +27,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import org.graphity.core.MediaTypes;
 import org.graphity.core.model.QueriedResource;
 import org.graphity.core.model.SPARQLEndpoint;
 import org.slf4j.Logger;
@@ -54,14 +55,15 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
      * @param request current request object
      * @param servletConfig webapp context
      * @param endpoint SPARQL endpoint backing this resource
+     * @param mediaTypes supported media types
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html">JAX-RS UriInfo</a>
      * @see <a href="http://docs.oracle.com/javaee/7/api/javax/servlet/ServletContext.html">ServletContext</a>
      * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceContext.html">Jersey ResourceContext</a>
      */
-    public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletConfig servletConfig,
+    public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletConfig servletConfig, @Context MediaTypes mediaTypes,
             @Context SPARQLEndpoint endpoint)
     {
-	super(uriInfo, request, servletConfig);
+	super(uriInfo, request, servletConfig, mediaTypes);
 	if (endpoint == null) throw new IllegalArgumentException("SPARQLEndpoint cannot be null");
 	this.endpoint = endpoint;
     }

@@ -45,15 +45,6 @@ public interface SPARQLEndpoint
 {
 
     /**
-     * Media types that can be used to represent of SPARQL result set
-     * 
-     * @see <a href="http://www.w3.org/TR/sparql11-protocol/#query-success">SPARQL 1.1 Protocol. 2.1.6 Success Responses</a>
-     * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/ResultSetRewindable.html">Jena ResultSetRewindable</a>
-     */
-    public static final javax.ws.rs.core.MediaType[] RESULT_SET_MEDIA_TYPES = new javax.ws.rs.core.MediaType[]{org.graphity.core.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE,
-			    org.graphity.core.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE};
-
-    /**
      * Handles GET query request and returns result as response
      * 
      * @param query the submitted SPARQL query

@@ -33,6 +33,7 @@ import org.apache.jena.riot.RDFParserRegistry;
 import org.graphity.core.model.impl.GraphStoreProxyBase;
 import org.graphity.core.model.impl.QueriedResourceBase;
 import org.graphity.core.model.impl.SPARQLEndpointProxyBase;
+import org.graphity.core.provider.MediaTypesProvider;
 import org.graphity.core.riot.RDFLanguages;
 import org.graphity.core.riot.lang.RDFPostReaderAdapter;
 import org.graphity.core.riot.lang.RDFPostReaderFactory;
@@ -85,6 +86,7 @@ public class ApplicationBase extends javax.ws.rs.core.Application
         singletons.add(new SPARQLEndpointOriginProvider());
         singletons.add(new GraphStoreOriginProvider());
         singletons.add(new SPARQLEndpointProvider());
+        singletons.add(new MediaTypesProvider());
     }
     
     /**

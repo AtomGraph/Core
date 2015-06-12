@@ -22,6 +22,7 @@ import javax.servlet.ServletConfig;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
+import org.graphity.core.MediaTypes;
 import org.graphity.core.model.GraphStoreOrigin;
 import org.graphity.core.model.GraphStoreProxy;
 import org.graphity.core.model.Origin;
@@ -48,13 +49,14 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
      * 
      * @param request request
      * @param servletConfig servlet config
+     * @param mediaTypes supported media types
      * @param origin graph store origin
      * @param dataManager data manager
      */
-    public GraphStoreProxyBase(@Context Request request, @Context ServletConfig servletConfig,
+    public GraphStoreProxyBase(@Context Request request, @Context ServletConfig servletConfig, @Context MediaTypes mediaTypes,
             @Context GraphStoreOrigin origin, @Context DataManager dataManager)
     {
-        super(request, servletConfig);
+        super(request, servletConfig, mediaTypes);
         if (origin == null) throw new IllegalArgumentException("GraphStoreOrigin cannot be null");
         if (dataManager == null) throw new IllegalArgumentException("DataManager cannot be null");
         this.origin = origin;

@@ -20,6 +20,7 @@ package org.graphity.core.model;
 import javax.servlet.ServletConfig;
 import org.graphity.core.model.impl.GraphStoreProxyBase;
 import javax.ws.rs.core.Request;
+import org.graphity.core.MediaTypes;
 import org.graphity.core.util.DataManager;
 
 /**
@@ -38,11 +39,12 @@ public class GraphStoreFactory
      * @param servletConfig servlet config
      * @param origin remote graph store origin
      * @param dataManager RDF data manager for this graph store
+     * @param mediaTypes
      * @return graph store instance
      */
-    public static GraphStore createProxy(Request request, ServletConfig servletConfig, GraphStoreOrigin origin, DataManager dataManager)
+    public static GraphStore createProxy(Request request, ServletConfig servletConfig, MediaTypes mediaTypes, GraphStoreOrigin origin, DataManager dataManager)
     {
-	return new GraphStoreProxyBase(request, servletConfig, origin, dataManager);
+	return new GraphStoreProxyBase(request, servletConfig, mediaTypes, origin, dataManager);
     }
 
 }

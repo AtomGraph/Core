@@ -25,6 +25,7 @@ import javax.servlet.ServletConfig;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
+import org.graphity.core.MediaTypes;
 import org.graphity.core.model.Origin;
 import org.graphity.core.model.SPARQLEndpointOrigin;
 import org.graphity.core.model.SPARQLEndpointProxy;
@@ -53,10 +54,12 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
      * @param servletConfig
      * @param origin
      * @param dataManager 
+     * @param mediaTypes 
      */
-    public SPARQLEndpointProxyBase(@Context Request request, @Context ServletConfig servletConfig, @Context SPARQLEndpointOrigin origin, @Context DataManager dataManager)
+    public SPARQLEndpointProxyBase(@Context Request request, @Context ServletConfig servletConfig, @Context MediaTypes mediaTypes,
+            @Context SPARQLEndpointOrigin origin, @Context DataManager dataManager)
     {
-        super(request, servletConfig);
+        super(request, servletConfig, mediaTypes);
         if (origin == null) throw new IllegalArgumentException("SPARQLEndpointOrigin cannot be null");
         if (dataManager == null) throw new IllegalArgumentException("DataManager cannot be null");
         this.origin = origin;

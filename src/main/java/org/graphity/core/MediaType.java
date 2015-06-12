@@ -102,22 +102,4 @@ public class MediaType extends javax.ws.rs.core.MediaType
         super();
     }
 
-    public static List<javax.ws.rs.core.MediaType> getRegistered()
-    {
-        List<javax.ws.rs.core.MediaType> mediaTypes = new ArrayList<>();
-        
-        Iterator<Lang> it = RDFLanguages.getRegisteredLanguages().iterator();
-        while (it.hasNext())
-        {
-            Lang lang = it.next();
-            if (!lang.equals(Lang.RDFNULL))
-            {
-                ContentType ct = lang.getContentType();
-                mediaTypes.add(new javax.ws.rs.core.MediaType(ct.getType(), ct.getSubType()));
-            }
-        }
-
-        return mediaTypes;
-    }
-
 }

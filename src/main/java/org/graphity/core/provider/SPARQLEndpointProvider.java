@@ -25,6 +25,7 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 import javax.ws.rs.ext.Providers;
+import org.graphity.core.MediaTypes;
 import org.graphity.core.model.SPARQLEndpoint;
 import org.graphity.core.model.SPARQLEndpointFactory;
 import org.graphity.core.model.SPARQLEndpointOrigin;
@@ -80,6 +81,12 @@ public class SPARQLEndpointProvider extends PerRequestTypeInjectableProvider<Con
 	return cr.getContext(SPARQLEndpointOrigin.class);
     }
 
+    public MediaTypes getMediaTypes()
+    {
+	ContextResolver<MediaTypes> cr = getProviders().getContextResolver(MediaTypes.class, null);
+	return cr.getContext(MediaTypes.class);
+    }
+
     @Override
     public Injectable<SPARQLEndpoint> getInjectable(ComponentContext cc, Context context)
     {
@@ -95,12 +102,12 @@ public class SPARQLEndpointProvider extends PerRequestTypeInjectableProvider<Con
 
     public SPARQLEndpoint getSPARQLEndpoint()
     {
-        return getSPARQLEndpoint(getRequest(), getServletConfig(), getSPARQLEndpointOrigin(), getDataManager());
+        return getSPARQLEndpoint(getRequest(), getServletConfig(), getMediaTypes(), getSPARQLEndpointOrigin(), getDataManager());
     }
 
-    public SPARQLEndpoint getSPARQLEndpoint(Request request, ServletConfig servletConfig, SPARQLEndpointOrigin origin, DataManager dataManager)
+    public SPARQLEndpoint getSPARQLEndpoint(Request request, ServletConfig servletConfig, MediaTypes mediaTypes, SPARQLEndpointOrigin origin, DataManager dataManager)
     {
-        return SPARQLEndpointFactory.createProxy(request, servletConfig, origin, dataManager);
+        return SPARQLEndpointFactory.createProxy(request, servletConfig, mediaTypes, origin, dataManager);
     }
     
     @Override

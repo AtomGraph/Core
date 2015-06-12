@@ -18,21 +18,18 @@ package org.graphity.core.model.impl;
 
 import com.hp.hpl.jena.rdf.model.*;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Variant;
+import org.graphity.core.MediaTypes;
 import org.graphity.core.model.Resource;
 import org.graphity.core.vocabulary.G;
 import org.slf4j.Logger;
@@ -51,6 +48,7 @@ public abstract class ResourceBase implements Resource
     private final UriInfo uriInfo;
     private final Request request;
     private final ServletConfig servletConfig;
+    private final MediaTypes mediaTypes;
     private final org.graphity.core.model.impl.Response response;
     private CacheControl cacheControl;
 
@@ -61,17 +59,21 @@ public abstract class ResourceBase implements Resource
      * @param uriInfo URI information of the request
      * @param request current request object
      * @param servletConfig webapp context
+     * @param mediaTypes supported media types
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html#getAbsolutePath()">JAX-RS UriInfo.getAbsolutePath()</a>
      */
-    public ResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletConfig servletConfig)
+    public ResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletConfig servletConfig,
+            @Context MediaTypes mediaTypes)
     {
 	if (uriInfo == null) throw new IllegalArgumentException("UriInfo cannot be null");
 	if (request == null) throw new IllegalArgumentException("Request cannot be null");
 	if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
+	if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
 
         this.uriInfo = uriInfo;
         this.request = request;
         this.servletConfig = servletConfig;
+        this.mediaTypes = mediaTypes;
         this.response = org.graphity.core.model.impl.Response.fromRequest(request);
     }
 
@@ -120,7 +122,7 @@ public abstract class ResourceBase implements Resource
     
     public Variant.VariantListBuilder getVariantListBuilder()
     {
-        return getResponse().getVariantListBuilder(getMediaTypes(), getLanguages(), getEncodings());
+        return getResponse().getVariantListBuilder(getMediaTypes().getModelMediaTypes(), getLanguages(), getEncodings());
     }
     
     /**
@@ -132,7 +134,7 @@ public abstract class ResourceBase implements Resource
      * @return variant builder
      */
     /*
-    public Variant.VariantListBuilder getVariantListBuilder(List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings)
+    public Variant.VariantListBuilder getVariantListBuilder(MediaTypes mediaTypes, List<Locale> languages, List<String> encodings)
     {        
         return Variant.VariantListBuilder.newInstance().
                 mediaTypes(org.graphity.core.model.impl.Response.mediaTypeListToArray(mediaTypes)).
@@ -141,9 +143,15 @@ public abstract class ResourceBase implements Resource
     }
     */
     
-    public List<MediaType> getMediaTypes()
+    public MediaTypes getMediaTypes()
     {
-        List<MediaType> list = new ArrayList<>();
+        return mediaTypes;
+    }
+    
+    /*
+    public MediaTypes getMediaTypes()
+    {
+        MediaTypes list = new ArrayList<>();
         Map<String, String> utf8Param = new HashMap<>();
         utf8Param.put("charset", "UTF-8");
         
@@ -159,6 +167,7 @@ public abstract class ResourceBase implements Resource
         
         return list;
     }
+    */
     
     public List<Locale> getLanguages()
     {

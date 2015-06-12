@@ -26,6 +26,7 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 import javax.ws.rs.ext.Providers;
+import org.graphity.core.MediaTypes;
 import org.graphity.core.model.GraphStore;
 import org.graphity.core.model.GraphStoreFactory;
 import org.graphity.core.model.GraphStoreOrigin;
@@ -81,6 +82,12 @@ public class GraphStoreProvider extends PerRequestTypeInjectableProvider<Context
 	return cr.getContext(GraphStoreOrigin.class);
     }
 
+    public MediaTypes getMediaTypes()
+    {
+	ContextResolver<MediaTypes> cr = getProviders().getContextResolver(MediaTypes.class, null);
+	return cr.getContext(MediaTypes.class);
+    }
+
     @Override
     public Injectable<GraphStore> getInjectable(ComponentContext cc, Context context)
     {
@@ -96,12 +103,12 @@ public class GraphStoreProvider extends PerRequestTypeInjectableProvider<Context
 
     public GraphStore getGraphStore()
     {
-        return GraphStoreFactory.createProxy(getRequest(), getServletConfig(), getGraphStoreOrigin(), getDataManager());
+        return GraphStoreFactory.createProxy(getRequest(), getServletConfig(), getMediaTypes(), getGraphStoreOrigin(), getDataManager());
     }
 
-    public GraphStore getGraphStore(Request request, ServletConfig servletConfig, GraphStoreOrigin origin, DataManager dataManager)
+    public GraphStore getGraphStore(Request request, ServletConfig servletConfig, MediaTypes mediaTypes, GraphStoreOrigin origin, DataManager dataManager)
     {
-        return GraphStoreFactory.createProxy(request, servletConfig, origin, dataManager);
+        return GraphStoreFactory.createProxy(request, servletConfig, mediaTypes, origin, dataManager);
     }
     
     @Override
