@@ -24,6 +24,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -122,7 +123,7 @@ public abstract class ResourceBase implements Resource
     
     public Variant.VariantListBuilder getVariantListBuilder()
     {
-        return getResponse().getVariantListBuilder(getMediaTypes().getModelMediaTypes(), getLanguages(), getEncodings());
+        return getResponse().getVariantListBuilder(getModelMediaTypes(), getLanguages(), getEncodings());
     }
     
     /**
@@ -146,6 +147,11 @@ public abstract class ResourceBase implements Resource
     public MediaTypes getMediaTypes()
     {
         return mediaTypes;
+    }
+    
+    public List<MediaType> getModelMediaTypes()
+    {
+        return getMediaTypes().getModelMediaTypes();
     }
     
     /*
