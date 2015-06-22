@@ -53,4 +53,12 @@ public final class G
 
     public static final DatatypeProperty preemptiveAuth = m_model.createDatatypeProperty( NS + "preemptiveAuth" );
 
+    public static final ObjectProperty baseUri = m_model.createObjectProperty( NS + "baseUri" );
+
+    public static final ObjectProperty absolutePath = m_model.createObjectProperty( NS + "absolutePath" );
+
+    public static final ObjectProperty requestUri = m_model.createObjectProperty( NS + "requestUri" );
+
+    public static final DatatypeProperty httpHeaders = m_model.createDatatypeProperty( NS + "httpHeaders" );
+
 }

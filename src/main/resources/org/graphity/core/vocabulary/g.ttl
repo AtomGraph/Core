@@ -13,7 +13,7 @@
 <#> a owl:Ontology ;
     owl:imports sd:, http: ;
     rdfs:label "Graphity Core ontology" ;
-    owl:versionInfo "1.1.2" .
+    owl:versionInfo "1.1.4" .
 
 <#graphStore> a owl:ObjectProperty, owl:InverseFunctionalProperty ;
     rdfs:domain sd:Service ;
@@ -39,4 +39,24 @@
     rdfs:label "LIMIT modifier" ;
     rdfs:description "Value of this property is set on all executed SELECT queries" ;
     rdfs:seeAlso <http://www.w3.org/TR/sparql11-query/#modResultLimit> ;
+    rdfs:isDefinedBy <#> .
+
+<#baseUri> a owl:ObjectProperty ;
+    rdfs:label "Application base URI" ;
+    rdfs:domain <#Application> ;
+    rdfs:comment "Base URI of the application" ;
+    rdfs:isDefinedBy <#> .
+
+<#absolutePath> a owl:ObjectProperty ;
+    rdfs:label "Absolute path URI" ;
+    rdfs:domain http:Request ;
+    rdfs:comment "Absolute path of the request" ;
+    rdfs:seeAlso http:absoluteURI ;
+    rdfs:isDefinedBy <#> .
+
+<#requestUri> a owl:ObjectProperty ;
+    rdfs:label "Request URI" ;
+    rdfs:domain http:Request ;
+    rdfs:comment "Absolute path of the request" ;
+    rdfs:seeAlso http:requestURI ;
     rdfs:isDefinedBy <#> .

@@ -16,6 +16,7 @@
  */
 package org.graphity.core;
 
+import com.hp.hpl.jena.rdf.model.Property;
 import org.graphity.core.provider.ResultSetWriter;
 import org.graphity.core.provider.DataManagerProvider;
 import org.graphity.core.provider.ModelProvider;
@@ -33,6 +34,7 @@ import org.apache.jena.riot.RDFParserRegistry;
 import org.graphity.core.model.impl.GraphStoreProxyBase;
 import org.graphity.core.model.impl.QueriedResourceBase;
 import org.graphity.core.model.impl.SPARQLEndpointProxyBase;
+import org.graphity.core.provider.GraphStoreProvider;
 import org.graphity.core.provider.MediaTypesProvider;
 import org.graphity.core.riot.RDFLanguages;
 import org.graphity.core.riot.lang.RDFPostReaderAdapter;
@@ -86,6 +88,7 @@ public class ApplicationBase extends javax.ws.rs.core.Application
         singletons.add(new SPARQLEndpointOriginProvider());
         singletons.add(new GraphStoreOriginProvider());
         singletons.add(new SPARQLEndpointProvider());
+        //singletons.add(new GraphStoreProvider());
         singletons.add(new MediaTypesProvider());
     }
     
@@ -123,6 +126,17 @@ public class ApplicationBase extends javax.ws.rs.core.Application
     public ServletConfig getServletConfig()
     {
 	return servletConfig;
+    }
+
+    public boolean getPreemptiveAuth(ServletConfig servletConfig, Property property)
+    {
+	if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
+	if (property == null) throw new IllegalArgumentException("Property cannot be null");
+
+        boolean preemptiveAuth = false;
+        if (servletConfig.getInitParameter(property.getURI()) != null)
+            preemptiveAuth = Boolean.parseBoolean(servletConfig.getInitParameter(property.getURI()).toString());
+        return preemptiveAuth;
     }
 
 }
