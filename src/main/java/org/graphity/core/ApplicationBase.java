@@ -31,10 +31,10 @@ import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
 import org.apache.jena.riot.IO_Jena;
 import org.apache.jena.riot.RDFParserRegistry;
+import org.graphity.core.mapper.NotFoundExceptionMapper;
 import org.graphity.core.model.impl.GraphStoreProxyBase;
 import org.graphity.core.model.impl.QueriedResourceBase;
 import org.graphity.core.model.impl.SPARQLEndpointProxyBase;
-import org.graphity.core.provider.GraphStoreProvider;
 import org.graphity.core.provider.MediaTypesProvider;
 import org.graphity.core.riot.RDFLanguages;
 import org.graphity.core.riot.lang.RDFPostReaderAdapter;
@@ -90,6 +90,7 @@ public class ApplicationBase extends javax.ws.rs.core.Application
         singletons.add(new SPARQLEndpointProvider());
         //singletons.add(new GraphStoreProvider());
         singletons.add(new MediaTypesProvider());
+        singletons.add(new NotFoundExceptionMapper());
     }
     
     /**

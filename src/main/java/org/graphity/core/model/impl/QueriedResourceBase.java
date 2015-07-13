@@ -28,6 +28,7 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.graphity.core.MediaTypes;
+import org.graphity.core.exception.NotFoundException;
 import org.graphity.core.model.QueriedResource;
 import org.graphity.core.model.SPARQLEndpoint;
 import org.slf4j.Logger;
@@ -79,7 +80,15 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     @Override
     public Model describe()
     {
-	return getSPARQLEndpoint().loadModel(getQuery());
+	Model model = getSPARQLEndpoint().loadModel(getQuery());
+        
+	if (model.isEmpty())
+	{
+	    if (log.isDebugEnabled()) log.debug("Query result Model is empty; returning 404 Not Found");
+	    throw new NotFoundException("Query result Model is empty; returning 404 Not Found");
+	}
+
+        return model;
     }
     
     /**
@@ -92,12 +101,6 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     public Response get()
     {
 	Model description = describe();
-
-	if (description.isEmpty())
-	{
-	    if (log.isDebugEnabled()) log.debug("DESCRIBE Model is empty; returning 404 Not Found");
-	    throw new WebApplicationException(Response.Status.NOT_FOUND);
-	}
 	if (log.isDebugEnabled()) log.debug("Returning @GET Response with {} statements in Model", description.size());
 	return getResponse(description);
     }
