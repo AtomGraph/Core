@@ -35,6 +35,7 @@ import org.graphity.core.mapper.NotFoundExceptionMapper;
 import org.graphity.core.model.impl.GraphStoreProxyBase;
 import org.graphity.core.model.impl.QueriedResourceBase;
 import org.graphity.core.model.impl.SPARQLEndpointProxyBase;
+import org.graphity.core.provider.DatasetProvider;
 import org.graphity.core.provider.MediaTypesProvider;
 import org.graphity.core.riot.RDFLanguages;
 import org.graphity.core.riot.lang.RDFPostReaderAdapter;
@@ -81,7 +82,8 @@ public class ApplicationBase extends javax.ws.rs.core.Application
 	classes.add(GraphStoreProxyBase.class); // handles /service requests
 
 	singletons.add(new ModelProvider());
-	singletons.add(new ResultSetWriter());
+	singletons.add(new DatasetProvider());
+        singletons.add(new ResultSetWriter());
 	singletons.add(new QueryParamProvider());
 	singletons.add(new UpdateRequestReader());
         singletons.add(new DataManagerProvider());

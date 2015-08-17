@@ -114,7 +114,7 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     @Override
     public Response post(Model model)
     {
-	if (log.isWarnEnabled()) log.warn("POST request with RDF payload: {}. Graphity Core is read-only!  Only GET is supported");
+	if (log.isWarnEnabled()) log.warn("POST request with RDF payload: {}. Graphity Core is read-only!  Only GET is supported", model);
 	throw new WebApplicationException(405);
     }
 
@@ -127,7 +127,7 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     @Override
     public Response put(Model model)
     {
-	if (log.isWarnEnabled()) log.warn("PUT request with RDF payload: {}. Graphity Core is read-only!  Only GET is supported");
+	if (log.isWarnEnabled()) log.warn("PUT request with RDF payload: {}. Graphity Core is read-only! Only GET is supported", model);
 	throw new WebApplicationException(405);
     }
 

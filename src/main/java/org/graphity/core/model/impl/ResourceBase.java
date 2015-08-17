@@ -76,6 +76,7 @@ public abstract class ResourceBase implements Resource
         this.servletConfig = servletConfig;
         this.mediaTypes = mediaTypes;
         this.response = org.graphity.core.model.impl.Response.fromRequest(request);
+        if (log.isDebugEnabled()) log.debug("Request URI: {}", uriInfo.getRequestUri());        
     }
 
     /**
