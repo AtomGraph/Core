@@ -59,15 +59,28 @@ public class DatasetGraphAccessorHTTP implements DatasetGraphAccessor
     private HttpAuthenticator authenticator;
 
     /** Format used to send a graph to the server */ 
-    private static RDFFormat sendLang = RDFFormat.NTRIPLES_UTF8; //RDFFormat.RDFXML_PLAIN ;
+    private final RDFFormat format; //RDFFormat.RDFXML_PLAIN ;
 
     /** 
      * Create a DatasetUpdater for the remote URL 
      * @param remote Remote URL
+     * @param format RDF serialization format
      */
-    public DatasetGraphAccessorHTTP(String remote)
+    public DatasetGraphAccessorHTTP(String remote, RDFFormat format)
     {
         this.remote = remote ;
+        this.format = format;
+    }
+
+    public DatasetGraphAccessorHTTP(String remote)
+    {
+        this(remote, RDFFormat.NTRIPLES_UTF8);
+    }
+    
+    public DatasetGraphAccessorHTTP(String remote, RDFFormat format, HttpAuthenticator authenticator)
+    {
+        this(remote, format);
+        this.authenticator = authenticator;        
     }
     
     /** 
@@ -76,27 +89,13 @@ public class DatasetGraphAccessorHTTP implements DatasetGraphAccessor
      * @param authenticator HTTP Authenticator
      */
     public DatasetGraphAccessorHTTP(String remote, HttpAuthenticator authenticator) {
-        this(remote);
-        this.setAuthenticator(authenticator);
+        this(remote, RDFFormat.NTRIPLES_UTF8, authenticator);
     }
-    
-    /**
-     * Sets authentication credentials for the remote URL
-     * @param username User name
-     * @param password Password
-     */
-    public void setAuthentication(String username, char[] password) {
-        this.setAuthenticator(new SimpleAuthenticator(username, password));
+
+    public DatasetGraphAccessorHTTP(String remote, String username, char[] password) {
+        this(remote, RDFFormat.NTRIPLES_UTF8, new SimpleAuthenticator(username, password));
     }
-    
-    /**
-     * Sets an authenticator to use for authentication to the remote URL
-     * @param authenticator Authenticator
-     */
-    public void setAuthenticator(HttpAuthenticator authenticator) {
-        this.authenticator = authenticator;
-    }
-    
+        
     @Override
     public Graph httpGet()                            { return doGet(targetDefault()) ; }
 
@@ -255,7 +254,7 @@ public class DatasetGraphAccessorHTTP implements DatasetGraphAccessor
     
     public Lang getSendLang()
     {
-        return sendLang.getLang();
+        return format.getLang();
     }
     
 }

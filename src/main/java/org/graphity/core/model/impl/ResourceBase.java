@@ -126,25 +126,7 @@ public abstract class ResourceBase implements Resource
     {
         return getResponse().getVariantListBuilder(getModelMediaTypes(), getLanguages(), getEncodings());
     }
-    
-    /**
-     * Produces a Variant builder from a list of media types.
-     * 
-     * @param mediaTypes
-     * @param languages
-     * @param encodings
-     * @return variant builder
-     */
-    /*
-    public Variant.VariantListBuilder getVariantListBuilder(MediaTypes mediaTypes, List<Locale> languages, List<String> encodings)
-    {        
-        return Variant.VariantListBuilder.newInstance().
-                mediaTypes(org.graphity.core.model.impl.Response.mediaTypeListToArray(mediaTypes)).
-                languages(org.graphity.core.model.impl.Response.localeListToArray(languages)).
-                encodings(org.graphity.core.model.impl.Response.stringListToArray(encodings));
-    }
-    */
-    
+        
     public MediaTypes getMediaTypes()
     {
         return mediaTypes;
