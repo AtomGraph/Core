@@ -54,7 +54,7 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     public boolean isRDFMediaType(MediaType mediaType)
     {
         MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
-        return RDFLanguages.contentTypeToLang(formatType.toString()) != null;        
+        return RDFLanguages.contentTypeToLang(formatType.toString()) != null;
     }
     
     // READER

@@ -16,13 +16,8 @@
  */
 package org.graphity.core;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import org.apache.jena.atlas.web.ContentType;
 import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.RDFLanguages;
 
 /**
  * Extends standard JAX-RS media type with RDF media types
