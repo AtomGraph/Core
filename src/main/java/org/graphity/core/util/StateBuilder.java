@@ -66,6 +66,17 @@ public class StateBuilder
         
         return this;
     }
+
+    public StateBuilder replaceProperty(Property property, RDFNode value)
+    {
+        if (property == null) throw new IllegalArgumentException("Property cannot be null");        
+        if (value == null) throw new IllegalArgumentException("Object cannot be null");        
+
+        getResource().removeAll(property).addProperty(property, value);
+        getUriBuilder().replaceQueryParam(property.getLocalName(), value);
+        
+        return this;
+    }
     
     public StateBuilder literal(Property property, Object value)
     {
@@ -74,6 +85,17 @@ public class StateBuilder
 
         getResource().addLiteral(property, value);
         getUriBuilder().queryParam(property.getLocalName(), value);
+        
+        return this;
+    }
+
+    public StateBuilder replaceLiteral(Property property, RDFNode value)
+    {
+        if (property == null) throw new IllegalArgumentException("Property cannot be null");        
+        if (value == null) throw new IllegalArgumentException("Object cannot be null");        
+
+        getResource().removeAll(property).addLiteral(property, value);
+        getUriBuilder().replaceQueryParam(property.getLocalName(), value);
         
         return this;
     }
