@@ -16,28 +16,16 @@
 
 package org.graphity.core.exception;
 
-import javax.ws.rs.core.Response;
-
 /**
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class NotFoundException extends javax.ws.rs.WebApplicationException
+public class NotFoundException extends RuntimeException
 {
-
-    public NotFoundException(String msg)
-    {
-        this(msg, Response.Status.NOT_FOUND.getStatusCode());
-    }
     
-    public NotFoundException(String msg, int status)
+    public NotFoundException(String message)
     {
-        this(Response.status(status).entity(msg).build());
-    }
-    
-    public NotFoundException(Response response)
-    {
-        super(response);
+        super(message);
     }
     
 }
