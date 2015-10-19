@@ -52,10 +52,10 @@ import org.slf4j.LoggerFactory;
  * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/Application.html">JAX-RS Application</a>
  * @see <a href="http://docs.oracle.com/cd/E24329_01/web.1211/e24983/configure.htm#CACEAEGG">Packaging the RESTful Web Service Application Using web.xml With Application Subclass</a>
  */
-public class ApplicationBase extends javax.ws.rs.core.Application
+public class Application extends javax.ws.rs.core.Application
 {
 
-    private static final Logger log = LoggerFactory.getLogger(ApplicationBase.class);
+    private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     private final Set<Class<?>> classes = new HashSet<>();
     private final Set<Object> singletons = new HashSet<>();
@@ -67,7 +67,7 @@ public class ApplicationBase extends javax.ws.rs.core.Application
      * 
      * @param servletConfig filter config
      */
-    public ApplicationBase(@Context ServletConfig servletConfig)
+    public Application(@Context ServletConfig servletConfig)
     {
         if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
         this.servletConfig = servletConfig;

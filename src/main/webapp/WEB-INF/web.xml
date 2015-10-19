@@ -11,7 +11,7 @@
         <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
         <init-param>
             <param-name>javax.ws.rs.Application</param-name>
-            <param-value>org.graphity.core.ApplicationBase</param-value>
+            <param-value>org.graphity.core.Application</param-value>
         </init-param>
         <init-param>
             <param-name>http://www.w3.org/ns/sparql-service-description#endpoint</param-name>
