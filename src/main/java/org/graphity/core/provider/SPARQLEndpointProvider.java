@@ -29,7 +29,7 @@ import org.graphity.core.MediaTypes;
 import org.graphity.core.model.SPARQLEndpoint;
 import org.graphity.core.model.SPARQLEndpointFactory;
 import org.graphity.core.model.SPARQLEndpointOrigin;
-import org.graphity.core.util.DataManager;
+import org.graphity.core.util.jena.DataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

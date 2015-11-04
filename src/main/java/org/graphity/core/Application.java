@@ -131,7 +131,7 @@ public class Application extends javax.ws.rs.core.Application
 	return servletConfig;
     }
 
-    public boolean getPreemptiveAuth(ServletConfig servletConfig, Property property)
+    public boolean getBooleanParam(ServletConfig servletConfig, Property property)
     {
 	if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
 	if (property == null) throw new IllegalArgumentException("Property cannot be null");

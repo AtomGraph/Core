@@ -18,7 +18,7 @@
 package org.graphity.core.model.impl;
 
 import org.graphity.core.model.GraphStoreOrigin;
-import org.graphity.core.util.DataManager;
+import org.graphity.core.util.jena.DataManager;
 
 /**
  * Base class of SPARQL Graph Store origins.

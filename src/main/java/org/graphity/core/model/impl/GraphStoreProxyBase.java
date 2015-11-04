@@ -26,7 +26,7 @@ import org.graphity.core.MediaTypes;
 import org.graphity.core.model.GraphStoreOrigin;
 import org.graphity.core.model.GraphStoreProxy;
 import org.graphity.core.model.Origin;
-import org.graphity.core.util.DataManager;
+import org.graphity.core.util.jena.DataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

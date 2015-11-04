@@ -14,10 +14,8 @@
  *  limitations under the License.
  *
  */
-package org.graphity.core.util;
+package org.graphity.core.util.jena;
 
-import org.graphity.core.util.jena.DatasetGraphAccessorHTTP;
-import org.graphity.core.util.jena.QueryEngineHTTP;
 import com.hp.hpl.jena.query.*;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Property;

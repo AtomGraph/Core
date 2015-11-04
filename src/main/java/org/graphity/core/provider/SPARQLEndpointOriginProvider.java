@@ -32,7 +32,7 @@ import javax.ws.rs.ext.Provider;
 import javax.ws.rs.ext.Providers;
 import org.graphity.core.model.SPARQLEndpointOrigin;
 import org.graphity.core.model.impl.SPARQLEndpointOriginBase;
-import org.graphity.core.util.DataManager;
+import org.graphity.core.util.jena.DataManager;
 import org.graphity.core.vocabulary.SD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

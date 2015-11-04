@@ -16,8 +16,8 @@
 
 package org.graphity.core.mapper;
 
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import org.graphity.core.exception.NotFoundException;
 
@@ -31,7 +31,7 @@ public class NotFoundExceptionMapper implements ExceptionMapper<NotFoundExceptio
     @Override
     public Response toResponse(NotFoundException e)
     {
-        throw new WebApplicationException(e, Response.Status.NOT_FOUND);
+        return Response.status(Status.NOT_FOUND).build();
     }
     
 }
