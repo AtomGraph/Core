@@ -28,7 +28,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
-import org.graphity.core.util.DataManager;
+import org.graphity.core.util.DataClient;
+import org.graphity.core.util.jena.DataManager;
 import org.graphity.core.vocabulary.G;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,7 +112,8 @@ public class DataManagerProvider extends PerRequestTypeInjectableProvider<Contex
 
     public DataManager getDataManager(LocationMapper mapper, com.hp.hpl.jena.sparql.util.Context context, boolean preemptiveAuth)
     {
-        return new DataManager(mapper, context, preemptiveAuth);
+        //return new DataManager(mapper, context, preemptiveAuth);
+        return new DataClient(mapper, context, preemptiveAuth);
     }
 
     @Override

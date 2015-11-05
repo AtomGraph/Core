@@ -25,13 +25,17 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.MultivaluedMap;
 import org.graphity.core.MediaType;
+import org.graphity.core.provider.DatasetProvider;
 import org.graphity.core.provider.ModelProvider;
 import org.graphity.core.provider.QueryWriter;
+import org.graphity.core.provider.ResultSetWriter;
+import org.graphity.core.provider.UpdateRequestReader;
 import org.graphity.core.util.jena.DataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,9 +54,14 @@ public class DataClient extends DataManager
     public DataClient(LocationMapper mapper, Context context, boolean preemptiveAuth)
     {
         super(mapper, context, preemptiveAuth);
-        
+
+        cc.getProperties().put(URLConnectionClientHandler.PROPERTY_HTTP_URL_CONNECTION_SET_METHOD_WORKAROUND, true);
         cc.getSingletons().add(new ModelProvider());
+        cc.getSingletons().add(new DatasetProvider());
+        cc.getSingletons().add(new ResultSetWriter());
         cc.getSingletons().add(new QueryWriter());
+        cc.getSingletons().add(new UpdateRequestReader());
+
         client = Client.create(cc);
     }
    
@@ -88,7 +97,7 @@ public class DataClient extends DataManager
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
 
 	return getEndpoint(endpointURI, query, params).
-            accept(MediaType.TEXT_TURTLE, MediaType.APPLICATION_RDF_XML).
+            accept(MediaType.TEXT_NTRIPLES_TYPE, MediaType.APPLICATION_RDF_XML_TYPE).
             type(MediaType.APPLICATION_SPARQL_QUERY_TYPE).
             post(ClientResponse.class, query).
             getEntity(Model.class);
