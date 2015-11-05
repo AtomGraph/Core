@@ -26,6 +26,13 @@ import com.hp.hpl.jena.update.UpdateExecutionFactory;
 import com.hp.hpl.jena.update.UpdateRequest;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.util.LocationMapper;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.config.ClientConfig;
+import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -36,6 +43,12 @@ import org.apache.jena.atlas.web.auth.HttpAuthenticator;
 import org.apache.jena.atlas.web.auth.PreemptiveBasicAuthenticator;
 import org.apache.jena.atlas.web.auth.SimpleAuthenticator;
 import org.apache.jena.web.DatasetAdapter;
+import org.graphity.core.MediaType;
+import org.graphity.core.provider.DatasetProvider;
+import org.graphity.core.provider.ModelProvider;
+import org.graphity.core.provider.QueryWriter;
+import org.graphity.core.provider.ResultSetWriter;
+import org.graphity.core.provider.UpdateRequestReader;
 import org.graphity.core.vocabulary.G;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +73,8 @@ public class DataManager extends FileManager
 
     private final Context context;
     private final boolean preemptiveAuth;
+    private final ClientConfig cc = new DefaultClientConfig();
+    private final Client client;
     
     /**
      * Creates data manager from file manager and SPARQL context.
@@ -74,8 +89,54 @@ public class DataManager extends FileManager
 	if (context == null) throw new IllegalArgumentException("Context cannot be null");
 	this.context = context;
         this.preemptiveAuth = preemptiveAuth;
+        
+        cc.getProperties().put(URLConnectionClientHandler.PROPERTY_HTTP_URL_CONNECTION_SET_METHOD_WORKAROUND, true);
+        cc.getSingletons().add(new ModelProvider());
+        cc.getSingletons().add(new DatasetProvider());
+        cc.getSingletons().add(new ResultSetWriter());
+        cc.getSingletons().add(new QueryWriter());
+        cc.getSingletons().add(new UpdateRequestReader());
+
+        client = Client.create(cc);
     }
 
+    public Client getClient()
+    {
+        return client;
+    }
+    
+    public WebResource getEndpoint(String endpointURI, Query query, MultivaluedMap<String, String> params)
+    {
+	if (endpointURI == null) throw new IllegalArgumentException("Endpoint URI must be not null");
+        if (query == null) throw new IllegalArgumentException("Query must be not null");
+	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, query);
+        
+        WebResource endpoint = getClient().resource(URI.create(endpointURI));
+        
+	if (params != null)
+	    for (Map.Entry<String, List<String>> entry : params.entrySet())
+		if (!entry.getKey().equals("query")) // query param is handled separately
+		    for (String value : entry.getValue())
+		    {
+			if (log.isTraceEnabled()) log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
+			endpoint.queryParam(entry.getKey(), value);
+		    }
+	
+	return endpoint;
+    }
+    
+    public Model loadModel(String endpointURI, Query query, MultivaluedMap<String, String> params)
+    {
+	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, query);
+	if (query == null) throw new IllegalArgumentException("Query must be not null");
+
+	return getEndpoint(endpointURI, query, params).
+            accept(MediaType.TEXT_NTRIPLES_TYPE, MediaType.APPLICATION_RDF_XML_TYPE).
+            type(MediaType.APPLICATION_SPARQL_QUERY_TYPE).
+            post(ClientResponse.class, query).
+            getEntity(Model.class);
+    }
+    
     public QueryEngineHTTP sparqlService(String endpointURI, Query query, MultivaluedMap<String, String> params)
     {
         return sparqlService(endpointURI, query, params, getHttpAuthenticator(getServiceContext(endpointURI)));
@@ -120,6 +181,7 @@ public class DataManager extends FileManager
      * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#describe">DESCRIBE</a>
      * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#construct">CONSTRUCT</a>
      */
+    /*
     public Model loadModel(String endpointURI, Query query, MultivaluedMap<String, String> params)
     {
 	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, query);
@@ -143,6 +205,7 @@ public class DataManager extends FileManager
 	    qex.close();
 	}
     }
+    */
     
     /**
      * Loads RDF model from a remote SPARQL endpoint using a query and optional request parameters.

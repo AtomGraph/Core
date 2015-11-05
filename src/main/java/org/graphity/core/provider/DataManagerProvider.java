@@ -25,10 +25,8 @@ import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
-import org.graphity.core.util.DataClient;
 import org.graphity.core.util.jena.DataManager;
 import org.graphity.core.vocabulary.G;
 import org.slf4j.Logger;
@@ -47,17 +45,11 @@ public class DataManagerProvider extends PerRequestTypeInjectableProvider<Contex
 
     private static final Logger log = LoggerFactory.getLogger(DataManagerProvider.class);
 
-    @Context UriInfo uriInfo;
     @Context ServletConfig servletConfig;
 
     public ServletConfig getServletConfig()
     {
 	return servletConfig;
-    }
-
-    public UriInfo getUriInfo()
-    {
-	return uriInfo;
     }
 
     public DataManagerProvider()
@@ -112,8 +104,7 @@ public class DataManagerProvider extends PerRequestTypeInjectableProvider<Contex
 
     public DataManager getDataManager(LocationMapper mapper, com.hp.hpl.jena.sparql.util.Context context, boolean preemptiveAuth)
     {
-        //return new DataManager(mapper, context, preemptiveAuth);
-        return new DataClient(mapper, context, preemptiveAuth);
+        return new DataManager(mapper, context, preemptiveAuth);
     }
 
     @Override
