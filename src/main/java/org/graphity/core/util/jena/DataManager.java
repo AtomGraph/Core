@@ -50,6 +50,7 @@ import org.apache.jena.atlas.web.auth.SimpleAuthenticator;
 import org.apache.jena.web.DatasetAdapter;
 import org.graphity.core.MediaType;
 import org.graphity.core.provider.DatasetProvider;
+import org.graphity.core.provider.MediaTypesProvider;
 import org.graphity.core.provider.ModelProvider;
 import org.graphity.core.provider.QueryWriter;
 import org.graphity.core.provider.ResultSetProvider;
@@ -167,8 +168,9 @@ public class DataManager extends FileManager
 	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, query);
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
 
+        List<javax.ws.rs.core.MediaType> mediaTypes = new MediaTypesProvider().getMediaTypes().getModelMediaTypes();        
 	return getEndpoint(endpointURI, query, params).
-            accept(MediaType.TEXT_NTRIPLES_TYPE, MediaType.APPLICATION_RDF_XML_TYPE).
+            accept(mediaTypes.toArray(new javax.ws.rs.core.MediaType[mediaTypes.size()])).
             type(MediaType.APPLICATION_SPARQL_QUERY_TYPE).
             post(ClientResponse.class, query).
             getEntity(Model.class);
@@ -273,8 +275,9 @@ public class DataManager extends FileManager
 	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, query);
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
 
+        List<javax.ws.rs.core.MediaType> mediaTypes = new MediaTypesProvider().getMediaTypes().getResultSetMediaTypes();
 	return getEndpoint(endpointURI, query, params).
-            accept(MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE, MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE).
+            accept(mediaTypes.toArray(new javax.ws.rs.core.MediaType[mediaTypes.size()])).
             type(MediaType.APPLICATION_SPARQL_QUERY_TYPE).
             post(ClientResponse.class, query).
             getEntity(ResultSetRewindable.class);
