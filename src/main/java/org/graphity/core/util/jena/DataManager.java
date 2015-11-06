@@ -36,6 +36,7 @@ import com.sun.jersey.api.client.filter.ClientFilter;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.HashMap;
@@ -134,22 +135,15 @@ public class DataManager extends FileManager
 	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, query);
       
         Client client = Client.create(getClientConfig());
-        ClientFilter authFilter = getClientAuthFilter(getServiceContext(endpointURI));
-        if (authFilter != null) client.addFilter(authFilter);
+        Context serviceContext = getServiceContext(endpointURI);
+        if (serviceContext != null)
+        {
+            ClientFilter authFilter = getClientAuthFilter(serviceContext);
+            if (authFilter != null) client.addFilter(authFilter);
+        }
         client.addFilter(new LoggingFilter(System.out)); // if (log.isTraceEnabled())        
         
-        WebResource endpoint = client.resource(URI.create(endpointURI));
-        
-	if (params != null)
-	    for (Map.Entry<String, List<String>> entry : params.entrySet())
-		if (!entry.getKey().equals("query")) // query param is handled separately
-		    for (String value : entry.getValue())
-		    {
-			if (log.isTraceEnabled()) log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
-			endpoint.queryParam(entry.getKey(), value);
-		    }
-	
-	return endpoint;
+        return client.resource(URI.create(endpointURI));
     }
     
     /**
@@ -168,11 +162,23 @@ public class DataManager extends FileManager
 	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, query);
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
 
+        MultivaluedMap formData = new MultivaluedMapImpl();
+        formData.add("query", query.toString());
+
+	if (params != null)
+	    for (Map.Entry<String, List<String>> entry : params.entrySet())
+		if (!entry.getKey().equals("query")) // query param is handled separately
+		    for (String value : entry.getValue())
+		    {
+			if (log.isTraceEnabled()) log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
+                        formData.add(entry.getKey(), value);
+		    }
+        
         List<javax.ws.rs.core.MediaType> mediaTypes = new MediaTypesProvider().getMediaTypes().getModelMediaTypes();        
 	return getEndpoint(endpointURI, query, params).
             accept(mediaTypes.toArray(new javax.ws.rs.core.MediaType[mediaTypes.size()])).
-            type(MediaType.APPLICATION_SPARQL_QUERY_TYPE).
-            post(ClientResponse.class, query).
+            type(MediaType.APPLICATION_FORM_URLENCODED_TYPE). //type(MediaType.APPLICATION_SPARQL_QUERY_TYPE).
+            post(ClientResponse.class, formData). // post(ClientResponse.class, query).
             getEntity(Model.class);
     }
     
@@ -275,11 +281,23 @@ public class DataManager extends FileManager
 	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, query);
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
 
+        MultivaluedMap formData = new MultivaluedMapImpl();
+        formData.add("query", query.toString());
+
+	if (params != null)
+	    for (Map.Entry<String, List<String>> entry : params.entrySet())
+		if (!entry.getKey().equals("query")) // query param is handled separately
+		    for (String value : entry.getValue())
+		    {
+			if (log.isTraceEnabled()) log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
+                        formData.add(entry.getKey(), value);
+		    }
+        
         List<javax.ws.rs.core.MediaType> mediaTypes = new MediaTypesProvider().getMediaTypes().getResultSetMediaTypes();
 	return getEndpoint(endpointURI, query, params).
             accept(mediaTypes.toArray(new javax.ws.rs.core.MediaType[mediaTypes.size()])).
-            type(MediaType.APPLICATION_SPARQL_QUERY_TYPE).
-            post(ClientResponse.class, query).
+            type(MediaType.APPLICATION_FORM_URLENCODED_TYPE). //type(MediaType.APPLICATION_SPARQL_QUERY_TYPE).
+            post(ClientResponse.class, formData). // post(ClientResponse.class, query).
             getEntity(ResultSetRewindable.class);
     }
     
@@ -378,10 +396,22 @@ public class DataManager extends FileManager
 	if (log.isDebugEnabled()) log.debug("Remote service {} Query execution: {} ", endpointURI, query);
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
 
+        MultivaluedMap formData = new MultivaluedMapImpl();
+        formData.add("query", query.toString());
+
+	if (params != null)
+	    for (Map.Entry<String, List<String>> entry : params.entrySet())
+		if (!entry.getKey().equals("query")) // query param is handled separately
+		    for (String value : entry.getValue())
+		    {
+			if (log.isTraceEnabled()) log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
+                        formData.add(entry.getKey(), value);
+		    }
+        
 	InputStream is = getEndpoint(endpointURI, query, params).
-            accept(MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE, MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE).
-            type(MediaType.APPLICATION_SPARQL_QUERY_TYPE).
-            post(ClientResponse.class, query).
+            accept(MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE).
+            type(MediaType.APPLICATION_FORM_URLENCODED_TYPE). //type(MediaType.APPLICATION_SPARQL_QUERY_TYPE).
+            post(ClientResponse.class, formData). // post(ClientResponse.class, query).
             getEntity(InputStream.class);
         
         return XMLInput.booleanFromXML(is);
