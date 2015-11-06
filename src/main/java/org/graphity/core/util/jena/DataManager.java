@@ -21,6 +21,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.sparql.engine.http.Service;
+import com.hp.hpl.jena.sparql.resultset.XMLInput;
 import com.hp.hpl.jena.sparql.util.Context;
 import com.hp.hpl.jena.update.UpdateExecutionFactory;
 import com.hp.hpl.jena.update.UpdateRequest;
@@ -31,7 +32,11 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.api.client.filter.ClientFilter;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
+import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -47,7 +52,7 @@ import org.graphity.core.MediaType;
 import org.graphity.core.provider.DatasetProvider;
 import org.graphity.core.provider.ModelProvider;
 import org.graphity.core.provider.QueryWriter;
-import org.graphity.core.provider.ResultSetWriter;
+import org.graphity.core.provider.ResultSetProvider;
 import org.graphity.core.provider.UpdateRequestReader;
 import org.graphity.core.vocabulary.G;
 import org.slf4j.Logger;
@@ -73,8 +78,8 @@ public class DataManager extends FileManager
 
     private final Context context;
     private final boolean preemptiveAuth;
-    private final ClientConfig cc = new DefaultClientConfig();
-    private final Client client;
+    private final ClientConfig clientConfig = new DefaultClientConfig();
+    //private final Client client;
     
     /**
      * Creates data manager from file manager and SPARQL context.
@@ -90,19 +95,35 @@ public class DataManager extends FileManager
 	this.context = context;
         this.preemptiveAuth = preemptiveAuth;
         
-        cc.getProperties().put(URLConnectionClientHandler.PROPERTY_HTTP_URL_CONNECTION_SET_METHOD_WORKAROUND, true);
-        cc.getSingletons().add(new ModelProvider());
-        cc.getSingletons().add(new DatasetProvider());
-        cc.getSingletons().add(new ResultSetWriter());
-        cc.getSingletons().add(new QueryWriter());
-        cc.getSingletons().add(new UpdateRequestReader());
-
-        client = Client.create(cc);
+        clientConfig.getProperties().put(URLConnectionClientHandler.PROPERTY_HTTP_URL_CONNECTION_SET_METHOD_WORKAROUND, true);
+        clientConfig.getSingletons().add(new ModelProvider());
+        clientConfig.getSingletons().add(new DatasetProvider());
+        clientConfig.getSingletons().add(new ResultSetProvider());
+        clientConfig.getSingletons().add(new QueryWriter());
+        clientConfig.getSingletons().add(new UpdateRequestReader());
+    }
+    
+    public ClientConfig getClientConfig()
+    {
+        return clientConfig;
     }
 
-    public Client getClient()
+    public ClientFilter getClientAuthFilter(Context serviceContext)
     {
-        return client;
+        if (serviceContext == null) throw new IllegalArgumentException("Context cannot be null");
+
+        String usr = serviceContext.getAsString(Service.queryAuthUser);
+        String pwd = serviceContext.getAsString(Service.queryAuthPwd);
+
+        if (usr != null || pwd != null)
+        {
+            usr = usr==null?"":usr;
+            pwd = pwd==null?"":pwd;
+
+            return new HTTPBasicAuthFilter(usr, pwd);
+        }
+
+        return null;
     }
     
     public WebResource getEndpoint(String endpointURI, Query query, MultivaluedMap<String, String> params)
@@ -110,8 +131,13 @@ public class DataManager extends FileManager
 	if (endpointURI == null) throw new IllegalArgumentException("Endpoint URI must be not null");
         if (query == null) throw new IllegalArgumentException("Query must be not null");
 	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, query);
+      
+        Client client = Client.create(getClientConfig());
+        ClientFilter authFilter = getClientAuthFilter(getServiceContext(endpointURI));
+        if (authFilter != null) client.addFilter(authFilter);
+        client.addFilter(new LoggingFilter(System.out)); // if (log.isTraceEnabled())        
         
-        WebResource endpoint = getClient().resource(URI.create(endpointURI));
+        WebResource endpoint = client.resource(URI.create(endpointURI));
         
 	if (params != null)
 	    for (Map.Entry<String, List<String>> entry : params.entrySet())
@@ -125,51 +151,6 @@ public class DataManager extends FileManager
 	return endpoint;
     }
     
-    public Model loadModel(String endpointURI, Query query, MultivaluedMap<String, String> params)
-    {
-	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, query);
-	if (query == null) throw new IllegalArgumentException("Query must be not null");
-
-	return getEndpoint(endpointURI, query, params).
-            accept(MediaType.TEXT_NTRIPLES_TYPE, MediaType.APPLICATION_RDF_XML_TYPE).
-            type(MediaType.APPLICATION_SPARQL_QUERY_TYPE).
-            post(ClientResponse.class, query).
-            getEntity(Model.class);
-    }
-    
-    public QueryEngineHTTP sparqlService(String endpointURI, Query query, MultivaluedMap<String, String> params)
-    {
-        return sparqlService(endpointURI, query, params, getHttpAuthenticator(getServiceContext(endpointURI)));
-    }
-
-    /**
-     * Creates remote SPARQL execution based on a query and optional request parameters
-     * 
-     * @param endpointURI remote endpoint URI
-     * @param query query object
-     * @param params name/value pairs of request parameters or null, if none
-     * @param httpAuthenticator HTTP authenticator
-     * @return query execution
-     */
-    public QueryEngineHTTP sparqlService(String endpointURI, Query query, MultivaluedMap<String, String> params, HttpAuthenticator httpAuthenticator)
-    {
-	if (endpointURI == null) throw new IllegalArgumentException("Endpoint URI must be not null");
-        if (query == null) throw new IllegalArgumentException("Query must be not null");
-	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, query);
-
-	QueryEngineHTTP request = new QueryEngineHTTP(endpointURI, query, httpAuthenticator);
-	if (params != null)
-	    for (Entry<String, List<String>> entry : params.entrySet())
-		if (!entry.getKey().equals("query")) // query param is handled separately
-		    for (String value : entry.getValue())
-		    {
-			if (log.isTraceEnabled()) log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
-			request.addParam(entry.getKey(), value);
-		    }
-	
-	return request;
-    }
-    
     /**
      * Loads RDF model from a remote SPARQL endpoint using a query and optional request parameters.
      * Only <code>DESCRIBE</code> and <code>CONSTRUCT</code> queries can be used with this method.
@@ -181,31 +162,17 @@ public class DataManager extends FileManager
      * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#describe">DESCRIBE</a>
      * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#construct">CONSTRUCT</a>
      */
-    /*
     public Model loadModel(String endpointURI, Query query, MultivaluedMap<String, String> params)
     {
 	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, query);
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
 
-	QueryExecution qex = sparqlService(endpointURI, query, params);
-	try
-	{
-	    if (query.isConstructType()) return qex.execConstruct();
-	    if (query.isDescribeType()) return qex.execDescribe();
-
-	    throw new QueryExecException("Query to load Model must be CONSTRUCT or DESCRIBE");
-	}
-	catch (QueryExecException ex)
-	{
-	    if (log.isDebugEnabled()) log.debug("Remote query execution exception: {}", ex);
-	    throw ex;
-	}
-	finally
-	{
-	    qex.close();
-	}
+	return getEndpoint(endpointURI, query, params).
+            accept(MediaType.TEXT_NTRIPLES_TYPE, MediaType.APPLICATION_RDF_XML_TYPE).
+            type(MediaType.APPLICATION_SPARQL_QUERY_TYPE).
+            post(ClientResponse.class, query).
+            getEntity(Model.class);
     }
-    */
     
     /**
      * Loads RDF model from a remote SPARQL endpoint using a query and optional request parameters.
@@ -303,25 +270,14 @@ public class DataManager extends FileManager
      */
     public ResultSetRewindable loadResultSet(String endpointURI, Query query, MultivaluedMap<String, String> params)
     {
-	if (log.isDebugEnabled()) log.debug("Remote service {} Query execution: {} ", endpointURI, query);
+	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, query);
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
 
-	QueryExecution qex = sparqlService(endpointURI, query, params);
-	try
-	{
-	    if (query.isSelectType()) return ResultSetFactory.copyResults(qex.execSelect());
-	    
-	    throw new QueryExecException("Query to load ResultSet must be SELECT");
-	}
-	catch (QueryExecException ex)
-	{
-	    if (log.isDebugEnabled()) log.debug("Remote query execution exception: {}", ex);
-	    throw ex;
-	}
-	finally
-	{
-	    qex.close();
-	}
+	return getEndpoint(endpointURI, query, params).
+            accept(MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE, MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE).
+            type(MediaType.APPLICATION_SPARQL_QUERY_TYPE).
+            post(ClientResponse.class, query).
+            getEntity(ResultSetRewindable.class);
     }
     
     /**
@@ -352,7 +308,7 @@ public class DataManager extends FileManager
     {
 	if (log.isDebugEnabled()) log.debug("Local Model Query: {}", query);
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
-	
+
 	QueryExecution qex = QueryExecutionFactory.create(query, model);
 	try
 	{
@@ -419,22 +375,13 @@ public class DataManager extends FileManager
 	if (log.isDebugEnabled()) log.debug("Remote service {} Query execution: {} ", endpointURI, query);
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
 
-	QueryExecution qex = sparqlService(endpointURI, query, params);
-	try
-	{
-	    if (query.isAskType()) return qex.execAsk();
-	    
-	    throw new QueryExecException("Query to load ResultSet must be ASK");
-	}
-	catch (QueryExecException ex)
-	{
-	    if (log.isDebugEnabled()) log.debug("Remote query execution exception: {}", ex);
-	    throw ex;
-	}
-	finally
-	{
-	    qex.close();
-	}
+	InputStream is = getEndpoint(endpointURI, query, params).
+            accept(MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE, MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE).
+            type(MediaType.APPLICATION_SPARQL_QUERY_TYPE).
+            post(ClientResponse.class, query).
+            getEntity(InputStream.class);
+        
+        return XMLInput.booleanFromXML(is);
     }
 
     /**

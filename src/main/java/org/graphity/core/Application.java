@@ -17,7 +17,7 @@
 package org.graphity.core;
 
 import com.hp.hpl.jena.rdf.model.Property;
-import org.graphity.core.provider.ResultSetWriter;
+import org.graphity.core.provider.ResultSetProvider;
 import org.graphity.core.provider.DataManagerProvider;
 import org.graphity.core.provider.ModelProvider;
 import org.graphity.core.provider.QueryParamProvider;
@@ -83,7 +83,7 @@ public class Application extends javax.ws.rs.core.Application
 
 	singletons.add(new ModelProvider());
 	singletons.add(new DatasetProvider());
-        singletons.add(new ResultSetWriter());
+        singletons.add(new ResultSetProvider());
 	singletons.add(new QueryParamProvider());
 	singletons.add(new UpdateRequestReader());
         singletons.add(new DataManagerProvider());

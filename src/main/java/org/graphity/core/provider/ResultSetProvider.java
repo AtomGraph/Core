@@ -17,15 +17,20 @@
 package org.graphity.core.provider;
 
 import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.query.ResultSetFormatter;
+import com.hp.hpl.jena.query.ResultSetRewindable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
@@ -41,10 +46,25 @@ import org.slf4j.LoggerFactory;
  * @see <a href="http://jsr311.java.net/nonav/javadoc/javax/ws/rs/ext/MessageBodyWriter.html">JAX-RS MessageBodyWriter</a>
  */
 @Provider
+@Consumes({org.graphity.core.MediaType.APPLICATION_SPARQL_RESULTS_XML})
 @Produces({org.graphity.core.MediaType.APPLICATION_SPARQL_RESULTS_XML, org.graphity.core.MediaType.APPLICATION_SPARQL_RESULTS_JSON})
-public class ResultSetWriter implements MessageBodyWriter<ResultSet>
+public class ResultSetProvider implements MessageBodyReader<ResultSetRewindable>, MessageBodyWriter<ResultSet>
 {
-    private static final Logger log = LoggerFactory.getLogger(ResultSetWriter.class);
+    private static final Logger log = LoggerFactory.getLogger(ResultSetProvider.class);
+    
+    @Override
+    public boolean isReadable(Class<?> type, Type type1, Annotation[] antns, javax.ws.rs.core.MediaType mt)
+    {
+        return type == ResultSetRewindable.class;
+    }
+
+    @Override
+    public ResultSetRewindable readFrom(Class<ResultSetRewindable> type, Type type1, Annotation[] antns, javax.ws.rs.core.MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream in) throws IOException, WebApplicationException
+    {
+        if (log.isTraceEnabled()) log.trace("Reading ResultSet with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
+        // result set needs to be rewindable because results might be processed multiple times, e.g. to calculate hash and write response
+        return ResultSetFactory.makeRewindable(ResultSetFactory.fromXML(in));
+    }
     
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
