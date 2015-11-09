@@ -102,7 +102,7 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
     public void update(UpdateRequest updateRequest)
     {
 	if (log.isDebugEnabled()) log.debug("Executing update on SPARQL endpoint: {} using UpdateRequest: {}", getOrigin().getURI(), updateRequest);
-	getDataManager().executeUpdateRequest(getOrigin().getURI(), updateRequest);
+	getDataManager().executeUpdateRequest(getOrigin().getURI(), updateRequest, null);
     }
 
     public DataManager getDataManager()

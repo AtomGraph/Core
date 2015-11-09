@@ -45,5 +45,11 @@ public class OriginBase implements Origin
     {
         return uri;
     }
+
+    @Override
+    public String toString()
+    {
+        return uri;
+    }
     
 }

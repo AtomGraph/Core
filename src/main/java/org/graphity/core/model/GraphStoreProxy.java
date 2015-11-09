@@ -17,12 +17,14 @@
 
 package org.graphity.core.model;
 
+import com.hp.hpl.jena.query.DatasetAccessor;
+
 /**
  * A class representing a Graph Store proxy.
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public interface GraphStoreProxy extends Proxy
+public interface GraphStoreProxy extends Proxy, DatasetAccessor
 {
     
 }

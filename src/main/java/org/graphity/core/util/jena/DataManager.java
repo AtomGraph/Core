@@ -23,7 +23,6 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.sparql.engine.http.Service;
 import com.hp.hpl.jena.sparql.resultset.XMLInput;
 import com.hp.hpl.jena.sparql.util.Context;
-import com.hp.hpl.jena.update.UpdateExecutionFactory;
 import com.hp.hpl.jena.update.UpdateRequest;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.util.LocationMapper;
@@ -45,10 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.ws.rs.core.MultivaluedMap;
-import org.apache.jena.atlas.web.auth.HttpAuthenticator;
-import org.apache.jena.atlas.web.auth.PreemptiveBasicAuthenticator;
-import org.apache.jena.atlas.web.auth.SimpleAuthenticator;
-import org.apache.jena.web.DatasetAdapter;
+import javax.ws.rs.core.Response.Status.Family;
 import org.graphity.core.MediaType;
 import org.graphity.core.provider.DatasetProvider;
 import org.graphity.core.provider.MediaTypesProvider;
@@ -56,7 +52,6 @@ import org.graphity.core.provider.ModelProvider;
 import org.graphity.core.provider.QueryWriter;
 import org.graphity.core.provider.ResultSetProvider;
 import org.graphity.core.provider.UpdateRequestReader;
-import org.graphity.core.vocabulary.G;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,8 +76,9 @@ public class DataManager extends FileManager
     private final Context context;
     private final boolean preemptiveAuth;
     private final ClientConfig clientConfig = new DefaultClientConfig();
-    //private final Client client;
-    
+    private final javax.ws.rs.core.MediaType[] modelMediaTypes;
+    private final javax.ws.rs.core.MediaType[] resultSetMediaTypes;
+            
     /**
      * Creates data manager from file manager and SPARQL context.
      * 
@@ -96,13 +92,17 @@ public class DataManager extends FileManager
 	if (context == null) throw new IllegalArgumentException("Context cannot be null");
 	this.context = context;
         this.preemptiveAuth = preemptiveAuth;
+        List<javax.ws.rs.core.MediaType> modelMediaTypeList = new MediaTypesProvider().getMediaTypes().getModelMediaTypes();
+        modelMediaTypes = modelMediaTypeList.toArray(new javax.ws.rs.core.MediaType[modelMediaTypeList.size()]);
+        List<javax.ws.rs.core.MediaType> resultMediaTypeList = new MediaTypesProvider().getMediaTypes().getResultSetMediaTypes();
+        resultSetMediaTypes = resultMediaTypeList.toArray(new javax.ws.rs.core.MediaType[resultMediaTypeList.size()]);
         
         clientConfig.getProperties().put(URLConnectionClientHandler.PROPERTY_HTTP_URL_CONNECTION_SET_METHOD_WORKAROUND, true);
         clientConfig.getSingletons().add(new ModelProvider());
         clientConfig.getSingletons().add(new DatasetProvider());
         clientConfig.getSingletons().add(new ResultSetProvider());
         clientConfig.getSingletons().add(new QueryWriter());
-        clientConfig.getSingletons().add(new UpdateRequestReader());
+        clientConfig.getSingletons().add(new UpdateRequestReader()); // TO-DO: UpdateRequestProvider
     }
     
     public ClientConfig getClientConfig()
@@ -110,6 +110,16 @@ public class DataManager extends FileManager
         return clientConfig;
     }
 
+    public javax.ws.rs.core.MediaType[] getModelMediaTypes()
+    {
+        return modelMediaTypes;
+    }
+
+    public javax.ws.rs.core.MediaType[] getResultSetMediaTypes()
+    {
+        return resultSetMediaTypes;
+    }
+    
     public ClientFilter getClientAuthFilter(Context serviceContext)
     {
         if (serviceContext == null) throw new IllegalArgumentException("Context cannot be null");
@@ -128,11 +138,9 @@ public class DataManager extends FileManager
         return null;
     }
     
-    public WebResource getEndpoint(String endpointURI, Query query, MultivaluedMap<String, String> params)
+    public WebResource getEndpoint(String endpointURI, MultivaluedMap<String, String> params)
     {
 	if (endpointURI == null) throw new IllegalArgumentException("Endpoint URI must be not null");
-        if (query == null) throw new IllegalArgumentException("Query must be not null");
-	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, query);
       
         Client client = Client.create(getClientConfig());
         Context serviceContext = getServiceContext(endpointURI);
@@ -141,7 +149,7 @@ public class DataManager extends FileManager
             ClientFilter authFilter = getClientAuthFilter(serviceContext);
             if (authFilter != null) client.addFilter(authFilter);
         }
-        client.addFilter(new LoggingFilter(System.out)); // if (log.isTraceEnabled())        
+        if (log.isDebugEnabled()) client.addFilter(new LoggingFilter(System.out));
         
         return client.resource(URI.create(endpointURI));
     }
@@ -174,9 +182,8 @@ public class DataManager extends FileManager
                         formData.add(entry.getKey(), value);
 		    }
         
-        List<javax.ws.rs.core.MediaType> mediaTypes = new MediaTypesProvider().getMediaTypes().getModelMediaTypes();        
-	return getEndpoint(endpointURI, query, params).
-            accept(mediaTypes.toArray(new javax.ws.rs.core.MediaType[mediaTypes.size()])).
+	return getEndpoint(endpointURI, params).
+            accept(getModelMediaTypes()).
             type(MediaType.APPLICATION_FORM_URLENCODED_TYPE). //type(MediaType.APPLICATION_SPARQL_QUERY_TYPE).
             post(ClientResponse.class, formData). // post(ClientResponse.class, query).
             getEntity(Model.class);
@@ -293,9 +300,8 @@ public class DataManager extends FileManager
                         formData.add(entry.getKey(), value);
 		    }
         
-        List<javax.ws.rs.core.MediaType> mediaTypes = new MediaTypesProvider().getMediaTypes().getResultSetMediaTypes();
-	return getEndpoint(endpointURI, query, params).
-            accept(mediaTypes.toArray(new javax.ws.rs.core.MediaType[mediaTypes.size()])).
+	return getEndpoint(endpointURI, params).
+            accept(getResultSetMediaTypes()).
             type(MediaType.APPLICATION_FORM_URLENCODED_TYPE). //type(MediaType.APPLICATION_SPARQL_QUERY_TYPE).
             post(ClientResponse.class, formData). // post(ClientResponse.class, query).
             getEntity(ResultSetRewindable.class);
@@ -408,8 +414,8 @@ public class DataManager extends FileManager
                         formData.add(entry.getKey(), value);
 		    }
         
-	InputStream is = getEndpoint(endpointURI, query, params).
-            accept(MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE).
+	InputStream is = getEndpoint(endpointURI, params).
+            accept(MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE). // needs to be XML since we're reading with XMLInput
             type(MediaType.APPLICATION_FORM_URLENCODED_TYPE). //type(MediaType.APPLICATION_SPARQL_QUERY_TYPE).
             post(ClientResponse.class, formData). // post(ClientResponse.class, query).
             getEntity(InputStream.class);
@@ -502,10 +508,29 @@ public class DataManager extends FileManager
      * 
      * @param endpointURI remote endpoint URI
      * @param updateRequest update request
+     * @param params name/value pairs of request parameters or null, if none
+     * @return client response
      */
-    public void executeUpdateRequest(String endpointURI, UpdateRequest updateRequest)
+    public ClientResponse executeUpdateRequest(String endpointURI, UpdateRequest updateRequest, MultivaluedMap<String, String> params)
     {
-        UpdateExecutionFactory.createRemote(updateRequest, endpointURI, getHttpAuthenticator(getServiceContext(endpointURI))).execute();
+	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, updateRequest);
+	if (updateRequest == null) throw new IllegalArgumentException("UpdateRequest must be not null");
+
+        MultivaluedMap formData = new MultivaluedMapImpl();
+        formData.add("update", updateRequest.toString());
+
+	if (params != null)
+	    for (Map.Entry<String, List<String>> entry : params.entrySet())
+		if (!entry.getKey().equals("update")) // update param is handled separately
+		    for (String value : entry.getValue())
+		    {
+			if (log.isTraceEnabled()) log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
+                        formData.add(entry.getKey(), value);
+		    }
+        
+	return getEndpoint(endpointURI, params).
+            type(MediaType.APPLICATION_FORM_URLENCODED_TYPE). //type(MediaType.APPLICATION_SPARQL_QUERY_TYPE).
+            post(ClientResponse.class, formData); // post(ClientResponse.class, query).
     }
     
     /**
@@ -518,7 +543,11 @@ public class DataManager extends FileManager
     public boolean containsModel(String graphStoreURI, String graphURI)
     {
 	if (log.isDebugEnabled()) log.debug("Checking if Graph Store {} contains GRAPH with URI {}", graphStoreURI, graphURI);
-        return getDatasetAccessor(graphStoreURI).containsModel(graphURI);
+	return getEndpoint(graphStoreURI, null).
+            queryParam("graph", graphURI).
+            method("HEAD", ClientResponse.class).
+                getStatusInfo().
+                getFamily().equals(Family.SUCCESSFUL);
     }
     
     /**
@@ -532,7 +561,11 @@ public class DataManager extends FileManager
     public Model getModel(String graphStoreURI)
     {
 	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} default graph", graphStoreURI);
-        return getDatasetAccessor(graphStoreURI).getModel();
+	return getEndpoint(graphStoreURI, null).
+            queryParam("default", "").
+            accept(getModelMediaTypes()).
+            get(ClientResponse.class).
+            getEntity(Model.class);
     }
     
     /**
@@ -547,7 +580,11 @@ public class DataManager extends FileManager
     public Model getModel(String graphStoreURI, String graphURI)
     {
 	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} with named graph URI: {}", graphStoreURI, graphURI);
-	return getDatasetAccessor(graphStoreURI).getModel(graphURI);	
+	return getEndpoint(graphStoreURI, null).
+            queryParam("graph", graphURI).
+            accept(getModelMediaTypes()).                
+            get(ClientResponse.class).
+            getEntity(Model.class);
     }
 
     /**
@@ -555,11 +592,15 @@ public class DataManager extends FileManager
      * 
      * @param graphStoreURI remote graph store URI
      * @param model RDF model to be added
+     * @return client response
      */
-    public void addModel(String graphStoreURI, Model model)
+    public ClientResponse addModel(String graphStoreURI, Model model)
     {
 	if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} default graph", graphStoreURI);
-	getDatasetAccessor(graphStoreURI).add(model);
+	return getEndpoint(graphStoreURI, null).
+            queryParam("default", "").
+            type(MediaType.TEXT_NTRIPLES).
+            post(ClientResponse.class, model);
     }
     
     /**
@@ -568,11 +609,15 @@ public class DataManager extends FileManager
      * @param graphStoreURI remote graph store URI
      * @param graphURI named graph URI
      * @param model RDF model to be added
+     * @return client response
      */
-    public void addModel(String graphStoreURI, String graphURI, Model model)
+    public ClientResponse addModel(String graphStoreURI, String graphURI, Model model)
     {
 	if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} with named graph URI: {}", graphStoreURI, graphURI);
-	getDatasetAccessor(graphStoreURI).add(graphURI, model);
+	return getEndpoint(graphStoreURI, null).
+            queryParam("graph", graphURI).
+            type(MediaType.TEXT_NTRIPLES).                
+            post(ClientResponse.class, model);
     }
 
     /**
@@ -581,11 +626,15 @@ public class DataManager extends FileManager
      * 
      * @param graphStoreURI remote graph store URI
      * @param model RDF model to be stored
+     * @return client response
      */
-    public void putModel(String graphStoreURI, Model model)
+    public ClientResponse putModel(String graphStoreURI, Model model)
     {
 	if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} default graph", graphStoreURI);
-	getDatasetAccessor(graphStoreURI).putModel(model);
+	return getEndpoint(graphStoreURI, null).
+            queryParam("default", "").
+            type(MediaType.TEXT_NTRIPLES).                
+            put(ClientResponse.class, model);
     }
 
     /**
@@ -595,11 +644,15 @@ public class DataManager extends FileManager
      * @param graphStoreURI remote graph store URI
      * @param graphURI named graph URI
      * @param model RDF model to be stored
+     * @return client response
      */
-    public void putModel(String graphStoreURI, String graphURI, Model model)
+    public ClientResponse putModel(String graphStoreURI, String graphURI, Model model)
     {
 	if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} with named graph URI {}", graphStoreURI, graphURI);
-	getDatasetAccessor(graphStoreURI).putModel(graphURI, model);
+	return getEndpoint(graphStoreURI, null).
+            queryParam("graph", graphURI).
+            type(MediaType.TEXT_NTRIPLES).                
+            put(ClientResponse.class, model);
     }
 
     /**
@@ -607,11 +660,14 @@ public class DataManager extends FileManager
      * Uses SPARQL Graph Store protocol.
      * 
      * @param graphStoreURI remote graph store URI
+     * @return client response
      */
-    public void deleteDefault(String graphStoreURI)
+    public ClientResponse deleteDefault(String graphStoreURI)
     {
 	if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store {}", graphStoreURI);
-	getDatasetAccessor(graphStoreURI).deleteDefault();
+	return getEndpoint(graphStoreURI, null).
+            queryParam("default", "").
+            delete(ClientResponse.class);
     }
 
     /**
@@ -620,73 +676,14 @@ public class DataManager extends FileManager
      * 
      * @param graphStoreURI remote graph store URI
      * @param graphURI named graph URI
+     * @return client response
      */
-    public void deleteModel(String graphStoreURI, String graphURI)
+    public ClientResponse deleteModel(String graphStoreURI, String graphURI)
     {
 	if (log.isDebugEnabled()) log.debug("DELETE named graph with URI {} from Graph Store {}", graphURI, graphStoreURI);
-        getDatasetAccessor(graphStoreURI).deleteModel(graphURI);
-    }
-
-    /**
-     * Returns dataset accessor for a given graph store URI.
-     * 
-     * @param graphStoreURI graph store URI
-     * @return accessor
-     */
-    public DatasetAccessor getDatasetAccessor(String graphStoreURI)
-    {
-        HttpAuthenticator authenticator = getHttpAuthenticator(getServiceContext(graphStoreURI));
-
-        if (authenticator != null) return new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI, authenticator));
-        else return new DatasetAdapter(new DatasetGraphAccessorHTTP(graphStoreURI));
-    }
-    
-    /**
-     * Returns authenticator (used by Jena) for a given endpoint or graph store URI.
-     * 
-     * @param serviceContext
-     * @return authenticator
-     */
-    public HttpAuthenticator getHttpAuthenticator(Context serviceContext)
-    {
-        if (serviceContext != null)
-            return getHttpAuthenticator(serviceContext, usePreemptiveAuth(G.preemptiveAuth));
-        
-        return null;
-    }
-    
-    /**
-     * Converts context with username/password credentials into authenticator (used by Jena).
-     * 
-     * @param serviceContext authentication context
-     * @param preemptive
-     * @return authenticator
-     */
-    public HttpAuthenticator getHttpAuthenticator(Context serviceContext, boolean preemptive)
-    {
-        if (serviceContext == null) throw new IllegalArgumentException("Context cannot be null");
-
-        String usr = serviceContext.getAsString(Service.queryAuthUser);
-        String pwd = serviceContext.getAsString(Service.queryAuthPwd);
-
-        if (usr != null || pwd != null)
-        {
-            usr = usr==null?"":usr;
-            pwd = pwd==null?"":pwd;
-
-            if (preemptive)
-            {
-                if (log.isDebugEnabled()) log.debug("Creating PreemptiveBasicAuthenticator for Context {} with username: {} ", serviceContext, usr);
-                return new PreemptiveBasicAuthenticator(new SimpleAuthenticator(usr, pwd.toCharArray()));
-            }
-            else
-            {
-                if (log.isDebugEnabled()) log.debug("Creating SimpleAuthenticator for Context {} with username: {} ", serviceContext, usr);
-                return new SimpleAuthenticator(usr, pwd.toCharArray());
-            }
-        }
-
-        return null;
+	return getEndpoint(graphStoreURI, null).
+            queryParam("graph", graphURI).
+            delete(ClientResponse.class);
     }
 
     public boolean usePreemptiveAuth(Property property)
