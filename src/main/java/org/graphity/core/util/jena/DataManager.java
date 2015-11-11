@@ -119,22 +119,28 @@ public class DataManager extends FileManager
     {
         return resultSetMediaTypes;
     }
-    
+
+    public ClientFilter getClientAuthFilter(String endpointURI)
+    {
+        return getClientAuthFilter(getServiceContext(endpointURI));
+    }
+        
     public ClientFilter getClientAuthFilter(Context serviceContext)
     {
-        if (serviceContext == null) throw new IllegalArgumentException("Context cannot be null");
-
-        String usr = serviceContext.getAsString(Service.queryAuthUser);
-        String pwd = serviceContext.getAsString(Service.queryAuthPwd);
-
-        if (usr != null || pwd != null)
+        if (serviceContext != null)
         {
-            usr = usr==null?"":usr;
-            pwd = pwd==null?"":pwd;
+            String usr = serviceContext.getAsString(Service.queryAuthUser);
+            String pwd = serviceContext.getAsString(Service.queryAuthPwd);
 
-            return new HTTPBasicAuthFilter(usr, pwd);
+            if (usr != null || pwd != null)
+            {
+                usr = usr==null?"":usr;
+                pwd = pwd==null?"":pwd;
+
+                return new HTTPBasicAuthFilter(usr, pwd);
+            }
         }
-
+        
         return null;
     }
     
@@ -143,12 +149,8 @@ public class DataManager extends FileManager
 	if (endpointURI == null) throw new IllegalArgumentException("Endpoint URI must be not null");
       
         Client client = Client.create(getClientConfig());
-        Context serviceContext = getServiceContext(endpointURI);
-        if (serviceContext != null)
-        {
-            ClientFilter authFilter = getClientAuthFilter(serviceContext);
-            if (authFilter != null) client.addFilter(authFilter);
-        }
+        ClientFilter authFilter = getClientAuthFilter(endpointURI);
+        if (authFilter != null) client.addFilter(authFilter);
         if (log.isDebugEnabled()) client.addFilter(new LoggingFilter(System.out));
         
         return client.resource(URI.create(endpointURI));
