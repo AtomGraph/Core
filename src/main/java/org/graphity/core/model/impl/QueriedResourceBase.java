@@ -19,6 +19,7 @@ package org.graphity.core.model.impl;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.Model;
+import java.net.URI;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -161,9 +162,10 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
      * @param uri resource URI
      * @return query object
      */
-    public Query getQuery(String uri)
+    public Query getQuery(URI uri)
     {
-	return QueryFactory.create("DESCRIBE <" + uri + ">");
+	if (uri == null) throw new IllegalArgumentException("URI cannot be null");        
+	return QueryFactory.create("DESCRIBE <" + uri.toString() + ">");
     }
 
     /**

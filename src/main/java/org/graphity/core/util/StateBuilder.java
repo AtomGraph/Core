@@ -21,6 +21,7 @@ import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.util.ResourceUtils;
+import java.net.URI;
 import javax.ws.rs.core.UriBuilder;
 
 /**
@@ -32,18 +33,23 @@ public class StateBuilder
     private final Resource resource;
     private final UriBuilder uriBuilder;
     
-    private StateBuilder(String uri, Model model)
+    private StateBuilder(UriBuilder uriBuilder, Model model)
     {
-	if (uri == null) throw new IllegalArgumentException("String cannot be null");
+	if (uriBuilder == null) throw new IllegalArgumentException("UriBuilder cannot be null");
 	if (model == null) throw new IllegalArgumentException("Model cannot be null");
         
         resource = model.createResource();
-        uriBuilder = UriBuilder.fromUri(uri);
+        this.uriBuilder = uriBuilder;
     }
     
+    public static StateBuilder fromUri(URI uri, Model model)
+    {
+        return new StateBuilder(UriBuilder.fromUri(uri), model);
+    }
+
     public static StateBuilder fromUri(String uri, Model model)
     {
-        return new StateBuilder(uri, model);
+        return new StateBuilder(UriBuilder.fromUri(uri), model);
     }
     
     protected Resource getResource()

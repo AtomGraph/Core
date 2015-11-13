@@ -17,6 +17,7 @@
 package org.graphity.core.model;
 
 import com.hp.hpl.jena.rdf.model.Model;
+import java.net.URI;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -31,7 +32,7 @@ import javax.ws.rs.core.Response;
 public interface Resource
 {
 
-    public String getURI();
+    public URI getURI();
     
     /**
      * Handles GET request and returns response

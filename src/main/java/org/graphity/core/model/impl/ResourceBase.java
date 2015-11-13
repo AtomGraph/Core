@@ -17,6 +17,7 @@
 package org.graphity.core.model.impl;
 
 import com.hp.hpl.jena.rdf.model.*;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -153,9 +154,9 @@ public abstract class ResourceBase implements Resource
      * @return URI of this resource
      */
     @Override
-    public String getURI()
+    public URI getURI()
     {
-	return getUriInfo().getAbsolutePath().toString();
+	return getUriInfo().getAbsolutePath();
     }
 
     /**
