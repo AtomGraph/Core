@@ -95,7 +95,7 @@ public class StateBuilder
         return this;
     }
 
-    public StateBuilder replaceLiteral(Property property, RDFNode value)
+    public StateBuilder replaceLiteral(Property property, Object value)
     {
         if (property == null) throw new IllegalArgumentException("Property cannot be null");        
         if (value == null) throw new IllegalArgumentException("Object cannot be null");        
