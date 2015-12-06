@@ -84,13 +84,15 @@ public class DataManager extends FileManager
      * 
      * @param mapper location mapper
      * @param context SPARQL context
+     * @param cacheModelLoads true if loaded models should be cached
      * @param preemptiveAuth if true, preemptive HTTP authentication will be used
      */
-    public DataManager(LocationMapper mapper, Context context, boolean preemptiveAuth)
+    public DataManager(LocationMapper mapper, Context context, boolean cacheModelLoads, boolean preemptiveAuth)
     {
 	super(mapper);
 	if (context == null) throw new IllegalArgumentException("Context cannot be null");
 	this.context = context;
+        setModelCaching(cacheModelLoads);
         this.preemptiveAuth = preemptiveAuth;
         List<javax.ws.rs.core.MediaType> modelMediaTypeList = new MediaTypesProvider().getMediaTypes().getModelMediaTypes();
         modelMediaTypes = modelMediaTypeList.toArray(new javax.ws.rs.core.MediaType[modelMediaTypeList.size()]);

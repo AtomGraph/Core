@@ -136,10 +136,10 @@ public class Application extends javax.ws.rs.core.Application
 	if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
 	if (property == null) throw new IllegalArgumentException("Property cannot be null");
 
-        boolean preemptiveAuth = false;
+        boolean value = false;
         if (servletConfig.getInitParameter(property.getURI()) != null)
-            preemptiveAuth = Boolean.parseBoolean(servletConfig.getInitParameter(property.getURI()).toString());
-        return preemptiveAuth;
+            value = Boolean.parseBoolean(servletConfig.getInitParameter(property.getURI()).toString());
+        return value;
     }
 
 }

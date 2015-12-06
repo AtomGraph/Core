@@ -84,27 +84,30 @@ public class DataManagerProvider extends PerRequestTypeInjectableProvider<Contex
         return getDataManager(LocationMapper.get(), ARQ.getContext(), servletConfig);
     }
     
-    public boolean getPreemptiveAuth(ServletConfig servletConfig, Property property)
+    public boolean getBooleanParam(ServletConfig servletConfig, Property property)
     {
 	if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
 	if (property == null) throw new IllegalArgumentException("Property cannot be null");
 
-        boolean preemptiveAuth = false;
+        boolean value = false;
         if (servletConfig.getInitParameter(property.getURI()) != null)
-            preemptiveAuth = Boolean.parseBoolean(servletConfig.getInitParameter(property.getURI()).toString());
-        return preemptiveAuth;
+            value = Boolean.parseBoolean(servletConfig.getInitParameter(property.getURI()).toString());
+        return value;
     }
     
     public DataManager getDataManager(LocationMapper mapper, com.hp.hpl.jena.sparql.util.Context context, ServletConfig servletConfig)
     {
 	if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
         
-        return getDataManager(mapper, context, getPreemptiveAuth(servletConfig, G.preemptiveAuth));
+        return getDataManager(mapper, context,
+                getBooleanParam(servletConfig, G.cacheModelLoads),
+                getBooleanParam(servletConfig, G.preemptiveAuth));
     }
 
-    public DataManager getDataManager(LocationMapper mapper, com.hp.hpl.jena.sparql.util.Context context, boolean preemptiveAuth)
+    public DataManager getDataManager(LocationMapper mapper, com.hp.hpl.jena.sparql.util.Context context,
+            boolean cacheModelLoads, boolean preemptiveAuth)
     {
-        return new DataManager(mapper, context, preemptiveAuth);
+        return new DataManager(mapper, context, cacheModelLoads, preemptiveAuth);
     }
 
     @Override
