@@ -32,7 +32,6 @@ import javax.ws.rs.ext.Provider;
 import javax.ws.rs.ext.Providers;
 import org.graphity.core.model.GraphStoreOrigin;
 import org.graphity.core.model.impl.GraphStoreOriginBase;
-import org.graphity.core.util.jena.DataManager;
 import org.graphity.core.vocabulary.G;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,13 +66,7 @@ public class GraphStoreOriginProvider extends PerRequestTypeInjectableProvider<C
     {
         return providers;
     }
-
-    public DataManager getDataManager()
-    {
-	ContextResolver<DataManager> cr = getProviders().getContextResolver(DataManager.class, null);
-	return cr.getContext(DataManager.class);
-    }
-
+    
     @Override
     public Injectable<GraphStoreOrigin> getInjectable(ComponentContext cc, Context a)
     {
@@ -101,7 +94,7 @@ public class GraphStoreOriginProvider extends PerRequestTypeInjectableProvider<C
      */
     public GraphStoreOrigin getGraphStoreOrigin()
     {
-        GraphStoreOrigin origin = getGraphStoreOrigin(G.graphStore, getDataManager());
+        GraphStoreOrigin origin = getGraphStoreOrigin(G.graphStore);
         
         if (origin == null)
         {
@@ -116,20 +109,21 @@ public class GraphStoreOriginProvider extends PerRequestTypeInjectableProvider<C
      * Returns Graph Store origin for supplied webapp context configuration.
      * 
      * @param property configuration property string
-     * @param dataManager data manager
      * @return graph store origin
      */
-    public GraphStoreOrigin getGraphStoreOrigin(Property property, DataManager dataManager)
+    public GraphStoreOrigin getGraphStoreOrigin(Property property)
     {
         if (property == null) throw new IllegalArgumentException("Property cannot be null");
 
-        Object storeURI = getServletConfig().getInitParameter(property.getURI());
+        Object storeURI = getServletConfig().getInitParameter(property.getURI());        
         if (storeURI != null)
         {
-            return new GraphStoreOriginBase(storeURI.toString(),
-                (String)getServletConfig().getInitParameter(Service.queryAuthUser.getSymbol()),
-                (String)getServletConfig().getInitParameter(Service.queryAuthPwd.getSymbol()),
-                dataManager);
+            String authUser = (String)getServletConfig().getInitParameter(Service.queryAuthUser.getSymbol());
+            String authPwd = (String)getServletConfig().getInitParameter(Service.queryAuthPwd.getSymbol());
+            if (authUser != null && authPwd != null)
+                return new GraphStoreOriginBase(storeURI.toString(), authUser, authPwd);
+            
+            return new GraphStoreOriginBase(storeURI.toString());
         }
 
         return null;

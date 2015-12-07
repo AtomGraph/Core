@@ -16,14 +16,11 @@
  */
 package org.graphity.core.util.jena;
 
-import com.hp.hpl.jena.query.*;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.sparql.engine.http.Service;
-import com.hp.hpl.jena.sparql.resultset.XMLInput;
 import com.hp.hpl.jena.sparql.util.Context;
-import com.hp.hpl.jena.update.UpdateRequest;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.util.LocationMapper;
 import com.sun.jersey.api.client.Client;
@@ -35,8 +32,6 @@ import com.sun.jersey.api.client.filter.ClientFilter;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
-import com.sun.jersey.core.util.MultivaluedMapImpl;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -44,8 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response.Status.Family;
-import org.graphity.core.MediaType;
 import org.graphity.core.provider.DatasetProvider;
 import org.graphity.core.provider.MediaTypesProvider;
 import org.graphity.core.provider.ModelProvider;
@@ -145,13 +138,18 @@ public class DataManager extends FileManager
         
         return null;
     }
+
+    public WebResource getEndpoint(String endpointURI)
+    {
+        return getEndpoint(endpointURI, getClientAuthFilter(endpointURI), null);
+    }
     
     public WebResource getEndpoint(String endpointURI, MultivaluedMap<String, String> params)
     {
-        return getEndpoint(endpointURI, params, getClientAuthFilter(endpointURI));
+        return getEndpoint(endpointURI, getClientAuthFilter(endpointURI), params);
     }
     
-    public WebResource getEndpoint(String endpointURI, MultivaluedMap<String, String> params, ClientFilter authFilter)
+    public WebResource getEndpoint(String endpointURI, ClientFilter authFilter, MultivaluedMap<String, String> params)
     {
 	if (endpointURI == null) throw new IllegalArgumentException("Endpoint URI must be not null");
       
@@ -175,272 +173,7 @@ public class DataManager extends FileManager
     {
         return get(uri, getModelMediaTypes()).getEntity(Model.class);
     }
-    
-    /**
-     * Loads RDF model from a remote SPARQL endpoint using a query and optional request parameters.
-     * Only <code>DESCRIBE</code> and <code>CONSTRUCT</code> queries can be used with this method.
-     * 
-     * @param endpointURI remote endpoint URI
-     * @param query query object
-     * @param acceptedTypes accepted media types
-     * @param params name/value pairs of request parameters or null, if none
-     * @return result RDF model
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#describe">DESCRIBE</a>
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#construct">CONSTRUCT</a>
-     */
-    public ClientResponse executeQuery(String endpointURI, Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
-    {
-	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, query);
-	if (query == null) throw new IllegalArgumentException("Query must be not null");
-	if (acceptedTypes == null) throw new IllegalArgumentException("Accepted MediaType[] must be not null");
-
-        MultivaluedMap formData = new MultivaluedMapImpl();
-        if (params != null) formData.putAll(params);
-        formData.putSingle("query", query.toString());
         
-        return getEndpoint(endpointURI, params).
-            accept(acceptedTypes).
-            type(MediaType.APPLICATION_FORM_URLENCODED_TYPE).
-            post(ClientResponse.class, formData);
-    }
-    
-    /**
-     * Loads RDF model from a remote SPARQL endpoint using a query and optional request parameters.
-     * Only <code>DESCRIBE</code> and <code>CONSTRUCT</code> queries can be used with this method.
-     * This is a convenience method for {@link #loadModel(String,Query,MultivaluedMap<String, String>)}
-     * with null request parameters.
-     * 
-     * @param endpointURI remote endpoint URI
-     * @param query query object
-     * @param acceptedTypes accepted media types
-     * @return RDF model result
-     */
-    public ClientResponse executeQuery(String endpointURI, Query query, javax.ws.rs.core.MediaType[] acceptedTypes)
-    {
-	return executeQuery(endpointURI, query, acceptedTypes, null);
-    }
-    
-    /**
-     * Returns boolean result from a remote SPARQL endpoint using a query and optional request parameters.
-     * Only <code>ASK</code> queries can be used with this method.
-     * 
-     * @param endpointURI remote endpoint URI
-     * @param query query object
-     * @param params name/value pairs of request parameters or null, if none
-     * @return boolean result
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#ask">ASK</a>
-     */
-    public boolean ask(String endpointURI, Query query, MultivaluedMap<String, String> params)
-    {
-	if (log.isDebugEnabled()) log.debug("Remote service {} Query execution: {} ", endpointURI, query);
-	if (query == null) throw new IllegalArgumentException("Query must be not null");
-
-        MultivaluedMap formData = new MultivaluedMapImpl();
-        if (params != null) formData.putAll(params);
-        formData.putSingle("query", query.toString());
-        
-        return XMLInput.booleanFromXML(getEndpoint(endpointURI, params).
-            accept(MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE). // needs to be XML since we're reading with XMLInput
-            type(MediaType.APPLICATION_FORM_URLENCODED_TYPE).
-            post(ClientResponse.class, formData).
-            getEntity(InputStream.class));
-    }
-
-    /**
-     * Loads result set from a remote SPARQL endpoint using a query.
-     * Only <code>ASK</code> queries can be used with this method.
-     * This is a convenience method for {@link #ask(String,Query,MultivaluedMap<String, String>)} with
-     * null request parameters.
-     * 
-     * @param endpointURI remote endpoint URI
-     * @param query query object
-     * @return boolean result
-     */
-    public boolean ask(String endpointURI, Query query)
-    {
-	return ask(endpointURI, query, null);
-    }
-
-    /**
-     * Executes update request on a remote SPARQL endpoint.
-     * 
-     * @param endpointURI remote endpoint URI
-     * @param updateRequest update request
-     * @param params name/value pairs of request parameters or null, if none
-     * @return client response
-     */
-    public ClientResponse executeUpdateRequest(String endpointURI, UpdateRequest updateRequest, MultivaluedMap<String, String> params)
-    {
-	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, updateRequest);
-	if (updateRequest == null) throw new IllegalArgumentException("UpdateRequest must be not null");
-	//if (acceptedTypes == null) throw new IllegalArgumentException("Accepted MediaType[] must be not null");
-
-        MultivaluedMap formData = new MultivaluedMapImpl();
-        if (params != null) formData.putAll(params);
-        formData.putSingle("update", updateRequest.toString());
-        
-	return getEndpoint(endpointURI, params).
-            //accept(acceptedTypes).
-            type(MediaType.APPLICATION_FORM_URLENCODED_TYPE).
-            post(ClientResponse.class, formData);
-    }
-    
-    /**
-     * Checks whether Graph Store contains a certain named graph.
-     * 
-     * @param graphStoreURI remote graph store URI
-     * @param graphURI named graph URI
-     * @return true if graph store contains named graph, false otherwise
-     */
-    public boolean containsNamed(String graphStoreURI, String graphURI)
-    {
-	if (log.isDebugEnabled()) log.debug("Checking if Graph Store {} contains GRAPH with URI {}", graphStoreURI, graphURI);
-	return headNamed(graphStoreURI, graphURI).
-            getStatusInfo().
-            getFamily().equals(Family.SUCCESSFUL);
-    }
-
-    public ClientResponse headNamed(String graphStoreURI, String graphURI)
-    {
-	return getEndpoint(graphStoreURI, null).
-            queryParam("graph", graphURI).
-            method("HEAD", ClientResponse.class);
-    }
-    
-    /**
-     * Loads RDF model from the default graph on a remote SPARQL Graph Store.
-     * In comparison, <code>loadModel()</code> variants operate on SPARQL Protocol, but can be used for the
-     * same purpose.
-     * 
-     * @param graphStoreURI Graph Store URI
-     * @return client response
-     */
-    public ClientResponse getDefault(String graphStoreURI)
-    {
-	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} default graph", graphStoreURI);
-	return getEndpoint(graphStoreURI, null).
-            queryParam("default", "").
-            accept(getModelMediaTypes()).
-            get(ClientResponse.class);
-    }
-    
-    /**
-     * Loads RDF model from a named graph on a remote SPARQL Graph Store.
-     * In comparison, <code>loadModel()</code> variants operate on SPARQL Protocol, but can be used for the
-     * same purpose.
-     * 
-     * @param graphStoreURI Graph Store URI
-     * @param graphURI named graph URI
-     * @return RDF model of the named graph
-     */
-    public ClientResponse getNamed(String graphStoreURI, String graphURI)
-    {
-	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} with named graph URI: {}", graphStoreURI, graphURI);
-	return getEndpoint(graphStoreURI, null).
-            queryParam("graph", graphURI).
-            accept(getModelMediaTypes()).                
-            get(ClientResponse.class);
-    }
-
-    /**
-     * Adds RDF model to the default graph on a remote SPARQL Graph Store.
-     * 
-     * @param graphStoreURI remote graph store URI
-     * @param model RDF model to be added
-     * @return client response
-     */
-    public ClientResponse postToDefault(String graphStoreURI, Model model)
-    {
-	if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} default graph", graphStoreURI);
-	return getEndpoint(graphStoreURI, null).
-            queryParam("default", "").
-            type(MediaType.TEXT_NTRIPLES).
-            post(ClientResponse.class, model);
-    }
-    
-    /**
-     * Adds RDF model to a named graph on a remote SPARQL Graph Store.
-     * 
-     * @param graphStoreURI remote graph store URI
-     * @param graphURI named graph URI
-     * @param model RDF model to be added
-     * @return client response
-     */
-    public ClientResponse postToNamed(String graphStoreURI, String graphURI, Model model)
-    {
-	if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} with named graph URI: {}", graphStoreURI, graphURI);
-	return getEndpoint(graphStoreURI, null).
-            queryParam("graph", graphURI).
-            type(MediaType.TEXT_NTRIPLES).                
-            post(ClientResponse.class, model);
-    }
-
-    /**
-     * Stores RDF model into the default graph on a remote SPARQL Graph Store.
-     * Uses SPARQL Graph Store protocol.
-     * 
-     * @param graphStoreURI remote graph store URI
-     * @param model RDF model to be stored
-     * @return client response
-     */
-    public ClientResponse putToDefault(String graphStoreURI, Model model)
-    {
-	if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} default graph", graphStoreURI);
-	return getEndpoint(graphStoreURI, null).
-            queryParam("default", "").
-            type(MediaType.TEXT_NTRIPLES).                
-            put(ClientResponse.class, model);
-    }
-
-    /**
-     * Creates/replaces a named graph on a remote SPARQL Graph Store and stores RDF model.
-     * Uses SPARQL Graph Store protocol.
-     * 
-     * @param graphStoreURI remote graph store URI
-     * @param graphURI named graph URI
-     * @param model RDF model to be stored
-     * @return client response
-     */
-    public ClientResponse putToNamed(String graphStoreURI, String graphURI, Model model)
-    {
-	if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} with named graph URI {}", graphStoreURI, graphURI);
-	return getEndpoint(graphStoreURI, null).
-            queryParam("graph", graphURI).
-            type(MediaType.TEXT_NTRIPLES).                
-            put(ClientResponse.class, model);
-    }
-
-    /**
-     * Deletes contents of the default graph on a remote SPARQL Graph Store.
-     * Uses SPARQL Graph Store protocol.
-     * 
-     * @param graphStoreURI remote graph store URI
-     * @return client response
-     */
-    public ClientResponse deleteDefault(String graphStoreURI)
-    {
-	if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store {}", graphStoreURI);
-	return getEndpoint(graphStoreURI, null).
-            queryParam("default", "").
-            delete(ClientResponse.class);
-    }
-
-    /**
-     * Deletes contents of a named graph on a remote SPARQL Graph Store.
-     * Uses SPARQL Graph Store protocol.
-     * 
-     * @param graphStoreURI remote graph store URI
-     * @param graphURI named graph URI
-     * @return client response
-     */
-    public ClientResponse deleteNamed(String graphStoreURI, String graphURI)
-    {
-	if (log.isDebugEnabled()) log.debug("DELETE named graph with URI {} from Graph Store {}", graphURI, graphStoreURI);
-	return getEndpoint(graphStoreURI, null).
-            queryParam("graph", graphURI).
-            delete(ClientResponse.class);
-    }
-
     public boolean usePreemptiveAuth(Property property)
     {
         return preemptiveAuth;

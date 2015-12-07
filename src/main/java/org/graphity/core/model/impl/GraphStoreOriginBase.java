@@ -18,7 +18,6 @@
 package org.graphity.core.model.impl;
 
 import org.graphity.core.model.GraphStoreOrigin;
-import org.graphity.core.util.jena.DataManager;
 
 /**
  * Base class of SPARQL Graph Store origins.
@@ -34,14 +33,15 @@ public class GraphStoreOriginBase extends OriginBase implements GraphStoreOrigin
      * @param uri origin URI
      * @param authUser authentication username
      * @param authPwd authentication password
-     * @param dataManager data manager
      */
-    public GraphStoreOriginBase(String uri, String authUser, String authPwd, DataManager dataManager)
+    public GraphStoreOriginBase(String uri, String authUser, byte[] authPwd)
     {
-        super(uri);
-        
-        if (dataManager != null && authUser != null && authPwd != null)
-            dataManager.putAuthContext(uri, authUser, authPwd);
+        super(uri, authUser, authPwd);
+    }
+
+    public GraphStoreOriginBase(String uri, String authUser, String authPwd)
+    {
+        super(uri, authUser, authPwd);
     }
     
     /**
@@ -51,7 +51,7 @@ public class GraphStoreOriginBase extends OriginBase implements GraphStoreOrigin
      */
     public GraphStoreOriginBase(String uri)
     {
-        this(uri, null, null, null);
+        super(uri);
     }
     
 }

@@ -203,12 +203,7 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     public ResponseBuilder getResponseBuilder(Model model)
     {
         return org.graphity.core.model.impl.Response.fromRequest(getRequest()).
-                getResponseBuilder(model, getVariants(getModelMediaTypes()));
-    }
-
-    public List<MediaType> getModelMediaTypes()
-    {
-        return getMediaTypes().getModelMediaTypes();
+                getResponseBuilder(model, getVariants(getMediaTypes().getModelMediaTypes()));
     }
     
     /**

@@ -32,5 +32,9 @@ public interface Origin
      * @return origin URI
      */
     public String getURI();
+
+    public String getUsername();
+    
+    public byte[] getPassword();
     
 }

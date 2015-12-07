@@ -45,7 +45,7 @@ public class SPARQLEndpointFactory
      */
     public static SPARQLEndpoint createProxy(Request request, ServletConfig servletConfig, MediaTypes mediaTypes, SPARQLEndpointOrigin origin, DataManager dataManager)
     {
-	return new SPARQLEndpointProxyBase(request, servletConfig, mediaTypes, origin, dataManager);
+	return new SPARQLEndpointProxyBase(request, servletConfig, mediaTypes, origin);
     }
 
 }

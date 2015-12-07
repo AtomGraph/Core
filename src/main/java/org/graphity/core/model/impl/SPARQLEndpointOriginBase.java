@@ -18,30 +18,31 @@
 package org.graphity.core.model.impl;
 
 import org.graphity.core.model.SPARQLEndpointOrigin;
-import org.graphity.core.util.jena.DataManager;
 
 /**
  * Base class of SPARQL Graph Store origins.
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
+@Deprecated
 public class SPARQLEndpointOriginBase extends OriginBase implements SPARQLEndpointOrigin
 {
-
+    
     /**
      * Constructs SPARQL endpoint origin from URI and HTTP authentication credentials.
      * 
      * @param uri origin URI
-     * @param authUser authentication username
-     * @param authPwd authentication password
-     * @param dataManager data manager
+     * @param username authentication username
+     * @param password authentication password
      */
-    public SPARQLEndpointOriginBase(String uri, String authUser, String authPwd, DataManager dataManager)
+    public SPARQLEndpointOriginBase(String uri, String username, byte[] password)
     {
-        super(uri);
-        
-        if (dataManager != null && authUser != null && authPwd != null)
-            dataManager.putAuthContext(uri, authUser, authPwd);
+        super(uri, username, password);
+    }
+
+    public SPARQLEndpointOriginBase(String uri, String username, String password)
+    {
+        super(uri, username, password);
     }
     
     /**
@@ -51,7 +52,7 @@ public class SPARQLEndpointOriginBase extends OriginBase implements SPARQLEndpoi
      */
     public SPARQLEndpointOriginBase(String uri)
     {
-        this(uri, null, null, null);
+        super(uri);
     }
     
 }

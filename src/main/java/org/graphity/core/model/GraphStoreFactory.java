@@ -44,7 +44,7 @@ public class GraphStoreFactory
      */
     public static GraphStore createProxy(Request request, ServletConfig servletConfig, MediaTypes mediaTypes, GraphStoreOrigin origin, DataManager dataManager)
     {
-	return new GraphStoreProxyBase(request, servletConfig, mediaTypes, origin, dataManager);
+	return new GraphStoreProxyBase(request, servletConfig, mediaTypes, origin);
     }
 
 }

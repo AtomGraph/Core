@@ -68,12 +68,14 @@ public class SPARQLEndpointOriginProvider extends PerRequestTypeInjectableProvid
         return providers;
     }
 
+    /*
     public DataManager getDataManager()
     {
 	ContextResolver<DataManager> cr = getProviders().getContextResolver(DataManager.class, null);
 	return cr.getContext(DataManager.class);
     }
-
+    */
+    
     @Override
     public Injectable<SPARQLEndpointOrigin> getInjectable(ComponentContext cc, Context context)
     {
@@ -101,7 +103,7 @@ public class SPARQLEndpointOriginProvider extends PerRequestTypeInjectableProvid
      */
     public SPARQLEndpointOrigin getSPARQLEndpointOrigin()
     {
-        SPARQLEndpointOrigin origin = getSPARQLEndpointOrigin(SD.endpoint, getDataManager());
+        SPARQLEndpointOrigin origin = getSPARQLEndpointOrigin(SD.endpoint);
         
         if (origin == null)
         {
@@ -116,21 +118,24 @@ public class SPARQLEndpointOriginProvider extends PerRequestTypeInjectableProvid
      * Returns SPARQL endpoint origin for supplied webapp context configuration.
      * 
      * @param property configuration property
-     * @param dataManager dataManager
      * @return endpoint origin
      */
-    public SPARQLEndpointOrigin getSPARQLEndpointOrigin(Property property, DataManager dataManager)
+    public SPARQLEndpointOrigin getSPARQLEndpointOrigin(Property property)
     {
         if (property == null) throw new IllegalArgumentException("Property cannot be null");
-        if (dataManager == null) throw new IllegalArgumentException("DataManager cannot be null");
+        //if (dataManager == null) throw new IllegalArgumentException("DataManager cannot be null");
 
         Object endpointURI = getServletConfig().getInitParameter(property.getURI());
         if (endpointURI != null)
-            return new SPARQLEndpointOriginBase(endpointURI.toString(),
-                    (String)getServletConfig().getInitParameter(Service.queryAuthUser.getSymbol()),
-                    (String)getServletConfig().getInitParameter(Service.queryAuthPwd.getSymbol()),
-                    dataManager);
-
+        {
+            String authUser = (String)getServletConfig().getInitParameter(Service.queryAuthUser.getSymbol());
+            String authPwd = (String)getServletConfig().getInitParameter(Service.queryAuthPwd.getSymbol());
+            if (authUser != null && authPwd != null)
+                return new SPARQLEndpointOriginBase(endpointURI.toString(), authUser, authPwd);
+            
+            return new SPARQLEndpointOriginBase(endpointURI.toString()); // , authUser, authPwd
+        }
+        
         return null;
     }
 
