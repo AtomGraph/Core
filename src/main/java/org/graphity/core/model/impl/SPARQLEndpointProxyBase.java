@@ -76,7 +76,8 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
     public Model loadModel(Query query)
     {
 	if (log.isDebugEnabled()) log.debug("Loading Model from SPARQL endpoint: {} using Query: {}", getOrigin().getURI(), query);
-	return getDataManager().loadModel(getOrigin().getURI(), query);
+	return getDataManager().executeQuery(getOrigin().getURI(), query, getDataManager().getModelMediaTypes()).
+                getEntity(Model.class);
     }
 
     @Override
@@ -86,7 +87,8 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
         if (!query.isSelectType()) throw new IllegalArgumentException("Query must be SELECT");
         
 	if (log.isDebugEnabled()) log.debug("Loading ResultSet from SPARQL endpoint: {} using Query: {}", getOrigin().getURI(), query);
-	return getDataManager().loadResultSet(getOrigin().getURI(), query); // .getResultSetRewindable()
+	return getDataManager().executeQuery(getOrigin().getURI(), query, getDataManager().getResultSetMediaTypes()).
+            getEntity(ResultSetRewindable.class);
     }
 
     @Override

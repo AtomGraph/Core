@@ -114,25 +114,7 @@ public abstract class GraphStoreBase implements GraphStore
     {
         return getMediaTypes().getModelMediaTypes();
     }
-    
-    /**
-     * Produces a Variant builder from a combination of media types, locales, and encodings.
-     * 
-     * @param mediaTypes supported media types
-     * @param languages supported languages
-     * @param encodings supported encodings
-     * @return variant builder
-     */
-    /*
-    public Variant.VariantListBuilder getVariantListBuilder(List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings)
-    {        
-        return Variant.VariantListBuilder.newInstance().
-                mediaTypes(org.graphity.core.model.impl.Response.mediaTypeListToArray(mediaTypes)).
-                languages(org.graphity.core.model.impl.Response.localeListToArray(languages)).
-                encodings(org.graphity.core.model.impl.Response.stringListToArray(encodings));
-    }
-    */
-    
+        
     /**
      * Returns a list of supported languages.
      * 

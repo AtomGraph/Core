@@ -78,31 +78,31 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
     @Override
     public Model getModel()
     {
-	return getDataManager().getModel(getOrigin().getURI());
+	return getDataManager().getDefault(getOrigin().getURI()).getEntity(Model.class);
     }
 
     @Override
     public Model getModel(String uri)
     {
-        return getDataManager().getModel(getOrigin().getURI(), uri);
+        return getDataManager().getNamed(getOrigin().getURI(), uri).getEntity(Model.class);
     }
 
     @Override
     public boolean containsModel(String uri)
     {
-        return getDataManager().containsModel(getOrigin().getURI(), uri);
+        return getDataManager().containsNamed(getOrigin().getURI(), uri);
     }
 
     @Override
     public void putModel(Model model)
     {
-        getDataManager().putModel(getOrigin().getURI(), model);
+        getDataManager().putToDefault(getOrigin().getURI(), model);
     }
 
     @Override
     public void putModel(String uri, Model model)
     {
-        getDataManager().putModel(getOrigin().getURI(), uri, model);
+        getDataManager().putToNamed(getOrigin().getURI(), uri, model);
     }
 
     @Override
@@ -114,19 +114,19 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
     @Override
     public void deleteModel(String uri)
     {
-        getDataManager().deleteModel(getOrigin().getURI(), uri);
+        getDataManager().deleteNamed(getOrigin().getURI(), uri);
     }
 
     @Override
     public void add(Model model)
     {
-        getDataManager().addModel(getOrigin().getURI(), model);
+        getDataManager().postToDefault(getOrigin().getURI(), model);
     }
 
     @Override
     public void add(String uri, Model model)
     {
-        getDataManager().addModel(getOrigin().getURI(), uri, model);
+        getDataManager().postToNamed(getOrigin().getURI(), uri, model);
     }
 
     public DataManager getDataManager()

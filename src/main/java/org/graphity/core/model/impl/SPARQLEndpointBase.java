@@ -233,25 +233,7 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     {
         return getResponse().getVariantListBuilder(mediaTypes, getLanguages(), getEncodings()).add().build();
     }
-    
-    /**
-     * Produces a Variant builder from a list of media types.
-     * 
-     * @param mediaTypes
-     * @param languages
-     * @param encodings
-     * @return variant builder
-     */
-    /*
-    public Variant.VariantListBuilder getVariantListBuilder(List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings)
-    {        
-        return Variant.VariantListBuilder.newInstance().
-                mediaTypes(org.graphity.core.model.impl.Response.mediaTypeListToArray(mediaTypes)).
-                languages(org.graphity.core.model.impl.Response.localeListToArray(languages)).
-                encodings(org.graphity.core.model.impl.Response.stringListToArray(encodings));
-    }
-    */
-    
+        
     /**
      * Returns supported languages.
      * 

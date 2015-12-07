@@ -148,14 +148,32 @@ public class DataManager extends FileManager
     
     public WebResource getEndpoint(String endpointURI, MultivaluedMap<String, String> params)
     {
+        return getEndpoint(endpointURI, params, getClientAuthFilter(endpointURI));
+    }
+    
+    public WebResource getEndpoint(String endpointURI, MultivaluedMap<String, String> params, ClientFilter authFilter)
+    {
 	if (endpointURI == null) throw new IllegalArgumentException("Endpoint URI must be not null");
       
         Client client = Client.create(getClientConfig());
-        ClientFilter authFilter = getClientAuthFilter(endpointURI);
         if (authFilter != null) client.addFilter(authFilter);
         if (log.isDebugEnabled()) client.addFilter(new LoggingFilter(System.out));
         
         return client.resource(URI.create(endpointURI));
+    }
+    
+    public ClientResponse get(String uri, javax.ws.rs.core.MediaType[] acceptedTypes)
+    {
+	if (log.isDebugEnabled()) log.debug("GET Model from URI: {}", uri);
+	return getEndpoint(uri, null).
+            accept(acceptedTypes).
+            get(ClientResponse.class);
+    }
+    
+    @Override
+    public Model loadModel(String uri)
+    {
+        return get(uri, getModelMediaTypes()).getEntity(Model.class);
     }
     
     /**
@@ -164,33 +182,26 @@ public class DataManager extends FileManager
      * 
      * @param endpointURI remote endpoint URI
      * @param query query object
+     * @param acceptedTypes accepted media types
      * @param params name/value pairs of request parameters or null, if none
      * @return result RDF model
      * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#describe">DESCRIBE</a>
      * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#construct">CONSTRUCT</a>
      */
-    public Model loadModel(String endpointURI, Query query, MultivaluedMap<String, String> params)
+    public ClientResponse executeQuery(String endpointURI, Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
     {
 	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, query);
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
+	if (acceptedTypes == null) throw new IllegalArgumentException("Accepted MediaType[] must be not null");
 
         MultivaluedMap formData = new MultivaluedMapImpl();
-        formData.add("query", query.toString());
-
-	if (params != null)
-	    for (Map.Entry<String, List<String>> entry : params.entrySet())
-		if (!entry.getKey().equals("query")) // query param is handled separately
-		    for (String value : entry.getValue())
-		    {
-			if (log.isTraceEnabled()) log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
-                        formData.add(entry.getKey(), value);
-		    }
+        if (params != null) formData.putAll(params);
+        formData.putSingle("query", query.toString());
         
-	return getEndpoint(endpointURI, params).
-            accept(getModelMediaTypes()).
-            type(MediaType.APPLICATION_FORM_URLENCODED_TYPE). //type(MediaType.APPLICATION_SPARQL_QUERY_TYPE).
-            post(ClientResponse.class, formData). // post(ClientResponse.class, query).
-            getEntity(Model.class);
+        return getEndpoint(endpointURI, params).
+            accept(acceptedTypes).
+            type(MediaType.APPLICATION_FORM_URLENCODED_TYPE).
+            post(ClientResponse.class, formData);
     }
     
     /**
@@ -201,196 +212,14 @@ public class DataManager extends FileManager
      * 
      * @param endpointURI remote endpoint URI
      * @param query query object
+     * @param acceptedTypes accepted media types
      * @return RDF model result
      */
-    public Model loadModel(String endpointURI, Query query)
+    public ClientResponse executeQuery(String endpointURI, Query query, javax.ws.rs.core.MediaType[] acceptedTypes)
     {
-	return loadModel(endpointURI, query, null);
+	return executeQuery(endpointURI, query, acceptedTypes, null);
     }
     
-    /**
-     * Loads RDF model from another RDF model using a SPARQL query.
-     * Only <code>DESCRIBE</code> and <code>CONSTRUCT</code> queries can be used with this method.
-     * 
-     * @param model the RDF model to be queried
-     * @param query query object
-     * @return result RDF model
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#describe">DESCRIBE</a>
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#construct">CONSTRUCT</a>
-     */
-    public Model loadModel(Model model, Query query)
-    {
-	if (log.isDebugEnabled()) log.debug("Local Model Query: {}", query);
-	if (query == null) throw new IllegalArgumentException("Query must be not null");
-	
-	QueryExecution qex = QueryExecutionFactory.create(query, model);
-	try
-	{	
-	    if (query.isConstructType()) return qex.execConstruct();
-	    if (query.isDescribeType()) return qex.execDescribe();
-	
-	    throw new QueryExecException("Query to load Model must be CONSTRUCT or DESCRIBE"); // return null;
-	}
-	catch (QueryExecException ex)
-	{
-	    if (log.isDebugEnabled()) log.debug("Local query execution exception: {}", ex);
-	    throw ex;
-	}
-	finally
-	{
-	    qex.close();
-	}
-    }
-
-    /**
-     * Loads RDF model from an RDF dataset using a SPARQL query.
-     * Only <code>DESCRIBE</code> and <code>CONSTRUCT</code> queries can be used with this method.
-     * 
-     * @param dataset the RDF dataset to be queried
-     * @param query query object
-     * @return result RDF model
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#describe">DESCRIBE</a>
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#construct">CONSTRUCT</a>
-     */
-    public Model loadModel(Dataset dataset, Query query)
-    {
-	if (log.isDebugEnabled()) log.debug("Local Dataset Query: {}", query);
-	if (dataset == null) throw new IllegalArgumentException("Dataset must be not null");
-        if (query == null) throw new IllegalArgumentException("Query must be not null");
-	
-	QueryExecution qex = QueryExecutionFactory.create(query, dataset);
-	try
-	{	
-	    if (query.isConstructType()) return qex.execConstruct();
-	    if (query.isDescribeType()) return qex.execDescribe();
-	
-	    throw new QueryExecException("Query to load Model must be CONSTRUCT or DESCRIBE"); // return null;
-	}
-	catch (QueryExecException ex)
-	{
-	    if (log.isDebugEnabled()) log.debug("Local query execution exception: {}", ex);
-	    throw ex;
-	}
-	finally
-	{
-	    qex.close();
-	}
-    }
-
-    /**
-     * Loads result set from a remote SPARQL endpoint using a query and optional request parameters.
-     * Only <code>SELECT</code> queries can be used with this method.
-     * 
-     * @param endpointURI remote endpoint URI
-     * @param query query object
-     * @param params name/value pairs of request parameters or null, if none
-     * @return result set
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#select">SELECT</a>
-     */
-    public ResultSetRewindable loadResultSet(String endpointURI, Query query, MultivaluedMap<String, String> params)
-    {
-	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, query);
-	if (query == null) throw new IllegalArgumentException("Query must be not null");
-
-        MultivaluedMap formData = new MultivaluedMapImpl();
-        formData.add("query", query.toString());
-
-	if (params != null)
-	    for (Map.Entry<String, List<String>> entry : params.entrySet())
-		if (!entry.getKey().equals("query")) // query param is handled separately
-		    for (String value : entry.getValue())
-		    {
-			if (log.isTraceEnabled()) log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
-                        formData.add(entry.getKey(), value);
-		    }
-        
-	return getEndpoint(endpointURI, params).
-            accept(getResultSetMediaTypes()).
-            type(MediaType.APPLICATION_FORM_URLENCODED_TYPE). //type(MediaType.APPLICATION_SPARQL_QUERY_TYPE).
-            post(ClientResponse.class, formData). // post(ClientResponse.class, query).
-            getEntity(ResultSetRewindable.class);
-    }
-    
-    /**
-     * Loads result set from a remote SPARQL endpoint using a query.
-     * Only <code>SELECT</code> queries can be used with this method.
-     * This is a convenience method for {@link #loadResultSet(String,Query,MultivaluedMap<String, String>)} with
-     * null request parameters.
-     * 
-     * @param endpointURI remote endpoint URI
-     * @param query query object
-     * @return result set
-     */
-    public ResultSetRewindable loadResultSet(String endpointURI, Query query)
-    {
-	return loadResultSet(endpointURI, query, null);
-    }
-    
-    /**
-     * Loads result set from an RDF model using a SPARQL query.
-     * Only <code>SELECT</code> queries can be used with this method.
-     * 
-     * @param model the RDF model to be queried
-     * @param query query object
-     * @return result set
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#select">SELECT</a>
-     */
-    public ResultSetRewindable loadResultSet(Model model, Query query)
-    {
-	if (log.isDebugEnabled()) log.debug("Local Model Query: {}", query);
-	if (query == null) throw new IllegalArgumentException("Query must be not null");
-
-	QueryExecution qex = QueryExecutionFactory.create(query, model);
-	try
-	{
-	    if (query.isSelectType()) return ResultSetFactory.copyResults(qex.execSelect());
-	    
-	    throw new QueryExecException("Query to load ResultSet must be SELECT");
-	}
-	catch (QueryExecException ex)
-	{
-	    if (log.isDebugEnabled()) log.debug("Local query execution exception: {}", ex);
-	    throw ex;
-	}
-	finally
-	{
-	    qex.close();
-	}
-    }
-
-    /**
-     * Loads result set from an RDF dataset using a SPARQL query.
-     * Only <code>SELECT</code> queries can be used with this method.
-     * 
-     * @param dataset the RDF dataset to be queried
-     * @param query query object
-     * @return result set
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#select">SELECT</a>
-     */
-    public ResultSetRewindable loadResultSet(Dataset dataset, Query query)
-    {
-	if (log.isDebugEnabled()) log.debug("Local Dataset Query: {}", query);
-	if (dataset == null) throw new IllegalArgumentException("Dataset must be not null");
-        if (query == null) throw new IllegalArgumentException("Query must be not null");
-	
-	QueryExecution qex = QueryExecutionFactory.create(query, dataset);
-	try
-	{
-	    if (query.isSelectType()) return ResultSetFactory.copyResults(qex.execSelect());
-	    
-	    throw new QueryExecException("Query to load ResultSet must be SELECT");
-	}
-	catch (QueryExecException ex)
-	{
-	    if (log.isDebugEnabled()) log.debug("Local query execution exception: {}", ex);
-	    throw ex;
-	}
-	finally
-	{
-	    qex.close();
-	}
-    }
-
     /**
      * Returns boolean result from a remote SPARQL endpoint using a query and optional request parameters.
      * Only <code>ASK</code> queries can be used with this method.
@@ -407,24 +236,14 @@ public class DataManager extends FileManager
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
 
         MultivaluedMap formData = new MultivaluedMapImpl();
-        formData.add("query", query.toString());
-
-	if (params != null)
-	    for (Map.Entry<String, List<String>> entry : params.entrySet())
-		if (!entry.getKey().equals("query")) // query param is handled separately
-		    for (String value : entry.getValue())
-		    {
-			if (log.isTraceEnabled()) log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
-                        formData.add(entry.getKey(), value);
-		    }
+        if (params != null) formData.putAll(params);
+        formData.putSingle("query", query.toString());
         
-	InputStream is = getEndpoint(endpointURI, params).
+        return XMLInput.booleanFromXML(getEndpoint(endpointURI, params).
             accept(MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE). // needs to be XML since we're reading with XMLInput
-            type(MediaType.APPLICATION_FORM_URLENCODED_TYPE). //type(MediaType.APPLICATION_SPARQL_QUERY_TYPE).
-            post(ClientResponse.class, formData). // post(ClientResponse.class, query).
-            getEntity(InputStream.class);
-        
-        return XMLInput.booleanFromXML(is);
+            type(MediaType.APPLICATION_FORM_URLENCODED_TYPE).
+            post(ClientResponse.class, formData).
+            getEntity(InputStream.class));
     }
 
     /**
@@ -443,71 +262,6 @@ public class DataManager extends FileManager
     }
 
     /**
-     * Returns boolean result from an RDF model using a SPARQL query.
-     * Only <code>ASK</code> queries can be used with this method.
-     *
-     * @param model the RDF model to be queried
-     * @param query query object
-     * @return boolean result
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#ask">ASK</a>
-     */
-    public boolean ask(Model model, Query query)
-    {
-	if (log.isDebugEnabled()) log.debug("Local Model Query: {}", query);
-	if (query == null) throw new IllegalArgumentException("Query must be not null");
-
-	QueryExecution qex = QueryExecutionFactory.create(query, model);
-	try
-	{
-	    if (query.isAskType()) return qex.execAsk();
-
-	    throw new QueryExecException("Query to load ResultSet must be SELECT");
-	}
-	catch (QueryExecException ex)
-	{
-	    if (log.isDebugEnabled()) log.debug("Local query execution exception: {}", ex);
-	    throw ex;
-	}
-	finally
-	{
-	    qex.close();
-	}
-    }
-
-    /**
-     * Returns boolean result from an RDF dataset using a SPARQL query.
-     * Only <code>ASK</code> queries can be used with this method.
-     *
-     * @param dataset the RDF dataset to be queried
-     * @param query query object
-     * @return boolean result
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#ask">ASK</a>
-     */
-    public boolean ask(Dataset dataset, Query query)
-    {
-	if (log.isDebugEnabled()) log.debug("Local Dataset Query: {}", query);
-	if (dataset == null) throw new IllegalArgumentException("Dataset must be not null");
-        if (query == null) throw new IllegalArgumentException("Query must be not null");
-
-	QueryExecution qex = QueryExecutionFactory.create(query, dataset);
-	try
-	{
-	    if (query.isAskType()) return qex.execAsk();
-
-	    throw new QueryExecException("Query to load ResultSet must be SELECT");
-	}
-	catch (QueryExecException ex)
-	{
-	    if (log.isDebugEnabled()) log.debug("Local query execution exception: {}", ex);
-	    throw ex;
-	}
-	finally
-	{
-	    qex.close();
-	}
-    }
-
-    /**
      * Executes update request on a remote SPARQL endpoint.
      * 
      * @param endpointURI remote endpoint URI
@@ -519,22 +273,16 @@ public class DataManager extends FileManager
     {
 	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", endpointURI, updateRequest);
 	if (updateRequest == null) throw new IllegalArgumentException("UpdateRequest must be not null");
+	//if (acceptedTypes == null) throw new IllegalArgumentException("Accepted MediaType[] must be not null");
 
         MultivaluedMap formData = new MultivaluedMapImpl();
-        formData.add("update", updateRequest.toString());
-
-	if (params != null)
-	    for (Map.Entry<String, List<String>> entry : params.entrySet())
-		if (!entry.getKey().equals("update")) // update param is handled separately
-		    for (String value : entry.getValue())
-		    {
-			if (log.isTraceEnabled()) log.trace("Adding param to SPARQL request with name: {} and value: {}", entry.getKey(), value);
-                        formData.add(entry.getKey(), value);
-		    }
+        if (params != null) formData.putAll(params);
+        formData.putSingle("update", updateRequest.toString());
         
 	return getEndpoint(endpointURI, params).
-            type(MediaType.APPLICATION_FORM_URLENCODED_TYPE). //type(MediaType.APPLICATION_SPARQL_QUERY_TYPE).
-            post(ClientResponse.class, formData); // post(ClientResponse.class, query).
+            //accept(acceptedTypes).
+            type(MediaType.APPLICATION_FORM_URLENCODED_TYPE).
+            post(ClientResponse.class, formData);
     }
     
     /**
@@ -544,14 +292,19 @@ public class DataManager extends FileManager
      * @param graphURI named graph URI
      * @return true if graph store contains named graph, false otherwise
      */
-    public boolean containsModel(String graphStoreURI, String graphURI)
+    public boolean containsNamed(String graphStoreURI, String graphURI)
     {
 	if (log.isDebugEnabled()) log.debug("Checking if Graph Store {} contains GRAPH with URI {}", graphStoreURI, graphURI);
+	return headNamed(graphStoreURI, graphURI).
+            getStatusInfo().
+            getFamily().equals(Family.SUCCESSFUL);
+    }
+
+    public ClientResponse headNamed(String graphStoreURI, String graphURI)
+    {
 	return getEndpoint(graphStoreURI, null).
             queryParam("graph", graphURI).
-            method("HEAD", ClientResponse.class).
-                getStatusInfo().
-                getFamily().equals(Family.SUCCESSFUL);
+            method("HEAD", ClientResponse.class);
     }
     
     /**
@@ -560,16 +313,15 @@ public class DataManager extends FileManager
      * same purpose.
      * 
      * @param graphStoreURI Graph Store URI
-     * @return RDF model of the default graph
+     * @return client response
      */
-    public Model getModel(String graphStoreURI)
+    public ClientResponse getDefault(String graphStoreURI)
     {
 	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} default graph", graphStoreURI);
 	return getEndpoint(graphStoreURI, null).
             queryParam("default", "").
             accept(getModelMediaTypes()).
-            get(ClientResponse.class).
-            getEntity(Model.class);
+            get(ClientResponse.class);
     }
     
     /**
@@ -581,14 +333,13 @@ public class DataManager extends FileManager
      * @param graphURI named graph URI
      * @return RDF model of the named graph
      */
-    public Model getModel(String graphStoreURI, String graphURI)
+    public ClientResponse getNamed(String graphStoreURI, String graphURI)
     {
 	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} with named graph URI: {}", graphStoreURI, graphURI);
 	return getEndpoint(graphStoreURI, null).
             queryParam("graph", graphURI).
             accept(getModelMediaTypes()).                
-            get(ClientResponse.class).
-            getEntity(Model.class);
+            get(ClientResponse.class);
     }
 
     /**
@@ -598,7 +349,7 @@ public class DataManager extends FileManager
      * @param model RDF model to be added
      * @return client response
      */
-    public ClientResponse addModel(String graphStoreURI, Model model)
+    public ClientResponse postToDefault(String graphStoreURI, Model model)
     {
 	if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} default graph", graphStoreURI);
 	return getEndpoint(graphStoreURI, null).
@@ -615,7 +366,7 @@ public class DataManager extends FileManager
      * @param model RDF model to be added
      * @return client response
      */
-    public ClientResponse addModel(String graphStoreURI, String graphURI, Model model)
+    public ClientResponse postToNamed(String graphStoreURI, String graphURI, Model model)
     {
 	if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} with named graph URI: {}", graphStoreURI, graphURI);
 	return getEndpoint(graphStoreURI, null).
@@ -632,7 +383,7 @@ public class DataManager extends FileManager
      * @param model RDF model to be stored
      * @return client response
      */
-    public ClientResponse putModel(String graphStoreURI, Model model)
+    public ClientResponse putToDefault(String graphStoreURI, Model model)
     {
 	if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} default graph", graphStoreURI);
 	return getEndpoint(graphStoreURI, null).
@@ -650,7 +401,7 @@ public class DataManager extends FileManager
      * @param model RDF model to be stored
      * @return client response
      */
-    public ClientResponse putModel(String graphStoreURI, String graphURI, Model model)
+    public ClientResponse putToNamed(String graphStoreURI, String graphURI, Model model)
     {
 	if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} with named graph URI {}", graphStoreURI, graphURI);
 	return getEndpoint(graphStoreURI, null).
@@ -682,7 +433,7 @@ public class DataManager extends FileManager
      * @param graphURI named graph URI
      * @return client response
      */
-    public ClientResponse deleteModel(String graphStoreURI, String graphURI)
+    public ClientResponse deleteNamed(String graphStoreURI, String graphURI)
     {
 	if (log.isDebugEnabled()) log.debug("DELETE named graph with URI {} from Graph Store {}", graphURI, graphStoreURI);
 	return getEndpoint(graphStoreURI, null).
