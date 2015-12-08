@@ -21,7 +21,6 @@ import javax.servlet.ServletConfig;
 import org.graphity.core.model.impl.GraphStoreProxyBase;
 import javax.ws.rs.core.Request;
 import org.graphity.core.MediaTypes;
-import org.graphity.core.util.jena.DataManager;
 
 /**
  * A factory class for creating new SPARQL Graph Store proxies.
@@ -38,11 +37,10 @@ public class GraphStoreFactory
      * @param request current request
      * @param servletConfig servlet config
      * @param origin remote graph store origin
-     * @param dataManager RDF data manager for this graph store
      * @param mediaTypes
      * @return graph store instance
      */
-    public static GraphStore createProxy(Request request, ServletConfig servletConfig, MediaTypes mediaTypes, GraphStoreOrigin origin, DataManager dataManager)
+    public static GraphStore createProxy(Request request, ServletConfig servletConfig, MediaTypes mediaTypes, GraphStoreOrigin origin)
     {
 	return new GraphStoreProxyBase(request, servletConfig, mediaTypes, origin);
     }

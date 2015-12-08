@@ -20,7 +20,6 @@ import javax.servlet.ServletConfig;
 import org.graphity.core.model.impl.SPARQLEndpointProxyBase;
 import javax.ws.rs.core.Request;
 import org.graphity.core.MediaTypes;
-import org.graphity.core.util.jena.DataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,11 +38,10 @@ public class SPARQLEndpointFactory
      * @param request request
      * @param servletConfig servlet config
      * @param origin proxy origin
-     * @param dataManager RDF data manager for this endpoint
      * @param mediaTypes
      * @return a new endpoint
      */
-    public static SPARQLEndpoint createProxy(Request request, ServletConfig servletConfig, MediaTypes mediaTypes, SPARQLEndpointOrigin origin, DataManager dataManager)
+    public static SPARQLEndpoint createProxy(Request request, ServletConfig servletConfig, MediaTypes mediaTypes, SPARQLEndpointOrigin origin)
     {
 	return new SPARQLEndpointProxyBase(request, servletConfig, mediaTypes, origin);
     }

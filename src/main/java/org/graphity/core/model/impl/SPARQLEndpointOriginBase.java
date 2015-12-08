@@ -24,7 +24,6 @@ import org.graphity.core.model.SPARQLEndpointOrigin;
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-@Deprecated
 public class SPARQLEndpointOriginBase extends OriginBase implements SPARQLEndpointOrigin
 {
     
