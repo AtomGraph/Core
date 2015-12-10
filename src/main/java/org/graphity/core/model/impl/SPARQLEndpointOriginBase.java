@@ -17,6 +17,7 @@
 
 package org.graphity.core.model.impl;
 
+import com.sun.jersey.api.client.WebResource;
 import org.graphity.core.model.SPARQLEndpointOrigin;
 
 /**
@@ -26,32 +27,9 @@ import org.graphity.core.model.SPARQLEndpointOrigin;
  */
 public class SPARQLEndpointOriginBase extends OriginBase implements SPARQLEndpointOrigin
 {
-    
-    /**
-     * Constructs SPARQL endpoint origin from URI and HTTP authentication credentials.
-     * 
-     * @param uri origin URI
-     * @param username authentication username
-     * @param password authentication password
-     */
-    public SPARQLEndpointOriginBase(String uri, String username, byte[] password)
+    public SPARQLEndpointOriginBase(WebResource webResource)
     {
-        super(uri, username, password);
-    }
-
-    public SPARQLEndpointOriginBase(String uri, String username, String password)
-    {
-        super(uri, username, password);
-    }
-    
-    /**
-     * Constructs SPARQL endpoint origin from URI.
-     * 
-     * @param uri origin URI
-     */
-    public SPARQLEndpointOriginBase(String uri)
-    {
-        super(uri);
+        super(webResource);
     }
     
 }

@@ -69,12 +69,12 @@ public class GraphStoreProvider extends PerRequestTypeInjectableProvider<Context
         return providers;
     }
 
-    public GraphStoreOrigin getGraphStoreOrigin()
+    public GraphStoreOrigin getOrigin()
     {
 	ContextResolver<GraphStoreOrigin> cr = getProviders().getContextResolver(GraphStoreOrigin.class, null);
 	return cr.getContext(GraphStoreOrigin.class);
     }
-
+    
     public MediaTypes getMediaTypes()
     {
 	ContextResolver<MediaTypes> cr = getProviders().getContextResolver(MediaTypes.class, null);
@@ -96,7 +96,7 @@ public class GraphStoreProvider extends PerRequestTypeInjectableProvider<Context
 
     public GraphStore getGraphStore()
     {
-        return GraphStoreFactory.createProxy(getRequest(), getServletConfig(), getMediaTypes(), getGraphStoreOrigin());
+        return GraphStoreFactory.createProxy(getRequest(), getServletConfig(), getMediaTypes(), getOrigin());
     }
 
     public GraphStore getGraphStore(Request request, ServletConfig servletConfig, MediaTypes mediaTypes, GraphStoreOrigin origin)

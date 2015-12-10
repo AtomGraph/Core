@@ -18,7 +18,7 @@
 package org.graphity.core.provider;
 
 import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.sparql.engine.http.Service;
+import com.sun.jersey.api.client.Client;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
@@ -67,13 +67,11 @@ public class SPARQLEndpointOriginProvider extends PerRequestTypeInjectableProvid
         return providers;
     }
 
-    /*
-    public DataManager getDataManager()
+    public Client getClient()
     {
-	ContextResolver<DataManager> cr = getProviders().getContextResolver(DataManager.class, null);
-	return cr.getContext(DataManager.class);
+	ContextResolver<Client> cr = getProviders().getContextResolver(Client.class, null);
+	return cr.getContext(Client.class);
     }
-    */
     
     @Override
     public Injectable<SPARQLEndpointOrigin> getInjectable(ComponentContext cc, Context context)
@@ -122,20 +120,11 @@ public class SPARQLEndpointOriginProvider extends PerRequestTypeInjectableProvid
     public SPARQLEndpointOrigin getSPARQLEndpointOrigin(Property property)
     {
         if (property == null) throw new IllegalArgumentException("Property cannot be null");
-        //if (dataManager == null) throw new IllegalArgumentException("DataManager cannot be null");
 
         Object endpointURI = getServletConfig().getInitParameter(property.getURI());
-        if (endpointURI != null)
-        {
-            String authUser = (String)getServletConfig().getInitParameter(Service.queryAuthUser.getSymbol());
-            String authPwd = (String)getServletConfig().getInitParameter(Service.queryAuthPwd.getSymbol());
-            if (authUser != null && authPwd != null)
-                return new SPARQLEndpointOriginBase(endpointURI.toString(), authUser, authPwd);
-            
-            return new SPARQLEndpointOriginBase(endpointURI.toString()); // , authUser, authPwd
-        }
+        if (endpointURI != null) return new SPARQLEndpointOriginBase(getClient().resource(endpointURI.toString()));
         
         return null;
     }
-
+    
 }

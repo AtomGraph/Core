@@ -39,6 +39,7 @@ public class SPARQLEndpointFactory
      * @param servletConfig servlet config
      * @param origin proxy origin
      * @param mediaTypes
+     * @param client
      * @return a new endpoint
      */
     public static SPARQLEndpoint createProxy(Request request, ServletConfig servletConfig, MediaTypes mediaTypes, SPARQLEndpointOrigin origin)

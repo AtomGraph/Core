@@ -35,6 +35,7 @@ import org.graphity.core.mapper.NotFoundExceptionMapper;
 import org.graphity.core.model.impl.GraphStoreProxyBase;
 import org.graphity.core.model.impl.QueriedResourceBase;
 import org.graphity.core.model.impl.SPARQLEndpointProxyBase;
+import org.graphity.core.provider.ClientProvider;
 import org.graphity.core.provider.DatasetProvider;
 import org.graphity.core.provider.MediaTypesProvider;
 import org.graphity.core.riot.RDFLanguages;
@@ -87,6 +88,7 @@ public class Application extends javax.ws.rs.core.Application
 	singletons.add(new QueryParamProvider());
 	singletons.add(new UpdateRequestReader());
         singletons.add(new DataManagerProvider());
+        singletons.add(new ClientProvider());        
         singletons.add(new SPARQLEndpointOriginProvider());
         singletons.add(new GraphStoreOriginProvider());
         singletons.add(new SPARQLEndpointProvider());

@@ -18,7 +18,7 @@
 package org.graphity.core.provider;
 
 import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.sparql.engine.http.Service;
+import com.sun.jersey.api.client.Client;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
@@ -118,15 +118,23 @@ public class GraphStoreOriginProvider extends PerRequestTypeInjectableProvider<C
         Object storeURI = getServletConfig().getInitParameter(property.getURI());        
         if (storeURI != null)
         {
+            /*
             String authUser = (String)getServletConfig().getInitParameter(Service.queryAuthUser.getSymbol());
             String authPwd = (String)getServletConfig().getInitParameter(Service.queryAuthPwd.getSymbol());
             if (authUser != null && authPwd != null)
                 return new GraphStoreOriginBase(storeURI.toString(), authUser, authPwd);
+            */
             
-            return new GraphStoreOriginBase(storeURI.toString());
+            return new GraphStoreOriginBase(getClient().resource(storeURI.toString()));
         }
 
         return null;
     }
 
+    public Client getClient()
+    {
+	ContextResolver<Client> cr = getProviders().getContextResolver(Client.class, null);
+	return cr.getContext(Client.class);
+    }
+    
 }

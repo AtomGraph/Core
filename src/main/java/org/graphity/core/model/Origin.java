@@ -17,6 +17,8 @@
 
 package org.graphity.core.model;
 
+import com.sun.jersey.api.client.WebResource;
+
 /**
  * A class representing the origin resource when the application works as an HTTP proxy.
  * 
@@ -31,10 +33,14 @@ public interface Origin
      * 
      * @return origin URI
      */
+    /*
     public String getURI();
 
     public String getUsername();
     
     public byte[] getPassword();
+    */
+    
+    WebResource getWebResource();
     
 }

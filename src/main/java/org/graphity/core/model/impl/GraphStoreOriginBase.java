@@ -17,6 +17,7 @@
 
 package org.graphity.core.model.impl;
 
+import com.sun.jersey.api.client.WebResource;
 import org.graphity.core.model.GraphStoreOrigin;
 
 /**
@@ -27,6 +28,11 @@ import org.graphity.core.model.GraphStoreOrigin;
 public class GraphStoreOriginBase extends OriginBase implements GraphStoreOrigin
 {
 
+    public GraphStoreOriginBase(WebResource webResource)
+    {
+        super(webResource);
+    }
+    
     /**
      * Constructs Graph Store origin from URI and HTTP authentication credentials.
      * 
@@ -34,6 +40,7 @@ public class GraphStoreOriginBase extends OriginBase implements GraphStoreOrigin
      * @param authUser authentication username
      * @param authPwd authentication password
      */
+    /*
     public GraphStoreOriginBase(String uri, String authUser, byte[] authPwd)
     {
         super(uri, authUser, authPwd);
@@ -43,15 +50,16 @@ public class GraphStoreOriginBase extends OriginBase implements GraphStoreOrigin
     {
         super(uri, authUser, authPwd);
     }
-    
+    */
     /**
      * Constructs Graph Store origin from URI.
      * 
      * @param uri 
      */
+    /*
     public GraphStoreOriginBase(String uri)
     {
         super(uri);
     }
-    
+    */
 }

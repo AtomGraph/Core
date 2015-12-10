@@ -16,6 +16,7 @@
  */
 package org.graphity.core.provider;
 
+import com.sun.jersey.api.client.Client;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
@@ -68,7 +69,7 @@ public class SPARQLEndpointProvider extends PerRequestTypeInjectableProvider<Con
         return servletConfig;
     }
 
-    public SPARQLEndpointOrigin getSPARQLEndpointOrigin()
+    public SPARQLEndpointOrigin getOrigin()
     {
 	ContextResolver<SPARQLEndpointOrigin> cr = getProviders().getContextResolver(SPARQLEndpointOrigin.class, null);
 	return cr.getContext(SPARQLEndpointOrigin.class);
@@ -95,7 +96,7 @@ public class SPARQLEndpointProvider extends PerRequestTypeInjectableProvider<Con
 
     public SPARQLEndpoint getSPARQLEndpoint()
     {
-        return getSPARQLEndpoint(getRequest(), getServletConfig(), getMediaTypes(), getSPARQLEndpointOrigin());
+        return getSPARQLEndpoint(getRequest(), getServletConfig(), getMediaTypes(), getOrigin());
     }
 
     public SPARQLEndpoint getSPARQLEndpoint(Request request, ServletConfig servletConfig, MediaTypes mediaTypes, SPARQLEndpointOrigin origin)

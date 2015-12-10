@@ -18,23 +18,15 @@
 package org.graphity.core.model.impl;
 
 import com.hp.hpl.jena.rdf.model.Model;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
-import com.sun.jersey.api.client.filter.LoggingFilter;
-import java.net.URI;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Request;
 import org.graphity.core.MediaType;
 import org.graphity.core.MediaTypes;
+import org.graphity.core.client.GraphStoreClient;
 import org.graphity.core.model.GraphStoreOrigin;
 import org.graphity.core.model.GraphStoreProxy;
-import org.graphity.core.model.Origin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +41,8 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreProxyBase.class);
 
-    private final Origin origin;
+    private final GraphStoreOrigin origin;
+    private final GraphStoreClient client;
     private final javax.ws.rs.core.MediaType[] modelMediaTypes;
     
     /**
@@ -67,6 +60,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
         if (origin == null) throw new IllegalArgumentException("GraphStoreOrigin cannot be null");
         this.origin = origin;
         modelMediaTypes = mediaTypes.getModelMediaTypes().toArray(new javax.ws.rs.core.MediaType[mediaTypes.getModelMediaTypes().size()]);        
+        client = GraphStoreClient.create(origin.getWebResource());
     }
 
      /**
@@ -76,11 +70,16 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
      * @return graph store resource
      */
     @Override
-    public Origin getOrigin()
+    public GraphStoreOrigin getOrigin()
     {
         return origin;
     }
 
+    public GraphStoreClient getClient()
+    {
+        return client;
+    }
+    
     public javax.ws.rs.core.MediaType[] getModelMediaTypes()
     {
         return modelMediaTypes;
@@ -89,103 +88,66 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
     @Override
     public Model getModel()
     {
-	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} default graph", getOrigin().getURI());
-	return getEndpoint().queryParam("default", "").
-            accept(getModelMediaTypes()).
-            get(ClientResponse.class).
-                getEntity(Model.class);
+	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} default graph", getClient().getWebResource().getURI());
+	return getClient().getModel(getModelMediaTypes()).getEntity(Model.class);
     }
 
     @Override
     public Model getModel(String uri)
     {
-	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} with named graph URI: {}", getOrigin().getURI(), uri);
-	return getEndpoint().queryParam("graph", uri).
-            accept(getModelMediaTypes()).
-            get(ClientResponse.class).
-                getEntity(Model.class);
+	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} with named graph URI: {}", getClient().getWebResource().getURI(), uri);
+	return getClient().getModel(getModelMediaTypes()).getEntity(Model.class);
     }
 
     @Override
     public boolean containsModel(String uri)
     {
-	if (log.isDebugEnabled()) log.debug("Checking if Graph Store {} contains GRAPH with URI {}", getOrigin().getURI(), uri);
-	return headNamed(getOrigin().getURI(), uri).
+	if (log.isDebugEnabled()) log.debug("Checking if Graph Store {} contains GRAPH with URI {}", getClient().getWebResource().getURI(), uri);
+	return getClient().headNamed(uri).
             getStatusInfo().
             getFamily().equals(javax.ws.rs.core.Response.Status.Family.SUCCESSFUL);
-    }
-
-    public ClientResponse headNamed(String graphStoreURI, String graphURI)
-    {
-	return getEndpoint().queryParam("graph", graphURI).
-            method("HEAD", ClientResponse.class);
     }
     
     @Override
     public void putModel(Model model)
     {
-	if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} default graph", getOrigin().getURI());
-	getEndpoint().queryParam("default", "").
-            type(MediaType.TEXT_NTRIPLES).
-            put(ClientResponse.class, model);
+	if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} default graph", getClient().getWebResource().getURI());
+	getClient().putModel(MediaType.TEXT_NTRIPLES_TYPE, model);
     }
 
     @Override
     public void putModel(String uri, Model model)
     {
-	if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} with named graph URI {}", getOrigin().getURI(), uri);
-	getEndpoint().queryParam("graph", uri).
-            type(MediaType.TEXT_NTRIPLES).
-            put(ClientResponse.class, model);
+	if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} with named graph URI {}", getClient().getWebResource().getURI(), uri);
+	getClient().putModel(MediaType.TEXT_NTRIPLES_TYPE, uri, model);
     }
 
     @Override
     public void deleteDefault()
     {
-	if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store {}", getOrigin().getURI());
-	getEndpoint().queryParam("default", "").
-            delete(ClientResponse.class);
+	if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store {}", getClient().getWebResource().getURI());
+	getClient().deleteDefault();
     }
 
     @Override
     public void deleteModel(String uri)
     {
-	if (log.isDebugEnabled()) log.debug("DELETE named graph with URI {} from Graph Store {}", uri, getOrigin().getURI());
-	getEndpoint().queryParam("graph", uri).
-            delete(ClientResponse.class);
+	if (log.isDebugEnabled()) log.debug("DELETE named graph with URI {} from Graph Store {}", uri, getClient().getWebResource().getURI());
+	getClient().deleteModel(uri);
     }
 
     @Override
     public void add(Model model)
     {
-	if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} default graph", getOrigin().getURI());
-	getEndpoint().queryParam("default", "").
-            type(MediaType.TEXT_NTRIPLES).
-            post(ClientResponse.class, model);
+	if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} default graph", getClient().getWebResource().getURI());
+	getClient().add(MediaType.TEXT_NTRIPLES_TYPE, model);
     }
 
     @Override
     public void add(String uri, Model model)
     {
-	if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} with named graph URI: {}", getOrigin().getURI(), uri);
-	getEndpoint().queryParam("graph", uri).
-            type(MediaType.TEXT_NTRIPLES).
-            post(ClientResponse.class, model);
+	if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} with named graph URI: {}", getClient().getWebResource().getURI(), uri);
+	getClient().add(MediaType.TEXT_NTRIPLES_TYPE, uri, model);
     }
 
-    public WebResource getEndpoint()
-    {
-        return getEndpoint(null);
-    }
-    
-    public WebResource getEndpoint(MultivaluedMap<String, String> params)
-    {      
-        Client client = Client.create(new DefaultClientConfig());
-        if (getOrigin().getUsername() != null && getOrigin().getPassword() != null)
-            client.addFilter(new HTTPBasicAuthFilter(getOrigin().getUsername(), getOrigin().getPassword()));
-        if (log.isDebugEnabled()) client.addFilter(new LoggingFilter(System.out));
-        
-        return client.resource(URI.create(getOrigin().getURI()));
-    }
-    
 }
