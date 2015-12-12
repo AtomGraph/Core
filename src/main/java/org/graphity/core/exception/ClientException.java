@@ -16,11 +16,24 @@
 
 package org.graphity.core.exception;
 
+import javax.ws.rs.core.Response.StatusType;
+
 /**
- *
+ * A runtime exception thrown by a client that signals a failure to process the HTTP request or HTTP response.
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class ConfigurationException extends RuntimeException
+public class ClientException extends RuntimeException
 {
+    private final StatusType statusType;
+    
+    public ClientException(StatusType statusType)
+    {
+        this.statusType = statusType;
+    }
+    
+    public StatusType getStatusType()
+    {
+        return statusType;
+    }
     
 }

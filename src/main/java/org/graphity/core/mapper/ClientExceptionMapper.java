@@ -14,13 +14,23 @@
  * limitations under the License.
  */
 
-package org.graphity.core.exception;
+package org.graphity.core.mapper;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
+import org.graphity.core.exception.ClientException;
 
 /**
  *
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class ConfigurationException extends RuntimeException
+public class ClientExceptionMapper implements ExceptionMapper<ClientException>
 {
+
+    @Override
+    public Response toResponse(ClientException exception)
+    {
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+    }
     
 }

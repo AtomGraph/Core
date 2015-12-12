@@ -31,6 +31,7 @@ import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
 import org.apache.jena.riot.IO_Jena;
 import org.apache.jena.riot.RDFParserRegistry;
+import org.graphity.core.mapper.ClientExceptionMapper;
 import org.graphity.core.mapper.NotFoundExceptionMapper;
 import org.graphity.core.model.impl.GraphStoreProxyBase;
 import org.graphity.core.model.impl.QueriedResourceBase;
@@ -94,6 +95,7 @@ public class Application extends javax.ws.rs.core.Application
         singletons.add(new SPARQLEndpointProvider());
         //singletons.add(new GraphStoreProvider());
         singletons.add(new MediaTypesProvider());
+        singletons.add(new ClientExceptionMapper());        
         singletons.add(new NotFoundExceptionMapper());
     }
     

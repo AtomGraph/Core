@@ -26,13 +26,12 @@ import com.sun.jersey.api.client.ClientResponse;
 import java.io.InputStream;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Path;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response.Status.Family;
 import org.graphity.core.MediaTypes;
 import org.graphity.core.client.SPARQLClient;
+import org.graphity.core.exception.ClientException;
 import org.graphity.core.model.SPARQLEndpointOrigin;
 import org.graphity.core.model.SPARQLEndpointProxy;
 import org.slf4j.Logger;
@@ -100,8 +99,11 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
 	if (log.isDebugEnabled()) log.debug("Loading Model from SPARQL endpoint: {} using Query: {}", getOrigin().getWebResource().getURI(), query);
 	ClientResponse cr = getClient().query(query, getModelMediaTypes());
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
-            throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR); // TO-DO: improve
-            
+        {
+            if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+            throw new ClientException(cr.getStatusInfo());
+        }
+
         return cr.getEntity(Model.class);
     }
 
@@ -112,8 +114,14 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
         if (!query.isSelectType()) throw new IllegalArgumentException("Query must be SELECT");
         
 	if (log.isDebugEnabled()) log.debug("Loading ResultSet from SPARQL endpoint: {} using Query: {}", getOrigin().getWebResource().getURI(), query);
-	return getClient().query(query, getResultSetMediaTypes()).
-            getEntity(ResultSetRewindable.class);
+	ClientResponse cr = getClient().query(query, getResultSetMediaTypes());
+        if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
+        {
+            if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+            throw new ClientException(cr.getStatusInfo());
+        }
+        
+        return cr.getEntity(ResultSetRewindable.class);
     }
 
     /**
@@ -121,7 +129,6 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
      * Only <code>ASK</code> queries can be used with this method.
      * 
      * @param query query object
-     * @param params name/value pairs of request parameters or null, if none
      * @return boolean result
      * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#ask">ASK</a>
      */    
@@ -131,9 +138,14 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
         if (!query.isAskType()) throw new IllegalArgumentException("Query must be ASK");
         
-	//return ask(query, null);
-        return XMLInput.booleanFromXML(getClient().query(query, getResultSetMediaTypes()).
-            getEntity(InputStream.class));        
+        ClientResponse cr = getClient().query(query, getResultSetMediaTypes());
+        if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
+        {
+            if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+            throw new ClientException(cr.getStatusInfo());
+        }
+
+        return XMLInput.booleanFromXML(cr.getEntity(InputStream.class));
     }
 
     /*
@@ -158,7 +170,12 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
     public void update(UpdateRequest updateRequest)
     {
 	if (log.isDebugEnabled()) log.debug("Executing update on SPARQL endpoint: {} using UpdateRequest: {}", getOrigin().getWebResource().getURI(), updateRequest);
-	getClient().update(updateRequest, null);
+	ClientResponse cr = getClient().update(updateRequest, null);
+        if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
+        {
+            if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+            throw new ClientException(cr.getStatusInfo());
+        }        
     }
     
 }
