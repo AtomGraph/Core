@@ -18,7 +18,6 @@
 package org.graphity.core.model.impl;
 
 import com.sun.jersey.api.client.WebResource;
-import java.nio.charset.Charset;
 import org.graphity.core.model.Origin;
 
 /**
@@ -29,13 +28,7 @@ import org.graphity.core.model.Origin;
  */
 public class OriginBase implements Origin
 {
-    static private final Charset CHARACTER_SET = Charset.forName("iso-8859-1");
     
-    /*
-    private final String uri;
-    private final String username;
-    private final byte[] password;
-    */
     private final WebResource webResource;
     
     public OriginBase(WebResource webResource)
@@ -48,61 +41,11 @@ public class OriginBase implements Origin
     {
         return webResource;
     }
-    
-    /**
-     * Constructs origin from URI.
-     * 
-     * @param uri origin URI
-     */
-    /*
-    public OriginBase(String uri)
-    {
-        this(uri, null, (byte[])null);
-    }
-    */
-    
-    /**
-     * Constructs origin from URI.
-     * 
-     * @param uri origin URI
-     * @param username username
-     * @param password password
-     */
-    /*
-    public OriginBase(String uri, String username, byte[] password)
-    {
-        this.uri = uri;
-        this.username = username;
-        this.password = password;
-    }
-    
-    public OriginBase(String uri, String username, String password)
-    {
-        this(uri, username, password.getBytes(CHARACTER_SET));
-    }
-    
-    @Override
-    public String getURI()
-    {
-        return uri;
-    }
-
-    @Override
-    public String getUsername()
-    {
-        return username;
-    }
-
-    @Override
-    public byte[] getPassword()
-    {
-        return password;
-    }
-    
+        
     @Override
     public String toString()
     {
-        return uri; // TO-DO: add username/password?
+        return getWebResource().getURI().toString();
     }
-    */
+
 }

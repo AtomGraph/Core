@@ -20,6 +20,7 @@ import com.hp.hpl.jena.sparql.engine.http.Service;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.api.client.filter.ClientFilter;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
@@ -70,10 +71,16 @@ public class ClientProvider extends PerRequestTypeInjectableProvider<Context, Cl
     {
         return getClient();
     }
- 
+
     public Client getClient()
     {
-        ClientConfig clientConfig = new DefaultClientConfig();
+        return getClient(addProviders(new DefaultClientConfig()), getHTTPAuthFilter(getServletConfig()));
+    }
+    
+    public ClientConfig addProviders(ClientConfig clientConfig)
+    {
+        if (clientConfig == null) throw new IllegalArgumentException("ClientConfig cannot be null");
+        
         clientConfig.getProperties().put(URLConnectionClientHandler.PROPERTY_HTTP_URL_CONNECTION_SET_METHOD_WORKAROUND, true);
         clientConfig.getSingletons().add(new ModelProvider());
         clientConfig.getSingletons().add(new DatasetProvider());
@@ -81,14 +88,29 @@ public class ClientProvider extends PerRequestTypeInjectableProvider<Context, Cl
         clientConfig.getSingletons().add(new QueryWriter());
         clientConfig.getSingletons().add(new UpdateRequestReader()); // TO-DO: UpdateRequestProvider
 
+        return clientConfig;
+    }
+
+    public ClientFilter getHTTPAuthFilter(ServletConfig servletConfig)
+    {
+        if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
+
+        String authUser = (String)servletConfig.getInitParameter(Service.queryAuthUser.getSymbol());
+        String authPwd = (String)servletConfig.getInitParameter(Service.queryAuthPwd.getSymbol());
+        if (authUser != null && authPwd != null) return new HTTPBasicAuthFilter(authUser, authPwd);
+        
+        return null;
+    }
+    
+    public Client getClient(ClientConfig clientConfig, ClientFilter clientFilter)
+    {
+        if (clientConfig == null) throw new IllegalArgumentException("ClientConfig cannot be null");
+        
         Client client = Client.create(clientConfig);
-        String authUser = (String)getServletConfig().getInitParameter(Service.queryAuthUser.getSymbol());
-        String authPwd = (String)getServletConfig().getInitParameter(Service.queryAuthPwd.getSymbol());
-        if (authUser != null && authPwd != null)
-            client.addFilter(new HTTPBasicAuthFilter(authUser, authPwd));
+        if (clientFilter != null) client.addFilter(clientFilter);
         if (log.isDebugEnabled()) client.addFilter(new LoggingFilter(System.out));
         
-        return Client.create(clientConfig);
+        return client;
     }
     
 }

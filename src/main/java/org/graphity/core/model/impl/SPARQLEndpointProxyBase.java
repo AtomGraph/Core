@@ -20,6 +20,7 @@ package org.graphity.core.model.impl;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.sparql.resultset.JSONInput;
 import com.hp.hpl.jena.sparql.resultset.XMLInput;
 import com.hp.hpl.jena.update.UpdateRequest;
 import com.sun.jersey.api.client.ClientResponse;
@@ -29,6 +30,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response.Status.Family;
+import org.graphity.core.MediaType;
 import org.graphity.core.MediaTypes;
 import org.graphity.core.client.SPARQLClient;
 import org.graphity.core.exception.ClientException;
@@ -49,7 +51,6 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointProxyBase.class);
 
     private final SPARQLEndpointOrigin origin;
-    //private final ClientConfig clientConfig = new DefaultClientConfig();
     private final SPARQLClient client;
     private final javax.ws.rs.core.MediaType[] modelMediaTypes, resultSetMediaTypes;
 
@@ -145,7 +146,12 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
             throw new ClientException(cr.getStatusInfo());
         }
 
-        return XMLInput.booleanFromXML(cr.getEntity(InputStream.class));
+        if (cr.getType().isCompatible(MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
+            return JSONInput.booleanFromJSON(cr.getEntity(InputStream.class));
+        if (cr.getType().isCompatible(MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE))        
+            return XMLInput.booleanFromXML(cr.getEntity(InputStream.class));
+        
+        throw new ClientException(cr.getStatusInfo()); // TO-DO: refactor
     }
 
     /*

@@ -32,6 +32,8 @@ import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
 import java.net.URI;
 import java.util.List;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
+import org.graphity.core.exception.ClientException;
 import org.graphity.core.provider.DatasetProvider;
 import org.graphity.core.provider.MediaTypesProvider;
 import org.graphity.core.provider.ModelProvider;
@@ -127,7 +129,14 @@ public class DataManager extends FileManager
     @Override
     public Model loadModel(String uri)
     {
-        return get(uri, getModelMediaTypes()).getEntity(Model.class);
+        ClientResponse cr = get(uri, getModelMediaTypes());
+        if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+        {
+            if (log.isDebugEnabled()) log.debug("RDF request to URI: {} unsuccessful. Reason: {}", uri, cr.getStatusInfo().getReasonPhrase());
+            throw new ClientException(cr.getStatusInfo());
+        }
+        
+        return cr.getEntity(Model.class);
     }
         
     public boolean usePreemptiveAuth(Property property)
