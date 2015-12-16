@@ -28,12 +28,19 @@ public class ClientException extends RuntimeException
     
     public ClientException(StatusType statusType)
     {
+	if (statusType == null) throw new IllegalArgumentException("StatusType must be not null");        
         this.statusType = statusType;
     }
     
     public StatusType getStatusType()
     {
         return statusType;
+    }
+    
+    @Override
+    public String toString()
+    {
+        return getStatusType().toString();
     }
     
 }
