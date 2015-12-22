@@ -16,6 +16,7 @@
  */
 package org.graphity.core.util.jena;
 
+import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.sparql.util.Context;
@@ -33,6 +34,7 @@ import java.net.URI;
 import java.util.List;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import org.graphity.core.MediaTypes;
 import org.graphity.core.exception.ClientException;
 import org.graphity.core.provider.DatasetProvider;
 import org.graphity.core.provider.MediaTypesProvider;
@@ -79,9 +81,10 @@ public class DataManager extends FileManager
 	super(mapper);
         setModelCaching(cacheModelLoads);
         this.preemptiveAuth = preemptiveAuth;
-        List<javax.ws.rs.core.MediaType> modelMediaTypeList = new MediaTypesProvider().getMediaTypes().getModelMediaTypes();
+        MediaTypes mediaTypes = new MediaTypesProvider().getMediaTypes(); // new MediaTypes() ?
+        List<javax.ws.rs.core.MediaType> modelMediaTypeList = mediaTypes.forClass(Model.class);
         modelMediaTypes = modelMediaTypeList.toArray(new javax.ws.rs.core.MediaType[modelMediaTypeList.size()]);
-        List<javax.ws.rs.core.MediaType> resultMediaTypeList = new MediaTypesProvider().getMediaTypes().getResultSetMediaTypes();
+        List<javax.ws.rs.core.MediaType> resultMediaTypeList = mediaTypes.forClass(ResultSet.class);
         resultSetMediaTypes = resultMediaTypeList.toArray(new javax.ws.rs.core.MediaType[resultMediaTypeList.size()]);
         
         clientConfig.getProperties().put(URLConnectionClientHandler.PROPERTY_HTTP_URL_CONNECTION_SET_METHOD_WORKAROUND, true);

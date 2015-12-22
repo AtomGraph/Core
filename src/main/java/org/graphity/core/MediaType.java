@@ -17,6 +17,7 @@
 package org.graphity.core;
 
 import java.util.Map;
+import org.apache.jena.atlas.web.ContentType;
 import org.apache.jena.riot.Lang;
 
 /**
@@ -82,6 +83,16 @@ public class MediaType extends javax.ws.rs.core.MediaType
     /** "application/rdf+x-www-form-urlencoded" */
     public final static MediaType APPLICATION_RDF_URLENCODED_TYPE = new MediaType("application","application/rdf+x-www-form-urlencoded");
 
+    public MediaType(Lang lang)
+    {
+        this(lang.getContentType());
+    }
+
+    public MediaType(ContentType ct)
+    {
+        this(ct.getType(), ct.getSubType());
+    }
+    
     public MediaType(String type, String subtype, Map<String, String> parameters)
     {
 	super(type, subtype, parameters);

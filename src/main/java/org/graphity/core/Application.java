@@ -75,9 +75,9 @@ public class Application extends javax.ws.rs.core.Application
         this.servletConfig = servletConfig;
 
         // add RDF/POST serialization
-        RDFLanguages.register(RDFLanguages.RDFPOST) ;
+        RDFLanguages.register(RDFLanguages.RDFPOST);
         RDFParserRegistry.registerLangTriples(RDFLanguages.RDFPOST, new RDFPostReaderFactory());
-        IO_Jena.registerForModelRead(RDFLanguages.strLangRDFPOST, RDFPostReaderAdapter.class) ;
+        IO_Jena.registerForModelRead(RDFLanguages.strLangRDFPOST, RDFPostReaderAdapter.class);
 
 	classes.add(QueriedResourceBase.class); // handles all
 	classes.add(SPARQLEndpointProxyBase.class); // handles /sparql queries

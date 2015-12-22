@@ -19,6 +19,7 @@ package org.graphity.core.model.impl;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.sun.jersey.api.client.ClientResponse;
+import java.util.List;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
@@ -62,7 +63,8 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
         super(request, servletConfig, mediaTypes);
         if (origin == null) throw new IllegalArgumentException("GraphStoreOrigin cannot be null");
         this.origin = origin;
-        modelMediaTypes = mediaTypes.getModelMediaTypes().toArray(new javax.ws.rs.core.MediaType[mediaTypes.getModelMediaTypes().size()]);        
+        List<javax.ws.rs.core.MediaType> modelTypeList = mediaTypes.forClass(Model.class);
+        modelMediaTypes = modelTypeList.toArray(new javax.ws.rs.core.MediaType[modelTypeList.size()]);        
         client = GraphStoreClient.create(origin.getWebResource());
     }
 

@@ -18,6 +18,7 @@ package org.graphity.core.model.impl;
 
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.rdf.model.*;
 import com.hp.hpl.jena.update.UpdateFactory;
@@ -203,9 +204,9 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     public ResponseBuilder getResponseBuilder(Model model)
     {
         return org.graphity.core.model.impl.Response.fromRequest(getRequest()).
-                getResponseBuilder(model, getVariants(getMediaTypes().getModelMediaTypes()));
+                getResponseBuilder(model, getVariants(getMediaTypes().forClass(Model.class)));
     }
-    
+        
     /**
      * Returns response builder for the given SPARQL result set.
      * 
@@ -215,7 +216,7 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     public ResponseBuilder getResponseBuilder(ResultSetRewindable resultSet)
     {
 	return org.graphity.core.model.impl.Response.fromRequest(getRequest()).
-                getResponseBuilder(resultSet, getVariants(getMediaTypes().getResultSetMediaTypes()));
+                getResponseBuilder(resultSet, getVariants(getMediaTypes().forClass(ResultSet.class)));
     }
     
     /**

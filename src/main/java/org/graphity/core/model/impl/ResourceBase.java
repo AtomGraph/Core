@@ -25,7 +25,6 @@ import javax.annotation.PostConstruct;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -133,9 +132,9 @@ public abstract class ResourceBase implements Resource
         return mediaTypes;
     }
     
-    public List<MediaType> getModelMediaTypes()
+    public List<javax.ws.rs.core.MediaType> getModelMediaTypes()
     {
-        return getMediaTypes().getModelMediaTypes();
+        return getMediaTypes().forClass(Model.class);
     }
     
     public List<Locale> getLanguages()

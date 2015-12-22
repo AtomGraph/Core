@@ -107,7 +107,7 @@ public abstract class GraphStoreBase implements GraphStore
      */
     public Variant.VariantListBuilder getVariantListBuilder()
     {
-        return getResponse().getVariantListBuilder(getMediaTypes().getModelMediaTypes(), getLanguages(), getEncodings());
+        return getResponse().getVariantListBuilder(getMediaTypes().forClass(Model.class), getLanguages(), getEncodings());
     }
         
     /**

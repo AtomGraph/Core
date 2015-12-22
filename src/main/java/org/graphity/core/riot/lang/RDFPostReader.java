@@ -515,13 +515,6 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
         if ( !lookingAt(tokens, peekIter, DIRECTIVE))
             exception(peekToken(tokens, peekIter), "Expected RDF/POST directive (found '" + peekToken(tokens, peekIter) + "')") ;
         nextToken(tokens, peekIter) ; // move to the real value
-
-        /*
-        Token t = peekToken(tokens, peekIter) ;
-        String image = t.getImage() ;        
-        if ( !image.equals(URI_PRED) && !image.equals(DEF_NS_PRED) && !image.equals(NS_PRED))
-            exception(peekToken(tokens, peekIter), "Expected RDF predicate directive 'su'/'sv'/'sn' (found '" + peekToken(tokens, peekIter) + "')") ;
-        */
         
         // Token to Node
         return tokenAsNode(profile, peekToken(tokens, peekIter)) ;

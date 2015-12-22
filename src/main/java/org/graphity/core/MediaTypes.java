@@ -16,6 +16,8 @@
 
 package org.graphity.core;
 
+import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.rdf.model.Model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -23,7 +25,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.apache.jena.atlas.web.ContentType;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFLanguages;
 
@@ -34,8 +35,9 @@ import org.apache.jena.riot.RDFLanguages;
  */
 public class MediaTypes
 {
-    private final List<javax.ws.rs.core.MediaType> modelMediaTypes;
-    private final List<javax.ws.rs.core.MediaType> resultSetMediaTypes;
+    //private final List<javax.ws.rs.core.MediaType> modelMediaTypes;
+    //private final List<javax.ws.rs.core.MediaType> resultSetMediaTypes;
+    private final Map<Class, List<javax.ws.rs.core.MediaType>> classTypes;
     
     /**
      * Media types that can be used to represent of SPARQL result set
@@ -43,58 +45,23 @@ public class MediaTypes
      * @see <a href="http://www.w3.org/TR/sparql11-protocol/#query-success">SPARQL 1.1 Protocol. 2.1.6 Success Responses</a>
      * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/ResultSetRewindable.html">Jena ResultSetRewindable</a>
      */
-    private static final javax.ws.rs.core.MediaType[] RESULT_SET_MEDIA_TYPES = new javax.ws.rs.core.MediaType[]{org.graphity.core.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE,
-			    org.graphity.core.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE};
+    private static final javax.ws.rs.core.MediaType[] RESULT_SET_MEDIA_TYPES = new MediaType[]{MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE,
+			    MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE};
     
-    public MediaTypes(List<javax.ws.rs.core.MediaType> modelMediaTypes, List<javax.ws.rs.core.MediaType> resultSetMediaTypes)
+    public MediaTypes(Map<Class, List<javax.ws.rs.core.MediaType>> classTypes)
     {
-        this.modelMediaTypes = modelMediaTypes;
-        this.resultSetMediaTypes = resultSetMediaTypes;
+        this.classTypes = classTypes;
     }
 
     public MediaTypes()
     {
-        this(getRegisteredModelMediaTypes(), getRegisteredResultSetMediaTypes());
-    }
+        classTypes = new HashMap<>();
 
-    public List<javax.ws.rs.core.MediaType> getModelMediaTypes()
-    {
-        return modelMediaTypes;
-    }
-
-    public List<javax.ws.rs.core.MediaType> getResultSetMediaTypes()
-    {
-        return resultSetMediaTypes;
-    }
-    
-    public static List<javax.ws.rs.core.MediaType> getRegistered()
-    {
-        List<javax.ws.rs.core.MediaType> mediaTypes = new ArrayList<>();
-        
-        Iterator<Lang> it = RDFLanguages.getRegisteredLanguages().iterator();
-        while (it.hasNext())
-        {
-            Lang lang = it.next();
-            if (!lang.equals(Lang.RDFNULL))
-            {
-                ContentType ct = lang.getContentType();
-                mediaTypes.add(new javax.ws.rs.core.MediaType(ct.getType(), ct.getSubType()));
-            }
-        }
-
-        return mediaTypes;
-    }
-
-    /**
-     * Returns supported RDF model media types.
-     * 
-     * @return list of media types
-     */
-    public static List<javax.ws.rs.core.MediaType> getRegisteredModelMediaTypes()
-    {
         List<javax.ws.rs.core.MediaType> list = new ArrayList<>();
         Map<String, String> utf8Param = new HashMap<>();
         utf8Param.put("charset", "UTF-8");
+
+        // Model
         
         Iterator<javax.ws.rs.core.MediaType> it = getRegistered().iterator();
         while (it.hasNext())
@@ -106,28 +73,49 @@ public class MediaTypes
         MediaType rdfXml = new MediaType(org.graphity.core.MediaType.APPLICATION_RDF_XML_TYPE.getType(), org.graphity.core.MediaType.APPLICATION_RDF_XML_TYPE.getSubtype(), utf8Param);
         list.add(0, rdfXml); // first one becomes default
         
-        return Collections.unmodifiableList(list);
-    }
-    
-    /**
-     * Returns supported SPARQL result set media types.
-     * 
-     * @return list of media types
-     */
-    public static List<javax.ws.rs.core.MediaType> getRegisteredResultSetMediaTypes()
-    {
-        List<javax.ws.rs.core.MediaType> list = new ArrayList<>();
-        Map<String, String> utf8Param = new HashMap<>();
-        utf8Param.put("charset", "UTF-8");
+        classTypes.put(Model.class, Collections.unmodifiableList(list));
 
-        Iterator<javax.ws.rs.core.MediaType> it = Arrays.asList(RESULT_SET_MEDIA_TYPES).iterator();
+        // ResultSet
+        
+        list = new ArrayList<>();
+
+        it = Arrays.asList(RESULT_SET_MEDIA_TYPES).iterator();
         while (it.hasNext())
         {
             javax.ws.rs.core.MediaType registered = it.next();
-            list.add(new javax.ws.rs.core.MediaType(registered.getType(), registered.getSubtype(), utf8Param));
+            list.add(new MediaType(registered.getType(), registered.getSubtype(), utf8Param));
         }
 
-        return Collections.unmodifiableList(list);
+        classTypes.put(ResultSet.class, Collections.unmodifiableList(list));
     }
 
+    public static List<javax.ws.rs.core.MediaType> getRegistered()
+    {
+        List<javax.ws.rs.core.MediaType> mediaTypes = new ArrayList<>();
+        
+        Iterator<Lang> it = RDFLanguages.getRegisteredLanguages().iterator();
+        while (it.hasNext())
+        {
+            Lang lang = it.next();
+            if (!lang.equals(Lang.RDFNULL)) mediaTypes.add(new MediaType(lang));
+        }
+
+        return mediaTypes;
+    }
+
+    /**
+     * Returns Java class to JAX-RS media type map.
+     * 
+     * @return class/type map
+     */
+    protected Map<Class, List<javax.ws.rs.core.MediaType>> getClassTypes()
+    {
+        return classTypes;
+    }
+    
+    public List<javax.ws.rs.core.MediaType> forClass(Class clazz)
+    {
+        return getClassTypes().get(clazz);
+    }
+    
 }

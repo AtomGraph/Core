@@ -18,6 +18,7 @@
 package org.graphity.core.model.impl;
 
 import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.sparql.resultset.JSONInput;
@@ -25,6 +26,7 @@ import com.hp.hpl.jena.sparql.resultset.XMLInput;
 import com.hp.hpl.jena.update.UpdateRequest;
 import com.sun.jersey.api.client.ClientResponse;
 import java.io.InputStream;
+import java.util.List;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
@@ -68,8 +70,11 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
         super(request, servletConfig, mediaTypes);
         if (origin == null) throw new IllegalArgumentException("SPARQLEndpointOrigin cannot be null");
         this.origin = origin;
-        modelMediaTypes = mediaTypes.getModelMediaTypes().toArray(new javax.ws.rs.core.MediaType[mediaTypes.getModelMediaTypes().size()]);
-        resultSetMediaTypes = mediaTypes.getResultSetMediaTypes().toArray(new javax.ws.rs.core.MediaType[mediaTypes.getResultSetMediaTypes().size()]);
+        
+        List<javax.ws.rs.core.MediaType> modelTypeList = mediaTypes.forClass(Model.class);
+        modelMediaTypes = modelTypeList.toArray(new javax.ws.rs.core.MediaType[modelTypeList.size()]);
+        List<javax.ws.rs.core.MediaType> resultSetTypeList = mediaTypes.forClass(ResultSet.class);        
+        resultSetMediaTypes = resultSetTypeList.toArray(new javax.ws.rs.core.MediaType[resultSetTypeList.size()]);
 
         client = SPARQLClient.create(origin.getWebResource());
     }
@@ -93,7 +98,7 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
     public javax.ws.rs.core.MediaType[] getResultSetMediaTypes() {
         return resultSetMediaTypes;
     }
-
+    
     @Override
     public Model loadModel(Query query)
     {
