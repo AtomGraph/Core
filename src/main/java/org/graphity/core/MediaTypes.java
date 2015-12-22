@@ -35,8 +35,6 @@ import org.apache.jena.riot.RDFLanguages;
  */
 public class MediaTypes
 {
-    //private final List<javax.ws.rs.core.MediaType> modelMediaTypes;
-    //private final List<javax.ws.rs.core.MediaType> resultSetMediaTypes;
     private final Map<Class, List<javax.ws.rs.core.MediaType>> classTypes;
     
     /**
@@ -50,6 +48,7 @@ public class MediaTypes
     
     public MediaTypes(Map<Class, List<javax.ws.rs.core.MediaType>> classTypes)
     {
+	if (classTypes == null) throw new IllegalArgumentException("Class/type Map must be not null");        
         this.classTypes = classTypes;
     }
 
