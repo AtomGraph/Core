@@ -54,7 +54,7 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
 
     private final SPARQLEndpointOrigin origin;
     private final SPARQLClient client;
-    private final javax.ws.rs.core.MediaType[] modelMediaTypes, resultSetMediaTypes;
+    private final javax.ws.rs.core.MediaType[] readableModelMediaTypes, readableResultSetMediaTypes;
 
     /**
      * Constructs SPARQL endpoint proxy from request metadata and origin.
@@ -71,10 +71,10 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
         if (origin == null) throw new IllegalArgumentException("SPARQLEndpointOrigin cannot be null");
         this.origin = origin;
         
-        List<javax.ws.rs.core.MediaType> modelTypeList = mediaTypes.forClass(Model.class);
-        modelMediaTypes = modelTypeList.toArray(new javax.ws.rs.core.MediaType[modelTypeList.size()]);
-        List<javax.ws.rs.core.MediaType> resultSetTypeList = mediaTypes.forClass(ResultSet.class);        
-        resultSetMediaTypes = resultSetTypeList.toArray(new javax.ws.rs.core.MediaType[resultSetTypeList.size()]);
+        List<javax.ws.rs.core.MediaType> modelTypeList = mediaTypes.getReadable(Model.class);
+        readableModelMediaTypes = modelTypeList.toArray(new javax.ws.rs.core.MediaType[modelTypeList.size()]);
+        List<javax.ws.rs.core.MediaType> resultSetTypeList = mediaTypes.getReadable(ResultSet.class);        
+        readableResultSetMediaTypes = resultSetTypeList.toArray(new javax.ws.rs.core.MediaType[resultSetTypeList.size()]);
 
         client = SPARQLClient.create(origin.getWebResource());
     }
@@ -90,20 +90,21 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
         return client;
     }
     
-    public javax.ws.rs.core.MediaType[] getModelMediaTypes()
+    public javax.ws.rs.core.MediaType[] getReadableModelMediaTypes()
     {
-        return modelMediaTypes;
+        return readableModelMediaTypes;
     }
 
-    public javax.ws.rs.core.MediaType[] getResultSetMediaTypes() {
-        return resultSetMediaTypes;
+    public javax.ws.rs.core.MediaType[] getReadableResultSetMediaTypes()
+    {
+        return readableResultSetMediaTypes;
     }
     
     @Override
     public Model loadModel(Query query)
     {
 	if (log.isDebugEnabled()) log.debug("Loading Model from SPARQL endpoint: {} using Query: {}", getOrigin().getWebResource().getURI(), query);
-	ClientResponse cr = getClient().query(query, getModelMediaTypes());
+	ClientResponse cr = getClient().query(query, getReadableModelMediaTypes());
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
             if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
@@ -120,7 +121,7 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
         if (!query.isSelectType()) throw new IllegalArgumentException("Query must be SELECT");
         
 	if (log.isDebugEnabled()) log.debug("Loading ResultSet from SPARQL endpoint: {} using Query: {}", getOrigin().getWebResource().getURI(), query);
-	ClientResponse cr = getClient().query(query, getResultSetMediaTypes());
+	ClientResponse cr = getClient().query(query, getReadableResultSetMediaTypes());
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
             if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
@@ -144,7 +145,7 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
         if (!query.isAskType()) throw new IllegalArgumentException("Query must be ASK");
         
-        ClientResponse cr = getClient().query(query, getResultSetMediaTypes());
+        ClientResponse cr = getClient().query(query, getReadableResultSetMediaTypes());
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
             if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());

@@ -18,8 +18,12 @@ package org.graphity.core;
 
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.shared.NoReaderForLangException;
+import com.hp.hpl.jena.shared.NoWriterForLangException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -35,7 +39,6 @@ import org.apache.jena.riot.RDFLanguages;
  */
 public class MediaTypes
 {
-    private final Map<Class, List<javax.ws.rs.core.MediaType>> classTypes;
     
     /**
      * Media types that can be used to represent of SPARQL result set
@@ -46,46 +49,83 @@ public class MediaTypes
     private static final javax.ws.rs.core.MediaType[] RESULT_SET_MEDIA_TYPES = new MediaType[]{MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE,
 			    MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE};
     
-    public MediaTypes(Map<Class, List<javax.ws.rs.core.MediaType>> classTypes)
+    public static final Map<String, String> UTF8_PARAM = new HashMap<>();
+    static
     {
-	if (classTypes == null) throw new IllegalArgumentException("Class/type Map must be not null");        
-        this.classTypes = classTypes;
+        UTF8_PARAM.put("charset", "UTF-8");
+    }
+    
+    private final Map<Class, List<javax.ws.rs.core.MediaType>> readable, writable;
+    
+    public MediaTypes(Map<Class, List<javax.ws.rs.core.MediaType>> readable, Map<Class, List<javax.ws.rs.core.MediaType>> writable)
+    {
+	if (readable == null) throw new IllegalArgumentException("Map of readable MediaTypes must be not null");        
+	if (writable == null) throw new IllegalArgumentException("Map of writable MediaTypes must be not null");        
+
+        this.readable = Collections.unmodifiableMap(readable);
+        this.writable = Collections.unmodifiableMap(writable);
     }
 
     public MediaTypes()
     {
-        classTypes = new HashMap<>();
-
-        List<javax.ws.rs.core.MediaType> list = new ArrayList<>();
-        Map<String, String> utf8Param = new HashMap<>();
-        utf8Param.put("charset", "UTF-8");
+        this(RDFLanguages.getRegisteredLanguages(), UTF8_PARAM);
+    }
+    
+    public MediaTypes(Collection<Lang> registered, Map<String, String> parameters)
+    {
+        Map<Class, List<javax.ws.rs.core.MediaType>> readableMap = new HashMap<>(), writableMap = new HashMap<>();
+        List<javax.ws.rs.core.MediaType> readableList = new ArrayList<>(), writableList = new ArrayList<>();
 
         // Model
-        
-        Iterator<javax.ws.rs.core.MediaType> it = getRegistered().iterator();
-        while (it.hasNext())
+
+        Iterator<Lang> modelLangIt = registered.iterator(); //RDFLanguages.getRegisteredLanguages().iterator();
+        while (modelLangIt.hasNext())
         {
-            javax.ws.rs.core.MediaType registered = it.next();
-            list.add(new MediaType(registered.getType(), registered.getSubtype(), utf8Param));
+            Lang lang = modelLangIt.next();
+            if (!lang.equals(Lang.RDFNULL))
+            {
+                try
+                {
+                    if (ModelFactory.createDefaultModel().getReader(lang.getName()) != null)
+                        readableList.add(new MediaType(lang, UTF8_PARAM));
+                }
+                catch (NoReaderForLangException ex) {}
+                
+                try
+                {
+                    if (ModelFactory.createDefaultModel().getWriter(lang.getName()) != null)
+                        writableList.add(new MediaType(lang, UTF8_PARAM));
+                }
+                catch (NoWriterForLangException ex) {}
+            }
         }
         
-        MediaType rdfXml = new MediaType(org.graphity.core.MediaType.APPLICATION_RDF_XML_TYPE.getType(), org.graphity.core.MediaType.APPLICATION_RDF_XML_TYPE.getSubtype(), utf8Param);
-        list.add(0, rdfXml); // first one becomes default
+        MediaType rdfXml = new MediaType(MediaType.APPLICATION_RDF_XML_TYPE.getType(), MediaType.APPLICATION_RDF_XML_TYPE.getSubtype(), parameters);
+        readableList.add(0, rdfXml); // first one becomes default
+        writableList.add(0, rdfXml); // first one becomes default
         
-        classTypes.put(Model.class, Collections.unmodifiableList(list));
-
+        readableMap.put(Model.class, Collections.unmodifiableList(readableList));
+        writableMap.put(Model.class, Collections.unmodifiableList(writableList));
+        
         // ResultSet
         
-        list = new ArrayList<>();
+        readableList = new ArrayList<>();
+        writableList = new ArrayList<>();
 
-        it = Arrays.asList(RESULT_SET_MEDIA_TYPES).iterator();
-        while (it.hasNext())
+        Iterator<javax.ws.rs.core.MediaType> resultSetLangIt = Arrays.asList(RESULT_SET_MEDIA_TYPES).iterator();
+        while (resultSetLangIt.hasNext())
         {
-            javax.ws.rs.core.MediaType registered = it.next();
-            list.add(new MediaType(registered.getType(), registered.getSubtype(), utf8Param));
+            javax.ws.rs.core.MediaType resultSetType = resultSetLangIt.next();
+            readableList.add(new MediaType(resultSetType.getType(), resultSetType.getSubtype(), parameters));
         }
 
-        classTypes.put(ResultSet.class, Collections.unmodifiableList(list));
+        readableMap.put(ResultSet.class, Collections.unmodifiableList(readableList));
+        writableMap.put(ResultSet.class, Collections.unmodifiableList(writableList));
+
+        // make maps unmodifiable
+        
+        readable = Collections.unmodifiableMap(readableMap);
+        writable = Collections.unmodifiableMap(writableMap);        
     }
 
     public static List<javax.ws.rs.core.MediaType> getRegistered()
@@ -107,14 +147,24 @@ public class MediaTypes
      * 
      * @return class/type map
      */
-    protected Map<Class, List<javax.ws.rs.core.MediaType>> getClassTypes()
+    public Map<Class, List<javax.ws.rs.core.MediaType>> getReadable()
     {
-        return classTypes;
+        return readable;
+    }
+
+    public Map<Class, List<javax.ws.rs.core.MediaType>> getWritable()
+    {
+        return writable;
     }
     
-    public List<javax.ws.rs.core.MediaType> forClass(Class clazz)
+    public List<javax.ws.rs.core.MediaType> getReadable(Class clazz)
     {
-        return getClassTypes().get(clazz);
+        return getReadable().get(clazz);
+    }
+
+    public List<javax.ws.rs.core.MediaType> getWritable(Class clazz)
+    {
+        return getWritable().get(clazz);
     }
     
 }

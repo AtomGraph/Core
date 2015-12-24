@@ -47,7 +47,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
 
     private final GraphStoreOrigin origin;
     private final GraphStoreClient client;
-    private final javax.ws.rs.core.MediaType[] modelMediaTypes;
+    private final javax.ws.rs.core.MediaType[] readableMediaTypes;
     
     /**
      * Constructs Graph Store proxy from request metadata and origin.
@@ -63,8 +63,8 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
         super(request, servletConfig, mediaTypes);
         if (origin == null) throw new IllegalArgumentException("GraphStoreOrigin cannot be null");
         this.origin = origin;
-        List<javax.ws.rs.core.MediaType> modelTypeList = mediaTypes.forClass(Model.class);
-        modelMediaTypes = modelTypeList.toArray(new javax.ws.rs.core.MediaType[modelTypeList.size()]);        
+        List<javax.ws.rs.core.MediaType> modelTypeList = mediaTypes.getReadable(Model.class);
+        readableMediaTypes = modelTypeList.toArray(new javax.ws.rs.core.MediaType[modelTypeList.size()]);        
         client = GraphStoreClient.create(origin.getWebResource());
     }
 
@@ -85,16 +85,16 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
         return client;
     }
     
-    public javax.ws.rs.core.MediaType[] getModelMediaTypes()
+    public javax.ws.rs.core.MediaType[] getReadableMediaTypes()
     {
-        return modelMediaTypes;
+        return readableMediaTypes;
     }
     
     @Override
     public Model getModel()
     {
 	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} default graph", getClient().getWebResource().getURI());
-	ClientResponse cr = getClient().getModel(getModelMediaTypes());
+	ClientResponse cr = getClient().getModel(getReadableMediaTypes());
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
             if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
@@ -108,7 +108,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
     public Model getModel(String uri)
     {
 	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} with named graph URI: {}", getClient().getWebResource().getURI(), uri);
-	ClientResponse cr = getClient().getModel(getModelMediaTypes());
+	ClientResponse cr = getClient().getModel(getReadableMediaTypes());
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
             if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());

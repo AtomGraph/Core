@@ -88,9 +88,19 @@ public class MediaType extends javax.ws.rs.core.MediaType
         this(lang.getContentType());
     }
 
+    public MediaType(Lang lang, Map<String, String> parameters)
+    {
+        this(lang.getContentType(), parameters);
+    }
+    
     public MediaType(ContentType ct)
     {
         this(ct.getType(), ct.getSubType());
+    }
+
+    public MediaType(ContentType ct, Map<String, String> parameters)
+    {
+        this(ct.getType(), ct.getSubType(), parameters);
     }
     
     public MediaType(String type, String subtype, Map<String, String> parameters)
@@ -100,7 +110,7 @@ public class MediaType extends javax.ws.rs.core.MediaType
 
     public MediaType(String type, String subtype)
     {
-        super(type,subtype);
+        super(type, subtype);
     }
 
     public MediaType()

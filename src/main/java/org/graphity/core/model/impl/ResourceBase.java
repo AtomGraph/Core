@@ -25,6 +25,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -108,33 +109,29 @@ public abstract class ResourceBase implements Resource
     public ResponseBuilder getResponseBuilder(Model model)
     {
         return org.graphity.core.model.impl.Response.fromRequest(getRequest()).
-                getResponseBuilder(model, getVariants()).
+                getResponseBuilder(model, getVariants(getWritableMediaTypes())).
                 cacheControl(getCacheControl());
     }
     
     /**
      * Builds a list of acceptable response variants
      * 
+     * @param mediaTypes
      * @return supported variants
      */
-    public List<Variant> getVariants()
+    public List<Variant> getVariants(List<MediaType> mediaTypes)
     {
-        return getVariantListBuilder().add().build();
-    }
-    
-    public Variant.VariantListBuilder getVariantListBuilder()
-    {
-        return getResponse().getVariantListBuilder(getModelMediaTypes(), getLanguages(), getEncodings());
+        return getResponse().getVariantListBuilder(mediaTypes, getLanguages(), getEncodings()).add().build();
     }
         
     public MediaTypes getMediaTypes()
     {
         return mediaTypes;
     }
-    
-    public List<javax.ws.rs.core.MediaType> getModelMediaTypes()
+
+    public List<javax.ws.rs.core.MediaType> getWritableMediaTypes()
     {
-        return getMediaTypes().forClass(Model.class);
+        return getMediaTypes().getWritable(Model.class);
     }
     
     public List<Locale> getLanguages()

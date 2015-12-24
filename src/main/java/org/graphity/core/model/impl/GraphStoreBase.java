@@ -87,27 +87,18 @@ public abstract class GraphStoreBase implements GraphStore
     public ResponseBuilder getResponseBuilder(Model model)
     {
         return org.graphity.core.model.impl.Response.fromRequest(getRequest()).
-                getResponseBuilder(model, getVariants());
+                getResponseBuilder(model, getVariants(getMediaTypes().getWritable(Model.class)));
     }
     
     /**
-     * Builds a list of acceptable response variants.
+     * Builds a list of acceptable response variants
      * 
+     * @param mediaTypes
      * @return supported variants
      */
-    public List<Variant> getVariants()
+    public List<Variant> getVariants(List<MediaType> mediaTypes)
     {
-        return getVariantListBuilder().add().build();
-    }
-    
-    /**
-     * Returns a builder object for supported response variants.
-     * 
-     * @return variant builder
-     */
-    public Variant.VariantListBuilder getVariantListBuilder()
-    {
-        return getResponse().getVariantListBuilder(getMediaTypes().forClass(Model.class), getLanguages(), getEncodings());
+        return getResponse().getVariantListBuilder(mediaTypes, getLanguages(), getEncodings()).add().build();
     }
         
     /**

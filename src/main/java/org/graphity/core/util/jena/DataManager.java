@@ -82,9 +82,9 @@ public class DataManager extends FileManager
         setModelCaching(cacheModelLoads);
         this.preemptiveAuth = preemptiveAuth;
         MediaTypes mediaTypes = new MediaTypesProvider().getMediaTypes(); // new MediaTypes() ?
-        List<javax.ws.rs.core.MediaType> modelMediaTypeList = mediaTypes.forClass(Model.class);
+        List<javax.ws.rs.core.MediaType> modelMediaTypeList = mediaTypes.getReadable(Model.class);
         modelMediaTypes = modelMediaTypeList.toArray(new javax.ws.rs.core.MediaType[modelMediaTypeList.size()]);
-        List<javax.ws.rs.core.MediaType> resultMediaTypeList = mediaTypes.forClass(ResultSet.class);
+        List<javax.ws.rs.core.MediaType> resultMediaTypeList = mediaTypes.getReadable(ResultSet.class);
         resultSetMediaTypes = resultMediaTypeList.toArray(new javax.ws.rs.core.MediaType[resultMediaTypeList.size()]);
         
         clientConfig.getProperties().put(URLConnectionClientHandler.PROPERTY_HTTP_URL_CONNECTION_SET_METHOD_WORKAROUND, true);
