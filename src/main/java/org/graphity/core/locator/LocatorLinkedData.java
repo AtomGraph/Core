@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius <martynas@graphity.org>
  * @see org.graphity.processor.util.DataManager
  */
+@Deprecated
 public class LocatorLinkedData implements Locator
 {
     private static final Logger log = LoggerFactory.getLogger(LocatorLinkedData.class);

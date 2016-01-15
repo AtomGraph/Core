@@ -86,7 +86,7 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
 	if (model.isEmpty())
 	{
 	    if (log.isDebugEnabled()) log.debug("Query result Model is empty; returning 404 Not Found");
-	    throw new NotFoundException("Query result Model is empty; returning 404 Not Found");
+	    throw new NotFoundException("Query result Model is empty");
 	}
 
         return model;
