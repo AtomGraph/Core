@@ -20,7 +20,10 @@ import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.update.UpdateRequest;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.uri.UriComponent;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
+import java.util.List;
+import java.util.Map;
 import javax.ws.rs.core.MultivaluedMap;
 import org.graphity.core.MediaType;
 import org.slf4j.Logger;
@@ -94,7 +97,16 @@ public class SPARQLClient
             //String escapedQueryString = UriComponent.encode(query.toString(), UriComponent.Type.QUERY_PARAM);
             String escapedQueryString = query.toString().replace("{", "%7B").replace("}", "%7D");
             WebResource queryResource = getWebResource().queryParam("query", escapedQueryString);
-            if (params != null) queryResource = queryResource.queryParams(params);
+            if (params != null)
+            {
+                MultivaluedMap<String, String> encodedParams = new MultivaluedMapImpl();
+                for (Map.Entry<String, List<String>> entry : params.entrySet())
+                    if (!entry.getKey().equals("query")) // query param is handled separately
+                        for (String value : entry.getValue())
+                            encodedParams.add(entry.getKey(), UriComponent.encode(value, UriComponent.Type.QUERY_PARAM));
+
+                queryResource = queryResource.queryParams(encodedParams);
+            }
         
             return queryResource.accept(acceptedTypes).
                 get(ClientResponse.class);
