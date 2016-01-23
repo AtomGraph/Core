@@ -37,14 +37,14 @@ public class SPARQLClient
 {
 
     private static final Logger log = LoggerFactory.getLogger(SPARQLClient.class);
-
-    public static final int MAX_GET_REQUEST_SIZE = 8192;
     
     private final WebResource webResource;
+    private final int maxGetRequestSize;
 
-    protected SPARQLClient(WebResource webResource)
+    protected SPARQLClient(WebResource webResource, int maxGetRequestSize)
     {
         this.webResource = webResource;
+        this.maxGetRequestSize = maxGetRequestSize;
     }
     
     public WebResource getWebResource()
@@ -54,12 +54,17 @@ public class SPARQLClient
 
     public static SPARQLClient create(WebResource webResource)
     {
-        return new SPARQLClient(webResource);
+        return new SPARQLClient(webResource, 8192);
     }
 
+    public static SPARQLClient create(WebResource webResource, int maxGetRequestSize)
+    {
+        return new SPARQLClient(webResource, maxGetRequestSize);
+    }
+    
     public ClientResponse query(Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
     {
-        return query(query, acceptedTypes, params, MAX_GET_REQUEST_SIZE);
+        return query(query, acceptedTypes, params, getMaxGetRequestSize());
     }
     
     /**
@@ -149,6 +154,11 @@ public class SPARQLClient
             //accept(acceptedTypes).
             type(MediaType.APPLICATION_FORM_URLENCODED_TYPE).
             post(ClientResponse.class, formData);
+    }
+    
+    public int getMaxGetRequestSize()
+    {
+        return maxGetRequestSize;
     }
     
 }

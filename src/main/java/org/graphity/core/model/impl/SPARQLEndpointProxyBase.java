@@ -17,6 +17,7 @@
 
 package org.graphity.core.model.impl;
 
+import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetRewindable;
@@ -38,6 +39,7 @@ import org.graphity.core.client.SPARQLClient;
 import org.graphity.core.exception.ClientException;
 import org.graphity.core.model.SPARQLEndpointOrigin;
 import org.graphity.core.model.SPARQLEndpointProxy;
+import org.graphity.core.vocabulary.G;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +66,7 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
      * @param origin
      * @param mediaTypes 
      */
+    @SuppressWarnings("empty-statement")
     public SPARQLEndpointProxyBase(@Context Request request, @Context ServletConfig servletConfig, @Context MediaTypes mediaTypes,
             @Context SPARQLEndpointOrigin origin)
     {
@@ -76,7 +79,9 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
         List<javax.ws.rs.core.MediaType> resultSetTypeList = mediaTypes.getReadable(ResultSet.class);        
         readableResultSetMediaTypes = resultSetTypeList.toArray(new javax.ws.rs.core.MediaType[resultSetTypeList.size()]);
 
-        client = SPARQLClient.create(origin.getWebResource());
+        Integer maxGetRequestSize = getMaxGetRequestSize(servletConfig, G.maxGetRequestSize);
+        if (maxGetRequestSize != null) client = SPARQLClient.create(origin.getWebResource(), maxGetRequestSize);
+        else client = SPARQLClient.create(origin.getWebResource());;
     }
     
     @Override
@@ -159,24 +164,6 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
         
         throw new ClientException(cr.getStatusInfo()); // TO-DO: refactor
     }
-
-    /*
-    public boolean ask(Query query, MultivaluedMap<String, String> params)
-    {
-	if (log.isDebugEnabled()) log.debug("Remote service {} Query execution: {} ", getWebResource().getURI(), query);
-	if (query == null) throw new IllegalArgumentException("Query must be not null");
-
-        MultivaluedMap formData = new MultivaluedMapImpl();
-        if (params != null) formData.putAll(params);
-        formData.putSingle("query", query.toString());
-        
-        return XMLInput.booleanFromXML(getWebResource().
-            accept(MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE). // needs to be XML since we're reading with XMLInput
-            type(MediaType.APPLICATION_FORM_URLENCODED_TYPE).
-            post(ClientResponse.class, formData).
-            getEntity(InputStream.class));
-    }
-    */
     
     @Override
     public void update(UpdateRequest updateRequest)
@@ -188,6 +175,17 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
             if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
             throw new ClientException(cr.getStatusInfo());
         }        
+    }
+    
+    public final Integer getMaxGetRequestSize(ServletConfig servletConfig, DatatypeProperty property)
+    {
+        if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
+        if (property == null) throw new IllegalArgumentException("Property cannot be null");
+
+        Object sizeValue = servletConfig.getInitParameter(property.getURI());
+        if (sizeValue != null) return Integer.parseInt(sizeValue.toString());
+
+        return null;
     }
     
 }
