@@ -35,6 +35,8 @@ public class SPARQLClient
 
     private static final Logger log = LoggerFactory.getLogger(SPARQLClient.class);
 
+    public static final int MAX_GET_REQUEST_SIZE = 8192;
+    
     private final WebResource webResource;
 
     protected SPARQLClient(WebResource webResource)
@@ -52,6 +54,11 @@ public class SPARQLClient
         return new SPARQLClient(webResource);
     }
 
+    public ClientResponse query(Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
+    {
+        return query(query, acceptedTypes, params, MAX_GET_REQUEST_SIZE);
+    }
+    
     /**
      * Loads RDF model from a remote SPARQL endpoint using a query and optional request parameters.
      * Only <code>DESCRIBE</code> and <code>CONSTRUCT</code> queries can be used with this method.
@@ -59,23 +66,39 @@ public class SPARQLClient
      * @param query query object
      * @param acceptedTypes accepted media types
      * @param params name/value pairs of request parameters or null, if none
+     * @param maxGetRequestSize request size limit for <pre>GET</pre>
      * @return result RDF model
      * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#describe">DESCRIBE</a>
      * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#construct">CONSTRUCT</a>
      */
-    public ClientResponse query(Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
+    public ClientResponse query(Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, int maxGetRequestSize)
     {
 	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {}", getWebResource().getURI(), query);
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
 	if (acceptedTypes == null) throw new IllegalArgumentException("Accepted MediaType[] must be not null");
 
-        MultivaluedMap formData = new MultivaluedMapImpl();
-        if (params != null) formData.putAll(params);
-        formData.putSingle("query", query.toString());
+        // POST if request size is over limit, GET otherwise        
+        if (query.toString().length() > maxGetRequestSize)
+        {
+            MultivaluedMap formData = new MultivaluedMapImpl();
+            if (params != null) formData.putAll(params);
+            formData.putSingle("query", query.toString());
+
+            return getWebResource().accept(acceptedTypes).
+                type(MediaType.APPLICATION_FORM_URLENCODED_TYPE).
+                post(ClientResponse.class, formData);
+        }
+        else
+        {
+            // workaround for Jersey UriBuilder failing on { } brackets
+            //String escapedQueryString = UriComponent.encode(query.toString(), UriComponent.Type.QUERY_PARAM);
+            String escapedQueryString = query.toString().replace("{", "%7B").replace("}", "%7D");
+            WebResource queryResource = getWebResource().queryParam("query", escapedQueryString);
+            if (params != null) queryResource = queryResource.queryParams(params);
         
-        return getWebResource().accept(acceptedTypes).
-            type(MediaType.APPLICATION_FORM_URLENCODED_TYPE).
-            post(ClientResponse.class, formData);
+            return queryResource.accept(acceptedTypes).
+                get(ClientResponse.class);
+        }
     }
     
     /**
