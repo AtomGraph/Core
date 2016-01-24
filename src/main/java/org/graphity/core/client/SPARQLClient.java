@@ -98,9 +98,8 @@ public class SPARQLClient
         }
         else
         {
-            // workaround for Jersey UriBuilder failing on { } brackets
-            //String escapedQueryString = UriComponent.encode(query.toString(), UriComponent.Type.QUERY_PARAM);
-            String escapedQueryString = query.toString().replace("{", "%7B").replace("}", "%7D");
+            // workaround for Jersey UriBuilder to encode { } brackets using UNRESERVED type
+            String escapedQueryString = UriComponent.encode(query.toString(), UriComponent.Type.UNRESERVED);
             WebResource queryResource = getWebResource().queryParam("query", escapedQueryString);
             if (params != null)
             {
@@ -108,7 +107,8 @@ public class SPARQLClient
                 for (Map.Entry<String, List<String>> entry : params.entrySet())
                     if (!entry.getKey().equals("query")) // query param is handled separately
                         for (String value : entry.getValue())
-                            encodedParams.add(entry.getKey(), UriComponent.encode(value, UriComponent.Type.QUERY_PARAM));
+                            encodedParams.add(UriComponent.encode(entry.getKey(), UriComponent.Type.UNRESERVED),
+                                UriComponent.encode(value, UriComponent.Type.UNRESERVED));
 
                 queryResource = queryResource.queryParams(encodedParams);
             }
