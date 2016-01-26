@@ -108,7 +108,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
     public Model getModel(String uri)
     {
 	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} with named graph URI: {}", getClient().getWebResource().getURI(), uri);
-	ClientResponse cr = getClient().getModel(getReadableMediaTypes());
+	ClientResponse cr = getClient().getModel(getReadableMediaTypes(), uri);
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
             if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
