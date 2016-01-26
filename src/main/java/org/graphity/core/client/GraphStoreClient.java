@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public class GraphStoreClient
 {
-    private static final Logger log = LoggerFactory.getLogger(SPARQLClient.class);
+    private static final Logger log = LoggerFactory.getLogger(GraphStoreClient.class);
 
     private final WebResource webResource;
 

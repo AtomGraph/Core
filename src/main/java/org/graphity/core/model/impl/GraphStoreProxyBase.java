@@ -97,7 +97,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
 	ClientResponse cr = getClient().getModel(getReadableMediaTypes());
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
-            if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+            if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
             throw new ClientException(cr.getStatusInfo());
         }
         
@@ -111,7 +111,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
 	ClientResponse cr = getClient().getModel(getReadableMediaTypes());
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
-            if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+            if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
             throw new ClientException(cr.getStatusInfo());
         }
         
@@ -125,7 +125,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
 	ClientResponse cr = getClient().headNamed(uri);
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
-            if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+            if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
             throw new ClientException(cr.getStatusInfo());
         }
 
@@ -139,7 +139,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
 	ClientResponse cr = getClient().putModel(MediaType.TEXT_NTRIPLES_TYPE, model);
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
-            if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+            if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
             throw new ClientException(cr.getStatusInfo());
         }
     }
@@ -151,7 +151,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
 	ClientResponse cr = getClient().putModel(MediaType.TEXT_NTRIPLES_TYPE, uri, model);
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
-            if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+            if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
             throw new ClientException(cr.getStatusInfo());
         }
     }
@@ -163,7 +163,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
 	ClientResponse cr = getClient().deleteDefault();
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
-            if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+            if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
             throw new ClientException(cr.getStatusInfo());
         }
     }
@@ -175,7 +175,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
 	ClientResponse cr = getClient().deleteModel(uri);
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
-            if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+            if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
             throw new ClientException(cr.getStatusInfo());
         }
     }
@@ -187,7 +187,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
 	ClientResponse cr = getClient().add(MediaType.TEXT_NTRIPLES_TYPE, model);
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
-            if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+            if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
             throw new ClientException(cr.getStatusInfo());
         }
     }
@@ -199,7 +199,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
 	ClientResponse cr = getClient().add(MediaType.TEXT_NTRIPLES_TYPE, uri, model);
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
-            if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+            if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
             throw new ClientException(cr.getStatusInfo());
         }
     }

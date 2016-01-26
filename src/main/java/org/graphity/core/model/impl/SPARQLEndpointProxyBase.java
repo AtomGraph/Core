@@ -66,7 +66,6 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
      * @param origin
      * @param mediaTypes 
      */
-    @SuppressWarnings("empty-statement")
     public SPARQLEndpointProxyBase(@Context Request request, @Context ServletConfig servletConfig, @Context MediaTypes mediaTypes,
             @Context SPARQLEndpointOrigin origin)
     {
