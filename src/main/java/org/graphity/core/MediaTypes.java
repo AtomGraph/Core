@@ -117,6 +117,7 @@ public class MediaTypes
         {
             javax.ws.rs.core.MediaType resultSetType = resultSetLangIt.next();
             readableList.add(new MediaType(resultSetType.getType(), resultSetType.getSubtype(), parameters));
+            writableList.add(new MediaType(resultSetType.getType(), resultSetType.getSubtype(), parameters));            
         }
 
         readableMap.put(ResultSet.class, Collections.unmodifiableList(readableList));

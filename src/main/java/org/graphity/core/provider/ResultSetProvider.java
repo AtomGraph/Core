@@ -25,8 +25,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -46,16 +44,16 @@ import org.slf4j.LoggerFactory;
  * @see <a href="http://jsr311.java.net/nonav/javadoc/javax/ws/rs/ext/MessageBodyWriter.html">JAX-RS MessageBodyWriter</a>
  */
 @Provider
-@Consumes({org.graphity.core.MediaType.APPLICATION_SPARQL_RESULTS_XML})
-@Produces({org.graphity.core.MediaType.APPLICATION_SPARQL_RESULTS_XML, org.graphity.core.MediaType.APPLICATION_SPARQL_RESULTS_JSON})
 public class ResultSetProvider implements MessageBodyReader<ResultSetRewindable>, MessageBodyWriter<ResultSet>
 {
     private static final Logger log = LoggerFactory.getLogger(ResultSetProvider.class);
     
     @Override
-    public boolean isReadable(Class<?> type, Type type1, Annotation[] antns, javax.ws.rs.core.MediaType mt)
+    public boolean isReadable(Class<?> type, Type type1, Annotation[] antns, javax.ws.rs.core.MediaType mediaType)
     {
-        return type == ResultSetRewindable.class;
+        return type == ResultSetRewindable.class &&
+                (mediaType.isCompatible(org.graphity.core.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE) ||
+                mediaType.isCompatible(org.graphity.core.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE));        
     }
 
     @Override
@@ -63,7 +61,10 @@ public class ResultSetProvider implements MessageBodyReader<ResultSetRewindable>
     {
         if (log.isTraceEnabled()) log.trace("Reading ResultSet with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
         // result set needs to be rewindable because results might be processed multiple times, e.g. to calculate hash and write response
-        return ResultSetFactory.makeRewindable(ResultSetFactory.fromXML(in));
+	if (mediaType.isCompatible(org.graphity.core.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
+	    return ResultSetFactory.makeRewindable(ResultSetFactory.fromJSON(in));
+	else
+	    return ResultSetFactory.makeRewindable(ResultSetFactory.fromXML(in));        
     }
     
     @Override
