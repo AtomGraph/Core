@@ -19,7 +19,6 @@ package org.graphity.core.util.jena;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.sparql.util.Context;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.util.LocationMapper;
 import com.sun.jersey.api.client.Client;
@@ -37,7 +36,6 @@ import javax.ws.rs.core.Response;
 import org.graphity.core.MediaTypes;
 import org.graphity.core.exception.ClientException;
 import org.graphity.core.provider.DatasetProvider;
-import org.graphity.core.provider.MediaTypesProvider;
 import org.graphity.core.provider.ModelProvider;
 import org.graphity.core.provider.QueryWriter;
 import org.graphity.core.provider.ResultSetProvider;
@@ -65,6 +63,7 @@ public class DataManager extends FileManager
 
     private final boolean preemptiveAuth;
     private final ClientConfig clientConfig = new DefaultClientConfig();
+    private final MediaTypes mediaTypes;
     private final javax.ws.rs.core.MediaType[] modelMediaTypes;
     private final javax.ws.rs.core.MediaType[] resultSetMediaTypes;
             
@@ -72,16 +71,17 @@ public class DataManager extends FileManager
      * Creates data manager from file manager and SPARQL context.
      * 
      * @param mapper location mapper
-     * @param context SPARQL context
+     * @param mediaTypes supported readable and writable media types
      * @param cacheModelLoads true if loaded models should be cached
      * @param preemptiveAuth if true, preemptive HTTP authentication will be used
      */
-    public DataManager(LocationMapper mapper, Context context, boolean cacheModelLoads, boolean preemptiveAuth)
+    public DataManager(LocationMapper mapper, MediaTypes mediaTypes, boolean cacheModelLoads, boolean preemptiveAuth)
     {
 	super(mapper);
+	if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes must be not null");
+        this.mediaTypes = mediaTypes;
         setModelCaching(cacheModelLoads);
         this.preemptiveAuth = preemptiveAuth;
-        MediaTypes mediaTypes = new MediaTypesProvider().getMediaTypes(); // new MediaTypes() ?
         List<javax.ws.rs.core.MediaType> modelMediaTypeList = mediaTypes.getReadable(Model.class);
         modelMediaTypes = modelMediaTypeList.toArray(new javax.ws.rs.core.MediaType[modelMediaTypeList.size()]);
         List<javax.ws.rs.core.MediaType> resultMediaTypeList = mediaTypes.getReadable(ResultSet.class);
@@ -100,6 +100,11 @@ public class DataManager extends FileManager
         return clientConfig;
     }
 
+    public MediaTypes getMediaTypes()
+    {
+        return mediaTypes;
+    }
+    
     public javax.ws.rs.core.MediaType[] getModelMediaTypes()
     {
         return modelMediaTypes;

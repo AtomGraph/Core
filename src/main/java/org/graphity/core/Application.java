@@ -93,7 +93,6 @@ public class Application extends javax.ws.rs.core.Application
         singletons.add(new SPARQLEndpointOriginProvider());
         singletons.add(new GraphStoreOriginProvider());
         singletons.add(new SPARQLEndpointProvider());
-        //singletons.add(new GraphStoreProvider());
         singletons.add(new MediaTypesProvider());
         singletons.add(new ClientExceptionMapper());        
         singletons.add(new NotFoundExceptionMapper());

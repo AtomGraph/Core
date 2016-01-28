@@ -27,6 +27,7 @@ import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
+import org.graphity.core.MediaTypes;
 import org.graphity.core.util.jena.DataManager;
 import org.graphity.core.vocabulary.G;
 import org.slf4j.Logger;
@@ -81,7 +82,7 @@ public class DataManagerProvider extends PerRequestTypeInjectableProvider<Contex
 
     public DataManager getDataManager(ServletConfig servletConfig)
     {
-        return getDataManager(LocationMapper.get(), ARQ.getContext(), servletConfig);
+        return getDataManager(LocationMapper.get(), new MediaTypes(), ARQ.getContext(), servletConfig);
     }
     
     public boolean getBooleanParam(ServletConfig servletConfig, Property property)
@@ -95,19 +96,19 @@ public class DataManagerProvider extends PerRequestTypeInjectableProvider<Contex
         return value;
     }
     
-    public DataManager getDataManager(LocationMapper mapper, com.hp.hpl.jena.sparql.util.Context context, ServletConfig servletConfig)
+    public DataManager getDataManager(LocationMapper mapper, MediaTypes mediaTypes, com.hp.hpl.jena.sparql.util.Context context, ServletConfig servletConfig)
     {
 	if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
         
-        return getDataManager(mapper, context,
+        return getDataManager(mapper, mediaTypes,
                 getBooleanParam(servletConfig, G.cacheModelLoads),
                 getBooleanParam(servletConfig, G.preemptiveAuth));
     }
 
-    public DataManager getDataManager(LocationMapper mapper, com.hp.hpl.jena.sparql.util.Context context,
+    public DataManager getDataManager(LocationMapper mapper, MediaTypes mediaTypes,
             boolean cacheModelLoads, boolean preemptiveAuth)
     {
-        return new DataManager(mapper, context, cacheModelLoads, preemptiveAuth);
+        return new DataManager(mapper, mediaTypes, cacheModelLoads, preemptiveAuth);
     }
 
     @Override
