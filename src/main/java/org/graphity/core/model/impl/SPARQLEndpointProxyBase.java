@@ -80,7 +80,7 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
 
         Integer maxGetRequestSize = getMaxGetRequestSize(servletConfig, G.maxGetRequestSize);
         if (maxGetRequestSize != null) client = SPARQLClient.create(origin.getWebResource(), maxGetRequestSize);
-        else client = SPARQLClient.create(origin.getWebResource());;
+        else client = SPARQLClient.create(origin.getWebResource());
     }
     
     @Override
@@ -89,16 +89,19 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
         return origin;
     }
     
+    @Override
     public SPARQLClient getClient()
     {
         return client;
     }
     
+    @Override
     public javax.ws.rs.core.MediaType[] getReadableModelMediaTypes()
     {
         return readableModelMediaTypes;
     }
 
+    @Override
     public javax.ws.rs.core.MediaType[] getReadableResultSetMediaTypes()
     {
         return readableResultSetMediaTypes;

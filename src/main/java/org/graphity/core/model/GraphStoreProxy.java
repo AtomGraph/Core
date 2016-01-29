@@ -18,6 +18,8 @@
 package org.graphity.core.model;
 
 import com.hp.hpl.jena.query.DatasetAccessor;
+import javax.ws.rs.core.MediaType;
+import org.graphity.core.client.GraphStoreClient;
 
 /**
  * A class representing a Graph Store proxy.
@@ -26,5 +28,14 @@ import com.hp.hpl.jena.query.DatasetAccessor;
  */
 public interface GraphStoreProxy extends Proxy, DatasetAccessor
 {
+    
+    GraphStoreClient getClient();
+    
+    /**
+     * Returns an array of readable media types.
+     * 
+     * @return array of media types
+     */
+    MediaType[] getReadableMediaTypes();    
     
 }

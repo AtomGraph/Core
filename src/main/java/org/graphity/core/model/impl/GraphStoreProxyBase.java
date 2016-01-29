@@ -80,11 +80,13 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
         return origin;
     }
 
+    @Override
     public GraphStoreClient getClient()
     {
         return client;
     }
     
+    @Override
     public javax.ws.rs.core.MediaType[] getReadableMediaTypes()
     {
         return readableMediaTypes;

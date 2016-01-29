@@ -17,6 +17,9 @@
 
 package org.graphity.core.model;
 
+import javax.ws.rs.core.MediaType;
+import org.graphity.core.client.SPARQLClient;
+
 /**
  * A class representing a SPARQL endpoint proxy.
  * 
@@ -24,5 +27,11 @@ package org.graphity.core.model;
  */
 public interface SPARQLEndpointProxy extends Proxy
 {
+
+    SPARQLClient getClient();
+    
+    MediaType[] getReadableModelMediaTypes();
+
+    MediaType[] getReadableResultSetMediaTypes();
     
 }
