@@ -32,9 +32,7 @@ import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
 import java.net.URI;
 import java.util.List;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 import org.graphity.core.MediaTypes;
-import org.graphity.core.exception.ClientException;
 import org.graphity.core.provider.DatasetProvider;
 import org.graphity.core.provider.ModelProvider;
 import org.graphity.core.provider.QueryWriter;
@@ -45,9 +43,6 @@ import org.slf4j.LoggerFactory;
 
 /**
 * Utility class for retrieval of SPARQL query results from local RDF models and remote endpoints.
-* Uses portions of Jena code
-* (c) Copyright 2010 Epimorphics Ltd.
-* All rights reserved.
 *
 * @author Martynas Jusevičius <martynas@graphity.org>
 * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/util/FileManager.html">Jena FileManager</a>
@@ -134,19 +129,6 @@ public class DataManager extends FileManager
             get(ClientResponse.class);
     }
     
-    @Override
-    public Model loadModel(String uri)
-    {
-        ClientResponse cr = get(uri, getModelMediaTypes());
-        if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
-        {
-            if (log.isDebugEnabled()) log.debug("RDF request to URI: {} unsuccessful. Reason: {}", uri, cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr.getStatusInfo());
-        }
-        
-        return cr.getEntity(Model.class);
-    }
-        
     public boolean usePreemptiveAuth(Property property)
     {
         return preemptiveAuth;
