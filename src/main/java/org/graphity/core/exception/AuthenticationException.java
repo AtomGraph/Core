@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.graphity.core.auth;
+package org.graphity.core.exception;
 
 /**
  * Exception that can be thrown when authentication fails.

@@ -14,8 +14,9 @@
  *  limitations under the License.
  *
  */
-package org.graphity.core.auth;
+package org.graphity.core.mapper;
 
+import org.graphity.core.exception.AuthenticationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
