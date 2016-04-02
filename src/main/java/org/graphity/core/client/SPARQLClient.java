@@ -61,11 +61,6 @@ public class SPARQLClient
     {
         return new SPARQLClient(webResource, maxGetRequestSize);
     }
-
-    public WebResource.Builder queryBuilder(Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
-    {
-        return queryBuilder(query, acceptedTypes, params, getMaxGetRequestSize());
-    }
     
     public WebResource.Builder queryBuilder(Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, int maxGetRequestSize)
     {
@@ -103,6 +98,16 @@ public class SPARQLClient
         }
     }
 
+    public WebResource.Builder queryBuilder(Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
+    {
+        return queryBuilder(query, acceptedTypes, params, getMaxGetRequestSize());
+    }
+
+    public WebResource.Builder queryBuilder(Query query, javax.ws.rs.core.MediaType[] acceptedTypes)
+    {
+        return queryBuilder(query, acceptedTypes, null);
+    }
+    
     /**
      * Loads RDF model from a remote SPARQL endpoint using a query and optional request parameters.
      * Only <code>DESCRIBE</code> and <code>CONSTRUCT</code> queries can be used with this method.
