@@ -61,7 +61,12 @@ public class SPARQLClient
     {
         return new SPARQLClient(webResource, maxGetRequestSize);
     }
-        
+
+    public WebResource.Builder queryBuilder(Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
+    {
+        return queryBuilder(query, acceptedTypes, params, getMaxGetRequestSize());
+    }
+    
     public WebResource.Builder queryBuilder(Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, int maxGetRequestSize)
     {
 	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {}", getWebResource().getURI(), query);
