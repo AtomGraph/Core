@@ -16,7 +16,7 @@
 
 package org.graphity.core.exception;
 
-import javax.ws.rs.core.Response.StatusType;
+import com.sun.jersey.api.client.ClientResponse;
 
 /**
  * A runtime exception thrown by a client that signals a failure to process the HTTP request or HTTP response.
@@ -24,23 +24,10 @@ import javax.ws.rs.core.Response.StatusType;
  */
 public class ClientException extends RuntimeException
 {
-    private final StatusType statusType;
     
-    public ClientException(StatusType statusType)
+    public ClientException(ClientResponse clientResponse)
     {
-	if (statusType == null) throw new IllegalArgumentException("StatusType must be not null");        
-        this.statusType = statusType;
-    }
-    
-    public StatusType getStatusType()
-    {
-        return statusType;
-    }
-    
-    @Override
-    public String toString()
-    {
-        return getStatusType().toString();
+        super(clientResponse.getStatusInfo().getReasonPhrase());
     }
     
 }

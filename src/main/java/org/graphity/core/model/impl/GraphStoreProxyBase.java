@@ -100,7 +100,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
             if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr.getStatusInfo());
+            throw new ClientException(cr);
         }
         
         return cr.getEntity(Model.class);
@@ -114,7 +114,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
             if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr.getStatusInfo());
+            throw new ClientException(cr);
         }
         
         return cr.getEntity(Model.class);
@@ -128,7 +128,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
             if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr.getStatusInfo());
+            throw new ClientException(cr);
         }
 
         return true;
@@ -142,7 +142,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
             if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr.getStatusInfo());
+            throw new ClientException(cr);
         }
     }
 
@@ -154,7 +154,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
             if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr.getStatusInfo());
+            throw new ClientException(cr);
         }
     }
 
@@ -166,7 +166,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
             if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr.getStatusInfo());
+            throw new ClientException(cr);
         }
     }
 
@@ -178,7 +178,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
             if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr.getStatusInfo());
+            throw new ClientException(cr);
         }
     }
 
@@ -190,7 +190,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
             if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr.getStatusInfo());
+            throw new ClientException(cr);
         }
     }
 
@@ -202,7 +202,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
             if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr.getStatusInfo());
+            throw new ClientException(cr);
         }
     }
 

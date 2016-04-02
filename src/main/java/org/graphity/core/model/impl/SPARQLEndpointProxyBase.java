@@ -115,7 +115,7 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
             if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr.getStatusInfo());
+            throw new ClientException(cr);
         }
 
         return cr.getEntity(Model.class);
@@ -132,7 +132,7 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
             if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr.getStatusInfo());
+            throw new ClientException(cr);
         }
         
         return cr.getEntity(ResultSetRewindable.class);
@@ -156,7 +156,7 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
             if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr.getStatusInfo());
+            throw new ClientException(cr);
         }
 
         if (cr.getType().isCompatible(MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
@@ -164,7 +164,7 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
         if (cr.getType().isCompatible(MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE))        
             return XMLInput.booleanFromXML(cr.getEntity(InputStream.class));
         
-        throw new ClientException(cr.getStatusInfo()); // TO-DO: refactor
+        throw new ClientException(cr); // TO-DO: refactor
     }
     
     @Override
@@ -175,7 +175,7 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
             if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr.getStatusInfo());
+            throw new ClientException(cr);
         }        
     }
     
