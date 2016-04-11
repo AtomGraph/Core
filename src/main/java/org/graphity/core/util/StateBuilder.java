@@ -51,6 +51,11 @@ public class StateBuilder
     {
         return new StateBuilder(UriBuilder.fromUri(uri), model);
     }
+
+    public static StateBuilder fromResource(Resource resource)
+    {
+        return new StateBuilder(UriBuilder.fromUri(resource.getURI()), resource.getModel());
+    }
     
     protected Resource getResource()
     {
