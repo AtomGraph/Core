@@ -788,11 +788,6 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
     }    
 
     @Override
-    public void read(Reader reader, String string, ContentType ct, StreamRDF srdf, Context cntxt) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
     public ErrorHandler getErrorHandler()
     {
         return errorHandler;
@@ -814,6 +809,12 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
     public void setParserProfile(ParserProfile parserProfile)
     {
         this.parserProfile = parserProfile;
+    }
+
+    @Override
+    public void read(Reader reader, String baseURI, ContentType ct, StreamRDF output, Context context)
+    {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }
