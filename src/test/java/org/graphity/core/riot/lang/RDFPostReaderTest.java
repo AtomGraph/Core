@@ -16,10 +16,10 @@
  */
 package org.graphity.core.riot.lang;
 
-import com.hp.hpl.jena.datatypes.BaseDatatype;
-import com.hp.hpl.jena.rdf.model.AnonId;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
+import org.apache.jena.datatypes.BaseDatatype;
+import org.apache.jena.rdf.model.AnonId;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import java.net.URLEncoder;
 import org.junit.*;
 import static org.junit.Assert.*;

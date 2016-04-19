@@ -17,17 +17,18 @@
 package org.graphity.core.riot.lang;
 
 import org.graphity.core.riot.RDFLanguages;
-import com.hp.hpl.jena.datatypes.BaseDatatype;
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.rdf.model.AnonId;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.sparql.util.Context;
+import org.apache.jena.datatypes.BaseDatatype;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.rdf.model.AnonId;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.sparql.util.Context;
 import java.io.InputStream;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -37,6 +38,7 @@ import java.util.List;
 import org.apache.jena.atlas.AtlasException;
 import org.apache.jena.atlas.io.PeekReader;
 import org.apache.jena.atlas.iterator.PeekIterator;
+import org.apache.jena.atlas.web.ContentType;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.ReaderRIOTBase;
 import org.apache.jena.riot.RiotParseException;
@@ -65,6 +67,9 @@ import org.slf4j.LoggerFactory;
 public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // implements ReaderRIOT
 {    
     private static final Logger log = LoggerFactory.getLogger(RDFPostReader.class);
+    
+    private ErrorHandler errorHandler; 
+    private ParserProfile parserProfile = null;
     
     public Model parse(String body, String charsetName) throws URISyntaxException
     {
@@ -776,10 +781,39 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
     
     protected final void raiseException(RiotParseException ex)
     { 
-        ErrorHandler errorHandler = null; // profile.getHandler() ; 
+        //ErrorHandler errorHandler = null; // profile.getHandler() ; 
         if ( errorHandler != null )
             errorHandler.fatal(ex.getOriginalMessage(), ex.getLine(), ex.getCol()) ;
         throw ex ;
     }    
+
+    @Override
+    public void read(Reader reader, String string, ContentType ct, StreamRDF srdf, Context cntxt) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public ErrorHandler getErrorHandler()
+    {
+        return errorHandler;
+    }
+
+    @Override
+    public void setErrorHandler(ErrorHandler errorHandler)
+    {
+        this.errorHandler = errorHandler;
+    }
+
+    @Override
+    public ParserProfile getParserProfile()
+    {
+        return parserProfile;
+    }
+
+    @Override
+    public void setParserProfile(ParserProfile parserProfile)
+    {
+        this.parserProfile = parserProfile;
+    }
 
 }

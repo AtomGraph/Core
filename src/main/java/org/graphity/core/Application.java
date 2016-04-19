@@ -16,7 +16,7 @@
  */
 package org.graphity.core;
 
-import com.hp.hpl.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.Property;
 import org.graphity.core.provider.ResultSetProvider;
 import org.graphity.core.provider.DataManagerProvider;
 import org.graphity.core.provider.ModelProvider;
@@ -29,8 +29,8 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
-import org.apache.jena.riot.IO_Jena;
 import org.apache.jena.riot.RDFParserRegistry;
+import org.apache.jena.riot.system.IO_JenaReaders;
 import org.graphity.core.mapper.ClientExceptionMapper;
 import org.graphity.core.mapper.NotFoundExceptionMapper;
 import org.graphity.core.model.impl.GraphStoreProxyBase;
@@ -77,7 +77,7 @@ public class Application extends javax.ws.rs.core.Application
         // add RDF/POST serialization
         RDFLanguages.register(RDFLanguages.RDFPOST);
         RDFParserRegistry.registerLangTriples(RDFLanguages.RDFPOST, new RDFPostReaderFactory());
-        IO_Jena.registerForModelRead(RDFLanguages.strLangRDFPOST, RDFPostReaderAdapter.class);
+        IO_JenaReaders.registerForModelRead(RDFLanguages.strLangRDFPOST, RDFPostReaderAdapter.class);
 
 	classes.add(QueriedResourceBase.class); // handles all
 	classes.add(SPARQLEndpointProxyBase.class); // handles /sparql queries

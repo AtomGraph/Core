@@ -16,7 +16,6 @@
  */
 package org.graphity.core.provider;
 
-import com.sun.jersey.api.client.Client;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;

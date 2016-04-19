@@ -16,8 +16,8 @@
  */
 package org.graphity.core.model;
 
-import com.hp.hpl.jena.query.DatasetAccessor;
-import com.hp.hpl.jena.rdf.model.Model;
+import org.apache.jena.query.DatasetAccessor;
+import org.apache.jena.rdf.model.Model;
 import java.net.URI;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;

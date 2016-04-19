@@ -16,7 +16,7 @@
  */
 package org.graphity.core.model.impl;
 
-import com.hp.hpl.jena.rdf.model.*;
+import org.apache.jena.rdf.model.*;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;

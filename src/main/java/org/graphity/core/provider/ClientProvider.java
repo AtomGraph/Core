@@ -16,7 +16,7 @@
 
 package org.graphity.core.provider;
 
-import com.hp.hpl.jena.sparql.engine.http.Service;
+import org.apache.jena.sparql.engine.http.Service;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;

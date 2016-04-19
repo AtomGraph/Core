@@ -16,7 +16,7 @@
 
 package org.graphity.core.provider;
 
-import com.hp.hpl.jena.query.Query;
+import org.apache.jena.query.Query;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;

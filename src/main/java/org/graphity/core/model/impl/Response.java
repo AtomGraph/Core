@@ -17,9 +17,9 @@
 
 package org.graphity.core.model.impl;
 
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.query.ResultSetRewindable;
-import com.hp.hpl.jena.rdf.model.Model;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetRewindable;
+import org.apache.jena.rdf.model.Model;
 import java.util.List;
 import java.util.Locale;
 import javax.ws.rs.WebApplicationException;

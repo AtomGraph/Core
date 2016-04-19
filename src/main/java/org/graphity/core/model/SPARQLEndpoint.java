@@ -16,10 +16,10 @@
  */
 package org.graphity.core.model;
 
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.ResultSetRewindable;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.update.UpdateRequest;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.ResultSetRewindable;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.update.UpdateRequest;
 import java.net.URI;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
