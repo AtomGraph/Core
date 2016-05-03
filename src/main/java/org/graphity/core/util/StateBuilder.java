@@ -21,6 +21,7 @@ import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.util.ResourceUtils;
+import com.sun.jersey.api.uri.UriComponent;
 import java.net.URI;
 import javax.ws.rs.core.UriBuilder;
 
@@ -70,10 +71,14 @@ public class StateBuilder
     public StateBuilder property(Property property, RDFNode value)
     {
         if (property == null) throw new IllegalArgumentException("Property cannot be null");        
-        if (value == null) throw new IllegalArgumentException("Object cannot be null");        
+        if (value == null) throw new IllegalArgumentException("RDFNode cannot be null");        
 
         getResource().addProperty(property, value);
-        getUriBuilder().queryParam(property.getLocalName(), value);
+        String encodedValue = value.toString(); // not a reliable serialization
+        // we URI-encode values ourselves because Jersey 1.x fails to do so: https://java.net/jira/browse/JERSEY-1717
+        if (value.isURIResource()) encodedValue = UriComponent.encode(value.asResource().getURI(), UriComponent.Type.UNRESERVED);
+        if (value.isLiteral()) encodedValue = UriComponent.encode(value.asLiteral().getString(), UriComponent.Type.UNRESERVED);
+        getUriBuilder().queryParam(property.getLocalName(), encodedValue);
         
         return this;
     }
@@ -81,10 +86,14 @@ public class StateBuilder
     public StateBuilder replaceProperty(Property property, RDFNode value)
     {
         if (property == null) throw new IllegalArgumentException("Property cannot be null");        
-        if (value == null) throw new IllegalArgumentException("Object cannot be null");        
+        if (value == null) throw new IllegalArgumentException("RDFNode cannot be null");        
 
         getResource().removeAll(property).addProperty(property, value);
-        getUriBuilder().replaceQueryParam(property.getLocalName(), value);
+        String encodedValue = value.toString(); // not a reliable serialization
+        // we URI-encode values ourselves because Jersey 1.x fails to do so: https://java.net/jira/browse/JERSEY-1717
+        if (value.isURIResource()) encodedValue = UriComponent.encode(value.asResource().getURI(), UriComponent.Type.UNRESERVED);
+        if (value.isLiteral()) encodedValue = UriComponent.encode(value.asLiteral().getString(), UriComponent.Type.UNRESERVED);
+        getUriBuilder().replaceQueryParam(property.getLocalName(), encodedValue);
         
         return this;
     }
@@ -95,7 +104,9 @@ public class StateBuilder
         if (value == null) throw new IllegalArgumentException("Object cannot be null");        
 
         getResource().addLiteral(property, value);
-        getUriBuilder().queryParam(property.getLocalName(), value);
+        // we URI-encode values ourselves because Jersey 1.x fails to do so: https://java.net/jira/browse/JERSEY-1717
+        String encodedValue = UriComponent.encode(value.toString(), UriComponent.Type.UNRESERVED);
+        getUriBuilder().queryParam(property.getLocalName(), encodedValue);
         
         return this;
     }
@@ -106,7 +117,9 @@ public class StateBuilder
         if (value == null) throw new IllegalArgumentException("Object cannot be null");        
 
         getResource().removeAll(property).addLiteral(property, value);
-        getUriBuilder().replaceQueryParam(property.getLocalName(), value);
+        // we URI-encode values ourselves because Jersey 1.x fails to do so: https://java.net/jira/browse/JERSEY-1717
+        String encodedValue = UriComponent.encode(value.toString(), UriComponent.Type.UNRESERVED);
+        getUriBuilder().replaceQueryParam(property.getLocalName(), encodedValue);
         
         return this;
     }
