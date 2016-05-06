@@ -81,15 +81,7 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     @Override
     public Model describe()
     {
-	Model model = getSPARQLEndpoint().loadModel(getQuery());
-        
-	if (model.isEmpty())
-	{
-	    if (log.isDebugEnabled()) log.debug("Query result Model is empty; returning 404 Not Found");
-	    throw new NotFoundException("Query result Model is empty");
-	}
-
-        return model;
+	return getSPARQLEndpoint().loadModel(getQuery());
     }
     
     /**
@@ -102,6 +94,13 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     public Response get()
     {
 	Model description = describe();
+        
+	if (description.isEmpty())
+	{
+	    if (log.isDebugEnabled()) log.debug("Query result Model is empty; returning 404 Not Found");
+	    throw new NotFoundException("Query result Model is empty");
+	}
+        
 	if (log.isDebugEnabled()) log.debug("Returning @GET Response with {} statements in Model", description.size());
 	return getResponse(description);
     }
