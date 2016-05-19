@@ -86,14 +86,11 @@ public class StateBuilder
     public StateBuilder replaceProperty(Property property, RDFNode value)
     {
         if (property == null) throw new IllegalArgumentException("Property cannot be null");        
-        if (value == null) throw new IllegalArgumentException("RDFNode cannot be null");        
 
-        getResource().removeAll(property).addProperty(property, value);
-        String encodedValue = value.toString(); // not a reliable serialization
-        // we URI-encode values ourselves because Jersey 1.x fails to do so: https://java.net/jira/browse/JERSEY-1717
-        if (value.isURIResource()) encodedValue = UriComponent.encode(value.asResource().getURI(), UriComponent.Type.UNRESERVED);
-        if (value.isLiteral()) encodedValue = UriComponent.encode(value.asLiteral().getString(), UriComponent.Type.UNRESERVED);
-        getUriBuilder().replaceQueryParam(property.getLocalName(), encodedValue);
+        getResource().removeAll(property);
+        getUriBuilder().replaceQueryParam(property.getLocalName(), (Object[])null);
+        
+        if (value != null) property(property, value);
         
         return this;
     }
@@ -114,12 +111,11 @@ public class StateBuilder
     public StateBuilder replaceLiteral(Property property, Object value)
     {
         if (property == null) throw new IllegalArgumentException("Property cannot be null");        
-        if (value == null) throw new IllegalArgumentException("Object cannot be null");        
 
-        getResource().removeAll(property).addLiteral(property, value);
-        // we URI-encode values ourselves because Jersey 1.x fails to do so: https://java.net/jira/browse/JERSEY-1717
-        String encodedValue = UriComponent.encode(value.toString(), UriComponent.Type.UNRESERVED);
-        getUriBuilder().replaceQueryParam(property.getLocalName(), encodedValue);
+        getResource().removeAll(property);
+        getUriBuilder().replaceQueryParam(property.getLocalName(), (Object[])null);
+        
+        if (value != null) literal(property, value);
         
         return this;
     }
