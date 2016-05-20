@@ -94,32 +94,7 @@ public class StateBuilder
         
         return this;
     }
-    
-    public StateBuilder literal(Property property, Object value)
-    {
-        if (property == null) throw new IllegalArgumentException("Property cannot be null");        
-        if (value == null) throw new IllegalArgumentException("Object cannot be null");        
-
-        getResource().addLiteral(property, value);
-        // we URI-encode values ourselves because Jersey 1.x fails to do so: https://java.net/jira/browse/JERSEY-1717
-        String encodedValue = UriComponent.encode(value.toString(), UriComponent.Type.UNRESERVED);
-        getUriBuilder().queryParam(property.getLocalName(), encodedValue);
         
-        return this;
-    }
-
-    public StateBuilder replaceLiteral(Property property, Object value)
-    {
-        if (property == null) throw new IllegalArgumentException("Property cannot be null");        
-
-        getResource().removeAll(property);
-        getUriBuilder().replaceQueryParam(property.getLocalName(), (Object[])null);
-        
-        if (value != null) literal(property, value);
-        
-        return this;
-    }
-    
     public Resource build()
     {
         return ResourceUtils.renameResource(getResource(), getUriBuilder().build().toString());
