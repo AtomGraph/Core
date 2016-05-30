@@ -32,34 +32,5 @@ public class GraphStoreOriginBase extends OriginBase implements GraphStoreOrigin
     {
         super(webResource);
     }
-    
-    /**
-     * Constructs Graph Store origin from URI and HTTP authentication credentials.
-     * 
-     * @param uri origin URI
-     * @param authUser authentication username
-     * @param authPwd authentication password
-     */
-    /*
-    public GraphStoreOriginBase(String uri, String authUser, byte[] authPwd)
-    {
-        super(uri, authUser, authPwd);
-    }
 
-    public GraphStoreOriginBase(String uri, String authUser, String authPwd)
-    {
-        super(uri, authUser, authPwd);
-    }
-    */
-    /**
-     * Constructs Graph Store origin from URI.
-     * 
-     * @param uri 
-     */
-    /*
-    public GraphStoreOriginBase(String uri)
-    {
-        super(uri);
-    }
-    */
 }

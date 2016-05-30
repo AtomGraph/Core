@@ -95,7 +95,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
     @Override
     public Model getModel()
     {
-	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} default graph", getClient().getWebResource().getURI());
+	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} default graph", getOrigin().getWebResource().getURI());
 	ClientResponse cr = getClient().getModel(getReadableMediaTypes());
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
@@ -109,8 +109,8 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
     @Override
     public Model getModel(String uri)
     {
-	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} with named graph URI: {}", getClient().getWebResource().getURI(), uri);
-	ClientResponse cr = getClient().getModel(getReadableMediaTypes(), uri);
+	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} with named graph URI: {}", getOrigin().getWebResource().getURI(), uri);
+	ClientResponse cr = getClient().get(getReadableMediaTypes(), uri);
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
             if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
@@ -123,7 +123,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
     @Override
     public boolean containsModel(String uri)
     {
-	if (log.isDebugEnabled()) log.debug("Checking if Graph Store {} contains GRAPH with URI {}", getClient().getWebResource().getURI(), uri);
+	if (log.isDebugEnabled()) log.debug("Checking if Graph Store {} contains GRAPH with URI {}", getOrigin().getWebResource().getURI(), uri);
 	ClientResponse cr = getClient().headNamed(uri);
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
@@ -137,7 +137,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
     @Override
     public void putModel(Model model)
     {
-	if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} default graph", getClient().getWebResource().getURI());
+	if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} default graph", getOrigin().getWebResource().getURI());
 	ClientResponse cr = getClient().putModel(MediaType.TEXT_NTRIPLES_TYPE, model);
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
@@ -149,7 +149,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
     @Override
     public void putModel(String uri, Model model)
     {
-	if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} with named graph URI {}", getClient().getWebResource().getURI(), uri);
+	if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} with named graph URI {}", getOrigin().getWebResource().getURI(), uri);
 	ClientResponse cr = getClient().putModel(MediaType.TEXT_NTRIPLES_TYPE, uri, model);
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
@@ -161,7 +161,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
     @Override
     public void deleteDefault()
     {
-	if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store {}", getClient().getWebResource().getURI());
+	if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store {}", getOrigin().getWebResource().getURI());
 	ClientResponse cr = getClient().deleteDefault();
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
@@ -173,7 +173,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
     @Override
     public void deleteModel(String uri)
     {
-	if (log.isDebugEnabled()) log.debug("DELETE named graph with URI {} from Graph Store {}", uri, getClient().getWebResource().getURI());
+	if (log.isDebugEnabled()) log.debug("DELETE named graph with URI {} from Graph Store {}", uri, getOrigin().getWebResource().getURI());
 	ClientResponse cr = getClient().deleteModel(uri);
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
@@ -185,7 +185,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
     @Override
     public void add(Model model)
     {
-	if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} default graph", getClient().getWebResource().getURI());
+	if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} default graph", getOrigin().getWebResource().getURI());
 	ClientResponse cr = getClient().add(MediaType.TEXT_NTRIPLES_TYPE, model);
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {
@@ -197,7 +197,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
     @Override
     public void add(String uri, Model model)
     {
-	if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} with named graph URI: {}", getClient().getWebResource().getURI(), uri);
+	if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} with named graph URI: {}", getOrigin().getWebResource().getURI(), uri);
 	ClientResponse cr = getClient().add(MediaType.TEXT_NTRIPLES_TYPE, uri, model);
         if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
         {

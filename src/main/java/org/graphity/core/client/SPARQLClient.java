@@ -43,6 +43,8 @@ public class SPARQLClient
 
     protected SPARQLClient(WebResource webResource, int maxGetRequestSize)
     {
+        if (webResource == null) throw new IllegalArgumentException("WebResource cannot be null");
+        
         this.webResource = webResource;
         this.maxGetRequestSize = maxGetRequestSize;
     }
@@ -51,7 +53,7 @@ public class SPARQLClient
     {
         return webResource;
     }
-
+    
     public static SPARQLClient create(WebResource webResource)
     {
         return new SPARQLClient(webResource, 8192);
