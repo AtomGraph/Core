@@ -150,7 +150,7 @@ public abstract class ResourceBase implements Resource
      * @return URI of this resource
      */
     @Override
-    public URI getURI()
+    public final URI getURI()
     {
 	return getUriInfo().getAbsolutePath();
     }
@@ -212,7 +212,7 @@ public abstract class ResourceBase implements Resource
 
         if (getServletConfig().getInitParameter(property.getURI()) == null) return null;
         
-        return CacheControl.valueOf(getServletConfig().getInitParameter(property.getURI()).toString());
+        return CacheControl.valueOf(getServletConfig().getInitParameter(property.getURI()));
     }
     
 }
