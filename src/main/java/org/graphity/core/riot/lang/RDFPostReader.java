@@ -16,7 +16,6 @@
 
 package org.graphity.core.riot.lang;
 
-import org.graphity.core.riot.RDFLanguages;
 import com.hp.hpl.jena.datatypes.BaseDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
@@ -62,10 +61,12 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // implements ReaderRIOT
+public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
 {    
     private static final Logger log = LoggerFactory.getLogger(RDFPostReader.class);
-    
+
+    private ParserProfile parserProfile = null;
+        
     public Model parse(String body, String charsetName) throws URISyntaxException
     {
         List<String> keys = new ArrayList<>(), values = new ArrayList<>();
@@ -240,14 +241,9 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
         
         try
         {
-            runParser(tokens, RiotLib.profile(RDFLanguages.RDFPOST, baseURI), output);
+            setParserProfile(RiotLib.profile(lang, baseURI));
+            runParser(tokens, getParserProfile(), output);
         }
-        /*
-        catch (IOException ex)
-        {
-            
-        }
-        */
         finally
         {
             output.finish();
@@ -265,9 +261,10 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
             if ( lookingAt(tokens, peekIter, DIRECTIVE) && !t.getImage().equals(TokenizerRDFPost.RDF))
                 exception(peekToken(tokens, peekIter), "RDF/POST needs to start with 'rdf' query param (found '" + peekToken(tokens, peekIter) + "')") ;
             nextToken(tokens, peekIter);
-       }
+        }
             
-        while (moreTokens(peekIter)) {
+        while (moreTokens(peekIter))
+        {
             Token t = peekToken(tokens, peekIter) ;
             if ( lookingAt(tokens, peekIter, DIRECTIVE) &&
                     (t.getImage().equals(DEF_NS_DECL) || t.getImage().equals(NS_DECL)))
@@ -553,7 +550,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
         Token t = peekToken(tokens, peekIter) ;
         String image = t.getImage() ;
         
-        if ( !image.startsWith("o"))
+        if (!image.startsWith("o"))
         {
             if (image.equals(TYPE) || image.equals(LANG)) // lt or ll
                 return objectLiteral(tokens, peekIter, profile);
@@ -775,11 +772,29 @@ public class RDFPostReader extends ReaderRIOTBase // implements StreamRDF // imp
     }
     
     protected final void raiseException(RiotParseException ex)
-    { 
-        ErrorHandler errorHandler = null; // profile.getHandler() ; 
-        if ( errorHandler != null )
-            errorHandler.fatal(ex.getOriginalMessage(), ex.getLine(), ex.getCol()) ;
+    {
+        if (getErrorHandler() != null)
+            getErrorHandler().fatal(ex.getOriginalMessage(), ex.getLine(), ex.getCol()) ;
         throw ex ;
     }    
 
+    public ErrorHandler getErrorHandler()
+    {
+        return getParserProfile().getHandler();
+    }
+    
+    public void setErrorHandler(ErrorHandler errorHandler)
+    {
+        getParserProfile().setHandler(errorHandler);
+    }
+
+    public ParserProfile getParserProfile()
+    {
+        return parserProfile;
+    } 
+    
+    public void setParserProfile(ParserProfile parserProfile)
+    {
+        this.parserProfile = parserProfile;
+    }    
 }
