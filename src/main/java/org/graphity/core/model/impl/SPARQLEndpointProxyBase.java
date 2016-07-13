@@ -17,14 +17,14 @@
 
 package org.graphity.core.model.impl;
 
-import com.hp.hpl.jena.ontology.DatatypeProperty;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.query.ResultSetRewindable;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.sparql.resultset.JSONInput;
-import com.hp.hpl.jena.sparql.resultset.XMLInput;
-import com.hp.hpl.jena.update.UpdateRequest;
+import org.apache.jena.ontology.DatatypeProperty;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetRewindable;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.sparql.resultset.JSONInput;
+import org.apache.jena.sparql.resultset.XMLInput;
+import org.apache.jena.update.UpdateRequest;
 import com.sun.jersey.api.client.ClientResponse;
 import java.io.InputStream;
 import java.util.List;

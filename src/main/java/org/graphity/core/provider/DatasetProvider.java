@@ -16,10 +16,10 @@
 
 package org.graphity.core.provider;
 
-import com.hp.hpl.jena.query.Dataset;
-import com.hp.hpl.jena.query.DatasetFactory;
-import com.hp.hpl.jena.shared.NoReaderForLangException;
-import com.hp.hpl.jena.shared.NoWriterForLangException;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.query.DatasetFactory;
+import org.apache.jena.shared.NoReaderForLangException;
+import org.apache.jena.shared.NoWriterForLangException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

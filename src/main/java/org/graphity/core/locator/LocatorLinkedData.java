@@ -16,8 +16,8 @@
  */
 package org.graphity.core.locator;
 
-import com.hp.hpl.jena.util.Locator;
-import com.hp.hpl.jena.util.TypedStream;
+import org.apache.jena.util.Locator;
+import org.apache.jena.util.TypedStream;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;

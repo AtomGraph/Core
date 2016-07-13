@@ -16,8 +16,8 @@
  */
 package org.graphity.core.model;
 
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.rdf.model.Model;
+import org.apache.jena.query.Query;
+import org.apache.jena.rdf.model.Model;
 
 /**
  * RDF resource, representation of which was queried from a SPARQL endpoint.

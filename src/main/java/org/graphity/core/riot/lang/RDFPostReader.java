@@ -16,17 +16,18 @@
 
 package org.graphity.core.riot.lang;
 
-import com.hp.hpl.jena.datatypes.BaseDatatype;
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.rdf.model.AnonId;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.sparql.util.Context;
+import org.apache.jena.datatypes.BaseDatatype;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.rdf.model.AnonId;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.sparql.util.Context;
 import java.io.InputStream;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -36,7 +37,9 @@ import java.util.List;
 import org.apache.jena.atlas.AtlasException;
 import org.apache.jena.atlas.io.PeekReader;
 import org.apache.jena.atlas.iterator.PeekIterator;
+import org.apache.jena.atlas.web.ContentType;
 import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.ReaderRIOTBase;
 import org.apache.jena.riot.RiotParseException;
 import org.apache.jena.riot.system.ErrorHandler;
@@ -48,6 +51,7 @@ import org.apache.jena.riot.tokens.TokenType;
 import static org.apache.jena.riot.tokens.TokenType.*;
 import static org.graphity.core.riot.lang.TokenizerRDFPost.*;
 import org.apache.jena.riot.tokens.Tokenizer;
+import org.apache.jena.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -233,11 +237,28 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
     {
         return true;
     }
-    
+
+    @Override
+    public void read(InputStream in, String baseURI, ContentType ct, StreamRDF output, Context context)
+    {
+        read(in, baseURI, RDFLanguages.contentTypeToLang(ct), output, context);
+    }
+
     @Override
     public void read(InputStream in, String baseURI, Lang lang, StreamRDF output, Context context)
     {
-        Tokenizer tokens = new TokenizerRDFPost(PeekReader.makeUTF8(in));  
+        read(FileUtils.asBufferedUTF8(in), baseURI, lang, output, context);
+    }
+    
+    @Override
+    public void read(Reader in, String baseURI, ContentType ct, StreamRDF output, Context context)
+    {
+        read(in, baseURI, RDFLanguages.contentTypeToLang(ct), output, context);
+    }
+    
+    public void read(Reader in, String baseURI, Lang lang, StreamRDF output, Context context)
+    {
+        Tokenizer tokens = new TokenizerRDFPost(PeekReader.make(in));  
         
         try
         {
@@ -776,25 +797,30 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
         if (getErrorHandler() != null)
             getErrorHandler().fatal(ex.getOriginalMessage(), ex.getLine(), ex.getCol()) ;
         throw ex ;
-    }    
+    }
 
+    @Override
     public ErrorHandler getErrorHandler()
     {
         return getParserProfile().getHandler();
     }
     
+    @Override
     public void setErrorHandler(ErrorHandler errorHandler)
     {
         getParserProfile().setHandler(errorHandler);
     }
 
+    @Override    
     public ParserProfile getParserProfile()
     {
         return parserProfile;
     } 
-    
+
+    @Override
     public void setParserProfile(ParserProfile parserProfile)
     {
         this.parserProfile = parserProfile;
     }    
+
 }

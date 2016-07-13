@@ -16,7 +16,7 @@
 
 package org.graphity.core.client;
 
-import com.hp.hpl.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Model;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import org.graphity.core.MediaType;

@@ -17,7 +17,7 @@
 
 package org.graphity.core.model;
 
-import com.hp.hpl.jena.query.DatasetAccessor;
+import org.apache.jena.query.DatasetAccessor;
 import javax.ws.rs.core.MediaType;
 import org.graphity.core.client.GraphStoreClient;
 

@@ -17,9 +17,9 @@
 
 package org.graphity.core.provider;
 
-import com.hp.hpl.jena.query.ARQ;
-import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.util.LocationMapper;
+import org.apache.jena.query.ARQ;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.util.LocationMapper;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
@@ -92,11 +92,11 @@ public class DataManagerProvider extends PerRequestTypeInjectableProvider<Contex
 
         boolean value = false;
         if (servletConfig.getInitParameter(property.getURI()) != null)
-            value = Boolean.parseBoolean(servletConfig.getInitParameter(property.getURI()).toString());
+            value = Boolean.parseBoolean(servletConfig.getInitParameter(property.getURI()));
         return value;
     }
     
-    public DataManager getDataManager(LocationMapper mapper, MediaTypes mediaTypes, com.hp.hpl.jena.sparql.util.Context context, ServletConfig servletConfig)
+    public DataManager getDataManager(LocationMapper mapper, MediaTypes mediaTypes, org.apache.jena.sparql.util.Context context, ServletConfig servletConfig)
     {
 	if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
         

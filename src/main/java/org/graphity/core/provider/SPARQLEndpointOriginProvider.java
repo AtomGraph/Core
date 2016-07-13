@@ -17,7 +17,7 @@
 
 package org.graphity.core.provider;
 
-import com.hp.hpl.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.Property;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;

@@ -17,7 +17,7 @@
 
 package org.graphity.core.model.impl;
 
-import com.hp.hpl.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Model;
 import com.sun.jersey.api.client.ClientResponse;
 import java.util.List;
 import javax.servlet.ServletConfig;

@@ -16,8 +16,8 @@
  */
 package org.graphity.core.provider;
 
-import com.hp.hpl.jena.update.UpdateFactory;
-import com.hp.hpl.jena.update.UpdateRequest;
+import org.apache.jena.update.UpdateFactory;
+import org.apache.jena.update.UpdateRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;

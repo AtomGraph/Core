@@ -29,7 +29,7 @@ import org.apache.jena.atlas.io.PeekReader ;
 import org.apache.jena.riot.RiotParseException ;
 import org.apache.jena.riot.system.RiotChars ;
 
-import com.hp.hpl.jena.sparql.ARQInternalErrorException ;
+import org.apache.jena.sparql.ARQInternalErrorException ;
 import org.apache.jena.riot.tokens.Token;
 import org.apache.jena.riot.tokens.TokenChecker;
 import org.apache.jena.riot.tokens.TokenType;
