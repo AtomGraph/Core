@@ -82,19 +82,28 @@ public class MediaTypes
         while (modelLangIt.hasNext())
         {
             Lang lang = modelLangIt.next();
-            if (!lang.equals(Lang.RDFNULL))
+            // we ignore TriX for now because of Jena bug: https://issues.apache.org/jira/browse/JENA-1211
+            if (!lang.equals(Lang.RDFNULL) && !lang.equals(Lang.TRIX))
             {
                 try
                 {
                     if (ModelFactory.createDefaultModel().getReader(lang.getName()) != null)
-                        readableList.add(new MediaType(lang, UTF8_PARAM));
+                    {
+                        MediaType mt = new MediaType(lang, UTF8_PARAM);
+                        // avoid adding duplicates. Cannot use Set because ordering is important
+                        if (!readableList.contains(mt)) readableList.add(mt);
+                    }
                 }
                 catch (NoReaderForLangException ex) {}
                 
                 try
                 {
                     if (ModelFactory.createDefaultModel().getWriter(lang.getName()) != null)
-                        writableList.add(new MediaType(lang, UTF8_PARAM));
+                    {
+                        MediaType mt = new MediaType(lang, UTF8_PARAM);                        
+                        // avoid adding duplicates. Cannot use Set because ordering is important                        
+                        if (!writableList.contains(mt)) writableList.add(mt);
+                    }
                 }
                 catch (NoWriterForLangException ex) {}
             }
