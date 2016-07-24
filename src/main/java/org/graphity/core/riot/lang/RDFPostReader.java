@@ -43,6 +43,7 @@ import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.ReaderRIOTBase;
 import org.apache.jena.riot.RiotParseException;
 import org.apache.jena.riot.system.ErrorHandler;
+import org.apache.jena.riot.system.ErrorHandlerFactory;
 import org.apache.jena.riot.system.ParserProfile;
 import org.apache.jena.riot.system.RiotLib;
 import org.apache.jena.riot.system.StreamRDF;
@@ -69,6 +70,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
 {    
     private static final Logger log = LoggerFactory.getLogger(RDFPostReader.class);
 
+    private ErrorHandler errorHandler = ErrorHandlerFactory.getDefaultErrorHandler();    
     private ParserProfile parserProfile = null;
         
     public Model parse(String body, String charsetName) throws URISyntaxException
@@ -258,11 +260,16 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
     
     public void read(Reader in, String baseURI, Lang lang, StreamRDF output, Context context)
     {
+        ParserProfile profile = parserProfile;
+        if (profile == null)
+            profile = RiotLib.profile(baseURI, false, false, errorHandler); 
+        if (errorHandler == null)
+            setErrorHandler(profile.getHandler());
+        
         Tokenizer tokens = new TokenizerRDFPost(PeekReader.make(in));  
         
         try
         {
-            setParserProfile(RiotLib.profile(lang, baseURI));
             runParser(tokens, getParserProfile(), output);
         }
         finally
@@ -802,13 +809,13 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
     @Override
     public ErrorHandler getErrorHandler()
     {
-        return getParserProfile().getHandler();
+        return errorHandler;
     }
     
     @Override
     public void setErrorHandler(ErrorHandler errorHandler)
     {
-        getParserProfile().setHandler(errorHandler);
+        this.errorHandler = errorHandler;
     }
 
     @Override    

@@ -33,7 +33,14 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFLanguages;
+import org.apache.jena.riot.ReaderRIOT;
+import org.apache.jena.riot.system.ErrorHandler;
+import org.apache.jena.riot.system.ErrorHandlerFactory;
+import org.apache.jena.riot.system.ParserProfile;
+import org.apache.jena.riot.system.RiotLib;
+import org.apache.jena.riot.system.StreamRDFLib;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,12 +87,17 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
             if (log.isErrorEnabled()) log.error("MediaType {} not supported by Jena", mediaType);
             throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);
         }
-	String syntax = lang.getName();
-	if (log.isDebugEnabled()) log.debug("Syntax used to read Model: {}", syntax);
-
-	// extract base URI from httpHeaders? extract charset from MediaType
-        //mediaType.getParameters().containsKey("charset")
-	return model.read(entityStream, null, syntax);
+	if (log.isDebugEnabled()) log.debug("RDF language used to read Model: {}", lang);
+        
+        String baseURI = null; // extract base URI from httpHeaders?
+        ErrorHandler errorHandler = getErrorHandler();
+        ReaderRIOT parser = RDFDataMgr.createReader(lang);
+        ParserProfile profile = RiotLib.profile(baseURI, true, true, errorHandler);
+        parser.setErrorHandler(errorHandler);
+        parser.setParserProfile(profile);
+        parser.read(entityStream, baseURI, null, StreamRDFLib.graph(model.getGraph()), null);
+        
+        return model; // need a Model which contains URI violations?!
     }
     
     // WRITER
@@ -119,6 +131,12 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
 	if (log.isDebugEnabled()) log.debug("Syntax used to write Model: {}", syntax);
 
 	model.write(entityStream, syntax);
+    }
+
+    // ModelProvider is a singleton shared by threads, so we create error handler per request to avoid concurrency
+    public ErrorHandler getErrorHandler()
+    {
+        return ErrorHandlerFactory.errorHandlerStrict; // throw exception and return 400 Bad Request on URI parse errors
     }
     
 }
