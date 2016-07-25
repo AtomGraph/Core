@@ -73,12 +73,14 @@ public class MediaTypes
     
     public MediaTypes(Collection<Lang> registered, Map<String, String> parameters)
     {
+	if (registered == null) throw new IllegalArgumentException("Collection of Langs must be not null");        
+        
         Map<Class, List<javax.ws.rs.core.MediaType>> readableMap = new HashMap<>(), writableMap = new HashMap<>();
         List<javax.ws.rs.core.MediaType> readableList = new ArrayList<>(), writableList = new ArrayList<>();
 
         // Model
 
-        Iterator<Lang> modelLangIt = registered.iterator(); //RDFLanguages.getRegisteredLanguages().iterator();
+        Iterator<Lang> modelLangIt = registered.iterator();
         while (modelLangIt.hasNext())
         {
             Lang lang = modelLangIt.next();

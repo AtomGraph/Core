@@ -28,7 +28,6 @@ import java.lang.reflect.Type;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
@@ -83,21 +82,32 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
         Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
         if (lang == null)
         {
-            Throwable ex = new NoReaderForLangException("Media type not supported");
-            if (log.isErrorEnabled()) log.error("MediaType {} not supported by Jena", mediaType);
-            throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);
+            if (log.isErrorEnabled()) log.error("MediaType '{}' not supported by Jena", formatType);
+            throw new NoReaderForLangException("MediaType not supported: " + formatType);
         }
 	if (log.isDebugEnabled()) log.debug("RDF language used to read Model: {}", lang);
         
-        String baseURI = null; // extract base URI from httpHeaders?
-        ErrorHandler errorHandler = getErrorHandler();
+        return read(model, entityStream, lang, null); // extract base URI from httpHeaders?
+    }
+
+    public Model read(Model model, InputStream is, Lang lang, String baseURI)
+    {
+        ErrorHandler errorHandler = ErrorHandlerFactory.errorHandlerStrict; // throw exceptions on all parse errors
+        ParserProfile parserProfile = RiotLib.profile(baseURI, true, true, errorHandler);
+        return read(model, is, lang, baseURI, errorHandler, parserProfile);
+    }
+    
+    public Model read(Model model, InputStream is, Lang lang, String baseURI, ErrorHandler errorHandler, ParserProfile parserProfile)
+    {
+	if (model == null) throw new IllegalArgumentException("Model must be not null");        
+	if (is == null) throw new IllegalArgumentException("InputStream must be not null");        
+
         ReaderRIOT parser = RDFDataMgr.createReader(lang);
-        ParserProfile profile = RiotLib.profile(baseURI, true, true, errorHandler);
         parser.setErrorHandler(errorHandler);
-        parser.setParserProfile(profile);
-        parser.read(entityStream, baseURI, null, StreamRDFLib.graph(model.getGraph()), null);
+        parser.setParserProfile(parserProfile);
+        parser.read(is, baseURI, null, StreamRDFLib.graph(model.getGraph()), null);
         
-        return model; // need a Model which contains URI violations?!
+        return model;
     }
     
     // WRITER
@@ -123,20 +133,15 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
         Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
         if (lang == null)
         {
-            Throwable ex = new NoWriterForLangException("Media type not supported");
-            if (log.isErrorEnabled()) log.error("MediaType {} not supported by Jena", formatType);
-            throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);
+            if (log.isErrorEnabled()) log.error("MediaType '{}' not supported by Jena", formatType);
+            throw new NoWriterForLangException("MediaType not supported: " + formatType);
         }
+	if (log.isDebugEnabled()) log.debug("RDF language used to read Model: {}", lang);
+        
 	String syntax = lang.getName();
 	if (log.isDebugEnabled()) log.debug("Syntax used to write Model: {}", syntax);
 
 	model.write(entityStream, syntax);
-    }
-
-    // ModelProvider is a singleton shared by threads, so we create error handler per request to avoid concurrency
-    public ErrorHandler getErrorHandler()
-    {
-        return ErrorHandlerFactory.errorHandlerStrict; // throw exception and return 400 Bad Request on URI parse errors
     }
     
 }
