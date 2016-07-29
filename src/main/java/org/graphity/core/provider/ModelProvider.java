@@ -25,7 +25,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
@@ -72,7 +71,7 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     }
 
     @Override
-    public Model readFrom(Class<Model> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException, WebApplicationException
+    public Model readFrom(Class<Model> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException
     {
 	if (log.isTraceEnabled()) log.trace("Reading Model with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
 	
@@ -101,6 +100,7 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     {
 	if (model == null) throw new IllegalArgumentException("Model must be not null");        
 	if (is == null) throw new IllegalArgumentException("InputStream must be not null");        
+	if (lang == null) throw new IllegalArgumentException("Lang must be not null");        
 
         ReaderRIOT parser = RDFDataMgr.createReader(lang);
         parser.setErrorHandler(errorHandler);
@@ -125,7 +125,7 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     }
 
     @Override
-    public void writeTo(Model model, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException
+    public void writeTo(Model model, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException
     {
 	if (log.isTraceEnabled()) log.trace("Writing Model with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
 
@@ -138,10 +138,19 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
         }
 	if (log.isDebugEnabled()) log.debug("RDF language used to read Model: {}", lang);
         
-	String syntax = lang.getName();
-	if (log.isDebugEnabled()) log.debug("Syntax used to write Model: {}", syntax);
+	write(model, entityStream, lang, null);
+    }
 
-	model.write(entityStream, syntax);
+    public Model write(Model model, OutputStream os, Lang lang, String baseURI)
+    {
+	if (model == null) throw new IllegalArgumentException("Model must be not null");        
+	if (os == null) throw new IllegalArgumentException("OutputStream must be not null");        
+	if (lang == null) throw new IllegalArgumentException("Lang must be not null");        
+
+        String syntax = lang.getName();
+	if (log.isDebugEnabled()) log.debug("Syntax used to write Model: {}", syntax);
+        
+        return model.write(os, syntax);
     }
     
 }

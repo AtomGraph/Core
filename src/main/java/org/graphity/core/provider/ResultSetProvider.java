@@ -57,7 +57,7 @@ public class ResultSetProvider implements MessageBodyReader<ResultSetRewindable>
     }
 
     @Override
-    public ResultSetRewindable readFrom(Class<ResultSetRewindable> type, Type type1, Annotation[] antns, javax.ws.rs.core.MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream in) throws IOException, WebApplicationException
+    public ResultSetRewindable readFrom(Class<ResultSetRewindable> type, Type type1, Annotation[] antns, javax.ws.rs.core.MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream in) throws IOException
     {
         if (log.isTraceEnabled()) log.trace("Reading ResultSet with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
         // result set needs to be rewindable because results might be processed multiple times, e.g. to calculate hash and write response
@@ -82,7 +82,7 @@ public class ResultSetProvider implements MessageBodyReader<ResultSetRewindable>
     }
 
     @Override
-    public void writeTo(ResultSet results, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException
+    public void writeTo(ResultSet results, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException
     {
 	if (mediaType.isCompatible(org.graphity.core.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
 	    ResultSetFormatter.outputAsJSON(entityStream, results);
