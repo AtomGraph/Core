@@ -1,13 +1,13 @@
-Lower-level Linked Data server application that serves as a base for [Graphity Processor](https://github.com/Graphity/graphity-processor). It is implemented as a Java Web application (uses Maven).
+Lower-level Linked Data server application that serves as a base for [AtomGraph Processor](../Processor). It is implemented as a Java Web application (uses Maven).
 
 Features
 --------
 
-Graphity Core provides features similar to that of [Pubby](http://wifo5-03.informatik.uni-mannheim.de/pubby/):
+AtomGraph Core provides features similar to that of [Pubby](http://wifo5-03.informatik.uni-mannheim.de/pubby/):
 * serving Linked Data from a SPARQL endpoint
 * HTTP Basic authentication for endpoints
  
-For more advanced features and configuration, see [Graphity Processor](https://github.com/Graphity/graphity-processor).
+For more advanced features and configuration, see [AtomGraph Processor](../Processor).
 
 Configuration
 -------------
