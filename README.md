@@ -1,4 +1,4 @@
-Lower-level Linked Data server application that serves as a base for [AtomGraph Processor](../Processor). It is implemented as a Java Web application (uses Maven).
+Lower-level Linked Data server application that serves as a base for [AtomGraph Processor](../../../Processor). It is implemented as a Java Web application (uses Maven).
 
 Features
 --------
@@ -7,7 +7,7 @@ AtomGraph Core provides features similar to that of [Pubby](http://wifo5-03.info
 * serving Linked Data from a SPARQL endpoint
 * HTTP Basic authentication for endpoints
  
-For more advanced features and configuration, see [AtomGraph Processor](../Processor).
+For more advanced features and configuration, see [AtomGraph Processor](../../../Processor).
 
 Configuration
 -------------
