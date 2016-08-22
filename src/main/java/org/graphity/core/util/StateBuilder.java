@@ -99,5 +99,11 @@ public class StateBuilder
     {
         return ResourceUtils.renameResource(getResource(), getUriBuilder().build().toString());
     }
+
+    @Override
+    public String toString()
+    {
+        return getResource().listProperties().toList().toString();
+    }
     
 }
