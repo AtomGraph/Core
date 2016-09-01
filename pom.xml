@@ -1,25 +1,25 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.graphity</groupId>
+    <groupId>com.atomgraph</groupId>
     <artifactId>core</artifactId>
     <version>1.1.4-SNAPSHOT</version>
     <packaging>${packaging.type}</packaging>
 
-    <name>Graphity Core</name>
+    <name>AtomGraph Core</name>
     <description>Generic Linked Data server</description>
-    <url>https://github.com/Graphity/graphity-core</url>
+    <url>https://github.com/AtomGraph/Core</url>
         
     <developers>
         <developer>
             <id>pumba-lt</id>
-            <email>martynas@graphity.org</email>
+            <email>martynas@atomgraph.com</email>
             <roles>
                 <role>Developer</role>
                 <role>Founder</role>
             </roles>
-            <organization>Graphity</organization>
-            <organizationUrl>http://graphityhq.com</organizationUrl>
+            <organization>AtomGraph</organization>
+            <organizationUrl>http://atomgraph.com</organizationUrl>
         </developer>
     </developers>
     
@@ -39,9 +39,9 @@
     </properties>
  
     <scm>
-        <url>https://github.com/Graphity/graphity-core</url>
-        <connection>scm:git:git://github.com/Graphity/graphity-core.git</connection>
-        <developerConnection>scm:git:git@github.com:pumba-lt/graphity-core.git</developerConnection>
+        <url>https://github.com/AtomGraph/Core</url>
+        <connection>scm:git:git@github.com:AtomGraph/Core.git</connection>
+        <developerConnection>scm:git:git@github.com:AtomGraph/Core.git</developerConnection>
     </scm>
 
     <repositories>

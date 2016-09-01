@@ -1,5 +1,5 @@
 /**
- *  Copyright 2014 Martynas Jusevičius <martynas@graphity.org>
+ *  Copyright 2014 Martynas Jusevičius <martynas@atomgraph.com>
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.graphity.core.riot.lang;
+package com.atomgraph.core.riot.lang;
 
 import org.apache.jena.datatypes.BaseDatatype;
 import org.apache.jena.rdf.model.AnonId;
@@ -28,7 +28,7 @@ import org.junit.runners.JUnit4;
 
 /**
  *
- * @author Martynas Jusevičius <martynas@graphity.org>
+ * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
 @RunWith(JUnit4.class)
 public class RDFPostReaderTest

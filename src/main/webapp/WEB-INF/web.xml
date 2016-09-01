@@ -3,22 +3,22 @@
     xmlns="http://java.sun.com/xml/ns/javaee"
     xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
     xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" 
-    id="graphity-core" version="3.0">
-    <display-name>Graphity Core</display-name>
+    id="atomgraph-core" version="3.0">
+    <display-name>AtomGraph Core</display-name>
     <description>Generic Linked Data framework</description>    
     <servlet>
         <servlet-name>index</servlet-name>
         <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
         <init-param>
             <param-name>javax.ws.rs.Application</param-name>
-            <param-value>org.graphity.core.Application</param-value>
+            <param-value>com.atomgraph.core.Application</param-value>
         </init-param>
         <init-param>
             <param-name>http://www.w3.org/ns/sparql-service-description#endpoint</param-name>
             <param-value>http://graphity.dydra.com/graphity/core/sparql</param-value>
         </init-param>
         <init-param>
-            <param-name>http://graphity.org/g#graphStore</param-name>
+            <param-name>http://atomgraph.com/core/ns#graphStore</param-name>
             <param-value>http://graphity.dydra.com/graphity/core/service</param-value>
         </init-param>
         <!--
@@ -32,19 +32,19 @@
         </init-param>
         -->
         <init-param>
-            <param-name>http://graphity.org/g#preemptiveAuth</param-name>
+            <param-name>http://atomgraph.com/core/ns#preemptiveAuth</param-name>
             <param-value>true</param-value>
         </init-param>
         <init-param>
-            <param-name>http://graphity.org/g#cacheControl</param-name>
+            <param-name>http://atomgraph.com/core/ns#cacheControl</param-name>
             <param-value>no-cache</param-value>
         </init-param>
         <init-param>
-            <param-name>http://graphity.org/g#resultLimit</param-name>
+            <param-name>http://atomgraph.com/core/ns#resultLimit</param-name>
             <param-value>100</param-value>
         </init-param>
         <init-param>
-            <param-name>http://graphity.org/g#maxGetRequestSize</param-name>
+            <param-name>http://atomgraph.com/core/ns#maxGetRequestSize</param-name>
             <param-value>8192</param-value>
         </init-param>
     </servlet>

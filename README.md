@@ -22,7 +22,7 @@ For developers
 
 Documentation
 -------------
-* [JavaDoc](http://graphity.github.io/graphity-core/apidocs/)
+* [JavaDoc](http://atomgraph.github.io/atomgraph-core/apidocs/)
 
 Dependencies
 --------------
