@@ -445,7 +445,6 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
 
         nextToken(tokens, peekIter) ;
         predicateObjectList(tokens, peekIter, profile, dest, subject) ;
-        //expectEndOfTriples() ;
     }
     
     protected void predicateObjectList(Tokenizer tokens, PeekIterator<Token> peekIter, ParserProfile profile, StreamRDF dest, Node subject)
@@ -488,6 +487,11 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
         if (predicate == null) return; // if predicateNS() failed to find pv
         
         nextToken(tokens, peekIter) ;
+        
+        // we reached the end - there is no object for this predicate
+        if (lookingAt(tokens, peekIter, EOF))
+            return;
+        
         objectList(tokens, peekIter, profile, dest, subject, predicate) ;
     }
     

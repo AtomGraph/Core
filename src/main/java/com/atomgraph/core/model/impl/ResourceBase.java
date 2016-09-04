@@ -33,7 +33,7 @@ import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Variant;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.model.Resource;
-import com.atomgraph.core.vocabulary.AC;
+import com.atomgraph.core.vocabulary.A;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +86,7 @@ public abstract class ResourceBase implements Resource
     @PostConstruct
     public void init()
     {
-        this.cacheControl = getCacheControl(AC.cacheControl);        
+        this.cacheControl = getCacheControl(A.cacheControl);
     }
     
     /**

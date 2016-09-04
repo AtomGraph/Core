@@ -39,7 +39,7 @@ import com.atomgraph.core.client.SPARQLClient;
 import com.atomgraph.core.exception.ClientException;
 import com.atomgraph.core.model.SPARQLEndpointOrigin;
 import com.atomgraph.core.model.SPARQLEndpointProxy;
-import com.atomgraph.core.vocabulary.AC;
+import com.atomgraph.core.vocabulary.A;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +78,7 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
         List<javax.ws.rs.core.MediaType> resultSetTypeList = mediaTypes.getReadable(ResultSet.class);        
         readableResultSetMediaTypes = resultSetTypeList.toArray(new javax.ws.rs.core.MediaType[resultSetTypeList.size()]);
 
-        Integer maxGetRequestSize = getMaxGetRequestSize(servletConfig, AC.maxGetRequestSize);
+        Integer maxGetRequestSize = getMaxGetRequestSize(servletConfig, A.maxGetRequestSize);
         if (maxGetRequestSize != null) client = SPARQLClient.create(origin.getWebResource(), maxGetRequestSize);
         else client = SPARQLClient.create(origin.getWebResource());
     }

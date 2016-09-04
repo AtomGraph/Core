@@ -34,7 +34,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.*;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.model.SPARQLEndpoint;
-import com.atomgraph.core.vocabulary.AC;
+import com.atomgraph.core.vocabulary.A;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -168,8 +168,8 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
         if (query.isSelectType())
         {
             if (log.isDebugEnabled()) log.debug("SPARQL endpoint executing SELECT query: {}", query);
-            if (getServletConfig().getInitParameter(AC.resultLimit.getURI()) != null)
-                query.setLimit(Long.parseLong(getServletConfig().getInitParameter(AC.resultLimit.getURI()).toString()));
+            if (getServletConfig().getInitParameter(A.resultLimit.getURI()) != null)
+                query.setLimit(Long.parseLong(getServletConfig().getInitParameter(A.resultLimit.getURI()).toString()));
 
             return getResponseBuilder(select(query));
         }

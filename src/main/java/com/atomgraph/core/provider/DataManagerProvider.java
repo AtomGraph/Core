@@ -29,7 +29,7 @@ import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.util.jena.DataManager;
-import com.atomgraph.core.vocabulary.AC;
+import com.atomgraph.core.vocabulary.A;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,8 +101,8 @@ public class DataManagerProvider extends PerRequestTypeInjectableProvider<Contex
 	if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
         
         return getDataManager(mapper, mediaTypes,
-                getBooleanParam(servletConfig, AC.cacheModelLoads),
-                getBooleanParam(servletConfig, AC.preemptiveAuth));
+                getBooleanParam(servletConfig, A.cacheModelLoads),
+                getBooleanParam(servletConfig, A.preemptiveAuth));
     }
 
     public DataManager getDataManager(LocationMapper mapper, MediaTypes mediaTypes,

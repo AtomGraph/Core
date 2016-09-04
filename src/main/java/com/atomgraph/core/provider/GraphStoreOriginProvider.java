@@ -32,7 +32,7 @@ import javax.ws.rs.ext.Provider;
 import javax.ws.rs.ext.Providers;
 import com.atomgraph.core.model.GraphStoreOrigin;
 import com.atomgraph.core.model.impl.GraphStoreOriginBase;
-import com.atomgraph.core.vocabulary.AC;
+import com.atomgraph.core.vocabulary.A;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,7 +94,7 @@ public class GraphStoreOriginProvider extends PerRequestTypeInjectableProvider<C
      */
     public GraphStoreOrigin getGraphStoreOrigin()
     {
-        GraphStoreOrigin origin = getGraphStoreOrigin(AC.graphStore);
+        GraphStoreOrigin origin = getGraphStoreOrigin(A.graphStore);
         
         if (origin == null)
         {
