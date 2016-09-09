@@ -17,9 +17,9 @@
 
 package com.atomgraph.core.model;
 
-import org.apache.jena.query.DatasetAccessor;
-import javax.ws.rs.core.MediaType;
+import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.GraphStoreClient;
+import org.apache.jena.query.DatasetAccessor;
 
 /**
  * A class representing a Graph Store proxy.
@@ -31,11 +31,6 @@ public interface GraphStoreProxy extends Proxy, DatasetAccessor
     
     GraphStoreClient getClient();
     
-    /**
-     * Returns an array of readable media types.
-     * 
-     * @return array of media types
-     */
-    MediaType[] getReadableMediaTypes();    
+    MediaTypes getMediaTypes();    
     
 }

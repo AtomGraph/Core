@@ -19,24 +19,15 @@ package com.atomgraph.core.model.impl;
 
 import org.apache.jena.ontology.DatatypeProperty;
 import org.apache.jena.query.Query;
-import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetRewindable;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.sparql.resultset.JSONInput;
-import org.apache.jena.sparql.resultset.XMLInput;
 import org.apache.jena.update.UpdateRequest;
-import com.sun.jersey.api.client.ClientResponse;
-import java.io.InputStream;
-import java.util.List;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response.Status.Family;
-import com.atomgraph.core.MediaType;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.SPARQLClient;
-import com.atomgraph.core.exception.ClientException;
 import com.atomgraph.core.model.SPARQLEndpointOrigin;
 import com.atomgraph.core.model.SPARQLEndpointProxy;
 import com.atomgraph.core.vocabulary.A;
@@ -56,7 +47,6 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
 
     private final SPARQLEndpointOrigin origin;
     private final SPARQLClient client;
-    private final javax.ws.rs.core.MediaType[] readableModelMediaTypes, readableResultSetMediaTypes;
 
     /**
      * Constructs SPARQL endpoint proxy from request metadata and origin.
@@ -73,14 +63,9 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
         if (origin == null) throw new IllegalArgumentException("SPARQLEndpointOrigin cannot be null");
         this.origin = origin;
         
-        List<javax.ws.rs.core.MediaType> modelTypeList = mediaTypes.getReadable(Model.class);
-        readableModelMediaTypes = modelTypeList.toArray(new javax.ws.rs.core.MediaType[modelTypeList.size()]);
-        List<javax.ws.rs.core.MediaType> resultSetTypeList = mediaTypes.getReadable(ResultSet.class);        
-        readableResultSetMediaTypes = resultSetTypeList.toArray(new javax.ws.rs.core.MediaType[resultSetTypeList.size()]);
-
         Integer maxGetRequestSize = getMaxGetRequestSize(servletConfig, A.maxGetRequestSize);
-        if (maxGetRequestSize != null) client = SPARQLClient.create(origin.getWebResource(), maxGetRequestSize);
-        else client = SPARQLClient.create(origin.getWebResource());
+        if (maxGetRequestSize != null) client = SPARQLClient.create(origin.getWebResource(), mediaTypes, maxGetRequestSize);
+        else client = SPARQLClient.create(origin.getWebResource(), mediaTypes);
     }
     
     @Override
@@ -94,48 +79,17 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
     {
         return client;
     }
-    
-    @Override
-    public javax.ws.rs.core.MediaType[] getReadableModelMediaTypes()
-    {
-        return readableModelMediaTypes;
-    }
-
-    @Override
-    public javax.ws.rs.core.MediaType[] getReadableResultSetMediaTypes()
-    {
-        return readableResultSetMediaTypes;
-    }
-    
+        
     @Override
     public Model loadModel(Query query)
     {
-	if (log.isDebugEnabled()) log.debug("Loading Model from SPARQL endpoint: {} using Query: {}", getOrigin().getWebResource().getURI(), query);
-	ClientResponse cr = getClient().query(query, getReadableModelMediaTypes());
-        if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
-        {
-            if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr);
-        }
-
-        return cr.getEntity(Model.class);
+	return getClient().loadModel(query);
     }
 
     @Override
     public ResultSetRewindable select(Query query)
     {
-	if (query == null) throw new IllegalArgumentException("Query must be not null");
-        if (!query.isSelectType()) throw new IllegalArgumentException("Query must be SELECT");
-        
-	if (log.isDebugEnabled()) log.debug("Loading ResultSet from SPARQL endpoint: {} using Query: {}", getOrigin().getWebResource().getURI(), query);
-	ClientResponse cr = getClient().query(query, getReadableResultSetMediaTypes());
-        if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
-        {
-            if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr);
-        }
-        
-        return cr.getEntity(ResultSetRewindable.class);
+        return getClient().select(query);
     }
 
     /**
@@ -149,34 +103,13 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
     @Override
     public boolean ask(Query query)
     {
-	if (query == null) throw new IllegalArgumentException("Query must be not null");
-        if (!query.isAskType()) throw new IllegalArgumentException("Query must be ASK");
-        
-        ClientResponse cr = getClient().query(query, getReadableResultSetMediaTypes());
-        if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
-        {
-            if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr);
-        }
-
-        if (cr.getType().isCompatible(MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
-            return JSONInput.booleanFromJSON(cr.getEntity(InputStream.class));
-        if (cr.getType().isCompatible(MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE))        
-            return XMLInput.booleanFromXML(cr.getEntity(InputStream.class));
-        
-        throw new ClientException(cr); // TO-DO: refactor
+        return getClient().ask(query);
     }
     
     @Override
     public void update(UpdateRequest updateRequest)
     {
-	if (log.isDebugEnabled()) log.debug("Executing update on SPARQL endpoint: {} using UpdateRequest: {}", getOrigin().getWebResource().getURI(), updateRequest);
-	ClientResponse cr = getClient().update(updateRequest, null);
-        if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
-        {
-            if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr);
-        }        
+        getClient().update(updateRequest);
     }
     
     public final Integer getMaxGetRequestSize(ServletConfig servletConfig, DatatypeProperty property)

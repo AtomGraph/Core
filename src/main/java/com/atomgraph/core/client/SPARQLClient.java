@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Martynas Jusevičius <martynas@atomgraph.com>.
+ * Copyright 2016 Martynas Jusevičius <martynas@atomgraph.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,166 +13,172 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.atomgraph.core.client;
 
-import org.apache.jena.query.Query;
-import org.apache.jena.update.UpdateRequest;
+import com.atomgraph.core.client.simple.SimpleSPARQLClient;
+import com.atomgraph.core.MediaType;
+import com.atomgraph.core.MediaTypes;
+import com.atomgraph.core.exception.ClientException;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.uri.UriComponent;
-import com.sun.jersey.core.util.MultivaluedMapImpl;
-import java.util.List;
-import java.util.Map;
+import java.io.InputStream;
 import javax.ws.rs.core.MultivaluedMap;
-import com.atomgraph.core.MediaType;
+import javax.ws.rs.core.Response;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetRewindable;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.sparql.resultset.JSONInput;
+import org.apache.jena.sparql.resultset.XMLInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class SPARQLClient
+public class SPARQLClient extends SimpleSPARQLClient // TO-DO: implements SPARQLEndpoint
+ // TO-DO: implements SPARQLEndpoint
 {
-
+    
     private static final Logger log = LoggerFactory.getLogger(SPARQLClient.class);
-    
-    private final WebResource webResource;
-    private final int maxGetRequestSize;
 
-    protected SPARQLClient(WebResource webResource, int maxGetRequestSize)
-    {
-        if (webResource == null) throw new IllegalArgumentException("WebResource cannot be null");
-        
-        this.webResource = webResource;
-        this.maxGetRequestSize = maxGetRequestSize;
-    }
+    private final MediaTypes mediaTypes;
     
-    public WebResource getWebResource()
+    protected SPARQLClient(WebResource webResource, MediaTypes mediaTypes, int maxGetRequestSize)
     {
-        return webResource;
+        super(webResource, maxGetRequestSize);
+        this.mediaTypes = mediaTypes;
     }
-    
+
+    protected SPARQLClient(WebResource webResource, MediaTypes mediaTypes)
+    {
+        super(webResource);
+        this.mediaTypes = mediaTypes;
+    }
+
+    protected SPARQLClient(WebResource webResource)
+    {
+        this(webResource, new MediaTypes());
+    }
+
+    public static SPARQLClient create(WebResource webResource, MediaTypes mediaTypes, int maxGetRequestSize)
+    {
+        return new SPARQLClient(webResource, mediaTypes, maxGetRequestSize);
+    }
+
+    public static SPARQLClient create(WebResource webResource, MediaTypes mediaTypes)
+    {
+        return new SPARQLClient(webResource, mediaTypes);
+    }
+
     public static SPARQLClient create(WebResource webResource)
     {
-        return new SPARQLClient(webResource, 8192);
+        return new SPARQLClient(webResource);
     }
 
-    public static SPARQLClient create(WebResource webResource, int maxGetRequestSize)
+    public WebResource.Builder loadModelBuilder(Query query, MultivaluedMap<String, String> mvm)
     {
-        return new SPARQLClient(webResource, maxGetRequestSize);
+        return queryBuilder(query, getReadableMediaTypes(Model.class), mvm);
+    }
+
+    public Model loadModel(Query query)
+    {
+        return loadModel(query, null);
     }
     
-    public WebResource.Builder queryBuilder(Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, int maxGetRequestSize)
+    public Model loadModel(Query query, MultivaluedMap<String, String> mvm)
     {
-	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {}", getWebResource().getURI(), query);
+        ClientResponse cr = loadModelBuilder(query, mvm).get(ClientResponse.class);
+
+        if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+        {
+            if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+            throw new ClientException(cr);
+        }
+        
+        return cr.getEntity(Model.class);
+    }
+    
+    public WebResource.Builder selectBuilder(Query query, MultivaluedMap<String, String> mvm)
+    {
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
-	if (acceptedTypes == null) throw new IllegalArgumentException("Accepted MediaType[] must be not null");
-
-        // POST if request size is over limit, GET otherwise        
-        if (query.toString().length() > maxGetRequestSize)
-        {
-            MultivaluedMap formData = new MultivaluedMapImpl();
-            if (params != null) formData.putAll(params);
-            formData.putSingle("query", query.toString());
-
-            return getWebResource().accept(acceptedTypes).type(MediaType.APPLICATION_FORM_URLENCODED_TYPE);
-        }
-        else
-        {
-            // workaround for Jersey UriBuilder to encode { } brackets using UNRESERVED type
-            String escapedQueryString = UriComponent.encode(query.toString(), UriComponent.Type.UNRESERVED);
-            WebResource queryResource = getWebResource().queryParam("query", escapedQueryString);
-            if (params != null)
-            {
-                MultivaluedMap<String, String> encodedParams = new MultivaluedMapImpl();
-                for (Map.Entry<String, List<String>> entry : params.entrySet())
-                    if (!entry.getKey().equals("query")) // query param is handled separately
-                        for (String value : entry.getValue())
-                            encodedParams.add(UriComponent.encode(entry.getKey(), UriComponent.Type.UNRESERVED),
-                                UriComponent.encode(value, UriComponent.Type.UNRESERVED));
-
-                queryResource = queryResource.queryParams(encodedParams);
-            }
+        if (!query.isSelectType()) throw new IllegalArgumentException("Query must be SELECT");
         
-            return queryResource.accept(acceptedTypes);
-        }
+        return queryBuilder(query, getReadableMediaTypes(ResultSet.class), mvm);
     }
 
-    public WebResource.Builder queryBuilder(Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
+    public ResultSetRewindable select(Query query)
     {
-        return queryBuilder(query, acceptedTypes, params, getMaxGetRequestSize());
-    }
-
-    public WebResource.Builder queryBuilder(Query query, javax.ws.rs.core.MediaType[] acceptedTypes)
-    {
-        return queryBuilder(query, acceptedTypes, null);
+        return select(query, null);
     }
     
-    /**
-     * Loads RDF model from a remote SPARQL endpoint using a query and optional request parameters.
-     * Only <code>DESCRIBE</code> and <code>CONSTRUCT</code> queries can be used with this method.
-     * 
-     * @param query query object
-     * @param acceptedTypes accepted media types
-     * @param params name/value pairs of request parameters or null, if none
-     * @param maxGetRequestSize request size limit for <pre>GET</pre>
-     * @return result RDF model
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#describe">DESCRIBE</a>
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#construct">CONSTRUCT</a>
-     */    
-    public ClientResponse query(Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, int maxGetRequestSize)
-    {
-        return queryBuilder(query, acceptedTypes, params, maxGetRequestSize).get(ClientResponse.class);
-    }
-
-    public ClientResponse query(Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
-    {
-        return query(query, acceptedTypes, params, getMaxGetRequestSize());
-    }
-    
-    /**
-     * Loads RDF model from a remote SPARQL endpoint using a query and optional request parameters.
-     * Only <code>DESCRIBE</code> and <code>CONSTRUCT</code> queries can be used with this method.
-     * This is a convenience method for {@link #loadModel(String,Query,MultivaluedMap<String, String>)}
-     * with null request parameters.
-     * 
-     * @param query query object
-     * @param acceptedTypes accepted media types
-     * @return RDF model result
-     */
-    public ClientResponse query(Query query, javax.ws.rs.core.MediaType[] acceptedTypes)
-    {
-	return query(query, acceptedTypes, null);
-    }
-    
-    /**
-     * Executes update request on a remote SPARQL endpoint.
-     * 
-     * @param updateRequest update request
-     * @param params name/value pairs of request parameters or null, if none
-     * @return client response
-     */
-    public ClientResponse update(UpdateRequest updateRequest, MultivaluedMap<String, String> params)
-    {
-	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", getWebResource().getURI(), updateRequest);
-	if (updateRequest == null) throw new IllegalArgumentException("UpdateRequest must be not null");
-	//if (acceptedTypes == null) throw new IllegalArgumentException("Accepted MediaType[] must be not null");
-
-        MultivaluedMap formData = new MultivaluedMapImpl();
-        if (params != null) formData.putAll(params);
-        formData.putSingle("update", updateRequest.toString());
+    public ResultSetRewindable select(Query query, MultivaluedMap<String, String> mvm)
+    {        
+        ClientResponse cr = selectBuilder(query, mvm).get(ClientResponse.class);
         
-	return getWebResource().
-            //accept(acceptedTypes).
-            type(MediaType.APPLICATION_FORM_URLENCODED_TYPE).
-            post(ClientResponse.class, formData);
+        if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+        {
+            if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+            throw new ClientException(cr);
+        }
+        
+        return cr.getEntity(ResultSetRewindable.class);
     }
-    
-    public int getMaxGetRequestSize()
+
+    public WebResource.Builder askBuilder(Query query, MultivaluedMap<String, String> mvm)
     {
-        return maxGetRequestSize;
+	if (query == null) throw new IllegalArgumentException("Query must be not null");
+        if (!query.isAskType()) throw new IllegalArgumentException("Query must be ASK");
+
+        return queryBuilder(query, getReadableMediaTypes(ResultSet.class), mvm);
+    }
+
+    public boolean ask(Query query)
+    {
+        return ask(query, null);
     }
     
+    public boolean ask(Query query, MultivaluedMap<String, String> mvm)
+    {
+        ClientResponse cr = askBuilder(query, mvm).get(ClientResponse.class);
+        
+        if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+        {
+            if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+            throw new ClientException(cr);
+        }
+        
+        if (cr.getType().isCompatible(MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
+            return JSONInput.booleanFromJSON(cr.getEntity(InputStream.class));
+        if (cr.getType().isCompatible(MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE))        
+            return XMLInput.booleanFromXML(cr.getEntity(InputStream.class));
+        
+        throw new ClientException(cr); // TO-DO: refactor
+    }
+
+    /*
+    @Override
+    public void post(UpdateRequest updateRequest)
+    {
+	if (log.isDebugEnabled()) log.debug("Executing post on SPARQL endpoint: {} using UpdateRequest: {}", getOrigin().getWebResource().getURI(), updateRequest);
+	ClientResponse cr = getClient().post(updateRequest, null);
+        if (!cr.getStatusInfo().getFamily().equals(Family.SUCCESSFUL))
+        {
+            if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getOrigin().getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+            throw new ClientException(cr);
+        }        
+    }
+    */
+    
+    public MediaTypes getMediaTypes()
+    {
+        return mediaTypes;
+    }
+
+    public javax.ws.rs.core.MediaType[] getReadableMediaTypes(Class clazz)
+    {
+        return getMediaTypes().getReadable(clazz).toArray(new javax.ws.rs.core.MediaType[0]);
+    }
+
 }

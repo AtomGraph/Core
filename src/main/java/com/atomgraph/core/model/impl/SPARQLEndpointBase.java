@@ -169,7 +169,7 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
         {
             if (log.isDebugEnabled()) log.debug("SPARQL endpoint executing SELECT query: {}", query);
             if (getServletConfig().getInitParameter(A.resultLimit.getURI()) != null)
-                query.setLimit(Long.parseLong(getServletConfig().getInitParameter(A.resultLimit.getURI()).toString()));
+                query.setLimit(Long.parseLong(getServletConfig().getInitParameter(A.resultLimit.getURI())));
 
             return getResponseBuilder(select(query));
         }

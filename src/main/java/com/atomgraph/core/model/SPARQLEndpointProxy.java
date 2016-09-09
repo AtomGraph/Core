@@ -17,7 +17,7 @@
 
 package com.atomgraph.core.model;
 
-import javax.ws.rs.core.MediaType;
+import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.SPARQLClient;
 
 /**
@@ -30,8 +30,6 @@ public interface SPARQLEndpointProxy extends Proxy
 
     SPARQLClient getClient();
     
-    MediaType[] getReadableModelMediaTypes();
-
-    MediaType[] getReadableResultSetMediaTypes();
+    MediaTypes getMediaTypes();
     
 }
