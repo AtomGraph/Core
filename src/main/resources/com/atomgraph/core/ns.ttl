@@ -1,4 +1,4 @@
-@base           <http://atomgraph.com/core/ns> .
+@base           <http://atomgraph.com/ns/core> .
 
 # @prefix :	<#> .
 @prefix rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -39,12 +39,6 @@
     rdfs:label "LIMIT modifier" ;
     rdfs:description "Value of this property is set on all executed SELECT queries" ;
     rdfs:seeAlso <http://www.w3.org/TR/sparql11-query/#modResultLimit> ;
-    rdfs:isDefinedBy <#> .
-
-<#baseUri> a owl:ObjectProperty ;
-    rdfs:label "Application base URI" ;
-    rdfs:domain <#Application> ;
-    rdfs:comment "Base URI of the application" ;
     rdfs:isDefinedBy <#> .
 
 <#absolutePath> a owl:ObjectProperty ;

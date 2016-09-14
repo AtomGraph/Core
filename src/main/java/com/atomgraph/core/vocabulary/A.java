@@ -33,7 +33,7 @@ public final class A
     private static OntModel m_model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, null);
     
     /** <p>The namespace of the vocabulary as a string</p> */
-    public static final String NS = "http://atomgraph.com/core/ns#";
+    public static final String NS = "http://atomgraph.com/ns/core#";
     
     /** <p>The namespace of the vocabulary as a string</p>
      *  @see #NS */
@@ -54,8 +54,6 @@ public final class A
     public static final DatatypeProperty preemptiveAuth = m_model.createDatatypeProperty( NS + "preemptiveAuth" );
     
     public static final DatatypeProperty cacheModelLoads = m_model.createDatatypeProperty( NS + "cacheModelLoads" );
-
-    public static final ObjectProperty baseUri = m_model.createObjectProperty( NS + "baseUri" );
 
     public static final ObjectProperty absolutePath = m_model.createObjectProperty( NS + "absolutePath" );
 
