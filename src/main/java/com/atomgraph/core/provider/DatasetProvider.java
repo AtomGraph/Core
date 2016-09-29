@@ -68,7 +68,7 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
     {
 	if (log.isTraceEnabled()) log.trace("Reading Dataset with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
 	
-	Dataset dataset = DatasetFactory.createMem();
+	Dataset dataset = DatasetFactory.create();
 
         MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param        
         Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());

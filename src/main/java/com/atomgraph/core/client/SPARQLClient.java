@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Martynas Jusevičius <martynas@graphity.org>
+ * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
 public class SPARQLClient extends SimpleSPARQLClient // TO-DO: implements SPARQLEndpoint
  // TO-DO: implements SPARQLEndpoint
