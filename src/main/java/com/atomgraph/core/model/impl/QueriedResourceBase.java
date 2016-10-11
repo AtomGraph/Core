@@ -29,9 +29,11 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import com.atomgraph.core.MediaTypes;
+import com.atomgraph.core.client.SPARQLClient;
 import com.atomgraph.core.exception.NotFoundException;
+import com.atomgraph.core.model.Application;
 import com.atomgraph.core.model.QueriedResource;
-import com.atomgraph.core.model.SPARQLEndpoint;
+import com.sun.jersey.api.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +49,9 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
 {
     private static final Logger log = LoggerFactory.getLogger(QueriedResourceBase.class);
     
-    private final SPARQLEndpoint endpoint;
+    private final Client client;
+    private final Application application;
+    private final SPARQLClient sparqlClient;
 
     /**
      * JAX-RS-compatible resource constructor with injected initialization objects.
@@ -56,18 +60,21 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
      * @param uriInfo URI information of the request
      * @param request current request object
      * @param servletConfig webapp context
-     * @param endpoint SPARQL endpoint backing this resource
+     * @param application LDT application
+     * @param client
      * @param mediaTypes supported media types
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html">JAX-RS UriInfo</a>
      * @see <a href="http://docs.oracle.com/javaee/7/api/javax/servlet/ServletContext.html">ServletContext</a>
      * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceContext.html">Jersey ResourceContext</a>
      */
     public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletConfig servletConfig, @Context MediaTypes mediaTypes,
-            @Context SPARQLEndpoint endpoint)
+            @Context Client client, @Context Application application)
     {
 	super(uriInfo, request, servletConfig, mediaTypes);
-	if (endpoint == null) throw new IllegalArgumentException("SPARQLEndpoint cannot be null");
-	this.endpoint = endpoint;
+	if (application == null) throw new IllegalArgumentException("Application cannot be null");
+        this.client = client;
+	this.application = application;
+        this.sparqlClient = SPARQLClient.create(application.getService().getSPARQLEndpointOrigin(client));
     }
     
     /**
@@ -81,7 +88,7 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     @Override
     public Model describe()
     {
-	return getSPARQLEndpoint().loadModel(getQuery());
+        return getSPARQLClient().loadModel(getQuery());
     }
     
     /**
@@ -167,16 +174,19 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
 	return QueryFactory.create("DESCRIBE <" + uri.toString() + ">");
     }
 
-    /**
-     * Returns SPARQL endpoint of this resource.
-     * Query is executed on this endpoint to retrieve RDF representation of this resource.
-     * 
-     * @return SPARQL endpoint resource
-     */
-    @Override
-    public SPARQLEndpoint getSPARQLEndpoint()
+    public Client getClient()
     {
-	return endpoint;
+        return client;
+    }
+    
+    public SPARQLClient getSPARQLClient()
+    {
+        return sparqlClient;
+    }
+    
+    public Application getApplication()
+    {
+	return application;
     }
 
 }

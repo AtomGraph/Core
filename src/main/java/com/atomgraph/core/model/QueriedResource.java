@@ -42,7 +42,7 @@ public interface QueriedResource
      * @return endpoint resource
      * @see SPARQLEndpoint
      */
-    SPARQLEndpoint getSPARQLEndpoint();
+    //SPARQLEndpoint getSPARQLEndpoint();
 
     /**
      * Returns RDF description of this resource. It is retrieved by executing the query on the SPARQL endpoint.

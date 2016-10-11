@@ -258,7 +258,7 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
      * @param query
      * @return RDF model
      */
-    @Override
+    //@Override
     public Model describe(Query query)
     {
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
@@ -274,7 +274,7 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
      * @param query
      * @return RDF model
      */
-    @Override
+    //@Override
     public Model construct(Query query)
     {
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
@@ -302,5 +302,41 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     {
         return response;
     }
+ 
+    /**
+     * Loads RDF model from the endpoint by executing a SPARQL query (<code>DESCRIBE</code> or <code>CONSTRUCT</code>)
+     * 
+     * @param query SPARQL query
+     * @return RDF model
+     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#describe">DESCRIBE</a>
+     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#construct">CONSTRUCT</a>
+     */
+    public abstract Model loadModel(Query query);
+    
+    /**
+     * Loads RDF model from the endpoint by executing a SPARQL query (<pre>SELECT</pre>)
+     * 
+     * @param query SPARQL query
+     * @return SPARQL result set
+     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#select">SELECT</a>
+     */
+    public abstract ResultSetRewindable select(Query query);
+
+    /**
+     * Asks boolean result from the endpoint by executing a SPARQL query (<pre>ASK</pre>)
+     * 
+     * @param query SPARQL query
+     * @return boolean result
+     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#ask">ASK</a>
+     */
+    public abstract boolean ask(Query query);
+
+    /**
+     * Execute SPARQL update request
+     * 
+     * @param updateRequest update request
+     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-update-20130321/">SPARQL 1.1 Update</a>
+     */
+    public abstract void update(UpdateRequest updateRequest);
     
 }

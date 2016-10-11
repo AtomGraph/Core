@@ -38,13 +38,12 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
 public class SPARQLClient extends SimpleSPARQLClient // TO-DO: implements SPARQLEndpoint
- // TO-DO: implements SPARQLEndpoint
 {
     
     private static final Logger log = LoggerFactory.getLogger(SPARQLClient.class);
 
     private final MediaTypes mediaTypes;
-    
+
     protected SPARQLClient(WebResource webResource, MediaTypes mediaTypes, int maxGetRequestSize)
     {
         super(webResource, maxGetRequestSize);

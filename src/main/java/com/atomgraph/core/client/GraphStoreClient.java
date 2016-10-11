@@ -47,7 +47,7 @@ public class GraphStoreClient extends SimpleGraphStoreClient implements DatasetA
     {
         this(webResource, new MediaTypes());
     }
-    
+
     public static GraphStoreClient create(WebResource webResource, MediaTypes mediaTypes)
     {
         return new GraphStoreClient(webResource, mediaTypes);

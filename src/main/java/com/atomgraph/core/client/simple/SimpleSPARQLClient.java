@@ -54,7 +54,7 @@ public class SimpleSPARQLClient
         this(webResource, 8192);
     }
     
-    public WebResource getWebResource()
+    public final WebResource getWebResource()
     {
         return webResource;
     }

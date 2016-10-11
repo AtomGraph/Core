@@ -17,8 +17,6 @@
 package com.atomgraph.core.model;
 
 import org.apache.jena.query.Query;
-import org.apache.jena.query.ResultSetRewindable;
-import org.apache.jena.rdf.model.Model;
 import org.apache.jena.update.UpdateRequest;
 import java.net.URI;
 import javax.ws.rs.Consumes;
@@ -40,9 +38,16 @@ import com.atomgraph.core.MediaType;
  * @see <a href="http://www.w3.org/TR/sparql11-protocol/">SPARQL Protocol for RDF</a>
  * 
  */
-@Path("/sparql")
+//@Path("/sparql")
 public interface SPARQLEndpoint
 {
+
+    public static String QUERY = "query";
+    public static String UPDATE = "update";
+    public static String DEFAULT_GRAPH_URI = "default-graph-uri";
+    public static String NAMED_GRAPH_URI = "named-graph-uri";
+    public static String USING_GRAPH_URI = "using-graph-uri";
+    public static String USING_NAMED_GRAPH_URI = "using-named-graph-uri";
 
     /**
      * Handles GET query request and returns result as response
@@ -53,7 +58,7 @@ public interface SPARQLEndpoint
      * @return result response (in one of the representation variants)
      * @see <a href="http://www.w3.org/TR/sparql11-protocol/#query-via-get">2.1.1 query via GET</a>
      */
-    @GET Response get(@QueryParam("query") Query query, @QueryParam("default-graph-uri") URI defaultGraphUri, @QueryParam("named-graph-uri") URI graphUri);
+    @GET Response get(@QueryParam(QUERY) Query query, @QueryParam(DEFAULT_GRAPH_URI) URI defaultGraphUri, @QueryParam(NAMED_GRAPH_URI) URI graphUri);
     
     /**
      * Handles URL-encoded POST query request and returns result as response.
@@ -68,7 +73,7 @@ public interface SPARQLEndpoint
      * @see <a href="http://www.w3.org/TR/sparql11-protocol/#query-via-post-urlencoded">2.1.2 query via POST with URL-encoded parameters</a>
      * @see <a href="http://www.w3.org/TR/sparql11-protocol/#update-via-post-urlencoded">2.2.1 update via POST with URL-encoded parameters</a>
     */
-    @POST @Consumes(MediaType.APPLICATION_FORM_URLENCODED) Response post(@FormParam("query") String queryString, @FormParam("update") String updateString, @FormParam("using-graph-uri") URI defaultGraphUri, @FormParam("using-named-graph-uri") URI graphUri);
+    @POST @Consumes(MediaType.APPLICATION_FORM_URLENCODED) Response post(@FormParam(QUERY) String queryString, @FormParam(UPDATE) String updateString, @FormParam(USING_GRAPH_URI) URI defaultGraphUri, @FormParam(USING_NAMED_GRAPH_URI) URI graphUri);
 
     /**
      * Handles direct POST query request and returns result as response
@@ -79,7 +84,7 @@ public interface SPARQLEndpoint
      * @return result response (in one of the representation variants)
      * @see <a href="http://www.w3.org/TR/sparql11-protocol/#query-via-post-direct">2.1.3 query via POST directly</a>
      */
-    @POST @Consumes(MediaType.APPLICATION_SPARQL_QUERY) Response post(Query query, @QueryParam("default-graph-uri") URI defaultGraphUri, @QueryParam("named-graph-uri") URI graphUri);
+    @POST @Consumes(MediaType.APPLICATION_SPARQL_QUERY) Response post(Query query, @QueryParam(DEFAULT_GRAPH_URI) URI defaultGraphUri, @QueryParam(NAMED_GRAPH_URI) URI graphUri);
     
     /**
      * Handles direct POST update request and returns result as response
@@ -90,60 +95,6 @@ public interface SPARQLEndpoint
      * @return success or failure response
      * @see <a href="http://www.w3.org/TR/sparql11-protocol/#update-via-post-direct">2.2.2 update via POST directly</a>
      */
-    @POST @Consumes(MediaType.APPLICATION_SPARQL_UPDATE) Response post(UpdateRequest update, @QueryParam("using-graph-uri") URI defaultGraphUri, @QueryParam("using-named-graph-uri") URI graphUri);
-
-    /**
-     * Loads RDF model from the endpoint by executing a SPARQL query (<code>DESCRIBE</code> or <code>CONSTRUCT</code>)
-     * 
-     * @param query SPARQL query
-     * @return RDF model
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#describe">DESCRIBE</a>
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#construct">CONSTRUCT</a>
-     */
-    Model loadModel(Query query);
-
-    /**
-     * Loads RDF model from the endpoint by executing a SPARQL query (<code>DESCRIBE</code>)
-     * 
-     * @param query SPARQL query
-     * @return RDF model
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#describe">DESCRIBE</a>
-     */
-    Model describe(Query query);
-
-    /**
-     * Loads RDF model from the endpoint by executing a SPARQL query (<code>CONSTRUCT</code>)
-     * 
-     * @param query SPARQL query
-     * @return RDF model
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#construct">CONSTRUCT</a>
-     */
-    Model construct(Query query);
-    
-    /**
-     * Loads RDF model from the endpoint by executing a SPARQL query (<pre>SELECT</pre>)
-     * 
-     * @param query SPARQL query
-     * @return SPARQL result set
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#select">SELECT</a>
-     */
-    ResultSetRewindable select(Query query);
-
-    /**
-     * Asks boolean result from the endpoint by executing a SPARQL query (<pre>ASK</pre>)
-     * 
-     * @param query SPARQL query
-     * @return boolean result
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#ask">ASK</a>
-     */
-    boolean ask(Query query);
-
-    /**
-     * Execute SPARQL update request
-     * 
-     * @param updateRequest update request
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-update-20130321/">SPARQL 1.1 Update</a>
-     */
-    void update(UpdateRequest updateRequest);
+    @POST @Consumes(MediaType.APPLICATION_SPARQL_UPDATE) Response post(UpdateRequest update, @QueryParam(USING_GRAPH_URI) URI defaultGraphUri, @QueryParam(USING_NAMED_GRAPH_URI) URI graphUri);
 
 }

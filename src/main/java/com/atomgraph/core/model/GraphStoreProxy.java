@@ -26,10 +26,10 @@ import org.apache.jena.query.DatasetAccessor;
  * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
-public interface GraphStoreProxy extends Proxy, DatasetAccessor
+public interface GraphStoreProxy extends DatasetAccessor // Proxy, 
 {
     
-    GraphStoreClient getClient();
+    GraphStoreClient getGraphStoreClient();
     
     MediaTypes getMediaTypes();    
     

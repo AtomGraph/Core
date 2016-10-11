@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Martynas Jusevičius <martynas@atomgraph.com>.
+ * Copyright 2016 Martynas Jusevičius <martynas@graphity.org>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.atomgraph.core.model;
 
-package com.atomgraph.core.exception;
-
-import org.apache.jena.rdf.model.Property;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
 
 /**
  *
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius <martynas@graphity.org>
  */
-public class ConfigurationException extends RuntimeException
+public interface Service
 {
-
-    public ConfigurationException(Property property)
-    {
-        super("Property '" + property.getURI() + "' not defined in configuration");
-    }
     
+    org.apache.jena.rdf.model.Resource getSPARQLEndpoint();
+
+    WebResource getSPARQLEndpointOrigin(Client client);
+    
+    org.apache.jena.rdf.model.Resource getGraphStore();
+    
+    WebResource getGraphStoreOrigin(Client client);
+
+    String getAuthUser();
+    
+    String getAuthPwd();
 }

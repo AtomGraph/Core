@@ -40,7 +40,7 @@ public class SimpleGraphStoreClient
         this.webResource = webResource;
     }
     
-    public WebResource getWebResource()
+    public final WebResource getWebResource()
     {
         return webResource;
     }

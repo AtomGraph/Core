@@ -16,20 +16,18 @@
 
 package com.atomgraph.core.provider;
 
-import org.apache.jena.sparql.engine.http.Service;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.api.client.filter.ClientFilter;
-import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
-import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
+import com.sun.jersey.spi.resource.Singleton;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.ext.ContextResolver;
+import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,15 +35,29 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
+@Provider
+@Singleton
 public class ClientProvider extends PerRequestTypeInjectableProvider<Context, Client> implements ContextResolver<Client>
 {
     private static final Logger log = LoggerFactory.getLogger(DataManagerProvider.class);
 
     @Context ServletConfig servletConfig;
     
+    private final Client client;
+    
     public ClientProvider()
     {
         super(Client.class);
+        
+        ClientConfig clientConfig = new DefaultClientConfig();
+        clientConfig.getProperties().put(URLConnectionClientHandler.PROPERTY_HTTP_URL_CONNECTION_SET_METHOD_WORKAROUND, true);
+        clientConfig.getSingletons().add(new ModelProvider());
+        clientConfig.getSingletons().add(new DatasetProvider());
+        clientConfig.getSingletons().add(new ResultSetProvider());
+        clientConfig.getSingletons().add(new QueryWriter());
+        clientConfig.getSingletons().add(new UpdateRequestReader()); // TO-DO: UpdateRequestProvider
+        
+        client = Client.create(clientConfig);
     }
 
     public ServletConfig getServletConfig()
@@ -74,20 +86,15 @@ public class ClientProvider extends PerRequestTypeInjectableProvider<Context, Cl
 
     public Client getClient()
     {
-        return getClient(addProviders(new DefaultClientConfig()), getHTTPAuthFilter(getServletConfig()));
+        //return getClient(addProviders(new DefaultClientConfig()), getHTTPAuthFilter(getServletConfig()));
+        return client;
     }
     
-    public ClientConfig addProviders(ClientConfig clientConfig)
+    /*
+    private ClientConfig addProviders(ClientConfig clientConfig)
     {
         if (clientConfig == null) throw new IllegalArgumentException("ClientConfig cannot be null");
         
-        clientConfig.getProperties().put(URLConnectionClientHandler.PROPERTY_HTTP_URL_CONNECTION_SET_METHOD_WORKAROUND, true);
-        clientConfig.getSingletons().add(new ModelProvider());
-        clientConfig.getSingletons().add(new DatasetProvider());
-        clientConfig.getSingletons().add(new ResultSetProvider());
-        clientConfig.getSingletons().add(new QueryWriter());
-        clientConfig.getSingletons().add(new UpdateRequestReader()); // TO-DO: UpdateRequestProvider
-
         return clientConfig;
     }
 
@@ -112,5 +119,6 @@ public class ClientProvider extends PerRequestTypeInjectableProvider<Context, Cl
         
         return client;
     }
+    */
     
 }

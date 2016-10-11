@@ -28,9 +28,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.SPARQLClient;
-import com.atomgraph.core.model.SPARQLEndpointOrigin;
+import com.atomgraph.core.model.Application;
 import com.atomgraph.core.model.SPARQLEndpointProxy;
 import com.atomgraph.core.vocabulary.A;
+import com.sun.jersey.api.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,51 +46,51 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
 {
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointProxyBase.class);
 
-    private final SPARQLEndpointOrigin origin;
-    private final SPARQLClient client;
+    private final Application application;
+    private final SPARQLClient sparqlClient;
 
     /**
      * Constructs SPARQL endpoint proxy from request metadata and origin.
      * 
-     * @param request
-     * @param servletConfig
-     * @param origin
-     * @param mediaTypes 
+     * @param request request
+     * @param servletConfig servlet config
+     * @param mediaTypes supported media types
+     * @param client HTTP client
+     * @param application LDT application
      */
     public SPARQLEndpointProxyBase(@Context Request request, @Context ServletConfig servletConfig, @Context MediaTypes mediaTypes,
-            @Context SPARQLEndpointOrigin origin)
+            @Context Client client, @Context Application application)
     {
         super(request, servletConfig, mediaTypes);
-        if (origin == null) throw new IllegalArgumentException("SPARQLEndpointOrigin cannot be null");
-        this.origin = origin;
+        if (application == null) throw new IllegalArgumentException("Application cannot be null");
+        this.application = application;
         
         Integer maxGetRequestSize = getMaxGetRequestSize(servletConfig, A.maxGetRequestSize);
-        if (maxGetRequestSize != null) client = SPARQLClient.create(origin.getWebResource(), mediaTypes, maxGetRequestSize);
-        else client = SPARQLClient.create(origin.getWebResource(), mediaTypes);
-    }
-    
-    @Override
-    public SPARQLEndpointOrigin getOrigin()
-    {
-        return origin;
-    }
-    
-    @Override
-    public SPARQLClient getClient()
-    {
-        return client;
+        if (maxGetRequestSize != null) sparqlClient = SPARQLClient.create(application.getService().getSPARQLEndpointOrigin(client), mediaTypes, maxGetRequestSize);
+        else sparqlClient = SPARQLClient.create(application.getService().getSPARQLEndpointOrigin(client), mediaTypes);
     }
         
+    @Override
+    public SPARQLClient getSPARQLClient()
+    {
+        return sparqlClient;
+    }
+    
+    public Application getApplication()
+    {
+        return application;
+    }
+    
     @Override
     public Model loadModel(Query query)
     {
-	return getClient().loadModel(query);
+	return getSPARQLClient().loadModel(query);
     }
 
     @Override
     public ResultSetRewindable select(Query query)
     {
-        return getClient().select(query);
+        return getSPARQLClient().select(query);
     }
 
     /**
@@ -103,13 +104,13 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
     @Override
     public boolean ask(Query query)
     {
-        return getClient().ask(query);
+        return getSPARQLClient().ask(query);
     }
     
     @Override
     public void update(UpdateRequest updateRequest)
     {
-        getClient().update(updateRequest);
+        getSPARQLClient().update(updateRequest);
     }
     
     public final Integer getMaxGetRequestSize(ServletConfig servletConfig, DatatypeProperty property)

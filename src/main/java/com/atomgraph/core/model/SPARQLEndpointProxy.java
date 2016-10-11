@@ -25,10 +25,10 @@ import com.atomgraph.core.client.SPARQLClient;
  * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
-public interface SPARQLEndpointProxy extends Proxy
+public interface SPARQLEndpointProxy //extends Proxy
 {
 
-    SPARQLClient getClient();
+    SPARQLClient getSPARQLClient();
     
     MediaTypes getMediaTypes();
     

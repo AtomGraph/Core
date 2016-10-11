@@ -18,20 +18,15 @@
 package com.atomgraph.core.model.impl;
 
 import org.apache.jena.rdf.model.Model;
-import com.sun.jersey.api.client.ClientResponse;
-import java.util.List;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response.Status.Family;
-import com.atomgraph.core.MediaType;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.GraphStoreClient;
-import com.atomgraph.core.client.simple.SimpleGraphStoreClient;
-import com.atomgraph.core.exception.ClientException;
-import com.atomgraph.core.model.GraphStoreOrigin;
+import com.atomgraph.core.model.Application;
 import com.atomgraph.core.model.GraphStoreProxy;
+import com.sun.jersey.api.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,8 +41,8 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreProxyBase.class);
 
-    private final GraphStoreOrigin origin;
-    private final GraphStoreClient client;
+    //private final GraphStoreOrigin origin;
+    private final GraphStoreClient graphStoreClient;
     //private final javax.ws.rs.core.MediaType[] readableMediaTypes;
     
     /**
@@ -56,71 +51,57 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
      * @param request request
      * @param servletConfig servlet config
      * @param mediaTypes supported media types
-     * @param origin graph store origin
+     * @param client HTTP client
+     * @param application LDT application
      */
     public GraphStoreProxyBase(@Context Request request, @Context ServletConfig servletConfig, @Context MediaTypes mediaTypes,
-            @Context GraphStoreOrigin origin)
+            @Context Client client, @Context Application application)
     {
         super(request, servletConfig, mediaTypes);
-        if (origin == null) throw new IllegalArgumentException("GraphStoreOrigin cannot be null");
-        this.origin = origin;
-        //List<javax.ws.rs.core.MediaType> modelTypeList = mediaTypes.getReadable(Model.class);
-        //readableMediaTypes = modelTypeList.toArray(new javax.ws.rs.core.MediaType[modelTypeList.size()]);        
-        client = GraphStoreClient.create(origin.getWebResource(), mediaTypes);
-    }
-
-     /**
-     * Returns configured Graph Store resource.
-     * This graph store is a proxy for the remote one.
-     * 
-     * @return graph store resource
-     */
-    @Override
-    public GraphStoreOrigin getOrigin()
-    {
-        return origin;
+        if (application == null) throw new IllegalArgumentException("Application cannot be null");
+        graphStoreClient = GraphStoreClient.create(application.getService().getSPARQLEndpointOrigin(client), mediaTypes);
     }
 
     @Override
-    public GraphStoreClient getClient()
+    public GraphStoreClient getGraphStoreClient()
     {
-        return client;
+        return graphStoreClient;
     }
     
     @Override
     public Model getModel()
     {
-        return getClient().getModel();
+        return getGraphStoreClient().getModel();
     }
 
     @Override
     public Model getModel(String uri)
     {
-        return getClient().getModel(uri);
+        return getGraphStoreClient().getModel(uri);
     }
 
     @Override
     public boolean containsModel(String uri)
     {
-        return getClient().containsModel(uri);
+        return getGraphStoreClient().containsModel(uri);
     }
     
     @Override
     public void putModel(Model model)
     {
-        getClient().putModel(model);
+        getGraphStoreClient().putModel(model);
     }
 
     @Override
     public void putModel(String uri, Model model)
     {
-        getClient().putModel(uri, model);
+        getGraphStoreClient().putModel(uri, model);
     }
 
     @Override
     public void deleteDefault()
     {
-        getClient().deleteDefault();
+        getGraphStoreClient().deleteDefault();
     }
 
     @Override
@@ -132,13 +113,13 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
     @Override
     public void add(Model model)
     {
-        getClient().add(model);
+        getGraphStoreClient().add(model);
     }
 
     @Override
     public void add(String uri, Model model)
     {
-        getClient().add(uri, model);
+        getGraphStoreClient().add(uri, model);
     }
 
 }
