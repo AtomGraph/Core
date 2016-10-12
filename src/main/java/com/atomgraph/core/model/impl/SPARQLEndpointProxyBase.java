@@ -46,7 +46,7 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
 {
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointProxyBase.class);
 
-    private final Application application;
+    //private final Application application;
     private final SPARQLClient sparqlClient;
 
     /**
@@ -59,15 +59,11 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
      * @param application LDT application
      */
     public SPARQLEndpointProxyBase(@Context Request request, @Context ServletConfig servletConfig, @Context MediaTypes mediaTypes,
-            @Context Client client, @Context Application application)
+            @Context SPARQLClient sparqlClient)
     {
         super(request, servletConfig, mediaTypes);
-        if (application == null) throw new IllegalArgumentException("Application cannot be null");
-        this.application = application;
-        
-        Integer maxGetRequestSize = getMaxGetRequestSize(servletConfig, A.maxGetRequestSize);
-        if (maxGetRequestSize != null) sparqlClient = SPARQLClient.create(application.getService().getSPARQLEndpointOrigin(client), mediaTypes, maxGetRequestSize);
-        else sparqlClient = SPARQLClient.create(application.getService().getSPARQLEndpointOrigin(client), mediaTypes);
+        if (sparqlClient == null) throw new IllegalArgumentException("Application cannot be null");
+        this.sparqlClient = sparqlClient;        
     }
         
     @Override
@@ -76,10 +72,12 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
         return sparqlClient;
     }
     
+    /*
     public Application getApplication()
     {
         return application;
     }
+    */
     
     @Override
     public Model loadModel(Query query)
@@ -111,17 +109,6 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
     public void update(UpdateRequest updateRequest)
     {
         getSPARQLClient().update(updateRequest);
-    }
-    
-    public final Integer getMaxGetRequestSize(ServletConfig servletConfig, DatatypeProperty property)
-    {
-        if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
-        if (property == null) throw new IllegalArgumentException("Property cannot be null");
-
-        Object sizeValue = servletConfig.getInitParameter(property.getURI());
-        if (sizeValue != null) return Integer.parseInt(sizeValue.toString());
-
-        return null;
     }
     
 }

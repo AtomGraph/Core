@@ -27,11 +27,11 @@ public interface Service
     
     org.apache.jena.rdf.model.Resource getSPARQLEndpoint();
 
-    WebResource getSPARQLEndpointOrigin(Client client);
+    // WebResource getSPARQLEndpointOrigin(Client client);
     
     org.apache.jena.rdf.model.Resource getGraphStore();
     
-    WebResource getGraphStoreOrigin(Client client);
+    // WebResource getGraphStoreOrigin(Client client);
 
     String getAuthUser();
     

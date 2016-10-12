@@ -24,9 +24,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.GraphStoreClient;
-import com.atomgraph.core.model.Application;
 import com.atomgraph.core.model.GraphStoreProxy;
-import com.sun.jersey.api.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,9 +39,7 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreProxyBase.class);
 
-    //private final GraphStoreOrigin origin;
     private final GraphStoreClient graphStoreClient;
-    //private final javax.ws.rs.core.MediaType[] readableMediaTypes;
     
     /**
      * Constructs Graph Store proxy from request metadata and origin.
@@ -51,15 +47,13 @@ public class GraphStoreProxyBase extends GraphStoreBase implements GraphStorePro
      * @param request request
      * @param servletConfig servlet config
      * @param mediaTypes supported media types
-     * @param client HTTP client
-     * @param application LDT application
+     * @param graphStoreClient graph store client
      */
     public GraphStoreProxyBase(@Context Request request, @Context ServletConfig servletConfig, @Context MediaTypes mediaTypes,
-            @Context Client client, @Context Application application)
+            @Context GraphStoreClient graphStoreClient)
     {
         super(request, servletConfig, mediaTypes);
-        if (application == null) throw new IllegalArgumentException("Application cannot be null");
-        graphStoreClient = GraphStoreClient.create(application.getService().getSPARQLEndpointOrigin(client), mediaTypes);
+        this.graphStoreClient = graphStoreClient;
     }
 
     @Override

@@ -16,9 +16,6 @@
 package com.atomgraph.core.model.impl;
 
 import com.atomgraph.core.model.Service;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import org.apache.jena.rdf.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,37 +53,11 @@ public class ServiceImpl implements Service
     {
         return sparqlEndpoint;
     }
-
-    @Override
-    public WebResource getSPARQLEndpointOrigin(Client client)
-    {
-	if (client == null) throw new IllegalArgumentException("Client must be not null");
-
-        WebResource origin = client.resource(getSPARQLEndpoint().getURI());
-
-        if (getAuthUser() != null && getAuthPwd() != null)
-            origin.addFilter(new HTTPBasicAuthFilter(getAuthUser(), getAuthPwd())); 
-        
-        return origin;
-    }
     
     @Override
     public Resource getGraphStore()
     {
         return graphStore;
-    }
-
-    @Override
-    public WebResource getGraphStoreOrigin(Client client)
-    {
-	if (client == null) throw new IllegalArgumentException("Client must be not null");
-
-        WebResource origin = client.resource(getGraphStore().getURI());
-
-        if (getAuthUser() != null && getAuthPwd() != null)
-            origin.addFilter(new HTTPBasicAuthFilter(getAuthUser(), getAuthPwd())); 
-        
-        return origin;
     }
 
     @Override

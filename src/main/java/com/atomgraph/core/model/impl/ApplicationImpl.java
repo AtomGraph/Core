@@ -29,6 +29,7 @@ public class ApplicationImpl implements Application
     
     public ApplicationImpl(Service service)
     {
+        if (service == null) throw new IllegalArgumentException("Service cannot be null");
         this.service = service;
     }
     

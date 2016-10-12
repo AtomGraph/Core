@@ -31,9 +31,7 @@ import javax.ws.rs.core.UriInfo;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.SPARQLClient;
 import com.atomgraph.core.exception.NotFoundException;
-import com.atomgraph.core.model.Application;
 import com.atomgraph.core.model.QueriedResource;
-import com.sun.jersey.api.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,8 +47,8 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
 {
     private static final Logger log = LoggerFactory.getLogger(QueriedResourceBase.class);
     
-    private final Client client;
-    private final Application application;
+    //private final Client client;
+    //private final Application application;
     private final SPARQLClient sparqlClient;
 
     /**
@@ -60,21 +58,20 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
      * @param uriInfo URI information of the request
      * @param request current request object
      * @param servletConfig webapp context
-     * @param application LDT application
-     * @param client
      * @param mediaTypes supported media types
+     * @param sparqlClient SPARQL client
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html">JAX-RS UriInfo</a>
      * @see <a href="http://docs.oracle.com/javaee/7/api/javax/servlet/ServletContext.html">ServletContext</a>
      * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceContext.html">Jersey ResourceContext</a>
      */
     public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletConfig servletConfig, @Context MediaTypes mediaTypes,
-            @Context Client client, @Context Application application)
+            @Context SPARQLClient sparqlClient)
     {
 	super(uriInfo, request, servletConfig, mediaTypes);
-	if (application == null) throw new IllegalArgumentException("Application cannot be null");
-        this.client = client;
-	this.application = application;
-        this.sparqlClient = SPARQLClient.create(application.getService().getSPARQLEndpointOrigin(client));
+	if (sparqlClient == null) throw new IllegalArgumentException("SPARQLClient cannot be null");
+        //this.client = client;
+	//this.application = application;
+        this.sparqlClient = sparqlClient;
     }
     
     /**
@@ -174,19 +171,23 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
 	return QueryFactory.create("DESCRIBE <" + uri.toString() + ">");
     }
 
+    /*
     public Client getClient()
     {
         return client;
     }
+    */
     
     public SPARQLClient getSPARQLClient()
     {
         return sparqlClient;
     }
     
+    /*
     public Application getApplication()
     {
 	return application;
     }
-
+    */
+    
 }

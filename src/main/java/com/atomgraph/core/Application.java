@@ -35,9 +35,14 @@ import com.atomgraph.core.model.impl.SPARQLEndpointProxyBase;
 import com.atomgraph.core.provider.ApplicationProvider;
 import com.atomgraph.core.provider.ClientProvider;
 import com.atomgraph.core.provider.DatasetProvider;
+import com.atomgraph.core.provider.GraphStoreClientProvider;
+import com.atomgraph.core.provider.GraphStoreProvider;
 import com.atomgraph.core.provider.MediaTypesProvider;
+import com.atomgraph.core.provider.SPARQLClientProvider;
+import com.atomgraph.core.provider.SPARQLEndpointProvider;
 import com.atomgraph.core.riot.RDFLanguages;
 import com.atomgraph.core.riot.lang.RDFPostReaderFactory;
+import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,8 +78,11 @@ public class Application extends javax.ws.rs.core.Application
         // add RDF/POST serialization
         RDFLanguages.register(RDFLanguages.RDFPOST);
         RDFParserRegistry.registerLangTriples(RDFLanguages.RDFPOST, new RDFPostReaderFactory());
-        //IO_Jena.registerForModelRead(RDFLanguages.strLangRDFPOST, RDFPostReaderAdapter.class);
-
+    }
+    
+    @PostConstruct
+    public void init()
+    {
 	classes.add(QueriedResourceBase.class); // handles all
 	classes.add(SPARQLEndpointProxyBase.class); // handles /sparql queries
 	classes.add(GraphStoreProxyBase.class); // handles /service requests
@@ -85,7 +93,11 @@ public class Application extends javax.ws.rs.core.Application
 	singletons.add(new QueryParamProvider());
 	singletons.add(new UpdateRequestReader());
         singletons.add(new DataManagerProvider());
-	singletons.add(new ApplicationProvider(servletConfig));
+	singletons.add(new ApplicationProvider(getServletConfig()));
+        singletons.add(new SPARQLClientProvider(getServletConfig()));
+        singletons.add(new SPARQLEndpointProvider(getServletConfig()));
+        singletons.add(new GraphStoreClientProvider());
+        singletons.add(new GraphStoreProvider(getServletConfig()));
         singletons.add(new ClientProvider());        
         singletons.add(new MediaTypesProvider());
         singletons.add(new ClientExceptionMapper());        
@@ -135,7 +147,7 @@ public class Application extends javax.ws.rs.core.Application
 
         boolean value = false;
         if (servletConfig.getInitParameter(property.getURI()) != null)
-            value = Boolean.parseBoolean(servletConfig.getInitParameter(property.getURI()).toString());
+            value = Boolean.parseBoolean(servletConfig.getInitParameter(property.getURI()));
         return value;
     }
 
