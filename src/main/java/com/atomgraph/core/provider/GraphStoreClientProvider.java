@@ -66,15 +66,16 @@ public class GraphStoreClientProvider extends PerRequestTypeInjectableProvider<C
 
     public GraphStoreClient getGraphStoreClient()
     {
-        return getGraphStoreClient(getApplication().getService(), getClient());
+        return getGraphStoreClient(getApplication().getService(), getClient(), getMediaTypes());
     }
     
-    public GraphStoreClient getGraphStoreClient(Service service, Client client)
+    public GraphStoreClient getGraphStoreClient(Service service, Client client, MediaTypes mediaTypes)
     {
 	if (service == null) throw new IllegalArgumentException("Service must be not null");
         if (client == null) throw new IllegalArgumentException("Client must be not null");
+        if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes must be not null");
 
-        return GraphStoreClient.create(getOrigin(service, client), getMediaTypes());
+        return GraphStoreClient.create(getOrigin(service, client), mediaTypes);
     }
 
     public MediaTypes getMediaTypes()

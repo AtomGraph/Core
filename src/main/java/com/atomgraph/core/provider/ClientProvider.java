@@ -19,6 +19,7 @@ package com.atomgraph.core.provider;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
@@ -58,6 +59,7 @@ public class ClientProvider extends PerRequestTypeInjectableProvider<Context, Cl
         clientConfig.getSingletons().add(new UpdateRequestReader()); // TO-DO: UpdateRequestProvider
         
         client = Client.create(clientConfig);
+        if (log.isDebugEnabled()) client.addFilter(new LoggingFilter(System.out));
     }
 
     public ServletConfig getServletConfig()

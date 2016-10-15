@@ -73,16 +73,17 @@ public class SPARQLClientProvider extends PerRequestTypeInjectableProvider<Conte
     
     public SPARQLClient getSPARQLClient()
     {
-        return getSPARQLClient(getApplication().getService(), getClient());
+        return getSPARQLClient(getApplication().getService(), getClient(), getMediaTypes());
     }
     
-    public SPARQLClient getSPARQLClient(Service service, Client client)
+    public SPARQLClient getSPARQLClient(Service service, Client client, MediaTypes mediaTypes)
     {
 	if (service == null) throw new IllegalArgumentException("Service must be not null");
         if (client == null) throw new IllegalArgumentException("Client must be not null");
+        if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes must be not null");
 
         if (getMaxGetRequestSize() != null) return SPARQLClient.create(getOrigin(service, client), getMediaTypes(), getMaxGetRequestSize());
-        else return SPARQLClient.create(getOrigin(service, client), getMediaTypes());
+        else return SPARQLClient.create(getOrigin(service, client), mediaTypes);
     }
 
     public MediaTypes getMediaTypes()
