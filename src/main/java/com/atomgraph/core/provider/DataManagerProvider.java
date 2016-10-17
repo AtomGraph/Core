@@ -17,8 +17,6 @@
 
 package com.atomgraph.core.provider;
 
-import org.apache.jena.query.ARQ;
-import org.apache.jena.rdf.model.Property;
 import org.apache.jena.util.LocationMapper;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
@@ -30,6 +28,8 @@ import javax.ws.rs.ext.Provider;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.util.jena.DataManager;
 import com.atomgraph.core.vocabulary.A;
+import com.sun.jersey.api.client.Client;
+import javax.ws.rs.ext.Providers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,16 +46,17 @@ public class DataManagerProvider extends PerRequestTypeInjectableProvider<Contex
 
     private static final Logger log = LoggerFactory.getLogger(DataManagerProvider.class);
 
-    @Context ServletConfig servletConfig;
-
-    public ServletConfig getServletConfig()
-    {
-	return servletConfig;
-    }
-
-    public DataManagerProvider()
+    @Context Providers providers;
+    
+    public final boolean preemptiveAuth;
+    
+    public DataManagerProvider(ServletConfig servletConfig)
     {
         super(DataManager.class);
+        
+        if (servletConfig.getInitParameter(A.preemptiveAuth.getURI()) != null)
+            preemptiveAuth = Boolean.parseBoolean(servletConfig.getInitParameter(A.preemptiveAuth.getURI()));
+        else preemptiveAuth = false;
     }
 
     @Override
@@ -71,50 +72,39 @@ public class DataManagerProvider extends PerRequestTypeInjectableProvider<Contex
 	};
     }
 
+    @Override
+    public DataManager getContext(Class<?> type)
+    {
+        return getDataManager();
+    }
+
     /**
      * Returns default data manager instance.
      * @return data manager instance
      */
     public DataManager getDataManager()
     {
-        return getDataManager(getServletConfig());
-    }
-
-    public DataManager getDataManager(ServletConfig servletConfig)
-    {
-        return getDataManager(LocationMapper.get(), new MediaTypes(), ARQ.getContext(), servletConfig);
+        return new DataManager(LocationMapper.get(), getClient(), getMediaTypes(), getPreemptiveAuth());
     }
     
-    public boolean getBooleanParam(ServletConfig servletConfig, Property property)
+    public Client getClient()
     {
-	if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
-	if (property == null) throw new IllegalArgumentException("Property cannot be null");
-
-        boolean value = false;
-        if (servletConfig.getInitParameter(property.getURI()) != null)
-            value = Boolean.parseBoolean(servletConfig.getInitParameter(property.getURI()));
-        return value;
+	return getProviders().getContextResolver(Client.class, null).getContext(Client.class);
     }
     
-    public DataManager getDataManager(LocationMapper mapper, MediaTypes mediaTypes, org.apache.jena.sparql.util.Context context, ServletConfig servletConfig)
+    public MediaTypes getMediaTypes()
     {
-	if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
-        
-        return getDataManager(mapper, mediaTypes,
-                getBooleanParam(servletConfig, A.cacheModelLoads),
-                getBooleanParam(servletConfig, A.preemptiveAuth));
+	return getProviders().getContextResolver(MediaTypes.class, null).getContext(MediaTypes.class);
+    }
+ 
+    public Providers getProviders()
+    {
+        return providers;
     }
 
-    public DataManager getDataManager(LocationMapper mapper, MediaTypes mediaTypes,
-            boolean cacheModelLoads, boolean preemptiveAuth)
+    public boolean getPreemptiveAuth()
     {
-        return new DataManager(mapper, mediaTypes, cacheModelLoads, preemptiveAuth);
-    }
-
-    @Override
-    public DataManager getContext(Class<?> type)
-    {
-        return getDataManager();
+        return preemptiveAuth;
     }
     
 }

@@ -92,7 +92,7 @@ public class Application extends javax.ws.rs.core.Application
         singletons.add(new ResultSetProvider());
 	singletons.add(new QueryParamProvider());
 	singletons.add(new UpdateRequestReader());
-        singletons.add(new DataManagerProvider());
+        singletons.add(new DataManagerProvider(getServletConfig()));
 	singletons.add(new ApplicationProvider(getServletConfig()));
         singletons.add(new SPARQLClientProvider(getServletConfig()));
         singletons.add(new SPARQLEndpointProvider(getServletConfig()));
