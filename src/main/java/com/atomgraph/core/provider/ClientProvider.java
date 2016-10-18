@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class ClientProvider extends PerRequestTypeInjectableProvider<Context, Client> implements ContextResolver<Client>
 {
-    private static final Logger log = LoggerFactory.getLogger(DataManagerProvider.class);
+    private static final Logger log = LoggerFactory.getLogger(ClientProvider.class);
 
     @Context ServletConfig servletConfig;
     
@@ -88,39 +88,7 @@ public class ClientProvider extends PerRequestTypeInjectableProvider<Context, Cl
 
     public Client getClient()
     {
-        //return getClient(addProviders(new DefaultClientConfig()), getHTTPAuthFilter(getServletConfig()));
         return client;
     }
-    
-    /*
-    private ClientConfig addProviders(ClientConfig clientConfig)
-    {
-        if (clientConfig == null) throw new IllegalArgumentException("ClientConfig cannot be null");
-        
-        return clientConfig;
-    }
-
-    public ClientFilter getHTTPAuthFilter(ServletConfig servletConfig)
-    {
-        if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
-
-        String authUser = (String)servletConfig.getInitParameter(Service.queryAuthUser.getSymbol());
-        String authPwd = (String)servletConfig.getInitParameter(Service.queryAuthPwd.getSymbol());
-        if (authUser != null && authPwd != null) return new HTTPBasicAuthFilter(authUser, authPwd);
-        
-        return null;
-    }
-    
-    public Client getClient(ClientConfig clientConfig, ClientFilter clientFilter)
-    {
-        if (clientConfig == null) throw new IllegalArgumentException("ClientConfig cannot be null");
-        
-        Client client = Client.create(clientConfig);
-        if (clientFilter != null) client.addFilter(clientFilter);
-        if (log.isDebugEnabled()) client.addFilter(new LoggingFilter(System.out));
-        
-        return client;
-    }
-    */
     
 }
