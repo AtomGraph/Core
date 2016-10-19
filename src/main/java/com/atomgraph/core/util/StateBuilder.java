@@ -34,7 +34,7 @@ public class StateBuilder
     private final Resource resource;
     private final UriBuilder uriBuilder;
     
-    private StateBuilder(UriBuilder uriBuilder, Model model)
+    protected StateBuilder(UriBuilder uriBuilder, Model model)
     {
 	if (uriBuilder == null) throw new IllegalArgumentException("UriBuilder cannot be null");
 	if (model == null) throw new IllegalArgumentException("Model cannot be null");
