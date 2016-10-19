@@ -53,8 +53,6 @@ public final class A
 
     public static final DatatypeProperty preemptiveAuth = m_model.createDatatypeProperty( NS + "preemptiveAuth" );
     
-    public static final DatatypeProperty cacheModelLoads = m_model.createDatatypeProperty( NS + "cacheModelLoads" );
-
     public static final ObjectProperty absolutePath = m_model.createObjectProperty( NS + "absolutePath" );
 
     public static final ObjectProperty requestUri = m_model.createObjectProperty( NS + "requestUri" );
