@@ -22,7 +22,6 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.util.ResourceUtils;
 import com.sun.jersey.api.uri.UriComponent;
-import java.net.URI;
 import javax.ws.rs.core.UriBuilder;
 
 /**
@@ -34,28 +33,26 @@ public class StateBuilder
     private final Resource resource;
     private final UriBuilder uriBuilder;
     
-    protected StateBuilder(UriBuilder uriBuilder, Model model)
+    protected StateBuilder(Resource resource)
     {
-	if (uriBuilder == null) throw new IllegalArgumentException("UriBuilder cannot be null");
-	if (model == null) throw new IllegalArgumentException("Model cannot be null");
+	if (resource == null) throw new IllegalArgumentException("Resource cannot be null");
+        if (!resource.isURIResource()) throw new IllegalArgumentException("Resource must be URI resource");
         
-        resource = model.createResource();
-        this.uriBuilder = uriBuilder;
-    }
-    
-    public static StateBuilder fromUri(URI uri, Model model)
-    {
-        return new StateBuilder(UriBuilder.fromUri(uri), model);
+        this.resource = resource;
+        this.uriBuilder = UriBuilder.fromUri(resource.getURI());
     }
 
     public static StateBuilder fromUri(String uri, Model model)
     {
-        return new StateBuilder(UriBuilder.fromUri(uri), model);
+        if (uri == null) throw new IllegalArgumentException("URI String cannot be null");        
+        if (model == null) throw new IllegalArgumentException("Model cannot be null");        
+        
+        return new StateBuilder(model.createResource(uri));
     }
 
     public static StateBuilder fromResource(Resource resource)
     {
-        return new StateBuilder(UriBuilder.fromUri(resource.getURI()), resource.getModel());
+        return new StateBuilder(resource);
     }
     
     protected Resource getResource()
@@ -94,7 +91,7 @@ public class StateBuilder
         
         return this;
     }
-        
+    
     public Resource build()
     {
         return ResourceUtils.renameResource(getResource(), getUriBuilder().build().toString());
