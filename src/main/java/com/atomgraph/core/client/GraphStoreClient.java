@@ -58,105 +58,190 @@ public class GraphStoreClient extends SimpleGraphStoreClient implements DatasetA
         return new GraphStoreClient(webResource);
     }
 
+    public MediaType getDefaultMediaType()
+    {
+        return MediaType.TEXT_NTRIPLES_TYPE;
+    }
+    
     @Override
     public Model getModel()
     {
-	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} default graph", getWebResource().getURI());
-	ClientResponse cr = get(getReadableMediaTypes(Model.class));
-        if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
-        {
-            if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr);
-        }
+        ClientResponse cr = null;
         
-        return cr.getEntity(Model.class);
+        try
+        {
+            if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} default graph", getWebResource().getURI());
+            cr = get(getReadableMediaTypes(Model.class));
+            
+            if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+            {
+                if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                throw new ClientException(cr);
+            }
+
+            return cr.getEntity(Model.class);
+        }
+        finally
+        {
+            if (cr != null) cr.close();
+        }
     }
 
     @Override
     public Model getModel(String uri)
     {
-	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} with named graph URI: {}", getWebResource().getURI(), uri);
-	ClientResponse cr = get(getReadableMediaTypes(Model.class), uri);
-        if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
-        {
-            if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr);
-        }
+        ClientResponse cr = null;
         
-        return cr.getEntity(Model.class);
+        try
+        {
+            if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} with named graph URI: {}", getWebResource().getURI(), uri);
+            cr = get(getReadableMediaTypes(Model.class), uri);
+            
+            if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+            {
+                if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                throw new ClientException(cr);
+            }
+
+            return cr.getEntity(Model.class);
+        }
+        finally
+        {
+            if (cr != null) cr.close();
+        }
     }
 
     @Override
     public boolean containsModel(String uri)
     {
-	if (log.isDebugEnabled()) log.debug("Checking if Graph Store {} contains GRAPH with URI {}", getWebResource().getURI(), uri);
-	ClientResponse cr = head(uri);
-        if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+        ClientResponse cr = null;
+        
+        try
         {
-            if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr);
-        }
+            if (log.isDebugEnabled()) log.debug("Checking if Graph Store {} contains GRAPH with URI {}", getWebResource().getURI(), uri);
+            cr = head(uri);
+            
+            if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+            {
+                if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                throw new ClientException(cr);
+            }
 
-        return true;
+            return true;
+        }
+        finally
+        {
+            if (cr != null) cr.close();
+        }
     }
     
     @Override
     public void putModel(Model model)
     {
-	if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} default graph", getWebResource().getURI());
-	ClientResponse cr = put(MediaType.TEXT_NTRIPLES_TYPE, model);
-        if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+        ClientResponse cr = null;
+        
+        try
         {
-            if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr);
+            if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} default graph", getWebResource().getURI());
+            cr = put(getDefaultMediaType(), model);
+            
+            if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+            {
+                if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                throw new ClientException(cr);
+            }
+        }
+        finally
+        {
+            if (cr != null) cr.close();
         }
     }
 
     @Override
     public void putModel(String uri, Model model)
     {
-	if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} with named graph URI {}", getWebResource().getURI(), uri);
-	ClientResponse cr = putModel(MediaType.TEXT_NTRIPLES_TYPE, uri, model);
-        if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+        ClientResponse cr = null;
+        
+        try
         {
-            if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr);
+            if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} with named graph URI {}", getWebResource().getURI(), uri);
+            cr = putModel(getDefaultMediaType(), uri, model);
+            
+            if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+            {
+                if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                throw new ClientException(cr);
+            }
+        }
+        finally
+        {
+            if (cr != null) cr.close();
         }
     }
 
     @Override
     public void deleteDefault()
     {
-	if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store {}", getWebResource().getURI());
-	ClientResponse cr = delete();
-        if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+        ClientResponse cr = null;
+        
+        try
         {
-            if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr);
+            if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store {}", getWebResource().getURI());
+            cr = delete();
+            
+            if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+            {
+                if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                throw new ClientException(cr);
+            }
+        }
+        finally
+        {
+            if (cr != null) cr.close();
         }
     }
 
     @Override
     public void deleteModel(String uri)
     {
-	if (log.isDebugEnabled()) log.debug("DELETE named graph with URI {} from Graph Store {}", uri, getWebResource().getURI());
-	ClientResponse cr = delete(uri);
-        if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+        ClientResponse cr = null;
+        
+        try
         {
-            if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr);
+            if (log.isDebugEnabled()) log.debug("DELETE named graph with URI {} from Graph Store {}", uri, getWebResource().getURI());
+            cr = delete(uri);
+            
+            if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+            {
+                if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                throw new ClientException(cr);
+            }
+        }
+        finally
+        {
+            if (cr != null) cr.close();
         }
     }
 
     @Override
     public void add(Model model)
     {
-	if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} default graph", getWebResource().getURI());
-	ClientResponse cr = add(MediaType.TEXT_NTRIPLES_TYPE, model);
-        if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+        ClientResponse cr = null;
+        
+        try
         {
-            if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr);
+            if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} default graph", getWebResource().getURI());
+            cr = add(getDefaultMediaType(), model);
+            
+            if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+            {
+                if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                throw new ClientException(cr);
+            }
+        }
+        finally
+        {
+            if (cr != null) cr.close();
         }
     }
 
@@ -164,12 +249,22 @@ public class GraphStoreClient extends SimpleGraphStoreClient implements DatasetA
     @Override
     public void add(String uri, Model model)
     {
-	if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} with named graph URI: {}", getWebResource().getURI(), uri);
-	ClientResponse cr = add(MediaType.TEXT_NTRIPLES_TYPE, uri, model);
-        if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+        ClientResponse cr = null;
+        
+        try
         {
-            if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr);
+            if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} with named graph URI: {}", getWebResource().getURI(), uri);
+            cr = add(getDefaultMediaType(), uri, model);
+            
+            if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+            {
+                if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                throw new ClientException(cr);
+            }
+        }
+        finally
+        {
+            if (cr != null) cr.close();
         }
     }
 

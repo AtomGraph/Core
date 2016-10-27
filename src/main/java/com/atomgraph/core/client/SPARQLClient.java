@@ -88,15 +88,24 @@ public class SPARQLClient extends SimpleSPARQLClient // TO-DO: implements SPARQL
     
     public Model loadModel(Query query, MultivaluedMap<String, String> mvm)
     {
-        ClientResponse cr = loadModelBuilder(query, mvm).get(ClientResponse.class);
-
-        if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
-        {
-            if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr);
-        }
+        ClientResponse cr = null;
         
-        return cr.getEntity(Model.class);
+        try
+        {
+            cr = loadModelBuilder(query, mvm).get(ClientResponse.class);
+
+            if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+            {
+                if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                throw new ClientException(cr);
+            }
+
+            return cr.getEntity(Model.class);
+        }
+        finally
+        {
+            if (cr != null) cr.close();
+        }
     }
     
     public WebResource.Builder selectBuilder(Query query, MultivaluedMap<String, String> mvm)
@@ -114,15 +123,24 @@ public class SPARQLClient extends SimpleSPARQLClient // TO-DO: implements SPARQL
     
     public ResultSetRewindable select(Query query, MultivaluedMap<String, String> mvm)
     {        
-        ClientResponse cr = selectBuilder(query, mvm).get(ClientResponse.class);
+        ClientResponse cr = null;
         
-        if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+        try
         {
-            if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr);
-        }
+            cr = selectBuilder(query, mvm).get(ClientResponse.class);
         
-        return cr.getEntity(ResultSetRewindable.class);
+            if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+            {
+                if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                throw new ClientException(cr);
+            }
+
+            return cr.getEntity(ResultSetRewindable.class);
+        }
+        finally
+        {
+            if (cr != null) cr.close();
+        }
     }
 
     public WebResource.Builder askBuilder(Query query, MultivaluedMap<String, String> mvm)
@@ -140,20 +158,29 @@ public class SPARQLClient extends SimpleSPARQLClient // TO-DO: implements SPARQL
     
     public boolean ask(Query query, MultivaluedMap<String, String> mvm)
     {
-        ClientResponse cr = askBuilder(query, mvm).get(ClientResponse.class);
+        ClientResponse cr = null;
         
-        if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+        try
         {
-            if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr);
+            cr = askBuilder(query, mvm).get(ClientResponse.class);
+        
+            if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+            {
+                if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                throw new ClientException(cr);
+            }
+
+            if (cr.getType().isCompatible(MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
+                return JSONInput.booleanFromJSON(cr.getEntity(InputStream.class));
+            if (cr.getType().isCompatible(MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE))        
+                return XMLInput.booleanFromXML(cr.getEntity(InputStream.class));
+
+            throw new ClientException(cr); // TO-DO: refactor
         }
-        
-        if (cr.getType().isCompatible(MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
-            return JSONInput.booleanFromJSON(cr.getEntity(InputStream.class));
-        if (cr.getType().isCompatible(MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE))        
-            return XMLInput.booleanFromXML(cr.getEntity(InputStream.class));
-        
-        throw new ClientException(cr); // TO-DO: refactor
+        finally
+        {
+            if (cr != null) cr.close();
+        }
     }
 
     /*
