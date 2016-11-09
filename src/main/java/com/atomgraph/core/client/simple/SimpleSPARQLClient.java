@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
+@Deprecated
 public class SimpleSPARQLClient
 {
 
@@ -75,8 +76,10 @@ public class SimpleSPARQLClient
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
 	if (acceptedTypes == null) throw new IllegalArgumentException("Accepted MediaType[] must be not null");
 
+        String escapedQueryString = UriComponent.encode(query.toString(), UriComponent.Type.UNRESERVED);
+        int urlLength = getWebResource().getURI().toString().length() + "?query=".length() + escapedQueryString.length();
         // POST if request size is over limit, GET otherwise        
-        if (query.toString().length() > maxGetRequestSize)
+        if (urlLength > getMaxGetRequestSize())
         {
             MultivaluedMap formData = new MultivaluedMapImpl();
             if (params != null) formData.putAll(params);
@@ -87,7 +90,6 @@ public class SimpleSPARQLClient
         else
         {
             // workaround for Jersey UriBuilder to encode { } brackets using UNRESERVED type
-            String escapedQueryString = UriComponent.encode(query.toString(), UriComponent.Type.UNRESERVED);
             WebResource queryResource = getWebResource().queryParam("query", escapedQueryString);
             if (params != null)
             {
