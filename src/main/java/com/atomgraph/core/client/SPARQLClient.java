@@ -86,12 +86,11 @@ public class SPARQLClient // TO-DO: implements SPARQLEndpoint
         return new SPARQLClient(webResource);
     }
 
-    protected int getURLLength(Query query)
+    protected int getQueryURLLength(Query query, MultivaluedMap<String, String> params)
     {
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
         
-        String escapedQueryString = UriComponent.encode(query.toString(), UriComponent.Type.UNRESERVED);
-        return getWebResource().getURI().toString().length() + "?query=".length() + escapedQueryString.length();
+        return getQueryResource(query, params).getURI().toString().length();
     }
     
     protected WebResource.Builder setHeaders(WebResource.Builder builder, Map<String, Object> headers)
@@ -109,15 +108,14 @@ public class SPARQLClient // TO-DO: implements SPARQLEndpoint
         return builder;
     }
     
-    protected ClientResponse get(Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, Map<String, Object> headers)
+    protected WebResource getQueryResource(Query query, MultivaluedMap<String, String> params)
     {
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
-	if (acceptedTypes == null) throw new IllegalArgumentException("Accepted MediaType[] must be not null");
-    
-        if (log.isDebugEnabled()) log.debug("Remote SPARQL service {} GET query: {}", getWebResource().getURI(), query);        
+
         String escapedQueryString = UriComponent.encode(query.toString(), UriComponent.Type.UNRESERVED);
         // workaround for Jersey UriBuilder to encode { } brackets using UNRESERVED type
         WebResource queryResource = getWebResource().queryParam("query", escapedQueryString);
+        
         if (params != null)
         {
             MultivaluedMap<String, String> encodedParams = new MultivaluedMapImpl();
@@ -129,8 +127,18 @@ public class SPARQLClient // TO-DO: implements SPARQLEndpoint
 
             queryResource = queryResource.queryParams(encodedParams);
         }
+        
+        return queryResource;
+    }
+    
+    protected ClientResponse get(Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, Map<String, Object> headers)
+    {
+	if (query == null) throw new IllegalArgumentException("Query must be not null");
+	if (acceptedTypes == null) throw new IllegalArgumentException("Accepted MediaType[] must be not null");
+    
+        if (log.isDebugEnabled()) log.debug("Remote SPARQL service {} GET query: {}", getWebResource().getURI(), query);        
 
-        WebResource.Builder builder = queryResource.accept(acceptedTypes);
+        WebResource.Builder builder = getQueryResource(query, params).accept(acceptedTypes);
         if (headers != null) setHeaders(builder, headers);
         return builder.get(ClientResponse.class);
     }
@@ -162,7 +170,7 @@ public class SPARQLClient // TO-DO: implements SPARQLEndpoint
         
         try
         {
-            if (getURLLength(query) > getMaxGetRequestSize())
+            if (getQueryURLLength(query, params) > getMaxGetRequestSize())
                 cr = post(query, getReadableMediaTypes(Model.class), params, headers);
             else
                 cr = get(query, getReadableMediaTypes(Model.class), params, headers);
@@ -192,7 +200,7 @@ public class SPARQLClient // TO-DO: implements SPARQLEndpoint
 
         try
         {
-            if (getURLLength(query) > getMaxGetRequestSize())
+            if (getQueryURLLength(query, params) > getMaxGetRequestSize())
                 cr = post(query, getReadableMediaTypes(ResultSet.class), params, headers);
             else
                 cr = get(query, getReadableMediaTypes(ResultSet.class), params, headers);
@@ -222,7 +230,7 @@ public class SPARQLClient // TO-DO: implements SPARQLEndpoint
         
         try
         {
-            if (getURLLength(query) > getMaxGetRequestSize())
+            if (getQueryURLLength(query, params) > getMaxGetRequestSize())
                 cr = post(query, getReadableMediaTypes(ResultSet.class), params, headers);
             else
                 cr = get(query, getReadableMediaTypes(ResultSet.class), params, headers);
