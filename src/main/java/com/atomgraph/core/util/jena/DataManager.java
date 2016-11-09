@@ -28,6 +28,7 @@ import java.net.URI;
 import java.util.List;
 import javax.ws.rs.core.MultivaluedMap;
 import com.atomgraph.core.MediaTypes;
+import java.net.URISyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,11 +103,21 @@ public class DataManager extends FileManager
         return resultSetMediaTypes;
     }
     
-    public WebResource getEndpoint(String endpointURI, ClientFilter authFilter, MultivaluedMap<String, String> params)
+    public WebResource getEndpoint(URI endpointURI, ClientFilter authFilter, MultivaluedMap<String, String> params)
     {
 	if (endpointURI == null) throw new IllegalArgumentException("Endpoint URI must be not null");
+
+        try
+        {
+            // remove fragment and normalize
+            endpointURI = new URI(endpointURI.getScheme(), endpointURI.getSchemeSpecificPart(), null).normalize();
+        }
+        catch (URISyntaxException ex)
+        {
+            // should not happen, this a URI to URI conversion
+        }
         
-        WebResource webResource = getClient().resource(URI.create(endpointURI));
+        WebResource webResource = getClient().resource(endpointURI.normalize());
         if (authFilter != null) webResource.addFilter(authFilter);
 
         return webResource;
@@ -115,7 +126,7 @@ public class DataManager extends FileManager
     public ClientResponse get(String uri, javax.ws.rs.core.MediaType[] acceptedTypes)
     {
 	if (log.isDebugEnabled()) log.debug("GET Model from URI: {}", uri);
-	return getEndpoint(uri, null, null).
+	return getEndpoint(URI.create(uri), null, null).
             accept(acceptedTypes).
             get(ClientResponse.class);
     }
