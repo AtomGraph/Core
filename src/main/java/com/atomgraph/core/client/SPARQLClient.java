@@ -87,9 +87,7 @@ public class SPARQLClient // TO-DO: implements SPARQLEndpoint
     }
 
     protected int getQueryURLLength(Query query, MultivaluedMap<String, String> params)
-    {
-	if (query == null) throw new IllegalArgumentException("Query must be not null");
-        
+    {        
         return getQueryResource(query, params).getURI().toString().length();
     }
     
