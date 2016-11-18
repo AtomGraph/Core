@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Martynas Jusevičius <martynas@graphity.org>.
+ * Copyright 2016 Martynas Jusevičius <martynas@atomgraph.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import com.atomgraph.core.model.Service;
 
 /**
  *
- * @author Martynas Jusevičius <martynas@graphity.org>
+ * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
 public class ApplicationImpl implements Application
 {
