@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
+@Deprecated
 public class SimpleGraphStoreClient
 {
     private static final Logger log = LoggerFactory.getLogger(SimpleGraphStoreClient.class);

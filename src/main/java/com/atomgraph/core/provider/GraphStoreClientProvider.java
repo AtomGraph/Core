@@ -17,8 +17,7 @@ package com.atomgraph.core.provider;
 
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.GraphStoreClient;
-import com.atomgraph.core.model.Application;
-import com.atomgraph.core.model.Service;
+import com.atomgraph.core.model.RemoteService;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
@@ -29,6 +28,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 import javax.ws.rs.ext.Providers;
+import javax.servlet.ServletConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -38,9 +40,11 @@ import javax.ws.rs.ext.Providers;
 public class GraphStoreClientProvider extends PerRequestTypeInjectableProvider<Context, GraphStoreClient> implements ContextResolver<GraphStoreClient>
 {
     
+    private static final Logger log = LoggerFactory.getLogger(GraphStoreClientProvider.class);
+
     @Context Providers providers;
 
-    public GraphStoreClientProvider()
+    public GraphStoreClientProvider(ServletConfig servletConfig)
     {
         super(GraphStoreClient.class);
     }
@@ -66,18 +70,35 @@ public class GraphStoreClientProvider extends PerRequestTypeInjectableProvider<C
 
     public GraphStoreClient getGraphStoreClient()
     {
-        return getGraphStoreClient(getApplication().getService(), getClient(), getMediaTypes());
+        return getGraphStoreClient(getOrigin(getClient(), getRemoteService()), getMediaTypes());
     }
     
-    public GraphStoreClient getGraphStoreClient(Service service, Client client, MediaTypes mediaTypes)
+    public GraphStoreClient getGraphStoreClient(WebResource origin, MediaTypes mediaTypes)
     {
-	if (service == null) throw new IllegalArgumentException("Service must be not null");
-        if (client == null) throw new IllegalArgumentException("Client must be not null");
+        if (origin == null) throw new IllegalArgumentException("WebResource must be not null");
         if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes must be not null");
 
-        return GraphStoreClient.create(getOrigin(service, client), mediaTypes);
+        return GraphStoreClient.create(origin, mediaTypes);
     }
 
+    public WebResource getOrigin(Client client, RemoteService service)
+    {
+        if (client == null) throw new IllegalArgumentException("Client must be not null");
+	if (service == null) throw new IllegalArgumentException("RemoteService must be not null");
+
+        WebResource origin = client.resource(service.getSPARQLEndpointURI());
+
+        if (service.getAuthUser() != null && service.getAuthPwd() != null)
+            origin.addFilter(new HTTPBasicAuthFilter(service.getAuthUser(), service.getAuthPwd())); 
+        
+        return origin;
+    }
+    
+    public RemoteService getRemoteService()
+    {
+	return getProviders().getContextResolver(RemoteService.class, null).getContext(RemoteService.class);
+    }
+    
     public MediaTypes getMediaTypes()
     {
 	return getProviders().getContextResolver(MediaTypes.class, null).getContext(MediaTypes.class);
@@ -86,29 +107,6 @@ public class GraphStoreClientProvider extends PerRequestTypeInjectableProvider<C
     public Client getClient()
     {
 	return getProviders().getContextResolver(Client.class, null).getContext(Client.class);
-    }
-
-    public Application getApplication()
-    {
-	return getProviders().getContextResolver(Application.class, null).getContext(Application.class);
-    }
-
-    public WebResource getOrigin(Service service)
-    {
-        return getOrigin(service, getClient());
-    }
-        
-    public WebResource getOrigin(Service service, Client client)
-    {
-	if (service == null) throw new IllegalArgumentException("Service must be not null");        
-	if (client == null) throw new IllegalArgumentException("Client must be not null");
-
-        WebResource origin = client.resource(service.getGraphStore().getURI());
-
-        if (service.getAuthUser() != null && service.getAuthPwd() != null)
-            origin.addFilter(new HTTPBasicAuthFilter(service.getAuthUser(), service.getAuthPwd()));
-        
-        return origin;
     }
 
     public Providers getProviders()

@@ -15,7 +15,7 @@
  *
  */
 
-package com.atomgraph.core.model.impl;
+package com.atomgraph.core.model.impl.proxy;
 
 import org.apache.jena.query.Query;
 import org.apache.jena.query.ResultSetRewindable;
@@ -27,7 +27,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.SPARQLClient;
-import com.atomgraph.core.model.SPARQLEndpointProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,9 +37,9 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
 @Path("/sparql")
-public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQLEndpointProxy
+public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndpointBase
 {
-    private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointProxyBase.class);
+    private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointBase.class);
 
     private final SPARQLClient sparqlClient;
 
@@ -52,7 +51,7 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
      * @param mediaTypes supported media types
      * @param sparqlClient SPARQL client
      */
-    public SPARQLEndpointProxyBase(@Context Request request, @Context ServletConfig servletConfig, @Context MediaTypes mediaTypes,
+    public SPARQLEndpointBase(@Context Request request, @Context ServletConfig servletConfig, @Context MediaTypes mediaTypes,
             @Context SPARQLClient sparqlClient)
     {
         super(request, servletConfig, mediaTypes);
@@ -60,7 +59,7 @@ public class SPARQLEndpointProxyBase extends SPARQLEndpointBase implements SPARQ
         this.sparqlClient = sparqlClient;        
     }
         
-    @Override
+    //@Override
     public SPARQLClient getSPARQLClient()
     {
         return sparqlClient;

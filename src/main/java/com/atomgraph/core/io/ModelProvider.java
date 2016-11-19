@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package com.atomgraph.core.provider;
+package com.atomgraph.core.io;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;

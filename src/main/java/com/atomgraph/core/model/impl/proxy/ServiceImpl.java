@@ -13,51 +13,50 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.atomgraph.core.model.impl;
+package com.atomgraph.core.model.impl.proxy;
 
-import com.atomgraph.core.model.Service;
-import org.apache.jena.rdf.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.atomgraph.core.model.RemoteService;
 
 /**
  *
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
-public class ServiceImpl implements Service
+public class ServiceImpl implements RemoteService
 {
 
     private static final Logger log = LoggerFactory.getLogger(ServiceImpl.class);
-    
-    private final Resource sparqlEndpoint, graphStore;
+        
+    private final String endpointURI, graphStoreURI;
     private final String authUser, authPwd;
 
-    public ServiceImpl(Resource sparqlEndpoint, Resource graphStore, String authUser, String authPwd)
+    public ServiceImpl(String endpointURI, String graphStoreURI, String authUser, String authPwd)
     {
-	if (sparqlEndpoint == null) throw new IllegalArgumentException("SPARQLEndpoint Resource must be not null");
-	if (graphStore == null) throw new IllegalArgumentException("Graph Store Resource must be not null");
+	if (endpointURI == null) throw new IllegalArgumentException("SPARQLEndpoint URI must be not null");
+	if (graphStoreURI == null) throw new IllegalArgumentException("Graph Store URI must be not null");
         
-        this.sparqlEndpoint = sparqlEndpoint;
-        this.graphStore = graphStore;
+        this.endpointURI = endpointURI;
+        this.graphStoreURI = graphStoreURI;
         this.authUser = authUser;
         this.authPwd = authPwd;
     }
 
-    public ServiceImpl(Resource sparqlEndpoint, Resource graphStore)
+    public ServiceImpl(String endpointURI, String graphStoreURI)
     {
-        this(sparqlEndpoint, graphStore, null, null);
+        this(endpointURI, graphStoreURI, null, null);
     }
     
     @Override
-    public Resource getSPARQLEndpoint()
+    public String getSPARQLEndpointURI()
     {
-        return sparqlEndpoint;
+        return endpointURI;
     }
     
     @Override
-    public Resource getGraphStore()
+    public String getGraphStoreURI()
     {
-        return graphStore;
+        return graphStoreURI;
     }
 
     @Override
@@ -71,5 +70,5 @@ public class ServiceImpl implements Service
     {
         return authPwd;
     }
-    
+        
 }

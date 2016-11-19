@@ -45,6 +45,8 @@ public final class A
     /** <p>The namespace of the vocabulary as a resource</p> */
     public static final Resource NAMESPACE = m_model.createResource( NS );
 
+    public static final DatatypeProperty dataset = m_model.createDatatypeProperty( NS + "dataset" );
+    
     public static final ObjectProperty graphStore = m_model.createObjectProperty( NS + "graphStore" );
     
     public static final DatatypeProperty cacheControl = m_model.createDatatypeProperty( NS + "cacheControl" );

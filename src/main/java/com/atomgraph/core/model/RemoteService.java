@@ -19,11 +19,19 @@ package com.atomgraph.core.model;
  *
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
-public interface Service
+public interface RemoteService extends Service
 {
-
-    // SPARQLEndpoint getSPARQLEndpoint(Request request, ServletConfig servletConfig, MediaTypes mediaTypes);
     
-    // GraphStore getGraphStore(Request request, ServletConfig servletConfig, MediaTypes mediaTypes);
+    // org.apache.jena.rdf.model.Resource getSPARQLEndpointOrigin();
+
+    // org.apache.jena.rdf.model.Resource getGraphStoreOrigin();
+
+    String getSPARQLEndpointURI();
+
+    String getGraphStoreURI();
+    
+    String getAuthUser();
+
+    String getAuthPwd();
     
 }

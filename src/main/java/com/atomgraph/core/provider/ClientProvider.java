@@ -16,6 +16,11 @@
 
 package com.atomgraph.core.provider;
 
+import com.atomgraph.core.io.UpdateRequestReader;
+import com.atomgraph.core.io.ResultSetProvider;
+import com.atomgraph.core.io.QueryWriter;
+import com.atomgraph.core.io.DatasetProvider;
+import com.atomgraph.core.io.ModelProvider;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;

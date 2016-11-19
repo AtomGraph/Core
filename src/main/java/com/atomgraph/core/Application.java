@@ -17,11 +17,11 @@
 package com.atomgraph.core;
 
 import org.apache.jena.rdf.model.Property;
-import com.atomgraph.core.provider.ResultSetProvider;
+import com.atomgraph.core.io.ResultSetProvider;
 import com.atomgraph.core.provider.DataManagerProvider;
-import com.atomgraph.core.provider.ModelProvider;
+import com.atomgraph.core.io.ModelProvider;
 import com.atomgraph.core.provider.QueryParamProvider;
-import com.atomgraph.core.provider.UpdateRequestReader;
+import com.atomgraph.core.io.UpdateRequestReader;
 import java.util.HashSet;
 import java.util.Set;
 import javax.servlet.ServletConfig;
@@ -29,17 +29,16 @@ import javax.ws.rs.core.Context;
 import org.apache.jena.riot.RDFParserRegistry;
 import com.atomgraph.core.mapper.ClientExceptionMapper;
 import com.atomgraph.core.mapper.NotFoundExceptionMapper;
-import com.atomgraph.core.model.impl.GraphStoreProxyBase;
+import com.atomgraph.core.model.impl.proxy.GraphStoreBase;
 import com.atomgraph.core.model.impl.QueriedResourceBase;
-import com.atomgraph.core.model.impl.SPARQLEndpointProxyBase;
+import com.atomgraph.core.model.impl.proxy.SPARQLEndpointBase;
 import com.atomgraph.core.provider.ApplicationProvider;
 import com.atomgraph.core.provider.ClientProvider;
-import com.atomgraph.core.provider.DatasetProvider;
+import com.atomgraph.core.io.DatasetProvider;
 import com.atomgraph.core.provider.GraphStoreClientProvider;
-import com.atomgraph.core.provider.GraphStoreProvider;
 import com.atomgraph.core.provider.MediaTypesProvider;
 import com.atomgraph.core.provider.SPARQLClientProvider;
-import com.atomgraph.core.provider.SPARQLEndpointProvider;
+import com.atomgraph.core.provider.ServiceProvider;
 import com.atomgraph.core.riot.RDFLanguages;
 import com.atomgraph.core.riot.lang.RDFPostReaderFactory;
 import javax.annotation.PostConstruct;
@@ -84,8 +83,8 @@ public class Application extends javax.ws.rs.core.Application
     public void init()
     {
 	classes.add(QueriedResourceBase.class); // handles all
-	classes.add(SPARQLEndpointProxyBase.class); // handles /sparql queries
-	classes.add(GraphStoreProxyBase.class); // handles /service requests
+	classes.add(SPARQLEndpointBase.class); // handles /sparql queries
+	classes.add(GraphStoreBase.class); // handles /service requests
 
 	singletons.add(new ModelProvider());
 	singletons.add(new DatasetProvider());
@@ -94,10 +93,9 @@ public class Application extends javax.ws.rs.core.Application
 	singletons.add(new UpdateRequestReader());
         singletons.add(new DataManagerProvider(getServletConfig()));
 	singletons.add(new ApplicationProvider(getServletConfig()));
+	singletons.add(new ServiceProvider(getServletConfig()));        
         singletons.add(new SPARQLClientProvider(getServletConfig()));
-        singletons.add(new SPARQLEndpointProvider(getServletConfig()));
-        singletons.add(new GraphStoreClientProvider());
-        singletons.add(new GraphStoreProvider(getServletConfig()));
+        singletons.add(new GraphStoreClientProvider(getServletConfig()));
         singletons.add(new ClientProvider());        
         singletons.add(new MediaTypesProvider());
         singletons.add(new ClientExceptionMapper());        
