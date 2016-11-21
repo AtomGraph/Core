@@ -26,6 +26,7 @@ import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 import javax.ws.rs.ext.Providers;
@@ -33,6 +34,7 @@ import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.riot.RDFDataMgr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,10 +48,11 @@ public class ServiceProvider extends PerRequestTypeInjectableProvider<Context, S
     
     private static final Logger log = LoggerFactory.getLogger(ServiceProvider.class);
     
+    @Context UriInfo uriInfo;
     @Context Providers providers;
 
     private final String datasetLocation;
-    private final Dataset dataset;
+    private Dataset dataset = null;
     private final Resource endpoint, graphStore;
     private final String authUser, authPwd;
 
@@ -61,16 +64,13 @@ public class ServiceProvider extends PerRequestTypeInjectableProvider<Context, S
         if (datasetLocationParam != null)
         {
             datasetLocation = datasetLocationParam.toString();
-            dataset = DatasetFactory.createTxnMem();
             endpoint = graphStore = null;
-            authUser = authPwd = null;
-            
-            //RDFDataMgr.read(dataset, datasetLocation.toString(), "http://localhost/", null);            
+            authUser = authPwd = null;            
         }
         else
         {
             datasetLocation = null;
-            dataset = null;
+            //dataset = null;
             
             Object endpointURIParam = servletConfig.getInitParameter(SD.endpoint.getURI());
             if (endpointURIParam == null)
@@ -132,6 +132,13 @@ public class ServiceProvider extends PerRequestTypeInjectableProvider<Context, S
     
     public Dataset getDataset()
     {
+        // lazy-load Dataset because we need base URI from UriInfo
+        if (getDatasetLocation() != null && dataset == null)
+        {
+            dataset = DatasetFactory.createTxnMem();            
+            RDFDataMgr.read(dataset, getDatasetLocation(), getUriInfo().getBaseUri().toString(), null);            
+        }
+        
         return dataset;
     }
     
@@ -143,6 +150,11 @@ public class ServiceProvider extends PerRequestTypeInjectableProvider<Context, S
     public MediaTypes getMediaTypes()
     {
 	return getProviders().getContextResolver(MediaTypes.class, null).getContext(MediaTypes.class);
+    }
+    
+    public String getDatasetLocation()
+    {
+        return datasetLocation;
     }
     
     public Resource getSPARQLEndpoint()
@@ -163,6 +175,11 @@ public class ServiceProvider extends PerRequestTypeInjectableProvider<Context, S
     public String getAuthPwd()
     {
         return authPwd;
+    }
+    
+    public UriInfo getUriInfo()
+    {
+        return uriInfo;
     }
     
     public Providers getProviders()

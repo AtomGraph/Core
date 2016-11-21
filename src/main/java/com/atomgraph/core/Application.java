@@ -16,7 +16,6 @@
  */
 package com.atomgraph.core;
 
-import org.apache.jena.rdf.model.Property;
 import com.atomgraph.core.io.ResultSetProvider;
 import com.atomgraph.core.provider.DataManagerProvider;
 import com.atomgraph.core.io.ModelProvider;
@@ -140,17 +139,6 @@ public class Application extends javax.ws.rs.core.Application
     public ServletConfig getServletConfig()
     {
 	return servletConfig;
-    }
-
-    public boolean getBooleanParam(ServletConfig servletConfig, Property property)
-    {
-	if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
-	if (property == null) throw new IllegalArgumentException("Property cannot be null");
-
-        boolean value = false;
-        if (servletConfig.getInitParameter(property.getURI()) != null)
-            value = Boolean.parseBoolean(servletConfig.getInitParameter(property.getURI()));
-        return value;
     }
 
 }
