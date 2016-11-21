@@ -25,7 +25,6 @@ import org.apache.jena.query.ResultSetFactory;
 import org.apache.jena.query.ResultSetRewindable;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.update.UpdateRequest;
-import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import com.atomgraph.core.MediaTypes;
@@ -51,12 +50,11 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
      * @param dataset ontology of this webapp
      * @param mediaTypes supported media types
      * @param request current request
-     * @param servletConfig webapp context
      */
-    public SPARQLEndpointBase(@Context Request request, @Context ServletConfig servletConfig, @Context MediaTypes mediaTypes,
+    public SPARQLEndpointBase(@Context Request request, @Context MediaTypes mediaTypes,
             @Context Dataset dataset)
     {
-	super(request, servletConfig, mediaTypes);
+	super(request, mediaTypes);
         if (dataset == null) throw new IllegalArgumentException("Dataset cannot be null");
         this.dataset = dataset;
     }

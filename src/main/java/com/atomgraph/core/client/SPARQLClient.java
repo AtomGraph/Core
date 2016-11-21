@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
-public class SPARQLClient // TO-DO: implements SPARQLEndpoint
+public class SPARQLClient
 {
     
     private static final Logger log = LoggerFactory.getLogger(SPARQLClient.class);
@@ -85,7 +85,7 @@ public class SPARQLClient // TO-DO: implements SPARQLEndpoint
     {
         return new SPARQLClient(webResource);
     }
-
+    
     protected int getQueryURLLength(Query query, MultivaluedMap<String, String> params)
     {        
         return getQueryResource(query, params).getURI().toString().length();

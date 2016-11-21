@@ -27,36 +27,36 @@ public class ServiceImpl implements RemoteService
 {
 
     private static final Logger log = LoggerFactory.getLogger(ServiceImpl.class);
-        
-    private final String endpointURI, graphStoreURI;
+    
+    private final org.apache.jena.rdf.model.Resource endpoint, graphStore;
     private final String authUser, authPwd;
 
-    public ServiceImpl(String endpointURI, String graphStoreURI, String authUser, String authPwd)
+    public ServiceImpl(org.apache.jena.rdf.model.Resource endpoint, org.apache.jena.rdf.model.Resource graphStore, String authUser, String authPwd)
     {
-	if (endpointURI == null) throw new IllegalArgumentException("SPARQLEndpoint URI must be not null");
-	if (graphStoreURI == null) throw new IllegalArgumentException("Graph Store URI must be not null");
+	if (endpoint == null) throw new IllegalArgumentException("SPARQL endpoint Resource must be not null");
+	if (graphStore == null) throw new IllegalArgumentException("Graph Store Resource must be not null");
         
-        this.endpointURI = endpointURI;
-        this.graphStoreURI = graphStoreURI;
+        this.endpoint = endpoint;
+        this.graphStore = graphStore;
         this.authUser = authUser;
         this.authPwd = authPwd;
     }
 
-    public ServiceImpl(String endpointURI, String graphStoreURI)
+    public ServiceImpl(org.apache.jena.rdf.model.Resource endpoint, org.apache.jena.rdf.model.Resource graphStore)
     {
-        this(endpointURI, graphStoreURI, null, null);
+        this(endpoint, graphStore, null, null);
+    }
+        
+    @Override
+    public org.apache.jena.rdf.model.Resource getSPARQLEndpoint()
+    {
+        return endpoint;
     }
     
     @Override
-    public String getSPARQLEndpointURI()
+    public org.apache.jena.rdf.model.Resource getGraphStore()
     {
-        return endpointURI;
-    }
-    
-    @Override
-    public String getGraphStoreURI()
-    {
-        return graphStoreURI;
+        return graphStore;
     }
 
     @Override
@@ -70,5 +70,5 @@ public class ServiceImpl implements RemoteService
     {
         return authPwd;
     }
-        
+
 }

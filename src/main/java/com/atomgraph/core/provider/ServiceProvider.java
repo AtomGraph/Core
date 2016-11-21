@@ -15,10 +15,12 @@
  */
 package com.atomgraph.core.provider;
 
+import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.exception.ConfigurationException;
 import com.atomgraph.core.model.Service;
 import com.atomgraph.core.vocabulary.A;
 import com.atomgraph.core.vocabulary.SD;
+import com.sun.jersey.api.client.Client;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
@@ -29,6 +31,8 @@ import javax.ws.rs.ext.Provider;
 import javax.ws.rs.ext.Providers;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,9 +50,9 @@ public class ServiceProvider extends PerRequestTypeInjectableProvider<Context, S
 
     private final String datasetLocation;
     private final Dataset dataset;
-    private final String endpointURI, graphStoreURI;
+    private final Resource endpoint, graphStore;
     private final String authUser, authPwd;
-    
+
     public ServiceProvider(ServletConfig servletConfig)
     {
 	super(Service.class);
@@ -58,7 +62,8 @@ public class ServiceProvider extends PerRequestTypeInjectableProvider<Context, S
         {
             datasetLocation = datasetLocationParam.toString();
             dataset = DatasetFactory.createTxnMem();
-            endpointURI = graphStoreURI = authUser = authPwd = null;
+            endpoint = graphStore = null;
+            authUser = authPwd = null;
             
             //RDFDataMgr.read(dataset, datasetLocation.toString(), "http://localhost/", null);            
         }
@@ -73,7 +78,7 @@ public class ServiceProvider extends PerRequestTypeInjectableProvider<Context, S
                 if (log.isErrorEnabled()) log.error("SPARQL endpoint not configured ('{}' not set in web.xml)", SD.endpoint.getURI());
                 throw new ConfigurationException(SD.endpoint);
             }
-            endpointURI = endpointURIParam.toString();
+            endpoint = ResourceFactory.createResource(endpointURIParam.toString());
 
             Object graphStoreURIParam = servletConfig.getInitParameter(A.graphStore.getURI());
             if (graphStoreURIParam == null)
@@ -81,12 +86,12 @@ public class ServiceProvider extends PerRequestTypeInjectableProvider<Context, S
                 if (log.isErrorEnabled()) log.error("Graph Store not configured ('{}' not set in web.xml)", A.graphStore.getURI());
                 throw new ConfigurationException(A.graphStore);
             }
-            graphStoreURI = graphStoreURIParam.toString();
+            graphStore = ResourceFactory.createResource(graphStoreURIParam.toString());
             
             Object authUserParam = servletConfig.getInitParameter(org.apache.jena.sparql.engine.http.Service.queryAuthUser.getSymbol());
             Object authPwdParam = servletConfig.getInitParameter(org.apache.jena.sparql.engine.http.Service.queryAuthPwd.getSymbol());
             authUser = authUserParam == null ? null : authUserParam.toString();
-            authPwd = authPwdParam == null ? null : authPwdParam.toString();            
+            authPwd = authPwdParam == null ? null : authPwdParam.toString();
         }
     }
     
@@ -112,7 +117,7 @@ public class ServiceProvider extends PerRequestTypeInjectableProvider<Context, S
     public Service getService()
     {
         if (getDataset() != null) return getService(getDataset());
-        else return getService(getEndpointURI(), getGraphStoreURI(), getAuthUser(),  getAuthPwd());
+        else return getService(getSPARQLEndpoint(), getGraphStore(), getAuthUser(), getAuthPwd());
     }
     
     public Service getService(Dataset dataset)
@@ -120,9 +125,9 @@ public class ServiceProvider extends PerRequestTypeInjectableProvider<Context, S
         return new com.atomgraph.core.model.impl.dataset.ServiceImpl(dataset);
     }
     
-    public Service getService(String endpointURI, String graphStoreURI, String authUser, String authPwd)
+    public Service getService(Resource endpoint, Resource graphStore, String authUser, String authPwd)
     {
-        return new com.atomgraph.core.model.impl.proxy.ServiceImpl(endpointURI, graphStoreURI, authUser, authPwd);
+        return new com.atomgraph.core.model.impl.proxy.ServiceImpl(endpoint, graphStore, authUser, authPwd);
     }
     
     public Dataset getDataset()
@@ -130,14 +135,24 @@ public class ServiceProvider extends PerRequestTypeInjectableProvider<Context, S
         return dataset;
     }
     
-    public String getEndpointURI()
+    public Client getClient()
     {
-        return endpointURI;
+	return getProviders().getContextResolver(Client.class, null).getContext(Client.class);
     }
     
-    public String getGraphStoreURI()
+    public MediaTypes getMediaTypes()
     {
-        return graphStoreURI;
+	return getProviders().getContextResolver(MediaTypes.class, null).getContext(MediaTypes.class);
+    }
+    
+    public Resource getSPARQLEndpoint()
+    {
+        return endpoint;
+    }
+    
+    public Resource getGraphStore()
+    {
+        return graphStore;
     }
     
     public String getAuthUser()

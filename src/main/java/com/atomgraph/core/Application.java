@@ -34,10 +34,11 @@ import com.atomgraph.core.model.impl.QueriedResourceBase;
 import com.atomgraph.core.model.impl.proxy.SPARQLEndpointBase;
 import com.atomgraph.core.provider.ApplicationProvider;
 import com.atomgraph.core.provider.ClientProvider;
-import com.atomgraph.core.io.DatasetProvider;
 import com.atomgraph.core.provider.GraphStoreClientProvider;
+import com.atomgraph.core.provider.GraphStoreProvider;
 import com.atomgraph.core.provider.MediaTypesProvider;
 import com.atomgraph.core.provider.SPARQLClientProvider;
+import com.atomgraph.core.provider.SPARQLEndpointProvider;
 import com.atomgraph.core.provider.ServiceProvider;
 import com.atomgraph.core.riot.RDFLanguages;
 import com.atomgraph.core.riot.lang.RDFPostReaderFactory;
@@ -87,15 +88,18 @@ public class Application extends javax.ws.rs.core.Application
 	classes.add(GraphStoreBase.class); // handles /service requests
 
 	singletons.add(new ModelProvider());
-	singletons.add(new DatasetProvider());
+	singletons.add(new com.atomgraph.core.io.DatasetProvider());
         singletons.add(new ResultSetProvider());
 	singletons.add(new QueryParamProvider());
 	singletons.add(new UpdateRequestReader());
         singletons.add(new DataManagerProvider(getServletConfig()));
 	singletons.add(new ApplicationProvider(getServletConfig()));
-	singletons.add(new ServiceProvider(getServletConfig()));        
-        singletons.add(new SPARQLClientProvider(getServletConfig()));
-        singletons.add(new GraphStoreClientProvider(getServletConfig()));
+	singletons.add(new ServiceProvider(getServletConfig()));
+        singletons.add(new SPARQLEndpointProvider(getServletConfig()));
+        singletons.add(new GraphStoreProvider(getServletConfig()));
+	singletons.add(new com.atomgraph.core.provider.DatasetProvider());
+	singletons.add(new SPARQLClientProvider());
+	singletons.add(new GraphStoreClientProvider());
         singletons.add(new ClientProvider());        
         singletons.add(new MediaTypesProvider());
         singletons.add(new ClientExceptionMapper());        

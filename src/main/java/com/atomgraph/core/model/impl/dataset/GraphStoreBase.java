@@ -19,11 +19,9 @@ package com.atomgraph.core.model.impl.dataset;
 
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
-import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import com.atomgraph.core.MediaTypes;
-import com.atomgraph.core.util.jena.DataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,10 +38,10 @@ public class GraphStoreBase extends com.atomgraph.core.model.impl.GraphStoreBase
 
     private final Dataset dataset;
         
-    public GraphStoreBase(@Context Request request, @Context ServletConfig servletConfig, @Context MediaTypes mediaTypes,
+    public GraphStoreBase(@Context Request request, @Context MediaTypes mediaTypes,
             @Context Dataset dataset)
     {
-        super(request, servletConfig, mediaTypes);
+        super(request, mediaTypes);
 	if (dataset == null) throw new IllegalArgumentException("Dataset cannot be null");
         this.dataset = dataset;
     }

@@ -18,6 +18,7 @@ package com.atomgraph.core.provider;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.GraphStoreClient;
 import com.atomgraph.core.model.RemoteService;
+import com.atomgraph.core.model.Service;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
@@ -28,7 +29,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 import javax.ws.rs.ext.Providers;
-import javax.servlet.ServletConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +44,7 @@ public class GraphStoreClientProvider extends PerRequestTypeInjectableProvider<C
 
     @Context Providers providers;
 
-    public GraphStoreClientProvider(ServletConfig servletConfig)
+    public GraphStoreClientProvider()
     {
         super(GraphStoreClient.class);
     }
@@ -70,7 +70,9 @@ public class GraphStoreClientProvider extends PerRequestTypeInjectableProvider<C
 
     public GraphStoreClient getGraphStoreClient()
     {
-        return getGraphStoreClient(getOrigin(getClient(), getRemoteService()), getMediaTypes());
+        if (!(getService() instanceof RemoteService)) return null;
+        
+        return getGraphStoreClient(getOrigin(getClient(), (RemoteService)getService()), getMediaTypes());
     }
     
     public GraphStoreClient getGraphStoreClient(WebResource origin, MediaTypes mediaTypes)
@@ -86,7 +88,7 @@ public class GraphStoreClientProvider extends PerRequestTypeInjectableProvider<C
         if (client == null) throw new IllegalArgumentException("Client must be not null");
 	if (service == null) throw new IllegalArgumentException("RemoteService must be not null");
 
-        WebResource origin = client.resource(service.getSPARQLEndpointURI());
+        WebResource origin = client.resource(service.getGraphStore().getURI());
 
         if (service.getAuthUser() != null && service.getAuthPwd() != null)
             origin.addFilter(new HTTPBasicAuthFilter(service.getAuthUser(), service.getAuthPwd())); 
@@ -94,9 +96,9 @@ public class GraphStoreClientProvider extends PerRequestTypeInjectableProvider<C
         return origin;
     }
     
-    public RemoteService getRemoteService()
+    public Service getService()
     {
-	return getProviders().getContextResolver(RemoteService.class, null).getContext(RemoteService.class);
+	return getProviders().getContextResolver(Service.class, null).getContext(Service.class);
     }
     
     public MediaTypes getMediaTypes()

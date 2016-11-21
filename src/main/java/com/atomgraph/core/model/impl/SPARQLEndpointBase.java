@@ -27,14 +27,12 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import javax.servlet.ServletConfig;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.*;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.model.SPARQLEndpoint;
-import com.atomgraph.core.vocabulary.A;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +48,6 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointBase.class);
     
     private final Request request;
-    private final ServletConfig servletConfig;
     private final MediaTypes mediaTypes;
     private final com.atomgraph.core.model.impl.Response response;
     
@@ -58,17 +55,14 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
      * Constructs SPARQL endpoint from request metadata.
      * 
      * @param request current request
-     * @param servletConfig servlet config
      * @param mediaTypes supported media types
      */
-    public SPARQLEndpointBase(@Context Request request, @Context ServletConfig servletConfig, @Context MediaTypes mediaTypes)
+    public SPARQLEndpointBase(@Context Request request, @Context MediaTypes mediaTypes)
     {
 	if (request == null) throw new IllegalArgumentException("Request cannot be null");
-	if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
 	if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
 
 	this.request = request;
-	this.servletConfig = servletConfig;
         this.mediaTypes = mediaTypes;
         this.response = com.atomgraph.core.model.impl.Response.fromRequest(request);
 	if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase");        
@@ -167,9 +161,11 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
 
         if (query.isSelectType())
         {
+            /*
             if (log.isDebugEnabled()) log.debug("SPARQL endpoint executing SELECT query: {}", query);
             if (getServletConfig().getInitParameter(A.resultLimit.getURI()) != null)
                 query.setLimit(Long.parseLong(getServletConfig().getInitParameter(A.resultLimit.getURI())));
+            */
 
             return getResponseBuilder(select(query));
         }
@@ -286,11 +282,6 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     public Request getRequest()
     {
 	return request;
-    }
-
-    public ServletConfig getServletConfig()
-    {
-	return servletConfig;
     }
     
     public MediaTypes getMediaTypes()

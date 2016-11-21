@@ -18,14 +18,13 @@ package com.atomgraph.core.provider;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.SPARQLClient;
 import com.atomgraph.core.model.RemoteService;
-import com.atomgraph.core.vocabulary.A;
+import com.atomgraph.core.model.Service;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
-import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
@@ -45,15 +44,9 @@ public class SPARQLClientProvider extends PerRequestTypeInjectableProvider<Conte
     
     @Context Providers providers;
 
-    private final Integer maxGetRequestSize;
-
-    public SPARQLClientProvider(ServletConfig servletConfig)
+    public SPARQLClientProvider()
     {
         super(SPARQLClient.class);
-
-        Object sizeValue = servletConfig.getInitParameter(A.maxGetRequestSize.getURI());
-        if (sizeValue != null) maxGetRequestSize = Integer.parseInt(sizeValue.toString());
-        else maxGetRequestSize = null;
     }
     
     @Override
@@ -77,7 +70,9 @@ public class SPARQLClientProvider extends PerRequestTypeInjectableProvider<Conte
     
     public SPARQLClient getSPARQLClient()
     {
-        return getSPARQLClient(getOrigin(getClient(), getRemoteService()), getMediaTypes());
+        if (!(getService() instanceof RemoteService)) return null;
+        
+        return getSPARQLClient(getOrigin(getClient(), (RemoteService)getService()), getMediaTypes());
     }
     
     public SPARQLClient getSPARQLClient(WebResource origin, MediaTypes mediaTypes)
@@ -94,7 +89,7 @@ public class SPARQLClientProvider extends PerRequestTypeInjectableProvider<Conte
         if (client == null) throw new IllegalArgumentException("Client must be not null");
 	if (service == null) throw new IllegalArgumentException("RemoteService must be not null");
 
-        WebResource origin = client.resource(service.getSPARQLEndpointURI());
+        WebResource origin = client.resource(service.getSPARQLEndpoint().getURI());
 
         if (service.getAuthUser() != null && service.getAuthPwd() != null)
             origin.addFilter(new HTTPBasicAuthFilter(service.getAuthUser(), service.getAuthPwd())); 
@@ -104,12 +99,12 @@ public class SPARQLClientProvider extends PerRequestTypeInjectableProvider<Conte
     
     public Integer getMaxGetRequestSize()
     {
-        return maxGetRequestSize;
+        return null;
     }
     
-    public RemoteService getRemoteService()
+    public Service getService()
     {
-	return getProviders().getContextResolver(RemoteService.class, null).getContext(RemoteService.class);
+	return getProviders().getContextResolver(Service.class, null).getContext(Service.class);
     }
 
     public MediaTypes getMediaTypes()

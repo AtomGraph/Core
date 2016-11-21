@@ -21,14 +21,12 @@ import org.apache.jena.query.Query;
 import org.apache.jena.query.ResultSetRewindable;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.update.UpdateRequest;
-import javax.servlet.ServletConfig;
-import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import com.atomgraph.core.MediaTypes;
-import com.atomgraph.core.client.SPARQLClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.atomgraph.core.client.SPARQLClient;
 
 /**
  * Proxy implementation of SPARQL endpoint.
@@ -36,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
-@Path("/sparql")
+// @Path("/sparql")
 public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndpointBase
 {
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointBase.class);
@@ -47,19 +45,16 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
      * Constructs SPARQL endpoint proxy from request metadata and origin.
      * 
      * @param request request
-     * @param servletConfig servlet config
      * @param mediaTypes supported media types
      * @param sparqlClient SPARQL client
      */
-    public SPARQLEndpointBase(@Context Request request, @Context ServletConfig servletConfig, @Context MediaTypes mediaTypes,
-            @Context SPARQLClient sparqlClient)
+    public SPARQLEndpointBase(@Context Request request, @Context MediaTypes mediaTypes, @Context SPARQLClient sparqlClient)
     {
-        super(request, servletConfig, mediaTypes);
+        super(request, mediaTypes);
         if (sparqlClient == null) throw new IllegalArgumentException("Application cannot be null");
         this.sparqlClient = sparqlClient;        
     }
         
-    //@Override
     public SPARQLClient getSPARQLClient()
     {
         return sparqlClient;

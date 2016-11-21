@@ -22,13 +22,9 @@ package com.atomgraph.core.model;
 public interface RemoteService extends Service
 {
     
-    // org.apache.jena.rdf.model.Resource getSPARQLEndpointOrigin();
+    org.apache.jena.rdf.model.Resource getSPARQLEndpoint();
 
-    // org.apache.jena.rdf.model.Resource getGraphStoreOrigin();
-
-    String getSPARQLEndpointURI();
-
-    String getGraphStoreURI();
+    org.apache.jena.rdf.model.Resource getGraphStore();
     
     String getAuthUser();
 

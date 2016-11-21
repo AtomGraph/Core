@@ -29,9 +29,11 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import com.atomgraph.core.MediaTypes;
-import com.atomgraph.core.client.SPARQLClient;
 import com.atomgraph.core.exception.NotFoundException;
+import com.atomgraph.core.model.Application;
+import com.atomgraph.core.model.GraphStore;
 import com.atomgraph.core.model.QueriedResource;
+import com.atomgraph.core.model.SPARQLEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,15 +44,15 @@ import org.slf4j.LoggerFactory;
  * @see com.atomgraph.core.model.SPARQLEndpoint
  * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/Query.html">ARQ Query</a>
  */
-@Path("{path: .*}")
+@Path("/")
 public class QueriedResourceBase extends ResourceBase implements QueriedResource
 {
     private static final Logger log = LoggerFactory.getLogger(QueriedResourceBase.class);
     
-    //private final Client client;
-    //private final Application application;
-    private final SPARQLClient sparqlClient;
-
+    private final Application application;
+    private final SPARQLEndpoint sparqlEndpoint;
+    private final GraphStore graphStore;
+    
     /**
      * JAX-RS-compatible resource constructor with injected initialization objects.
      * The URI of the resource being created is the absolute path of the current request URI.
@@ -59,21 +61,44 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
      * @param request current request object
      * @param servletConfig webapp context
      * @param mediaTypes supported media types
-     * @param sparqlClient SPARQL client
+     * @param application application
+     * @param sparqlEndpoint SPARQL endpoint
+     * @param graphStore Graph Store
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html">JAX-RS UriInfo</a>
      * @see <a href="http://docs.oracle.com/javaee/7/api/javax/servlet/ServletContext.html">ServletContext</a>
      * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceContext.html">Jersey ResourceContext</a>
      */
     public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletConfig servletConfig, @Context MediaTypes mediaTypes,
-            @Context SPARQLClient sparqlClient)
+            @Context Application application, @Context SPARQLEndpoint sparqlEndpoint, @Context GraphStore graphStore)
     {
 	super(uriInfo, request, servletConfig, mediaTypes);
-	if (sparqlClient == null) throw new IllegalArgumentException("SPARQLClient cannot be null");
-        //this.client = client;
-	//this.application = application;
-        this.sparqlClient = sparqlClient;
+	if (application == null) throw new IllegalArgumentException("Application cannot be null");
+	this.application = application;
+        this.sparqlEndpoint = sparqlEndpoint;
+        this.graphStore = graphStore;
     }
     
+    public SPARQLEndpoint getSPARQLEndpoint()
+    {
+        return sparqlEndpoint;
+    }
+    
+    public GraphStore getGraphStore()
+    {
+        return graphStore;
+    }
+    
+    @Path("{path: .+}")
+    public Object getSubResource()
+    {
+        if (getUriInfo().getAbsolutePath().equals(getUriInfo().getBaseUriBuilder().path("sparql").build()))
+                return getSPARQLEndpoint();
+        if (getUriInfo().getAbsolutePath().equals(getUriInfo().getBaseUriBuilder().path("service").build()))
+                return getGraphStore();
+
+        return this;
+    }
+
     /**
      * Returns RDF description of this resource.
      * The description is the result of a query executed on the SPARQL endpoint of this resource.
@@ -85,7 +110,7 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     @Override
     public Model describe()
     {
-        return getSPARQLClient().loadModel(getQuery());
+        return (Model)getSPARQLEndpoint().get(getQuery(), null, null).getEntity();
     }
     
     /**
@@ -170,24 +195,10 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
 	if (uri == null) throw new IllegalArgumentException("URI cannot be null");        
 	return QueryFactory.create("DESCRIBE <" + uri.toString() + ">");
     }
-
-    /*
-    public Client getClient()
-    {
-        return client;
-    }
-    */
     
-    public SPARQLClient getSPARQLClient()
-    {
-        return sparqlClient;
-    }
-    
-    /*
     public Application getApplication()
     {
 	return application;
     }
-    */
     
 }

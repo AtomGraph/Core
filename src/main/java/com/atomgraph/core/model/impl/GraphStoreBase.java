@@ -21,7 +21,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import javax.servlet.ServletConfig;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response;
@@ -44,7 +43,6 @@ public abstract class GraphStoreBase implements GraphStore
     private static final Logger log = LoggerFactory.getLogger(GraphStoreBase.class);
 
     private final Request request;
-    private final ServletConfig servletConfig;
     private final MediaTypes mediaTypes;
     private final com.atomgraph.core.model.impl.Response response;
     
@@ -52,17 +50,14 @@ public abstract class GraphStoreBase implements GraphStore
      * Constructs Graph Store from request metadata.
      * 
      * @param request request
-     * @param servletConfig servlet config
      * @param mediaTypes
      */
-    public GraphStoreBase(@Context Request request, @Context ServletConfig servletConfig, @Context MediaTypes mediaTypes)
+    public GraphStoreBase(@Context Request request, @Context MediaTypes mediaTypes)
     {
 	if (request == null) throw new IllegalArgumentException("Request cannot be null");
-	if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
 	if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
 	
 	this.request = request;
-        this.servletConfig = servletConfig;
         this.mediaTypes = mediaTypes;
         this.response = com.atomgraph.core.model.impl.Response.fromRequest(request);        
     }
@@ -264,11 +259,6 @@ public abstract class GraphStoreBase implements GraphStore
     public Request getRequest()
     {
 	return request;
-    }
-
-    public ServletConfig getServletConfig()
-    {
-        return servletConfig;
     }
     
     public MediaTypes getMediaTypes()

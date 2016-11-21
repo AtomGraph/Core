@@ -15,11 +15,15 @@
  */
 package com.atomgraph.core.model;
 
+import org.apache.jena.query.Dataset;
+
 /**
  *
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
-public interface Service
+public interface DatasetService extends Service
 {
+
+    Dataset getDataset();
     
 }

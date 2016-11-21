@@ -15,7 +15,7 @@
  */
 package com.atomgraph.core.model.impl.dataset;
 
-import com.atomgraph.core.model.Service;
+import com.atomgraph.core.model.DatasetService;
 import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
-public class ServiceImpl implements Service
+public class ServiceImpl implements DatasetService
 {
 
     private static final Logger log = LoggerFactory.getLogger(ServiceImpl.class);
@@ -40,18 +40,19 @@ public class ServiceImpl implements Service
 
     /*
     @Override
-    public SPARQLEndpoint getSPARQLEndpoint(Request request, ServletConfig servletConfig, MediaTypes mediaTypes)
+    public SPARQLEndpoint getSPARQLEndpoint(Request request, MediaTypes mediaTypes)
     {
-        return new SPARQLEndpointBase(request, servletConfig, mediaTypes, getDataset());
+        return new SPARQLEndpointBase(request, mediaTypes, getDataset());
     }
 
     @Override
-    public GraphStore getGraphStore(Request request, ServletConfig servletConfig, MediaTypes mediaTypes)
+    public GraphStore getGraphStore(Request request, MediaTypes mediaTypes)
     {
-        return new GraphStoreBase(request, servletConfig, mediaTypes, getDataset());
+        return new GraphStoreBase(request, mediaTypes, getDataset());
     }
     */
     
+    @Override
     public Dataset getDataset()
     {
         return dataset;
