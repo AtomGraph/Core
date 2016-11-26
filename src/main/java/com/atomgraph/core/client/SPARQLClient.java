@@ -22,6 +22,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.uri.UriComponent;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
@@ -239,10 +240,18 @@ public class SPARQLClient
                 throw new ClientException(cr);
             }
 
-            if (cr.getType().isCompatible(MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
-                return JSONInput.booleanFromJSON(cr.getEntity(InputStream.class));
-            if (cr.getType().isCompatible(MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE))        
-                return XMLInput.booleanFromXML(cr.getEntity(InputStream.class));
+            try (InputStream is = cr.getEntity(InputStream.class))
+            {
+                if (cr.getType().isCompatible(MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))                    
+                    return JSONInput.booleanFromJSON(is);
+                if (cr.getType().isCompatible(MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE))
+                    return XMLInput.booleanFromXML(is);
+            }
+            catch (IOException ex)
+            {
+                if (log.isDebugEnabled()) log.debug("Error closing ClientResponse entity stream");
+                throw new ClientException(cr);
+            }                
 
             throw new ClientException(cr); // TO-DO: refactor
         }
