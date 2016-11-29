@@ -96,7 +96,7 @@ public class GraphStoreBase extends com.atomgraph.core.model.impl.GraphStoreBase
     @Override
     public void deleteModel(String uri)
     {
-        
+        getGraphStoreClient().deleteModel(uri);
     }
 
     @Override

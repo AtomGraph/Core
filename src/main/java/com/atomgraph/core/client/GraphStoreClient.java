@@ -15,7 +15,6 @@
  */
 package com.atomgraph.core.client;
 
-import com.atomgraph.core.client.simple.SimpleGraphStoreClient;
 import com.atomgraph.core.MediaType;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.exception.ClientException;
@@ -31,15 +30,18 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
-public class GraphStoreClient extends SimpleGraphStoreClient implements DatasetAccessor
+public class GraphStoreClient implements DatasetAccessor
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreClient.class);
 
+    private final WebResource webResource;    
     private final MediaTypes mediaTypes;
     
     protected GraphStoreClient(WebResource webResource, MediaTypes mediaTypes)
     {
-        super(webResource);
+        if (webResource == null) throw new IllegalArgumentException("WebResource cannot be null");
+        
+        this.webResource = webResource;        
         this.mediaTypes = mediaTypes;
     }
 
@@ -61,6 +63,16 @@ public class GraphStoreClient extends SimpleGraphStoreClient implements DatasetA
     public MediaType getDefaultMediaType()
     {
         return MediaType.TEXT_NTRIPLES_TYPE;
+    }
+    
+    protected ClientResponse get(javax.ws.rs.core.MediaType[] acceptedTypes)
+    {
+        if (acceptedTypes == null) throw new IllegalArgumentException("MediaType[] cannot be null");
+        
+	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} default graph", getWebResource().getURI());
+	return getWebResource().queryParam("default", "").
+            accept(acceptedTypes).
+            get(ClientResponse.class);
     }
     
     @Override
@@ -87,6 +99,17 @@ public class GraphStoreClient extends SimpleGraphStoreClient implements DatasetA
         }
     }
 
+    protected ClientResponse get(javax.ws.rs.core.MediaType[] acceptedTypes, String graphURI)
+    {
+        if (acceptedTypes == null) throw new IllegalArgumentException("MediaType[] cannot be null");
+        if (graphURI == null) throw new IllegalArgumentException("String cannot be null");
+        
+	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} with named graph URI: {}", getWebResource().getURI(), graphURI);
+	return getWebResource().queryParam("graph", graphURI).
+            accept(acceptedTypes).
+            get(ClientResponse.class);
+    }
+    
     @Override
     public Model getModel(String uri)
     {
@@ -111,6 +134,12 @@ public class GraphStoreClient extends SimpleGraphStoreClient implements DatasetA
         }
     }
 
+    protected ClientResponse head(String graphURI)
+    {
+	return getWebResource().queryParam("graph", graphURI).
+            method("HEAD", ClientResponse.class);
+    }
+    
     @Override
     public boolean containsModel(String uri)
     {
@@ -135,6 +164,17 @@ public class GraphStoreClient extends SimpleGraphStoreClient implements DatasetA
         }
     }
     
+    protected ClientResponse put(MediaType contentType, Model model)
+    {
+        if (contentType == null) throw new IllegalArgumentException("MediaType cannot be null");
+        if (model == null) throw new IllegalArgumentException("Model cannot be null");
+        
+	if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} default graph", getWebResource().getURI());
+	return getWebResource().queryParam("default", "").
+            type(contentType).
+            put(ClientResponse.class, model);
+    }
+    
     @Override
     public void putModel(Model model)
     {
@@ -157,6 +197,18 @@ public class GraphStoreClient extends SimpleGraphStoreClient implements DatasetA
         }
     }
 
+    protected ClientResponse putModel(MediaType contentType, String graphURI, Model model)
+    {
+        if (contentType == null) throw new IllegalArgumentException("MediaType cannot be null");
+        if (graphURI == null) throw new IllegalArgumentException("String cannot be null");
+        if (model == null) throw new IllegalArgumentException("Model cannot be null");
+        
+	if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} with named graph URI {}", getWebResource().getURI(), graphURI);
+	return getWebResource().queryParam("graph", graphURI).
+            type(contentType).
+            put(ClientResponse.class, model);
+    }
+    
     @Override
     public void putModel(String uri, Model model)
     {
@@ -179,6 +231,13 @@ public class GraphStoreClient extends SimpleGraphStoreClient implements DatasetA
         }
     }
 
+    protected ClientResponse delete()
+    {
+	if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store {}", getWebResource().getURI());
+	return getWebResource().queryParam("default", "").
+            delete(ClientResponse.class);
+    }
+    
     @Override
     public void deleteDefault()
     {
@@ -201,6 +260,15 @@ public class GraphStoreClient extends SimpleGraphStoreClient implements DatasetA
         }
     }
 
+    protected ClientResponse delete(String graphURI)
+    {
+        if (graphURI == null) throw new IllegalArgumentException("String cannot be null");
+        
+	if (log.isDebugEnabled()) log.debug("DELETE named graph with URI {} from Graph Store {}", graphURI, getWebResource().getURI());
+	return getWebResource().queryParam("graph", graphURI).
+            delete(ClientResponse.class);
+    }
+    
     @Override
     public void deleteModel(String uri)
     {
@@ -223,6 +291,17 @@ public class GraphStoreClient extends SimpleGraphStoreClient implements DatasetA
         }
     }
 
+    protected ClientResponse add(MediaType contentType, Model model)
+    {
+        if (contentType == null) throw new IllegalArgumentException("MediaType cannot be null");
+        if (model == null) throw new IllegalArgumentException("Model cannot be null");
+        
+	if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} default graph", getWebResource().getURI());
+	return getWebResource().queryParam("default", "").
+            type(contentType).
+            post(ClientResponse.class, model);
+    }
+    
     @Override
     public void add(Model model)
     {
@@ -245,6 +324,17 @@ public class GraphStoreClient extends SimpleGraphStoreClient implements DatasetA
         }
     }
 
+    protected ClientResponse add(MediaType contentType, String graphURI, Model model)
+    {
+        if (contentType == null) throw new IllegalArgumentException("MediaType cannot be null");
+        if (graphURI == null) throw new IllegalArgumentException("String cannot be null");
+        if (model == null) throw new IllegalArgumentException("Model cannot be null");
+
+	if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} with named graph URI: {}", getWebResource().getURI(), graphURI);
+	return getWebResource().queryParam("graph", graphURI).
+            type(contentType).
+            post(ClientResponse.class, model);
+    }
     
     @Override
     public void add(String uri, Model model)
@@ -268,6 +358,11 @@ public class GraphStoreClient extends SimpleGraphStoreClient implements DatasetA
         }
     }
 
+    public final WebResource getWebResource()
+    {
+        return webResource;
+    }
+        
     public MediaTypes getMediaTypes()
     {
         return mediaTypes;
