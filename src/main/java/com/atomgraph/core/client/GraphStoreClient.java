@@ -27,7 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Graph Store Protocol 1.1 client.
+ * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
 public class GraphStoreClient implements DatasetAccessor
@@ -40,7 +41,8 @@ public class GraphStoreClient implements DatasetAccessor
     protected GraphStoreClient(WebResource webResource, MediaTypes mediaTypes)
     {
         if (webResource == null) throw new IllegalArgumentException("WebResource cannot be null");
-        
+        if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
+
         this.webResource = webResource;        
         this.mediaTypes = mediaTypes;
     }
