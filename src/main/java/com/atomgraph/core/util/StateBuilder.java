@@ -21,7 +21,6 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.util.ResourceUtils;
-import com.sun.jersey.api.uri.UriComponent;
 import java.net.URI;
 import javax.ws.rs.core.UriBuilder;
 
@@ -76,8 +75,8 @@ public class StateBuilder
         getResource().addProperty(property, value);
         String encodedValue = value.toString(); // not a reliable serialization
         // we URI-encode values ourselves because Jersey 1.x fails to do so: https://java.net/jira/browse/JERSEY-1717
-        if (value.isURIResource()) encodedValue = UriComponent.encode(value.asResource().getURI(), UriComponent.Type.UNRESERVED);
-        if (value.isLiteral()) encodedValue = UriComponent.encode(value.asLiteral().getString(), UriComponent.Type.UNRESERVED);
+        // if (value.isURIResource()) encodedValue = UriComponent.encode(value.asResource().getURI(), UriComponent.Type.UNRESERVED);
+        // if (value.isLiteral()) encodedValue = UriComponent.encode(value.asLiteral().getString(), UriComponent.Type.UNRESERVED);
         getUriBuilder().queryParam(property.getLocalName(), encodedValue);
         
         return this;

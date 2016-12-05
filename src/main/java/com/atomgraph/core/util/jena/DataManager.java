@@ -20,15 +20,15 @@ import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.util.FileManager;
 import org.apache.jena.util.LocationMapper;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.filter.ClientFilter;
 import java.net.URI;
 import java.util.List;
 import javax.ws.rs.core.MultivaluedMap;
 import com.atomgraph.core.MediaTypes;
 import java.net.URISyntaxException;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientRequestFilter;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,7 +94,7 @@ public class DataManager extends FileManager
         return resultSetMediaTypes;
     }
     
-    public WebResource getEndpoint(URI endpointURI, ClientFilter authFilter, MultivaluedMap<String, String> params)
+    public WebTarget getEndpoint(URI endpointURI, ClientRequestFilter authFilter, MultivaluedMap<String, String> params)
     {
 	if (endpointURI == null) throw new IllegalArgumentException("Endpoint URI must be not null");
 
@@ -108,18 +108,18 @@ public class DataManager extends FileManager
             // should not happen, this a URI to URI conversion
         }
         
-        WebResource webResource = getClient().resource(endpointURI.normalize());
-        if (authFilter != null) webResource.addFilter(authFilter);
+        WebTarget webTarget = getClient().target(endpointURI.normalize());
+        if (authFilter != null) webTarget.register(authFilter);
 
-        return webResource;
+        return webTarget;
     }
     
-    public ClientResponse get(String uri, javax.ws.rs.core.MediaType[] acceptedTypes)
+    public Response get(String uri, javax.ws.rs.core.MediaType[] acceptedTypes)
     {
 	if (log.isDebugEnabled()) log.debug("GET Model from URI: {}", uri);
 	return getEndpoint(URI.create(uri), null, null).
-            accept(acceptedTypes).
-            get(ClientResponse.class);
+            request(acceptedTypes).
+            get();
     }
     
     public boolean usePreemptiveAuth()
