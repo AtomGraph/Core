@@ -63,6 +63,16 @@ public class MediaType extends javax.ws.rs.core.MediaType
     /** "application/sparql-results+json" */
     public final static MediaType APPLICATION_SPARQL_RESULTS_JSON_TYPE = new MediaType("application","sparql-results+json");
 
+    /** "text/csv" */
+    public final static String APPLICATION_SPARQL_RESULTS_CSV = "text/csv";
+    /** "text/csv" */
+    public final static MediaType APPLICATION_SPARQL_RESULTS_CSV_TYPE = new MediaType("text","csv");
+    
+    /** "text/tab-separated-values" */
+    public final static String APPLICATION_SPARQL_RESULTS_TSV = "text/tab-separated-values";
+    /** "text/tab-separated-values" */
+    public final static MediaType APPLICATION_SPARQL_RESULTS_TSV_TYPE = new MediaType("text","tab-separated-values");
+
     /** "application/sparql-query" */
     public final static String APPLICATION_SPARQL_QUERY = "application/sparql-query";
     /** "application/sparql-query" */

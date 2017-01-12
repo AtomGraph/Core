@@ -56,7 +56,7 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
 {    
     private static final Logger log = LoggerFactory.getLogger(ModelProvider.class);
 
-    public boolean isRDFMediaType(MediaType mediaType)
+    public static boolean isModelType(MediaType mediaType)
     {
         MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
         return RDFLanguages.contentTypeToLang(formatType.toString()) != null;
@@ -67,7 +67,7 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-        return type == Model.class && isRDFMediaType(mediaType);
+        return type == Model.class && isModelType(mediaType);
     }
 
     @Override
@@ -115,7 +115,7 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-        return Model.class.isAssignableFrom(type) && isRDFMediaType(mediaType);
+        return Model.class.isAssignableFrom(type) && isModelType(mediaType);
     }
 
     @Override
