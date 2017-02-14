@@ -30,6 +30,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Variant;
 import com.atomgraph.core.util.ModelUtils;
 import com.atomgraph.core.util.ResultSetUtils;
+import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,13 +125,37 @@ public class Response // extends ResponseBuilder
         Variant variant = getRequest().selectVariant(variants);
         if (variant == null)
         {
-            if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants: {}", variant, variants);
-            throw new WebApplicationException(javax.ws.rs.core.Response.status(javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE).build());
+            variant = getRequest().selectVariant(removeLanguages(variants));
+            if (log.isTraceEnabled()) log.trace("Conneg did not produce acceptable response Variants; attempting conneg without language");
+            
+            if (variant == null)
+            {
+                if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants: {}", variant, variants);
+                throw new WebApplicationException(javax.ws.rs.core.Response.status(javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE).build());
+            }
         }
 
         return getResponseBuilder(model, getEntityTag(model, variant), variant);
     }
 
+    /**
+     * Clones variants while stripping languages.
+     * 
+     * @param variants variant list
+     * @return variant list
+     */
+    public List<Variant> removeLanguages(List<Variant> variants)
+    {
+	if (variants == null) throw new IllegalArgumentException("List<Variant> cannot be null");
+        
+        List<Variant> list = new ArrayList<>();
+        
+        for (Variant variant : variants)
+            list.add(new Variant(variant.getMediaType(), null, variant.getEncoding()));
+        
+        return list;
+    }
+    
     /**
      * Returns response builder for SPARQL result set.
      * 

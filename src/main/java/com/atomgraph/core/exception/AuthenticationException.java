@@ -25,6 +25,7 @@ public class AuthenticationException extends RuntimeException
 {
     private String realm = null;
     
+    // TO-DO: make more specific constructors with UserAccount
     public AuthenticationException(String message, String realm)
     {
 	super(message);
