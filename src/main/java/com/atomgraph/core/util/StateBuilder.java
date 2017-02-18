@@ -31,7 +31,7 @@ import javax.ws.rs.core.UriBuilder;
  */
 public class StateBuilder
 {
-    private final Resource resource;
+    private Resource resource;
     private final UriBuilder uriBuilder;
     
     protected StateBuilder(UriBuilder uriBuilder, Model model)
@@ -97,7 +97,8 @@ public class StateBuilder
         
     public Resource build()
     {
-        return ResourceUtils.renameResource(getResource(), getUriBuilder().build().toString());
+        resource = ResourceUtils.renameResource(getResource(), getUriBuilder().build().toString());
+        return resource;
     }
 
     @Override
