@@ -51,6 +51,7 @@ public abstract class ResourceBase implements Resource
     private final Request request;
     private final ServletConfig servletConfig;
     private final MediaTypes mediaTypes;
+    private final URI uri;
     private final com.atomgraph.core.model.impl.Response response;
     private CacheControl cacheControl;
 
@@ -65,17 +66,24 @@ public abstract class ResourceBase implements Resource
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html#getAbsolutePath()">JAX-RS UriInfo.getAbsolutePath()</a>
      */
     public ResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletConfig servletConfig,
-            @Context MediaTypes mediaTypes)
+            @Context MediaTypes mediaTypes)            
+    {
+        this(uriInfo, request, servletConfig, mediaTypes, uriInfo.getAbsolutePath());
+    }
+    
+    protected ResourceBase(UriInfo uriInfo, Request request, ServletConfig servletConfig, MediaTypes mediaTypes, URI uri)
     {
 	if (uriInfo == null) throw new IllegalArgumentException("UriInfo cannot be null");
 	if (request == null) throw new IllegalArgumentException("Request cannot be null");
 	if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
 	if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
+	if (uri == null) throw new IllegalArgumentException("URI cannot be null");
 
         this.uriInfo = uriInfo;
         this.request = request;
         this.servletConfig = servletConfig;
         this.mediaTypes = mediaTypes;
+        this.uri = uri;
         this.response = com.atomgraph.core.model.impl.Response.fromRequest(request);
         if (log.isDebugEnabled()) log.debug("Request URI: {}", uriInfo.getRequestUri());        
     }
@@ -152,7 +160,7 @@ public abstract class ResourceBase implements Resource
     @Override
     public final URI getURI()
     {
-	return getUriInfo().getAbsolutePath();
+        return uri;
     }
 
     /**

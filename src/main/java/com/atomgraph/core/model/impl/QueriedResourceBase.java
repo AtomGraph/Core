@@ -71,9 +71,15 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletConfig servletConfig, @Context MediaTypes mediaTypes,
             @Context Application application, @Context SPARQLEndpoint sparqlEndpoint, @Context GraphStore graphStore)
     {
-	super(uriInfo, request, servletConfig, mediaTypes);
-	if (application == null) throw new IllegalArgumentException("Application cannot be null");
-	this.application = application;
+        this(uriInfo, request, servletConfig, mediaTypes, uriInfo.getAbsolutePath(), application, sparqlEndpoint, graphStore);
+    }
+
+    protected QueriedResourceBase(UriInfo uriInfo, Request request, ServletConfig servletConfig, MediaTypes mediaTypes, URI uri,
+            Application application, SPARQLEndpoint sparqlEndpoint, GraphStore graphStore)            
+    {
+        super(uriInfo, request, servletConfig, mediaTypes, uri);
+        if (application == null) throw new IllegalArgumentException("Application cannot be null");
+        this.application = application;
         this.sparqlEndpoint = sparqlEndpoint;
         this.graphStore = graphStore;
     }
