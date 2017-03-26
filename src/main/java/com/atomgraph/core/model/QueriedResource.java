@@ -35,14 +35,6 @@ public interface QueriedResource
      * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#construct">CONSTRUCT</a>
      */
     Query getQuery();
-    
-    /**
-     * Returns SPARQL query endpoint that the query was executed on.
-     * 
-     * @return endpoint resource
-     * @see SPARQLEndpoint
-     */
-    //SPARQLEndpoint getSPARQLEndpoint();
 
     /**
      * Returns RDF description of this resource. It is retrieved by executing the query on the SPARQL endpoint.

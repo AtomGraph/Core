@@ -32,6 +32,10 @@ import javax.ws.rs.core.Response;
 public interface Resource
 {
 
+    /**
+     * Returns URI of the resource.
+     * @return absolute path (excludes the query string)
+     */
     public URI getURI();
     
     /**
