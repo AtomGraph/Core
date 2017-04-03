@@ -50,13 +50,11 @@ public class DataManagerProvider extends PerRequestTypeInjectableProvider<Contex
     
     public final boolean preemptiveAuth;
     
-    public DataManagerProvider(ServletConfig servletConfig)
+    public DataManagerProvider(boolean preemptiveAuth)
     {
         super(DataManager.class);
         
-        if (servletConfig.getInitParameter(A.preemptiveAuth.getURI()) != null)
-            preemptiveAuth = Boolean.parseBoolean(servletConfig.getInitParameter(A.preemptiveAuth.getURI()));
-        else preemptiveAuth = false;
+        this.preemptiveAuth = preemptiveAuth;
     }
 
     @Override

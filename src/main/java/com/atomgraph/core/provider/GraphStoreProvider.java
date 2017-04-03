@@ -20,7 +20,6 @@ package com.atomgraph.core.provider;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
-import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.ext.ContextResolver;
@@ -47,23 +46,15 @@ public class GraphStoreProvider extends PerRequestTypeInjectableProvider<Context
     
     @Context Request request;
     @Context Providers providers;
-    
-    private final ServletConfig servletConfig;
-    
-    public GraphStoreProvider(ServletConfig servletConfig)
+        
+    public GraphStoreProvider()
     {
 	super(GraphStore.class);
-        this.servletConfig = servletConfig;
     }
 
     public Request getRequest()
     {
         return request;
-    }
-
-    public ServletConfig getServletConfig()
-    {
-        return servletConfig;
     }
     
     public Providers getProviders()

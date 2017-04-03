@@ -19,7 +19,6 @@ package com.atomgraph.core.provider;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
-import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.ext.ContextResolver;
@@ -46,13 +45,10 @@ public class SPARQLEndpointProvider extends PerRequestTypeInjectableProvider<Con
 
     @Context Request request;
     @Context Providers providers;
-    
-    private final ServletConfig servletConfig;
-    
-    public SPARQLEndpointProvider(ServletConfig servletConfig)
+        
+    public SPARQLEndpointProvider()
     {
 	super(SPARQLEndpoint.class);        
-        this.servletConfig = servletConfig;
     }
     
     public Providers getProviders()
@@ -63,11 +59,6 @@ public class SPARQLEndpointProvider extends PerRequestTypeInjectableProvider<Con
     public Request getRequest()
     {
         return request;
-    }
-
-    public ServletConfig getServletConfig()
-    {
-        return servletConfig;
     }
 
     public Dataset getDataset()

@@ -43,7 +43,7 @@ public class ApplicationProvider extends PerRequestTypeInjectableProvider<Contex
     
     @Context Providers providers;
 
-    public ApplicationProvider(ServletConfig servletConfig)
+    public ApplicationProvider()
     {
 	super(Application.class);
     }

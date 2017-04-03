@@ -16,6 +16,7 @@
  */
 package com.atomgraph.core;
 
+import com.atomgraph.core.exception.ConfigurationException;
 import com.atomgraph.core.io.ResultSetProvider;
 import com.atomgraph.core.provider.DataManagerProvider;
 import com.atomgraph.core.io.ModelProvider;
@@ -28,6 +29,7 @@ import javax.ws.rs.core.Context;
 import org.apache.jena.riot.RDFParserRegistry;
 import com.atomgraph.core.mapper.ClientExceptionMapper;
 import com.atomgraph.core.mapper.NotFoundExceptionMapper;
+import com.atomgraph.core.model.Service;
 import com.atomgraph.core.model.impl.proxy.GraphStoreBase;
 import com.atomgraph.core.model.impl.QueriedResourceBase;
 import com.atomgraph.core.model.impl.proxy.SPARQLEndpointBase;
@@ -41,7 +43,14 @@ import com.atomgraph.core.provider.SPARQLEndpointProvider;
 import com.atomgraph.core.provider.ServiceProvider;
 import com.atomgraph.core.riot.RDFLanguages;
 import com.atomgraph.core.riot.lang.RDFPostReaderFactory;
+import com.atomgraph.core.vocabulary.A;
+import com.atomgraph.core.vocabulary.SD;
 import javax.annotation.PostConstruct;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.query.DatasetFactory;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.riot.RDFDataMgr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +71,9 @@ public class Application extends javax.ws.rs.core.Application
     private final Set<Class<?>> classes = new HashSet<>();
     private final Set<Object> singletons = new HashSet<>();
 
-    private final ServletConfig servletConfig;
+    private final Dataset dataset;
+    private final Service service;
+    private final boolean preemptiveAuth;
 
     /**
      * Initializes root resource classes and provider singletons
@@ -71,12 +82,51 @@ public class Application extends javax.ws.rs.core.Application
      */
     public Application(@Context ServletConfig servletConfig)
     {
-        if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
-        this.servletConfig = servletConfig;
-
+        this(
+            servletConfig.getInitParameter(A.dataset.getURI()) != null ? servletConfig.getInitParameter(A.dataset.getURI()) : null,
+            servletConfig.getInitParameter(SD.endpoint.getURI()) != null ? servletConfig.getInitParameter(SD.endpoint.getURI()) : null,
+            servletConfig.getInitParameter(A.graphStore.getURI()) != null ? servletConfig.getInitParameter(A.graphStore.getURI()) : null,
+            servletConfig.getInitParameter(org.apache.jena.sparql.engine.http.Service.queryAuthUser.getSymbol()) != null ? servletConfig.getInitParameter(org.apache.jena.sparql.engine.http.Service.queryAuthUser.getSymbol()) : null,
+            servletConfig.getInitParameter(org.apache.jena.sparql.engine.http.Service.queryAuthPwd.getSymbol()) != null ? servletConfig.getInitParameter(org.apache.jena.sparql.engine.http.Service.queryAuthPwd.getSymbol()) : null,
+            servletConfig.getInitParameter(A.preemptiveAuth.getURI()) != null ? Boolean.parseBoolean(servletConfig.getInitParameter(A.preemptiveAuth.getURI())) : false
+        );
+    }
+    
+    public Application(final String datasetLocation, final String endpointURI, final String graphStoreURI,
+            final String authUser, final String authPwd,
+            final boolean preemptiveAuth)
+    {
+        this.preemptiveAuth = preemptiveAuth;
+        
         // add RDF/POST serialization
         RDFLanguages.register(RDFLanguages.RDFPOST);
         RDFParserRegistry.registerLangTriples(RDFLanguages.RDFPOST, new RDFPostReaderFactory());
+        
+        // initialize Service either from Dataset location or SPARQL endpoint URI
+        if (datasetLocation != null)
+        {
+            dataset = DatasetFactory.createTxnMem();
+            // no base URI at this point, dataset URIs must be absolute            
+            RDFDataMgr.read(dataset, datasetLocation, null);
+            service = new com.atomgraph.core.model.impl.dataset.ServiceImpl(dataset);            
+        }
+        else
+        {
+            dataset = null;
+            if (endpointURI == null)
+            {
+                if (log.isErrorEnabled()) log.error("SPARQL endpoint not configured ('{}' not set in web.xml)", SD.endpoint.getURI());
+                throw new ConfigurationException(SD.endpoint);
+            }
+            final Resource endpoint = ResourceFactory.createResource(endpointURI);
+            if (graphStoreURI == null)
+            {
+                if (log.isErrorEnabled()) log.error("Graph Store not configured ('{}' not set in web.xml)", A.graphStore.getURI());
+                throw new ConfigurationException(A.graphStore);
+            }
+            final Resource graphStore = ResourceFactory.createResource(graphStoreURI);
+            service = new com.atomgraph.core.model.impl.proxy.ServiceImpl(endpoint, graphStore, authUser, authPwd);
+        }
     }
     
     @PostConstruct
@@ -91,12 +141,12 @@ public class Application extends javax.ws.rs.core.Application
         singletons.add(new ResultSetProvider());
 	singletons.add(new QueryParamProvider());
 	singletons.add(new UpdateRequestReader());
-        singletons.add(new DataManagerProvider(getServletConfig()));
-	singletons.add(new ApplicationProvider(getServletConfig()));
-	singletons.add(new ServiceProvider(getServletConfig()));
-        singletons.add(new SPARQLEndpointProvider(getServletConfig()));
-        singletons.add(new GraphStoreProvider(getServletConfig()));
-	singletons.add(new com.atomgraph.core.provider.DatasetProvider());
+        singletons.add(new DataManagerProvider(isPreemptiveAuth()));
+	singletons.add(new ApplicationProvider());
+	singletons.add(new ServiceProvider(getService()));
+        singletons.add(new SPARQLEndpointProvider());
+        singletons.add(new GraphStoreProvider());
+	singletons.add(new com.atomgraph.core.provider.DatasetProvider(getDataset()));
 	singletons.add(new SPARQLClientProvider());
 	singletons.add(new GraphStoreClientProvider());
         singletons.add(new ClientProvider());        
@@ -131,14 +181,19 @@ public class Application extends javax.ws.rs.core.Application
 	return singletons;
     }
 
-    /**
-     * Returns servlet configuration.
-     * 
-     * @return servlet config
-     */
-    public ServletConfig getServletConfig()
+    public Dataset getDataset()
     {
-	return servletConfig;
+        return dataset;
+    }
+    
+    public Service getService()
+    {
+        return service;
+    }
+    
+    public boolean isPreemptiveAuth()
+    {
+        return preemptiveAuth;
     }
 
 }

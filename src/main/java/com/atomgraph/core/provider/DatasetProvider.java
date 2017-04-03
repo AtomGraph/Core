@@ -15,15 +15,12 @@
  */
 package com.atomgraph.core.provider;
 
-import com.atomgraph.core.model.DatasetService;
-import com.atomgraph.core.model.Service;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
-import javax.ws.rs.ext.Providers;
 import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,11 +35,13 @@ public class DatasetProvider extends PerRequestTypeInjectableProvider<Context, D
     
     private static final Logger log = LoggerFactory.getLogger(SPARQLClientProvider.class);
     
-    @Context Providers providers;
+    private final Dataset dataset;
 
-    public DatasetProvider()
+    public DatasetProvider(Dataset dataset)
     {
         super(Dataset.class);
+        
+        this.dataset = dataset;
     }
     
     @Override
@@ -66,26 +65,7 @@ public class DatasetProvider extends PerRequestTypeInjectableProvider<Context, D
     
     public Dataset getDataset()
     {
-        if (!(getService() instanceof DatasetService)) return null;
-        
-        return getDataset((DatasetService)getService());
-    }
-    
-    public Dataset getDataset(DatasetService service)
-    {
-        if (service == null) throw new IllegalArgumentException("DatasetService must be not null");
-        
-        return service.getDataset();
-    }
-    
-    public Service getService()
-    {
-	return getProviders().getContextResolver(Service.class, null).getContext(Service.class);
-    }
-    
-    public Providers getProviders()
-    {
-        return providers;
+        return dataset;
     }
     
 }
