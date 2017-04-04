@@ -50,6 +50,7 @@ import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +84,7 @@ public class Application extends javax.ws.rs.core.Application
     public Application(@Context ServletConfig servletConfig)
     {
         this(
-            servletConfig.getInitParameter(A.dataset.getURI()) != null ? servletConfig.getInitParameter(A.dataset.getURI()) : null,
+            servletConfig.getInitParameter(A.dataset.getURI()) != null ? getDataset(servletConfig.getInitParameter(A.dataset.getURI()), null) : null,
             servletConfig.getInitParameter(SD.endpoint.getURI()) != null ? servletConfig.getInitParameter(SD.endpoint.getURI()) : null,
             servletConfig.getInitParameter(A.graphStore.getURI()) != null ? servletConfig.getInitParameter(A.graphStore.getURI()) : null,
             servletConfig.getInitParameter(org.apache.jena.sparql.engine.http.Service.queryAuthUser.getSymbol()) != null ? servletConfig.getInitParameter(org.apache.jena.sparql.engine.http.Service.queryAuthUser.getSymbol()) : null,
@@ -92,27 +93,20 @@ public class Application extends javax.ws.rs.core.Application
         );
     }
     
-    public Application(final String datasetLocation, final String endpointURI, final String graphStoreURI,
-            final String authUser, final String authPwd,
+    public Application(final Dataset dataset,
+            final String endpointURI, final String graphStoreURI, final String authUser, final String authPwd,
             final boolean preemptiveAuth)
     {
+        this.dataset = dataset;
         this.preemptiveAuth = preemptiveAuth;
         
         // add RDF/POST serialization
         RDFLanguages.register(RDFLanguages.RDFPOST);
         RDFParserRegistry.registerLangTriples(RDFLanguages.RDFPOST, new RDFPostReaderFactory());
         
-        // initialize Service either from Dataset location or SPARQL endpoint URI
-        if (datasetLocation != null)
-        {
-            dataset = DatasetFactory.createTxnMem();
-            // no base URI at this point, dataset URIs must be absolute            
-            RDFDataMgr.read(dataset, datasetLocation, null);
-            service = new com.atomgraph.core.model.impl.dataset.ServiceImpl(dataset);            
-        }
+        if (dataset != null) service = new com.atomgraph.core.model.impl.dataset.ServiceImpl(dataset);            
         else
         {
-            dataset = null;
             if (endpointURI == null)
             {
                 if (log.isErrorEnabled()) log.error("SPARQL endpoint not configured ('{}' not set in web.xml)", SD.endpoint.getURI());
@@ -132,23 +126,23 @@ public class Application extends javax.ws.rs.core.Application
     @PostConstruct
     public void init()
     {
-	classes.add(QueriedResourceBase.class); // handles all
-	classes.add(SPARQLEndpointBase.class); // handles /sparql queries
-	classes.add(GraphStoreBase.class); // handles /service requests
+        classes.add(QueriedResourceBase.class); // handles all
+        classes.add(SPARQLEndpointBase.class); // handles /sparql queries
+        classes.add(GraphStoreBase.class); // handles /service requests
 
-	singletons.add(new ModelProvider());
-	singletons.add(new com.atomgraph.core.io.DatasetProvider());
+        singletons.add(new ModelProvider());
+        singletons.add(new com.atomgraph.core.io.DatasetProvider());
         singletons.add(new ResultSetProvider());
-	singletons.add(new QueryParamProvider());
-	singletons.add(new UpdateRequestReader());
+        singletons.add(new QueryParamProvider());
+        singletons.add(new UpdateRequestReader());
         singletons.add(new DataManagerProvider(isPreemptiveAuth()));
-	singletons.add(new ApplicationProvider());
-	singletons.add(new ServiceProvider(getService()));
+        singletons.add(new ApplicationProvider());
+        singletons.add(new ServiceProvider(getService()));
         singletons.add(new SPARQLEndpointProvider());
         singletons.add(new GraphStoreProvider());
-	singletons.add(new com.atomgraph.core.provider.DatasetProvider(getDataset()));
-	singletons.add(new SPARQLClientProvider());
-	singletons.add(new GraphStoreClientProvider());
+        singletons.add(new com.atomgraph.core.provider.DatasetProvider(getDataset()));
+        singletons.add(new SPARQLClientProvider());
+        singletons.add(new GraphStoreClientProvider());
         singletons.add(new ClientProvider());        
         singletons.add(new MediaTypesProvider());
         singletons.add(new ClientExceptionMapper());        
@@ -164,7 +158,7 @@ public class Application extends javax.ws.rs.core.Application
      */
     @Override
     public Set<Class<?>> getClasses()
-    {	
+    {        
         return classes;
     }
 
@@ -178,7 +172,7 @@ public class Application extends javax.ws.rs.core.Application
     @Override
     public Set<Object> getSingletons()
     {
-	return singletons;
+        return singletons;
     }
 
     public Dataset getDataset()
@@ -196,4 +190,11 @@ public class Application extends javax.ws.rs.core.Application
         return preemptiveAuth;
     }
 
+    public static Dataset getDataset(String location, Lang lang)
+    {
+        Dataset dataset = DatasetFactory.createTxnMem();
+        RDFDataMgr.read(dataset, location, lang);
+        return dataset;
+    }
+    
 }
