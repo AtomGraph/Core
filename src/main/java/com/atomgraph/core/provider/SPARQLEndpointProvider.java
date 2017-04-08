@@ -23,7 +23,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
-import javax.ws.rs.ext.Providers;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.model.SPARQLEndpoint;
 import org.slf4j.Logger;
@@ -44,16 +43,17 @@ public class SPARQLEndpointProvider extends PerRequestTypeInjectableProvider<Con
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointProvider.class);
 
     @Context Request request;
-    @Context Providers providers;
-        
-    public SPARQLEndpointProvider()
-    {
-	super(SPARQLEndpoint.class);        
-    }
+
+    private final Dataset dataset;
+    private final MediaTypes mediaTypes;
+    private final SPARQLClient sparqlClient;
     
-    public Providers getProviders()
+    public SPARQLEndpointProvider(final MediaTypes mediaTypes, final Dataset dataset, final SPARQLClient sparqlClient)
     {
-        return providers;
+	super(SPARQLEndpoint.class);
+        this.mediaTypes = mediaTypes;
+        this.dataset = dataset;
+        this.sparqlClient = sparqlClient;
     }
 
     public Request getRequest()
@@ -63,17 +63,17 @@ public class SPARQLEndpointProvider extends PerRequestTypeInjectableProvider<Con
 
     public Dataset getDataset()
     {
-	return getProviders().getContextResolver(Dataset.class, null).getContext(Dataset.class);
+	return dataset;
     }
     
     public MediaTypes getMediaTypes()
     {
-	return getProviders().getContextResolver(MediaTypes.class, null).getContext(MediaTypes.class);
+	return mediaTypes;
     }
-    
+
     public SPARQLClient getSPARQLClient()
     {
-	return getProviders().getContextResolver(SPARQLClient.class, null).getContext(SPARQLClient.class);
+	return sparqlClient;
     }
         
     @Override

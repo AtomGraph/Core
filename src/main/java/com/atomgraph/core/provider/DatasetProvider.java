@@ -37,7 +37,7 @@ public class DatasetProvider extends PerRequestTypeInjectableProvider<Context, D
     
     private final Dataset dataset;
 
-    public DatasetProvider(Dataset dataset)
+    public DatasetProvider(final Dataset dataset)
     {
         super(Dataset.class);
         

@@ -37,10 +37,9 @@ public class ServiceProvider extends PerRequestTypeInjectableProvider<Context, S
     
     private final Service service;
     
-    public ServiceProvider(Service service)
+    public ServiceProvider(final Service service)
     {
 	super(Service.class);
-        
         this.service = service;
     }
     

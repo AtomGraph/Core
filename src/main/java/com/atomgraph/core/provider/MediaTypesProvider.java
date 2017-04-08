@@ -36,9 +36,13 @@ public class MediaTypesProvider extends PerRequestTypeInjectableProvider<Context
 
     private static final Logger log = LoggerFactory.getLogger(MediaTypesProvider.class);
     
-    public MediaTypesProvider()
+    private final MediaTypes mediaTypes;
+    
+    public MediaTypesProvider(final MediaTypes mediaTypes)
     {
         super(MediaTypes.class);
+        
+        this.mediaTypes = mediaTypes;
     }
 
     @Override
@@ -62,7 +66,7 @@ public class MediaTypesProvider extends PerRequestTypeInjectableProvider<Context
     
     public MediaTypes getMediaTypes()
     {
-        return new MediaTypes();
+        return mediaTypes;
     }
 
 }

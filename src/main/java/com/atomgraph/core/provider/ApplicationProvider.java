@@ -16,17 +16,13 @@
 package com.atomgraph.core.provider;
 
 import com.atomgraph.core.model.Application;
-import com.atomgraph.core.model.Service;
-import com.atomgraph.core.model.impl.ApplicationImpl;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
 import com.sun.jersey.spi.resource.Singleton;
-import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
-import javax.ws.rs.ext.Providers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,11 +37,12 @@ public class ApplicationProvider extends PerRequestTypeInjectableProvider<Contex
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationProvider.class);
     
-    @Context Providers providers;
-
-    public ApplicationProvider()
+    private final Application application;
+    
+    public ApplicationProvider(final Application application)
     {
 	super(Application.class);
+        this.application = application;
     }
     
     @Override
@@ -69,22 +66,7 @@ public class ApplicationProvider extends PerRequestTypeInjectableProvider<Contex
     
     public Application getApplication()
     {
-        return getApplication(getService());
-    }
-    
-    public Application getApplication(Service service)
-    {
-        return new ApplicationImpl(service);
-    }
-    
-    public Service getService()
-    {
-	return getProviders().getContextResolver(Service.class, null).getContext(Service.class);
-    }
-    
-    public Providers getProviders()
-    {
-        return providers;
+        return application;
     }
     
 }

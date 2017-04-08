@@ -17,19 +17,13 @@
 
 package com.atomgraph.core.provider;
 
-import org.apache.jena.util.LocationMapper;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
-import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
-import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.util.jena.DataManager;
-import com.atomgraph.core.vocabulary.A;
-import com.sun.jersey.api.client.Client;
-import javax.ws.rs.ext.Providers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,15 +40,13 @@ public class DataManagerProvider extends PerRequestTypeInjectableProvider<Contex
 
     private static final Logger log = LoggerFactory.getLogger(DataManagerProvider.class);
 
-    @Context Providers providers;
-    
-    public final boolean preemptiveAuth;
-    
-    public DataManagerProvider(boolean preemptiveAuth)
+    private final DataManager dataManager;
+        
+    public DataManagerProvider(final DataManager dataManager)
     {
         super(DataManager.class);
         
-        this.preemptiveAuth = preemptiveAuth;
+        this.dataManager = dataManager;
     }
 
     @Override
@@ -82,27 +74,7 @@ public class DataManagerProvider extends PerRequestTypeInjectableProvider<Contex
      */
     public DataManager getDataManager()
     {
-        return new DataManager(LocationMapper.get(), getClient(), getMediaTypes(), getPreemptiveAuth());
-    }
-    
-    public Client getClient()
-    {
-	return getProviders().getContextResolver(Client.class, null).getContext(Client.class);
-    }
-    
-    public MediaTypes getMediaTypes()
-    {
-	return getProviders().getContextResolver(MediaTypes.class, null).getContext(MediaTypes.class);
-    }
- 
-    public Providers getProviders()
-    {
-        return providers;
-    }
-
-    public boolean getPreemptiveAuth()
-    {
-        return preemptiveAuth;
+        return dataManager;
     }
     
 }

@@ -24,7 +24,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
-import javax.ws.rs.ext.Providers;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.GraphStoreClient;
 import com.atomgraph.core.model.GraphStore;
@@ -45,11 +44,17 @@ public class GraphStoreProvider extends PerRequestTypeInjectableProvider<Context
     private static final Logger log = LoggerFactory.getLogger(GraphStoreProvider.class);
     
     @Context Request request;
-    @Context Providers providers;
+    
+    private final Dataset dataset;
+    private final MediaTypes mediaTypes;
+    private final GraphStoreClient graphStoreClient;
         
-    public GraphStoreProvider()
+    public GraphStoreProvider(final MediaTypes mediaTypes, final Dataset dataset, final GraphStoreClient graphStoreClient)
     {
 	super(GraphStore.class);
+        this.dataset = dataset;
+        this.mediaTypes = mediaTypes;
+        this.graphStoreClient = graphStoreClient;
     }
 
     public Request getRequest()
@@ -57,24 +62,19 @@ public class GraphStoreProvider extends PerRequestTypeInjectableProvider<Context
         return request;
     }
     
-    public Providers getProviders()
-    {
-        return providers;
-    }
-    
     public Dataset getDataset()
     {
-	return getProviders().getContextResolver(Dataset.class, null).getContext(Dataset.class);
+	return dataset;
     }
     
     public MediaTypes getMediaTypes()
     {
-	return getProviders().getContextResolver(MediaTypes.class, null).getContext(MediaTypes.class);
+	return mediaTypes;
     }
 
     public GraphStoreClient getGraphStoreClient()
     {
-	return getProviders().getContextResolver(GraphStoreClient.class, null).getContext(GraphStoreClient.class);
+	return graphStoreClient;
     }
 
     @Override
