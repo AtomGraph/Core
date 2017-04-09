@@ -20,7 +20,6 @@ import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
 import java.net.URI;
-import javax.servlet.ServletConfig;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
@@ -28,12 +27,11 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.exception.NotFoundException;
-import com.atomgraph.core.model.Application;
 import com.atomgraph.core.model.GraphStore;
 import com.atomgraph.core.model.QueriedResource;
 import com.atomgraph.core.model.SPARQLEndpoint;
+import javax.ws.rs.core.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +47,6 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
 {
     private static final Logger log = LoggerFactory.getLogger(QueriedResourceBase.class);
     
-    private final Application application;
     private final SPARQLEndpoint sparqlEndpoint;
     private final GraphStore graphStore;
     
@@ -57,29 +54,30 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
      * JAX-RS-compatible resource constructor with injected initialization objects.
      * The URI of the resource being created is the absolute path of the current request URI.
      * 
+     * @param application application
      * @param uriInfo URI information of the request
      * @param request current request object
-     * @param servletConfig webapp context
-     * @param mediaTypes supported media types
-     * @param application application
      * @param sparqlEndpoint SPARQL endpoint
      * @param graphStore Graph Store
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html">JAX-RS UriInfo</a>
      * @see <a href="http://docs.oracle.com/javaee/7/api/javax/servlet/ServletContext.html">ServletContext</a>
      * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceContext.html">Jersey ResourceContext</a>
      */
-    public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletConfig servletConfig, @Context MediaTypes mediaTypes,
-            @Context Application application, @Context SPARQLEndpoint sparqlEndpoint, @Context GraphStore graphStore)
+    public QueriedResourceBase(@Context Application application, @Context UriInfo uriInfo, @Context Request request,
+            @Context SPARQLEndpoint sparqlEndpoint, @Context GraphStore graphStore)
     {
-        this(uriInfo, request, servletConfig, mediaTypes, uriInfo.getAbsolutePath(), application, sparqlEndpoint, graphStore);
+        this((com.atomgraph.core.Application)application, (com.atomgraph.core.Application)application, 
+                uriInfo, request, uriInfo.getAbsolutePath(), sparqlEndpoint, graphStore);
     }
 
-    protected QueriedResourceBase(UriInfo uriInfo, Request request, ServletConfig servletConfig, MediaTypes mediaTypes, URI uri,
-            Application application, SPARQLEndpoint sparqlEndpoint, GraphStore graphStore)            
+    protected QueriedResourceBase(final com.atomgraph.core.Application system, final com.atomgraph.core.model.Application application,
+            final UriInfo uriInfo, final Request request, final URI uri,
+            final SPARQLEndpoint sparqlEndpoint, final GraphStore graphStore)            
     {
-        super(uriInfo, request, servletConfig, mediaTypes, uri);
-        if (application == null) throw new IllegalArgumentException("Application cannot be null");
-        this.application = application;
+        super(system, application, uriInfo, request, uri);
+	if (sparqlEndpoint == null) throw new IllegalArgumentException("SPARQLEndpoint cannot be null");
+	if (graphStore == null) throw new IllegalArgumentException("GraphStore cannot be null");
+        
         this.sparqlEndpoint = sparqlEndpoint;
         this.graphStore = graphStore;
     }
@@ -200,11 +198,6 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     {
 	if (uri == null) throw new IllegalArgumentException("URI cannot be null");        
 	return QueryFactory.create("DESCRIBE <" + uri.toString() + ">");
-    }
-    
-    public Application getApplication()
-    {
-	return application;
     }
     
 }

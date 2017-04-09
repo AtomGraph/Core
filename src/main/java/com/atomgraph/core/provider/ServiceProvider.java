@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
 @Provider
+@Deprecated
 public class ServiceProvider extends PerRequestTypeInjectableProvider<Context, Service> implements ContextResolver<Service>
 {
     

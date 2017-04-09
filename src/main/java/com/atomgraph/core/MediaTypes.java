@@ -57,7 +57,12 @@ public class MediaTypes
     
     private final Map<Class, List<javax.ws.rs.core.MediaType>> readable, writable;
     
-    public MediaTypes(Map<Class, List<javax.ws.rs.core.MediaType>> readable, Map<Class, List<javax.ws.rs.core.MediaType>> writable)
+    public MediaTypes()
+    {
+        this(RDFLanguages.getRegisteredLanguages(), UTF8_PARAM);
+    }
+    
+    protected MediaTypes(Map<Class, List<javax.ws.rs.core.MediaType>> readable, Map<Class, List<javax.ws.rs.core.MediaType>> writable)
     {
 	if (readable == null) throw new IllegalArgumentException("Map of readable MediaTypes must be not null");        
 	if (writable == null) throw new IllegalArgumentException("Map of writable MediaTypes must be not null");        
@@ -65,13 +70,8 @@ public class MediaTypes
         this.readable = Collections.unmodifiableMap(readable);
         this.writable = Collections.unmodifiableMap(writable);
     }
-
-    public MediaTypes()
-    {
-        this(RDFLanguages.getRegisteredLanguages(), UTF8_PARAM);
-    }
     
-    public MediaTypes(Collection<Lang> registered, Map<String, String> parameters)
+    protected MediaTypes(Collection<Lang> registered, Map<String, String> parameters)
     {
 	if (registered == null) throw new IllegalArgumentException("Collection of Langs must be not null");        
         

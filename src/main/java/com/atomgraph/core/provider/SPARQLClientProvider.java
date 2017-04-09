@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
 @Provider
+@Deprecated
 public class SPARQLClientProvider extends PerRequestTypeInjectableProvider<Context, SPARQLClient> implements ContextResolver<SPARQLClient>
 {
     

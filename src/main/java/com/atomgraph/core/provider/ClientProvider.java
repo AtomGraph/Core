@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 @Provider
 @Singleton
+@Deprecated
 public class ClientProvider extends PerRequestTypeInjectableProvider<Context, Client> implements ContextResolver<Client>
 {
     private static final Logger log = LoggerFactory.getLogger(ClientProvider.class);

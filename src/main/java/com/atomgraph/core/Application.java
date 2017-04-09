@@ -61,6 +61,7 @@ import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
 import javax.annotation.PostConstruct;
+import javax.ws.rs.core.CacheControl;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Resource;
@@ -80,7 +81,7 @@ import org.slf4j.LoggerFactory;
  * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/Application.html">JAX-RS Application</a>
  * @see <a href="http://docs.oracle.com/cd/E24329_01/web.1211/e24983/configure.htm#CACEAEGG">Packaging the RESTful Web Service Application Using web.xml With Application Subclass</a>
  */
-public class Application extends javax.ws.rs.core.Application
+public class Application extends javax.ws.rs.core.Application implements com.atomgraph.core.model.Application
 {
 
     private static final Logger log = LoggerFactory.getLogger(Application.class);
@@ -98,11 +99,12 @@ public class Application extends javax.ws.rs.core.Application
     private final DataManager dataManager;
     private final Integer maxGetRequestSize;
     private final boolean preemptiveAuth;
+    private final CacheControl cacheControl;
 
     /**
      * Initializes root resource classes and provider singletons
      * 
-     * @param servletConfig filter config
+     * @param servletConfig servlet config
      */
     public Application(@Context ServletConfig servletConfig)
     {
@@ -112,19 +114,24 @@ public class Application extends javax.ws.rs.core.Application
             servletConfig.getInitParameter(A.graphStore.getURI()) != null ? servletConfig.getInitParameter(A.graphStore.getURI()) : null,
             servletConfig.getInitParameter(org.apache.jena.sparql.engine.http.Service.queryAuthUser.getSymbol()) != null ? servletConfig.getInitParameter(org.apache.jena.sparql.engine.http.Service.queryAuthUser.getSymbol()) : null,
             servletConfig.getInitParameter(org.apache.jena.sparql.engine.http.Service.queryAuthPwd.getSymbol()) != null ? servletConfig.getInitParameter(org.apache.jena.sparql.engine.http.Service.queryAuthPwd.getSymbol()) : null,
-            new MediaTypes(), null,
-            servletConfig.getInitParameter(A.preemptiveAuth.getURI()) != null ? Boolean.parseBoolean(servletConfig.getInitParameter(A.preemptiveAuth.getURI())) : false
+            new MediaTypes(), getClient(new DefaultClientConfig()),
+            servletConfig.getInitParameter(A.maxGetRequestSize.getURI()) != null ? Integer.parseInt(servletConfig.getInitParameter(A.maxGetRequestSize.getURI())) : null,
+            servletConfig.getInitParameter(A.preemptiveAuth.getURI()) != null ? Boolean.parseBoolean(servletConfig.getInitParameter(A.preemptiveAuth.getURI())) : false,
+            servletConfig.getInitParameter(A.cacheControl.getURI()) != null ? CacheControl.valueOf(servletConfig.getInitParameter(A.cacheControl.getURI())) : null
         );
     }
     
     public Application(final Dataset dataset,
             final String endpointURI, final String graphStoreURI, final String authUser, final String authPwd,
-            final MediaTypes mediaTypes, final Integer maxGetRequestSize, final boolean preemptiveAuth)
+            final MediaTypes mediaTypes, final Client client, final Integer maxGetRequestSize, final boolean preemptiveAuth,
+            final CacheControl cacheControl)
     {
         this.dataset = dataset;
         this.mediaTypes = mediaTypes;
         this.maxGetRequestSize = maxGetRequestSize;
         this.preemptiveAuth = preemptiveAuth;
+        this.client = client;
+        this.cacheControl = cacheControl;
         
         // add RDF/POST serialization
         RDFLanguages.register(RDFLanguages.RDFPOST);
@@ -132,7 +139,6 @@ public class Application extends javax.ws.rs.core.Application
         
         if (dataset != null)
         {
-            client = null;
             sparqlClient = null;
             graphStoreClient = null;
             service = new com.atomgraph.core.model.impl.dataset.ServiceImpl(dataset);
@@ -152,17 +158,6 @@ public class Application extends javax.ws.rs.core.Application
             }
             final Resource graphStore = ResourceFactory.createResource(graphStoreURI);
             final RemoteService remoteService = new com.atomgraph.core.model.impl.proxy.ServiceImpl(endpoint, graphStore, authUser, authPwd);            
-        
-            ClientConfig clientConfig = new DefaultClientConfig();
-            clientConfig.getProperties().put(URLConnectionClientHandler.PROPERTY_HTTP_URL_CONNECTION_SET_METHOD_WORKAROUND, true);
-            clientConfig.getSingletons().add(new ModelProvider());
-            clientConfig.getSingletons().add(new DatasetProvider());
-            clientConfig.getSingletons().add(new ResultSetProvider());
-            clientConfig.getSingletons().add(new QueryWriter());
-            clientConfig.getSingletons().add(new UpdateRequestReader()); // TO-DO: UpdateRequestProvider
-
-            client = Client.create(clientConfig);
-            if (log.isDebugEnabled()) client.addFilter(new LoggingFilter(System.out));
 
             WebResource sparqlEndpointOrigin = client.resource(remoteService.getSPARQLEndpoint().getURI());            
             WebResource graphStoreOrigin = client.resource(remoteService.getGraphStore().getURI());            
@@ -181,7 +176,7 @@ public class Application extends javax.ws.rs.core.Application
         }
         
         application = new ApplicationImpl(service);
-        dataManager = new DataManager(LocationMapper.get(), client, mediaTypes, preemptiveAuth); // client == null?
+        dataManager = new DataManager(LocationMapper.get(), client, mediaTypes, preemptiveAuth);
     }
     
     @PostConstruct
@@ -199,8 +194,8 @@ public class Application extends javax.ws.rs.core.Application
         singletons.add(new DataManagerProvider(getDataManager()));
         singletons.add(new ApplicationProvider(getApplication()));
         singletons.add(new ServiceProvider(getService()));
-        singletons.add(new SPARQLEndpointProvider(getMediaTypes(), getDataset(), getSPARQLClient()));
-        singletons.add(new GraphStoreProvider(getMediaTypes(), getDataset(), getGraphStoreClient()));
+        singletons.add(new SPARQLEndpointProvider(this));
+        singletons.add(new GraphStoreProvider(this));
         singletons.add(new com.atomgraph.core.provider.DatasetProvider(getDataset()));
         singletons.add(new SPARQLClientProvider(getSPARQLClient()));
         singletons.add(new GraphStoreClientProvider(getGraphStoreClient()));
@@ -241,6 +236,7 @@ public class Application extends javax.ws.rs.core.Application
         return dataset;
     }
     
+    @Override
     public Service getService()
     {
         return service;
@@ -251,7 +247,7 @@ public class Application extends javax.ws.rs.core.Application
         return application;
     }
     
-    private Client getClient()
+    public Client getClient()
     {
         return client;
     }
@@ -286,11 +282,31 @@ public class Application extends javax.ws.rs.core.Application
         return preemptiveAuth;
     }
 
+    public CacheControl getCacheControl()
+    {
+        return cacheControl;
+    }
+    
     public static Dataset getDataset(String location, Lang lang)
     {
         Dataset dataset = DatasetFactory.createTxnMem();
         RDFDataMgr.read(dataset, location, lang);
         return dataset;
+    }
+    
+    public static Client getClient(ClientConfig clientConfig)
+    {
+        clientConfig.getProperties().put(URLConnectionClientHandler.PROPERTY_HTTP_URL_CONNECTION_SET_METHOD_WORKAROUND, true);
+        clientConfig.getSingletons().add(new ModelProvider());
+        clientConfig.getSingletons().add(new DatasetProvider());
+        clientConfig.getSingletons().add(new ResultSetProvider());
+        clientConfig.getSingletons().add(new QueryWriter());
+        clientConfig.getSingletons().add(new UpdateRequestReader()); // TO-DO: UpdateRequestProvider
+
+        Client client = Client.create(clientConfig);
+        if (log.isDebugEnabled()) client.addFilter(new LoggingFilter(System.out));
+        
+        return client;
     }
     
 }

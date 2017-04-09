@@ -21,8 +21,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import javax.annotation.PostConstruct;
-import javax.servlet.ServletConfig;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -33,7 +31,7 @@ import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Variant;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.model.Resource;
-import com.atomgraph.core.vocabulary.A;
+import javax.ws.rs.core.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,54 +45,44 @@ public abstract class ResourceBase implements Resource
 {
     private static final Logger log = LoggerFactory.getLogger(ResourceBase.class);
 
+    private final com.atomgraph.core.Application system;
+    private final com.atomgraph.core.model.Application application;    
     private final UriInfo uriInfo;
     private final Request request;
-    private final ServletConfig servletConfig;
-    private final MediaTypes mediaTypes;
     private final URI uri;
     private final com.atomgraph.core.model.impl.Response response;
-    private CacheControl cacheControl;
 
     /** 
      * JAX-RS-compatible resource constructor with injected request metadata.
      * The URI of the resource being created is the absolute path of the current request URI.
      * 
+     * @param application application
      * @param uriInfo URI information of the request
      * @param request current request object
-     * @param servletConfig webapp context
-     * @param mediaTypes supported media types
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html#getAbsolutePath()">JAX-RS UriInfo.getAbsolutePath()</a>
      */
-    public ResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context ServletConfig servletConfig,
-            @Context MediaTypes mediaTypes)            
+    public ResourceBase(@Context Application application, @Context UriInfo uriInfo, @Context Request request)
     {
-        this(uriInfo, request, servletConfig, mediaTypes, uriInfo.getAbsolutePath());
+        this((com.atomgraph.core.Application)application, (com.atomgraph.core.model.Application)application, 
+                uriInfo, request, uriInfo.getAbsolutePath());
     }
     
-    protected ResourceBase(UriInfo uriInfo, Request request, ServletConfig servletConfig, MediaTypes mediaTypes, URI uri)
+    protected ResourceBase(final com.atomgraph.core.Application system, final com.atomgraph.core.model.Application application,
+            final UriInfo uriInfo, final Request request, URI uri)
     {
-	if (uriInfo == null) throw new IllegalArgumentException("UriInfo cannot be null");
-	if (request == null) throw new IllegalArgumentException("Request cannot be null");
-	if (servletConfig == null) throw new IllegalArgumentException("ServletConfig cannot be null");
-	if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
-	if (uri == null) throw new IllegalArgumentException("URI cannot be null");
+        if (system == null) throw new IllegalArgumentException("Application cannot be null");
+        if (application == null) throw new IllegalArgumentException("Application cannot be null");
+        if (uriInfo == null) throw new IllegalArgumentException("UriInfo cannot be null");
+        if (request == null) throw new IllegalArgumentException("Request cannot be null");
+        if (uri == null) throw new IllegalArgumentException("URI cannot be null");
 
+        this.system = system;
+        this.application = application;
         this.uriInfo = uriInfo;
         this.request = request;
-        this.servletConfig = servletConfig;
-        this.mediaTypes = mediaTypes;
         this.uri = uri;
         this.response = com.atomgraph.core.model.impl.Response.fromRequest(request);
         if (log.isDebugEnabled()) log.debug("Request URI: {}", uriInfo.getRequestUri());        
-    }
-
-    /**
-     * Post-construct initialization. Subclasses need to call super.init() first, just like with super() constructor.
-     */
-    @PostConstruct
-    public void init()
-    {
-        this.cacheControl = getCacheControl(A.cacheControl);
     }
     
     /**
@@ -134,7 +122,7 @@ public abstract class ResourceBase implements Resource
         
     public MediaTypes getMediaTypes()
     {
-        return mediaTypes;
+        return getSystem().getMediaTypes();
     }
 
     public List<javax.ws.rs.core.MediaType> getWritableMediaTypes()
@@ -170,7 +158,7 @@ public abstract class ResourceBase implements Resource
      */
     public UriInfo getUriInfo()
     {
-	return uriInfo;
+        return uriInfo;
     }
 
     /**
@@ -180,22 +168,22 @@ public abstract class ResourceBase implements Resource
      */
     public Request getRequest()
     {
-	return request;
-    }
-
-    /**
-     * Returns config for this servlet (including parameters specified in web.xml).
-     * 
-     * @return webapp context
-     */
-    public ServletConfig getServletConfig()
-    {
-	return servletConfig;
+        return request;
     }
 
     public com.atomgraph.core.model.impl.Response getResponse()
     {
         return response;
+    }
+        
+    public com.atomgraph.core.Application getSystem()
+    {
+        return system;
+    }
+    
+    public com.atomgraph.core.model.Application getApplication()
+    {
+        return application;
     }
     
     /**
@@ -205,22 +193,7 @@ public abstract class ResourceBase implements Resource
      */
     public CacheControl getCacheControl()
     {
-        return cacheControl;
-    }
-
-    /**
-     * Returns <code>Cache-Control</code> header configuration for this resource
-     * 
-     * @param property cache control property
-     * @return cache control of this resource
-     */
-    public CacheControl getCacheControl(Property property)
-    {
-	if (property == null) throw new IllegalArgumentException("Property cannot be null");
-
-        if (getServletConfig().getInitParameter(property.getURI()) == null) return null;
-        
-        return CacheControl.valueOf(getServletConfig().getInitParameter(property.getURI()));
+        return getSystem().getCacheControl();
     }
     
 }

@@ -16,6 +16,7 @@
  */
 package com.atomgraph.core.provider;
 
+import com.atomgraph.core.Application;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
@@ -23,12 +24,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
-import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.model.SPARQLEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.atomgraph.core.client.SPARQLClient;
-import org.apache.jena.query.Dataset;
 
 /**
  * JAX-RS provider for SPARQL endpoint.
@@ -44,16 +42,12 @@ public class SPARQLEndpointProvider extends PerRequestTypeInjectableProvider<Con
 
     @Context Request request;
 
-    private final Dataset dataset;
-    private final MediaTypes mediaTypes;
-    private final SPARQLClient sparqlClient;
+    private final Application application;
     
-    public SPARQLEndpointProvider(final MediaTypes mediaTypes, final Dataset dataset, final SPARQLClient sparqlClient)
+    public SPARQLEndpointProvider(final Application application)
     {
 	super(SPARQLEndpoint.class);
-        this.mediaTypes = mediaTypes;
-        this.dataset = dataset;
-        this.sparqlClient = sparqlClient;
+        this.application = application;
     }
 
     public Request getRequest()
@@ -61,21 +55,11 @@ public class SPARQLEndpointProvider extends PerRequestTypeInjectableProvider<Con
         return request;
     }
 
-    public Dataset getDataset()
+    public Application getApplication()
     {
-	return dataset;
-    }
-    
-    public MediaTypes getMediaTypes()
-    {
-	return mediaTypes;
+	return application;
     }
 
-    public SPARQLClient getSPARQLClient()
-    {
-	return sparqlClient;
-    }
-        
     @Override
     public Injectable<SPARQLEndpoint> getInjectable(ComponentContext cc, Context context)
     {
@@ -97,9 +81,9 @@ public class SPARQLEndpointProvider extends PerRequestTypeInjectableProvider<Con
 
     public SPARQLEndpoint getSPARQLEndpoint()
     {
-        if (getDataset() != null) return new com.atomgraph.core.model.impl.dataset.SPARQLEndpointBase(getRequest(), getMediaTypes(), getDataset());
+        if (getApplication().getDataset() != null) return new com.atomgraph.core.model.impl.dataset.SPARQLEndpointBase(getApplication(), getRequest());
         
-        return new com.atomgraph.core.model.impl.proxy.SPARQLEndpointBase(getRequest(), getMediaTypes(), getSPARQLClient());
+        return new com.atomgraph.core.model.impl.proxy.SPARQLEndpointBase(getApplication(), getRequest());
     }
     
 }

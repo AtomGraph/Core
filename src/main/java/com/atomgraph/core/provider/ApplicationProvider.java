@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
  */
 @Provider
 @Singleton
+@Deprecated
 public class ApplicationProvider extends PerRequestTypeInjectableProvider<Context, Application> implements ContextResolver<Application>
 {
 

@@ -21,7 +21,7 @@ import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
-import com.atomgraph.core.MediaTypes;
+import javax.ws.rs.core.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,15 +35,10 @@ import org.slf4j.LoggerFactory;
 public class GraphStoreBase extends com.atomgraph.core.model.impl.GraphStoreBase
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreBase.class);
-
-    private final Dataset dataset;
         
-    public GraphStoreBase(@Context Request request, @Context MediaTypes mediaTypes,
-            @Context Dataset dataset)
+    public GraphStoreBase(@Context Application application, @Context Request request)
     {
-        super(request, mediaTypes);
-	if (dataset == null) throw new IllegalArgumentException("Dataset cannot be null");
-        this.dataset = dataset;
+        super(application, request);
     }
 
     @Override
@@ -100,9 +95,10 @@ public class GraphStoreBase extends com.atomgraph.core.model.impl.GraphStoreBase
         getDataset().addNamedModel(uri, model);
     }
 
+    
     public Dataset getDataset()
     {
-        return dataset;
+        return getApplication().getDataset();
     }
 
 }

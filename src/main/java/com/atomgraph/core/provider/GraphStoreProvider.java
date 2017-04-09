@@ -17,6 +17,7 @@
 
 package com.atomgraph.core.provider;
 
+import com.atomgraph.core.Application;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
@@ -24,10 +25,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
-import com.atomgraph.core.MediaTypes;
-import com.atomgraph.core.client.GraphStoreClient;
 import com.atomgraph.core.model.GraphStore;
-import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,16 +43,12 @@ public class GraphStoreProvider extends PerRequestTypeInjectableProvider<Context
     
     @Context Request request;
     
-    private final Dataset dataset;
-    private final MediaTypes mediaTypes;
-    private final GraphStoreClient graphStoreClient;
+    private final Application application;
         
-    public GraphStoreProvider(final MediaTypes mediaTypes, final Dataset dataset, final GraphStoreClient graphStoreClient)
+    public GraphStoreProvider(final Application application)
     {
 	super(GraphStore.class);
-        this.dataset = dataset;
-        this.mediaTypes = mediaTypes;
-        this.graphStoreClient = graphStoreClient;
+        this.application = application;
     }
 
     public Request getRequest()
@@ -62,19 +56,9 @@ public class GraphStoreProvider extends PerRequestTypeInjectableProvider<Context
         return request;
     }
     
-    public Dataset getDataset()
+    public Application getApplication()
     {
-	return dataset;
-    }
-    
-    public MediaTypes getMediaTypes()
-    {
-	return mediaTypes;
-    }
-
-    public GraphStoreClient getGraphStoreClient()
-    {
-	return graphStoreClient;
+	return application;
     }
 
     @Override
@@ -98,9 +82,9 @@ public class GraphStoreProvider extends PerRequestTypeInjectableProvider<Context
 
     public GraphStore getGraphStore()
     {
-        if (getDataset() != null) return new com.atomgraph.core.model.impl.dataset.GraphStoreBase(getRequest(), getMediaTypes(), getDataset());
+        if (getApplication().getDataset() != null) return new com.atomgraph.core.model.impl.dataset.GraphStoreBase(getApplication(), getRequest());
         
-        return new com.atomgraph.core.model.impl.proxy.GraphStoreBase(getRequest(), getMediaTypes(), getGraphStoreClient());
+        return new com.atomgraph.core.model.impl.proxy.GraphStoreBase(getApplication(), getRequest());
     }
 
 }
