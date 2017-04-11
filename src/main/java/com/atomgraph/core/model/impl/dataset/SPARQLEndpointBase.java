@@ -27,7 +27,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.update.UpdateRequest;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Application;
+import com.atomgraph.core.MediaTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,15 +42,21 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
 {
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointBase.class);
 
+    private final Dataset dataset;
+
     /**
      * JAX-RS-compatible resource constructor with injected initialization objects.
      * 
-     * @param application application
+     * @param dataset ontology of this webapp
+     * @param mediaTypes supported media types
      * @param request current request
      */
-    public SPARQLEndpointBase(@Context Application application, @Context Request request)
+    public SPARQLEndpointBase(@Context Request request, @Context MediaTypes mediaTypes,
+            @Context Dataset dataset)
     {
-	super(application, request);
+	super(request, mediaTypes);
+        if (dataset == null) throw new IllegalArgumentException("Dataset cannot be null");
+        this.dataset = dataset;
     }
     
     /**
@@ -191,7 +197,7 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
 
     public Dataset getDataset()
     {
-        return getApplication().getDataset();
+        return dataset;
     }
 
 }

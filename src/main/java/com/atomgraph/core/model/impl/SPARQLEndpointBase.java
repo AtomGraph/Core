@@ -46,24 +46,24 @@ import org.slf4j.LoggerFactory;
 public abstract class SPARQLEndpointBase implements SPARQLEndpoint
 {
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointBase.class);
-
-    private final com.atomgraph.core.Application application;
+    
     private final Request request;
+    private final MediaTypes mediaTypes;
     private final com.atomgraph.core.model.impl.Response response;
     
     /**
      * Constructs SPARQL endpoint from request metadata.
      * 
-     * @param application application
      * @param request current request
+     * @param mediaTypes supported media types
      */
-    public SPARQLEndpointBase(@Context Application application, @Context Request request)
+    public SPARQLEndpointBase(@Context Request request, @Context MediaTypes mediaTypes)
     {
-	if (application == null) throw new IllegalArgumentException("Application cannot be null");
-        if (request == null) throw new IllegalArgumentException("Request cannot be null");
+	if (request == null) throw new IllegalArgumentException("Request cannot be null");
+	if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
 
-        this.application = (com.atomgraph.core.Application)application;
 	this.request = request;
+        this.mediaTypes = mediaTypes;
         this.response = com.atomgraph.core.model.impl.Response.fromRequest(request);
 	if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase");        
     }
@@ -279,11 +279,6 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
 	return loadModel(query);
     }
 
-    public com.atomgraph.core.Application getApplication()
-    {
-        return (com.atomgraph.core.Application)application;
-    }
-    
     public Request getRequest()
     {
 	return request;
@@ -291,7 +286,7 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     
     public MediaTypes getMediaTypes()
     {
-        return getApplication().getMediaTypes();
+        return mediaTypes;
     }
     
     public com.atomgraph.core.model.impl.Response getResponse()

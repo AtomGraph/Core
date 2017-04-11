@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
 @Provider
-@Deprecated
 public class MediaTypesProvider extends PerRequestTypeInjectableProvider<Context, MediaTypes> implements ContextResolver<MediaTypes>
 {
 

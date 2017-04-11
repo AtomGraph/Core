@@ -21,7 +21,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
@@ -31,7 +30,6 @@ import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Variant;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.model.Resource;
-import javax.ws.rs.core.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,10 +43,9 @@ public abstract class ResourceBase implements Resource
 {
     private static final Logger log = LoggerFactory.getLogger(ResourceBase.class);
 
-    private final com.atomgraph.core.Application system;
-    private final com.atomgraph.core.model.Application application;    
     private final UriInfo uriInfo;
     private final Request request;
+    private final MediaTypes mediaTypes;    
     private final URI uri;
     private final com.atomgraph.core.model.impl.Response response;
 
@@ -56,30 +53,26 @@ public abstract class ResourceBase implements Resource
      * JAX-RS-compatible resource constructor with injected request metadata.
      * The URI of the resource being created is the absolute path of the current request URI.
      * 
-     * @param application application
      * @param uriInfo URI information of the request
      * @param request current request object
+     * @param mediaTypes media types
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html#getAbsolutePath()">JAX-RS UriInfo.getAbsolutePath()</a>
      */
-    public ResourceBase(@Context Application application, @Context UriInfo uriInfo, @Context Request request)
+    public ResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context MediaTypes mediaTypes)
     {
-        this((com.atomgraph.core.Application)application, (com.atomgraph.core.model.Application)application, 
-                uriInfo, request, uriInfo.getAbsolutePath());
+        this(uriInfo, request, mediaTypes, uriInfo.getAbsolutePath());
     }
     
-    protected ResourceBase(final com.atomgraph.core.Application system, final com.atomgraph.core.model.Application application,
-            final UriInfo uriInfo, final Request request, URI uri)
+    protected ResourceBase(final UriInfo uriInfo, final Request request, final MediaTypes mediaTypes, final URI uri)
     {
-        if (system == null) throw new IllegalArgumentException("Application cannot be null");
-        if (application == null) throw new IllegalArgumentException("Application cannot be null");
         if (uriInfo == null) throw new IllegalArgumentException("UriInfo cannot be null");
         if (request == null) throw new IllegalArgumentException("Request cannot be null");
+        if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
         if (uri == null) throw new IllegalArgumentException("URI cannot be null");
 
-        this.system = system;
-        this.application = application;
         this.uriInfo = uriInfo;
         this.request = request;
+        this.mediaTypes = mediaTypes;        
         this.uri = uri;
         this.response = com.atomgraph.core.model.impl.Response.fromRequest(request);
         if (log.isDebugEnabled()) log.debug("Request URI: {}", uriInfo.getRequestUri());        
@@ -105,8 +98,8 @@ public abstract class ResourceBase implements Resource
     public ResponseBuilder getResponseBuilder(Model model)
     {
         return com.atomgraph.core.model.impl.Response.fromRequest(getRequest()).
-                getResponseBuilder(model, getVariants(getWritableMediaTypes())).
-                cacheControl(getCacheControl());
+                getResponseBuilder(model, getVariants(getWritableMediaTypes()));
+                //cacheControl(getCacheControl());
     }
     
     /**
@@ -122,7 +115,7 @@ public abstract class ResourceBase implements Resource
         
     public MediaTypes getMediaTypes()
     {
-        return getSystem().getMediaTypes();
+        return mediaTypes;
     }
 
     public List<javax.ws.rs.core.MediaType> getWritableMediaTypes()
@@ -174,26 +167,6 @@ public abstract class ResourceBase implements Resource
     public com.atomgraph.core.model.impl.Response getResponse()
     {
         return response;
-    }
-        
-    public com.atomgraph.core.Application getSystem()
-    {
-        return system;
-    }
-    
-    public com.atomgraph.core.model.Application getApplication()
-    {
-        return application;
-    }
-    
-    /**
-     * Returns <pre>Cache-Control</pre> header value.
-     * 
-     * @return cache control object
-     */
-    public CacheControl getCacheControl()
-    {
-        return getSystem().getCacheControl();
     }
     
 }

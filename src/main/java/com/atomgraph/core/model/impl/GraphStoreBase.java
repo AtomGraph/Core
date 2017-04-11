@@ -42,22 +42,23 @@ public abstract class GraphStoreBase implements GraphStore
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreBase.class);
 
-    private final com.atomgraph.core.Application application;
     private final Request request;
+    private final MediaTypes mediaTypes;
     private final com.atomgraph.core.model.impl.Response response;
     
     /**
      * Constructs Graph Store from request metadata.
      * 
-     * @param application application
      * @param request request
+     * @param mediaTypes
      */
-    public GraphStoreBase(@Context Application application, @Context Request request)
+    public GraphStoreBase(@Context Request request, @Context MediaTypes mediaTypes)
     {
-	if (application == null) throw new IllegalArgumentException("Application cannot be null");        
 	if (request == null) throw new IllegalArgumentException("Request cannot be null");
-        this.application = (com.atomgraph.core.Application)application;
+	if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
+	
 	this.request = request;
+        this.mediaTypes = mediaTypes;
         this.response = com.atomgraph.core.model.impl.Response.fromRequest(request);        
     }
     
@@ -255,11 +256,6 @@ public abstract class GraphStoreBase implements GraphStore
 	}
     }
 
-    public com.atomgraph.core.Application getApplication()
-    {
-        return application;
-    }
-    
     public Request getRequest()
     {
 	return request;
@@ -267,7 +263,7 @@ public abstract class GraphStoreBase implements GraphStore
     
     public MediaTypes getMediaTypes()
     {
-        return getApplication().getMediaTypes();
+        return mediaTypes;
     }
     
     public com.atomgraph.core.model.impl.Response getResponse()

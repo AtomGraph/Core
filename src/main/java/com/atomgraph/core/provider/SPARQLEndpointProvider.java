@@ -16,7 +16,6 @@
  */
 package com.atomgraph.core.provider;
 
-import com.atomgraph.core.Application;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
@@ -24,9 +23,13 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
+import javax.ws.rs.ext.Providers;
+import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.model.SPARQLEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.atomgraph.core.client.SPARQLClient;
+import org.apache.jena.query.Dataset;
 
 /**
  * JAX-RS provider for SPARQL endpoint.
@@ -41,13 +44,16 @@ public class SPARQLEndpointProvider extends PerRequestTypeInjectableProvider<Con
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointProvider.class);
 
     @Context Request request;
-
-    private final Application application;
+    @Context Providers providers;
     
-    public SPARQLEndpointProvider(final Application application)
+    public SPARQLEndpointProvider()
     {
-	super(SPARQLEndpoint.class);
-        this.application = application;
+	super(SPARQLEndpoint.class);        
+    }
+    
+    public Providers getProviders()
+    {
+        return providers;
     }
 
     public Request getRequest()
@@ -55,11 +61,21 @@ public class SPARQLEndpointProvider extends PerRequestTypeInjectableProvider<Con
         return request;
     }
 
-    public Application getApplication()
+    public Dataset getDataset()
     {
-	return application;
+	return getProviders().getContextResolver(Dataset.class, null).getContext(Dataset.class);
     }
-
+    
+    public MediaTypes getMediaTypes()
+    {
+	return getProviders().getContextResolver(MediaTypes.class, null).getContext(MediaTypes.class);
+    }
+    
+    public SPARQLClient getSPARQLClient()
+    {
+	return getProviders().getContextResolver(SPARQLClient.class, null).getContext(SPARQLClient.class);
+    }
+        
     @Override
     public Injectable<SPARQLEndpoint> getInjectable(ComponentContext cc, Context context)
     {
@@ -81,9 +97,9 @@ public class SPARQLEndpointProvider extends PerRequestTypeInjectableProvider<Con
 
     public SPARQLEndpoint getSPARQLEndpoint()
     {
-        if (getApplication().getDataset() != null) return new com.atomgraph.core.model.impl.dataset.SPARQLEndpointBase(getApplication(), getRequest());
+        if (getDataset() != null) return new com.atomgraph.core.model.impl.dataset.SPARQLEndpointBase(getRequest(), getMediaTypes(), getDataset());
         
-        return new com.atomgraph.core.model.impl.proxy.SPARQLEndpointBase(getApplication(), getRequest());
+        return new com.atomgraph.core.model.impl.proxy.SPARQLEndpointBase(getRequest(), getMediaTypes(), getSPARQLClient());
     }
     
 }

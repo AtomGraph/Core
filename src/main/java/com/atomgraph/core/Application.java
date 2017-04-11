@@ -61,7 +61,6 @@ import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
 import javax.annotation.PostConstruct;
-import javax.ws.rs.core.CacheControl;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Resource;
@@ -99,7 +98,6 @@ public class Application extends javax.ws.rs.core.Application implements com.ato
     private final DataManager dataManager;
     private final Integer maxGetRequestSize;
     private final boolean preemptiveAuth;
-    private final CacheControl cacheControl;
 
     /**
      * Initializes root resource classes and provider singletons
@@ -116,22 +114,19 @@ public class Application extends javax.ws.rs.core.Application implements com.ato
             servletConfig.getInitParameter(org.apache.jena.sparql.engine.http.Service.queryAuthPwd.getSymbol()) != null ? servletConfig.getInitParameter(org.apache.jena.sparql.engine.http.Service.queryAuthPwd.getSymbol()) : null,
             new MediaTypes(), getClient(new DefaultClientConfig()),
             servletConfig.getInitParameter(A.maxGetRequestSize.getURI()) != null ? Integer.parseInt(servletConfig.getInitParameter(A.maxGetRequestSize.getURI())) : null,
-            servletConfig.getInitParameter(A.preemptiveAuth.getURI()) != null ? Boolean.parseBoolean(servletConfig.getInitParameter(A.preemptiveAuth.getURI())) : false,
-            servletConfig.getInitParameter(A.cacheControl.getURI()) != null ? CacheControl.valueOf(servletConfig.getInitParameter(A.cacheControl.getURI())) : null
+            servletConfig.getInitParameter(A.preemptiveAuth.getURI()) != null ? Boolean.parseBoolean(servletConfig.getInitParameter(A.preemptiveAuth.getURI())) : false
         );
     }
     
     public Application(final Dataset dataset,
             final String endpointURI, final String graphStoreURI, final String authUser, final String authPwd,
-            final MediaTypes mediaTypes, final Client client, final Integer maxGetRequestSize, final boolean preemptiveAuth,
-            final CacheControl cacheControl)
+            final MediaTypes mediaTypes, final Client client, final Integer maxGetRequestSize, final boolean preemptiveAuth)
     {
         this.dataset = dataset;
         this.mediaTypes = mediaTypes;
+        this.client = client;        
         this.maxGetRequestSize = maxGetRequestSize;
         this.preemptiveAuth = preemptiveAuth;
-        this.client = client;
-        this.cacheControl = cacheControl;
         
         // add RDF/POST serialization
         RDFLanguages.register(RDFLanguages.RDFPOST);
@@ -194,8 +189,8 @@ public class Application extends javax.ws.rs.core.Application implements com.ato
         singletons.add(new DataManagerProvider(getDataManager()));
         singletons.add(new ApplicationProvider(getApplication()));
         singletons.add(new ServiceProvider(getService()));
-        singletons.add(new SPARQLEndpointProvider(this));
-        singletons.add(new GraphStoreProvider(this));
+        singletons.add(new SPARQLEndpointProvider());
+        singletons.add(new GraphStoreProvider());
         singletons.add(new com.atomgraph.core.provider.DatasetProvider(getDataset()));
         singletons.add(new SPARQLClientProvider(getSPARQLClient()));
         singletons.add(new GraphStoreClientProvider(getGraphStoreClient()));
@@ -282,11 +277,6 @@ public class Application extends javax.ws.rs.core.Application implements com.ato
         return preemptiveAuth;
     }
 
-    public CacheControl getCacheControl()
-    {
-        return cacheControl;
-    }
-    
     public static Dataset getDataset(String location, Lang lang)
     {
         Dataset dataset = DatasetFactory.createTxnMem();

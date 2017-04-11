@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
 @Provider
-@Deprecated
 public class GraphStoreClientProvider extends PerRequestTypeInjectableProvider<Context, GraphStoreClient> implements ContextResolver<GraphStoreClient>
 {
     

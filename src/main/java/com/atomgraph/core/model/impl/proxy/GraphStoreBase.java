@@ -20,8 +20,8 @@ package com.atomgraph.core.model.impl.proxy;
 import org.apache.jena.rdf.model.Model;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
+import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.GraphStoreClient;
-import javax.ws.rs.core.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,16 +35,26 @@ import org.slf4j.LoggerFactory;
 public class GraphStoreBase extends com.atomgraph.core.model.impl.GraphStoreBase 
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreBase.class);
+
+    private final GraphStoreClient graphStoreClient;
     
     /**
      * Constructs Graph Store proxy from request metadata and origin.
      * 
-     * @param application
      * @param request request
+     * @param mediaTypes supported media types
+     * @param graphStoreClient graph store client
      */
-    public GraphStoreBase(@Context Application application, @Context Request request)
+    public GraphStoreBase(@Context Request request, @Context MediaTypes mediaTypes,
+            @Context GraphStoreClient graphStoreClient)
     {
-        super(application, request);
+        super(request, mediaTypes);
+        this.graphStoreClient = graphStoreClient;
+    }
+
+    public GraphStoreClient getGraphStoreClient()
+    {
+        return graphStoreClient;
     }
     
     @Override
@@ -101,9 +111,4 @@ public class GraphStoreBase extends com.atomgraph.core.model.impl.GraphStoreBase
         getGraphStoreClient().add(uri, model);
     }
 
-    public GraphStoreClient getGraphStoreClient()
-    {
-        return getApplication().getGraphStoreClient();
-    }
-    
 }

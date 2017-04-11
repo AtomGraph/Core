@@ -17,7 +17,6 @@
 
 package com.atomgraph.core.provider;
 
-import com.atomgraph.core.Application;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
@@ -25,7 +24,11 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
+import javax.ws.rs.ext.Providers;
+import com.atomgraph.core.MediaTypes;
+import com.atomgraph.core.client.GraphStoreClient;
 import com.atomgraph.core.model.GraphStore;
+import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,13 +45,11 @@ public class GraphStoreProvider extends PerRequestTypeInjectableProvider<Context
     private static final Logger log = LoggerFactory.getLogger(GraphStoreProvider.class);
     
     @Context Request request;
+    @Context Providers providers;
     
-    private final Application application;
-        
-    public GraphStoreProvider(final Application application)
+    public GraphStoreProvider()
     {
 	super(GraphStore.class);
-        this.application = application;
     }
 
     public Request getRequest()
@@ -56,9 +57,24 @@ public class GraphStoreProvider extends PerRequestTypeInjectableProvider<Context
         return request;
     }
     
-    public Application getApplication()
+    public Providers getProviders()
     {
-	return application;
+        return providers;
+    }
+    
+    public Dataset getDataset()
+    {
+	return getProviders().getContextResolver(Dataset.class, null).getContext(Dataset.class);
+    }
+    
+    public MediaTypes getMediaTypes()
+    {
+	return getProviders().getContextResolver(MediaTypes.class, null).getContext(MediaTypes.class);
+    }
+
+    public GraphStoreClient getGraphStoreClient()
+    {
+	return getProviders().getContextResolver(GraphStoreClient.class, null).getContext(GraphStoreClient.class);
     }
 
     @Override
@@ -82,9 +98,9 @@ public class GraphStoreProvider extends PerRequestTypeInjectableProvider<Context
 
     public GraphStore getGraphStore()
     {
-        if (getApplication().getDataset() != null) return new com.atomgraph.core.model.impl.dataset.GraphStoreBase(getApplication(), getRequest());
+        if (getDataset() != null) return new com.atomgraph.core.model.impl.dataset.GraphStoreBase(getRequest(), getMediaTypes(), getDataset());
         
-        return new com.atomgraph.core.model.impl.proxy.GraphStoreBase(getApplication(), getRequest());
+        return new com.atomgraph.core.model.impl.proxy.GraphStoreBase(getRequest(), getMediaTypes(), getGraphStoreClient());
     }
 
 }

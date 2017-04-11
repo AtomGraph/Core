@@ -16,6 +16,7 @@
  */
 package com.atomgraph.core.model.impl;
 
+import com.atomgraph.core.MediaTypes;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
@@ -31,7 +32,6 @@ import com.atomgraph.core.exception.NotFoundException;
 import com.atomgraph.core.model.GraphStore;
 import com.atomgraph.core.model.QueriedResource;
 import com.atomgraph.core.model.SPARQLEndpoint;
-import javax.ws.rs.core.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +54,7 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
      * JAX-RS-compatible resource constructor with injected initialization objects.
      * The URI of the resource being created is the absolute path of the current request URI.
      * 
-     * @param application application
+     * @param mediaTypes mediaTypes
      * @param uriInfo URI information of the request
      * @param request current request object
      * @param sparqlEndpoint SPARQL endpoint
@@ -63,18 +63,16 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
      * @see <a href="http://docs.oracle.com/javaee/7/api/javax/servlet/ServletContext.html">ServletContext</a>
      * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceContext.html">Jersey ResourceContext</a>
      */
-    public QueriedResourceBase(@Context Application application, @Context UriInfo uriInfo, @Context Request request,
+    public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context MediaTypes mediaTypes,
             @Context SPARQLEndpoint sparqlEndpoint, @Context GraphStore graphStore)
     {
-        this((com.atomgraph.core.Application)application, (com.atomgraph.core.Application)application, 
-                uriInfo, request, uriInfo.getAbsolutePath(), sparqlEndpoint, graphStore);
+        this(uriInfo, request, mediaTypes, uriInfo.getAbsolutePath(), sparqlEndpoint, graphStore);
     }
 
-    protected QueriedResourceBase(final com.atomgraph.core.Application system, final com.atomgraph.core.model.Application application,
-            final UriInfo uriInfo, final Request request, final URI uri,
+    protected QueriedResourceBase(final UriInfo uriInfo, final Request request, final MediaTypes mediaTypes, final URI uri,
             final SPARQLEndpoint sparqlEndpoint, final GraphStore graphStore)            
     {
-        super(system, application, uriInfo, request, uri);
+        super(uriInfo, request, mediaTypes, uri);
 	if (sparqlEndpoint == null) throw new IllegalArgumentException("SPARQLEndpoint cannot be null");
 	if (graphStore == null) throw new IllegalArgumentException("GraphStore cannot be null");
         
