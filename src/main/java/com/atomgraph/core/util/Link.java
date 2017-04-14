@@ -85,6 +85,7 @@ public class Link
     *
     * @param val
     * @return
+     * @throws java.net.URISyntaxException
     */
     public static Link valueOf(String val) throws URISyntaxException
     {
