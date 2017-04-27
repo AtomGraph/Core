@@ -111,13 +111,25 @@ public class ResultSetProvider implements MessageBodyReader<ResultSetRewindable>
 
         //  TO-DO: construct Jena's ResultFormat and then pass to ResultSetFormatter.output(outStream, resultSet, rFmt)
 	if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE))
+        {
 	    ResultSetFormatter.outputAsXML(entityStream, results);
+            return;
+        }
         if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
+        {
 	    ResultSetFormatter.outputAsJSON(entityStream, results);
+            return;
+        }
         if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_CSV_TYPE))
+        {
 	    ResultSetFormatter.outputAsCSV(entityStream, results);
+            return;
+        }
         if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_TSV_TYPE))
+        {
 	    ResultSetFormatter.outputAsTSV(entityStream, results);
+            return;
+        }
         
         throw new IllegalStateException("ResultSet MediaType should be writable but no Jena writer matched");
     }
