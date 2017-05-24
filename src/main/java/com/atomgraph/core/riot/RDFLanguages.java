@@ -30,7 +30,6 @@ public class RDFLanguages extends org.apache.jena.riot.RDFLanguages
     public static final String strLangRDFPOST    = "RDF/POST" ;
     
     public static final Lang RDFPOST = LangBuilder.create(strLangRDFPOST, MediaType.APPLICATION_RDF_URLENCODED).
-            addAltContentTypes(MediaType.APPLICATION_FORM_URLENCODED).
             addFileExtensions("rpo").
             build();
 

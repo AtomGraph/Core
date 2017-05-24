@@ -51,7 +51,7 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
     public SPARQLEndpointBase(@Context Request request, @Context MediaTypes mediaTypes, @Context SPARQLClient sparqlClient)
     {
         super(request, mediaTypes);
-        if (sparqlClient == null) throw new IllegalArgumentException("Application cannot be null");
+        if (sparqlClient == null) throw new IllegalArgumentException("SPARQLClient cannot be null");
         this.sparqlClient = sparqlClient;        
     }
         

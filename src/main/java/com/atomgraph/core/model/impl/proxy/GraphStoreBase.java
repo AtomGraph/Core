@@ -49,6 +49,7 @@ public class GraphStoreBase extends com.atomgraph.core.model.impl.GraphStoreBase
             @Context GraphStoreClient graphStoreClient)
     {
         super(request, mediaTypes);
+        if (graphStoreClient == null) throw new IllegalArgumentException("GraphStoreClient cannot be null");
         this.graphStoreClient = graphStoreClient;
     }
 
