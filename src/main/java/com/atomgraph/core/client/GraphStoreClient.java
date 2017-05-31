@@ -89,7 +89,7 @@ public class GraphStoreClient implements DatasetAccessor
             
             if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
-                if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                if (log.isErrorEnabled()) log.error("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
                 throw new ClientException(cr);
             }
 
@@ -124,7 +124,7 @@ public class GraphStoreClient implements DatasetAccessor
             
             if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
-                if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                if (log.isErrorEnabled()) log.error("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
                 throw new ClientException(cr);
             }
 
@@ -154,7 +154,7 @@ public class GraphStoreClient implements DatasetAccessor
             
             if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
-                if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                if (log.isErrorEnabled()) log.error("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
                 throw new ClientException(cr);
             }
 
@@ -189,7 +189,7 @@ public class GraphStoreClient implements DatasetAccessor
             
             if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
-                if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                if (log.isErrorEnabled()) log.error("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
                 throw new ClientException(cr);
             }
         }
@@ -223,7 +223,7 @@ public class GraphStoreClient implements DatasetAccessor
             
             if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
-                if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                if (log.isErrorEnabled()) log.error("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
                 throw new ClientException(cr);
             }
         }
@@ -252,7 +252,7 @@ public class GraphStoreClient implements DatasetAccessor
             
             if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
-                if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                if (log.isErrorEnabled()) log.error("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
                 throw new ClientException(cr);
             }
         }
@@ -283,7 +283,7 @@ public class GraphStoreClient implements DatasetAccessor
             
             if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
-                if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                if (log.isErrorEnabled()) log.error("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
                 throw new ClientException(cr);
             }
         }
@@ -316,7 +316,7 @@ public class GraphStoreClient implements DatasetAccessor
             
             if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
-                if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                if (log.isErrorEnabled()) log.error("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
                 throw new ClientException(cr);
             }
         }
@@ -350,7 +350,7 @@ public class GraphStoreClient implements DatasetAccessor
             
             if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
-                if (log.isDebugEnabled()) log.debug("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                if (log.isErrorEnabled()) log.error("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
                 throw new ClientException(cr);
             }
         }

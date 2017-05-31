@@ -178,7 +178,7 @@ public class SPARQLClient
 
             if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
-                if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                if (log.isErrorEnabled()) log.error("Query request to endpoint: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
                 throw new ClientException(cr);
             }
 
@@ -208,7 +208,7 @@ public class SPARQLClient
             
             if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
-                if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                if (log.isErrorEnabled()) log.error("Query request to endpoint: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
                 throw new ClientException(cr);
             }
 
@@ -238,7 +238,7 @@ public class SPARQLClient
             
             if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
-                if (log.isDebugEnabled()) log.debug("Query request to endpoint: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                if (log.isErrorEnabled()) log.error("Query request to endpoint: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
                 throw new ClientException(cr);
             }
 
@@ -251,7 +251,7 @@ public class SPARQLClient
             }
             catch (IOException ex)
             {
-                if (log.isDebugEnabled()) log.debug("Error closing ClientResponse entity stream");
+                if (log.isErrorEnabled()) log.error("Error closing ClientResponse entity stream");
                 throw new ClientException(cr);
             }                
 
