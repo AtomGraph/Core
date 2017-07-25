@@ -72,7 +72,7 @@ public abstract class ResourceBase implements Resource
 
         this.uriInfo = uriInfo;
         this.request = request;
-        this.mediaTypes = mediaTypes;        
+        this.mediaTypes = mediaTypes;
         this.uri = uri;
         this.response = com.atomgraph.core.model.impl.Response.fromRequest(request);
         if (log.isDebugEnabled()) log.debug("Request URI: {}", uriInfo.getRequestUri());        
@@ -99,7 +99,6 @@ public abstract class ResourceBase implements Resource
     {
         return com.atomgraph.core.model.impl.Response.fromRequest(getRequest()).
                 getResponseBuilder(model, getVariants(getWritableMediaTypes()));
-                //cacheControl(getCacheControl());
     }
     
     /**
