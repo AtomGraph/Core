@@ -16,19 +16,19 @@
  */
 package com.atomgraph.core.util.jena;
 
-import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.util.FileManager;
 import org.apache.jena.util.LocationMapper;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.filter.ClientFilter;
 import java.net.URI;
-import java.util.List;
-import javax.ws.rs.core.MultivaluedMap;
 import com.atomgraph.core.MediaTypes;
+import com.atomgraph.core.client.LinkedDataClient;
 import java.net.URISyntaxException;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.ModelGetter;
+import org.apache.jena.rdf.model.ModelReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,12 +36,12 @@ import org.slf4j.LoggerFactory;
 * Utility class for retrieval of SPARQL query results from local RDF models and remote endpoints.
 *
 * @author Martynas Jusevičius <martynas@atomgraph.com>
-* @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/util/FileManager.html">Jena FileManager</a>
-* @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/rdf/model/Model.html">Jena Model</a>
-* @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/ResultSet.html">ARQ ResultSet</a>
+* @see <a href="http://jena.apache.org/documentation/javadoc/jena/org/apache/jena/util/FileManager.html">Jena FileManager</a>
+* @see <a href="http://jena.apache.org/documentation/javadoc/jena/org/apache/jena/rdf/model/Model.html">Jena Model</a>
+* @see <a href="https://jena.apache.org/documentation/javadoc/arq/org/apache/jena/query/ResultSet.html">ARQ ResultSet</a>
 */
 
-public class DataManager extends FileManager
+public class DataManager extends FileManager implements ModelGetter
 {
 
     private static final Logger log = LoggerFactory.getLogger(DataManager.class);
@@ -49,8 +49,6 @@ public class DataManager extends FileManager
     private final boolean preemptiveAuth;
     private final Client client;
     private final MediaTypes mediaTypes;
-    private final javax.ws.rs.core.MediaType[] modelMediaTypes;
-    private final javax.ws.rs.core.MediaType[] resultSetMediaTypes;
             
     /**
      * Creates data manager.
@@ -68,10 +66,6 @@ public class DataManager extends FileManager
         this.client = client;
         this.mediaTypes = mediaTypes;
         this.preemptiveAuth = preemptiveAuth;
-        List<javax.ws.rs.core.MediaType> modelMediaTypeList = mediaTypes.getReadable(Model.class);
-        modelMediaTypes = modelMediaTypeList.toArray(new javax.ws.rs.core.MediaType[modelMediaTypeList.size()]);
-        List<javax.ws.rs.core.MediaType> resultMediaTypeList = mediaTypes.getReadable(ResultSet.class);
-        resultSetMediaTypes = resultMediaTypeList.toArray(new javax.ws.rs.core.MediaType[resultMediaTypeList.size()]);
     }
     
     public Client getClient()
@@ -84,17 +78,7 @@ public class DataManager extends FileManager
         return mediaTypes;
     }
     
-    public javax.ws.rs.core.MediaType[] getModelMediaTypes()
-    {
-        return modelMediaTypes;
-    }
-
-    public javax.ws.rs.core.MediaType[] getResultSetMediaTypes()
-    {
-        return resultSetMediaTypes;
-    }
-    
-    public WebResource getEndpoint(URI endpointURI, ClientFilter authFilter, MultivaluedMap<String, String> params)
+    public WebResource getEndpoint(URI endpointURI)
     {
 	if (endpointURI == null) throw new IllegalArgumentException("Endpoint URI must be not null");
 
@@ -108,18 +92,13 @@ public class DataManager extends FileManager
             // should not happen, this a URI to URI conversion
         }
         
-        WebResource webResource = getClient().resource(endpointURI.normalize());
-        if (authFilter != null) webResource.addFilter(authFilter);
-
-        return webResource;
+        return getClient().resource(endpointURI.normalize());
     }
     
     public ClientResponse get(String uri, javax.ws.rs.core.MediaType[] acceptedTypes)
     {
-	if (log.isDebugEnabled()) log.debug("GET Model from URI: {}", uri);
-	return getEndpoint(URI.create(uri), null, null).
-            accept(acceptedTypes).
-            get(ClientResponse.class);
+        return LinkedDataClient.create(getEndpoint(URI.create(uri)), getMediaTypes()).
+                get(acceptedTypes);
     }
     
     public boolean usePreemptiveAuth()
@@ -127,4 +106,40 @@ public class DataManager extends FileManager
         return preemptiveAuth;
     }
         
+    @Override
+    public Model loadModel(String uri)
+    {
+        // only handle HTTP/HTTPS URIs, leave the rest to Jena
+        if (!hasCachedModel(uri))
+        {
+            String mappedURI = mapURI(uri);
+            if (mappedURI.startsWith("http") || mappedURI.startsWith("https"))
+            {
+                Model model = LinkedDataClient.create(getEndpoint(URI.create(uri)), getMediaTypes()).get();
+
+                if (isCachingModels()) addCacheModel(uri, model) ;
+
+                return model;
+            }
+        }
+        
+        return super.loadModel(uri);
+    }
+    
+    @Override
+    public Model getModel(String uri)
+    {
+        return loadModel(uri);
+    }
+
+    @Override
+    public Model getModel(String uri, ModelReader loadIfAbsent)
+    {
+        Model model = getModel(uri);
+        
+        if (model == null) return loadIfAbsent.readModel(ModelFactory.createDefaultModel(), uri);
+        
+        return model;
+    }
+    
 }

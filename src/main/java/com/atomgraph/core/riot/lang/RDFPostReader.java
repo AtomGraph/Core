@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  * @see <a href="http://www.lsrn.org/semweb/rdfpost.html">RDF/POST Encoding for RDF</a>
- * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/rdf/model/Model.html">Model</a>
+ * @see <a href="http://jena.apache.org/documentation/javadoc/jena/org/apache/jena/rdf/model/Model.html">Model</a>
  * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */

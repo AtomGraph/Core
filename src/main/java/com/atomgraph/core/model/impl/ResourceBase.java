@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Base class of generic read-only Linked Data resources.
  * 
- * @see <a href="http://jena.apache.org/documentation/javadoc/jena/com/hp/hpl/jena/rdf/model/Resource.html">Jena Resource</a>
+ * @see <a href="http://jena.apache.org/documentation/javadoc/jena/org/apache/jena/rdf/model/Resource.html">Jena Resource</a>
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
 public abstract class ResourceBase implements Resource
