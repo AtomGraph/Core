@@ -35,7 +35,7 @@ public class GraphStoreClient implements DatasetAccessor
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreClient.class);
 
-    private final WebResource webResource;    
+    private final WebResource webResource;
     private final MediaTypes mediaTypes;
     
     protected GraphStoreClient(WebResource webResource, MediaTypes mediaTypes)
@@ -43,7 +43,7 @@ public class GraphStoreClient implements DatasetAccessor
         if (webResource == null) throw new IllegalArgumentException("WebResource cannot be null");
         if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
 
-        this.webResource = webResource;        
+        this.webResource = webResource;
         this.mediaTypes = mediaTypes;
     }
 
@@ -67,7 +67,7 @@ public class GraphStoreClient implements DatasetAccessor
         return MediaType.TEXT_NTRIPLES_TYPE;
     }
     
-    protected ClientResponse get(javax.ws.rs.core.MediaType[] acceptedTypes)
+    public ClientResponse get(javax.ws.rs.core.MediaType[] acceptedTypes)
     {
         if (acceptedTypes == null) throw new IllegalArgumentException("MediaType[] cannot be null");
         
@@ -101,7 +101,7 @@ public class GraphStoreClient implements DatasetAccessor
         }
     }
 
-    protected ClientResponse get(javax.ws.rs.core.MediaType[] acceptedTypes, String graphURI)
+    public ClientResponse get(javax.ws.rs.core.MediaType[] acceptedTypes, String graphURI)
     {
         if (acceptedTypes == null) throw new IllegalArgumentException("MediaType[] cannot be null");
         if (graphURI == null) throw new IllegalArgumentException("String cannot be null");
@@ -136,7 +136,7 @@ public class GraphStoreClient implements DatasetAccessor
         }
     }
 
-    protected ClientResponse head(String graphURI)
+    public ClientResponse head(String graphURI)
     {
 	return getWebResource().queryParam("graph", graphURI).
             method("HEAD", ClientResponse.class);
@@ -166,7 +166,7 @@ public class GraphStoreClient implements DatasetAccessor
         }
     }
     
-    protected ClientResponse put(MediaType contentType, Model model)
+    public ClientResponse put(MediaType contentType, Model model)
     {
         if (contentType == null) throw new IllegalArgumentException("MediaType cannot be null");
         if (model == null) throw new IllegalArgumentException("Model cannot be null");
@@ -199,7 +199,7 @@ public class GraphStoreClient implements DatasetAccessor
         }
     }
 
-    protected ClientResponse putModel(MediaType contentType, String graphURI, Model model)
+    public ClientResponse putModel(MediaType contentType, String graphURI, Model model)
     {
         if (contentType == null) throw new IllegalArgumentException("MediaType cannot be null");
         if (graphURI == null) throw new IllegalArgumentException("String cannot be null");
@@ -233,7 +233,7 @@ public class GraphStoreClient implements DatasetAccessor
         }
     }
 
-    protected ClientResponse delete()
+    public ClientResponse delete()
     {
 	if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store {}", getWebResource().getURI());
 	return getWebResource().queryParam("default", "").
@@ -262,7 +262,7 @@ public class GraphStoreClient implements DatasetAccessor
         }
     }
 
-    protected ClientResponse delete(String graphURI)
+    public ClientResponse delete(String graphURI)
     {
         if (graphURI == null) throw new IllegalArgumentException("String cannot be null");
         
@@ -293,7 +293,7 @@ public class GraphStoreClient implements DatasetAccessor
         }
     }
 
-    protected ClientResponse add(MediaType contentType, Model model)
+    public ClientResponse add(MediaType contentType, Model model)
     {
         if (contentType == null) throw new IllegalArgumentException("MediaType cannot be null");
         if (model == null) throw new IllegalArgumentException("Model cannot be null");
@@ -326,7 +326,7 @@ public class GraphStoreClient implements DatasetAccessor
         }
     }
 
-    protected ClientResponse add(MediaType contentType, String graphURI, Model model)
+    public ClientResponse add(MediaType contentType, String graphURI, Model model)
     {
         if (contentType == null) throw new IllegalArgumentException("MediaType cannot be null");
         if (graphURI == null) throw new IllegalArgumentException("String cannot be null");

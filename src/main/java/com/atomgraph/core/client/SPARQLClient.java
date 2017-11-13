@@ -51,7 +51,7 @@ public class SPARQLClient
     private static final Logger log = LoggerFactory.getLogger(SPARQLClient.class);
 
     private final WebResource webResource;
-    private final int maxGetRequestSize;    
+    private final int maxGetRequestSize;
     private final MediaTypes mediaTypes;
 
     protected SPARQLClient(WebResource webResource, MediaTypes mediaTypes, int maxGetRequestSize)
@@ -89,12 +89,12 @@ public class SPARQLClient
         return new SPARQLClient(webResource);
     }
     
-    protected int getQueryURLLength(Query query, MultivaluedMap<String, String> params)
+    public int getQueryURLLength(Query query, MultivaluedMap<String, String> params)
     {        
         return getQueryResource(query, params).getURI().toString().length();
     }
     
-    protected WebResource.Builder setHeaders(WebResource.Builder builder, Map<String, Object> headers)
+    public WebResource.Builder setHeaders(WebResource.Builder builder, Map<String, Object> headers)
     {
 	if (builder == null) throw new IllegalArgumentException("WebResource.Builder must be not null");
 	if (headers == null) throw new IllegalArgumentException("Map<String, Object> must be not null");
@@ -109,7 +109,7 @@ public class SPARQLClient
         return builder;
     }
     
-    protected WebResource getQueryResource(Query query, MultivaluedMap<String, String> params)
+    public WebResource getQueryResource(Query query, MultivaluedMap<String, String> params)
     {
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
 
@@ -132,7 +132,7 @@ public class SPARQLClient
         return queryResource;
     }
     
-    protected ClientResponse get(Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, Map<String, Object> headers)
+    public ClientResponse get(Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, Map<String, Object> headers)
     {
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
 	if (acceptedTypes == null) throw new IllegalArgumentException("Accepted MediaType[] must be not null");
@@ -144,7 +144,7 @@ public class SPARQLClient
         return builder.get(ClientResponse.class);
     }
     
-    protected ClientResponse post(Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, Map<String, Object> headers)
+    public ClientResponse post(Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, Map<String, Object> headers)
     {
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
 	if (acceptedTypes == null) throw new IllegalArgumentException("Accepted MediaType[] must be not null");
@@ -269,7 +269,7 @@ public class SPARQLClient
     }
 
     /**
-     * Executes post request on a remote SPARQL endpoint.
+     * POSTs update to a remote SPARQL endpoint.
      * 
      * @param updateRequest post request
      * @param params name/value pairs of request parameters or null, if none
