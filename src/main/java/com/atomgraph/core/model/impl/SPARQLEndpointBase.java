@@ -17,22 +17,33 @@
 package com.atomgraph.core.model.impl;
 
 import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryFactory;
-import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetRewindable;
 import org.apache.jena.rdf.model.*;
-import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateRequest;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.*;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.model.SPARQLEndpoint;
+import static com.atomgraph.core.model.SPARQLEndpoint.DEFAULT_GRAPH_URI;
+import static com.atomgraph.core.model.SPARQLEndpoint.NAMED_GRAPH_URI;
+import static com.atomgraph.core.model.SPARQLEndpoint.QUERY;
+import static com.atomgraph.core.model.SPARQLEndpoint.UPDATE;
+import static com.atomgraph.core.model.SPARQLEndpoint.USING_GRAPH_URI;
+import static com.atomgraph.core.model.SPARQLEndpoint.USING_NAMED_GRAPH_URI;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.update.UpdateFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,94 +79,58 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
 	if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase");        
     }
     
-    /**
-     * Implements SPARQL 1.1 Protocol query GET method.
-     * Query object is injected using a provider, which must be registered in the application.
-     * 
-     * @param query SPARQL query
-     * @param defaultGraphUri default graph URI
-     * @param graphUri named graph URI
-     * @return result response
-     * @see com.atomgraph.core.provider.QueryParamProvider
-     */
     @Override
     @GET
-    public Response get(@QueryParam("query") Query query,
-	@QueryParam("default-graph-uri") URI defaultGraphUri, @QueryParam("named-graph-uri") URI graphUri)
+    public Response get(@QueryParam(QUERY) Query query,
+            @QueryParam(DEFAULT_GRAPH_URI) List<URI> defaultGraphUris, @QueryParam(NAMED_GRAPH_URI) List<URI> namedGraphUris)
     {
-	return getResponseBuilder(query).build();
+	return getResponseBuilder(query, defaultGraphUris, namedGraphUris).build();
     }
     
-    /**
-     * Implements SPARQL 1.1 Protocol query direct POST method.
-     * Query object is injected using a provider, which must be registered in the application.
-     * 
-     * @param query SPARQL query
-     * @param defaultGraphUri default graph URI
-     * @param graphUri named graph URI
-     * @return result response
-     */
-    @Override
-    @POST
-    @Consumes(com.atomgraph.core.MediaType.APPLICATION_SPARQL_QUERY)
-    public Response post(Query query, @QueryParam("default-graph-uri") URI defaultGraphUri,
-	@QueryParam("named-graph-uri") URI graphUri)
-    {
-	return get(query, defaultGraphUri, graphUri);
-    }
-    
-    /**
-     * Implements SPARQL 1.1 Protocol encoded POST method.
-     * Query or update object are injected as form parameters.
-     * 
-     * @param queryString
-     * @param updateString SPARQL update (possibly multiple operations)
-     * @param defaultGraphUri default graph URI
-     * @param graphUri named graph URI
-     * @return response with success or failure
-     */
     @Override
     @POST
     @Consumes(com.atomgraph.core.MediaType.APPLICATION_FORM_URLENCODED)
-    public Response post(@FormParam("query") String queryString, @FormParam("update") String updateString,
-	@FormParam("using-graph-uri") URI defaultGraphUri,
-	@FormParam("using-named-graph-uri") URI graphUri)
+    public Response post(@FormParam(QUERY) String queryString, @FormParam(UPDATE) String updateString,
+            @FormParam(DEFAULT_GRAPH_URI) List<URI> defaultGraphUris, @FormParam(NAMED_GRAPH_URI) List<URI> namedGraphUris,
+            @FormParam(USING_GRAPH_URI) List<URI> usingGraphUris, @FormParam(USING_NAMED_GRAPH_URI) List<URI> usingNamedGraphUris)
     {
-        if (queryString != null) return get(QueryFactory.create(queryString), defaultGraphUri, graphUri);
-        if (updateString != null) return post(UpdateFactory.create(updateString), defaultGraphUri, graphUri);
+        if (queryString != null) return get(QueryFactory.create(queryString), defaultGraphUris, namedGraphUris);
+        if (updateString != null) return post(UpdateFactory.create(updateString), usingGraphUris, usingNamedGraphUris);
 
         throw new WebApplicationException(Response.Status.BAD_REQUEST);
     }
     
-    /**
-     * Implements SPARQL 1.1 Protocol update direct POST method.
-     * Update object is injected using a provider, which must be registered in the application.
-     * 
-     * @param update update request (possibly multiple operations)
-     * @param defaultGraphUri default graph URI
-     * @param graphUri named graph URI
-     * @return response with success or failure
-     */
+    @Override
+    @POST
+    @Consumes(com.atomgraph.core.MediaType.APPLICATION_SPARQL_QUERY)
+    public Response post(Query query,
+            @QueryParam(DEFAULT_GRAPH_URI) List<URI> defaultGraphUris, @QueryParam(NAMED_GRAPH_URI) List<URI> namedGraphUris)
+    {
+	return get(query, defaultGraphUris, namedGraphUris);
+    }
+    
     @Override
     @POST
     @Consumes(com.atomgraph.core.MediaType.APPLICATION_SPARQL_UPDATE)
-    public Response post(UpdateRequest update, @QueryParam("using-graph-uri") URI defaultGraphUri,
-	@QueryParam("using-named-graph-uri") URI graphUri)
+    public Response post(UpdateRequest update,
+            @QueryParam(USING_GRAPH_URI) List<URI> usingGraphUris, @QueryParam(USING_NAMED_GRAPH_URI) List<URI> usingNamedGraphUris)
     {
-	update(update);
+	update(update, usingGraphUris, usingNamedGraphUris);
 
         return Response.ok().build();
     }
-
+            
     /**
      * Returns response builder for a SPARQL query.
      * Contains the main SPARQL endpoint JAX-RS implementation logic.
-     * Uses <code>gs:resultLimit</code> parameter value from web.xml as <code>LIMIT</code> value on <code>SELECT</code> queries, if present.
+     * Uses <code>a:resultLimit</code> parameter value from web.xml as <code>LIMIT</code> value on <code>SELECT</code> queries, if present.
      * 
      * @param query SPARQL query
+     * @param defaultGraphUris default graph URIs
+     * @param namedGraphUris named graph URIs
      * @return response builder
      */
-    public ResponseBuilder getResponseBuilder(Query query)
+    public ResponseBuilder getResponseBuilder(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris)
     {
 	if (query == null) throw new WebApplicationException(Response.Status.BAD_REQUEST);
 
@@ -167,13 +142,13 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
                 query.setLimit(Long.parseLong(getServletConfig().getInitParameter(A.resultLimit.getURI())));
             */
 
-            return getResponseBuilder(select(query));
+            return getResponseBuilder(select(query, defaultGraphUris, namedGraphUris));
         }
 
         if (query.isConstructType() || query.isDescribeType())
         {
             if (log.isDebugEnabled()) log.debug("SPARQL endpoint executing CONSTRUCT/DESCRIBE query: {}", query);
-            return getResponseBuilder(loadModel(query));
+            return getResponseBuilder(loadModel(query, defaultGraphUris, namedGraphUris));
         }
         
 	if (log.isWarnEnabled()) log.warn("SPARQL endpoint received unknown type of query: {}", query);
@@ -214,7 +189,85 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
 	return com.atomgraph.core.model.impl.Response.fromRequest(getRequest()).
                 getResponseBuilder(resultSet, getVariants(getMediaTypes().getWritable(ResultSet.class)));
     }
+
+    /**
+     * Convenience method for <pre>DESCRIBE</pre> queries.
+     * 
+     * @param defaultGraphUris default graph URIs
+     * @param namedGraphUris named graph URIs
+     * @link #loadModel(query)
+     * @param query
+     * @return RDF model
+     */
+    public Model describe(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris)    
+    {
+	if (query == null) throw new IllegalArgumentException("Query must be not null");
+        if (!query.isDescribeType()) throw new IllegalArgumentException("Query must be DESCRIBE");
+        
+	return loadModel(query, defaultGraphUris, namedGraphUris);
+    }
+
+    /**
+     * Convenience method for <pre>CONSTRUCT</pre> queries.
+     * 
+     * @param defaultGraphUris default graph URIs
+     * @param namedGraphUris named graph URIs
+     * @link #loadModel(query)
+     * @param query
+     * @return RDF model
+     */
+    public Model construct(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris)
+    {
+	if (query == null) throw new IllegalArgumentException("Query must be not null");
+        if (!query.isConstructType()) throw new IllegalArgumentException("Query must be CONSTRUCT");
+        
+	return loadModel(query, defaultGraphUris, namedGraphUris);
+    }
+
+    /**
+     * Loads RDF model from the endpoint by executing a SPARQL query (<code>DESCRIBE</code> or <code>CONSTRUCT</code>)
+     * 
+     * @param query SPARQL query
+     * @param defaultGraphUris default graph URIs
+     * @param namedGraphUris named graph URIs
+     * @return RDF model
+     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#describe">DESCRIBE</a>
+     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#construct">CONSTRUCT</a>
+     */
+    public abstract Model loadModel(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris);
     
+    /**
+     * Loads RDF model from the endpoint by executing a SPARQL query (<pre>SELECT</pre>)
+     * 
+     * @param query SPARQL query
+     * @param defaultGraphUris default graph URIs
+     * @param namedGraphUris named graph URIs
+     * @return SPARQL result set
+     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#select">SELECT</a>
+     */
+    public abstract ResultSetRewindable select(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris);
+
+    /**
+     * Asks boolean result from the endpoint by executing a SPARQL query (<pre>ASK</pre>)
+     * 
+     * @param query SPARQL query
+     * @param defaultGraphUris default graph URIs
+     * @param namedGraphUris named graph URIs
+     * @return boolean result
+     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#ask">ASK</a>
+     */
+    public abstract boolean ask(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris);
+
+    /**
+     * Execute SPARQL update request
+     * 
+     * @param updateRequest update request
+     * @param usingGraphUris using graph URIs
+     * @param usingNamedGraphUris using named graph URIs
+     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-update-20130321/">SPARQL 1.1 Update</a>
+     */
+    public abstract void update(UpdateRequest updateRequest, List<URI> usingGraphUris, List<URI> usingNamedGraphUris);
+
     /**
      * Builds a list of acceptable response variants
      * 
@@ -246,39 +299,7 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     {
         return new ArrayList<>();
     }
-
-    /**
-     * Convenience method for <pre>DESCRIBE</pre> queries.
-     * 
-     * @link #loadModel(query)
-     * @param query
-     * @return RDF model
-     */
-    //@Override
-    public Model describe(Query query)
-    {
-	if (query == null) throw new IllegalArgumentException("Query must be not null");
-        if (!query.isDescribeType()) throw new IllegalArgumentException("Query must be DESCRIBE");
-        
-	return loadModel(query);
-    }
-
-    /**
-     * Convenience method for <pre>CONSTRUCT</pre> queries.
-     * 
-     * @link #loadModel(query)
-     * @param query
-     * @return RDF model
-     */
-    //@Override
-    public Model construct(Query query)
-    {
-	if (query == null) throw new IllegalArgumentException("Query must be not null");
-        if (!query.isConstructType()) throw new IllegalArgumentException("Query must be CONSTRUCT");
-        
-	return loadModel(query);
-    }
-
+    
     public Request getRequest()
     {
 	return request;
@@ -294,40 +315,4 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
         return response;
     }
  
-    /**
-     * Loads RDF model from the endpoint by executing a SPARQL query (<code>DESCRIBE</code> or <code>CONSTRUCT</code>)
-     * 
-     * @param query SPARQL query
-     * @return RDF model
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#describe">DESCRIBE</a>
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#construct">CONSTRUCT</a>
-     */
-    public abstract Model loadModel(Query query);
-    
-    /**
-     * Loads RDF model from the endpoint by executing a SPARQL query (<pre>SELECT</pre>)
-     * 
-     * @param query SPARQL query
-     * @return SPARQL result set
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#select">SELECT</a>
-     */
-    public abstract ResultSetRewindable select(Query query);
-
-    /**
-     * Asks boolean result from the endpoint by executing a SPARQL query (<pre>ASK</pre>)
-     * 
-     * @param query SPARQL query
-     * @return boolean result
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#ask">ASK</a>
-     */
-    public abstract boolean ask(Query query);
-
-    /**
-     * Execute SPARQL update request
-     * 
-     * @param updateRequest update request
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-update-20130321/">SPARQL 1.1 Update</a>
-     */
-    public abstract void update(UpdateRequest updateRequest);
-    
 }

@@ -39,14 +39,11 @@ import com.atomgraph.core.model.impl.ApplicationImpl;
 import com.atomgraph.core.model.impl.proxy.GraphStoreBase;
 import com.atomgraph.core.model.impl.QueriedResourceBase;
 import com.atomgraph.core.model.impl.proxy.SPARQLEndpointBase;
-import com.atomgraph.core.provider.ApplicationProvider;
-import com.atomgraph.core.provider.ClientProvider;
 import com.atomgraph.core.provider.GraphStoreClientProvider;
 import com.atomgraph.core.provider.GraphStoreProvider;
 import com.atomgraph.core.provider.MediaTypesProvider;
 import com.atomgraph.core.provider.SPARQLClientProvider;
 import com.atomgraph.core.provider.SPARQLEndpointProvider;
-import com.atomgraph.core.provider.ServiceProvider;
 import com.atomgraph.core.riot.RDFLanguages;
 import com.atomgraph.core.riot.lang.RDFPostReaderFactory;
 import com.atomgraph.core.util.jena.DataManager;
@@ -187,16 +184,13 @@ public class Application extends javax.ws.rs.core.Application implements com.ato
         singletons.add(new QueryParamProvider());
         singletons.add(new UpdateRequestReader());
         singletons.add(new DataManagerProvider(getDataManager()));
-        singletons.add(new ApplicationProvider(getApplication()));
-        singletons.add(new ServiceProvider(getService()));
         singletons.add(new SPARQLEndpointProvider());
         singletons.add(new GraphStoreProvider());
         singletons.add(new com.atomgraph.core.provider.DatasetProvider(getDataset()));
         singletons.add(new SPARQLClientProvider(getSPARQLClient()));
         singletons.add(new GraphStoreClientProvider(getGraphStoreClient()));
-        singletons.add(new ClientProvider(getClient()));        
         singletons.add(new MediaTypesProvider(getMediaTypes()));
-        singletons.add(new ClientExceptionMapper());        
+        singletons.add(new ClientExceptionMapper());
         singletons.add(new NotFoundExceptionMapper());
     }
     

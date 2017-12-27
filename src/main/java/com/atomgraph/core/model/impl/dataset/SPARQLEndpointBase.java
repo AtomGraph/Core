@@ -28,6 +28,11 @@ import org.apache.jena.update.UpdateRequest;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import com.atomgraph.core.MediaTypes;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.jena.sparql.core.DatasetDescription;
+import org.apache.jena.sparql.core.DynamicDatasets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,17 +64,11 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
         this.dataset = dataset;
     }
     
-    /**
-     * Loads RDF model by querying RDF dataset.
-     * 
-     * @param query query object
-     * @return loaded model
-     */
     @Override
-    public Model loadModel(Query query)
+    public Model loadModel(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris)
     {
         if (log.isDebugEnabled()) log.debug("Loading Model from Dataset using Query: {}", query);
-        return loadModel(getDataset(), query);
+        return loadModel(specifyDataset(getDataset(), defaultGraphUris, namedGraphUris), query);
     }
 
     /**
@@ -102,17 +101,11 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
 	}
     }
     
-    /**
-     * Loads RDF model by querying dataset.
-     * 
-     * @param query query object
-     * @return loaded model
-     */
     @Override
-    public ResultSetRewindable select(Query query)
+    public ResultSetRewindable select(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris)
     {
         if (log.isDebugEnabled()) log.debug("Loading ResultSet from Dataset using Query: {}", query);
-        return loadResultSet(getDataset(), query);
+        return loadResultSet(specifyDataset(getDataset(), defaultGraphUris, namedGraphUris), query);
     }
 
     /**
@@ -143,17 +136,11 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
 	}
     }
     
-    /**
-     * Asks for boolean result by querying dataset.
-     * 
-     * @param query query object
-     * @return boolean result
-     */
     @Override
-    public boolean ask(Query query)
+    public boolean ask(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris)
     {
         if (log.isDebugEnabled()) log.debug("Loading Model from Dataset using Query: {}", query);
-        return ask(getDataset(), query);
+        return ask(specifyDataset(getDataset(), defaultGraphUris, namedGraphUris), query);
     }
 
     /**
@@ -190,11 +177,26 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
      * @param updateRequest update request
      */
     @Override
-    public void update(UpdateRequest updateRequest)
+    public void update(UpdateRequest updateRequest, List<URI> usingGraphUris, List<URI> usingNamedGraphUris)
     {
-        if (log.isDebugEnabled()) log.debug("Attempting to update local Model, discarding UpdateRequest: {}", updateRequest);
+        if (log.isDebugEnabled()) log.debug("Attempting to update local Dataset, discarding UpdateRequest: {}", updateRequest);
     }
 
+    // TO-DO: rewrite using Java 8 streams/lambdas
+    public Dataset specifyDataset(Dataset dataset, List<URI> defaultGraphUris, List<URI> namedGraphUris)
+    {        
+        List<String> defaultGraphUriStrings = new ArrayList<>();
+            for (URI defaultGraphUri : defaultGraphUris)
+                defaultGraphUriStrings.add(defaultGraphUri.toString());
+            
+        List<String> namedGraphUriStrings = new ArrayList<>();
+            for (URI namedGraphUri : namedGraphUris)
+                namedGraphUriStrings.add(namedGraphUri.toString());
+            
+        DatasetDescription desc = DatasetDescription.create(defaultGraphUriStrings, namedGraphUriStrings);
+        return DynamicDatasets.dynamicDataset(desc, dataset, false);
+    }
+    
     public Dataset getDataset()
     {
         return dataset;

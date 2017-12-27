@@ -27,6 +27,10 @@ import com.atomgraph.core.MediaTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.atomgraph.core.client.SPARQLClient;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
+import java.net.URI;
+import java.util.List;
+import javax.ws.rs.core.MultivaluedMap;
 
 /**
  * Proxy implementation of SPARQL endpoint.
@@ -52,44 +56,64 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
     {
         super(request, mediaTypes);
         if (sparqlClient == null) throw new IllegalArgumentException("SPARQLClient cannot be null");
-        this.sparqlClient = sparqlClient;        
+        this.sparqlClient = sparqlClient;
+    }
+    
+    @Override
+    public Model loadModel(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris)
+    {
+        MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+        
+        for (URI defaultGraphUri : defaultGraphUris)
+            params.add(DEFAULT_GRAPH_URI, defaultGraphUri.toString());
+        for (URI namedGraphUri : namedGraphUris)
+            params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
+
+        return getSPARQLClient().loadModel(query, params, null);
+    }
+
+    @Override
+    public ResultSetRewindable select(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris)
+    {
+        MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+        
+        for (URI defaultGraphUri : defaultGraphUris)
+            params.add(DEFAULT_GRAPH_URI, defaultGraphUri.toString());
+        for (URI namedGraphUri : namedGraphUris)
+            params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
+        
+        return getSPARQLClient().select(query, params, null);
+    }
+  
+    @Override
+    public boolean ask(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris)
+    {
+        MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+        
+        for (URI defaultGraphUri : defaultGraphUris)
+            params.add(DEFAULT_GRAPH_URI, defaultGraphUri.toString());
+        for (URI namedGraphUri : namedGraphUris)
+            params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
+        
+        return getSPARQLClient().ask(query, params, null);
+    }
+
+    @Override
+    public void update(UpdateRequest updateRequest, List<URI> usingGraphUris, List<URI> usingNamedGraphUris)
+    {
+        MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+        
+        for (URI usingGraphUri : usingGraphUris)
+            params.add(USING_GRAPH_URI, usingGraphUri.toString());
+        for (URI usingNamedGraphUri : usingNamedGraphUris)
+            params.add(USING_NAMED_GRAPH_URI, usingNamedGraphUri.toString());
+
+        getSPARQLClient().update(updateRequest, params, null);
     }
         
     public SPARQLClient getSPARQLClient()
     {
         return sparqlClient;
     }
-    
-    @Override
-    public Model loadModel(Query query)
-    {
-	return getSPARQLClient().loadModel(query);
-    }
 
-    @Override
-    public ResultSetRewindable select(Query query)
-    {
-        return getSPARQLClient().select(query);
-    }
-
-    /**
-     * Returns boolean result from a remote SPARQL endpoint using a query and optional request parameters.
-     * Only <code>ASK</code> queries can be used with this method.
-     * 
-     * @param query query object
-     * @return boolean result
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#ask">ASK</a>
-     */    
-    @Override
-    public boolean ask(Query query)
-    {
-        return getSPARQLClient().ask(query);
-    }
-    
-    @Override
-    public void update(UpdateRequest updateRequest)
-    {
-        getSPARQLClient().update(updateRequest);
-    }
-    
 }

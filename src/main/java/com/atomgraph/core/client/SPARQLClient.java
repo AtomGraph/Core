@@ -263,11 +263,6 @@ public class SPARQLClient
         }
     }
 
-    public void update(UpdateRequest updateRequest)
-    {
-        post(updateRequest, null, null).close();
-    }
-
     /**
      * POSTs update to a remote SPARQL endpoint.
      * 
@@ -290,6 +285,31 @@ public class SPARQLClient
         return builder.post(ClientResponse.class, formData);
     }
 
+    public void update(UpdateRequest updateRequest)
+    {
+        update(updateRequest, null, null);
+    }
+    
+    public void update(UpdateRequest updateRequest, MultivaluedMap<String, String> params, Map<String, Object> headers)
+    {
+        ClientResponse cr = null;
+        
+        try
+        {
+            cr = post(updateRequest, params, headers);
+
+            if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+            {
+                if (log.isErrorEnabled()) log.error("Query request to endpoint: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                throw new ClientException(cr);
+            }
+        }
+        finally
+        {
+            if (cr != null) cr.close();
+        }
+    }
+    
     public final WebResource getWebResource()
     {
         return webResource;
