@@ -62,6 +62,9 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
     @Override
     public Model loadModel(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris)
     {
+        if (defaultGraphUris == null) throw new IllegalArgumentException("List<URI> cannot be null");
+        if (namedGraphUris == null) throw new IllegalArgumentException("List<URI> cannot be null");
+
         MultivaluedMap<String, String> params = new MultivaluedMapImpl();
         
         for (URI defaultGraphUri : defaultGraphUris)
@@ -75,6 +78,9 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
     @Override
     public ResultSetRewindable select(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris)
     {
+        if (defaultGraphUris == null) throw new IllegalArgumentException("List<URI> cannot be null");
+        if (namedGraphUris == null) throw new IllegalArgumentException("List<URI> cannot be null");
+        
         MultivaluedMap<String, String> params = new MultivaluedMapImpl();
         
         for (URI defaultGraphUri : defaultGraphUris)
@@ -88,6 +94,9 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
     @Override
     public boolean ask(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris)
     {
+        if (defaultGraphUris == null) throw new IllegalArgumentException("List<URI> cannot be null");
+        if (namedGraphUris == null) throw new IllegalArgumentException("List<URI> cannot be null");
+        
         MultivaluedMap<String, String> params = new MultivaluedMapImpl();
         
         for (URI defaultGraphUri : defaultGraphUris)
@@ -101,6 +110,9 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
     @Override
     public void update(UpdateRequest updateRequest, List<URI> usingGraphUris, List<URI> usingNamedGraphUris)
     {
+        if (usingGraphUris == null) throw new IllegalArgumentException("List<URI> cannot be null");
+        if (usingNamedGraphUris == null) throw new IllegalArgumentException("List<URI> cannot be null");
+        
         MultivaluedMap<String, String> params = new MultivaluedMapImpl();
         
         for (URI usingGraphUri : usingGraphUris)
