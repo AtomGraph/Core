@@ -136,9 +136,10 @@ public class GraphStoreClient implements DatasetAccessor
         }
     }
 
-    public ClientResponse head(String graphURI)
+    public ClientResponse head(javax.ws.rs.core.MediaType[] acceptedTypes, String graphURI)
     {
 	return getWebResource().queryParam("graph", graphURI).
+            accept(acceptedTypes).
             method("HEAD", ClientResponse.class);
     }
     
@@ -150,7 +151,7 @@ public class GraphStoreClient implements DatasetAccessor
         try
         {
             if (log.isDebugEnabled()) log.debug("Checking if Graph Store {} contains GRAPH with URI {}", getWebResource().getURI(), uri);
-            cr = head(uri);
+            cr = head(getReadableMediaTypes(Model.class), uri);
             
             if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
