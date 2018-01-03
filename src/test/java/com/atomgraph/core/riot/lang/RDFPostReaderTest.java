@@ -16,21 +16,28 @@
  */
 package com.atomgraph.core.riot.lang;
 
+import com.atomgraph.core.riot.RDFLanguages;
+import java.io.ByteArrayInputStream;
 import org.apache.jena.datatypes.BaseDatatype;
 import org.apache.jena.rdf.model.AnonId;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import java.net.URLEncoder;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFParserRegistry;
+import org.apache.jena.riot.ReaderRIOT;
+import org.apache.jena.riot.system.ErrorHandler;
+import org.apache.jena.riot.system.ErrorHandlerFactory;
+import org.apache.jena.riot.system.ParserProfile;
+import org.apache.jena.riot.system.RiotLib;
+import org.apache.jena.riot.system.StreamRDFLib;
 import org.junit.*;
 import static org.junit.Assert.*;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /**
  *
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
-@RunWith(JUnit4.class)
 public class RDFPostReaderTest
 {
     public static String POST_BODY = "&rdf=&su=" + URLEncoder.encode("http://subject1") + "&pu=" + URLEncoder.encode("http://dc.org/#title") + "&ol=" + URLEncoder.encode("title") + "&ll=da" +
@@ -44,42 +51,18 @@ public class RDFPostReaderTest
     "&sb=" + URLEncoder.encode("b1") + "&pu=" + URLEncoder.encode("http://rdf.org/#first") + "&ou=" + URLEncoder.encode("http://something/") +
 					"&pu=" + URLEncoder.encode("http://rdf.org/#rest") + "&ou=" + URLEncoder.encode("http://rdf.org/#nil");
     
-    //public static Model MODEL = ModelFactory.createDefaultModel().
-    //	    add(ResourceFactory.createResource("http://subject1"), ResourceFactory.createProperty("http://dc.org/#title"),
+    private final Model expected;
     
-    public RDFPostReaderTest()
-    {
-    }
-
     @BeforeClass
     public static void setUpClass() throws Exception
     {
-    }
-
-    @AfterClass
-    public static void tearDownClass() throws Exception
-    {
+        RDFLanguages.register(RDFLanguages.RDFPOST);
+        RDFParserRegistry.registerLangTriples(RDFLanguages.RDFPOST, new RDFPostReaderFactory());
     }
     
-    @Before
-    public void setUp()
+    public RDFPostReaderTest()
     {
-    }
-    
-    @After
-    public void tearDown()
-    {
-    }
-
-    /**
-     * Test of parse method, of class RDFPostReader.
-     */
-    @Test
-    @Ignore
-    public void testParse() throws Exception
-    {
-	RDFPostReader instance = new RDFPostReader();
-	Model expected = ModelFactory.createDefaultModel();
+	expected = ModelFactory.createDefaultModel();
 	expected.add(expected.createResource("http://subject1"), expected.createProperty("http://dc.org/#title"), expected.createLiteral("title", "da")).
 		add(expected.createResource("http://subject1"), expected.createProperty("http://predicate1"), expected.createResource("http://object1")).
 		add(expected.createResource("http://subject1"), expected.createProperty("http://predicate2"), expected.createResource("http://object2")).
@@ -90,19 +73,30 @@ public class RDFPostReaderTest
 		add(expected.createResource("http://subject4"), expected.createProperty("http://dct.org/#hasPart"), expected.createResource(AnonId.create("b1"))).
 		add(expected.createResource(AnonId.create("b1")), expected.createProperty("http://rdf.org/#first"), expected.createResource("http://something/")).
 		add(expected.createResource(AnonId.create("b1")), expected.createProperty("http://rdf.org/#rest"), expected.createResource("http://rdf.org/#nil"));
-	System.out.println("Expected Model");
-	System.out.println(expected.listStatements().toList().toString());
-
-	Model parsed = instance.parse(POST_BODY, "UTF-8");
-	System.out.println("Parsed RDF/POST Model");
-	System.out.println(parsed.listStatements().toList().toString());
-
-	assertIsoModels(expected, parsed);
     }
 
-    public static void assertIsoModels(Model wanted, Model got)
+    /**
+     * Test of parse method, of class RDFPostReader.
+     */
+    @Test
+    @Ignore
+    public void testParse()
+    {
+        Model parsed = ModelFactory.createDefaultModel();
+        ErrorHandler errorHandler = ErrorHandlerFactory.errorHandlerStrict; // throw exceptions on all parse errors
+        ParserProfile parserProfile = RiotLib.profile("http://base", true, true, errorHandler);
+        ReaderRIOT parser = RDFDataMgr.createReader(RDFLanguages.RDFPOST);
+        parser.setErrorHandler(errorHandler);
+        parser.setParserProfile(parserProfile);
+        parser.read(new ByteArrayInputStream(POST_BODY.getBytes()), "http://base", null, StreamRDFLib.graph(parsed.getGraph()), null);
+        
+	assertIsomorphic(expected, parsed);
+    }
+
+    public static void assertIsomorphic(Model wanted, Model got)
     {
 	if (!wanted.isIsomorphicWith(got))
 	    fail("Models not isomorphic (not structurally equal))");
     }
+    
 }
