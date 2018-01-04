@@ -16,7 +16,6 @@
 
 package com.atomgraph.core.riot.lang;
 
-import org.apache.jena.datatypes.BaseDatatype;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.rdf.model.AnonId;
@@ -51,6 +50,7 @@ import org.apache.jena.riot.tokens.Token;
 import org.apache.jena.riot.tokens.TokenType;
 import static org.apache.jena.riot.tokens.TokenType.*;
 import static com.atomgraph.core.riot.lang.TokenizerRDFPost.*;
+import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.riot.tokens.Tokenizer;
 import org.apache.jena.util.FileUtils;
 import org.slf4j.Logger;
@@ -198,7 +198,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
 			switch (k.get(i + 1))
 			{
 			    case TYPE:
-				object = model.createTypedLiteral(v.get(i), new BaseDatatype(v.get(i + 1))); // typed literal (value+datatype)
+				object = model.createTypedLiteral(v.get(i), TypeMapper.getInstance().getSafeTypeByName(v.get(i + 1))); // typed literal (value+datatype)
 				i++; // skip the following "lt"
 				break;
 			    case LANG:
@@ -215,7 +215,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
 		case TYPE:
 		    if (i + 1 < k.size() && k.get(i + 1).equals(LITERAL_OBJ)) // followed by "ol" (if not out of bounds)
 		    {
-			object = model.createTypedLiteral(v.get(i + 1), new BaseDatatype(v.get(i))); // typed literal (datatype+value)
+			object = model.createTypedLiteral(v.get(i + 1), TypeMapper.getInstance().getSafeTypeByName(v.get(i))); // typed literal (datatype+value)
 			i++; // skip the following "ol"
 		    }
 		    break;
