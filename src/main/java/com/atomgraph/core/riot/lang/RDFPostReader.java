@@ -585,7 +585,13 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
         if (!image.startsWith("o"))
         {
             if (image.equals(TYPE) || image.equals(LANG)) // lt or ll
-                return objectLiteral(tokens, peekIter, profile);
+            {
+                Node n = objectLiteral(tokens, peekIter, profile);
+                if (n == null) skipToSubjectOrPredicateOrNonLiteralObject(tokens, peekIter);
+                
+                if (peekToken(tokens, peekIter).getImage().startsWith("o"))
+                    return object(tokens, peekIter, profile, subject, predicate);
+            }
 
             skipToSubjectOrPredicate(tokens, peekIter);
             return null;
@@ -636,11 +642,10 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
                     exception(peekToken(tokens, peekIter), "'lt' requires a URI (found '" + peekToken(tokens, peekIter) + "')") ;
                 Token dtIriToken = nextToken(tokens, peekIter);
                 
+                // no ol follows lt
                 if (!(lookingAt(tokens, peekIter, DIRECTIVE) && peekToken(tokens, peekIter).getImage().equals(LITERAL_OBJ)))
-                {
-                    skipToSubjectOrPredicateOrNonLiteralObject(tokens, peekIter);
                     return null;
-                }
+                
                 nextToken(tokens, peekIter); // skip ol
 
                 if ( !lookingAt(tokens, peekIter, STRING))
@@ -661,11 +666,10 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
                     exception(peekToken(tokens, peekIter), "'ol' requires a node (found '" + peekToken(tokens, peekIter) + "')") ;
                 Token langToken = nextToken(tokens, peekIter);
 
+                // no ol follows ll
                 if (!(lookingAt(tokens, peekIter, DIRECTIVE) && peekToken(tokens, peekIter).getImage().equals(LITERAL_OBJ)))
-                {
-                    skipToSubjectOrPredicateOrNonLiteralObject(tokens, peekIter);
                     return null;
-                }
+
                 nextToken(tokens, peekIter); // skip ol
 
                 if ( !lookingAt(tokens, peekIter, STRING))
@@ -682,7 +686,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
 
         if ( !lookingAt(tokens, peekIter, STRING))
             exception(peekToken(tokens, peekIter), "'ol' requires a string (found '" + peekToken(tokens, peekIter) + "')") ;
-        Token literal = nextToken(tokens, peekIter); // nextToken(tokens, peekIter);
+        Token literal = nextToken(tokens, peekIter);
         
         Node literalNode = tokenAsNode(profile, literal);
         

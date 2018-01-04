@@ -86,6 +86,10 @@ public class RDFPostReaderTest
 		add(validExpected.createResource(AnonId.create("b1")), validExpected.createProperty("http://rdf.org/#rest"), validExpected.createResource("http://rdf.org/#nil"));
     }
 
+    /**
+     * The simple parsing method only has this one test, others are for the streaming RIOT version
+     * @throws URISyntaxException 
+     */
     @Test
     public void testValidBodySimpleParse() throws URISyntaxException
     {
@@ -122,11 +126,10 @@ public class RDFPostReaderTest
     {
         String random = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&x=123" + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&ol=" + URLEncoder.encode("literal", ENC) + "&ZZZ=pu" +
             "&su=" + URLEncoder.encode("http://subject2", ENC) +  "&q=42" + "&pu=" + URLEncoder.encode("http://predicate3", ENC) + "&ol=" + URLEncoder.encode("literal1", ENC);
-        Model randomExp = ModelFactory.createDefaultModel();
         Model randomParsed = ModelFactory.createDefaultModel();
         createRIOTParser().read(new ByteArrayInputStream(random.getBytes()), "http://base", null, StreamRDFLib.graph(randomParsed.getGraph()), null);
         
-	assertIsomorphic(randomExp, randomParsed);
+	assertTrue(randomParsed.isEmpty());
     }
     
     @Test
@@ -162,10 +165,10 @@ public class RDFPostReaderTest
             "&su=" + URLEncoder.encode("http://subject2", ENC) + "&pu=" + URLEncoder.encode("http://predicate3", ENC) + "&ol=" + URLEncoder.encode("literal1", ENC);                
         Model skipToNextSubjectExp = ModelFactory.createDefaultModel();
 	skipToNextSubjectExp.add(skipToNextSubjectExp.createResource("http://subject2"), skipToNextSubjectExp.createProperty("http://predicate3"), skipToNextSubjectExp.createLiteral("literal1"));
-        Model skipSubjectParsed = ModelFactory.createDefaultModel();
-        createRIOTParser().read(new ByteArrayInputStream(skipToNextSubject.getBytes()), "http://base", null, StreamRDFLib.graph(skipSubjectParsed.getGraph()), null);
+        Model skipToNextSubjectParsed = ModelFactory.createDefaultModel();
+        createRIOTParser().read(new ByteArrayInputStream(skipToNextSubject.getBytes()), "http://base", null, StreamRDFLib.graph(skipToNextSubjectParsed.getGraph()), null);
         
-	assertIsomorphic(skipToNextSubjectExp, skipSubjectParsed);
+	assertIsomorphic(skipToNextSubjectExp, skipToNextSubjectParsed);
         
         String skipToNextPredicate = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://dc.org/#title", ENC) + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&ol=" + URLEncoder.encode("literal", ENC);
         Model skipToNextPredicateExp = ModelFactory.createDefaultModel();
@@ -192,6 +195,50 @@ public class RDFPostReaderTest
             "&pu=" + URLEncoder.encode("http://predicate3", ENC) + "&ol=" + URLEncoder.encode("literal1", ENC);
         Model skipToNextPredicateExp = ModelFactory.createDefaultModel();
 	skipToNextPredicateExp.add(skipToNextPredicateExp.createResource("http://subject1"), skipToNextPredicateExp.createProperty("http://predicate3"), skipToNextPredicateExp.createLiteral("literal1"));
+        Model skipToNextPredicateParsed = ModelFactory.createDefaultModel();
+        createRIOTParser().read(new ByteArrayInputStream(skipToNextPredicate.getBytes()), "http://base", null, StreamRDFLib.graph(skipToNextPredicateParsed.getGraph()), null);
+        
+	assertIsomorphic(skipToNextPredicateExp, skipToNextPredicateParsed);
+    }
+    
+    @Test
+    public void testSkipMissingDatatype() throws UnsupportedEncodingException
+    {
+        String skipToNextNonLiteralObject = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&lt=" + URLEncoder.encode("http://type", ENC) + "ll=da" +
+            "&ou=" + URLEncoder.encode("http://object1", ENC);
+        Model skipToNextNonLiteralObjectExp = ModelFactory.createDefaultModel();
+	skipToNextNonLiteralObjectExp.add(skipToNextNonLiteralObjectExp.createResource("http://subject1"), skipToNextNonLiteralObjectExp.createProperty("http://predicate1"), skipToNextNonLiteralObjectExp.createResource("http://object1"));
+        Model skipToNextNonLiteralObjectParsed = ModelFactory.createDefaultModel();
+        createRIOTParser().read(new ByteArrayInputStream(skipToNextNonLiteralObject.getBytes()), "http://base", null, StreamRDFLib.graph(skipToNextNonLiteralObjectParsed.getGraph()), null);
+	
+        assertIsomorphic(skipToNextNonLiteralObjectExp, skipToNextNonLiteralObjectParsed);
+
+        String skipToNextPredicate = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&lt=" + URLEncoder.encode("http://type", ENC) + "ll=da" +
+            "&pu=" + URLEncoder.encode("http://predicate3", ENC) + "&ou=" + URLEncoder.encode("http://object1", ENC);
+        Model skipToNextPredicateExp = ModelFactory.createDefaultModel();
+	skipToNextPredicateExp.add(skipToNextPredicateExp.createResource("http://subject1"), skipToNextPredicateExp.createProperty("http://predicate3"), skipToNextPredicateExp.createResource("http://object1"));
+        Model skipToNextPredicateParsed = ModelFactory.createDefaultModel();
+        createRIOTParser().read(new ByteArrayInputStream(skipToNextPredicate.getBytes()), "http://base", null, StreamRDFLib.graph(skipToNextPredicateParsed.getGraph()), null);
+        
+	assertIsomorphic(skipToNextPredicateExp, skipToNextPredicateParsed);
+    }
+    
+    @Test
+    public void testSkipMissingLangTag() throws UnsupportedEncodingException
+    {
+        String skipToNextNonLiteralObject = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&ll=da" + "&lt=" + URLEncoder.encode("http://type", ENC) +
+            "&ou=" + URLEncoder.encode("http://object1", ENC);
+        Model skipToNextNonLiteralObjectExp = ModelFactory.createDefaultModel();
+	skipToNextNonLiteralObjectExp.add(skipToNextNonLiteralObjectExp.createResource("http://subject1"), skipToNextNonLiteralObjectExp.createProperty("http://predicate1"), skipToNextNonLiteralObjectExp.createResource("http://object1"));
+        Model skipToNextNonLiteralObjectParsed = ModelFactory.createDefaultModel();
+        createRIOTParser().read(new ByteArrayInputStream(skipToNextNonLiteralObject.getBytes()), "http://base", null, StreamRDFLib.graph(skipToNextNonLiteralObjectParsed.getGraph()), null);
+	
+        assertIsomorphic(skipToNextNonLiteralObjectExp, skipToNextNonLiteralObjectParsed);
+
+        String skipToNextPredicate = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&ll=da" + "&lt=" + URLEncoder.encode("http://type", ENC) +
+            "&pu=" + URLEncoder.encode("http://predicate3", ENC) + "&ou=" + URLEncoder.encode("http://object1", ENC);
+        Model skipToNextPredicateExp = ModelFactory.createDefaultModel();
+	skipToNextPredicateExp.add(skipToNextPredicateExp.createResource("http://subject1"), skipToNextPredicateExp.createProperty("http://predicate3"), skipToNextPredicateExp.createResource("http://object1"));
         Model skipToNextPredicateParsed = ModelFactory.createDefaultModel();
         createRIOTParser().read(new ByteArrayInputStream(skipToNextPredicate.getBytes()), "http://base", null, StreamRDFLib.graph(skipToNextPredicateParsed.getGraph()), null);
         
