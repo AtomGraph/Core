@@ -15,7 +15,7 @@
  *
  */
 
-package com.atomgraph.core.model.impl.proxy;
+package com.atomgraph.core.model.impl.remote;
 
 import org.apache.jena.rdf.model.Model;
 import javax.ws.rs.core.Context;
@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
 //@Path("/service") // not standard
-public class GraphStoreBase extends com.atomgraph.core.model.impl.GraphStoreBase 
+public class GraphStoreBase extends com.atomgraph.core.model.impl.GraphStoreBase implements com.atomgraph.core.model.remote.GraphStore
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreBase.class);
 
@@ -45,17 +45,11 @@ public class GraphStoreBase extends com.atomgraph.core.model.impl.GraphStoreBase
      * @param mediaTypes supported media types
      * @param graphStoreClient graph store client
      */
-    public GraphStoreBase(@Context Request request, @Context MediaTypes mediaTypes,
-            @Context GraphStoreClient graphStoreClient)
+    public GraphStoreBase(@Context Request request, @Context MediaTypes mediaTypes, @Context GraphStoreClient graphStoreClient)
     {
         super(request, mediaTypes);
         if (graphStoreClient == null) throw new IllegalArgumentException("GraphStoreClient cannot be null");
         this.graphStoreClient = graphStoreClient;
-    }
-
-    public GraphStoreClient getGraphStoreClient()
-    {
-        return graphStoreClient;
     }
     
     @Override
@@ -112,4 +106,10 @@ public class GraphStoreBase extends com.atomgraph.core.model.impl.GraphStoreBase
         getGraphStoreClient().add(uri, model);
     }
 
+    @Override
+    public GraphStoreClient getGraphStoreClient()
+    {
+        return graphStoreClient;
+    }
+    
 }

@@ -1,0 +1,124 @@
+/*
+ * Copyright 2016 Martynas Jusevičius <martynas@atomgraph.com>.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.atomgraph.core.model.impl.remote;
+
+import com.atomgraph.core.MediaTypes;
+import com.atomgraph.core.client.GraphStoreClient;
+import com.atomgraph.core.client.SPARQLClient;
+import com.atomgraph.core.model.GraphStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.atomgraph.core.model.RemoteService;
+import com.atomgraph.core.model.SPARQLEndpoint;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.filter.ClientFilter;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
+import javax.ws.rs.core.Request;
+
+/**
+ *
+ * @author Martynas Jusevičius <martynas@atomgraph.com>
+ */
+public class ServiceImpl implements RemoteService
+{
+
+    private static final Logger log = LoggerFactory.getLogger(ServiceImpl.class);
+    
+    private final SPARQLClient sparqlClient;
+    private final GraphStoreClient graphStoreClient;
+    private final org.apache.jena.rdf.model.Resource endpoint, graphStore;
+    private final String authUser, authPwd;
+
+    public ServiceImpl(Client client, MediaTypes mediaTypes, org.apache.jena.rdf.model.Resource endpoint, org.apache.jena.rdf.model.Resource graphStore, String authUser, String authPwd,
+            Integer maxGetRequestSize)
+    {
+	if (client == null) throw new IllegalArgumentException("Client must be not null");
+	if (endpoint == null) throw new IllegalArgumentException("SPARQL endpoint Resource must be not null");
+	if (!endpoint.isURIResource()) throw new IllegalArgumentException("SPARQL endpoint Resource must be URI resource");
+	if (graphStore == null) throw new IllegalArgumentException("Graph Store Resource must be not null");
+	if (!graphStore.isURIResource()) throw new IllegalArgumentException("Graph Store Resource must be URI resource");
+
+        if (maxGetRequestSize != null)
+            this.sparqlClient = SPARQLClient.create(client.resource(endpoint.getURI()), mediaTypes, maxGetRequestSize);
+        else
+            this.sparqlClient = SPARQLClient.create(client.resource(endpoint.getURI()), mediaTypes);
+        this.graphStoreClient = GraphStoreClient.create(client.resource(graphStore.getURI()));
+        
+        if (authUser != null && authPwd != null)
+        {
+            ClientFilter authFilter = new HTTPBasicAuthFilter(authUser, authPwd);
+            this.sparqlClient.getWebResource().addFilter(authFilter);
+            this.graphStoreClient.getWebResource().addFilter(authFilter);
+        }
+            
+        this.endpoint = endpoint;
+        this.graphStore = graphStore;
+        this.authUser = authUser;
+        this.authPwd = authPwd;
+    }
+
+    public ServiceImpl(Client client, MediaTypes mediaTypes, org.apache.jena.rdf.model.Resource endpoint, org.apache.jena.rdf.model.Resource graphStore)
+    {
+        this(client, mediaTypes, endpoint, graphStore, null, null, null);
+    }
+        
+    @Override
+    public org.apache.jena.rdf.model.Resource getSPARQLEndpoint()
+    {
+        return endpoint;
+    }
+    
+    @Override
+    public org.apache.jena.rdf.model.Resource getGraphStore()
+    {
+        return graphStore;
+    }
+
+    @Override
+    public String getAuthUser() // protected?
+    {
+        return authUser;
+    }
+    
+    @Override
+    public String getAuthPwd()  // protected?
+    {
+        return authPwd;
+    }
+    
+    @Override
+    public SPARQLEndpoint getSPARQLEndpoint(Request request, MediaTypes mediaTypes)
+    {
+        return new SPARQLEndpointBase(request, mediaTypes, getSPARQLClient());
+    }
+
+    @Override
+    public GraphStore getGraphStore(Request request, MediaTypes mediaTypes)
+    {
+        return new GraphStoreBase(request, mediaTypes, getGraphStoreClient());
+    }
+    
+    protected SPARQLClient getSPARQLClient()
+    {
+        return sparqlClient;
+    }
+    
+    protected GraphStoreClient getGraphStoreClient()
+    {
+        return graphStoreClient;
+    }
+    
+}

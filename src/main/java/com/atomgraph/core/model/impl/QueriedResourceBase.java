@@ -29,9 +29,9 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import com.atomgraph.core.exception.NotFoundException;
-import com.atomgraph.core.model.GraphStore;
 import com.atomgraph.core.model.QueriedResource;
-import com.atomgraph.core.model.SPARQLEndpoint;
+import com.atomgraph.core.model.Service;
+import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,8 +47,7 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
 {
     private static final Logger log = LoggerFactory.getLogger(QueriedResourceBase.class);
     
-    private final SPARQLEndpoint sparqlEndpoint;
-    private final GraphStore graphStore;
+    private final Service service;
     
     /**
      * JAX-RS-compatible resource constructor with injected initialization objects.
@@ -57,46 +56,36 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
      * @param mediaTypes mediaTypes
      * @param uriInfo URI information of the request
      * @param request current request object
-     * @param sparqlEndpoint SPARQL endpoint
-     * @param graphStore Graph Store
+     * @param service SPARQL service
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html">JAX-RS UriInfo</a>
      * @see <a href="http://docs.oracle.com/javaee/7/api/javax/servlet/ServletContext.html">ServletContext</a>
      * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceContext.html">Jersey ResourceContext</a>
      */
-    public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context MediaTypes mediaTypes,
-            @Context SPARQLEndpoint sparqlEndpoint, @Context GraphStore graphStore)
+    public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context MediaTypes mediaTypes, @Context Service service)
     {
-        this(uriInfo, request, mediaTypes, uriInfo.getAbsolutePath(), sparqlEndpoint, graphStore);
+        this(uriInfo, request, mediaTypes, uriInfo.getAbsolutePath(), service);
     }
 
-    protected QueriedResourceBase(final UriInfo uriInfo, final Request request, final MediaTypes mediaTypes, final URI uri,
-            final SPARQLEndpoint sparqlEndpoint, final GraphStore graphStore)            
+    protected QueriedResourceBase(final UriInfo uriInfo, final Request request, final MediaTypes mediaTypes, final URI uri, final Service service)            
     {
         super(uriInfo, request, mediaTypes, uri);
-	if (sparqlEndpoint == null) throw new IllegalArgumentException("SPARQLEndpoint cannot be null");
-	if (graphStore == null) throw new IllegalArgumentException("GraphStore cannot be null");
+	if (service == null) throw new IllegalArgumentException("Service cannot be null");
         
-        this.sparqlEndpoint = sparqlEndpoint;
-        this.graphStore = graphStore;
+        this.service = service;
     }
     
-    public SPARQLEndpoint getSPARQLEndpoint()
+    public Service getService()
     {
-        return sparqlEndpoint;
-    }
-    
-    public GraphStore getGraphStore()
-    {
-        return graphStore;
+        return service;
     }
     
     @Path("{path: .+}")
     public Object getSubResource()
     {
         if (getUriInfo().getAbsolutePath().equals(getUriInfo().getBaseUriBuilder().path("sparql").build()))
-                return getSPARQLEndpoint();
+            return getService().getSPARQLEndpoint(getRequest(), getMediaTypes());
         if (getUriInfo().getAbsolutePath().equals(getUriInfo().getBaseUriBuilder().path("service").build()))
-                return getGraphStore();
+            return getService().getGraphStore(getRequest(), getMediaTypes());
 
         return this;
     }
@@ -112,7 +101,7 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     @Override
     public Model describe()
     {
-        return (Model)getSPARQLEndpoint().get(getQuery(), null, null).getEntity();
+        return (Model)getService().getSPARQLEndpoint(getRequest(), getMediaTypes()).get(getQuery(), Collections.<URI>emptyList() , Collections.<URI>emptyList()).getEntity();
     }
     
     /**

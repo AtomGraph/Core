@@ -56,8 +56,7 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
      * @param mediaTypes supported media types
      * @param request current request
      */
-    public SPARQLEndpointBase(@Context Request request, @Context MediaTypes mediaTypes,
-            @Context Dataset dataset)
+    public SPARQLEndpointBase(@Context Request request, @Context MediaTypes mediaTypes, @Context Dataset dataset)
     {
 	super(request, mediaTypes);
         if (dataset == null) throw new IllegalArgumentException("Dataset cannot be null");
@@ -184,7 +183,10 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
 
     // TO-DO: rewrite using Java 8 streams/lambdas
     public Dataset specifyDataset(Dataset dataset, List<URI> defaultGraphUris, List<URI> namedGraphUris)
-    {        
+    {
+        if (defaultGraphUris == null) throw new IllegalArgumentException("List<URI> cannot be null");
+        if (namedGraphUris == null) throw new IllegalArgumentException("List<URI> cannot be null");
+        
         List<String> defaultGraphUriStrings = new ArrayList<>();
             for (URI defaultGraphUri : defaultGraphUris)
                 defaultGraphUriStrings.add(defaultGraphUri.toString());

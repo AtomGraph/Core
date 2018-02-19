@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Martynas Jusevičius <martynas@atomgraph.com>.
+ * Copyright 2018 Martynas Jusevičius <martynas@atomgraph.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.atomgraph.core.model;
+package com.atomgraph.core.model.remote;
 
-import com.atomgraph.core.MediaTypes;
-import javax.ws.rs.core.Request;
+import com.atomgraph.core.client.GraphStoreClient;
 
 /**
  *
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
-public interface Service
+public interface GraphStore extends com.atomgraph.core.model.GraphStore
 {
-    
-    SPARQLEndpoint getSPARQLEndpoint(Request request, MediaTypes mediaTypes);
-    
-    GraphStore getGraphStore(Request request, MediaTypes mediaTypes);
+ 
+    GraphStoreClient getGraphStoreClient();
     
 }

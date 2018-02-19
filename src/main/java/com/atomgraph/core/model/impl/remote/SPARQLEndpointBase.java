@@ -15,7 +15,7 @@
  *
  */
 
-package com.atomgraph.core.model.impl.proxy;
+package com.atomgraph.core.model.impl.remote;
 
 import org.apache.jena.query.Query;
 import org.apache.jena.query.ResultSetRewindable;
@@ -39,7 +39,7 @@ import javax.ws.rs.core.MultivaluedMap;
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
 // @Path("/sparql")
-public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndpointBase
+public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndpointBase implements com.atomgraph.core.model.remote.SPARQLEndpoint
 {
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointBase.class);
 
@@ -123,6 +123,7 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
         getSPARQLClient().update(updateRequest, params, null);
     }
         
+    @Override
     public SPARQLClient getSPARQLClient()
     {
         return sparqlClient;

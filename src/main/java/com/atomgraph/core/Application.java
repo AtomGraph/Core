@@ -16,8 +16,6 @@
  */
 package com.atomgraph.core;
 
-import com.atomgraph.core.client.GraphStoreClient;
-import com.atomgraph.core.client.SPARQLClient;
 import com.atomgraph.core.exception.ConfigurationException;
 import com.atomgraph.core.io.DatasetProvider;
 import com.atomgraph.core.io.ResultSetProvider;
@@ -33,34 +31,26 @@ import javax.ws.rs.core.Context;
 import org.apache.jena.riot.RDFParserRegistry;
 import com.atomgraph.core.mapper.ClientExceptionMapper;
 import com.atomgraph.core.mapper.NotFoundExceptionMapper;
-import com.atomgraph.core.model.RemoteService;
 import com.atomgraph.core.model.Service;
 import com.atomgraph.core.model.impl.ApplicationImpl;
-import com.atomgraph.core.model.impl.proxy.GraphStoreBase;
+import com.atomgraph.core.model.impl.remote.GraphStoreBase;
 import com.atomgraph.core.model.impl.QueriedResourceBase;
-import com.atomgraph.core.model.impl.proxy.SPARQLEndpointBase;
-import com.atomgraph.core.provider.GraphStoreClientProvider;
-import com.atomgraph.core.provider.GraphStoreProvider;
+import com.atomgraph.core.model.impl.remote.SPARQLEndpointBase;
 import com.atomgraph.core.provider.MediaTypesProvider;
-import com.atomgraph.core.provider.SPARQLClientProvider;
-import com.atomgraph.core.provider.SPARQLEndpointProvider;
+import com.atomgraph.core.provider.ServiceProvider;
 import com.atomgraph.core.riot.RDFLanguages;
 import com.atomgraph.core.riot.lang.RDFPostReaderFactory;
 import com.atomgraph.core.util.jena.DataManager;
 import com.atomgraph.core.vocabulary.A;
 import com.atomgraph.core.vocabulary.SD;
 import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.api.client.filter.ClientFilter;
-import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
 import javax.annotation.PostConstruct;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
-import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
@@ -90,8 +80,6 @@ public class Application extends javax.ws.rs.core.Application implements com.ato
     private final com.atomgraph.core.model.Application application;
     private final MediaTypes mediaTypes;
     private final Client client;
-    private final SPARQLClient sparqlClient;
-    private final GraphStoreClient graphStoreClient;
     private final DataManager dataManager;
     private final Integer maxGetRequestSize;
     private final boolean preemptiveAuth;
@@ -130,11 +118,7 @@ public class Application extends javax.ws.rs.core.Application implements com.ato
         RDFParserRegistry.registerLangTriples(RDFLanguages.RDFPOST, new RDFPostReaderFactory());
         
         if (dataset != null)
-        {
-            sparqlClient = null;
-            graphStoreClient = null;
             service = new com.atomgraph.core.model.impl.dataset.ServiceImpl(dataset);
-        }            
         else
         {
             if (endpointURI == null)
@@ -142,29 +126,15 @@ public class Application extends javax.ws.rs.core.Application implements com.ato
                 if (log.isErrorEnabled()) log.error("SPARQL endpoint not configured ('{}' not set in web.xml)", SD.endpoint.getURI());
                 throw new ConfigurationException(SD.endpoint);
             }
-            final Resource endpoint = ResourceFactory.createResource(endpointURI);
             if (graphStoreURI == null)
             {
                 if (log.isErrorEnabled()) log.error("Graph Store not configured ('{}' not set in web.xml)", A.graphStore.getURI());
                 throw new ConfigurationException(A.graphStore);
             }
-            final Resource graphStore = ResourceFactory.createResource(graphStoreURI);
-            final RemoteService remoteService = new com.atomgraph.core.model.impl.proxy.ServiceImpl(endpoint, graphStore, authUser, authPwd);            
 
-            WebResource sparqlEndpointOrigin = client.resource(remoteService.getSPARQLEndpoint().getURI());            
-            WebResource graphStoreOrigin = client.resource(remoteService.getGraphStore().getURI());            
-            if (remoteService.getAuthUser() != null && remoteService.getAuthPwd() != null)
-            {
-                ClientFilter authFilter = new HTTPBasicAuthFilter(remoteService.getAuthUser(), remoteService.getAuthPwd());
-                sparqlEndpointOrigin.addFilter(authFilter);
-                graphStoreOrigin.addFilter(authFilter);
-            }
-            
-            if (maxGetRequestSize != null) sparqlClient = SPARQLClient.create(sparqlEndpointOrigin, mediaTypes, maxGetRequestSize);
-            else sparqlClient = SPARQLClient.create(sparqlEndpointOrigin, mediaTypes);
-            graphStoreClient = GraphStoreClient.create(graphStoreOrigin, mediaTypes);
-
-            service = remoteService;
+            service = new com.atomgraph.core.model.impl.remote.ServiceImpl(client, mediaTypes,
+                    ResourceFactory.createResource(endpointURI), ResourceFactory.createResource(graphStoreURI),
+                    authUser, authPwd, maxGetRequestSize);
         }
         
         application = new ApplicationImpl(service);
@@ -184,11 +154,12 @@ public class Application extends javax.ws.rs.core.Application implements com.ato
         singletons.add(new QueryParamProvider());
         singletons.add(new UpdateRequestReader());
         singletons.add(new DataManagerProvider(getDataManager()));
-        singletons.add(new SPARQLEndpointProvider());
-        singletons.add(new GraphStoreProvider());
-        singletons.add(new com.atomgraph.core.provider.DatasetProvider(getDataset()));
-        singletons.add(new SPARQLClientProvider(getSPARQLClient()));
-        singletons.add(new GraphStoreClientProvider(getGraphStoreClient()));
+        singletons.add(new ServiceProvider(getService()));
+//        singletons.add(new SPARQLEndpointProvider());
+//        singletons.add(new GraphStoreProvider());
+//        singletons.add(new com.atomgraph.core.provider.DatasetProvider(getDataset()));
+//        singletons.add(new SPARQLClientProvider(getSPARQLClient()));
+//        singletons.add(new GraphStoreClientProvider(getGraphStoreClient()));
         singletons.add(new MediaTypesProvider(getMediaTypes()));
         singletons.add(new ClientExceptionMapper());
         singletons.add(new NotFoundExceptionMapper());
@@ -250,17 +221,7 @@ public class Application extends javax.ws.rs.core.Application implements com.ato
     {
         return maxGetRequestSize;
     }    
-    
-    public SPARQLClient getSPARQLClient()
-    {
-        return sparqlClient;
-    }
-    
-    public GraphStoreClient getGraphStoreClient()
-    {
-        return graphStoreClient;
-    }
-    
+
     public DataManager getDataManager()
     {
         return dataManager;
