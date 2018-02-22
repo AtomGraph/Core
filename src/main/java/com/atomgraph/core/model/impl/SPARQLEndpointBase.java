@@ -103,8 +103,7 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     @Override
     @POST
     @Consumes(com.atomgraph.core.MediaType.APPLICATION_SPARQL_QUERY)
-    public Response post(Query query,
-            @QueryParam(DEFAULT_GRAPH_URI) List<URI> defaultGraphUris, @QueryParam(NAMED_GRAPH_URI) List<URI> namedGraphUris)
+    public Response post(Query query, @QueryParam(DEFAULT_GRAPH_URI) List<URI> defaultGraphUris, @QueryParam(NAMED_GRAPH_URI) List<URI> namedGraphUris)
     {
 	return get(query, defaultGraphUris, namedGraphUris);
     }
@@ -112,8 +111,7 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     @Override
     @POST
     @Consumes(com.atomgraph.core.MediaType.APPLICATION_SPARQL_UPDATE)
-    public Response post(UpdateRequest update,
-            @QueryParam(USING_GRAPH_URI) List<URI> usingGraphUris, @QueryParam(USING_NAMED_GRAPH_URI) List<URI> usingNamedGraphUris)
+    public Response post(UpdateRequest update, @QueryParam(USING_GRAPH_URI) List<URI> usingGraphUris, @QueryParam(USING_NAMED_GRAPH_URI) List<URI> usingNamedGraphUris)
     {
 	update(update, usingGraphUris, usingNamedGraphUris);
 

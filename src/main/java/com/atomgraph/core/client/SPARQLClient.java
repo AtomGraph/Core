@@ -94,16 +94,17 @@ public class SPARQLClient
         return getQueryResource(query, params).getURI().toString().length();
     }
     
-    public WebResource.Builder setHeaders(WebResource.Builder builder, Map<String, Object> headers)
+    public WebResource.Builder setHeaders(WebResource.Builder builder, MultivaluedMap<String, String> headers)
     {
 	if (builder == null) throw new IllegalArgumentException("WebResource.Builder must be not null");
 	if (headers == null) throw new IllegalArgumentException("Map<String, Object> must be not null");
 
-        Iterator<Entry<String, Object>> it = headers.entrySet().iterator();
+        Iterator<Entry<String, List<String>>> it = headers.entrySet().iterator();
         while (it.hasNext())
         {
-            Entry<String, Object> entry = it.next();
-            builder.header(entry.getKey(), entry.getValue());
+            Entry<String, List<String>> entry = it.next();
+            for (String value : entry.getValue())
+                builder.header(entry.getKey(), value);
         }
         
         return builder;
@@ -132,7 +133,7 @@ public class SPARQLClient
         return queryResource;
     }
     
-    public ClientResponse get(Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, Map<String, Object> headers)
+    public ClientResponse get(Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
 	if (acceptedTypes == null) throw new IllegalArgumentException("Accepted MediaType[] must be not null");
@@ -144,7 +145,7 @@ public class SPARQLClient
         return builder.get(ClientResponse.class);
     }
     
-    public ClientResponse post(Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, Map<String, Object> headers)
+    public ClientResponse post(Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
 	if (query == null) throw new IllegalArgumentException("Query must be not null");
 	if (acceptedTypes == null) throw new IllegalArgumentException("Accepted MediaType[] must be not null");
@@ -165,7 +166,7 @@ public class SPARQLClient
         return loadModel(query, null, null);
     }
     
-    public Model loadModel(Query query, MultivaluedMap<String, String> params, Map<String, Object> headers)
+    public Model loadModel(Query query, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
         ClientResponse cr = null;
         
@@ -195,7 +196,7 @@ public class SPARQLClient
         return select(query, null, null);
     }
     
-    public ResultSetRewindable select(Query query, MultivaluedMap<String, String> params, Map<String, Object> headers)
+    public ResultSetRewindable select(Query query, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {        
         ClientResponse cr = null;
 
@@ -225,7 +226,7 @@ public class SPARQLClient
         return ask(query, null, null);
     }
     
-    public boolean ask(Query query, MultivaluedMap<String, String> params, Map<String, Object> headers)
+    public boolean ask(Query query, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
         ClientResponse cr = null;
         
@@ -271,7 +272,7 @@ public class SPARQLClient
      * @param headers request headers
      * @return client response
      */
-    public ClientResponse post(UpdateRequest updateRequest, MultivaluedMap<String, String> params, Map<String, Object> headers)
+    public ClientResponse post(UpdateRequest updateRequest, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
 	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", getWebResource().getURI(), updateRequest);
 	if (updateRequest == null) throw new IllegalArgumentException("UpdateRequest must be not null");
@@ -290,7 +291,7 @@ public class SPARQLClient
         update(updateRequest, null, null);
     }
     
-    public void update(UpdateRequest updateRequest, MultivaluedMap<String, String> params, Map<String, Object> headers)
+    public void update(UpdateRequest updateRequest, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
         ClientResponse cr = null;
         
