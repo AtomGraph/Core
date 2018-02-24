@@ -24,6 +24,8 @@ import com.atomgraph.core.client.SPARQLClient;
 public interface SPARQLEndpoint extends com.atomgraph.core.model.SPARQLEndpoint
 {
     
+    String getURI();
+    
     SPARQLClient getSPARQLClient();
     
 }

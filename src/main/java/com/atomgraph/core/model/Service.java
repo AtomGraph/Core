@@ -15,7 +15,6 @@
  */
 package com.atomgraph.core.model;
 
-import com.atomgraph.core.MediaTypes;
 import javax.ws.rs.core.Request;
 
 /**
@@ -25,8 +24,8 @@ import javax.ws.rs.core.Request;
 public interface Service
 {
     
-    SPARQLEndpoint getSPARQLEndpoint(Request request, MediaTypes mediaTypes);
+    SPARQLEndpoint getSPARQLEndpoint(Request request);
     
-    GraphStore getGraphStore(Request request, MediaTypes mediaTypes);
+    GraphStore getGraphStore(Request request);
     
 }

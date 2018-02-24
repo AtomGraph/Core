@@ -34,29 +34,36 @@ public class ServiceImpl implements Service
     private static final Logger log = LoggerFactory.getLogger(ServiceImpl.class);
 
     private final Dataset dataset;
-
-    public ServiceImpl(Dataset dataset)
+    private final MediaTypes mediaTypes;
+    
+    public ServiceImpl(Dataset dataset, MediaTypes mediaTypes)
     {
 	if (dataset == null) throw new IllegalArgumentException("Dataset must be not null");
         
         this.dataset = dataset;
+        this.mediaTypes = mediaTypes;
     }
 
     @Override
-    public SPARQLEndpoint getSPARQLEndpoint(Request request, MediaTypes mediaTypes)
+    public SPARQLEndpoint getSPARQLEndpoint(Request request)
     {
-        return new SPARQLEndpointBase(request, mediaTypes, getDataset());
+        return new SPARQLEndpointBase(request, getMediaTypes(), getDataset());
     }
 
     @Override
-    public GraphStore getGraphStore(Request request, MediaTypes mediaTypes)
+    public GraphStore getGraphStore(Request request)
     {
-        return new GraphStoreBase(request, mediaTypes, getDataset());
+        return new GraphStoreBase(request, getMediaTypes(), getDataset());
     }
     
     protected Dataset getDataset()
     {
         return dataset;
+    }
+    
+    protected MediaTypes getMediaTypes()
+    {
+        return mediaTypes;
     }
     
 }

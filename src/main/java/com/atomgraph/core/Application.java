@@ -118,7 +118,7 @@ public class Application extends javax.ws.rs.core.Application implements com.ato
         RDFParserRegistry.registerLangTriples(RDFLanguages.RDFPOST, new RDFPostReaderFactory());
         
         if (dataset != null)
-            service = new com.atomgraph.core.model.impl.dataset.ServiceImpl(dataset);
+            service = new com.atomgraph.core.model.impl.dataset.ServiceImpl(dataset, mediaTypes);
         else
         {
             if (endpointURI == null)

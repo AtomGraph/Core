@@ -24,6 +24,8 @@ import com.atomgraph.core.client.GraphStoreClient;
 public interface GraphStore extends com.atomgraph.core.model.GraphStore
 {
  
+    String getURI();
+
     GraphStoreClient getGraphStoreClient();
     
 }

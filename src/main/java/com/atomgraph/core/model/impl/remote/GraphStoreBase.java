@@ -22,6 +22,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.GraphStoreClient;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.filter.ClientFilter;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,20 +39,32 @@ public class GraphStoreBase extends com.atomgraph.core.model.impl.GraphStoreBase
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreBase.class);
 
+    private final String uri;
     private final GraphStoreClient graphStoreClient;
     
     /**
-     * Constructs Graph Store proxy from request metadata and origin.
+     * Constructs Graph Store proxy from request metadata and origin URI.
      * 
-     * @param request request
+     * @param client HTTP client
      * @param mediaTypes supported media types
-     * @param graphStoreClient graph store client
+     * @param uri graph store URI
+     * @param authUser HTTP Basic username
+     * @param authPwd HTTP Basic password
+     * @param request HTTP request
      */
-    public GraphStoreBase(@Context Request request, @Context MediaTypes mediaTypes, @Context GraphStoreClient graphStoreClient)
+    public GraphStoreBase(@Context Client client, @Context MediaTypes mediaTypes, String uri, String authUser, String authPwd, @Context Request request)
     {
         super(request, mediaTypes);
-        if (graphStoreClient == null) throw new IllegalArgumentException("GraphStoreClient cannot be null");
-        this.graphStoreClient = graphStoreClient;
+        if (client == null) throw new IllegalArgumentException("Client cannot be null");
+        if (uri == null) throw new IllegalArgumentException("URI string cannot be null");
+        this.uri = uri;
+        this.graphStoreClient = GraphStoreClient.create(client.resource(uri));
+        
+        if (authUser != null && authPwd != null)
+        {
+            ClientFilter authFilter = new HTTPBasicAuthFilter(authUser, authPwd);
+            this.graphStoreClient.getWebResource().addFilter(authFilter);
+        }
     }
     
     @Override
@@ -106,6 +121,12 @@ public class GraphStoreBase extends com.atomgraph.core.model.impl.GraphStoreBase
         getGraphStoreClient().add(uri, model);
     }
 
+    @Override
+    public String getURI()
+    {
+        return uri;
+    }
+    
     @Override
     public GraphStoreClient getGraphStoreClient()
     {

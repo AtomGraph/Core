@@ -83,9 +83,9 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     public Object getSubResource()
     {
         if (getUriInfo().getAbsolutePath().equals(getUriInfo().getBaseUriBuilder().path("sparql").build()))
-            return getService().getSPARQLEndpoint(getRequest(), getMediaTypes());
+            return getService().getSPARQLEndpoint(getRequest());
         if (getUriInfo().getAbsolutePath().equals(getUriInfo().getBaseUriBuilder().path("service").build()))
-            return getService().getGraphStore(getRequest(), getMediaTypes());
+            return getService().getGraphStore(getRequest());
 
         return this;
     }
@@ -101,7 +101,7 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     @Override
     public Model describe()
     {
-        return (Model)getService().getSPARQLEndpoint(getRequest(), getMediaTypes()).get(getQuery(), Collections.<URI>emptyList() , Collections.<URI>emptyList()).getEntity();
+        return (Model)getService().getSPARQLEndpoint(getRequest()).get(getQuery(), Collections.<URI>emptyList() , Collections.<URI>emptyList()).getEntity();
     }
     
     /**
