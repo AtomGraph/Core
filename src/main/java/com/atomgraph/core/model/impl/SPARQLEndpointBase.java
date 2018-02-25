@@ -33,6 +33,7 @@ import static com.atomgraph.core.model.SPARQLEndpoint.QUERY;
 import static com.atomgraph.core.model.SPARQLEndpoint.UPDATE;
 import static com.atomgraph.core.model.SPARQLEndpoint.USING_GRAPH_URI;
 import static com.atomgraph.core.model.SPARQLEndpoint.USING_NAMED_GRAPH_URI;
+import java.util.Arrays;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -70,7 +71,7 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
      */
     public SPARQLEndpointBase(@Context Request request, @Context MediaTypes mediaTypes)
     {
-	if (request == null) throw new IllegalArgumentException("Request cannot be null");
+	//if (request == null) throw new IllegalArgumentException("Request cannot be null");
 	if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
 
 	this.request = request;
@@ -172,6 +173,10 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
      */
     public ResponseBuilder getResponseBuilder(Model model)
     {
+        if (getRequest() == null)
+            return com.atomgraph.core.model.impl.Response.fromRequest(getRequest()).
+                getResponseBuilder(model, getVariants(Arrays.asList(MediaType.WILDCARD_TYPE)));
+                    
         return com.atomgraph.core.model.impl.Response.fromRequest(getRequest()).
                 getResponseBuilder(model, getVariants(getMediaTypes().getWritable(Model.class)));
     }
@@ -184,6 +189,10 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
      */
     public ResponseBuilder getResponseBuilder(ResultSetRewindable resultSet)
     {
+        if (getRequest() == null)
+            return com.atomgraph.core.model.impl.Response.fromRequest(getRequest()).
+                getResponseBuilder(resultSet, getVariants(Arrays.asList(MediaType.WILDCARD_TYPE)));
+        
 	return com.atomgraph.core.model.impl.Response.fromRequest(getRequest()).
                 getResponseBuilder(resultSet, getVariants(getMediaTypes().getWritable(ResultSet.class)));
     }
