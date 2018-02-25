@@ -75,7 +75,7 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
 
 	this.request = request;
         this.mediaTypes = mediaTypes;
-        this.response = com.atomgraph.core.model.impl.Response.fromRequest(request);
+        this.response = request != null ? com.atomgraph.core.model.impl.Response.fromRequest(request) : null;
 	if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase");        
     }
     
