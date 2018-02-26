@@ -62,7 +62,7 @@ public class MediaTypes
         this(RDFLanguages.getRegisteredLanguages(), UTF8_PARAM);
     }
     
-    protected MediaTypes(Map<Class, List<javax.ws.rs.core.MediaType>> readable, Map<Class, List<javax.ws.rs.core.MediaType>> writable)
+    public MediaTypes(Map<Class, List<javax.ws.rs.core.MediaType>> readable, Map<Class, List<javax.ws.rs.core.MediaType>> writable)
     {
 	if (readable == null) throw new IllegalArgumentException("Map of readable MediaTypes must be not null");        
 	if (writable == null) throw new IllegalArgumentException("Map of writable MediaTypes must be not null");        
