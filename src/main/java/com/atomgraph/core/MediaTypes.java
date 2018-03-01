@@ -179,4 +179,10 @@ public class MediaTypes
         return getWritable().get(clazz);
     }
     
+    @Override
+    public String toString()
+    {
+        return "Readable: " + getReadable().toString() + " Writable: " + getWritable().toString();
+    }
+    
 }
