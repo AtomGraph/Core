@@ -130,7 +130,7 @@ public class GraphStoreClient implements DatasetAccessor
         try
         {
             MultivaluedMap<String, String> mergedParams = new MultivaluedMapImpl();
-            mergedParams.putAll(params);
+            if (params != null) mergedParams.putAll(params);
             mergedParams.putSingle("default", "");
 
             if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} default graph", getWebResource().getURI());
@@ -174,7 +174,7 @@ public class GraphStoreClient implements DatasetAccessor
         try
         {
             MultivaluedMap<String, String> mergedParams = new MultivaluedMapImpl();
-            mergedParams.putAll(params);
+            if (params != null) mergedParams.putAll(params);
             mergedParams.putSingle("graph", uri);
             
             if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} with named graph URI: {}", getWebResource().getURI(), uri);
@@ -214,7 +214,7 @@ public class GraphStoreClient implements DatasetAccessor
         try
         {
             MultivaluedMap<String, String> mergedParams = new MultivaluedMapImpl();
-            mergedParams.putAll(params);
+            if (params != null) mergedParams.putAll(params);
             mergedParams.putSingle("graph", uri);
             
             if (log.isDebugEnabled()) log.debug("Checking if Graph Store {} contains GRAPH with URI {}", getWebResource().getURI(), uri);
@@ -258,7 +258,7 @@ public class GraphStoreClient implements DatasetAccessor
         try
         {
             MultivaluedMap<String, String> mergedParams = new MultivaluedMapImpl();
-            mergedParams.putAll(params);
+            if (params != null) mergedParams.putAll(params);
             mergedParams.putSingle("default", "");
             
             if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} default graph", getWebResource().getURI());
@@ -301,7 +301,7 @@ public class GraphStoreClient implements DatasetAccessor
         try
         {
             MultivaluedMap<String, String> mergedParams = new MultivaluedMapImpl();
-            mergedParams.putAll(params);
+            if (params != null) mergedParams.putAll(params);
             mergedParams.putSingle("graph", uri);
             
             if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} with named graph URI {}", getWebResource().getURI(), uri);
@@ -340,7 +340,7 @@ public class GraphStoreClient implements DatasetAccessor
         try
         {
             MultivaluedMap<String, String> mergedParams = new MultivaluedMapImpl();
-            mergedParams.putAll(params);
+            if (params != null) mergedParams.putAll(params);
             mergedParams.putSingle("default", "");
             
             if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store {}", getWebResource().getURI());
@@ -380,7 +380,7 @@ public class GraphStoreClient implements DatasetAccessor
         try
         {
             MultivaluedMap<String, String> mergedParams = new MultivaluedMapImpl();
-            mergedParams.putAll(params);
+            if (params != null) mergedParams.putAll(params);
             mergedParams.putSingle("graph", uri);
             
             if (log.isDebugEnabled()) log.debug("DELETE named graph with URI {} from Graph Store {}", uri, getWebResource().getURI());
@@ -423,7 +423,7 @@ public class GraphStoreClient implements DatasetAccessor
         try
         {
             MultivaluedMap<String, String> mergedParams = new MultivaluedMapImpl();
-            mergedParams.putAll(params);
+            if (params != null) mergedParams.putAll(params);
             mergedParams.putSingle("default", "");
             
             if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} default graph", getWebResource().getURI());
@@ -466,7 +466,7 @@ public class GraphStoreClient implements DatasetAccessor
         try
         {
             MultivaluedMap<String, String> mergedParams = new MultivaluedMapImpl();
-            mergedParams.putAll(params);
+            if (params != null) mergedParams.putAll(params);
             mergedParams.putSingle("graph", uri);
             
             if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} with named graph URI: {}", getWebResource().getURI(), uri);
