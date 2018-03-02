@@ -129,11 +129,12 @@ public class GraphStoreClient implements DatasetAccessor
         
         try
         {
-            // MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-            params.putSingle("default", "");
+            MultivaluedMap<String, String> mergedParams = new MultivaluedMapImpl();
+            mergedParams.putAll(params);
+            mergedParams.putSingle("default", "");
 
             if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} default graph", getWebResource().getURI());
-            cr = get(getReadableMediaTypes(Model.class), params, headers);
+            cr = get(getReadableMediaTypes(Model.class), mergedParams, headers);
             
             if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
@@ -172,11 +173,12 @@ public class GraphStoreClient implements DatasetAccessor
         
         try
         {
-            // MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-            params.putSingle("graph", uri);
+            MultivaluedMap<String, String> mergedParams = new MultivaluedMapImpl();
+            mergedParams.putAll(params);
+            mergedParams.putSingle("graph", uri);
             
             if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} with named graph URI: {}", getWebResource().getURI(), uri);
-            cr = get(getReadableMediaTypes(Model.class), params, headers);
+            cr = get(getReadableMediaTypes(Model.class), mergedParams, headers);
             
             if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
@@ -211,11 +213,12 @@ public class GraphStoreClient implements DatasetAccessor
         
         try
         {
-            // MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-            params.putSingle("graph", uri);
+            MultivaluedMap<String, String> mergedParams = new MultivaluedMapImpl();
+            mergedParams.putAll(params);
+            mergedParams.putSingle("graph", uri);
             
             if (log.isDebugEnabled()) log.debug("Checking if Graph Store {} contains GRAPH with URI {}", getWebResource().getURI(), uri);
-            cr = head(getReadableMediaTypes(Model.class), params, headers);
+            cr = head(getReadableMediaTypes(Model.class), mergedParams, headers);
             
             if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
@@ -254,11 +257,12 @@ public class GraphStoreClient implements DatasetAccessor
         
         try
         {
-//            MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-            params.putSingle("default", "");
+            MultivaluedMap<String, String> mergedParams = new MultivaluedMapImpl();
+            mergedParams.putAll(params);
+            mergedParams.putSingle("default", "");
             
             if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} default graph", getWebResource().getURI());
-            cr = put(getDefaultMediaType(), model, params, headers);
+            cr = put(getDefaultMediaType(), model, mergedParams, headers);
             
             if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
@@ -296,11 +300,12 @@ public class GraphStoreClient implements DatasetAccessor
         
         try
         {
-//            MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-            params.putSingle("graph", uri);
+            MultivaluedMap<String, String> mergedParams = new MultivaluedMapImpl();
+            mergedParams.putAll(params);
+            mergedParams.putSingle("graph", uri);
             
             if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} with named graph URI {}", getWebResource().getURI(), uri);
-            cr = put(getDefaultMediaType(), model, params, headers);
+            cr = put(getDefaultMediaType(), model, mergedParams, headers);
             
             if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
@@ -334,11 +339,12 @@ public class GraphStoreClient implements DatasetAccessor
         
         try
         {
-//            MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-            params.putSingle("default", "");
+            MultivaluedMap<String, String> mergedParams = new MultivaluedMapImpl();
+            mergedParams.putAll(params);
+            mergedParams.putSingle("default", "");
             
             if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store {}", getWebResource().getURI());
-            cr = delete(params, headers);
+            cr = delete(mergedParams, headers);
             
             if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
@@ -373,11 +379,12 @@ public class GraphStoreClient implements DatasetAccessor
         
         try
         {
-//            MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-            params.putSingle("graph", uri);
+            MultivaluedMap<String, String> mergedParams = new MultivaluedMapImpl();
+            mergedParams.putAll(params);
+            mergedParams.putSingle("graph", uri);
             
             if (log.isDebugEnabled()) log.debug("DELETE named graph with URI {} from Graph Store {}", uri, getWebResource().getURI());
-            cr = delete(params, headers);
+            cr = delete(mergedParams, headers);
             
             if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
@@ -415,11 +422,12 @@ public class GraphStoreClient implements DatasetAccessor
         
         try
         {
-//            MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-            params.putSingle("default", "");
+            MultivaluedMap<String, String> mergedParams = new MultivaluedMapImpl();
+            mergedParams.putAll(params);
+            mergedParams.putSingle("default", "");
             
             if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} default graph", getWebResource().getURI());
-            cr = post(getDefaultMediaType(), model, params, headers);
+            cr = post(getDefaultMediaType(), model, mergedParams, headers);
             
             if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
@@ -457,11 +465,12 @@ public class GraphStoreClient implements DatasetAccessor
         
         try
         {
-//            MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-            params.putSingle("graph", uri);
+            MultivaluedMap<String, String> mergedParams = new MultivaluedMapImpl();
+            mergedParams.putAll(params);
+            mergedParams.putSingle("graph", uri);
             
             if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} with named graph URI: {}", getWebResource().getURI(), uri);
-            cr = post(getDefaultMediaType(), model, params, headers);
+            cr = post(getDefaultMediaType(), model, mergedParams, headers);
             
             if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
