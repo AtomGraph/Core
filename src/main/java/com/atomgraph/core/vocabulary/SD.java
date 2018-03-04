@@ -16,6 +16,7 @@
  */
 package com.atomgraph.core.vocabulary;
 
+import org.apache.jena.ontology.Individual;
 import org.apache.jena.ontology.ObjectProperty;
 import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
@@ -53,6 +54,8 @@ public class SD
     
     public static final OntClass NamedGraph = m_model.createClass( NS + "NamedGraph" );
     
+    public static final OntClass Language = m_model.createClass( NS + "Language" );
+    
     public static final ObjectProperty endpoint = m_model.createObjectProperty( NS + "endpoint" );
 
     public static final ObjectProperty graph = m_model.createObjectProperty( NS + "graph" );
@@ -62,5 +65,13 @@ public class SD
     public static final ObjectProperty defaultGraph = m_model.createObjectProperty( NS + "defaultGraph" );
 
     public static final ObjectProperty namedGraph = m_model.createObjectProperty( NS + "namedGraph" );
+    
+    public static final ObjectProperty supportedLanguage = m_model.createObjectProperty( NS + "supportedLanguage" );
+    
+    public static final Individual SPARQL10Query = m_model.createIndividual(NS + "SPARQL10Query", Language);
+    
+    public static final Individual SPARQL11Query = m_model.createIndividual(NS + "SPARQL11Query", Language);
+
+    public static final Individual SPARQL11Update = m_model.createIndividual(NS + "SPARQL11Update", Language);
 
 }
