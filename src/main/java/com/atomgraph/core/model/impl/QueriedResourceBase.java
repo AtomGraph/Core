@@ -94,6 +94,7 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
      * Returns RDF description of this resource.
      * The description is the result of a query executed on the SPARQL endpoint of this resource.
      * By default, the query is <code>DESCRIBE</code> with URI of this resource.
+     * The response from the endpoint does not depend on the current request, to make sure we always get a Model entity back (and not only response headers).
      * 
      * @return RDF description
      * @see getQuery()
@@ -101,7 +102,7 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     @Override
     public Model describe()
     {
-        return (Model)getService().getSPARQLEndpoint(getRequest()).get(getQuery(), Collections.<URI>emptyList() , Collections.<URI>emptyList()).getEntity();
+        return (Model)getService().getSPARQLEndpoint(null).get(getQuery(), Collections.<URI>emptyList() , Collections.<URI>emptyList()).getEntity();
     }
     
     /**
