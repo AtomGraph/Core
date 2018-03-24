@@ -244,6 +244,17 @@ public class RDFPostReaderTest
         
 	assertIsomorphic(skipToNextPredicateExp, skipToNextPredicateParsed);
     }
+
+    @Test
+    public void testSkipMissingObjectToEOF() throws UnsupportedEncodingException
+    {
+        String skipToEOF = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://dc.org/#title", ENC) + "&lt=" + URLEncoder.encode("http://type", ENC);
+        Model skipToEOFExp = ModelFactory.createDefaultModel();
+        Model skiptToEOFParsed = ModelFactory.createDefaultModel();
+        createRIOTParser().read(new ByteArrayInputStream(skipToEOF.getBytes()), "http://base", null, StreamRDFLib.graph(skiptToEOFParsed.getGraph()), null);
+        
+	assertIsomorphic(skipToEOFExp, skiptToEOFParsed);
+    }
     
     public static void assertIsomorphic(Model wanted, Model got)
     {

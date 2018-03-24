@@ -589,6 +589,8 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
                 Node n = objectLiteral(tokens, peekIter, profile);
                 if (n == null) skipToSubjectOrPredicateOrNonLiteralObject(tokens, peekIter);
                 
+                if (eof(tokens, peekIter)) return null; // no more tokens
+                
                 if (peekToken(tokens, peekIter).getImage().startsWith("o"))
                     return object(tokens, peekIter, profile, subject, predicate);
             }
