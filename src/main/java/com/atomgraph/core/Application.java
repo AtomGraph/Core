@@ -113,7 +113,7 @@ public class Application extends javax.ws.rs.core.Application implements com.ato
         this.maxGetRequestSize = maxGetRequestSize;
         this.preemptiveAuth = preemptiveAuth;
         
-        // add RDF/POST serialization
+        // add RDF/POST serializer
         RDFLanguages.register(RDFLanguages.RDFPOST);
         RDFParserRegistry.registerLangTriples(RDFLanguages.RDFPOST, new RDFPostReaderFactory());
         
@@ -155,11 +155,6 @@ public class Application extends javax.ws.rs.core.Application implements com.ato
         singletons.add(new UpdateRequestReader());
         singletons.add(new DataManagerProvider(getDataManager()));
         singletons.add(new ServiceProvider(getService()));
-//        singletons.add(new SPARQLEndpointProvider());
-//        singletons.add(new GraphStoreProvider());
-//        singletons.add(new com.atomgraph.core.provider.DatasetProvider(getDataset()));
-//        singletons.add(new SPARQLClientProvider(getSPARQLClient()));
-//        singletons.add(new GraphStoreClientProvider(getGraphStoreClient()));
         singletons.add(new MediaTypesProvider(getMediaTypes()));
         singletons.add(new ClientExceptionMapper());
         singletons.add(new NotFoundExceptionMapper());
