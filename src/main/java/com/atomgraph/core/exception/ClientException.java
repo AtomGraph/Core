@@ -25,9 +25,17 @@ import com.sun.jersey.api.client.ClientResponse;
 public class ClientException extends RuntimeException
 {
     
-    public ClientException(ClientResponse clientResponse)
+    private final ClientResponse cr;
+    
+    public ClientException(ClientResponse cr)
     {
-        super(clientResponse.getStatusInfo().getReasonPhrase());
+        super(cr.getStatusInfo().getReasonPhrase());
+        this.cr = cr;
+    }
+    
+    public ClientResponse getClientResponse()
+    {
+        return cr;
     }
     
 }
