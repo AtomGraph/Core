@@ -39,9 +39,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * JAX-RS provider for reading RDF dataset from request and writing it to response.
+ * Needs to be registered in the JAX-RS application.
+ * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @see org.apache.jena.query.Dataset
+ * @see javax.ws.rs.ext.MessageBodyReader
+ * @see javax.ws.rs.ext.MessageBodyWriter
  */
+
 @Provider
 public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyWriter<Dataset>
 {

@@ -41,7 +41,7 @@ public class MediaTypes
 {
     
     /**
-     * Media types that can be used to represent of SPARQL result set
+     * Registry of readable/writable RDF model and SPARQL result set media types
      * 
      * @see <a href="http://www.w3.org/TR/sparql11-protocol/#query-success">SPARQL 1.1 Protocol. 2.1.6 Success Responses</a>
      * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/ResultSetRewindable.html">Jena ResultSetRewindable</a>

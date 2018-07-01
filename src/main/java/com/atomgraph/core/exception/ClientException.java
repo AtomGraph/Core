@@ -20,6 +20,7 @@ import com.sun.jersey.api.client.ClientResponse;
 
 /**
  * A runtime exception thrown by a client that signals a failure to process the HTTP request or HTTP response.
+ * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
 public class ClientException extends RuntimeException

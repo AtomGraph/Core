@@ -44,12 +44,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * JAX-RS provider for reading RDF model from request and writing it to response.
- * Needs to be registered in the application.
+ * Needs to be registered in the JAX-RS application.
  * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
- * @see <a href="http://jena.apache.org/documentation/javadoc/jena/org/apache/jena/rdf/model/Model.html">Jena Model</a>
- * @see <a href="http://jsr311.java.net/nonav/javadoc/javax/ws/rs/ext/MessageBodyReader.html">JAX-RS MessageBodyReader</a>
- * @see <a href="http://jsr311.java.net/nonav/javadoc/javax/ws/rs/ext/MessageBodyWriter.html">JAX-RS MessageBodyWriter</a>
+ * @see org.apache.jena.rdf.model.Model
+ * @see javax.ws.rs.ext.MessageBodyReader
+ * @see javax.ws.rs.ext.MessageBodyWriter
  */
 @Provider
 public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWriter<Model>

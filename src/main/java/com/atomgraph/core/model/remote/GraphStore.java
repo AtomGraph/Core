@@ -18,7 +18,8 @@ package com.atomgraph.core.model.remote;
 import com.atomgraph.core.client.GraphStoreClient;
 
 /**
- *
+ * Remote Graph Store identified by URI.
+ * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
 public interface GraphStore extends com.atomgraph.core.model.GraphStore

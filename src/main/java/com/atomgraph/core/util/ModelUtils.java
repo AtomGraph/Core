@@ -17,6 +17,9 @@ import org.apache.jena.graph.Triple;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.util.iterator.ExtendedIterator;
 
+/**
+ * Model hash calculator.
+ */
 public class ModelUtils
 {
 

@@ -21,8 +21,10 @@ import org.apache.jena.riot.LangBuilder;
 import com.atomgraph.core.MediaType;
 
 /**
- *
+ * Adds new RDF languages to Jena's registry.
+ * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @see org.apache.jena.riot.RDFLanguages
  */
 public class RDFLanguages extends org.apache.jena.riot.RDFLanguages
 {

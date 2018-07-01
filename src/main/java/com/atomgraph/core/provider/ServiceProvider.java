@@ -26,8 +26,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * JAX-RS provider for application's SPARQL service.
+ * Needs to be registered in the JAX-RS application.
+ * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @see com.atomgraph.core.model.Service
  */
 @Provider
 public class ServiceProvider extends PerRequestTypeInjectableProvider<Context, Service> implements ContextResolver<Service>

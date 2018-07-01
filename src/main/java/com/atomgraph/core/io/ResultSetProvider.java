@@ -39,12 +39,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * JAX-RS provider for writing SPARQL result set to the response.
- * Needs to be registered in the application.
+ * Needs to be registered in the JAX-RS application.
  * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  * @see <a href="http://www.w3.org/TR/rdf-sparql-XMLres/">SPARQL Query Results XML Format</a>
- * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/ResultSet.html">Jena ResultSet</a>
- * @see <a href="http://jsr311.java.net/nonav/javadoc/javax/ws/rs/ext/MessageBodyWriter.html">JAX-RS MessageBodyWriter</a>
+ * @see org.apache.jena.query.ResultSet
+ * @see javax.ws.rs.ext.MessageBodyReader
+ * @see javax.ws.rs.ext.MessageBodyWriter
  */
 @Provider
 public class ResultSetProvider implements MessageBodyReader<ResultSetRewindable>, MessageBodyWriter<ResultSet>

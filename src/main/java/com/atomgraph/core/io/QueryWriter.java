@@ -31,8 +31,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * JAX-RS provider for writing SPARQL query into response.
+ * Needs to be registered in the JAX-RS application.
+ * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @see org.apache.jena.query.Query
  */ 
 @Provider
 @Produces(MediaType.APPLICATION_SPARQL_QUERY)

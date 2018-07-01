@@ -26,7 +26,6 @@ import javax.ws.rs.core.Response;
  * Generic SPARQL 1.1 Graph Store HTTP Protocol interface
  * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
- * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/Response.html">JAX-RS Response</a>
  * @see <a href="http://www.w3.org/TR/sparql11-http-rdf-update/">SPARQL 1.1 Graph Store HTTP Protocol</a>
  */
 public interface GraphStore extends DatasetAccessor

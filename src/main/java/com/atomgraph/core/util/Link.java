@@ -7,6 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * Represents HTTP <code>Link</code> header.
  * This class is based on <pre>ex09_1</pre> from the "RESTful Java with JAX-RS" book.
  * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>

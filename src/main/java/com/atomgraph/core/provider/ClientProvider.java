@@ -28,8 +28,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * JAX-RS provider for HTTP client.
+ * Needs to be registered in the JAX-RS application.
+ * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @see import com.sun.jersey.api.client.Client
+ * @see javax.ws.rs.core.Context
  */
 @Provider
 @Singleton

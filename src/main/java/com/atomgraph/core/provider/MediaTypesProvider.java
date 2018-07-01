@@ -27,8 +27,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * JAX-RS provider for media type registry.
+ * Needs to be registered in the JAX-RS application.
+ * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @see com.atomgraph.core.MediaTypes
+ * @see javax.ws.rs.core.Context
  */
 @Provider
 public class MediaTypesProvider extends PerRequestTypeInjectableProvider<Context, MediaTypes> implements ContextResolver<MediaTypes>

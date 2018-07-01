@@ -21,7 +21,8 @@ import org.apache.jena.riot.ReaderRIOT;
 import org.apache.jena.riot.ReaderRIOTFactory;
 
 /**
- *
+ * RDF/POST reader factory.
+ * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
 public class RDFPostReaderFactory implements ReaderRIOTFactory

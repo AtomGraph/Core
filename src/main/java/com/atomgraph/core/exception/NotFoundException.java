@@ -17,7 +17,8 @@
 package com.atomgraph.core.exception;
 
 /**
- *
+ * Exception thrown when resource is not found.
+ * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
 public class NotFoundException extends RuntimeException

@@ -19,7 +19,8 @@ package com.atomgraph.core.exception;
 import org.apache.jena.rdf.model.Property;
 
 /**
- *
+ * Exception thrown when configuration is invalid.
+ * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
 public class ConfigurationException extends RuntimeException

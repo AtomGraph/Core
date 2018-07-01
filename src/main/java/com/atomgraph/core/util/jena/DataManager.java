@@ -33,12 +33,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
-* Utility class for retrieval of SPARQL query results from local RDF models and remote endpoints.
+* Utility class for retrieval of RDF models from remote URLs.
 *
 * @author Martynas Jusevičius <martynas@atomgraph.com>
-* @see <a href="http://jena.apache.org/documentation/javadoc/jena/org/apache/jena/util/FileManager.html">Jena FileManager</a>
-* @see <a href="http://jena.apache.org/documentation/javadoc/jena/org/apache/jena/rdf/model/Model.html">Jena Model</a>
-* @see <a href="https://jena.apache.org/documentation/javadoc/arq/org/apache/jena/query/ResultSet.html">ARQ ResultSet</a>
+* @see org.apache.jena.util.FileManager
+* @see org.apache.jena.rdf.model.ModelGetter
+* @see com.atomgraph.core.client.LinkedDataClient
 */
 
 public class DataManager extends FileManager implements ModelGetter

@@ -29,13 +29,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Provides HTTP query parameter with SPARQL string as injectable ARQ query.
- * Needs to be registered in the application.
+ * JAX-RS query parameter provider for SPARQL string.
+ * Needs to be registered in the JAX-RS application.
  * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
- * @see <a href="http://jsr311.java.net/nonav/javadoc/javax/ws/rs/QueryParam.html">JAX-RS @QueryParam</a>
- * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/Query.html">Jena Query</a> 
- * @see <a href="http://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/spi/inject/PerRequestTypeInjectableProvider.html">PerRequestTypeInjectableProvider</a>
+ * @see org.apache.jena.query.Query
+ * @see javax.ws.rs.QueryParam
+ * @see javax.ws.rs.core.Context
  */
 @Provider
 public class QueryParamProvider extends PerRequestTypeInjectableProvider<QueryParam, Query>

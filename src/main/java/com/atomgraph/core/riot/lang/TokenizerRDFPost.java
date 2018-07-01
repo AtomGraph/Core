@@ -27,7 +27,8 @@ import org.apache.jena.riot.tokens.Tokenizer;
 import static com.atomgraph.core.riot.lang.TokenizerText.Checking;
 
 /**
- *
+ * RDF/POST tokenizer.
+ * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
 public class TokenizerRDFPost extends TokenizerText implements Tokenizer

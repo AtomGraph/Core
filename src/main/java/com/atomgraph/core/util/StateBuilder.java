@@ -26,8 +26,11 @@ import java.net.URI;
 import javax.ws.rs.core.UriBuilder;
 
 /**
- *
+ * Builds application state as RDF resource from URL query parameters.
+ * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @see <a href="https://en.wikipedia.org/wiki/HATEOAS">HATEOAS</a>
+ * @see <a href="https://atomgraph.github.io/Linked-Data-Templates/#func-state">LDT state function</a>
  */
 public class StateBuilder
 {

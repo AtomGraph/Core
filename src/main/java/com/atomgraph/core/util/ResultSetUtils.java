@@ -23,7 +23,8 @@ import org.apache.jena.rdf.model.RDFNode;
 import java.util.Iterator;
 
 /**
- *
+ * Result set hash calculator.
+ * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
 public class ResultSetUtils

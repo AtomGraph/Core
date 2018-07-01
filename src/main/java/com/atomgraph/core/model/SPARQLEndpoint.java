@@ -29,12 +29,11 @@ import com.atomgraph.core.MediaType;
 import java.util.List;
 
 /**
- * Extended SPARQL endpoint interface, includes query and update as well as JAX-RS helper methods.
+ * Generic SPARQL 1.1 Protocol interface
  * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
- * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/Query.html">ARQ Query</a>
- * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/update/UpdateRequest.html">Jena UpdateRequest</a>
- * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/Response.html">JAX-RS Response</a>
+ * @see org.apache.jena.query.Query
+ * @see org.apache.jena.update.UpdateRequest
  * @see <a href="http://www.w3.org/TR/sparql11-protocol/">SPARQL Protocol for RDF</a>
  * 
  */

@@ -25,6 +25,7 @@ import javax.ws.rs.ext.Provider;
 
 /**
  * Maps authentication exception to response.
+ * Needs to be registered in the JAX-RS application.
  * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */

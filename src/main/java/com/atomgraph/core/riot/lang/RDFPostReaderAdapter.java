@@ -19,7 +19,8 @@ package com.atomgraph.core.riot.lang;
 import org.apache.jena.riot.adapters.RDFReaderRIOT;
 
 /**
- *
+ * RDF/POST reader adapter.
+ * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
 public class RDFPostReaderAdapter extends RDFReaderRIOT

@@ -16,7 +16,8 @@
 package com.atomgraph.core.model;
 
 /**
- *
+ * Linked Data application backed by SPARQL service.
+ * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
 public interface Application

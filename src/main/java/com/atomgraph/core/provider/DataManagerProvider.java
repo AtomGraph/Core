@@ -28,11 +28,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * JAX-RS provider for data manager class.
- * Needs to be registered in the application.
+ * JAX-RS provider for data manager.
+ * Needs to be registered in the JAX-RS application.
  * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  * @see com.atomgraph.core.util.DataManager
+ * @see javax.ws.rs.core.Context
  */
 @Provider
 public class DataManagerProvider extends PerRequestTypeInjectableProvider<Context, DataManager> implements ContextResolver<DataManager>
