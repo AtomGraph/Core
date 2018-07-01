@@ -12,14 +12,14 @@
         
     <developers>
         <developer>
-            <id>pumba-lt</id>
+            <id>namedgraph</id>
             <email>martynas@atomgraph.com</email>
             <roles>
                 <role>Developer</role>
                 <role>Founder</role>
             </roles>
             <organization>AtomGraph</organization>
-            <organizationUrl>http://atomgraph.com</organizationUrl>
+            <organizationUrl>https://atomgraph.com</organizationUrl>
         </developer>
     </developers>
     
