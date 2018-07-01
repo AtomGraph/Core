@@ -27,7 +27,7 @@ import javax.ws.rs.core.Response;
 /**
  * Read-write Linked Data resource.
  * 
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
 public interface Resource
 {

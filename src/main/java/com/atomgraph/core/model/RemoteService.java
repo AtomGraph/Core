@@ -18,7 +18,7 @@ package com.atomgraph.core.model;
 /**
  * Remote SPARQL service with SPARQL 1.1 Protocol and Graph Store support.
  * 
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
 public interface RemoteService extends Service
 {

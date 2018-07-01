@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * Generic SPARQL 1.1 Protocol interface
  * 
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see org.apache.jena.query.Query
  * @see org.apache.jena.update.UpdateRequest
  * @see <a href="http://www.w3.org/TR/sparql11-protocol/">SPARQL Protocol for RDF</a>

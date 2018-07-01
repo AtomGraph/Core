@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
  * Can be extended or used as it is (needs to be configured in web.xml).
  * Needs to register JAX-RS root resource classes and providers.
  * 
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see javax.ws.rs.core.Application
  * @see <a href="http://docs.oracle.com/cd/E24329_01/web.1211/e24983/configure.htm#CACEAEGG">Packaging the RESTful Web Service Application Using web.xml With Application Subclass</a>
  */

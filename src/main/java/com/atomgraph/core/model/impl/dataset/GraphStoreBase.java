@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * Base class for dataset-backed Graph Stores.
  * Implementation of Graph Store Protocol on Jena dataset.
  * 
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see <a href="http://www.w3.org/TR/sparql11-http-rdf-update/">SPARQL 1.1 Graph Store HTTP Protocol</a>
  */
 public class GraphStoreBase extends com.atomgraph.core.model.impl.GraphStoreBase

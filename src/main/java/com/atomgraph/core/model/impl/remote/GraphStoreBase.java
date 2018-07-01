@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * Proxy implementation of Graph Store.
  * This class forwards requests to a remote origin.
  * 
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
 //@Path("/service") // not standard
 public class GraphStoreBase extends com.atomgraph.core.model.impl.GraphStoreBase implements com.atomgraph.core.model.remote.GraphStore

@@ -37,6 +37,7 @@ public class SD
     public static final String NS = "http://www.w3.org/ns/sparql-service-description#";
     
     /** <p>The namespace of the vocabulary as a string</p>
+     * @return namespace URI
      *  @see #NS */
     public static String getURI()
     {

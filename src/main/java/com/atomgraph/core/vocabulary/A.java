@@ -25,7 +25,7 @@ import org.apache.jena.rdf.model.Resource;
 
 /**
  *
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
 public final class A
 {
@@ -36,6 +36,7 @@ public final class A
     public static final String NS = "http://atomgraph.com/ns/core#";
     
     /** <p>The namespace of the vocabulary as a string</p>
+     * @return namespace URI
      *  @see #NS */
     public static String getURI()
     {

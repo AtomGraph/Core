@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Encapsulates the content negotiation logic used to build HTTP response from RDF model.
  * 
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see org.apache.jena.rdf.model.Model
  * @see javax.ws.rs.core.Variant
  */

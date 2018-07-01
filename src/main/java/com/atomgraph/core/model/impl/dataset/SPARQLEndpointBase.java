@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * Base class of SPARQL endpoints.
  * Implements SPARQL Protocol on Jena dataset.
  * 
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see <a href="http://www.w3.org/TR/sparql11-protocol/">SPARQL Protocol for RDF</a>
  */
 public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndpointBase

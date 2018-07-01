@@ -23,7 +23,7 @@ import org.apache.jena.riot.ReaderRIOTFactory;
 /**
  * RDF/POST reader factory.
  * 
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
 public class RDFPostReaderFactory implements ReaderRIOTFactory
 {

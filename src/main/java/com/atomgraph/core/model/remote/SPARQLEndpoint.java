@@ -20,7 +20,7 @@ import com.atomgraph.core.client.SPARQLClient;
 /**
  * Remote SPARQL endpoint identified by URI.
  * 
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
 public interface SPARQLEndpoint extends com.atomgraph.core.model.SPARQLEndpoint
 {

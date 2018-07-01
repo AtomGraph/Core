@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
  * Represents HTTP <code>Link</code> header.
  * This class is based on <pre>ex09_1</pre> from the "RESTful Java with JAX-RS" book.
  * 
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see <a href="http://shop.oreilly.com/product/9780596158057.do">RESTful Java with JAX-RS</a>
  */
 public class Link
@@ -66,9 +66,9 @@ public class Link
     }
 
     /**
-    * To write as link header
+    * To write as <code>Link</code> header
     *
-    * @return
+    * @return header value
     */
     @Override
     public String toString()
@@ -84,9 +84,9 @@ public class Link
     * Its not an efficient or perfect algorithm
     * and does make a few assumptions
     *
-    * @param val
-    * @return
-     * @throws java.net.URISyntaxException
+    * @param val header value
+    * @return parsed link object
+    * @throws java.net.URISyntaxException thrown if href value cannot be parsed
     */
     public static Link valueOf(String val) throws URISyntaxException
     {

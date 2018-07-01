@@ -39,7 +39,7 @@ import javax.ws.rs.core.MultivaluedMap;
  * Proxy implementation of SPARQL endpoint.
  * This class forwards requests to a remote origin.
  * 
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
 // @Path("/sparql")
 public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndpointBase implements com.atomgraph.core.model.remote.SPARQLEndpoint

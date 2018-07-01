@@ -19,7 +19,7 @@ package com.atomgraph.core.exception;
 /**
  * Exception that can be thrown when authentication fails.
  * 
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
 public class AuthenticationException extends RuntimeException
 {

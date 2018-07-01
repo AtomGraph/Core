@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 /**
 * Utility class for retrieval of RDF models from remote URLs.
 *
-* @author Martynas Jusevičius <martynas@atomgraph.com>
+* @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
 * @see org.apache.jena.util.FileManager
 * @see org.apache.jena.rdf.model.ModelGetter
 * @see com.atomgraph.core.client.LinkedDataClient

@@ -25,7 +25,7 @@ import com.atomgraph.core.exception.NotFoundException;
  * Maps resource not found exception to response.
  * Needs to be registered in the JAX-RS application.
  * 
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
 public class NotFoundExceptionMapper implements ExceptionMapper<NotFoundException>
 {

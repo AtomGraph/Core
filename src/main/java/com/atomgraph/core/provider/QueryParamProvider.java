@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * JAX-RS query parameter provider for SPARQL string.
  * Needs to be registered in the JAX-RS application.
  * 
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see org.apache.jena.query.Query
  * @see javax.ws.rs.QueryParam
  * @see javax.ws.rs.core.Context

@@ -24,7 +24,7 @@ import com.atomgraph.core.exception.ClientException;
  * Maps client exception to response.
  * Needs to be registered in the JAX-RS application.
  * 
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
 public class ClientExceptionMapper implements ExceptionMapper<ClientException>
 {

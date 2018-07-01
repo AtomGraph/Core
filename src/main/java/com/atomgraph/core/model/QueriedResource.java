@@ -22,7 +22,7 @@ import org.apache.jena.rdf.model.Model;
 /**
  * RDF resource, representation of which was queried from a SPARQL endpoint.
  * 
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/Query.html">ARQ Query</a>
  */
 public interface QueriedResource

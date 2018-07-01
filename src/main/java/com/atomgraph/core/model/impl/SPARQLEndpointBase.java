@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  * Base class of SPARQL endpoints.
  * Unfortunately cannot extend ResourceBase because of clashing JAX-RS method annotations.
  * 
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see com.atomgraph.core.model.SPARQLEndpoint
  */
 public abstract class SPARQLEndpointBase implements SPARQLEndpoint

@@ -20,7 +20,7 @@ import javax.ws.rs.core.Request;
 /**
  * SPARQL 1.1 service with endpoint and graph store.
  * 
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
 public interface Service
 {

@@ -29,7 +29,7 @@ import static com.atomgraph.core.riot.lang.TokenizerText.Checking;
 /**
  * RDF/POST tokenizer.
  * 
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
 public class TokenizerRDFPost extends TokenizerText implements Tokenizer
 {

@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * Base class of SPARQL Graph Stores.
  * Unfortunately cannot extend ResourceBase because of clashing JAX-RS method annotations.
  * 
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see com.atomgraph.core.model.GraphStore
  */
 public abstract class GraphStoreBase implements GraphStore
