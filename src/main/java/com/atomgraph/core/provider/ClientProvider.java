@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * Needs to be registered in the JAX-RS application.
  * 
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
- * @see import com.sun.jersey.api.client.Client
+ * @see com.sun.jersey.api.client.Client
  * @see javax.ws.rs.core.Context
  */
 @Provider
