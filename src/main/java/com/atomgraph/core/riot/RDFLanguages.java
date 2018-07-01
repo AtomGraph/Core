@@ -27,7 +27,7 @@ import com.atomgraph.core.MediaType;
 public class RDFLanguages extends org.apache.jena.riot.RDFLanguages
 {
 
-    public static final String strLangRDFPOST    = "RDF/POST" ;
+    public static final String strLangRDFPOST = "RDF/POST" ;
     
     public static final Lang RDFPOST = LangBuilder.create(strLangRDFPOST, MediaType.APPLICATION_RDF_URLENCODED).
             addFileExtensions("rpo").
@@ -35,7 +35,7 @@ public class RDFLanguages extends org.apache.jena.riot.RDFLanguages
 
     // JSON-LD support is built-in in later Jena versions
     
-    public static final String strLangJSONLD    = "JSON-LD" ;
+    public static final String strLangJSONLD = "JSON-LD" ;
     
     public static final Lang JSONLD = LangBuilder.create(strLangJSONLD, MediaType.APPLICATION_LD_JSON).
             addAltNames("JSONLD").

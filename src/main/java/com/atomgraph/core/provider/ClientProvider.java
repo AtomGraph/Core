@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
  */
 @Provider
 @Singleton
-@Deprecated
 public class ClientProvider extends PerRequestTypeInjectableProvider<Context, Client> implements ContextResolver<Client>
 {
     private static final Logger log = LoggerFactory.getLogger(ClientProvider.class);
@@ -49,14 +48,14 @@ public class ClientProvider extends PerRequestTypeInjectableProvider<Context, Cl
     @Override
     public Injectable<Client> getInjectable(ComponentContext ic, Context a)
     {
-	return new Injectable<Client>()
-	{
-	    @Override
-	    public Client getValue()
-	    {
-		return getClient();
-	    }
-	};
+        return new Injectable<Client>()
+        {
+            @Override
+            public Client getValue()
+            {
+                return getClient();
+            }
+        };
     }
 
     @Override

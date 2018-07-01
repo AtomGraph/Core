@@ -66,9 +66,9 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
     @Override
     public Dataset readFrom(Class<Dataset> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException, WebApplicationException
     {
-	if (log.isTraceEnabled()) log.trace("Reading Dataset with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
-	
-	Dataset dataset = DatasetFactory.create();
+        if (log.isTraceEnabled()) log.trace("Reading Dataset with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
+
+        Dataset dataset = DatasetFactory.create();
 
         MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param        
         Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
@@ -78,12 +78,12 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
             if (log.isErrorEnabled()) log.error("MediaType {} not supported by Jena", mediaType);
             throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);
         }
-	String syntax = lang.getName();
-	if (log.isDebugEnabled()) log.debug("Syntax used to read Dataset: {}", syntax);
+        String syntax = lang.getName();
+        if (log.isDebugEnabled()) log.debug("Syntax used to read Dataset: {}", syntax);
 
-	// extract base URI from httpHeaders? extract charset from MediaType
+        // TO-DO: extract base URI from httpHeaders? extract charset from MediaType
         //mediaType.getParameters().containsKey("charset")
-	//return dataset.read(entityStream, null, syntax);
+        //return dataset.read(entityStream, null, syntax);
         RDFDataMgr.read(dataset, entityStream, lang);
         return dataset;
     }
@@ -99,13 +99,13 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
     @Override
     public long getSize(Dataset model, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-	return -1;
+        return -1;
     }
 
     @Override
     public void writeTo(Dataset dataset, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException
     {
-	if (log.isTraceEnabled()) log.trace("Writing Dataset with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
+        if (log.isTraceEnabled()) log.trace("Writing Dataset with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
 
         MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param        
         Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
@@ -115,10 +115,10 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
             if (log.isErrorEnabled()) log.error("MediaType {} not supported by Jena", formatType);
             throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);
         }
-	String syntax = lang.getName();
-	if (log.isDebugEnabled()) log.debug("Syntax used to write Dataset: {}", syntax);
+        String syntax = lang.getName();
+        if (log.isDebugEnabled()) log.debug("Syntax used to write Dataset: {}", syntax);
 
-	//dataset.write(entityStream, syntax);
+        //dataset.write(entityStream, syntax);
         RDFDataMgr.write(entityStream, dataset, lang);
     }
 
