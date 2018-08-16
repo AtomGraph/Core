@@ -9,7 +9,8 @@
     <name>AtomGraph Core</name>
     <description>Generic Linked Data server</description>
     <url>https://github.com/AtomGraph/Core</url>
-        
+    <inceptionYear>2013</inceptionYear>
+
     <developers>
         <developer>
             <id>namedgraph</id>
