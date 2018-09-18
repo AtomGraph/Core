@@ -39,18 +39,18 @@ import org.apache.jena.atlas.iterator.PeekIterator;
 import org.apache.jena.atlas.web.ContentType;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFLanguages;
-import org.apache.jena.riot.ReaderRIOTBase;
 import org.apache.jena.riot.RiotParseException;
 import org.apache.jena.riot.system.ErrorHandler;
 import org.apache.jena.riot.system.ErrorHandlerFactory;
 import org.apache.jena.riot.system.ParserProfile;
-import org.apache.jena.riot.system.RiotLib;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.tokens.Token;
 import org.apache.jena.riot.tokens.TokenType;
 import static org.apache.jena.riot.tokens.TokenType.*;
 import static com.atomgraph.core.riot.lang.TokenizerRDFPost.*;
 import org.apache.jena.datatypes.TypeMapper;
+import org.apache.jena.riot.ReaderRIOT;
+import org.apache.jena.riot.system.IRIResolver;
 import org.apache.jena.riot.tokens.Tokenizer;
 import org.apache.jena.util.FileUtils;
 import org.slf4j.Logger;
@@ -63,173 +63,185 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see <a href="http://www.lsrn.org/semweb/rdfpost.html">RDF/POST Encoding for RDF</a>
  */
-public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
+public class RDFPostReader implements ReaderRIOT // extends ReaderRIOTBase
 {    
     private static final Logger log = LoggerFactory.getLogger(RDFPostReader.class);
 
-    private ErrorHandler errorHandler = ErrorHandlerFactory.getDefaultErrorHandler();    
+    private ErrorHandler errorHandler = ErrorHandlerFactory.getDefaultErrorHandler();
     private ParserProfile parserProfile = null;
         
+    public RDFPostReader(ParserProfile profile, ErrorHandler errorHandler)
+    {
+        this.parserProfile = profile;
+        this.errorHandler = errorHandler;
+    }
+    
+    public RDFPostReader(ParserProfile profile)
+    {
+        this.parserProfile = profile;
+        this.errorHandler = profile.getErrorHandler();
+    }
+
     public Model parse(String body, String charsetName) throws URISyntaxException
     {
         List<String> keys = new ArrayList<>(), values = new ArrayList<>();
 
-	String[] params = body.split("&");
+        String[] params = body.split("&");
 
-	for (String param : params)
-	{
-	    if (log.isTraceEnabled()) log.trace("Parameter: {}", param);
-	    
-	    String[] array = param.split("=");
-	    String key = null;
-	    String value = null;
+        for (String param : params)
+        {
+            if (log.isTraceEnabled()) log.trace("Parameter: {}", param);
+            
+            String[] array = param.split("=");
+            String key = null;
+            String value = null;
 
-	    try
-	    {
-		key = URLDecoder.decode(array[0], charsetName);
-		if (array.length > 1) value = URLDecoder.decode(array[1], charsetName);
-	    } catch (UnsupportedEncodingException ex)
-	    {
-		if (log.isWarnEnabled()) log.warn("Unsupported encoding", ex);
-	    }
+            try
+            {
+                key = URLDecoder.decode(array[0], charsetName);
+                if (array.length > 1) value = URLDecoder.decode(array[1], charsetName);
+            } catch (UnsupportedEncodingException ex)
+            {
+                if (log.isWarnEnabled()) log.warn("Unsupported encoding", ex);
+            }
 
             if (value != null) // && key != null
             {
                 keys.add(key);
                 values.add(value);
             }
-	}
+        }
 
         return parse(keys, values);
     }
 
     public Model parse(List<String> k, List<String> v) throws URISyntaxException
     {
-	Model model = ModelFactory.createDefaultModel();
+        Model model = ModelFactory.createDefaultModel();
 
-	Resource subject = null;
-	Property property = null;
-	RDFNode object = null;
+        Resource subject = null;
+        Property property = null;
+        RDFNode object = null;
 
-	for (int i = 0; i < k.size(); i++)
-	{
-	    switch (k.get(i))
-	    {
-		case DEF_NS_DECL:
-		    model.setNsPrefix("", v.get(i)); // default namespace
-		    break;
-		case NS_DECL:
-		    if (i + 1 < k.size() && k.get(i + 1).equals(DEF_NS_DECL)) // if followed by "v" (if not out of bounds)
-		    {
-			model.setNsPrefix(v.get(i), v.get(i + 1)); // namespace with prefix
-			i++; // skip the following "v"
-		    }
-		    break;
-		    
-		case BLANK_SUBJ:
-		    subject = model.createResource(new AnonId(v.get(i))); // blank node
-		    property = null;
-		    object = null;
-		    break;
-		case URI_SUBJ:
+        for (int i = 0; i < k.size(); i++)
+        {
+            switch (k.get(i))
+            {
+                case DEF_NS_DECL:
+                    model.setNsPrefix("", v.get(i)); // default namespace
+                    break;
+                case NS_DECL:
+                    if (i + 1 < k.size() && k.get(i + 1).equals(DEF_NS_DECL)) // if followed by "v" (if not out of bounds)
+                    {
+                        model.setNsPrefix(v.get(i), v.get(i + 1)); // namespace with prefix
+                        i++; // skip the following "v"
+                    }
+                    break;
+                    
+                case BLANK_SUBJ:
+                    subject = model.createResource(new AnonId(v.get(i))); // blank node
+                    property = null;
+                    object = null;
+                    break;
+                case URI_SUBJ:
                     URI subjectURI = new URI(v.get(i));
                     //if (!subjectURI.isAbsolute()) subjectURI = baseURI.resolve(subjectURI);
-		    subject = model.createResource(subjectURI.toString()); // full URI
-		    property = null;
-		    object = null;
-		    break;
-		case DEF_NS_SUBJ:
-		    subject = model.createResource(model.getNsPrefixURI("") + v.get(i)); // default namespace
-		    property = null;
-		    object = null;
-		    break;
-		case NS_SUBJ:
-		    if (i + 1 < k.size() && k.get(i + 1).equals(DEF_NS_SUBJ)) // if followed by "sv" (if not out of bounds)
-		    {
-			subject = model.createResource(model.getNsPrefixURI(v.get(i)) + v.get(i + 1)); // ns prefix + local name
-			property = null;
-			object = null;
-			i++; // skip the following "sv"
-		    }
-		    break;
+                    subject = model.createResource(subjectURI.toString()); // full URI
+                    property = null;
+                    object = null;
+                    break;
+                case DEF_NS_SUBJ:
+                    subject = model.createResource(model.getNsPrefixURI("") + v.get(i)); // default namespace
+                    property = null;
+                    object = null;
+                    break;
+                case NS_SUBJ:
+                    if (i + 1 < k.size() && k.get(i + 1).equals(DEF_NS_SUBJ)) // if followed by "sv" (if not out of bounds)
+                    {
+                        subject = model.createResource(model.getNsPrefixURI(v.get(i)) + v.get(i + 1)); // ns prefix + local name
+                        property = null;
+                        object = null;
+                        i++; // skip the following "sv"
+                    }
+                    break;
 
-		case URI_PRED:
+                case URI_PRED:
                     URI propertyURI = new URI(v.get(i));
                     //if (!propertyURI.isAbsolute()) propertyURI = baseURI.resolve(propertyURI);
                     property = model.createProperty(propertyURI.toString());
-		    object = null;
-		    break;
-		case DEF_NS_PRED:
-		    property = model.createProperty(model.getNsPrefixURI(""), v.get(i));
-		    object = null;
-		    break;
-		case NS_PRED:
-		    if (i + 1 < k.size() && k.get(i + 1).equals(DEF_NS_PRED)) // followed by "pv" (if not out of bounds)
-		    {
-			property = model.createProperty(model.getNsPrefixURI(v.get(i)) + v.get(i + 1)); // ns prefix + local name
-			object = null;
-			i++; // skip the following "pv"
-		    }
-		    break;
+                    object = null;
+                    break;
+                case DEF_NS_PRED:
+                    property = model.createProperty(model.getNsPrefixURI(""), v.get(i));
+                    object = null;
+                    break;
+                case NS_PRED:
+                    if (i + 1 < k.size() && k.get(i + 1).equals(DEF_NS_PRED)) // followed by "pv" (if not out of bounds)
+                    {
+                        property = model.createProperty(model.getNsPrefixURI(v.get(i)) + v.get(i + 1)); // ns prefix + local name
+                        object = null;
+                        i++; // skip the following "pv"
+                    }
+                    break;
 
-		case BLANK_OBJ:
-		    object = model.createResource(new AnonId(v.get(i))); // blank node
-		    break;
-		case URI_OBJ:
+                case BLANK_OBJ:
+                    object = model.createResource(new AnonId(v.get(i))); // blank node
+                    break;
+                case URI_OBJ:
                     URI objectURI = new URI(v.get(i));
                     //if (!objectURI.isAbsolute()) objectURI = baseURI.resolve(objectURI);
                     object = model.createResource(objectURI.toString()); // full URI
-		    break;
-		case DEF_NS_OBJ:
-		    object = model.createResource(model.getNsPrefixURI("") + v.get(i)); // default namespace
-		    break;
-		case NS_OBJ:
-		    if (i + 1 < k.size() && k.get(i + 1).equals(DEF_NS_OBJ)) // followed by "ov" (if not out of bounds)
-		    {
-			object = model.createResource(model.getNsPrefixURI(v.get(i)) + v.get(i + 1)); // ns prefix + local name
-			i++; // skip the following "ov"
-		    }
-		    break;
-		case LITERAL_OBJ:
-		    if (i + 1 < k.size()) // check if not out of bounds
-			switch (k.get(i + 1))
-			{
-			    case TYPE:
-				object = model.createTypedLiteral(v.get(i), TypeMapper.getInstance().getSafeTypeByName(v.get(i + 1))); // typed literal (value+datatype)
-				i++; // skip the following "lt"
-				break;
-			    case LANG:
-				object = model.createLiteral(v.get(i), v.get(i + 1)); // literal with language (value+lang)
-				i++; // skip the following "ll"
-				break;
-			    default:
-				object = model.createLiteral(v.get(i)); // plain literal (if not followed by lang or datatype)
-				break;
-			}
-		    else
-			object = model.createLiteral(v.get(i)); // plain literal
-		    break;
-		case TYPE:
-		    if (i + 1 < k.size() && k.get(i + 1).equals(LITERAL_OBJ)) // followed by "ol" (if not out of bounds)
-		    {
-			object = model.createTypedLiteral(v.get(i + 1), TypeMapper.getInstance().getSafeTypeByName(v.get(i))); // typed literal (datatype+value)
-			i++; // skip the following "ol"
-		    }
-		    break;
-		case LANG:
-		    if (i + 1 < k.size() && k.get(i + 1).equals(LITERAL_OBJ)) // followed by "ol" (if not out of bounds)
-		    {
-			model.createLiteral(v.get(i + 1), v.get(i)); // literal with language (lang+value)
-			i++; // skip the following "ol"
-		    }
-		    break;
-	    }
+                    break;
+                case DEF_NS_OBJ:
+                    object = model.createResource(model.getNsPrefixURI("") + v.get(i)); // default namespace
+                    break;
+                case NS_OBJ:
+                    if (i + 1 < k.size() && k.get(i + 1).equals(DEF_NS_OBJ)) // followed by "ov" (if not out of bounds)
+                    {
+                        object = model.createResource(model.getNsPrefixURI(v.get(i)) + v.get(i + 1)); // ns prefix + local name
+                        i++; // skip the following "ov"
+                    }
+                    break;
+                case LITERAL_OBJ:
+                    if (i + 1 < k.size()) // check if not out of bounds
+                        switch (k.get(i + 1))
+                        {
+                            case TYPE:
+                                object = model.createTypedLiteral(v.get(i), TypeMapper.getInstance().getSafeTypeByName(v.get(i + 1))); // typed literal (value+datatype)
+                                i++; // skip the following "lt"
+                                break;
+                            case LANG:
+                                object = model.createLiteral(v.get(i), v.get(i + 1)); // literal with language (value+lang)
+                                i++; // skip the following "ll"
+                                break;
+                            default:
+                                object = model.createLiteral(v.get(i)); // plain literal (if not followed by lang or datatype)
+                                break;
+                        }
+                    else
+                        object = model.createLiteral(v.get(i)); // plain literal
+                    break;
+                case TYPE:
+                    if (i + 1 < k.size() && k.get(i + 1).equals(LITERAL_OBJ)) // followed by "ol" (if not out of bounds)
+                    {
+                        object = model.createTypedLiteral(v.get(i + 1), TypeMapper.getInstance().getSafeTypeByName(v.get(i))); // typed literal (datatype+value)
+                        i++; // skip the following "ol"
+                    }
+                    break;
+                case LANG:
+                    if (i + 1 < k.size() && k.get(i + 1).equals(LITERAL_OBJ)) // followed by "ol" (if not out of bounds)
+                    {
+                        model.createLiteral(v.get(i + 1), v.get(i)); // literal with language (lang+value)
+                        i++; // skip the following "ol"
+                    }
+                    break;
+            }
 
-	    if (subject != null && property != null && object != null)
-		model.add(model.createStatement(subject, property, object));
-	}
+            if (subject != null && property != null && object != null)
+                model.add(model.createStatement(subject, property, object));
+        }
 
-	return model;
+        return model;
     }
 
     public boolean skipEmptyLiterals()
@@ -240,14 +252,14 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
     @Override
     public void read(InputStream in, String baseURI, ContentType ct, StreamRDF output, Context context)
     {
-        read(in, baseURI, RDFLanguages.contentTypeToLang(ct), output, context);
+        read(FileUtils.asBufferedUTF8(in), baseURI, RDFLanguages.contentTypeToLang(ct), output, context);
     }
 
-    @Override
-    public void read(InputStream in, String baseURI, Lang lang, StreamRDF output, Context context)
-    {
-        read(FileUtils.asBufferedUTF8(in), baseURI, lang, output, context);
-    }
+//    @Override
+//    public void read(InputStream in, String baseURI, Lang lang, StreamRDF output, Context context)
+//    {
+//        read(FileUtils.asBufferedUTF8(in), baseURI, lang, output, context);
+//    }
     
     @Override
     public void read(Reader in, String baseURI, ContentType ct, StreamRDF output, Context context)
@@ -257,13 +269,13 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
     
     public void read(Reader in, String baseURI, Lang lang, StreamRDF output, Context context)
     {
-        ParserProfile profile = parserProfile;
-        if (profile == null)
-            profile = RiotLib.profile(baseURI, false, false, errorHandler); 
-        if (errorHandler == null)
-            setErrorHandler(profile.getHandler());
+//        ParserProfile profile = parserProfile;
+//        if (profile == null)
+//            profile = RiotLib.profile(baseURI, false, false, errorHandler); 
+//        if (errorHandler == null)
+//            setErrorHandler(profile.getErrorHandler());
         
-        Tokenizer tokens = new TokenizerRDFPost(PeekReader.make(in));  
+        Tokenizer tokens = new TokenizerRDFPost(PeekReader.make(in));
         
         try
         {
@@ -400,7 +412,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
         org.apache.jena.iri.IRI baseIRI = profile.makeIRI(baseStr, currLine, currCol) ;
         emitBase(baseIRI.toString(), dest);
         nextToken(tokens, peekIter);
-        profile.getPrologue().setBaseURI(baseIRI) ;
+        profile.setIRIResolver(IRIResolver.create(baseIRI));
     }
     
     protected void emitBase(String baseStr, StreamRDF dest)
@@ -423,7 +435,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
             exception(peekToken(tokens, peekIter), "'v' requires a IRI (found '" + peekToken(tokens, peekIter) + "')") ;
         String iriStr = peekToken(tokens, peekIter).getImage() ;
         org.apache.jena.iri.IRI iri = profile.makeIRI(iriStr, currLine, currCol) ;
-        profile.getPrologue().getPrefixMap().add(prefix, iri) ;
+        profile.getPrefixMap().add(prefix, iri) ;
         emitPrefix(prefix, iri.toString(), dest) ;
         nextToken(tokens, peekIter) ;
     }
@@ -461,7 +473,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
             if (lookingAt(tokens, peekIter, EOF))
                 return;
             
-            predicateObjectItem(tokens, peekIter, profile, dest, subject) ;            
+            predicateObjectItem(tokens, peekIter, profile, dest, subject) ;
         }
     }
     
@@ -511,7 +523,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
     protected Node predicateNS(Tokenizer tokens, PeekIterator<Token> peekIter, ParserProfile profile)
     {
         if ( !lookingAt(tokens, peekIter, DIRECTIVE))
-            exception(peekToken(tokens, peekIter), "Expected RDF/POST directive (found '" + peekToken(tokens, peekIter) + "')") ;            
+            exception(peekToken(tokens, peekIter), "Expected RDF/POST directive (found '" + peekToken(tokens, peekIter) + "')") ;
         nextToken(tokens, peekIter); // skip pn
 
         if ( !lookingAt(tokens, peekIter, PREFIXED_NAME) && peekToken(tokens, peekIter).getImage() != null)
@@ -602,7 +614,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
 
         // on - a special case which checks for following ov
         if (lookingAt(tokens, peekIter, DIRECTIVE) && peekToken(tokens, peekIter).getImage().equals(NS_OBJ))
-            return objectNS(tokens, peekIter, profile);            
+            return objectNS(tokens, peekIter, profile);
         
         Node n = node(tokens, peekIter, profile) ;
         nextToken(tokens, peekIter) ; // skip what?
@@ -651,7 +663,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
                     exception(peekToken(tokens, peekIter), "'ol' requires a node (found '" + peekToken(tokens, peekIter) + "')") ;
                 Token literal = peekToken(tokens, peekIter);
                 
-                literal.setType(LITERAL_DT);                
+                literal.setType(LITERAL_DT);
                 literal.setSubToken2(dtIriToken);
                 return tokenAsNode(profile, literal);
             }
@@ -746,13 +758,13 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
         if ( !lookingAt(tokens, peekIter, LITERAL_LANG))
             exception(peekToken(tokens, peekIter), "'ll' requires a language string (found '" + peekToken(tokens, peekIter) + "')") ;
      
-        return nextToken(tokens, peekIter);        
+        return nextToken(tokens, peekIter);
     }
 
     protected Node objectNS(Tokenizer tokens, PeekIterator<Token> peekIter, ParserProfile profile)
     {
         if ( !lookingAt(tokens, peekIter, DIRECTIVE))
-            exception(peekToken(tokens, peekIter), "Expected RDF/POST directive (found '" + peekToken(tokens, peekIter) + "')") ;            
+            exception(peekToken(tokens, peekIter), "Expected RDF/POST directive (found '" + peekToken(tokens, peekIter) + "')") ;
         nextToken(tokens, peekIter); // skip on
 
         if ( !lookingAt(tokens, peekIter, PREFIXED_NAME) && peekToken(tokens, peekIter).getImage() != null)
@@ -813,19 +825,12 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
         throw ex ;
     }
 
-    @Override
     public ErrorHandler getErrorHandler()
     {
         return errorHandler;
     }
-    
-    @Override
-    public void setErrorHandler(ErrorHandler errorHandler)
-    {
-        this.errorHandler = errorHandler;
-    }
 
-    @Override    
+    @Override
     public ParserProfile getParserProfile()
     {
         return parserProfile;
@@ -835,6 +840,6 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
     public void setParserProfile(ParserProfile parserProfile)
     {
         this.parserProfile = parserProfile;
-    }    
+    }
 
 }

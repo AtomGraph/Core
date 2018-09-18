@@ -19,6 +19,7 @@ package com.atomgraph.core.riot.lang;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.ReaderRIOT;
 import org.apache.jena.riot.ReaderRIOTFactory;
+import org.apache.jena.riot.system.ParserProfile;
 
 /**
  * RDF/POST reader factory.
@@ -28,10 +29,16 @@ import org.apache.jena.riot.ReaderRIOTFactory;
 public class RDFPostReaderFactory implements ReaderRIOTFactory
 {
 
+//    @Override
+//    public ReaderRIOT create(Lang language)
+//    {
+//        return new RDFPostReader();
+//    }
+
     @Override
-    public ReaderRIOT create(Lang language)
+    public ReaderRIOT create(Lang lang, ParserProfile parserProfile)
     {
-        return new RDFPostReader();
+        return new RDFPostReader(parserProfile);
     }
     
 }

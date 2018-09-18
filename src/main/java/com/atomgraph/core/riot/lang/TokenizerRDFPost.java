@@ -24,15 +24,21 @@ import org.apache.jena.riot.RiotParseException;
 import org.apache.jena.riot.tokens.Token;
 import org.apache.jena.riot.tokens.TokenType;
 import org.apache.jena.riot.tokens.Tokenizer;
-import static com.atomgraph.core.riot.lang.TokenizerText.Checking;
+import java.util.NoSuchElementException;
+import org.apache.jena.atlas.AtlasException;
+import org.apache.jena.atlas.io.IO;
+import org.apache.jena.riot.tokens.TokenChecker;
 
 /**
  * RDF/POST tokenizer.
  * 
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
-public class TokenizerRDFPost extends TokenizerText implements Tokenizer
+public class TokenizerRDFPost implements Tokenizer // extends TokenizerText 
 {
+    
+    public static boolean Checking = false ;
+
     public static final char CH_EQUALS =        '=';
     public static final char CH_AMPERSAND =     '&';
     
@@ -59,16 +65,24 @@ public class TokenizerRDFPost extends TokenizerText implements Tokenizer
     public static final String TYPE =           "lt";
     public static final String LANG =           "ll";
         
-    private final StringBuilder stringBuilder = new StringBuilder(200);    
-    private Token token = null;    
+    private final PeekReader reader;
+    private final TokenChecker tokenChecker;
+    private final StringBuilder stringBuilder = new StringBuilder(200);
+    private boolean finished = false ;
+    private Token token = null;
     private String key, prevKey = null;
     
     public TokenizerRDFPost(PeekReader reader)
     {
-        super(reader);
+        this(reader, null);
     }
     
-    @Override
+    public TokenizerRDFPost(PeekReader reader, TokenChecker tokenChecker)
+    {
+        this.reader = reader;
+        this.tokenChecker = tokenChecker;
+    }
+    
     protected Token parseToken()
     {
         token = new Token(getLine(), getColumn());
@@ -76,7 +90,7 @@ public class TokenizerRDFPost extends TokenizerText implements Tokenizer
         
         try
         {
-            int ch = getReader().peekChar();            
+            int ch = getReader().peekChar();
             if (ch == CH_EQUALS || ch == CH_AMPERSAND) getReader().readChar();
 
             if (key != null)
@@ -154,12 +168,12 @@ public class TokenizerRDFPost extends TokenizerText implements Tokenizer
                         key = null;
                         return token;
                     case TYPE: // lt
-                        token.setType(TokenType.IRI); // token.setType(TokenType.LITERAL_DT);
+                        token.setType(TokenType.IRI);
                         token.setImage(readUntilDelimiter());
                         prevKey = key;
                         key = null;
                         return token;
-                    case LANG: // ll                        
+                    case LANG: // ll
                         token.setType(TokenType.LITERAL_LANG);
                         token.setImage2(readUntilDelimiter());
                         prevKey = key;
@@ -183,7 +197,7 @@ public class TokenizerRDFPost extends TokenizerText implements Tokenizer
                 case DEF_NS_PRED: // pv
                 case NS_PRED: // pn
                 case BLANK_OBJ: // ob
-                case URI_OBJ: // ou                    
+                case URI_OBJ: // ou
                 case DEF_NS_OBJ: // ov
                 case NS_OBJ: // on
                 case LITERAL_OBJ: // ol
@@ -229,4 +243,105 @@ public class TokenizerRDFPost extends TokenizerText implements Tokenizer
     private static void exception$(String message, long line, long col, Object... args) {
         throw new RiotParseException(String.format(message, args), line, col) ;
     }
+    
+    public PeekReader getReader()
+    {
+        return reader;
+    }
+
+    private void checkBlankNode(String image)
+    {
+       getTokenChecker().checkBlankNode(image);
+    }
+
+    private void checkURI(String image)
+    {
+        getTokenChecker().checkURI(image);
+    }
+   
+    @Override
+    public boolean hasNext()
+    {
+        if ( finished )
+            return false ;
+        if ( token != null )
+            return true ;
+
+        try
+        {
+            //skip() ;
+            if (getReader().eof())
+            {
+                //close() ;
+                finished = true ;
+                return false ;
+            }
+            token = parseToken() ;
+            if ( token == null )
+            {
+                //close() ;
+                finished = true ;
+                return false ;
+            }
+            return true ;
+        }
+        catch (AtlasException ex)
+        {
+            if ( ex.getCause() != null )
+            {
+                if ( ex.getCause().getClass() == java.nio.charset.MalformedInputException.class )
+                    throw new RiotParseException("Bad character encoding", getReader().getLineNum(), getReader().getColNum()) ;
+                throw new RiotParseException("Bad input stream ["+ex.getCause()+"]", getReader().getLineNum(), getReader().getColNum()) ;
+            }
+            throw new RiotParseException("Bad input stream", getReader().getLineNum(), getReader().getColNum()) ;
+        }
+    }    
+    
+    
+    @Override
+    public boolean eof()
+    {
+        return hasNext() ;
+    }
+
+    @Override
+    public Token next()
+    {
+        if ( ! hasNext() ) 
+            throw new NoSuchElementException() ;
+        Token t = token ;
+        token = null ;
+        return t ;
+    }
+    
+    @Override
+    public Token peek()
+    {
+        if ( ! hasNext() ) return null ;
+        return token ; 
+    }
+
+    @Override
+    public long getColumn()
+    {
+        return getReader().getColNum() ;
+    }
+
+    @Override
+    public long getLine()
+    {
+        return getReader().getLineNum() ;
+    }
+
+    @Override
+    public void close()
+    { 
+        IO.close(getReader()) ;
+    }
+ 
+    public TokenChecker getTokenChecker()
+    {
+        return tokenChecker;
+    }
+    
 }
