@@ -60,9 +60,9 @@ public class DataManager extends FileManager implements ModelGetter
      */
     public DataManager(LocationMapper mapper, Client client, MediaTypes mediaTypes, boolean preemptiveAuth)
     {
-	super(mapper);
-	if (client == null) throw new IllegalArgumentException("Client must be not null");        
-	if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes must be not null");
+        super(mapper);
+        if (client == null) throw new IllegalArgumentException("Client must be not null");
+        if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes must be not null");
         this.client = client;
         this.mediaTypes = mediaTypes;
         this.preemptiveAuth = preemptiveAuth;
@@ -80,7 +80,7 @@ public class DataManager extends FileManager implements ModelGetter
     
     public WebResource getEndpoint(URI endpointURI)
     {
-	if (endpointURI == null) throw new IllegalArgumentException("Endpoint URI must be not null");
+        if (endpointURI == null) throw new IllegalArgumentException("Endpoint URI must be not null");
 
         try
         {
@@ -142,4 +142,10 @@ public class DataManager extends FileManager implements ModelGetter
         return model;
     }
     
+    @Override
+    public Model readModel(Model model, String uri)
+    {
+        return LinkedDataClient.create(getEndpoint(URI.create(uri)), getMediaTypes()).get();
+    }
+
 }

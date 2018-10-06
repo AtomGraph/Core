@@ -84,7 +84,7 @@ public class LinkedDataClient
     {
         if (acceptedTypes == null) throw new IllegalArgumentException("MediaType... cannot be null");
 
-        WebResource.Builder builder = getWebResource().getRequestBuilder();        
+        WebResource.Builder builder = getWebResource().getRequestBuilder();
         if (headers != null) setHeaders(builder, headers);
         
         return builder.accept(acceptedTypes).
