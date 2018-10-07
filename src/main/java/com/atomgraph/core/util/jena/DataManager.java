@@ -145,7 +145,11 @@ public class DataManager extends FileManager implements ModelGetter
     @Override
     public Model readModel(Model model, String uri)
     {
-        return LinkedDataClient.create(getEndpoint(URI.create(uri)), getMediaTypes()).get();
+        String mappedURI = mapURI(uri);
+        if (mappedURI.startsWith("http") || mappedURI.startsWith("https"))
+            return LinkedDataClient.create(getEndpoint(URI.create(uri)), getMediaTypes()).get();
+        
+        return super.loadModel(uri);
     }
 
 }
