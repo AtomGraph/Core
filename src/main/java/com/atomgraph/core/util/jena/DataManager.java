@@ -149,7 +149,7 @@ public class DataManager extends FileManager implements ModelGetter
         if (mappedURI.startsWith("http") || mappedURI.startsWith("https"))
             return LinkedDataClient.create(getEndpoint(URI.create(uri)), getMediaTypes()).get();
         
-        return super.loadModel(uri);
+        return super.readModel(model, uri);
     }
 
 }
