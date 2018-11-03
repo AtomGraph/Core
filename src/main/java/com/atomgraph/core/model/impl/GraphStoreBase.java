@@ -237,7 +237,7 @@ public abstract class GraphStoreBase implements GraphStore
         if (defaultGraph)
         {
             deleteDefault();
-            if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store");            
+            if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store");
             return Response.noContent().build();
         }
         else

@@ -73,8 +73,8 @@ public class StateBuilder
 
     public StateBuilder property(Property property, RDFNode value)
     {
-        if (property == null) throw new IllegalArgumentException("Property cannot be null");        
-        if (value == null) throw new IllegalArgumentException("RDFNode cannot be null");        
+        if (property == null) throw new IllegalArgumentException("Property cannot be null");
+        if (value == null) throw new IllegalArgumentException("RDFNode cannot be null");
 
         getResource().addProperty(property, value);
         String encodedValue = value.toString(); // not a reliable serialization
@@ -88,7 +88,7 @@ public class StateBuilder
 
     public StateBuilder replaceProperty(Property property, RDFNode value)
     {
-        if (property == null) throw new IllegalArgumentException("Property cannot be null");        
+        if (property == null) throw new IllegalArgumentException("Property cannot be null");
 
         getResource().removeAll(property);
         getUriBuilder().replaceQueryParam(property.getLocalName(), (Object[])null);

@@ -75,9 +75,9 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     {
         if (log.isTraceEnabled()) log.trace("Reading Model with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
         
-        Model model = ModelFactory.createDefaultModel();        
+        Model model = ModelFactory.createDefaultModel();
 
-        MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param        
+        MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
         Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
         if (lang == null)
         {
@@ -98,9 +98,9 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     
     public Model read(Model model, InputStream is, Lang lang, String baseURI, ErrorHandler errorHandler, ParserProfile parserProfile)
     {
-        if (model == null) throw new IllegalArgumentException("Model must be not null");        
-        if (is == null) throw new IllegalArgumentException("InputStream must be not null");        
-        if (lang == null) throw new IllegalArgumentException("Lang must be not null");        
+        if (model == null) throw new IllegalArgumentException("Model must be not null");
+        if (is == null) throw new IllegalArgumentException("InputStream must be not null");
+        if (lang == null) throw new IllegalArgumentException("Lang must be not null");
 
         ReaderRIOT parser = RDFDataMgr.createReader(lang);
         parser.setErrorHandler(errorHandler);
@@ -129,7 +129,7 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     {
         if (log.isTraceEnabled()) log.trace("Writing Model with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
 
-        MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param        
+        MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
         Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
         if (lang == null)
         {
@@ -143,9 +143,9 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
 
     public Model write(Model model, OutputStream os, Lang lang, String baseURI)
     {
-        if (model == null) throw new IllegalArgumentException("Model must be not null");        
-        if (os == null) throw new IllegalArgumentException("OutputStream must be not null");        
-        if (lang == null) throw new IllegalArgumentException("Lang must be not null");        
+        if (model == null) throw new IllegalArgumentException("Model must be not null");
+        if (os == null) throw new IllegalArgumentException("OutputStream must be not null");
+        if (lang == null) throw new IllegalArgumentException("Lang must be not null");
 
         String syntax = lang.getName();
         if (log.isDebugEnabled()) log.debug("Syntax used to write Model: {}", syntax);

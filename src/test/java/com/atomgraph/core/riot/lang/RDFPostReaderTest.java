@@ -68,22 +68,22 @@ public class RDFPostReaderTest
         "&su=" + URLEncoder.encode("http://subject4", ENC) + "&pu=" + URLEncoder.encode("http://predicate5", ENC) + "&ol=" + URLEncoder.encode("literal3", ENC) + "&lt=" + URLEncoder.encode("http://type", ENC) +
                                                         "&pu=" + URLEncoder.encode("http://dct.org/#hasPart", ENC) + "&ob=" + URLEncoder.encode("b1", ENC) +
         "&sb=" + URLEncoder.encode("b1", ENC) + "&pu=" + URLEncoder.encode("http://rdf.org/#first", ENC) + "&ou=" + URLEncoder.encode("http://something/", ENC) +
-                                            "&pu=" + URLEncoder.encode("http://rdf.org/#rest", ENC) + "&ou=" + URLEncoder.encode("http://rdf.org/#nil", ENC);    
+                                            "&pu=" + URLEncoder.encode("http://rdf.org/#rest", ENC) + "&ou=" + URLEncoder.encode("http://rdf.org/#nil", ENC);
 
 
         RDFDatatype datatype = TypeMapper.getInstance().getSafeTypeByName("http://type");
 
-	validExpected = ModelFactory.createDefaultModel();
-	validExpected.add(validExpected.createResource("http://subject1"), validExpected.createProperty("http://dc.org/#title"), validExpected.createLiteral("title", "da")).
-		add(validExpected.createResource("http://subject1"), validExpected.createProperty("http://predicate1"), validExpected.createResource("http://object1")).
-		add(validExpected.createResource("http://subject1"), validExpected.createProperty("http://predicate2"), validExpected.createResource("http://object2")).
-		add(validExpected.createResource("http://subject1"), validExpected.createProperty("http://predicate2"), validExpected.createResource("http://object3")).
-		add(validExpected.createResource("http://subject2"), validExpected.createProperty("http://predicate3"), validExpected.createLiteral("literal1")).
-		add(validExpected.createResource("http://subject3"), validExpected.createProperty("http://predicate4"), validExpected.createLiteral("literal2", "da")).
-		add(validExpected.createResource("http://subject4"), validExpected.createProperty("http://predicate5"), validExpected.createTypedLiteral("literal3", datatype)).
-		add(validExpected.createResource("http://subject4"), validExpected.createProperty("http://dct.org/#hasPart"), validExpected.createResource(AnonId.create("b1"))).
-		add(validExpected.createResource(AnonId.create("b1")), validExpected.createProperty("http://rdf.org/#first"), validExpected.createResource("http://something/")).
-		add(validExpected.createResource(AnonId.create("b1")), validExpected.createProperty("http://rdf.org/#rest"), validExpected.createResource("http://rdf.org/#nil"));
+        validExpected = ModelFactory.createDefaultModel();
+        validExpected.add(validExpected.createResource("http://subject1"), validExpected.createProperty("http://dc.org/#title"), validExpected.createLiteral("title", "da")).
+                add(validExpected.createResource("http://subject1"), validExpected.createProperty("http://predicate1"), validExpected.createResource("http://object1")).
+                add(validExpected.createResource("http://subject1"), validExpected.createProperty("http://predicate2"), validExpected.createResource("http://object2")).
+                add(validExpected.createResource("http://subject1"), validExpected.createProperty("http://predicate2"), validExpected.createResource("http://object3")).
+                add(validExpected.createResource("http://subject2"), validExpected.createProperty("http://predicate3"), validExpected.createLiteral("literal1")).
+                add(validExpected.createResource("http://subject3"), validExpected.createProperty("http://predicate4"), validExpected.createLiteral("literal2", "da")).
+                add(validExpected.createResource("http://subject4"), validExpected.createProperty("http://predicate5"), validExpected.createTypedLiteral("literal3", datatype)).
+                add(validExpected.createResource("http://subject4"), validExpected.createProperty("http://dct.org/#hasPart"), validExpected.createResource(AnonId.create("b1"))).
+                add(validExpected.createResource(AnonId.create("b1")), validExpected.createProperty("http://rdf.org/#first"), validExpected.createResource("http://something/")).
+                add(validExpected.createResource(AnonId.create("b1")), validExpected.createProperty("http://rdf.org/#rest"), validExpected.createResource("http://rdf.org/#nil"));
     }
 
     /**
@@ -93,9 +93,9 @@ public class RDFPostReaderTest
     @Test
     public void testValidBodySimpleParse() throws URISyntaxException
     {
-	Model parsed = new RDFPostReader().parse(validRDFPost, ENC);
+        Model parsed = new RDFPostReader().parse(validRDFPost, ENC);
         
-	assertIsomorphic(validExpected, parsed);
+        assertIsomorphic(validExpected, parsed);
     }
     
     public ReaderRIOT createRIOTParser()
@@ -118,7 +118,7 @@ public class RDFPostReaderTest
 
         createRIOTParser().read(new ByteArrayInputStream(validRDFPost.getBytes()), "http://base", null, StreamRDFLib.graph(parsed.getGraph()), null);
         
-	assertIsomorphic(validExpected, parsed);
+        assertIsomorphic(validExpected, parsed);
     }
 
     @Test
@@ -129,7 +129,7 @@ public class RDFPostReaderTest
         Model randomParsed = ModelFactory.createDefaultModel();
         createRIOTParser().read(new ByteArrayInputStream(random.getBytes()), "http://base", null, StreamRDFLib.graph(randomParsed.getGraph()), null);
         
-	assertTrue(randomParsed.isEmpty());
+        assertTrue(randomParsed.isEmpty());
     }
     
     @Test
@@ -138,11 +138,11 @@ public class RDFPostReaderTest
         String skipToNextSubject = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&ol=" + URLEncoder.encode("literal", ENC) +
             "&su=" + URLEncoder.encode("http://subject2", ENC) + "&pu=" + URLEncoder.encode("http://predicate3", ENC) + "&ol=" + URLEncoder.encode("literal1", ENC);
         Model expected = ModelFactory.createDefaultModel();
-	expected.add(expected.createResource("http://subject2"), expected.createProperty("http://predicate3"), expected.createLiteral("literal1"));
+        expected.add(expected.createResource("http://subject2"), expected.createProperty("http://predicate3"), expected.createLiteral("literal1"));
         Model parsed = ModelFactory.createDefaultModel();
         createRIOTParser().read(new ByteArrayInputStream(skipToNextSubject.getBytes()), "http://base", null, StreamRDFLib.graph(parsed.getGraph()), null);
         
-	assertIsomorphic(expected, parsed);
+        assertIsomorphic(expected, parsed);
     }
     
     @Test
@@ -151,32 +151,32 @@ public class RDFPostReaderTest
         String skipToNextSubject = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pn=" + URLEncoder.encode("http://ns/", ENC) + "&ol=" + URLEncoder.encode("literal", ENC) +
             "&su=" + URLEncoder.encode("http://subject2", ENC) + "&pu=" + URLEncoder.encode("http://predicate3", ENC) + "&ol=" + URLEncoder.encode("literal1", ENC);
         Model expected = ModelFactory.createDefaultModel();
-	expected.add(expected.createResource("http://subject2"), expected.createProperty("http://predicate3"), expected.createLiteral("literal1"));
+        expected.add(expected.createResource("http://subject2"), expected.createProperty("http://predicate3"), expected.createLiteral("literal1"));
         Model parsed = ModelFactory.createDefaultModel();
         createRIOTParser().read(new ByteArrayInputStream(skipToNextSubject.getBytes()), "http://base", null, StreamRDFLib.graph(parsed.getGraph()), null);
         
-	assertIsomorphic(expected, parsed);
+        assertIsomorphic(expected, parsed);
     }
     
     @Test
     public void testSkipMissingObject() throws UnsupportedEncodingException
     {
         String skipToNextSubject = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://dc.org/#title", ENC) + 
-            "&su=" + URLEncoder.encode("http://subject2", ENC) + "&pu=" + URLEncoder.encode("http://predicate3", ENC) + "&ol=" + URLEncoder.encode("literal1", ENC);                
+            "&su=" + URLEncoder.encode("http://subject2", ENC) + "&pu=" + URLEncoder.encode("http://predicate3", ENC) + "&ol=" + URLEncoder.encode("literal1", ENC);
         Model skipToNextSubjectExp = ModelFactory.createDefaultModel();
-	skipToNextSubjectExp.add(skipToNextSubjectExp.createResource("http://subject2"), skipToNextSubjectExp.createProperty("http://predicate3"), skipToNextSubjectExp.createLiteral("literal1"));
+        skipToNextSubjectExp.add(skipToNextSubjectExp.createResource("http://subject2"), skipToNextSubjectExp.createProperty("http://predicate3"), skipToNextSubjectExp.createLiteral("literal1"));
         Model skipToNextSubjectParsed = ModelFactory.createDefaultModel();
         createRIOTParser().read(new ByteArrayInputStream(skipToNextSubject.getBytes()), "http://base", null, StreamRDFLib.graph(skipToNextSubjectParsed.getGraph()), null);
         
-	assertIsomorphic(skipToNextSubjectExp, skipToNextSubjectParsed);
+        assertIsomorphic(skipToNextSubjectExp, skipToNextSubjectParsed);
         
         String skipToNextPredicate = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://dc.org/#title", ENC) + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&ol=" + URLEncoder.encode("literal", ENC);
         Model skipToNextPredicateExp = ModelFactory.createDefaultModel();
-	skipToNextPredicateExp.add(skipToNextPredicateExp.createResource("http://subject1"), skipToNextPredicateExp.createProperty("http://predicate1"), skipToNextPredicateExp.createLiteral("literal"));
+        skipToNextPredicateExp.add(skipToNextPredicateExp.createResource("http://subject1"), skipToNextPredicateExp.createProperty("http://predicate1"), skipToNextPredicateExp.createLiteral("literal"));
         Model skipToNextPredicateParsed = ModelFactory.createDefaultModel();
         createRIOTParser().read(new ByteArrayInputStream(skipToNextPredicate.getBytes()), "http://base", null, StreamRDFLib.graph(skipToNextPredicateParsed.getGraph()), null);
         
-	assertIsomorphic(skipToNextPredicateExp, skipToNextPredicateParsed);
+        assertIsomorphic(skipToNextPredicateExp, skipToNextPredicateParsed);
     }
     
     @Test
@@ -185,20 +185,20 @@ public class RDFPostReaderTest
         String skipToNextSubject = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&on=" + URLEncoder.encode("http://ns/", ENC) +
             "&su=" + URLEncoder.encode("http://subject2", ENC) + "&pu=" + URLEncoder.encode("http://predicate3", ENC) + "&ol=" + URLEncoder.encode("literal1", ENC);
         Model skipToNextSubjectExp = ModelFactory.createDefaultModel();
-	skipToNextSubjectExp.add(skipToNextSubjectExp.createResource("http://subject2"), skipToNextSubjectExp.createProperty("http://predicate3"), skipToNextSubjectExp.createLiteral("literal1"));
+        skipToNextSubjectExp.add(skipToNextSubjectExp.createResource("http://subject2"), skipToNextSubjectExp.createProperty("http://predicate3"), skipToNextSubjectExp.createLiteral("literal1"));
         Model skipToNextSubjectParsed = ModelFactory.createDefaultModel();
         createRIOTParser().read(new ByteArrayInputStream(skipToNextSubject.getBytes()), "http://base", null, StreamRDFLib.graph(skipToNextSubjectParsed.getGraph()), null);
-	
+        
         assertIsomorphic(skipToNextSubjectExp, skipToNextSubjectParsed);
 
         String skipToNextPredicate = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&on=" + URLEncoder.encode("http://ns/", ENC) +
             "&pu=" + URLEncoder.encode("http://predicate3", ENC) + "&ol=" + URLEncoder.encode("literal1", ENC);
         Model skipToNextPredicateExp = ModelFactory.createDefaultModel();
-	skipToNextPredicateExp.add(skipToNextPredicateExp.createResource("http://subject1"), skipToNextPredicateExp.createProperty("http://predicate3"), skipToNextPredicateExp.createLiteral("literal1"));
+        skipToNextPredicateExp.add(skipToNextPredicateExp.createResource("http://subject1"), skipToNextPredicateExp.createProperty("http://predicate3"), skipToNextPredicateExp.createLiteral("literal1"));
         Model skipToNextPredicateParsed = ModelFactory.createDefaultModel();
         createRIOTParser().read(new ByteArrayInputStream(skipToNextPredicate.getBytes()), "http://base", null, StreamRDFLib.graph(skipToNextPredicateParsed.getGraph()), null);
         
-	assertIsomorphic(skipToNextPredicateExp, skipToNextPredicateParsed);
+        assertIsomorphic(skipToNextPredicateExp, skipToNextPredicateParsed);
     }
     
     @Test
@@ -207,20 +207,20 @@ public class RDFPostReaderTest
         String skipToNextNonLiteralObject = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&lt=" + URLEncoder.encode("http://type", ENC) + "ll=da" +
             "&ou=" + URLEncoder.encode("http://object1", ENC);
         Model skipToNextNonLiteralObjectExp = ModelFactory.createDefaultModel();
-	skipToNextNonLiteralObjectExp.add(skipToNextNonLiteralObjectExp.createResource("http://subject1"), skipToNextNonLiteralObjectExp.createProperty("http://predicate1"), skipToNextNonLiteralObjectExp.createResource("http://object1"));
+        skipToNextNonLiteralObjectExp.add(skipToNextNonLiteralObjectExp.createResource("http://subject1"), skipToNextNonLiteralObjectExp.createProperty("http://predicate1"), skipToNextNonLiteralObjectExp.createResource("http://object1"));
         Model skipToNextNonLiteralObjectParsed = ModelFactory.createDefaultModel();
         createRIOTParser().read(new ByteArrayInputStream(skipToNextNonLiteralObject.getBytes()), "http://base", null, StreamRDFLib.graph(skipToNextNonLiteralObjectParsed.getGraph()), null);
-	
+        
         assertIsomorphic(skipToNextNonLiteralObjectExp, skipToNextNonLiteralObjectParsed);
 
         String skipToNextPredicate = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&lt=" + URLEncoder.encode("http://type", ENC) + "ll=da" +
             "&pu=" + URLEncoder.encode("http://predicate3", ENC) + "&ou=" + URLEncoder.encode("http://object1", ENC);
         Model skipToNextPredicateExp = ModelFactory.createDefaultModel();
-	skipToNextPredicateExp.add(skipToNextPredicateExp.createResource("http://subject1"), skipToNextPredicateExp.createProperty("http://predicate3"), skipToNextPredicateExp.createResource("http://object1"));
+        skipToNextPredicateExp.add(skipToNextPredicateExp.createResource("http://subject1"), skipToNextPredicateExp.createProperty("http://predicate3"), skipToNextPredicateExp.createResource("http://object1"));
         Model skipToNextPredicateParsed = ModelFactory.createDefaultModel();
         createRIOTParser().read(new ByteArrayInputStream(skipToNextPredicate.getBytes()), "http://base", null, StreamRDFLib.graph(skipToNextPredicateParsed.getGraph()), null);
         
-	assertIsomorphic(skipToNextPredicateExp, skipToNextPredicateParsed);
+        assertIsomorphic(skipToNextPredicateExp, skipToNextPredicateParsed);
     }
     
     @Test
@@ -229,20 +229,20 @@ public class RDFPostReaderTest
         String skipToNextNonLiteralObject = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&ll=da" + "&lt=" + URLEncoder.encode("http://type", ENC) +
             "&ou=" + URLEncoder.encode("http://object1", ENC);
         Model skipToNextNonLiteralObjectExp = ModelFactory.createDefaultModel();
-	skipToNextNonLiteralObjectExp.add(skipToNextNonLiteralObjectExp.createResource("http://subject1"), skipToNextNonLiteralObjectExp.createProperty("http://predicate1"), skipToNextNonLiteralObjectExp.createResource("http://object1"));
+        skipToNextNonLiteralObjectExp.add(skipToNextNonLiteralObjectExp.createResource("http://subject1"), skipToNextNonLiteralObjectExp.createProperty("http://predicate1"), skipToNextNonLiteralObjectExp.createResource("http://object1"));
         Model skipToNextNonLiteralObjectParsed = ModelFactory.createDefaultModel();
         createRIOTParser().read(new ByteArrayInputStream(skipToNextNonLiteralObject.getBytes()), "http://base", null, StreamRDFLib.graph(skipToNextNonLiteralObjectParsed.getGraph()), null);
-	
+        
         assertIsomorphic(skipToNextNonLiteralObjectExp, skipToNextNonLiteralObjectParsed);
 
         String skipToNextPredicate = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&ll=da" + "&lt=" + URLEncoder.encode("http://type", ENC) +
             "&pu=" + URLEncoder.encode("http://predicate3", ENC) + "&ou=" + URLEncoder.encode("http://object1", ENC);
         Model skipToNextPredicateExp = ModelFactory.createDefaultModel();
-	skipToNextPredicateExp.add(skipToNextPredicateExp.createResource("http://subject1"), skipToNextPredicateExp.createProperty("http://predicate3"), skipToNextPredicateExp.createResource("http://object1"));
+        skipToNextPredicateExp.add(skipToNextPredicateExp.createResource("http://subject1"), skipToNextPredicateExp.createProperty("http://predicate3"), skipToNextPredicateExp.createResource("http://object1"));
         Model skipToNextPredicateParsed = ModelFactory.createDefaultModel();
         createRIOTParser().read(new ByteArrayInputStream(skipToNextPredicate.getBytes()), "http://base", null, StreamRDFLib.graph(skipToNextPredicateParsed.getGraph()), null);
         
-	assertIsomorphic(skipToNextPredicateExp, skipToNextPredicateParsed);
+        assertIsomorphic(skipToNextPredicateExp, skipToNextPredicateParsed);
     }
 
     @Test
@@ -253,13 +253,13 @@ public class RDFPostReaderTest
         Model skiptToEOFParsed = ModelFactory.createDefaultModel();
         createRIOTParser().read(new ByteArrayInputStream(skipToEOF.getBytes()), "http://base", null, StreamRDFLib.graph(skiptToEOFParsed.getGraph()), null);
         
-	assertIsomorphic(skipToEOFExp, skiptToEOFParsed);
+        assertIsomorphic(skipToEOFExp, skiptToEOFParsed);
     }
     
     public static void assertIsomorphic(Model wanted, Model got)
     {
-	if (!wanted.isIsomorphicWith(got))
-	    fail("Models not isomorphic (not structurally equal))");
+        if (!wanted.isIsomorphicWith(got))
+            fail("Models not isomorphic (not structurally equal))");
     }
     
 }

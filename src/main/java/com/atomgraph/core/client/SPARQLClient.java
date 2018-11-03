@@ -138,7 +138,7 @@ public class SPARQLClient
         if (query == null) throw new IllegalArgumentException("Query must be not null");
         if (acceptedTypes == null) throw new IllegalArgumentException("Accepted MediaType[] must be not null");
     
-        if (log.isDebugEnabled()) log.debug("Remote SPARQL service {} GET query: {}", getWebResource().getURI(), query);        
+        if (log.isDebugEnabled()) log.debug("Remote SPARQL service {} GET query: {}", getWebResource().getURI(), query);
 
         WebResource.Builder builder = getQueryResource(query, params).accept(acceptedTypes);
         if (headers != null) setHeaders(builder, headers);

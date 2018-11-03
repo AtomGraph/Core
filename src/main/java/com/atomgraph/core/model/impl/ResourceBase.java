@@ -45,7 +45,7 @@ public abstract class ResourceBase implements Resource
 
     private final UriInfo uriInfo;
     private final Request request;
-    private final MediaTypes mediaTypes;    
+    private final MediaTypes mediaTypes;
     private final URI uri;
     private final com.atomgraph.core.model.impl.Response response;
 
@@ -75,7 +75,7 @@ public abstract class ResourceBase implements Resource
         this.mediaTypes = mediaTypes;
         this.uri = uri;
         this.response = com.atomgraph.core.model.impl.Response.fromRequest(request);
-        if (log.isDebugEnabled()) log.debug("Request URI: {}", uriInfo.getRequestUri());        
+        if (log.isDebugEnabled()) log.debug("Request URI: {}", uriInfo.getRequestUri());
     }
     
     /**

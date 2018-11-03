@@ -59,8 +59,8 @@ public class TokenizerRDFPost extends TokenizerText implements Tokenizer
     public static final String TYPE =           "lt";
     public static final String LANG =           "ll";
         
-    private final StringBuilder stringBuilder = new StringBuilder(200);    
-    private Token token = null;    
+    private final StringBuilder stringBuilder = new StringBuilder(200);
+    private Token token = null;
     private String key, prevKey = null;
     
     public TokenizerRDFPost(PeekReader reader)
@@ -76,7 +76,7 @@ public class TokenizerRDFPost extends TokenizerText implements Tokenizer
         
         try
         {
-            int ch = getReader().peekChar();            
+            int ch = getReader().peekChar();
             if (ch == CH_EQUALS || ch == CH_AMPERSAND) getReader().readChar();
 
             if (key != null)
@@ -159,7 +159,7 @@ public class TokenizerRDFPost extends TokenizerText implements Tokenizer
                         prevKey = key;
                         key = null;
                         return token;
-                    case LANG: // ll                        
+                    case LANG: // ll
                         token.setType(TokenType.LITERAL_LANG);
                         token.setImage2(readUntilDelimiter());
                         prevKey = key;
@@ -183,7 +183,7 @@ public class TokenizerRDFPost extends TokenizerText implements Tokenizer
                 case DEF_NS_PRED: // pv
                 case NS_PRED: // pn
                 case BLANK_OBJ: // ob
-                case URI_OBJ: // ou                    
+                case URI_OBJ: // ou
                 case DEF_NS_OBJ: // ov
                 case NS_OBJ: // on
                 case LITERAL_OBJ: // ol
