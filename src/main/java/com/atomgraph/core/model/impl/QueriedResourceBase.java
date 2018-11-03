@@ -69,7 +69,7 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     protected QueriedResourceBase(final UriInfo uriInfo, final Request request, final MediaTypes mediaTypes, final URI uri, final Service service)            
     {
         super(uriInfo, request, mediaTypes, uri);
-	if (service == null) throw new IllegalArgumentException("Service cannot be null");
+        if (service == null) throw new IllegalArgumentException("Service cannot be null");
         
         this.service = service;
     }
@@ -114,16 +114,16 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     @Override
     public Response get()
     {
-	Model description = describe();
+        Model description = describe();
         
-	if (description.isEmpty())
-	{
-	    if (log.isDebugEnabled()) log.debug("Query result Model is empty; returning 404 Not Found");
-	    throw new NotFoundException("Query result Model is empty");
-	}
+        if (description.isEmpty())
+        {
+            if (log.isDebugEnabled()) log.debug("Query result Model is empty; returning 404 Not Found");
+            throw new NotFoundException("Query result Model is empty");
+        }
         
-	if (log.isDebugEnabled()) log.debug("Returning @GET Response with {} statements in Model", description.size());
-	return getResponse(description);
+        if (log.isDebugEnabled()) log.debug("Returning @GET Response with {} statements in Model", description.size());
+        return getResponse(description);
     }
 
     /**
@@ -135,8 +135,8 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     @Override
     public Response post(Model model)
     {
-	if (log.isWarnEnabled()) log.warn("POST request with RDF payload: {}. AtomGraph Core is read-only!  Only GET is supported", model);
-	throw new WebApplicationException(405);
+        if (log.isWarnEnabled()) log.warn("POST request with RDF payload: {}. AtomGraph Core is read-only!  Only GET is supported", model);
+        throw new WebApplicationException(405);
     }
 
     /**
@@ -148,8 +148,8 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     @Override
     public Response put(Model model)
     {
-	if (log.isWarnEnabled()) log.warn("PUT request with RDF payload: {}. AtomGraph Core is read-only! Only GET is supported", model);
-	throw new WebApplicationException(405);
+        if (log.isWarnEnabled()) log.warn("PUT request with RDF payload: {}. AtomGraph Core is read-only! Only GET is supported", model);
+        throw new WebApplicationException(405);
     }
 
     /**
@@ -161,8 +161,8 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     @Override
     public Response delete()
     {
-	if (log.isWarnEnabled()) log.warn("DELETE request with RDF payload: {}. AtomGraph Core is read-only! Only GET is supported");
-	throw new WebApplicationException(405);
+        if (log.isWarnEnabled()) log.warn("DELETE request with RDF payload: {}. AtomGraph Core is read-only! Only GET is supported");
+        throw new WebApplicationException(405);
     }
 
     /**
@@ -173,7 +173,7 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     @Override
     public Query getQuery()
     {
-	return getQuery(getURI());
+        return getQuery(getURI());
     }
     
     /**
@@ -184,8 +184,8 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
      */
     public Query getQuery(URI uri)
     {
-	if (uri == null) throw new IllegalArgumentException("URI cannot be null");        
-	return QueryFactory.create("DESCRIBE <" + uri.toString() + ">");
+        if (uri == null) throw new IllegalArgumentException("URI cannot be null");
+        return QueryFactory.create("DESCRIBE <" + uri.toString() + ">");
     }
     
 }

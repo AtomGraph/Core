@@ -53,8 +53,8 @@ public class LinkedDataClient
     
     protected WebResource.Builder setHeaders(WebResource.Builder builder, Map<String, Object> headers)
     {
-	if (builder == null) throw new IllegalArgumentException("WebResource.Builder must be not null");
-	if (headers == null) throw new IllegalArgumentException("Map<String, Object> must be not null");
+        if (builder == null) throw new IllegalArgumentException("WebResource.Builder must be not null");
+        if (headers == null) throw new IllegalArgumentException("Map<String, Object> must be not null");
 
         Iterator<Map.Entry<String, Object>> it = headers.entrySet().iterator();
         while (it.hasNext())

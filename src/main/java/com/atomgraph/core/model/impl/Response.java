@@ -54,7 +54,7 @@ public class Response // extends ResponseBuilder
      */
     protected Response(Request request)
     {
-	if (request == null) throw new IllegalArgumentException("Request cannot be null");
+        if (request == null) throw new IllegalArgumentException("Request cannot be null");
         this.request = request;
     }
 
@@ -65,7 +65,7 @@ public class Response // extends ResponseBuilder
     
     public static Response fromRequest(Request request)
     {
-	return new Response(request);
+        return new Response(request);
     }
 
     public static MediaType[] mediaTypeListToArray(List<MediaType> list)
@@ -120,7 +120,7 @@ public class Response // extends ResponseBuilder
      */
     public ResponseBuilder getResponseBuilder(Model model, List<Variant> variants)
     {
-	if (variants == null) throw new IllegalArgumentException("List<Variant> cannot be null");
+        if (variants == null) throw new IllegalArgumentException("List<Variant> cannot be null");
 
         Variant variant = getRequest().selectVariant(variants);
         if (variant == null)
@@ -146,7 +146,7 @@ public class Response // extends ResponseBuilder
      */
     public List<Variant> removeLanguages(List<Variant> variants)
     {
-	if (variants == null) throw new IllegalArgumentException("List<Variant> cannot be null");
+        if (variants == null) throw new IllegalArgumentException("List<Variant> cannot be null");
         
         List<Variant> list = new ArrayList<>();
         
@@ -165,8 +165,8 @@ public class Response // extends ResponseBuilder
      */    
     public ResponseBuilder getResponseBuilder(ResultSetRewindable resultSet, List<Variant> variants)
     {
-	if (resultSet == null) throw new IllegalArgumentException("ResultSetRewindable cannot be null");        
-	if (variants == null) throw new IllegalArgumentException("List<Variant> cannot be null");
+        if (resultSet == null) throw new IllegalArgumentException("ResultSetRewindable cannot be null");
+        if (variants == null) throw new IllegalArgumentException("List<Variant> cannot be null");
         
         Variant variant = getRequest().selectVariant(variants);
         if (variant == null)
@@ -176,8 +176,8 @@ public class Response // extends ResponseBuilder
         }
 
         resultSet.reset();
-        EntityTag entityTag = getEntityTag(resultSet, variant);        
-	resultSet.reset(); // ResultSet needs to be rewinded back to the beginning
+        EntityTag entityTag = getEntityTag(resultSet, variant);
+        resultSet.reset(); // ResultSet needs to be rewinded back to the beginning
         return getResponseBuilder(resultSet, entityTag, variant);
     }
 
@@ -191,22 +191,22 @@ public class Response // extends ResponseBuilder
      */        
     public ResponseBuilder getResponseBuilder(Object entity, EntityTag entityTag, Variant variant)
     {
-	if (entity == null) throw new IllegalArgumentException("Object cannot be null");
-	if (entityTag == null) throw new IllegalArgumentException("EntityTag cannot be null");
-	if (variant == null) throw new IllegalArgumentException("Variant cannot be null");
+        if (entity == null) throw new IllegalArgumentException("Object cannot be null");
+        if (entityTag == null) throw new IllegalArgumentException("EntityTag cannot be null");
+        if (variant == null) throw new IllegalArgumentException("Variant cannot be null");
 
         ResponseBuilder rb = getRequest().evaluatePreconditions(entityTag);
-	if (rb != null)
-	{
-	    if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
-	    return rb.variant(variant); // Jersey doesn't seem to set "Vary" header
-	}
-	else
-	{
+        if (rb != null)
+        {
+            if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
+            return rb.variant(variant); // Jersey doesn't seem to set "Vary" header
+        }
+        else
+        {
             if (log.isTraceEnabled()) log.trace("Generating RDF Response with Variant: {} and EntityTag: {}", variant, entityTag);
             return javax.ws.rs.core.Response.ok(entity, variant).
                     tag(entityTag);
-	}	
+        }
     }
         
     /**
@@ -218,8 +218,8 @@ public class Response // extends ResponseBuilder
      */
     public long getModelVariantHash(Model model, Variant variant)
     {
-	if (model == null) throw new IllegalArgumentException("Model cannot be null");
-	if (variant == null) throw new IllegalArgumentException("Variant cannot be null");
+        if (model == null) throw new IllegalArgumentException("Model cannot be null");
+        if (variant == null) throw new IllegalArgumentException("Variant cannot be null");
         
         return ModelUtils.hashModel(model) + variant.hashCode();
     }
@@ -233,8 +233,8 @@ public class Response // extends ResponseBuilder
      */    
     public long getResultSetVariantHash(ResultSet resultSet, Variant variant)
     {
-	if (resultSet == null) throw new IllegalArgumentException("ResultSet cannot be null");
-	if (variant == null) throw new IllegalArgumentException("Variant cannot be null");
+        if (resultSet == null) throw new IllegalArgumentException("ResultSet cannot be null");
+        if (variant == null) throw new IllegalArgumentException("Variant cannot be null");
 
         return ResultSetUtils.hashResultSet(resultSet) + variant.hashCode();
     }

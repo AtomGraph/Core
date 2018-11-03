@@ -42,21 +42,21 @@ public class ServiceProvider extends PerRequestTypeInjectableProvider<Context, S
     
     public ServiceProvider(final Service service)
     {
-	super(Service.class);
+        super(Service.class);
         this.service = service;
     }
     
     @Override
     public Injectable<Service> getInjectable(ComponentContext ic, Context a)
     {
-	return new Injectable<Service>()
-	{
-	    @Override
-	    public Service getValue()
-	    {
-		return getService();
-	    }
-	};
+        return new Injectable<Service>()
+        {
+            @Override
+            public Service getValue()
+            {
+                return getService();
+            }
+        };
     }
 
     @Override

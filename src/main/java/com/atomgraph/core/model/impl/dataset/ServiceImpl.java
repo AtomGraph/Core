@@ -38,7 +38,7 @@ public class ServiceImpl implements Service
     
     public ServiceImpl(Dataset dataset, MediaTypes mediaTypes)
     {
-	if (dataset == null) throw new IllegalArgumentException("Dataset must be not null");
+        if (dataset == null) throw new IllegalArgumentException("Dataset must be not null");
         
         this.dataset = dataset;
         this.mediaTypes = mediaTypes;

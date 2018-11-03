@@ -47,7 +47,7 @@ public class MediaTypes
      * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/ResultSetRewindable.html">Jena ResultSetRewindable</a>
      */
     private static final javax.ws.rs.core.MediaType[] RESULT_SET_MEDIA_TYPES = new MediaType[]{MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE,
-			    MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE};
+                            MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE};
     
     public static final Map<String, String> UTF8_PARAM = new HashMap<>();
     static
@@ -64,8 +64,8 @@ public class MediaTypes
     
     public MediaTypes(Map<Class, List<javax.ws.rs.core.MediaType>> readable, Map<Class, List<javax.ws.rs.core.MediaType>> writable)
     {
-	if (readable == null) throw new IllegalArgumentException("Map of readable MediaTypes must be not null");        
-	if (writable == null) throw new IllegalArgumentException("Map of writable MediaTypes must be not null");        
+        if (readable == null) throw new IllegalArgumentException("Map of readable MediaTypes must be not null");
+        if (writable == null) throw new IllegalArgumentException("Map of writable MediaTypes must be not null");
 
         this.readable = Collections.unmodifiableMap(readable);
         this.writable = Collections.unmodifiableMap(writable);
@@ -73,7 +73,7 @@ public class MediaTypes
     
     protected MediaTypes(Collection<Lang> registered, Map<String, String> parameters)
     {
-	if (registered == null) throw new IllegalArgumentException("Collection of Langs must be not null");        
+        if (registered == null) throw new IllegalArgumentException("Collection of Langs must be not null");
         
         Map<Class, List<javax.ws.rs.core.MediaType>> readableMap = new HashMap<>(), writableMap = new HashMap<>();
         List<javax.ws.rs.core.MediaType> readableList = new ArrayList<>(), writableList = new ArrayList<>();
@@ -91,7 +91,7 @@ public class MediaTypes
                 {
                     if (ModelFactory.createDefaultModel().getReader(lang.getName()) != null)
                     {
-                        MediaType mt = new MediaType(lang, UTF8_PARAM);
+                        MediaType mt = new MediaType(lang); // don't add charset=UTF-8 on readable types
                         // avoid adding duplicates. Cannot use Set because ordering is important
                         if (!readableList.contains(mt)) readableList.add(mt);
                     }
@@ -102,8 +102,8 @@ public class MediaTypes
                 {
                     if (ModelFactory.createDefaultModel().getWriter(lang.getName()) != null)
                     {
-                        MediaType mt = new MediaType(lang, UTF8_PARAM);                        
-                        // avoid adding duplicates. Cannot use Set because ordering is important                        
+                        MediaType mt = new MediaType(lang, UTF8_PARAM);
+                        // avoid adding duplicates. Cannot use Set because ordering is important
                         if (!writableList.contains(mt)) writableList.add(mt);
                     }
                 }
@@ -128,7 +128,7 @@ public class MediaTypes
         {
             javax.ws.rs.core.MediaType resultSetType = resultSetLangIt.next();
             readableList.add(new MediaType(resultSetType.getType(), resultSetType.getSubtype(), parameters));
-            writableList.add(new MediaType(resultSetType.getType(), resultSetType.getSubtype(), parameters));            
+            writableList.add(new MediaType(resultSetType.getType(), resultSetType.getSubtype(), parameters));
         }
 
         readableMap.put(ResultSet.class, Collections.unmodifiableList(readableList));
@@ -137,7 +137,7 @@ public class MediaTypes
         // make maps unmodifiable
         
         readable = Collections.unmodifiableMap(readableMap);
-        writable = Collections.unmodifiableMap(writableMap);        
+        writable = Collections.unmodifiableMap(writableMap);
     }
 
     public static List<javax.ws.rs.core.MediaType> getRegistered()

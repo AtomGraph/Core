@@ -52,7 +52,7 @@ public class QueryWriter implements MessageBodyWriter<Query>
     @Override
     public long getSize(Query query, Class<?> type, Type genericType, Annotation[] annotations, javax.ws.rs.core.MediaType mediaType)
     {
-	return -1;
+        return -1;
     }
 
     @Override

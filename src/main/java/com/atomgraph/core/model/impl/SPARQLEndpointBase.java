@@ -70,13 +70,13 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
      */
     public SPARQLEndpointBase(@Context Request request, @Context MediaTypes mediaTypes)
     {
-	//if (request == null) throw new IllegalArgumentException("Request cannot be null");
-	if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
+        //if (request == null) throw new IllegalArgumentException("Request cannot be null");
+        if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
 
-	this.request = request;
+        this.request = request;
         this.mediaTypes = mediaTypes;
         this.response = request != null ? com.atomgraph.core.model.impl.Response.fromRequest(request) : null;
-	if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase");        
+        if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase");        
     }
     
     @Override
@@ -84,7 +84,7 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     public Response get(@QueryParam(QUERY) Query query,
             @QueryParam(DEFAULT_GRAPH_URI) List<URI> defaultGraphUris, @QueryParam(NAMED_GRAPH_URI) List<URI> namedGraphUris)
     {
-	return getResponseBuilder(query, defaultGraphUris, namedGraphUris).build();
+        return getResponseBuilder(query, defaultGraphUris, namedGraphUris).build();
     }
     
     @Override
@@ -105,7 +105,7 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     @Consumes(com.atomgraph.core.MediaType.APPLICATION_SPARQL_QUERY)
     public Response post(Query query, @QueryParam(DEFAULT_GRAPH_URI) List<URI> defaultGraphUris, @QueryParam(NAMED_GRAPH_URI) List<URI> namedGraphUris)
     {
-	return get(query, defaultGraphUris, namedGraphUris);
+        return get(query, defaultGraphUris, namedGraphUris);
     }
     
     @Override
@@ -113,7 +113,7 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     @Consumes(com.atomgraph.core.MediaType.APPLICATION_SPARQL_UPDATE)
     public Response post(UpdateRequest update, @QueryParam(USING_GRAPH_URI) List<URI> usingGraphUris, @QueryParam(USING_NAMED_GRAPH_URI) List<URI> usingNamedGraphUris)
     {
-	update(update, usingGraphUris, usingNamedGraphUris);
+        update(update, usingGraphUris, usingNamedGraphUris);
 
         return Response.ok().build();
     }
@@ -130,7 +130,7 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
      */
     public ResponseBuilder getResponseBuilder(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris)
     {
-	if (query == null) throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        if (query == null) throw new WebApplicationException(Response.Status.BAD_REQUEST);
 
         if (query.isSelectType())
         {
@@ -149,8 +149,8 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
             return getResponseBuilder(loadModel(query, defaultGraphUris, namedGraphUris));
         }
         
-	if (log.isWarnEnabled()) log.warn("SPARQL endpoint received unknown type of query: {}", query);
-	throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        if (log.isWarnEnabled()) log.warn("SPARQL endpoint received unknown type of query: {}", query);
+        throw new WebApplicationException(Response.Status.BAD_REQUEST);
     }
 
     /**
@@ -188,7 +188,7 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     {
         if (getRequest() == null) return Response.ok(resultSet);
         
-	return com.atomgraph.core.model.impl.Response.fromRequest(getRequest()).
+        return com.atomgraph.core.model.impl.Response.fromRequest(getRequest()).
                 getResponseBuilder(resultSet, getVariants(getMediaTypes().getWritable(ResultSet.class)));
     }
 
@@ -203,10 +203,10 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
      */
     public Model describe(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris)    
     {
-	if (query == null) throw new IllegalArgumentException("Query must be not null");
+        if (query == null) throw new IllegalArgumentException("Query must be not null");
         if (!query.isDescribeType()) throw new IllegalArgumentException("Query must be DESCRIBE");
         
-	return loadModel(query, defaultGraphUris, namedGraphUris);
+        return loadModel(query, defaultGraphUris, namedGraphUris);
     }
 
     /**
@@ -220,10 +220,10 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
      */
     public Model construct(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris)
     {
-	if (query == null) throw new IllegalArgumentException("Query must be not null");
+        if (query == null) throw new IllegalArgumentException("Query must be not null");
         if (!query.isConstructType()) throw new IllegalArgumentException("Query must be CONSTRUCT");
         
-	return loadModel(query, defaultGraphUris, namedGraphUris);
+        return loadModel(query, defaultGraphUris, namedGraphUris);
     }
 
     /**
@@ -304,7 +304,7 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     
     public Request getRequest()
     {
-	return request;
+        return request;
     }
     
     public MediaTypes getMediaTypes()

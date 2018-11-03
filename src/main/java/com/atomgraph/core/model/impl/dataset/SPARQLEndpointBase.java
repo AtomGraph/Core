@@ -58,7 +58,7 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
      */
     public SPARQLEndpointBase(@Context Request request, @Context MediaTypes mediaTypes, @Context Dataset dataset)
     {
-	super(request, mediaTypes);
+        super(request, mediaTypes);
         if (dataset == null) throw new IllegalArgumentException("Dataset cannot be null");
         this.dataset = dataset;
     }
@@ -82,22 +82,22 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
      */
     public Model loadModel(Dataset dataset, Query query)
     {
-	if (log.isDebugEnabled()) log.debug("Local Dataset Query: {}", query);
-	if (dataset == null) throw new IllegalArgumentException("Dataset must be not null");
+        if (log.isDebugEnabled()) log.debug("Local Dataset Query: {}", query);
+        if (dataset == null) throw new IllegalArgumentException("Dataset must be not null");
         if (query == null) throw new IllegalArgumentException("Query must be not null");
-	
-	try (QueryExecution qex = QueryExecutionFactory.create(query, dataset))
-        {	
-	    if (query.isConstructType()) return qex.execConstruct();
-	    if (query.isDescribeType()) return qex.execDescribe();
-	
-	    throw new QueryExecException("Query to load Model must be CONSTRUCT or DESCRIBE");
-	}
-	catch (QueryExecException ex)
-	{
-	    if (log.isDebugEnabled()) log.debug("Local query execution exception: {}", ex);
-	    throw ex;
-	}
+        
+        try (QueryExecution qex = QueryExecutionFactory.create(query, dataset))
+        {        
+            if (query.isConstructType()) return qex.execConstruct();
+            if (query.isDescribeType()) return qex.execDescribe();
+        
+            throw new QueryExecException("Query to load Model must be CONSTRUCT or DESCRIBE");
+        }
+        catch (QueryExecException ex)
+        {
+            if (log.isDebugEnabled()) log.debug("Local query execution exception: {}", ex);
+            throw ex;
+        }
     }
     
     @Override
@@ -118,21 +118,21 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
      */
     public ResultSetRewindable loadResultSet(Dataset dataset, Query query)
     {
-	if (log.isDebugEnabled()) log.debug("Local Dataset Query: {}", query);
-	if (dataset == null) throw new IllegalArgumentException("Dataset must be not null");
+        if (log.isDebugEnabled()) log.debug("Local Dataset Query: {}", query);
+        if (dataset == null) throw new IllegalArgumentException("Dataset must be not null");
         if (query == null) throw new IllegalArgumentException("Query must be not null");
-	
-	try (QueryExecution qex = QueryExecutionFactory.create(query, dataset))
+        
+        try (QueryExecution qex = QueryExecutionFactory.create(query, dataset))
         {
-	    if (query.isSelectType()) return ResultSetFactory.copyResults(qex.execSelect());
-	    
-	    throw new QueryExecException("Query to load ResultSet must be SELECT");
-	}
-	catch (QueryExecException ex)
-	{
-	    if (log.isDebugEnabled()) log.debug("Local query execution exception: {}", ex);
-	    throw ex;
-	}
+            if (query.isSelectType()) return ResultSetFactory.copyResults(qex.execSelect());
+            
+            throw new QueryExecException("Query to load ResultSet must be SELECT");
+        }
+        catch (QueryExecException ex)
+        {
+            if (log.isDebugEnabled()) log.debug("Local query execution exception: {}", ex);
+            throw ex;
+        }
     }
     
     @Override
@@ -153,21 +153,21 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
      */
     public boolean ask(Dataset dataset, Query query)
     {
-	if (log.isDebugEnabled()) log.debug("Local Dataset Query: {}", query);
-	if (dataset == null) throw new IllegalArgumentException("Dataset must be not null");
+        if (log.isDebugEnabled()) log.debug("Local Dataset Query: {}", query);
+        if (dataset == null) throw new IllegalArgumentException("Dataset must be not null");
         if (query == null) throw new IllegalArgumentException("Query must be not null");
 
-	try (QueryExecution qex = QueryExecutionFactory.create(query, dataset))
+        try (QueryExecution qex = QueryExecutionFactory.create(query, dataset))
         {
-	    if (query.isAskType()) return qex.execAsk();
+            if (query.isAskType()) return qex.execAsk();
 
-	    throw new QueryExecException("Query to load ResultSet must be SELECT");
-	}
-	catch (QueryExecException ex)
-	{
-	    if (log.isDebugEnabled()) log.debug("Local query execution exception: {}", ex);
-	    throw ex;
-	}
+            throw new QueryExecException("Query to load ResultSet must be SELECT");
+        }
+        catch (QueryExecException ex)
+        {
+            if (log.isDebugEnabled()) log.debug("Local query execution exception: {}", ex);
+            throw ex;
+        }
     }
     
     /**

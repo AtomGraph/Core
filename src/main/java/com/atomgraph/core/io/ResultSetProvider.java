@@ -81,14 +81,14 @@ public class ResultSetProvider implements MessageBodyReader<ResultSetRewindable>
         if (log.isTraceEnabled()) log.trace("Reading ResultSet with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
         // result set needs to be rewindable because results might be processed multiple times, e.g. to calculate hash and write response
         // TO-DO: construct Jena's ResultFormat and then pass to ResultSet.load(in, format)
-	if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE))
-	    return ResultSetFactory.makeRewindable(ResultSetFactory.fromXML(in));
-	if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
-	    return ResultSetFactory.makeRewindable(ResultSetFactory.fromJSON(in));
-	if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_CSV_TYPE))
-	    return ResultSetFactory.makeRewindable(CSVInput.fromCSV(in));
-	if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_CSV_TYPE))
-	    return ResultSetFactory.makeRewindable(TSVInput.fromTSV(in));
+        if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE))
+            return ResultSetFactory.makeRewindable(ResultSetFactory.fromXML(in));
+        if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
+            return ResultSetFactory.makeRewindable(ResultSetFactory.fromJSON(in));
+        if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_CSV_TYPE))
+            return ResultSetFactory.makeRewindable(CSVInput.fromCSV(in));
+        if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_CSV_TYPE))
+            return ResultSetFactory.makeRewindable(TSVInput.fromTSV(in));
         
         throw new IllegalStateException("ResultSet MediaType should be readable but no Jena reader matched");
     }
@@ -102,33 +102,33 @@ public class ResultSetProvider implements MessageBodyReader<ResultSetRewindable>
     @Override
     public long getSize(ResultSet t, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-	return -1;
+        return -1;
     }
 
     @Override
     public void writeTo(ResultSet results, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException
     {
-	if (log.isTraceEnabled()) log.trace("Writing ResultSet with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
+        if (log.isTraceEnabled()) log.trace("Writing ResultSet with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
 
         //  TO-DO: construct Jena's ResultFormat and then pass to ResultSetFormatter.output(outStream, resultSet, rFmt)
-	if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE))
+        if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE))
         {
-	    ResultSetFormatter.outputAsXML(entityStream, results);
+            ResultSetFormatter.outputAsXML(entityStream, results);
             return;
         }
         if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
         {
-	    ResultSetFormatter.outputAsJSON(entityStream, results);
+            ResultSetFormatter.outputAsJSON(entityStream, results);
             return;
         }
         if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_CSV_TYPE))
         {
-	    ResultSetFormatter.outputAsCSV(entityStream, results);
+            ResultSetFormatter.outputAsCSV(entityStream, results);
             return;
         }
         if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_TSV_TYPE))
         {
-	    ResultSetFormatter.outputAsTSV(entityStream, results);
+            ResultSetFormatter.outputAsTSV(entityStream, results);
             return;
         }
         

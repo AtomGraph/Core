@@ -52,14 +52,14 @@ public class MediaTypesProvider extends PerRequestTypeInjectableProvider<Context
     @Override
     public Injectable<MediaTypes> getInjectable(ComponentContext ic, Context context)
     {
-	return new Injectable<MediaTypes>()
-	{
-	    @Override
-	    public MediaTypes getValue()
-	    {
-		return getMediaTypes();
-	    }
-	};
+        return new Injectable<MediaTypes>()
+        {
+            @Override
+            public MediaTypes getValue()
+            {
+                return getMediaTypes();
+            }
+        };
     }
 
     @Override

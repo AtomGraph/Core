@@ -96,8 +96,8 @@ public class SPARQLClient
     
     public WebResource.Builder setHeaders(WebResource.Builder builder, MultivaluedMap<String, String> headers)
     {
-	if (builder == null) throw new IllegalArgumentException("WebResource.Builder must be not null");
-	if (headers == null) throw new IllegalArgumentException("Map<String, Object> must be not null");
+        if (builder == null) throw new IllegalArgumentException("WebResource.Builder must be not null");
+        if (headers == null) throw new IllegalArgumentException("Map<String, Object> must be not null");
 
         Iterator<Entry<String, List<String>>> it = headers.entrySet().iterator();
         while (it.hasNext())
@@ -112,7 +112,7 @@ public class SPARQLClient
     
     public WebResource getQueryResource(Query query, MultivaluedMap<String, String> params)
     {
-	if (query == null) throw new IllegalArgumentException("Query must be not null");
+        if (query == null) throw new IllegalArgumentException("Query must be not null");
 
         String escapedQueryString = UriComponent.encode(query.toString(), UriComponent.Type.UNRESERVED);
         // workaround for Jersey UriBuilder to encode { } brackets using UNRESERVED type
@@ -135,8 +135,8 @@ public class SPARQLClient
     
     public ClientResponse get(Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
-	if (query == null) throw new IllegalArgumentException("Query must be not null");
-	if (acceptedTypes == null) throw new IllegalArgumentException("Accepted MediaType[] must be not null");
+        if (query == null) throw new IllegalArgumentException("Query must be not null");
+        if (acceptedTypes == null) throw new IllegalArgumentException("Accepted MediaType[] must be not null");
     
         if (log.isDebugEnabled()) log.debug("Remote SPARQL service {} GET query: {}", getWebResource().getURI(), query);        
 
@@ -147,9 +147,9 @@ public class SPARQLClient
     
     public ClientResponse post(Query query, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
-	if (query == null) throw new IllegalArgumentException("Query must be not null");
-	if (acceptedTypes == null) throw new IllegalArgumentException("Accepted MediaType[] must be not null");
-	
+        if (query == null) throw new IllegalArgumentException("Query must be not null");
+        if (acceptedTypes == null) throw new IllegalArgumentException("Accepted MediaType[] must be not null");
+        
         if (log.isDebugEnabled()) log.debug("Remote SPARQL service {} POST query: {}", getWebResource().getURI(), query);
         MultivaluedMap formData = new MultivaluedMapImpl();
         if (params != null) formData.putAll(params);
@@ -274,14 +274,14 @@ public class SPARQLClient
      */
     public ClientResponse post(UpdateRequest updateRequest, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
-	if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", getWebResource().getURI(), updateRequest);
-	if (updateRequest == null) throw new IllegalArgumentException("UpdateRequest must be not null");
+        if (log.isDebugEnabled()) log.debug("Remote service {} Query: {} ", getWebResource().getURI(), updateRequest);
+        if (updateRequest == null) throw new IllegalArgumentException("UpdateRequest must be not null");
 
         MultivaluedMap formData = new MultivaluedMapImpl();
         if (params != null) formData.putAll(params);
         formData.putSingle("update", updateRequest.toString());
         
-	WebResource.Builder builder = getWebResource().type(MediaType.APPLICATION_FORM_URLENCODED_TYPE);
+        WebResource.Builder builder = getWebResource().type(MediaType.APPLICATION_FORM_URLENCODED_TYPE);
         if (headers != null) return setHeaders(builder, headers).post(ClientResponse.class, formData);
         return builder.post(ClientResponse.class, formData);
     }

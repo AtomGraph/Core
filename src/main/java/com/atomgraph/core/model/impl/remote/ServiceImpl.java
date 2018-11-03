@@ -42,12 +42,12 @@ public class ServiceImpl implements RemoteService
     public ServiceImpl(Client client, MediaTypes mediaTypes, org.apache.jena.rdf.model.Resource endpoint, org.apache.jena.rdf.model.Resource graphStore, String authUser, String authPwd,
             Integer maxGetRequestSize)
     {
-	if (client == null) throw new IllegalArgumentException("Client must be not null");
-	if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes must be not null");
-	if (endpoint == null) throw new IllegalArgumentException("SPARQL endpoint Resource must be not null");
-	if (!endpoint.isURIResource()) throw new IllegalArgumentException("SPARQL endpoint Resource must be URI resource");
-	if (graphStore == null) throw new IllegalArgumentException("Graph Store Resource must be not null");
-	if (!graphStore.isURIResource()) throw new IllegalArgumentException("Graph Store Resource must be URI resource");
+        if (client == null) throw new IllegalArgumentException("Client must be not null");
+        if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes must be not null");
+        if (endpoint == null) throw new IllegalArgumentException("SPARQL endpoint Resource must be not null");
+        if (!endpoint.isURIResource()) throw new IllegalArgumentException("SPARQL endpoint Resource must be URI resource");
+        if (graphStore == null) throw new IllegalArgumentException("Graph Store Resource must be not null");
+        if (!graphStore.isURIResource()) throw new IllegalArgumentException("Graph Store Resource must be URI resource");
             
         this.client = client;
         this.mediaTypes = mediaTypes;

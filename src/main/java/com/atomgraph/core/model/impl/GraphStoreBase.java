@@ -54,10 +54,10 @@ public abstract class GraphStoreBase implements GraphStore
      */
     public GraphStoreBase(@Context Request request, @Context MediaTypes mediaTypes)
     {
-	// if (request == null) throw new IllegalArgumentException("Request cannot be null");
-	if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
-	
-	this.request = request;
+        // if (request == null) throw new IllegalArgumentException("Request cannot be null");
+        if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
+        
+        this.request = request;
         this.mediaTypes = mediaTypes;
         this.response = request != null ? com.atomgraph.core.model.impl.Response.fromRequest(request) : null;
     }
@@ -128,28 +128,28 @@ public abstract class GraphStoreBase implements GraphStore
     @Override
     public Response get(@QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
     {
-	if (!defaultGraph && graphUri == null) throw new WebApplicationException(Status.BAD_REQUEST);
+        if (!defaultGraph && graphUri == null) throw new WebApplicationException(Status.BAD_REQUEST);
 
-	if (defaultGraph)
-	{
-	    Model model = getModel();
+        if (defaultGraph)
+        {
+            Model model = getModel();
             if (log.isDebugEnabled()) log.debug("GET Graph Store default graph, returning Model of size(): {}", model.size());
-	    return getResponse(model);
-	}
-	else
-	{
-	    Model model = getModel(graphUri.toString());
-	    if (model == null)
-	    {
-		if (log.isDebugEnabled()) log.debug("GET Graph Store named graph with URI: {} not found", graphUri);
-		return Response.status(Status.NOT_FOUND).build();
-	    }
-	    else
-	    {
-		if (log.isDebugEnabled()) log.debug("GET Graph Store named graph with URI: {} found, returning Model of size(): {}", graphUri, model.size());
-		return getResponse(model);
-	    }
-	}
+            return getResponse(model);
+        }
+        else
+        {
+            Model model = getModel(graphUri.toString());
+            if (model == null)
+            {
+                if (log.isDebugEnabled()) log.debug("GET Graph Store named graph with URI: {} not found", graphUri);
+                return Response.status(Status.NOT_FOUND).build();
+            }
+            else
+            {
+                if (log.isDebugEnabled()) log.debug("GET Graph Store named graph with URI: {} found, returning Model of size(): {}", graphUri, model.size());
+                return getResponse(model);
+            }
+        }
     }
 
     /**
@@ -164,28 +164,28 @@ public abstract class GraphStoreBase implements GraphStore
     @Override
     public Response post(Model model, @QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
     {
-	if (!defaultGraph && graphUri == null) throw new WebApplicationException(Status.BAD_REQUEST);
-	if (log.isDebugEnabled()) log.debug("POST Graph Store request with RDF payload: {} payload size(): {}", model, model.size());
-	
-	if (model.isEmpty()) return Response.noContent().build();
-	
-	if (defaultGraph)
-	{
-	    if (log.isDebugEnabled()) log.debug("POST Model to default graph");
-	    add(model);
-	    return Response.ok().build();
-	}
-	else
-	{
-	    boolean existingGraph = containsModel(graphUri.toString());
+        if (!defaultGraph && graphUri == null) throw new WebApplicationException(Status.BAD_REQUEST);
+        if (log.isDebugEnabled()) log.debug("POST Graph Store request with RDF payload: {} payload size(): {}", model, model.size());
+        
+        if (model.isEmpty()) return Response.noContent().build();
+        
+        if (defaultGraph)
+        {
+            if (log.isDebugEnabled()) log.debug("POST Model to default graph");
+            add(model);
+            return Response.ok().build();
+        }
+        else
+        {
+            boolean existingGraph = containsModel(graphUri.toString());
 
-	    // is this implemented correctly? The specification is not very clear.
-	    if (log.isDebugEnabled()) log.debug("POST Model to named graph with URI: {} Did it already exist? {}", graphUri, existingGraph);
-	    add(graphUri.toString(), model);
-	    
-	    if (existingGraph) return Response.ok().build();
-	    else return Response.created(graphUri).build();
-	}
+            // is this implemented correctly? The specification is not very clear.
+            if (log.isDebugEnabled()) log.debug("POST Model to named graph with URI: {} Did it already exist? {}", graphUri, existingGraph);
+            add(graphUri.toString(), model);
+            
+            if (existingGraph) return Response.ok().build();
+            else return Response.created(graphUri).build();
+        }
     }
 
     /**
@@ -200,25 +200,25 @@ public abstract class GraphStoreBase implements GraphStore
     @Override
     public Response put(Model model, @QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
     {
-	if (!defaultGraph && graphUri == null) throw new WebApplicationException(Status.BAD_REQUEST);
-	if (log.isDebugEnabled()) log.debug("PUT Graph Store request with RDF payload: {} payload size(): {}", model, model.size());
-	
-	if (defaultGraph)
-	{
-	    if (log.isDebugEnabled()) log.debug("PUT Model to default graph");
-	    putModel(model);
-	    return Response.ok().build();
-	}
-	else
-	{
-	    boolean existingGraph = containsModel(graphUri.toString());
-	    
-	    if (log.isDebugEnabled()) log.debug("PUT Model to named graph with URI: {} Did it already exist? {}", graphUri, existingGraph);
-	    putModel(graphUri.toString(), model);
-	    
-	    if (existingGraph) return Response.ok().build();
-	    else return Response.created(graphUri).build();
-	}	
+        if (!defaultGraph && graphUri == null) throw new WebApplicationException(Status.BAD_REQUEST);
+        if (log.isDebugEnabled()) log.debug("PUT Graph Store request with RDF payload: {} payload size(): {}", model, model.size());
+        
+        if (defaultGraph)
+        {
+            if (log.isDebugEnabled()) log.debug("PUT Model to default graph");
+            putModel(model);
+            return Response.ok().build();
+        }
+        else
+        {
+            boolean existingGraph = containsModel(graphUri.toString());
+            
+            if (log.isDebugEnabled()) log.debug("PUT Model to named graph with URI: {} Did it already exist? {}", graphUri, existingGraph);
+            putModel(graphUri.toString(), model);
+            
+            if (existingGraph) return Response.ok().build();
+            else return Response.created(graphUri).build();
+        }        
     }
 
     /**
@@ -232,33 +232,33 @@ public abstract class GraphStoreBase implements GraphStore
     @Override
     public Response delete(@QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
     {
-	if (!defaultGraph && graphUri == null) throw new WebApplicationException(Status.BAD_REQUEST);
-	
-	if (defaultGraph)
-	{
-	    deleteDefault();
-	    if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store");	    
-	    return Response.noContent().build();
-	}
-	else
-	{
-	    if (!containsModel(graphUri.toString()))
-	    {
-		if (log.isDebugEnabled()) log.debug("DELETE named graph with URI {}: not found", graphUri);
-		return Response.status(Status.NOT_FOUND).build();
-	    }
-	    else
-	    {
-		if (log.isDebugEnabled()) log.debug("DELETE named graph with URI: {}", graphUri);
-		deleteModel(graphUri.toString());
-		return Response.noContent().build();
-	    }
-	}
+        if (!defaultGraph && graphUri == null) throw new WebApplicationException(Status.BAD_REQUEST);
+        
+        if (defaultGraph)
+        {
+            deleteDefault();
+            if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store");            
+            return Response.noContent().build();
+        }
+        else
+        {
+            if (!containsModel(graphUri.toString()))
+            {
+                if (log.isDebugEnabled()) log.debug("DELETE named graph with URI {}: not found", graphUri);
+                return Response.status(Status.NOT_FOUND).build();
+            }
+            else
+            {
+                if (log.isDebugEnabled()) log.debug("DELETE named graph with URI: {}", graphUri);
+                deleteModel(graphUri.toString());
+                return Response.noContent().build();
+            }
+        }
     }
 
     public Request getRequest()
     {
-	return request;
+        return request;
     }
     
     public MediaTypes getMediaTypes()

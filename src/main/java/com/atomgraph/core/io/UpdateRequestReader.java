@@ -55,8 +55,8 @@ public class UpdateRequestReader implements MessageBodyReader<UpdateRequest>
     @Override
     public UpdateRequest readFrom(Class<UpdateRequest> type, Type type1, Annotation[] antns, javax.ws.rs.core.MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream in) throws IOException, WebApplicationException
     {
-	if (log.isTraceEnabled()) log.trace("Reading UpdateRequest with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
-	return UpdateFactory.read(in);
+        if (log.isTraceEnabled()) log.trace("Reading UpdateRequest with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
+        return UpdateFactory.read(in);
     }
     
 }

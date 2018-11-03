@@ -109,7 +109,7 @@ public class Application extends javax.ws.rs.core.Application implements com.ato
     {
         this.dataset = dataset;
         this.mediaTypes = mediaTypes;
-        this.client = client;        
+        this.client = client;
         this.maxGetRequestSize = maxGetRequestSize;
         this.preemptiveAuth = preemptiveAuth;
         

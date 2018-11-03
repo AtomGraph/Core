@@ -27,8 +27,8 @@ public class Link
     
     public Link(URI href, String rel, String type)
     {
-	if (href == null) throw new IllegalArgumentException("Link value cannot be null");
-	if (rel == null) throw new IllegalArgumentException("Link relationship cannot be null");
+        if (href == null) throw new IllegalArgumentException("Link value cannot be null");
+        if (rel == null) throw new IllegalArgumentException("Link relationship cannot be null");
         
         this.href = href;
         this.rel = rel;
@@ -90,7 +90,7 @@ public class Link
     */
     public static Link valueOf(String val) throws URISyntaxException
     {
-	if (val == null) throw new IllegalArgumentException("Link value cannot be null");
+        if (val == null) throw new IllegalArgumentException("Link value cannot be null");
         
         Matcher matcher = PATTERN.matcher(val);
         if (!matcher.matches())

@@ -31,25 +31,25 @@ public class ResultSetUtils
 {
     public static long hashResultSet(ResultSet result)
     {
-    	long hash = 0;
-	
-	while (result.hasNext()) hash ^= hashQuerySolution(result.next());
-	
-	return hash;
+        long hash = 0;
+        
+        while (result.hasNext()) hash ^= hashQuerySolution(result.next());
+        
+        return hash;
     }
     
     public static long hashQuerySolution(QuerySolution solution)
     {
-	long hash = 0;
-	
-	Iterator<String> it = solution.varNames();
-	while (it.hasNext())
-	{
-	    RDFNode node = solution.get(it.next());
-	    if (node != null) hash ^= (long) node.hashCode();
-	}
-	
-	return hash;
+        long hash = 0;
+        
+        Iterator<String> it = solution.varNames();
+        while (it.hasNext())
+        {
+            RDFNode node = solution.get(it.next());
+            if (node != null) hash ^= (long) node.hashCode();
+        }
+        
+        return hash;
     }
     
 }

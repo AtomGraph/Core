@@ -42,7 +42,7 @@ public class GraphStoreBase extends com.atomgraph.core.model.impl.GraphStoreBase
             @Context Dataset dataset)
     {
         super(request, mediaTypes);
-	if (dataset == null) throw new IllegalArgumentException("Dataset cannot be null");
+        if (dataset == null) throw new IllegalArgumentException("Dataset cannot be null");
         this.dataset = dataset;
     }
 

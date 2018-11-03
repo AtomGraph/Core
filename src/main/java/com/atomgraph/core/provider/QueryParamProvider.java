@@ -46,39 +46,39 @@ public class QueryParamProvider extends PerRequestTypeInjectableProvider<QueryPa
 
     public QueryParamProvider()
     {
-	super(Query.class);
+        super(Query.class);
     }
 
     @Override
     public Injectable<Query> getInjectable(ComponentContext ic, QueryParam qp)
     {
-	final String paramName = qp.value();
-	return new Injectable<Query>()
-	{
-	    @Override
-	    public Query getValue()
-	    {
-		String value = getHttpContext().getUriInfo().getQueryParameters().getFirst(paramName);
-		if (value == null || value.isEmpty()) return null;
-		    
-		if (log.isTraceEnabled()) log.trace("Providing Injectable<Query> with @QueryParam({}) and value: {}", paramName, value);
-		try
-		{
-		    return QueryFactory.create(value);
-		}
-		catch (Exception ex)
-		{
-		    if (log.isWarnEnabled()) log.warn("Supplied SPARQL query string could not be parsed, check syntax: {}", value);
-		    //throw new WebApplicationException(ex, Response.Status.BAD_REQUEST);
+        final String paramName = qp.value();
+        return new Injectable<Query>()
+        {
+            @Override
+            public Query getValue()
+            {
+                String value = getHttpContext().getUriInfo().getQueryParameters().getFirst(paramName);
+                if (value == null || value.isEmpty()) return null;
+                    
+                if (log.isTraceEnabled()) log.trace("Providing Injectable<Query> with @QueryParam({}) and value: {}", paramName, value);
+                try
+                {
+                    return QueryFactory.create(value);
+                }
+                catch (Exception ex)
+                {
+                    if (log.isWarnEnabled()) log.warn("Supplied SPARQL query string could not be parsed, check syntax: {}", value);
+                    //throw new WebApplicationException(ex, Response.Status.BAD_REQUEST);
                     return null;
-		}
-	    }
-	};
+                }
+            }
+        };
     }
 
     public HttpContext getHttpContext()
     {
-	return httpContext;
+        return httpContext;
     }
 
 } 

@@ -75,8 +75,8 @@ public class GraphStoreClient implements DatasetAccessor
     
     public WebResource.Builder setHeaders(WebResource.Builder builder, MultivaluedMap<String, String> headers)
     {
-	if (builder == null) throw new IllegalArgumentException("WebResource.Builder must be not null");
-	if (headers == null) throw new IllegalArgumentException("Map<String, Object> must be not null");
+        if (builder == null) throw new IllegalArgumentException("WebResource.Builder must be not null");
+        if (headers == null) throw new IllegalArgumentException("Map<String, Object> must be not null");
 
         Iterator<Map.Entry<String, List<String>>> it = headers.entrySet().iterator();
         while (it.hasNext())
@@ -111,8 +111,8 @@ public class GraphStoreClient implements DatasetAccessor
     {
         if (acceptedTypes == null) throw new IllegalArgumentException("MediaType[] cannot be null");
         
-	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} default graph", getWebResource().getURI());
-	WebResource.Builder builder =  getResource(params).accept(acceptedTypes);
+        if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} default graph", getWebResource().getURI());
+        WebResource.Builder builder =  getResource(params).accept(acceptedTypes);
         if (headers != null) setHeaders(builder, headers);
         return builder.get(ClientResponse.class);
     }
@@ -155,8 +155,8 @@ public class GraphStoreClient implements DatasetAccessor
 //        if (acceptedTypes == null) throw new IllegalArgumentException("MediaType[] cannot be null");
 //        if (graphURI == null) throw new IllegalArgumentException("String cannot be null");
 //        
-//	if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} with named graph URI: {}", getWebResource().getURI(), graphURI);
-//	return getWebResource().queryParam("graph", graphURI).
+//        if (log.isDebugEnabled()) log.debug("GET Model from Graph Store {} with named graph URI: {}", getWebResource().getURI(), graphURI);
+//        return getWebResource().queryParam("graph", graphURI).
 //            accept(acceptedTypes).
 //            get(ClientResponse.class);
 //    }
@@ -196,7 +196,7 @@ public class GraphStoreClient implements DatasetAccessor
 
     public ClientResponse head(javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
-	WebResource.Builder builder = getResource(params).accept(acceptedTypes);
+        WebResource.Builder builder = getResource(params).accept(acceptedTypes);
         if (headers != null) setHeaders(builder, headers);
         return builder.method("HEAD", ClientResponse.class);
     }
@@ -239,8 +239,8 @@ public class GraphStoreClient implements DatasetAccessor
         if (contentType == null) throw new IllegalArgumentException("MediaType cannot be null");
         if (model == null) throw new IllegalArgumentException("Model cannot be null");
         
-	if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} default graph", getWebResource().getURI());
-	WebResource.Builder builder = getResource(params).type(contentType); // getWebResource().queryParam("default", "").
+        if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} default graph", getWebResource().getURI());
+        WebResource.Builder builder = getResource(params).type(contentType); // getWebResource().queryParam("default", "").
         if (headers != null) setHeaders(builder, headers);
         return builder.put(ClientResponse.class, model);
     }
@@ -282,8 +282,8 @@ public class GraphStoreClient implements DatasetAccessor
 //        if (graphURI == null) throw new IllegalArgumentException("String cannot be null");
 //        if (model == null) throw new IllegalArgumentException("Model cannot be null");
 //        
-//	if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} with named graph URI {}", getWebResource().getURI(), graphURI);
-//	return getWebResource().queryParam("graph", graphURI).
+//        if (log.isDebugEnabled()) log.debug("PUT Model to Graph Store {} with named graph URI {}", getWebResource().getURI(), graphURI);
+//        return getWebResource().queryParam("graph", graphURI).
 //            type(contentType).
 //            put(ClientResponse.class, model);
 //    }
@@ -321,8 +321,8 @@ public class GraphStoreClient implements DatasetAccessor
 
     public ClientResponse delete(MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
-	if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store {}", getWebResource().getURI());
-	WebResource.Builder builder = getResource(params).getRequestBuilder(); // getWebResource().queryParam("default", "").
+        if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store {}", getWebResource().getURI());
+        WebResource.Builder builder = getResource(params).getRequestBuilder(); // getWebResource().queryParam("default", "").
         if (headers != null) setHeaders(builder, headers);
         return builder.delete(ClientResponse.class);
     }
@@ -362,8 +362,8 @@ public class GraphStoreClient implements DatasetAccessor
 //    {
 //        if (graphURI == null) throw new IllegalArgumentException("String cannot be null");
 //        
-//	if (log.isDebugEnabled()) log.debug("DELETE named graph with URI {} from Graph Store {}", graphURI, getWebResource().getURI());
-//	return getWebResource().queryParam("graph", graphURI).
+//        if (log.isDebugEnabled()) log.debug("DELETE named graph with URI {} from Graph Store {}", graphURI, getWebResource().getURI());
+//        return getWebResource().queryParam("graph", graphURI).
 //            delete(ClientResponse.class);
 //    }
     
@@ -403,8 +403,8 @@ public class GraphStoreClient implements DatasetAccessor
         if (contentType == null) throw new IllegalArgumentException("MediaType cannot be null");
         if (model == null) throw new IllegalArgumentException("Model cannot be null");
         
-	if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} default graph", getWebResource().getURI());
-	WebResource.Builder builder = getResource(params).type(contentType); // getWebResource().queryParam("default", "").
+        if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} default graph", getWebResource().getURI());
+        WebResource.Builder builder = getResource(params).type(contentType); // getWebResource().queryParam("default", "").
         if (headers != null) setHeaders(builder, headers);
         return builder.post(ClientResponse.class, model);
     }
@@ -447,8 +447,8 @@ public class GraphStoreClient implements DatasetAccessor
 //        if (graphURI == null) throw new IllegalArgumentException("String cannot be null");
 //        if (model == null) throw new IllegalArgumentException("Model cannot be null");
 //
-//	if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} with named graph URI: {}", getWebResource().getURI(), graphURI);
-//	return getWebResource().queryParam("graph", graphURI).
+//        if (log.isDebugEnabled()) log.debug("POST Model to Graph Store {} with named graph URI: {}", getWebResource().getURI(), graphURI);
+//        return getWebResource().queryParam("graph", graphURI).
 //            type(contentType).
 //            post(ClientResponse.class, model);
 //    }

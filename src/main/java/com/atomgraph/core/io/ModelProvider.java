@@ -73,9 +73,9 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     @Override
     public Model readFrom(Class<Model> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException
     {
-	if (log.isTraceEnabled()) log.trace("Reading Model with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
-	
-	Model model = ModelFactory.createDefaultModel();	
+        if (log.isTraceEnabled()) log.trace("Reading Model with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
+        
+        Model model = ModelFactory.createDefaultModel();        
 
         MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param        
         Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
@@ -84,7 +84,7 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
             if (log.isErrorEnabled()) log.error("MediaType '{}' not supported by Jena", formatType);
             throw new NoReaderForLangException("MediaType not supported: " + formatType);
         }
-	if (log.isDebugEnabled()) log.debug("RDF language used to read Model: {}", lang);
+        if (log.isDebugEnabled()) log.debug("RDF language used to read Model: {}", lang);
         
         return read(model, entityStream, lang, null); // extract base URI from httpHeaders?
     }
@@ -98,9 +98,9 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     
     public Model read(Model model, InputStream is, Lang lang, String baseURI, ErrorHandler errorHandler, ParserProfile parserProfile)
     {
-	if (model == null) throw new IllegalArgumentException("Model must be not null");        
-	if (is == null) throw new IllegalArgumentException("InputStream must be not null");        
-	if (lang == null) throw new IllegalArgumentException("Lang must be not null");        
+        if (model == null) throw new IllegalArgumentException("Model must be not null");        
+        if (is == null) throw new IllegalArgumentException("InputStream must be not null");        
+        if (lang == null) throw new IllegalArgumentException("Lang must be not null");        
 
         ReaderRIOT parser = RDFDataMgr.createReader(lang);
         parser.setErrorHandler(errorHandler);
@@ -121,13 +121,13 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     @Override
     public long getSize(Model model, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-	return -1;
+        return -1;
     }
 
     @Override
     public void writeTo(Model model, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException
     {
-	if (log.isTraceEnabled()) log.trace("Writing Model with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
+        if (log.isTraceEnabled()) log.trace("Writing Model with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
 
         MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param        
         Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
@@ -136,19 +136,19 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
             if (log.isErrorEnabled()) log.error("MediaType '{}' not supported by Jena", formatType);
             throw new NoWriterForLangException("MediaType not supported: " + formatType);
         }
-	if (log.isDebugEnabled()) log.debug("RDF language used to read Model: {}", lang);
+        if (log.isDebugEnabled()) log.debug("RDF language used to read Model: {}", lang);
         
-	write(model, entityStream, lang, null);
+        write(model, entityStream, lang, null);
     }
 
     public Model write(Model model, OutputStream os, Lang lang, String baseURI)
     {
-	if (model == null) throw new IllegalArgumentException("Model must be not null");        
-	if (os == null) throw new IllegalArgumentException("OutputStream must be not null");        
-	if (lang == null) throw new IllegalArgumentException("Lang must be not null");        
+        if (model == null) throw new IllegalArgumentException("Model must be not null");        
+        if (os == null) throw new IllegalArgumentException("OutputStream must be not null");        
+        if (lang == null) throw new IllegalArgumentException("Lang must be not null");        
 
         String syntax = lang.getName();
-	if (log.isDebugEnabled()) log.debug("Syntax used to write Model: {}", syntax);
+        if (log.isDebugEnabled()) log.debug("Syntax used to write Model: {}", syntax);
         
         return model.write(os, syntax);
     }

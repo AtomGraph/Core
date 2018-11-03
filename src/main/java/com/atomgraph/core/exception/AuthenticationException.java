@@ -28,12 +28,12 @@ public class AuthenticationException extends RuntimeException
     // TO-DO: make more specific constructors with UserAccount
     public AuthenticationException(String message, String realm)
     {
-	super(message);
-	this.realm = realm;
+        super(message);
+        this.realm = realm;
     }
     
     public String getRealm()
     {
-	return realm;
+        return realm;
     }
 }

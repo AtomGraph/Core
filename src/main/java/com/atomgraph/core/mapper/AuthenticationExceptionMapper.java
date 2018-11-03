@@ -43,7 +43,7 @@ public class AuthenticationExceptionMapper implements ExceptionMapper<Authentica
                     type(MediaType.TEXT_PLAIN).
                     entity(ae.getMessage()).
                     build();
-	else return Response.
+        else return Response.
                     status(Status.UNAUTHORIZED).
                     type(MediaType.TEXT_PLAIN).
                     entity(ae.getMessage()).

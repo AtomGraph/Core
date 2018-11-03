@@ -74,162 +74,162 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
     {
         List<String> keys = new ArrayList<>(), values = new ArrayList<>();
 
-	String[] params = body.split("&");
+        String[] params = body.split("&");
 
-	for (String param : params)
-	{
-	    if (log.isTraceEnabled()) log.trace("Parameter: {}", param);
-	    
-	    String[] array = param.split("=");
-	    String key = null;
-	    String value = null;
+        for (String param : params)
+        {
+            if (log.isTraceEnabled()) log.trace("Parameter: {}", param);
+            
+            String[] array = param.split("=");
+            String key = null;
+            String value = null;
 
-	    try
-	    {
-		key = URLDecoder.decode(array[0], charsetName);
-		if (array.length > 1) value = URLDecoder.decode(array[1], charsetName);
-	    } catch (UnsupportedEncodingException ex)
-	    {
-		if (log.isWarnEnabled()) log.warn("Unsupported encoding", ex);
-	    }
+            try
+            {
+                key = URLDecoder.decode(array[0], charsetName);
+                if (array.length > 1) value = URLDecoder.decode(array[1], charsetName);
+            } catch (UnsupportedEncodingException ex)
+            {
+                if (log.isWarnEnabled()) log.warn("Unsupported encoding", ex);
+            }
 
             if (value != null) // && key != null
             {
                 keys.add(key);
                 values.add(value);
             }
-	}
+        }
 
         return parse(keys, values);
     }
 
     public Model parse(List<String> k, List<String> v) throws URISyntaxException
     {
-	Model model = ModelFactory.createDefaultModel();
+        Model model = ModelFactory.createDefaultModel();
 
-	Resource subject = null;
-	Property property = null;
-	RDFNode object = null;
+        Resource subject = null;
+        Property property = null;
+        RDFNode object = null;
 
-	for (int i = 0; i < k.size(); i++)
-	{
-	    switch (k.get(i))
-	    {
-		case DEF_NS_DECL:
-		    model.setNsPrefix("", v.get(i)); // default namespace
-		    break;
-		case NS_DECL:
-		    if (i + 1 < k.size() && k.get(i + 1).equals(DEF_NS_DECL)) // if followed by "v" (if not out of bounds)
-		    {
-			model.setNsPrefix(v.get(i), v.get(i + 1)); // namespace with prefix
-			i++; // skip the following "v"
-		    }
-		    break;
-		    
-		case BLANK_SUBJ:
-		    subject = model.createResource(new AnonId(v.get(i))); // blank node
-		    property = null;
-		    object = null;
-		    break;
-		case URI_SUBJ:
+        for (int i = 0; i < k.size(); i++)
+        {
+            switch (k.get(i))
+            {
+                case DEF_NS_DECL:
+                    model.setNsPrefix("", v.get(i)); // default namespace
+                    break;
+                case NS_DECL:
+                    if (i + 1 < k.size() && k.get(i + 1).equals(DEF_NS_DECL)) // if followed by "v" (if not out of bounds)
+                    {
+                        model.setNsPrefix(v.get(i), v.get(i + 1)); // namespace with prefix
+                        i++; // skip the following "v"
+                    }
+                    break;
+                    
+                case BLANK_SUBJ:
+                    subject = model.createResource(new AnonId(v.get(i))); // blank node
+                    property = null;
+                    object = null;
+                    break;
+                case URI_SUBJ:
                     URI subjectURI = new URI(v.get(i));
                     //if (!subjectURI.isAbsolute()) subjectURI = baseURI.resolve(subjectURI);
-		    subject = model.createResource(subjectURI.toString()); // full URI
-		    property = null;
-		    object = null;
-		    break;
-		case DEF_NS_SUBJ:
-		    subject = model.createResource(model.getNsPrefixURI("") + v.get(i)); // default namespace
-		    property = null;
-		    object = null;
-		    break;
-		case NS_SUBJ:
-		    if (i + 1 < k.size() && k.get(i + 1).equals(DEF_NS_SUBJ)) // if followed by "sv" (if not out of bounds)
-		    {
-			subject = model.createResource(model.getNsPrefixURI(v.get(i)) + v.get(i + 1)); // ns prefix + local name
-			property = null;
-			object = null;
-			i++; // skip the following "sv"
-		    }
-		    break;
+                    subject = model.createResource(subjectURI.toString()); // full URI
+                    property = null;
+                    object = null;
+                    break;
+                case DEF_NS_SUBJ:
+                    subject = model.createResource(model.getNsPrefixURI("") + v.get(i)); // default namespace
+                    property = null;
+                    object = null;
+                    break;
+                case NS_SUBJ:
+                    if (i + 1 < k.size() && k.get(i + 1).equals(DEF_NS_SUBJ)) // if followed by "sv" (if not out of bounds)
+                    {
+                        subject = model.createResource(model.getNsPrefixURI(v.get(i)) + v.get(i + 1)); // ns prefix + local name
+                        property = null;
+                        object = null;
+                        i++; // skip the following "sv"
+                    }
+                    break;
 
-		case URI_PRED:
+                case URI_PRED:
                     URI propertyURI = new URI(v.get(i));
                     //if (!propertyURI.isAbsolute()) propertyURI = baseURI.resolve(propertyURI);
                     property = model.createProperty(propertyURI.toString());
-		    object = null;
-		    break;
-		case DEF_NS_PRED:
-		    property = model.createProperty(model.getNsPrefixURI(""), v.get(i));
-		    object = null;
-		    break;
-		case NS_PRED:
-		    if (i + 1 < k.size() && k.get(i + 1).equals(DEF_NS_PRED)) // followed by "pv" (if not out of bounds)
-		    {
-			property = model.createProperty(model.getNsPrefixURI(v.get(i)) + v.get(i + 1)); // ns prefix + local name
-			object = null;
-			i++; // skip the following "pv"
-		    }
-		    break;
+                    object = null;
+                    break;
+                case DEF_NS_PRED:
+                    property = model.createProperty(model.getNsPrefixURI(""), v.get(i));
+                    object = null;
+                    break;
+                case NS_PRED:
+                    if (i + 1 < k.size() && k.get(i + 1).equals(DEF_NS_PRED)) // followed by "pv" (if not out of bounds)
+                    {
+                        property = model.createProperty(model.getNsPrefixURI(v.get(i)) + v.get(i + 1)); // ns prefix + local name
+                        object = null;
+                        i++; // skip the following "pv"
+                    }
+                    break;
 
-		case BLANK_OBJ:
-		    object = model.createResource(new AnonId(v.get(i))); // blank node
-		    break;
-		case URI_OBJ:
+                case BLANK_OBJ:
+                    object = model.createResource(new AnonId(v.get(i))); // blank node
+                    break;
+                case URI_OBJ:
                     URI objectURI = new URI(v.get(i));
                     //if (!objectURI.isAbsolute()) objectURI = baseURI.resolve(objectURI);
                     object = model.createResource(objectURI.toString()); // full URI
-		    break;
-		case DEF_NS_OBJ:
-		    object = model.createResource(model.getNsPrefixURI("") + v.get(i)); // default namespace
-		    break;
-		case NS_OBJ:
-		    if (i + 1 < k.size() && k.get(i + 1).equals(DEF_NS_OBJ)) // followed by "ov" (if not out of bounds)
-		    {
-			object = model.createResource(model.getNsPrefixURI(v.get(i)) + v.get(i + 1)); // ns prefix + local name
-			i++; // skip the following "ov"
-		    }
-		    break;
-		case LITERAL_OBJ:
-		    if (i + 1 < k.size()) // check if not out of bounds
-			switch (k.get(i + 1))
-			{
-			    case TYPE:
-				object = model.createTypedLiteral(v.get(i), TypeMapper.getInstance().getSafeTypeByName(v.get(i + 1))); // typed literal (value+datatype)
-				i++; // skip the following "lt"
-				break;
-			    case LANG:
-				object = model.createLiteral(v.get(i), v.get(i + 1)); // literal with language (value+lang)
-				i++; // skip the following "ll"
-				break;
-			    default:
-				object = model.createLiteral(v.get(i)); // plain literal (if not followed by lang or datatype)
-				break;
-			}
-		    else
-			object = model.createLiteral(v.get(i)); // plain literal
-		    break;
-		case TYPE:
-		    if (i + 1 < k.size() && k.get(i + 1).equals(LITERAL_OBJ)) // followed by "ol" (if not out of bounds)
-		    {
-			object = model.createTypedLiteral(v.get(i + 1), TypeMapper.getInstance().getSafeTypeByName(v.get(i))); // typed literal (datatype+value)
-			i++; // skip the following "ol"
-		    }
-		    break;
-		case LANG:
-		    if (i + 1 < k.size() && k.get(i + 1).equals(LITERAL_OBJ)) // followed by "ol" (if not out of bounds)
-		    {
-			model.createLiteral(v.get(i + 1), v.get(i)); // literal with language (lang+value)
-			i++; // skip the following "ol"
-		    }
-		    break;
-	    }
+                    break;
+                case DEF_NS_OBJ:
+                    object = model.createResource(model.getNsPrefixURI("") + v.get(i)); // default namespace
+                    break;
+                case NS_OBJ:
+                    if (i + 1 < k.size() && k.get(i + 1).equals(DEF_NS_OBJ)) // followed by "ov" (if not out of bounds)
+                    {
+                        object = model.createResource(model.getNsPrefixURI(v.get(i)) + v.get(i + 1)); // ns prefix + local name
+                        i++; // skip the following "ov"
+                    }
+                    break;
+                case LITERAL_OBJ:
+                    if (i + 1 < k.size()) // check if not out of bounds
+                        switch (k.get(i + 1))
+                        {
+                            case TYPE:
+                                object = model.createTypedLiteral(v.get(i), TypeMapper.getInstance().getSafeTypeByName(v.get(i + 1))); // typed literal (value+datatype)
+                                i++; // skip the following "lt"
+                                break;
+                            case LANG:
+                                object = model.createLiteral(v.get(i), v.get(i + 1)); // literal with language (value+lang)
+                                i++; // skip the following "ll"
+                                break;
+                            default:
+                                object = model.createLiteral(v.get(i)); // plain literal (if not followed by lang or datatype)
+                                break;
+                        }
+                    else
+                        object = model.createLiteral(v.get(i)); // plain literal
+                    break;
+                case TYPE:
+                    if (i + 1 < k.size() && k.get(i + 1).equals(LITERAL_OBJ)) // followed by "ol" (if not out of bounds)
+                    {
+                        object = model.createTypedLiteral(v.get(i + 1), TypeMapper.getInstance().getSafeTypeByName(v.get(i))); // typed literal (datatype+value)
+                        i++; // skip the following "ol"
+                    }
+                    break;
+                case LANG:
+                    if (i + 1 < k.size() && k.get(i + 1).equals(LITERAL_OBJ)) // followed by "ol" (if not out of bounds)
+                    {
+                        model.createLiteral(v.get(i + 1), v.get(i)); // literal with language (lang+value)
+                        i++; // skip the following "ol"
+                    }
+                    break;
+            }
 
-	    if (subject != null && property != null && object != null)
-		model.add(model.createStatement(subject, property, object));
-	}
+            if (subject != null && property != null && object != null)
+                model.add(model.createStatement(subject, property, object));
+        }
 
-	return model;
+        return model;
     }
 
     public boolean skipEmptyLiterals()

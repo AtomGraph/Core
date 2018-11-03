@@ -115,7 +115,7 @@ public class MediaType extends javax.ws.rs.core.MediaType
     
     public MediaType(String type, String subtype, Map<String, String> parameters)
     {
-	super(type, subtype, parameters);
+        super(type, subtype, parameters);
     }
 
     public MediaType(String type, String subtype)
