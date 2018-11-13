@@ -55,22 +55,22 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
      * @param client HTTP client
      * @param mediaTypes supported media types
      * @param maxGetRequestSize max GET URL size in bytes
-     * @param uri endpoint URI
+     * @param endpointURI endpoint URI
      * @param request request
      * @param authUser HTTP Basic username
      * @param authPwd HTTP Basic password
      */
-    public SPARQLEndpointBase(@Context Client client, @Context MediaTypes mediaTypes, Integer maxGetRequestSize, String uri, String authUser, String authPwd, @Context Request request)
+    public SPARQLEndpointBase(@Context Client client, @Context MediaTypes mediaTypes, Integer maxGetRequestSize, String endpointURI, String authUser, String authPwd, @Context Request request)
     {
         super(request, mediaTypes);
         if (client == null) throw new IllegalArgumentException("Client cannot be null");
-        if (uri == null) throw new IllegalArgumentException("URI string cannot be null");
-        this.uri = uri;
+        if (endpointURI == null) throw new IllegalArgumentException("URI string cannot be null");
+        this.uri = endpointURI;
         
         if (maxGetRequestSize != null)
-            this.sparqlClient = SPARQLClient.create(client.resource(uri), mediaTypes, maxGetRequestSize);
+            this.sparqlClient = SPARQLClient.create(client.resource(endpointURI), mediaTypes, maxGetRequestSize);
         else
-            this.sparqlClient = SPARQLClient.create(client.resource(uri), mediaTypes);
+            this.sparqlClient = SPARQLClient.create(client.resource(endpointURI), mediaTypes);
         
         if (authUser != null && authPwd != null)
         {
