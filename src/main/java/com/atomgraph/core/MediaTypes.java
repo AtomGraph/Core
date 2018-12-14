@@ -91,7 +91,7 @@ public class MediaTypes
                 {
                     if (ModelFactory.createDefaultModel().getReader(lang.getName()) != null)
                     {
-                        MediaType mt = new MediaType(lang); // don't add charset=UTF-8 on readable types
+                        MediaType mt = new MediaType(lang); // don't add charset=UTF-8 param on readable types
                         // avoid adding duplicates. Cannot use Set because ordering is important
                         if (!readableList.contains(mt)) readableList.add(mt);
                     }
@@ -111,9 +111,10 @@ public class MediaTypes
             }
         }
         
-        MediaType rdfXml = new MediaType(MediaType.APPLICATION_RDF_XML_TYPE.getType(), MediaType.APPLICATION_RDF_XML_TYPE.getSubtype(), parameters);
-        readableList.add(0, rdfXml); // first one becomes default
-        writableList.add(0, rdfXml); // first one becomes default
+        // first MediaType becomes default:
+        readableList.add(0, MediaType.APPLICATION_RDF_XML_TYPE); // don't add charset=UTF-8 param on readable types
+        MediaType rdfXmlUtf8 = new MediaType(MediaType.APPLICATION_RDF_XML_TYPE.getType(), MediaType.APPLICATION_RDF_XML_TYPE.getSubtype(), parameters);
+        writableList.add(0, rdfXmlUtf8);
         
         readableMap.put(Model.class, Collections.unmodifiableList(readableList));
         writableMap.put(Model.class, Collections.unmodifiableList(writableList));
