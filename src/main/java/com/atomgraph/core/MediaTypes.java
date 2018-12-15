@@ -42,9 +42,6 @@ public class MediaTypes
     
     /**
      * Registry of readable/writable RDF model and SPARQL result set media types
-     * 
-     * @see <a href="http://www.w3.org/TR/sparql11-protocol/#query-success">SPARQL 1.1 Protocol. 2.1.6 Success Responses</a>
-     * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/ResultSetRewindable.html">Jena ResultSetRewindable</a>
      */
     private static final javax.ws.rs.core.MediaType[] RESULT_SET_MEDIA_TYPES = new MediaType[]{MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE,
                             MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE};

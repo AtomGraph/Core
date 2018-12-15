@@ -56,6 +56,9 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
 {    
     private static final Logger log = LoggerFactory.getLogger(ModelProvider.class);
 
+    public static final String REQUEST_URI_HEADER = "X-Request-URI";
+    public static final String RESPONSE_URI_HEADER = "X-Response-URI";
+    
     public static boolean isModelType(MediaType mediaType)
     {
         MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
@@ -86,7 +89,11 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
         }
         if (log.isDebugEnabled()) log.debug("RDF language used to read Model: {}", lang);
         
-        return read(model, entityStream, lang, null); // extract base URI from httpHeaders?
+        String baseURI = null;
+        // attempt to retrieve base URI from a special-purpose header (workaround for JAX-RS 1.x limitation)
+        if (httpHeaders.containsKey(REQUEST_URI_HEADER)) baseURI = httpHeaders.getFirst(REQUEST_URI_HEADER);
+
+        return read(model, entityStream, lang, baseURI); // extract base URI from httpHeaders?
     }
 
     public Model read(Model model, InputStream is, Lang lang, String baseURI)
@@ -138,7 +145,11 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
         }
         if (log.isDebugEnabled()) log.debug("RDF language used to read Model: {}", lang);
         
-        write(model, entityStream, lang, null);
+        String baseURI = null;
+        // attempt to retrieve base URI from a special-purpose header (workaround for JAX-RS 1.x limitation)
+        if (httpHeaders.containsKey(RESPONSE_URI_HEADER)) baseURI = httpHeaders.getFirst(RESPONSE_URI_HEADER).toString();
+
+        write(model, entityStream, lang, baseURI);
     }
 
     public Model write(Model model, OutputStream os, Lang lang, String baseURI)
