@@ -15,6 +15,8 @@
  */
 package com.atomgraph.core.model;
 
+import com.atomgraph.core.client.SPARQLClient;
+
 /**
  * Remote SPARQL service with SPARQL 1.1 Protocol and Graph Store support.
  * 
@@ -22,6 +24,7 @@ package com.atomgraph.core.model;
  */
 public interface RemoteService extends Service
 {
+    SPARQLClient getSPARQLClient();
     
     org.apache.jena.rdf.model.Resource getSPARQLEndpoint();
 

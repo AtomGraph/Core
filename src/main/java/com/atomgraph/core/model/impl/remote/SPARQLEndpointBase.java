@@ -27,9 +27,6 @@ import com.atomgraph.core.MediaTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.atomgraph.core.client.SPARQLClient;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.filter.ClientFilter;
-import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.net.URI;
 import java.util.List;
@@ -41,42 +38,25 @@ import javax.ws.rs.core.MultivaluedMap;
  * 
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
-// @Path("/sparql")
 public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndpointBase implements com.atomgraph.core.model.remote.SPARQLEndpoint
 {
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointBase.class);
 
-    private final String uri;
     private final SPARQLClient sparqlClient;
 
     /**
      * Constructs SPARQL endpoint proxy from request metadata and origin URI.
      * 
-     * @param client HTTP client
+     * @param sparqlClient SPARQL 1.1 Protocol client
      * @param mediaTypes supported media types
-     * @param maxGetRequestSize max GET URL size in bytes
-     * @param endpointURI endpoint URI
-     * @param request request
-     * @param authUser HTTP Basic username
-     * @param authPwd HTTP Basic password
+     * @param request HTTP request
      */
-    public SPARQLEndpointBase(@Context Client client, @Context MediaTypes mediaTypes, Integer maxGetRequestSize, String endpointURI, String authUser, String authPwd, @Context Request request)
+    public SPARQLEndpointBase(@Context SPARQLClient sparqlClient, @Context MediaTypes mediaTypes, @Context Request request)
     {
         super(request, mediaTypes);
-        if (client == null) throw new IllegalArgumentException("Client cannot be null");
-        if (endpointURI == null) throw new IllegalArgumentException("URI string cannot be null");
-        this.uri = endpointURI;
+        if (sparqlClient == null) throw new IllegalArgumentException("SPARQLClient cannot be null");
         
-        if (maxGetRequestSize != null)
-            this.sparqlClient = SPARQLClient.create(client.resource(endpointURI), mediaTypes, maxGetRequestSize);
-        else
-            this.sparqlClient = SPARQLClient.create(client.resource(endpointURI), mediaTypes);
-        
-        if (authUser != null && authPwd != null)
-        {
-            ClientFilter authFilter = new HTTPBasicAuthFilter(authUser, authPwd);
-            this.sparqlClient.getWebResource().addFilter(authFilter);
-        }
+        this.sparqlClient = sparqlClient;
     }
     
     @Override
@@ -146,7 +126,7 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
     @Override
     public String getURI()
     {
-        return uri;
+        return getSPARQLClient().getWebResource().getURI().toString();
     }
     
     @Override

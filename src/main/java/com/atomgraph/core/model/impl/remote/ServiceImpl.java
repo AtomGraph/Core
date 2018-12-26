@@ -16,12 +16,16 @@
 package com.atomgraph.core.model.impl.remote;
 
 import com.atomgraph.core.MediaTypes;
+import com.atomgraph.core.client.SPARQLClient;
 import com.atomgraph.core.model.GraphStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.atomgraph.core.model.RemoteService;
 import com.atomgraph.core.model.SPARQLEndpoint;
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.ClientFilter;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import javax.ws.rs.core.Request;
 
 /**
@@ -103,9 +107,33 @@ public class ServiceImpl implements RemoteService
     }
     
     @Override
+    public SPARQLClient getSPARQLClient()
+    {
+        return getSPARQLClient(getClient().resource(getSPARQLEndpoint().getURI()));
+    }
+    
+    public SPARQLClient getSPARQLClient(WebResource resource)
+    {
+        SPARQLClient sparqlClient;
+        
+        if (getMaxGetRequestSize() != null)
+            sparqlClient = SPARQLClient.create(resource, getMediaTypes(), getMaxGetRequestSize());
+        else
+            sparqlClient = SPARQLClient.create(resource, getMediaTypes());
+        
+        if (getAuthUser() != null && getAuthPwd() != null)
+        {
+            ClientFilter authFilter = new HTTPBasicAuthFilter(getAuthUser(), getAuthPwd());
+            sparqlClient.getWebResource().addFilter(authFilter);
+        }
+        
+        return sparqlClient;
+    }
+    
+    @Override
     public SPARQLEndpoint getSPARQLEndpoint(Request request)
     {
-        return new SPARQLEndpointBase(getClient(), getMediaTypes(), getMaxGetRequestSize(), getSPARQLEndpoint().getURI(), getAuthUser(), getAuthPwd(), request);
+        return new SPARQLEndpointBase(getSPARQLClient(), getMediaTypes(), request);
     }
 
     @Override
