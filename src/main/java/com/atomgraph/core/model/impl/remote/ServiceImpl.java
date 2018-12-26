@@ -16,6 +16,7 @@
 package com.atomgraph.core.model.impl.remote;
 
 import com.atomgraph.core.MediaTypes;
+import com.atomgraph.core.client.GraphStoreClient;
 import com.atomgraph.core.client.SPARQLClient;
 import com.atomgraph.core.model.GraphStore;
 import org.slf4j.Logger;
@@ -137,9 +138,28 @@ public class ServiceImpl implements RemoteService
     }
 
     @Override
+    public GraphStoreClient getGraphStoreClient()
+    {
+        return getGraphStoreClient(getClient().resource(getGraphStore().getURI()));
+    }
+    
+    public GraphStoreClient getGraphStoreClient(WebResource resource)
+    {
+        GraphStoreClient graphStoreClient = GraphStoreClient.create(resource);
+        
+        if (getAuthUser() != null && getAuthPwd() != null)
+        {
+            ClientFilter authFilter = new HTTPBasicAuthFilter(getAuthUser(), getAuthPwd());
+            graphStoreClient.getWebResource().addFilter(authFilter);
+        }
+        
+        return graphStoreClient;
+    }
+    
+    @Override
     public GraphStore getGraphStore(Request request)
     {
-        return new GraphStoreBase(getClient(), getMediaTypes(), getGraphStore().getURI(), getAuthUser(), getAuthPwd(), request);
+        return new GraphStoreBase(getGraphStoreClient(), getMediaTypes(), request);
     }
     
 }

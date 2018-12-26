@@ -15,6 +15,7 @@
  */
 package com.atomgraph.core.model;
 
+import com.atomgraph.core.client.GraphStoreClient;
 import com.atomgraph.core.client.SPARQLClient;
 
 /**
@@ -28,6 +29,8 @@ public interface RemoteService extends Service
     
     org.apache.jena.rdf.model.Resource getSPARQLEndpoint();
 
+    GraphStoreClient getGraphStoreClient();
+    
     org.apache.jena.rdf.model.Resource getGraphStore();
     
     String getAuthUser();
