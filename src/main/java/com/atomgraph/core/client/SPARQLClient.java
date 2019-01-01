@@ -245,7 +245,7 @@ public class SPARQLClient
 
             try (InputStream is = cr.getEntity(InputStream.class))
             {
-                if (cr.getType().isCompatible(MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))                    
+                if (cr.getType().isCompatible(MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
                     return JSONInput.booleanFromJSON(is);
                 if (cr.getType().isCompatible(MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE))
                     return XMLInput.booleanFromXML(is);
@@ -254,7 +254,7 @@ public class SPARQLClient
             {
                 if (log.isErrorEnabled()) log.error("Error closing ClientResponse entity stream");
                 throw new ClientException(cr);
-            }                
+            }
 
             throw new ClientException(cr); // TO-DO: refactor
         }
