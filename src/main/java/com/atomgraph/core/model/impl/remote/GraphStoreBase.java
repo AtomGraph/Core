@@ -107,7 +107,7 @@ public class GraphStoreBase extends com.atomgraph.core.model.impl.GraphStoreBase
     }
 
     @Override
-    public String getURI()
+    public String getURI()  // needs to align with Jena's Resource.getURI() which returns String
     {
         return getGraphStoreClient().getWebResource().getURI().toString();
     }

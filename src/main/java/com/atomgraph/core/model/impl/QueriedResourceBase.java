@@ -32,6 +32,7 @@ import com.atomgraph.core.exception.NotFoundException;
 import com.atomgraph.core.model.QueriedResource;
 import com.atomgraph.core.model.Service;
 import java.util.Collections;
+import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -129,26 +130,26 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     /**
      * Handles POST method, stores the submitted RDF model in the SPARQL endpoint, and returns response.
      * 
-     * @param model RDF payload
+     * @param dataset RDF payload
      * @return response
      */
     @Override
-    public Response post(Model model)
+    public Response post(Dataset dataset)
     {
-        if (log.isWarnEnabled()) log.warn("POST request with RDF payload: {}. AtomGraph Core is read-only!  Only GET is supported", model);
+        if (log.isWarnEnabled()) log.warn("POST request with RDF payload: {}. AtomGraph Core is read-only!  Only GET is supported", dataset);
         throw new WebApplicationException(405);
     }
 
     /**
      * Handles PUT method, stores the submitted RDF model in the SPARQL endpoint, and returns response.
      * 
-     * @param model RDF payload
+     * @param dataset RDF payload
      * @return response
      */
     @Override
-    public Response put(Model model)
+    public Response put(Dataset dataset)
     {
-        if (log.isWarnEnabled()) log.warn("PUT request with RDF payload: {}. AtomGraph Core is read-only! Only GET is supported", model);
+        if (log.isWarnEnabled()) log.warn("PUT request with RDF payload: {}. AtomGraph Core is read-only! Only GET is supported", dataset);
         throw new WebApplicationException(405);
     }
 

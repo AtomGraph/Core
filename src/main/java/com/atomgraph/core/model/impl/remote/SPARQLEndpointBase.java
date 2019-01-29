@@ -124,7 +124,7 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
     }
         
     @Override
-    public String getURI()
+    public String getURI() // needs to align with Jena's Resource.getURI() which returns String
     {
         return getSPARQLClient().getWebResource().getURI().toString();
     }
