@@ -26,14 +26,12 @@ import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
-import javax.ws.rs.ext.Providers;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
@@ -55,8 +53,8 @@ import org.slf4j.LoggerFactory;
 public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyWriter<Dataset>
 {
 
-    @Context Providers providers;
-
+    private final MessageBodyReader<Model> modelReader = new ModelProvider();
+    
     private static final Logger log = LoggerFactory.getLogger(DatasetProvider.class);
 
     public boolean isQuadsMediaType(MediaType mediaType)
@@ -74,7 +72,7 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
         boolean quadsReadable = type == Dataset.class && isQuadsMediaType(mediaType);
         if (quadsReadable) return true;
         
-        return getModelReader(annotations, mediaType).isReadable(type, genericType, annotations, mediaType); // fallback to reading Model
+        return getModelReader().isReadable(type, genericType, annotations, mediaType); // fallback to reading Model
     }
 
     @Override
@@ -136,14 +134,9 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
         RDFDataMgr.write(entityStream, dataset, lang);
     }
 
-    public MessageBodyReader<Model> getModelReader(Annotation[] annotations, MediaType mediaType)
+    public MessageBodyReader<Model> getModelReader()
     {
-        return getProviders().getMessageBodyReader(Model.class, Model.class, annotations, mediaType);
-    }
-    
-    public Providers getProviders()
-    {
-        return providers;
+        return modelReader;
     }
     
 }
