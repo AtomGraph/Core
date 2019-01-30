@@ -26,12 +26,15 @@ import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
+import javax.ws.rs.ext.Providers;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFLanguages;
@@ -51,7 +54,9 @@ import org.slf4j.LoggerFactory;
 @Provider
 public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyWriter<Dataset>
 {
- 
+
+    @Context Providers providers;
+
     private static final Logger log = LoggerFactory.getLogger(DatasetProvider.class);
 
     public boolean isQuadsMediaType(MediaType mediaType)
@@ -66,7 +71,10 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-        return type == Dataset.class && isQuadsMediaType(mediaType);
+        boolean quadsReadable = type == Dataset.class && isQuadsMediaType(mediaType);
+        if (quadsReadable) return true;
+        
+        return getModelReader(annotations, mediaType).isReadable(type, genericType, annotations, mediaType); // fallback to reading Model
     }
 
     @Override
@@ -76,7 +84,7 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
 
         Dataset dataset = DatasetFactory.create();
 
-        MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param        
+        MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
         Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
         if (lang == null)
         {
@@ -113,7 +121,7 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
     {
         if (log.isTraceEnabled()) log.trace("Writing Dataset with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
 
-        MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param        
+        MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
         Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
         if (lang == null)
         {
@@ -128,4 +136,14 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
         RDFDataMgr.write(entityStream, dataset, lang);
     }
 
+    public MessageBodyReader<Model> getModelReader(Annotation[] annotations, MediaType mediaType)
+    {
+        return getProviders().getMessageBodyReader(Model.class, Model.class, annotations, mediaType);
+    }
+    
+    public Providers getProviders()
+    {
+        return providers;
+    }
+    
 }
