@@ -96,9 +96,7 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
         // TO-DO: extract base URI from httpHeaders? extract charset from MediaType
         //mediaType.getParameters().containsKey("charset")
         //return dataset.read(entityStream, null, syntax);
-        //if (isQuadsMediaType(mediaType))
         RDFDataMgr.read(dataset, entityStream, lang);
-        // else RDFDataMgr.read(dataset.getDefaultModel(), entityStream, lang);
         
         return dataset;
     }
