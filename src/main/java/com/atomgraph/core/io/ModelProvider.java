@@ -30,6 +30,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
+import org.apache.jena.query.Dataset;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFLanguages;
@@ -70,7 +71,7 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-        return type == Model.class && isModelType(mediaType);
+        return (type == Model.class || type == Dataset.class) && isModelType(mediaType);
     }
 
     @Override
