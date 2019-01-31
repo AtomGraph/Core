@@ -257,17 +257,15 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
     
     public void read(Reader in, String baseURI, Lang lang, StreamRDF output, Context context)
     {
-        ParserProfile profile = parserProfile;
-        if (profile == null)
-            profile = RiotLib.profile(baseURI, false, false, errorHandler); 
-        if (errorHandler == null)
-            setErrorHandler(profile.getHandler());
+        ParserProfile profile = getParserProfile();
+        if (profile == null) profile = RiotLib.profile(baseURI, false, false, errorHandler); 
+        if (getErrorHandler() == null) setErrorHandler(profile.getHandler());
         
-        Tokenizer tokens = new TokenizerRDFPost(PeekReader.make(in));  
+        Tokenizer tokens = new TokenizerRDFPost(PeekReader.make(in));
         
         try
         {
-            runParser(tokens, getParserProfile(), output);
+            runParser(tokens, profile, output);
         }
         finally
         {
