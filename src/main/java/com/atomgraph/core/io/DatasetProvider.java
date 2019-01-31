@@ -33,6 +33,7 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFLanguages;
@@ -96,7 +97,9 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
         // TO-DO: extract base URI from httpHeaders? extract charset from MediaType
         //mediaType.getParameters().containsKey("charset")
         //return dataset.read(entityStream, null, syntax);
-        RDFDataMgr.read(dataset, entityStream, lang);
+        if (isQuadsMediaType(mediaType)) RDFDataMgr.read(dataset, entityStream, lang);
+        else RDFDataMgr.read(dataset.getDefaultModel(), entityStream, lang);
+        
         return dataset;
     }
     
