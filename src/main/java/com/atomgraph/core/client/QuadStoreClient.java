@@ -44,6 +44,16 @@ public class QuadStoreClient extends GraphStoreClient implements QuadDatasetAcce
         super(webResource);
     }
 
+    public static QuadStoreClient create(WebResource webResource, MediaTypes mediaTypes)
+    {
+        return new QuadStoreClient(webResource, mediaTypes);
+    }
+
+    public static QuadStoreClient create(WebResource webResource)
+    {
+        return new QuadStoreClient(webResource);
+    }
+    
     @Override
     public Dataset get()
     {
