@@ -38,8 +38,7 @@ public class GraphStoreBase extends com.atomgraph.core.model.impl.GraphStoreBase
 
     private final Dataset dataset;
         
-    public GraphStoreBase(@Context Request request, @Context MediaTypes mediaTypes,
-            @Context Dataset dataset)
+    public GraphStoreBase(@Context Request request, @Context MediaTypes mediaTypes, @Context Dataset dataset)
     {
         super(request, mediaTypes);
         if (dataset == null) throw new IllegalArgumentException("Dataset cannot be null");

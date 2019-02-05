@@ -23,11 +23,11 @@ import org.apache.jena.util.iterator.ExtendedIterator;
 public class ModelUtils
 {
 
-    public static long hashModel( Model m )
+    public static long hashModel(Model m)
     {
         long result = 0;
         ExtendedIterator<Triple> it = m.getGraph().find(Node.ANY, Node.ANY, Node.ANY);
-            while (it.hasNext()) result ^= hashTriple( it.next() );
+            while (it.hasNext()) result ^= hashTriple(it.next());
         return result;
     }
 

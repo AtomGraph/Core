@@ -31,6 +31,8 @@ import javax.ws.rs.core.Variant;
 import com.atomgraph.core.util.ModelUtils;
 import com.atomgraph.core.util.ResultSetUtils;
 import java.util.ArrayList;
+import java.util.Iterator;
+import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,7 +114,7 @@ public class Response // extends ResponseBuilder
     }
     
     /**
-     * Returns response builder for RDF model.
+     * Returns response builder for an RDF model.
      * 
      * @param model RDF model
      * @param variants supported response variants
@@ -138,6 +140,33 @@ public class Response // extends ResponseBuilder
         return getResponseBuilder(model, getEntityTag(model, variant), variant);
     }
 
+    /**
+     * Returns response builder for an RDF dataset.
+     * 
+     * @param dataset RDF model
+     * @param variants supported response variants
+     * @return response builder
+     */
+    public ResponseBuilder getResponseBuilder(Dataset dataset, List<Variant> variants)
+    {
+        if (variants == null) throw new IllegalArgumentException("List<Variant> cannot be null");
+
+        Variant variant = getRequest().selectVariant(variants);
+        if (variant == null)
+        {
+            variant = getRequest().selectVariant(removeLanguages(variants));
+            if (log.isTraceEnabled()) log.trace("Conneg did not produce acceptable response Variants; attempting conneg without language");
+            
+            if (variant == null)
+            {
+                if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants: {}", variant, variants);
+                throw new WebApplicationException(javax.ws.rs.core.Response.status(javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE).build());
+            }
+        }
+
+        return getResponseBuilder(dataset, getEntityTag(dataset, variant), variant);
+    }
+    
     /**
      * Clones variants while stripping languages.
      * 
@@ -210,6 +239,26 @@ public class Response // extends ResponseBuilder
     }
         
     /**
+     * Calculates hash for an RDF dataset and a given response variant.
+     * 
+     * @param dataset RDF model
+     * @param variant response variant
+     * @return hash code
+     */
+    public long getDatasetVariantHash(Dataset dataset, Variant variant)
+    {
+        if (dataset == null) throw new IllegalArgumentException("Model cannot be null");
+        if (variant == null) throw new IllegalArgumentException("Variant cannot be null");
+        
+        long hash = ModelUtils.hashModel(dataset.getDefaultModel());
+        
+        Iterator<String> it = dataset.listNames();
+        while (it.hasNext()) hash += ModelUtils.hashModel(dataset.getNamedModel(it.next()));
+            
+        return hash + variant.hashCode();
+    }
+    
+    /**
      * Calculates hash for an RDF model and a given response variant.
      * 
      * @param model RDF model
@@ -237,6 +286,18 @@ public class Response // extends ResponseBuilder
         if (variant == null) throw new IllegalArgumentException("Variant cannot be null");
 
         return ResultSetUtils.hashResultSet(resultSet) + variant.hashCode();
+    }
+
+    /**
+     * Calculates ETag for an RDF dataset  and a given response variant.
+     * 
+     * @param dataset RDF model
+     * @param variant response variant
+     * @return entity tag object
+     */
+    public EntityTag getEntityTag(Dataset dataset, Variant variant)
+    {
+        return new EntityTag(Long.toHexString(getDatasetVariantHash(dataset, variant)));
     }
     
     /**
