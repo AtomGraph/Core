@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.apache.jena.query.Dataset;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFLanguages;
 
@@ -73,64 +74,81 @@ public class MediaTypes
         if (registered == null) throw new IllegalArgumentException("Collection of Langs must be not null");
         
         Map<Class, List<javax.ws.rs.core.MediaType>> readableMap = new HashMap<>(), writableMap = new HashMap<>();
-        List<javax.ws.rs.core.MediaType> readableList = new ArrayList<>(), writableList = new ArrayList<>();
 
-        // Model
+        // Model/Dataset
 
-        Iterator<Lang> modelLangIt = registered.iterator();
-        while (modelLangIt.hasNext())
+        List<javax.ws.rs.core.MediaType> readableModelList = new ArrayList<>(), writableModelList = new ArrayList<>(),
+                readableDatasetList = new ArrayList<>(), writableDatasetList = new ArrayList<>();
+
+        Iterator<Lang> langIt = registered.iterator();
+        while (langIt.hasNext())
         {
-            Lang lang = modelLangIt.next();
+            Lang lang = langIt.next();
             // we ignore TriX for now because of Jena bug: https://issues.apache.org/jira/browse/JENA-1211
             if (!lang.equals(Lang.RDFNULL) && !lang.equals(Lang.TRIX))
             {
-                try
+                if (RDFLanguages.isTriples(lang))
                 {
-                    if (ModelFactory.createDefaultModel().getReader(lang.getName()) != null)
-                    {
+//                try
+//                {
+//                    if (ModelFactory.createDefaultModel().getReader(lang.getName()) != null)
+//                    {
                         MediaType mt = new MediaType(lang); // don't add charset=UTF-8 param on readable types
                         // avoid adding duplicates. Cannot use Set because ordering is important
-                        if (!readableList.contains(mt)) readableList.add(mt);
-                    }
-                }
-                catch (NoReaderForLangException ex) {}
+                        if (!readableModelList.contains(mt)) readableModelList.add(mt);
+//                    }
+//                }
+//                catch (NoReaderForLangException ex) {}
                 
-                try
-                {
-                    if (ModelFactory.createDefaultModel().getWriter(lang.getName()) != null)
-                    {
-                        MediaType mt = new MediaType(lang, UTF8_PARAM);
+//                try
+//                {
+//                    if (ModelFactory.createDefaultModel().getWriter(lang.getName()) != null)
+//                    {
+                        MediaType mtUTF8 = new MediaType(lang, UTF8_PARAM);
                         // avoid adding duplicates. Cannot use Set because ordering is important
-                        if (!writableList.contains(mt)) writableList.add(mt);
-                    }
+                        if (!writableModelList.contains(mtUTF8)) writableModelList.add(mtUTF8);
+//                    }
                 }
-                catch (NoWriterForLangException ex) {}
+//                catch (NoWriterForLangException ex) {}
+
+                if (RDFLanguages.isQuads(lang))
+                {
+                    MediaType mt = new MediaType(lang); // don't add charset=UTF-8 param on readable types
+                    // avoid adding duplicates. Cannot use Set because ordering is important
+                    if (!readableDatasetList.contains(mt)) readableDatasetList.add(mt);
+                    
+                    MediaType mtUTF8 = new MediaType(lang, UTF8_PARAM);
+                    // avoid adding duplicates. Cannot use Set because ordering is important
+                    if (!writableDatasetList.contains(mtUTF8)) writableDatasetList.add(mtUTF8);
+                }
             }
         }
         
         // first MediaType becomes default:
-        readableList.add(0, MediaType.APPLICATION_RDF_XML_TYPE); // don't add charset=UTF-8 param on readable types
+        readableModelList.add(0, MediaType.APPLICATION_RDF_XML_TYPE); // don't add charset=UTF-8 param on readable types
         MediaType rdfXmlUtf8 = new MediaType(MediaType.APPLICATION_RDF_XML_TYPE.getType(), MediaType.APPLICATION_RDF_XML_TYPE.getSubtype(), parameters);
-        writableList.add(0, rdfXmlUtf8);
+        writableModelList.add(0, rdfXmlUtf8);
         
-        readableMap.put(Model.class, Collections.unmodifiableList(readableList));
-        writableMap.put(Model.class, Collections.unmodifiableList(writableList));
+        readableMap.put(Model.class, Collections.unmodifiableList(readableModelList));
+        writableMap.put(Model.class, Collections.unmodifiableList(writableModelList));
+        readableMap.put(Dataset.class, Collections.unmodifiableList(readableDatasetList));
+        writableMap.put(Dataset.class, Collections.unmodifiableList(writableDatasetList));
         
         // ResultSet
         
-        readableList = new ArrayList<>();
-        writableList = new ArrayList<>();
+        List<javax.ws.rs.core.MediaType> readableResultSetList = new ArrayList<>();
+        List<javax.ws.rs.core.MediaType> writableResultSetList = new ArrayList<>();
 
         Iterator<javax.ws.rs.core.MediaType> resultSetLangIt = Arrays.asList(RESULT_SET_MEDIA_TYPES).iterator();
         while (resultSetLangIt.hasNext())
         {
             javax.ws.rs.core.MediaType resultSetType = resultSetLangIt.next();
-            readableList.add(new MediaType(resultSetType.getType(), resultSetType.getSubtype(), parameters));
-            writableList.add(new MediaType(resultSetType.getType(), resultSetType.getSubtype(), parameters));
+            readableResultSetList.add(new MediaType(resultSetType.getType(), resultSetType.getSubtype(), parameters));
+            writableResultSetList.add(new MediaType(resultSetType.getType(), resultSetType.getSubtype(), parameters));
         }
 
-        readableMap.put(ResultSet.class, Collections.unmodifiableList(readableList));
-        writableMap.put(ResultSet.class, Collections.unmodifiableList(writableList));
+        readableMap.put(ResultSet.class, Collections.unmodifiableList(readableResultSetList));
+        writableMap.put(ResultSet.class, Collections.unmodifiableList(writableResultSetList));
 
         // make maps unmodifiable
         
