@@ -53,9 +53,11 @@ import org.slf4j.LoggerFactory;
 public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyWriter<Dataset>
 {
 
-    private final MessageBodyReader<Model> modelReader = new ModelProvider();
-    
     private static final Logger log = LoggerFactory.getLogger(DatasetProvider.class);
+
+    public static final String REQUEST_URI_HEADER = "X-Request-URI";
+
+    private final MessageBodyReader<Model> modelReader = new ModelProvider();
 
     public boolean isQuadsMediaType(MediaType mediaType)
     {
@@ -90,13 +92,12 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
             if (log.isErrorEnabled()) log.error("MediaType {} not supported by Jena", mediaType);
             throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);
         }
-        String syntax = lang.getName();
-        if (log.isDebugEnabled()) log.debug("Syntax used to read Dataset: {}", syntax);
 
-        // TO-DO: extract base URI from httpHeaders? extract charset from MediaType
-        //mediaType.getParameters().containsKey("charset")
-        //return dataset.read(entityStream, null, syntax);
-        RDFDataMgr.read(dataset, entityStream, lang);
+        String baseURI = null;
+        // attempt to retrieve base URI from a special-purpose header (workaround for JAX-RS 1.x limitation)
+        if (httpHeaders.containsKey(REQUEST_URI_HEADER)) baseURI = httpHeaders.getFirst(REQUEST_URI_HEADER);
+        
+        RDFDataMgr.read(dataset, entityStream, baseURI, lang);
         
         return dataset;
     }
@@ -128,9 +129,7 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
             if (log.isErrorEnabled()) log.error("MediaType {} not supported by Jena", formatType);
             throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);
         }
-        String syntax = lang.getName();
-        if (log.isDebugEnabled()) log.debug("Syntax used to write Dataset: {}", syntax);
-
+        
         //dataset.write(entityStream, syntax);
         RDFDataMgr.write(entityStream, dataset, lang);
     }
