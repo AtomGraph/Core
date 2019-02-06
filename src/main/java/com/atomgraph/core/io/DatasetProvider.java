@@ -74,7 +74,7 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
         boolean quadsReadable = type == Dataset.class && isQuadsMediaType(mediaType);
         if (quadsReadable) return true;
         
-        return getModelReader().isReadable(type, genericType, annotations, mediaType); // fallback to reading Model
+        return getModelReader().isReadable(Model.class, Model.class, annotations, mediaType); // fallback to reading Model
     }
 
     @Override
