@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetRewindable;
@@ -191,6 +192,36 @@ public class SPARQLClient
         }
     }
 
+    public Dataset loadDataset(Query query)
+    {
+        return loadDataset(query, null, null);
+    }
+    
+    public Dataset loadDataset(Query query, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
+    {
+        ClientResponse cr = null;
+        
+        try
+        {
+            if (getQueryURLLength(query, params) > getMaxGetRequestSize())
+                cr = post(query, getReadableMediaTypes(Dataset.class), params, headers);
+            else
+                cr = get(query, getReadableMediaTypes(Dataset.class), params, headers);
+
+            if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+            {
+                if (log.isErrorEnabled()) log.error("Query request to endpoint: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                throw new ClientException(cr);
+            }
+
+            return cr.getEntity(Dataset.class);
+        }
+        finally
+        {
+            if (cr != null) cr.close();
+        }
+    }
+    
     public ResultSetRewindable select(Query query)
     {
         return select(query, null, null);

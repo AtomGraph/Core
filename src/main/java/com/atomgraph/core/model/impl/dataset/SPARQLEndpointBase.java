@@ -31,6 +31,7 @@ import com.atomgraph.core.MediaTypes;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.sparql.core.DatasetDescription;
 import org.apache.jena.sparql.core.DynamicDatasets;
 import org.slf4j.Logger;
@@ -64,6 +65,13 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
     }
     
     @Override
+    public Dataset loadDataset(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris)
+    {
+        if (log.isDebugEnabled()) log.debug("Loading Model from Dataset using Query: {}", query);
+        return loadDataset(specifyDataset(getDataset(), defaultGraphUris, namedGraphUris), query);
+    }
+    
+    @Override
     public Model loadModel(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris)
     {
         if (log.isDebugEnabled()) log.debug("Loading Model from Dataset using Query: {}", query);
@@ -71,7 +79,37 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
     }
 
     /**
-     * Loads RDF model from an RDF dataset using a SPARQL query.
+     * Loads RDF dataset from an RDF dataset using a SPARQL query.
+     * Only <code>DESCRIBE</code> and <code>CONSTRUCT</code> queries can be used with this method.
+     * 
+     * @param dataset the RDF dataset to be queried
+     * @param query query object
+     * @return result RDF model
+     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#describe">DESCRIBE</a>
+     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#construct">CONSTRUCT</a>
+     */
+    public Dataset loadDataset(Dataset dataset, Query query)
+    {
+        if (log.isDebugEnabled()) log.debug("Local Dataset Query: {}", query);
+        if (dataset == null) throw new IllegalArgumentException("Dataset must be not null");
+        if (query == null) throw new IllegalArgumentException("Query must be not null");
+        
+        try (QueryExecution qex = QueryExecutionFactory.create(query, dataset))
+        {        
+            if (query.isConstructType()) return DatasetFactory.create(qex.execConstruct()); // subject to change if/when SPARQL can return quads
+            if (query.isDescribeType()) return DatasetFactory.create(qex.execDescribe());
+        
+            throw new QueryExecException("Query to load Model must be CONSTRUCT or DESCRIBE");
+        }
+        catch (QueryExecException ex)
+        {
+            if (log.isDebugEnabled()) log.debug("Local query execution exception: {}", ex);
+            throw ex;
+        }
+    }
+    
+    /**
+     * Loads RDF graph from an RDF dataset using a SPARQL query.
      * Only <code>DESCRIBE</code> and <code>CONSTRUCT</code> queries can be used with this method.
      * 
      * @param dataset the RDF dataset to be queried

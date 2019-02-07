@@ -31,6 +31,7 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.net.URI;
 import java.util.List;
 import javax.ws.rs.core.MultivaluedMap;
+import org.apache.jena.query.Dataset;
 
 /**
  * Proxy implementation of SPARQL endpoint.
@@ -57,6 +58,22 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
         if (sparqlClient == null) throw new IllegalArgumentException("SPARQLClient cannot be null");
         
         this.sparqlClient = sparqlClient;
+    }
+    
+    @Override
+    public Dataset loadDataset(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris)
+    {
+        if (defaultGraphUris == null) throw new IllegalArgumentException("List<URI> cannot be null");
+        if (namedGraphUris == null) throw new IllegalArgumentException("List<URI> cannot be null");
+
+        MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+        
+        for (URI defaultGraphUri : defaultGraphUris)
+            params.add(DEFAULT_GRAPH_URI, defaultGraphUri.toString());
+        for (URI namedGraphUri : namedGraphUris)
+            params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
+
+        return getSPARQLClient().loadDataset(query, params, null);
     }
     
     @Override

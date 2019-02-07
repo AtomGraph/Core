@@ -41,6 +41,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import org.apache.jena.query.Dataset;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.update.UpdateFactory;
@@ -227,7 +228,19 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     }
 
     /**
-     * Loads RDF model from the endpoint by executing a SPARQL query (<code>DESCRIBE</code> or <code>CONSTRUCT</code>)
+     * Loads RDF dataset from the endpoint by executing a SPARQL query (<code>DESCRIBE</code> or <code>CONSTRUCT</code>)
+     * 
+     * @param query SPARQL query
+     * @param defaultGraphUris default graph URIs
+     * @param namedGraphUris named graph URIs
+     * @return RDF model
+     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#describe">DESCRIBE</a>
+     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#construct">CONSTRUCT</a>
+     */
+    public abstract Dataset loadDataset(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris);
+
+    /**
+     * Loads RDF graph from the endpoint by executing a SPARQL query (<code>DESCRIBE</code> or <code>CONSTRUCT</code>)
      * 
      * @param query SPARQL query
      * @param defaultGraphUris default graph URIs
