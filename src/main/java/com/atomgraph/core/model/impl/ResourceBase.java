@@ -30,6 +30,7 @@ import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Variant;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.model.Resource;
+import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,24 +82,24 @@ public abstract class ResourceBase implements Resource
     /**
      * Returns response for the given RDF model.
      * 
-     * @param model RDF model
+     * @param dataset RDF dataset
      * @return response object
      */
-    public Response getResponse(Model model)
+    public Response getResponse(Dataset dataset)
     {
-        return getResponseBuilder(model).build();
+        return getResponseBuilder(dataset).build();
     }
 
     /**
      * Returns response builder for the given RDF model.
      * 
-     * @param model RDF model
+     * @param dataset RDF dataset
      * @return response builder
      */
-    public ResponseBuilder getResponseBuilder(Model model)
+    public ResponseBuilder getResponseBuilder(Dataset dataset)
     {
         return com.atomgraph.core.model.impl.Response.fromRequest(getRequest()).
-                getResponseBuilder(model, getVariants(getWritableMediaTypes()));
+                getResponseBuilder(dataset, getVariants(getWritableMediaTypes()));
     }
     
     /**

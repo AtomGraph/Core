@@ -19,7 +19,6 @@ package com.atomgraph.core.model.impl;
 import com.atomgraph.core.MediaTypes;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
-import org.apache.jena.rdf.model.Model;
 import java.net.URI;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -67,7 +66,7 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
         this(uriInfo, request, mediaTypes, uriInfo.getAbsolutePath(), service);
     }
 
-    protected QueriedResourceBase(final UriInfo uriInfo, final Request request, final MediaTypes mediaTypes, final URI uri, final Service service)            
+    protected QueriedResourceBase(final UriInfo uriInfo, final Request request, final MediaTypes mediaTypes, final URI uri, final Service service)
     {
         super(uriInfo, request, mediaTypes, uri);
         if (service == null) throw new IllegalArgumentException("Service cannot be null");
@@ -101,9 +100,9 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
      * @see getQuery()
      */
     @Override
-    public Model describe()
+    public Dataset describe()
     {
-        return (Model)getService().getSPARQLEndpoint(null).get(getQuery(), Collections.<URI>emptyList() , Collections.<URI>emptyList()).getEntity();
+        return (Dataset)getService().getSPARQLEndpoint(null).get(getQuery(), Collections.<URI>emptyList() , Collections.<URI>emptyList()).getEntity();
     }
     
     /**
@@ -115,15 +114,15 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     @Override
     public Response get()
     {
-        Model description = describe();
+        Dataset description = describe();
         
-        if (description.isEmpty())
+        if (description.getDefaultModel().isEmpty())
         {
             if (log.isDebugEnabled()) log.debug("Query result Model is empty; returning 404 Not Found");
             throw new NotFoundException("Query result Model is empty");
         }
         
-        if (log.isDebugEnabled()) log.debug("Returning @GET Response with {} statements in Model", description.size());
+        if (log.isDebugEnabled()) log.debug("Returning @GET Response with {} statements in the default graph", description.getDefaultModel().size());
         return getResponse(description);
     }
 
