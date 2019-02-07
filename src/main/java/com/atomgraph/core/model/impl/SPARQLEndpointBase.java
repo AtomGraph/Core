@@ -155,6 +155,17 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     }
 
     /**
+     * Returns response for the given RDF dataset.
+     * 
+     * @param dataset RDF dataset
+     * @return response object
+     */
+    public javax.ws.rs.core.Response getResponse(Dataset dataset)
+    {
+        return getResponseBuilder(dataset).build();
+    }
+    
+    /**
      * Returns response for the given RDF model.
      * 
      * @param model RDF model
@@ -163,6 +174,18 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     public Response getResponse(Model model)
     {
         return getResponseBuilder(model).build();
+    }
+
+    /**
+     * Returns response builder for the given RDF dataset.
+     * 
+     * @param dataset RDF dataset
+     * @return response builder
+     */
+    public javax.ws.rs.core.Response.ResponseBuilder getResponseBuilder(Dataset dataset)
+    {
+        return com.atomgraph.core.model.impl.Response.fromRequest(getRequest()).
+                getResponseBuilder(dataset, getVariants(getMediaTypes().getWritable(Model.class)));
     }
 
     /**
