@@ -16,6 +16,7 @@
 
 package com.atomgraph.core.io;
 
+import com.atomgraph.core.MediaTypes;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.shared.NoReaderForLangException;
@@ -58,20 +59,13 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
     public static final String REQUEST_URI_HEADER = "X-Request-URI";
 
     private final MessageBodyReader<Model> modelReader = new ModelProvider();
-
-    public boolean isQuadsMediaType(MediaType mediaType)
-    {
-        MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
-        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
-        return lang != null && RDFLanguages.isQuads(lang);
-    }
     
     // READER
     
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-        boolean quadsReadable = type == Dataset.class && isQuadsMediaType(mediaType);
+        boolean quadsReadable = type == Dataset.class && MediaTypes.isQuads(mediaType);
         if (quadsReadable) return true;
         
         return getModelReader().isReadable(Model.class, Model.class, annotations, mediaType); // fallback to reading Model
@@ -107,7 +101,7 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-        return Dataset.class.isAssignableFrom(type) && isQuadsMediaType(mediaType);
+        return Dataset.class.isAssignableFrom(type) && MediaTypes.isQuads(mediaType);
     }
 
     @Override

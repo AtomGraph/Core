@@ -16,6 +16,7 @@
  */
 package com.atomgraph.core.io;
 
+import com.atomgraph.core.MediaTypes;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.shared.NoReaderForLangException;
@@ -58,19 +59,14 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
 
     public static final String REQUEST_URI_HEADER = "X-Request-URI";
     public static final String RESPONSE_URI_HEADER = "X-Response-URI";
-    
-    public static boolean isModelType(MediaType mediaType)
-    {
-        MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
-        return RDFLanguages.contentTypeToLang(formatType.toString()) != null;
-    }
+
     
     // READER
     
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-        return type == Model.class && isModelType(mediaType);
+        return type == Model.class && MediaTypes.isTriples(mediaType);
     }
 
     @Override
@@ -122,7 +118,7 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-        return Model.class.isAssignableFrom(type) && isModelType(mediaType);
+        return Model.class.isAssignableFrom(type) && MediaTypes.isTriples(mediaType);
     }
 
     @Override

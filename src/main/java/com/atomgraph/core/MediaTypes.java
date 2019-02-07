@@ -18,9 +18,6 @@ package com.atomgraph.core;
 
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.shared.NoReaderForLangException;
-import org.apache.jena.shared.NoWriterForLangException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -54,6 +51,20 @@ public class MediaTypes
     }
     
     private final Map<Class, List<javax.ws.rs.core.MediaType>> readable, writable;
+    
+    public static boolean isTriples(javax.ws.rs.core.MediaType mediaType)
+    {
+        javax.ws.rs.core.MediaType formatType = new javax.ws.rs.core.MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
+        Lang lang =RDFLanguages.contentTypeToLang(formatType.toString());
+        return lang != null && RDFLanguages.isTriples(lang);
+    }
+    
+    public static boolean isQuads(javax.ws.rs.core.MediaType mediaType)
+    {
+        javax.ws.rs.core.MediaType formatType = new javax.ws.rs.core.MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
+        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
+        return lang != null && RDFLanguages.isQuads(lang);
+    }
     
     public MediaTypes()
     {

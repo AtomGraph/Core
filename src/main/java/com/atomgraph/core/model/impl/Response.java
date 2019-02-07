@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * @see org.apache.jena.rdf.model.Model
  * @see javax.ws.rs.core.Variant
  */
-public class Response // extends ResponseBuilder
+public class Response
 {
     private static final Logger log = LoggerFactory.getLogger(Response.class);
 
