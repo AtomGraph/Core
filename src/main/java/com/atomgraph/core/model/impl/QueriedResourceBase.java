@@ -31,6 +31,7 @@ import com.atomgraph.core.exception.NotFoundException;
 import com.atomgraph.core.model.QueriedResource;
 import com.atomgraph.core.model.Service;
 import java.util.Collections;
+import javax.ws.rs.core.Variant;
 import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,16 +115,21 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     @Override
     public Response get()
     {
-        Dataset description = describe();
+        final Dataset dataset = describe();
         
-        if (description.getDefaultModel().isEmpty())
+        Variant variant = getRequest().selectVariant(getVariants(getWritableMediaTypes()));
+        if (MediaTypes.isTriples(variant.getMediaType()))
         {
-            if (log.isDebugEnabled()) log.debug("Query result Model is empty; returning 404 Not Found");
-            throw new NotFoundException("Query result Model is empty");
+            if (dataset.getDefaultModel().isEmpty())
+            {
+                if (log.isDebugEnabled()) log.debug("Query result Model is empty; returning 404 Not Found");
+                throw new NotFoundException("Query result Model is empty");
+            }
+
+            return getResponse(dataset.getDefaultModel());
         }
-        
-        if (log.isDebugEnabled()) log.debug("Returning @GET Response with {} statements in the default graph", description.getDefaultModel().size());
-        return getResponse(description);
+
+        return getResponse(dataset);
     }
 
     /**
