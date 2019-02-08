@@ -78,9 +78,20 @@ public abstract class ResourceBase implements Resource
         this.response = com.atomgraph.core.model.impl.Response.fromRequest(request);
         if (log.isDebugEnabled()) log.debug("Request URI: {}", uriInfo.getRequestUri());
     }
-    
+
     /**
-     * Returns response for the given RDF model.
+     * Returns response for the given RDF graph.
+     * 
+     * @param model RDF dataset
+     * @return response object
+     */
+    public Response getResponse(Model model)
+    {
+        return getResponseBuilder(model).build();
+    }
+
+    /**
+     * Returns response for the given RDF dataset.
      * 
      * @param dataset RDF dataset
      * @return response object
@@ -91,7 +102,19 @@ public abstract class ResourceBase implements Resource
     }
 
     /**
-     * Returns response builder for the given RDF model.
+     * Returns response builder for the given RDF graph.
+     * 
+     * @param model RDF dataset
+     * @return response builder
+     */
+    public ResponseBuilder getResponseBuilder(Model model)
+    {
+        return com.atomgraph.core.model.impl.Response.fromRequest(getRequest()).
+                getResponseBuilder(model, getVariants(getWritableMediaTypes()));
+    }
+    
+    /**
+     * Returns response builder for the given RDF dataset.
      * 
      * @param dataset RDF dataset
      * @return response builder
