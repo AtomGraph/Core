@@ -59,6 +59,7 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
     public static final String REQUEST_URI_HEADER = "X-Request-URI";
 
     private final MessageBodyReader<Model> modelReader = new ModelProvider();
+    private final MessageBodyWriter<Model> modelWriter = new ModelProvider();
     
     // READER
     
@@ -101,7 +102,10 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-        return Dataset.class.isAssignableFrom(type) && MediaTypes.isQuads(mediaType);
+        boolean quadsWriteable = Dataset.class.isAssignableFrom(type) && MediaTypes.isQuads(mediaType);
+        if (quadsWriteable) return true;
+        
+        return getModelWriter().isWriteable(Model.class, Model.class, annotations, mediaType); // fallback to writing Model
     }
 
     @Override
@@ -131,6 +135,11 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
     public MessageBodyReader<Model> getModelReader()
     {
         return modelReader;
+    }
+    
+    public MessageBodyWriter<Model> getModelWriter()
+    {
+        return modelWriter;
     }
     
 }
