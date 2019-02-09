@@ -128,8 +128,9 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
             throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);
         }
         
-        //dataset.write(entityStream, syntax);
-        RDFDataMgr.write(entityStream, dataset, lang);
+        // if we need to provide triples, then we write only the default graph of the dataset
+        if (MediaTypes.isTriples(mediaType)) dataset.getDefaultModel().write(entityStream, lang.getName());
+        else RDFDataMgr.write(entityStream, dataset, lang);
     }
 
     public MessageBodyReader<Model> getModelReader()
