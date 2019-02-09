@@ -117,7 +117,7 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     {
         final Dataset dataset = describe();
         
-        Variant variant = getRequest().selectVariant(getVariants(getWritableMediaTypes()));
+        Variant variant = getRequest().selectVariant(getVariants(getMediaTypes().getWritable(Dataset.class)));
         if (MediaTypes.isTriples(variant.getMediaType()))
         {
             if (dataset.getDefaultModel().isEmpty())
