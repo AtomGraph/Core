@@ -110,7 +110,7 @@ public abstract class ResourceBase implements Resource
     public ResponseBuilder getResponseBuilder(Model model)
     {
         return com.atomgraph.core.model.impl.Response.fromRequest(getRequest()).
-                getResponseBuilder(model, getVariants(getMediaTypes().getWritable(Model.class)));
+                getResponseBuilder(model, getVariants(getWritableMediaTypes(Model.class)));
     }
     
     /**
@@ -122,7 +122,7 @@ public abstract class ResourceBase implements Resource
     public ResponseBuilder getResponseBuilder(Dataset dataset)
     {
         return com.atomgraph.core.model.impl.Response.fromRequest(getRequest()).
-                getResponseBuilder(dataset, getVariants(getMediaTypes().getWritable(Dataset.class)));
+                getResponseBuilder(dataset, getVariants(getWritableMediaTypes(Dataset.class)));
     }
     
     /**
@@ -135,7 +135,12 @@ public abstract class ResourceBase implements Resource
     {
         return getResponse().getVariantListBuilder(mediaTypes, getLanguages(), getEncodings()).add().build();
     }
-        
+    
+    public List<javax.ws.rs.core.MediaType> getWritableMediaTypes(Class clazz)
+    {
+        return getMediaTypes().getWritable(clazz);
+    }
+    
     public MediaTypes getMediaTypes()
     {
         return mediaTypes;
