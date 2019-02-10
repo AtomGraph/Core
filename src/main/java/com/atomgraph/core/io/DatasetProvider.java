@@ -33,7 +33,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
-import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFLanguages;
@@ -58,18 +57,12 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
 
     public static final String REQUEST_URI_HEADER = "X-Request-URI";
 
-    private final MessageBodyReader<Model> modelReader = new ModelProvider();
-    private final MessageBodyWriter<Model> modelWriter = new ModelProvider();
-    
     // READER
     
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-        boolean quadsReadable = type == Dataset.class && MediaTypes.isQuads(mediaType);
-        if (quadsReadable) return true;
-        
-        return getModelReader().isReadable(Model.class, Model.class, annotations, mediaType); // fallback to reading Model
+        return (type == Dataset.class && (MediaTypes.isQuads(mediaType) || MediaTypes.isTriples(mediaType)));
     }
 
     @Override
@@ -102,14 +95,11 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-        boolean quadsWriteable = Dataset.class.isAssignableFrom(type) && MediaTypes.isQuads(mediaType);
-        if (quadsWriteable) return true;
-        
-        return getModelWriter().isWriteable(Model.class, Model.class, annotations, mediaType); // fallback to writing Model
+        return (Dataset.class.isAssignableFrom(type) && (MediaTypes.isQuads(mediaType) || MediaTypes.isTriples(mediaType)));
     }
 
     @Override
-    public long getSize(Dataset model, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
+    public long getSize(Dataset dataset, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
         return -1;
     }
@@ -131,16 +121,6 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
         // if we need to provide triples, then we write only the default graph of the dataset
         if (MediaTypes.isTriples(mediaType)) dataset.getDefaultModel().write(entityStream, lang.getName());
         else RDFDataMgr.write(entityStream, dataset, lang);
-    }
-
-    public MessageBodyReader<Model> getModelReader()
-    {
-        return modelReader;
-    }
-    
-    public MessageBodyWriter<Model> getModelWriter()
-    {
-        return modelWriter;
     }
     
 }
