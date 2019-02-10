@@ -27,14 +27,12 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Variant;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
-import org.apache.jena.rdf.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +84,7 @@ public abstract class QuadStoreBase implements QuadStore
     public javax.ws.rs.core.Response.ResponseBuilder getResponseBuilder(Dataset dataset)
     {
         return com.atomgraph.core.model.impl.Response.fromRequest(getRequest()).
-                getResponseBuilder(dataset, getVariants(getMediaTypes().getWritable(Model.class)));
+                getResponseBuilder(dataset, getVariants(getMediaTypes().getWritable(Dataset.class)));
     }
     
     /**
