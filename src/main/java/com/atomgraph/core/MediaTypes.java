@@ -96,32 +96,20 @@ public class MediaTypes
         {
             Lang lang = langIt.next();
             // we ignore TriX for now because of Jena bug: https://issues.apache.org/jira/browse/JENA-1211
-            if (!lang.equals(Lang.RDFNULL) && !lang.equals(Lang.TRIX))
+            // also ignore JSON-LD because the reader attempts to make HTTP calls: https://mail-archives.apache.org/mod_mbox/jena-users/201712.mbox/%3CCAE35VmyGk-biQ1Fayp3zoOyiMikZhvjA8dTuGEd3JaYR98uYOA@mail.gmail.com%3E
+            if (!lang.equals(Lang.RDFNULL) && !lang.equals(Lang.TRIX) && !lang.equals(Lang.JSONLD))
             {
                 if (RDFLanguages.isTriples(lang))
                 {
-//                try
-//                {
-//                    if (ModelFactory.createDefaultModel().getReader(lang.getName()) != null)
-//                    {
-                        MediaType mt = new MediaType(lang); // don't add charset=UTF-8 param on readable types
-                        // avoid adding duplicates. Cannot use Set because ordering is important
-                        if (!readableModelList.contains(mt)) readableModelList.add(mt);
-//                    }
-//                }
-//                catch (NoReaderForLangException ex) {}
-                
-//                try
-//                {
-//                    if (ModelFactory.createDefaultModel().getWriter(lang.getName()) != null)
-//                    {
-                        MediaType mtUTF8 = new MediaType(lang, UTF8_PARAM);
-                        // avoid adding duplicates. Cannot use Set because ordering is important
-                        if (!writableModelList.contains(mtUTF8)) writableModelList.add(mtUTF8);
-//                    }
-                }
-//                catch (NoWriterForLangException ex) {}
+                    MediaType mt = new MediaType(lang); // don't add charset=UTF-8 param on readable types
+                    // avoid adding duplicates. Cannot use Set because ordering is important
+                    if (!readableModelList.contains(mt)) readableModelList.add(mt);
 
+                    MediaType mtUTF8 = new MediaType(lang, UTF8_PARAM);
+                    // avoid adding duplicates. Cannot use Set because ordering is important
+                    if (!writableModelList.contains(mtUTF8)) writableModelList.add(mtUTF8);
+                }
+                
                 if (RDFLanguages.isQuads(lang))
                 {
                     MediaType mt = new MediaType(lang); // don't add charset=UTF-8 param on readable types
@@ -167,19 +155,19 @@ public class MediaTypes
         writable = Collections.unmodifiableMap(writableMap);
     }
 
-    public static List<javax.ws.rs.core.MediaType> getRegistered()
-    {
-        List<javax.ws.rs.core.MediaType> mediaTypes = new ArrayList<>();
-        
-        Iterator<Lang> it = RDFLanguages.getRegisteredLanguages().iterator();
-        while (it.hasNext())
-        {
-            Lang lang = it.next();
-            if (!lang.equals(Lang.RDFNULL)) mediaTypes.add(new MediaType(lang));
-        }
-
-        return mediaTypes;
-    }
+//    public static List<javax.ws.rs.core.MediaType> getRegistered()
+//    {
+//        List<javax.ws.rs.core.MediaType> mediaTypes = new ArrayList<>();
+//        
+//        Iterator<Lang> it = RDFLanguages.getRegisteredLanguages().iterator();
+//        while (it.hasNext())
+//        {
+//            Lang lang = it.next();
+//            if (!lang.equals(Lang.RDFNULL)) mediaTypes.add(new MediaType(lang));
+//        }
+//
+//        return mediaTypes;
+//    }
 
     /**
      * Returns Java class to JAX-RS media type map.
