@@ -103,7 +103,7 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     @Override
     public Dataset describe()
     {
-        return (Dataset)getService().getSPARQLEndpoint(null).get(getQuery(), Collections.<URI>emptyList() , Collections.<URI>emptyList()).getEntity();
+        return (Dataset)getService().getSPARQLEndpoint(getRequest()).get(getQuery(), Collections.<URI>emptyList() , Collections.<URI>emptyList()).getEntity();
     }
     
     /**
