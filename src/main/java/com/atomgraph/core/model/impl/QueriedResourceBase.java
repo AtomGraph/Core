@@ -117,8 +117,8 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     {
         final Dataset dataset = describe();
         
-        Variant variant = getRequest().selectVariant(getVariants(getMediaTypes().getWritable(Dataset.class)));
-        if (MediaTypes.isTriples(variant.getMediaType()))
+        Variant variant = getRequest().selectVariant(getVariants(getWritableMediaTypes(Dataset.class)));
+        if (variant == null)
         {
             if (dataset.getDefaultModel().isEmpty())
             {
@@ -128,8 +128,16 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
 
             return getResponse(dataset.getDefaultModel());
         }
+        else
+        {
+            if (dataset.getDefaultModel().isEmpty() && !dataset.listNames().hasNext())
+            {
+                if (log.isDebugEnabled()) log.debug("Query result Dataset is empty; returning 404 Not Found");
+                throw new NotFoundException("Query result Dataset is empty");
+            }
 
-        return getResponse(dataset);
+            return getResponse(dataset);
+        }
     }
 
     /**
