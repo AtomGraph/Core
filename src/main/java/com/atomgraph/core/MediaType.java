@@ -49,7 +49,7 @@ public class MediaType extends javax.ws.rs.core.MediaType
     public final static MediaType TEXT_NTRIPLES_TYPE = new MediaType(Lang.NTRIPLES.getContentType().getType(), Lang.NTRIPLES.getContentType().getSubType());
 
     /** "application/n-quads" */
-    public final static String TEXT_NQUADS = Lang.NTRIPLES.getContentType().getContentType();
+    public final static String TEXT_NQUADS = Lang.NQUADS.getContentType().getContentType();
     /** "application/n-quads" */
     public final static MediaType TEXT_NQUADS_TYPE = new MediaType(Lang.NQUADS.getContentType().getType(), Lang.NQUADS.getContentType().getSubType());
 
