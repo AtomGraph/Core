@@ -155,20 +155,6 @@ public class MediaTypes
         writable = Collections.unmodifiableMap(writableMap);
     }
 
-//    public static List<javax.ws.rs.core.MediaType> getRegistered()
-//    {
-//        List<javax.ws.rs.core.MediaType> mediaTypes = new ArrayList<>();
-//        
-//        Iterator<Lang> it = RDFLanguages.getRegisteredLanguages().iterator();
-//        while (it.hasNext())
-//        {
-//            Lang lang = it.next();
-//            if (!lang.equals(Lang.RDFNULL)) mediaTypes.add(new MediaType(lang));
-//        }
-//
-//        return mediaTypes;
-//    }
-
     /**
      * Returns Java class to JAX-RS media type map.
      * 

@@ -98,6 +98,10 @@ public abstract class ResourceBase implements Resource
      */
     public Response getResponse(Dataset dataset)
     {
+        Variant variant = getRequest().selectVariant(getVariants(getWritableMediaTypes(Dataset.class)));
+        
+        if (variant == null) return getResponse(dataset.getDefaultModel()); // if quads are not acceptable, fallback to responding with the default graph
+
         return getResponseBuilder(dataset).build();
     }
 
