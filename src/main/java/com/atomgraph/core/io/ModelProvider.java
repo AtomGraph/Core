@@ -94,7 +94,7 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
 
     public Model read(Model model, InputStream is, Lang lang, String baseURI)
     {
-        ErrorHandler errorHandler = ErrorHandlerFactory.errorHandlerStrict; // throw exceptions on all parse errors
+        ErrorHandler errorHandler = ErrorHandlerFactory.errorHandlerStd; // throw exceptions on all parse errors
         ParserProfile parserProfile = RiotLib.profile(baseURI, true, true, errorHandler);
         return read(model, is, lang, baseURI, errorHandler, parserProfile);
     }
