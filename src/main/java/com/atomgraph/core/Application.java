@@ -149,7 +149,7 @@ public class Application extends javax.ws.rs.core.Application implements com.ato
         classes.add(GraphStoreBase.class); // handles /service requests
 
         singletons.add(new ModelProvider());
-        singletons.add(new com.atomgraph.core.io.DatasetProvider());
+        singletons.add(new DatasetProvider());
         singletons.add(new ResultSetProvider());
         singletons.add(new QueryParamProvider());
         singletons.add(new UpdateRequestReader());

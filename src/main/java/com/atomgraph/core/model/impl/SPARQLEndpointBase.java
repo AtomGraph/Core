@@ -141,13 +141,23 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
                 query.setLimit(Long.parseLong(getServletConfig().getInitParameter(A.resultLimit.getURI())));
             */
 
+            if (log.isDebugEnabled()) log.debug("Loading ResultSet using SELECT/ASK query: {}", query);
             return getResponseBuilder(select(query, defaultGraphUris, namedGraphUris));
         }
 
         if (query.isConstructType() || query.isDescribeType())
         {
-            if (log.isDebugEnabled()) log.debug("SPARQL endpoint executing CONSTRUCT/DESCRIBE query: {}", query);
-            return getResponseBuilder(loadModel(query, defaultGraphUris, namedGraphUris));
+            Variant variant = getRequest().selectVariant(getVariants(getMediaTypes().getWritable(Dataset.class)));
+            if (variant == null)
+            {
+                if (log.isDebugEnabled()) log.debug("Loading Model using CONSTRUCT/DESCRIBE query: {}", query);
+                return getResponseBuilder(loadModel(query, defaultGraphUris, namedGraphUris));
+            }
+            else
+            {
+                if (log.isDebugEnabled()) log.debug("Loading Dataset using CONSTRUCT/DESCRIBE query: {}", query);
+                return getResponseBuilder(loadDataset(query, defaultGraphUris, namedGraphUris));
+            }
         }
         
         if (log.isWarnEnabled()) log.warn("SPARQL endpoint received unknown type of query: {}", query);
@@ -163,7 +173,7 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     public javax.ws.rs.core.Response.ResponseBuilder getResponseBuilder(Dataset dataset)
     {
         return com.atomgraph.core.model.impl.Response.fromRequest(getRequest()).
-                getResponseBuilder(dataset, getVariants(getMediaTypes().getWritable(Model.class)));
+                getResponseBuilder(dataset, getVariants(getMediaTypes().getWritable(Dataset.class)));
     }
 
     /**
@@ -174,8 +184,6 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
      */
     public ResponseBuilder getResponseBuilder(Model model)
     {
-        if (getRequest() == null) return Response.ok(model);
-                    
         return com.atomgraph.core.model.impl.Response.fromRequest(getRequest()).
                 getResponseBuilder(model, getVariants(getMediaTypes().getWritable(Model.class)));
     }
@@ -188,8 +196,6 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
      */
     public ResponseBuilder getResponseBuilder(ResultSetRewindable resultSet)
     {
-        if (getRequest() == null) return Response.ok(resultSet);
-        
         return com.atomgraph.core.model.impl.Response.fromRequest(getRequest()).
                 getResponseBuilder(resultSet, getVariants(getMediaTypes().getWritable(ResultSet.class)));
     }

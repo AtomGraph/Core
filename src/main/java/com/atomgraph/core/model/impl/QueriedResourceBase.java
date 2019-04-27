@@ -104,7 +104,10 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     @Override
     public Dataset describe()
     {
-        return DatasetFactory.create((Model)getService().getSPARQLEndpoint(getRequest()).get(getQuery(), Collections.<URI>emptyList() , Collections.<URI>emptyList()).getEntity());
+        Object entity = getService().getSPARQLEndpoint(getRequest()).get(getQuery(), Collections.<URI>emptyList() , Collections.<URI>emptyList()).getEntity();
+        
+        if (entity instanceof Model) return DatasetFactory.create((Model)entity); // default graph
+        return (Dataset)entity;
     }
     
     /**
