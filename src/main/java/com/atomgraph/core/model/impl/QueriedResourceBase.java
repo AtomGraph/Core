@@ -31,8 +31,9 @@ import com.atomgraph.core.exception.NotFoundException;
 import com.atomgraph.core.model.QueriedResource;
 import com.atomgraph.core.model.Service;
 import java.util.Collections;
-import javax.ws.rs.core.Variant;
 import org.apache.jena.query.Dataset;
+import org.apache.jena.query.DatasetFactory;
+import org.apache.jena.rdf.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,7 +104,7 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     @Override
     public Dataset describe()
     {
-        return (Dataset)getService().getSPARQLEndpoint(getRequest()).get(getQuery(), Collections.<URI>emptyList() , Collections.<URI>emptyList()).getEntity();
+        return DatasetFactory.create((Model)getService().getSPARQLEndpoint(getRequest()).get(getQuery(), Collections.<URI>emptyList() , Collections.<URI>emptyList()).getEntity());
     }
     
     /**

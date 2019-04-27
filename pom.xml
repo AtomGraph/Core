@@ -7,7 +7,7 @@
     <packaging>${packaging.type}</packaging>
 
     <name>AtomGraph Core</name>
-    <description>Generic Linked Data server</description>
+    <description>Generic Linked Data framework for SPARQL tripestore backends</description>
     <url>https://github.com/AtomGraph/Core</url>
     <inceptionYear>2013</inceptionYear>
 

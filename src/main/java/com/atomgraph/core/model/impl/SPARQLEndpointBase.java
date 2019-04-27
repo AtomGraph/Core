@@ -155,28 +155,6 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     }
 
     /**
-     * Returns response for the given RDF dataset.
-     * 
-     * @param dataset RDF dataset
-     * @return response object
-     */
-    public javax.ws.rs.core.Response getResponse(Dataset dataset)
-    {
-        return getResponseBuilder(dataset).build();
-    }
-    
-    /**
-     * Returns response for the given RDF model.
-     * 
-     * @param model RDF model
-     * @return response object
-     */
-    public Response getResponse(Model model)
-    {
-        return getResponseBuilder(model).build();
-    }
-
-    /**
      * Returns response builder for the given RDF dataset.
      * 
      * @param dataset RDF dataset
