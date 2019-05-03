@@ -209,7 +209,7 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
      * @param query
      * @return RDF model
      */
-    public Model describe(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris)    
+    public Model describe(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris)
     {
         if (query == null) throw new IllegalArgumentException("Query must be not null");
         if (!query.isDescribeType()) throw new IllegalArgumentException("Query must be DESCRIBE");
