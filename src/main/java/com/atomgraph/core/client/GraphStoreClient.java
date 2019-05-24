@@ -142,6 +142,7 @@ public class GraphStoreClient implements DatasetAccessor
                 throw new ClientException(cr);
             }
 
+            cr.bufferEntity();
             return cr;
         }
         finally
@@ -175,6 +176,7 @@ public class GraphStoreClient implements DatasetAccessor
                 throw new ClientException(cr);
             }
 
+            cr.bufferEntity();
             return cr;
         }
         finally
@@ -215,6 +217,7 @@ public class GraphStoreClient implements DatasetAccessor
                 throw new ClientException(cr);
             }
 
+            cr.bufferEntity();
             return cr;
         }
         finally
@@ -259,6 +262,7 @@ public class GraphStoreClient implements DatasetAccessor
                 throw new ClientException(cr);
             }
             
+            cr.bufferEntity();
             return cr;
         }
         finally
@@ -292,6 +296,7 @@ public class GraphStoreClient implements DatasetAccessor
                 throw new ClientException(cr);
             }
             
+            cr.bufferEntity();
             return cr;
         }
         finally
@@ -333,6 +338,7 @@ public class GraphStoreClient implements DatasetAccessor
                 throw new ClientException(cr);
             }
             
+            cr.bufferEntity();
             return cr;
         }
         finally
@@ -367,6 +373,7 @@ public class GraphStoreClient implements DatasetAccessor
                 throw new ClientException(cr);
             }
             
+            cr.bufferEntity();
             return cr;
         }
         finally
@@ -412,6 +419,7 @@ public class GraphStoreClient implements DatasetAccessor
                 throw new ClientException(cr);
             }
             
+            cr.bufferEntity();
             return cr;
         }
         finally
@@ -445,6 +453,7 @@ public class GraphStoreClient implements DatasetAccessor
                 throw new ClientException(cr);
             }
             
+            cr.bufferEntity();
             return cr;
         }
         finally
