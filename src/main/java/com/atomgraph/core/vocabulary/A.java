@@ -56,14 +56,6 @@ public final class A
 
     public static final DatatypeProperty preemptiveAuth = m_model.createDatatypeProperty( NS + "preemptiveAuth" );
     
-//    public static final ObjectProperty absolutePath = m_model.createObjectProperty( NS + "absolutePath" );
-//
-//    public static final ObjectProperty requestUri = m_model.createObjectProperty( NS + "requestUri" );
-//
-//    public static final DatatypeProperty method = m_model.createDatatypeProperty( NS + "method" );
-//    
-//    public static final DatatypeProperty httpHeaders = m_model.createDatatypeProperty( NS + "httpHeaders" );
-
     public static final DatatypeProperty maxGetRequestSize = m_model.createDatatypeProperty( NS + "maxGetRequestSize" );
     
 }

@@ -120,10 +120,10 @@ public class GraphStoreClient implements DatasetAccessor
     @Override
     public Model getModel()
     {
-        return getModel(null, null);
+        return getModel(null, null).getEntity(Model.class);
     }
     
-    public Model getModel(MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
+    public ClientResponse getModel(MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
         ClientResponse cr = null;
         
@@ -142,7 +142,7 @@ public class GraphStoreClient implements DatasetAccessor
                 throw new ClientException(cr);
             }
 
-            return cr.getEntity(Model.class);
+            return cr;
         }
         finally
         {
@@ -153,10 +153,10 @@ public class GraphStoreClient implements DatasetAccessor
     @Override
     public Model getModel(String uri)
     {
-        return getModel(uri, null, null);
+        return getModel(uri, null, null).getEntity(Model.class);
     }
     
-    public Model getModel(String uri, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
+    public ClientResponse getModel(String uri, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
         ClientResponse cr = null;
         
@@ -175,7 +175,7 @@ public class GraphStoreClient implements DatasetAccessor
                 throw new ClientException(cr);
             }
 
-            return cr.getEntity(Model.class);
+            return cr;
         }
         finally
         {
@@ -193,10 +193,10 @@ public class GraphStoreClient implements DatasetAccessor
     @Override
     public boolean containsModel(String uri)
     {
-        return containsModel(uri, null, null);
+        return containsModel(uri, null, null).getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL);
     }
     
-    public boolean containsModel(String uri, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
+    public ClientResponse containsModel(String uri, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
         ClientResponse cr = null;
         
@@ -215,7 +215,7 @@ public class GraphStoreClient implements DatasetAccessor
                 throw new ClientException(cr);
             }
 
-            return true;
+            return cr;
         }
         finally
         {
@@ -240,7 +240,7 @@ public class GraphStoreClient implements DatasetAccessor
         putModel(null, null);
     }
     
-    public void putModel(Model model, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
+    public ClientResponse putModel(Model model, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
         ClientResponse cr = null;
         
@@ -258,6 +258,8 @@ public class GraphStoreClient implements DatasetAccessor
                 if (log.isErrorEnabled()) log.error("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
                 throw new ClientException(cr);
             }
+            
+            return cr;
         }
         finally
         {
@@ -271,7 +273,7 @@ public class GraphStoreClient implements DatasetAccessor
         putModel(uri, model, null, null);
     }
     
-    public void putModel(String uri, Model model, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
+    public ClientResponse putModel(String uri, Model model, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
         ClientResponse cr = null;
         
@@ -289,6 +291,8 @@ public class GraphStoreClient implements DatasetAccessor
                 if (log.isErrorEnabled()) log.error("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
                 throw new ClientException(cr);
             }
+            
+            return cr;
         }
         finally
         {
@@ -310,7 +314,7 @@ public class GraphStoreClient implements DatasetAccessor
         deleteDefault(null, null);
     }
     
-    public void deleteDefault(MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
+    public ClientResponse deleteDefault(MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
         ClientResponse cr = null;
         
@@ -328,6 +332,8 @@ public class GraphStoreClient implements DatasetAccessor
                 if (log.isErrorEnabled()) log.error("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
                 throw new ClientException(cr);
             }
+            
+            return cr;
         }
         finally
         {
@@ -342,7 +348,7 @@ public class GraphStoreClient implements DatasetAccessor
         deleteModel(uri, null, null);
     }
     
-    public void deleteModel(String uri, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
+    public ClientResponse deleteModel(String uri, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
         ClientResponse cr = null;
         
@@ -360,6 +366,8 @@ public class GraphStoreClient implements DatasetAccessor
                 if (log.isErrorEnabled()) log.error("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
                 throw new ClientException(cr);
             }
+            
+            return cr;
         }
         finally
         {
@@ -385,7 +393,7 @@ public class GraphStoreClient implements DatasetAccessor
         add(model, null, null);
     }
     
-    public void add(Model model, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
+    public ClientResponse add(Model model, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
         ClientResponse cr = null;
         
@@ -403,6 +411,8 @@ public class GraphStoreClient implements DatasetAccessor
                 if (log.isErrorEnabled()) log.error("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
                 throw new ClientException(cr);
             }
+            
+            return cr;
         }
         finally
         {
@@ -416,7 +426,7 @@ public class GraphStoreClient implements DatasetAccessor
         add(uri, model, null, null);
     }
     
-    public void add(String uri, Model model, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
+    public ClientResponse add(String uri, Model model, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
         ClientResponse cr = null;
         
@@ -434,6 +444,8 @@ public class GraphStoreClient implements DatasetAccessor
                 if (log.isErrorEnabled()) log.error("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
                 throw new ClientException(cr);
             }
+            
+            return cr;
         }
         finally
         {
