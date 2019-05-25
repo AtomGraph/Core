@@ -32,6 +32,7 @@ import java.net.URI;
 import java.util.List;
 import javax.ws.rs.core.MultivaluedMap;
 import org.apache.jena.query.Dataset;
+import org.apache.jena.query.ResultSet;
 
 /**
  * Proxy implementation of SPARQL endpoint.
@@ -73,7 +74,7 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
         for (URI namedGraphUri : namedGraphUris)
             params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
 
-        return getSPARQLClient().loadDataset(query, params, null).getEntity(Dataset.class);
+        return getSPARQLClient().query(query, Dataset.class, params, null).getEntity(Dataset.class);
     }
     
     @Override
@@ -89,7 +90,7 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
         for (URI namedGraphUri : namedGraphUris)
             params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
 
-        return getSPARQLClient().loadModel(query, params, null).getEntity(Model.class);
+        return getSPARQLClient().query(query, Model.class, params, null).getEntity(Model.class);
     }
 
     @Override
@@ -105,7 +106,7 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
         for (URI namedGraphUri : namedGraphUris)
             params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
         
-        return getSPARQLClient().select(query, params, null).getEntity(ResultSetRewindable.class);
+        return getSPARQLClient().query(query, ResultSet.class, params, null).getEntity(ResultSetRewindable.class);
     }
   
     @Override
@@ -121,7 +122,7 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
         for (URI namedGraphUri : namedGraphUris)
             params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
         
-        return SPARQLClient.parseBoolean(getSPARQLClient().ask(query, params, null));
+        return SPARQLClient.parseBoolean(getSPARQLClient().query(query, ResultSet.class, params, null));
     }
 
     @Override

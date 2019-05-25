@@ -161,21 +161,16 @@ public class SPARQLClient
         return builder.post(ClientResponse.class, formData);
     }
 
-    public Model loadModel(Query query)
-    {
-        return loadModel(query, null, null).getEntity(Model.class);
-    }
-    
-    public ClientResponse loadModel(Query query, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
+    public ClientResponse query(Query query, Class clazz, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
         ClientResponse cr = null;
         
         try
         {
             if (getQueryURLLength(query, params) > getMaxGetRequestSize())
-                cr = post(query, getReadableMediaTypes(Model.class), params, headers);
+                cr = post(query, getReadableMediaTypes(clazz), params, headers);
             else
-                cr = get(query, getReadableMediaTypes(Model.class), params, headers);
+                cr = get(query, getReadableMediaTypes(clazz), params, headers);
 
             if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {
@@ -190,73 +185,26 @@ public class SPARQLClient
         {
             if (cr != null) cr.close();
         }
+    }
+    
+    public Model loadModel(Query query)
+    {
+        return query(query, Model.class, null, null).getEntity(Model.class);
     }
 
     public Dataset loadDataset(Query query)
     {
-        return loadDataset(query, null, null).getEntity(Dataset.class);
-    }
-    
-    public ClientResponse loadDataset(Query query, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
-    {
-        ClientResponse cr = null;
-        
-        try
-        {
-            if (getQueryURLLength(query, params) > getMaxGetRequestSize())
-                cr = post(query, getReadableMediaTypes(Dataset.class), params, headers);
-            else
-                cr = get(query, getReadableMediaTypes(Dataset.class), params, headers);
-
-            if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
-            {
-                if (log.isErrorEnabled()) log.error("Query request to endpoint: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-                throw new ClientException(cr);
-            }
-
-            cr.bufferEntity();
-            return cr;
-        }
-        finally
-        {
-            if (cr != null) cr.close();
-        }
+        return query(query, Dataset.class, null, null).getEntity(Dataset.class);
     }
     
     public ResultSetRewindable select(Query query)
     {
-        return select(query, null, null).getEntity(ResultSetRewindable.class);
-    }
-    
-    public ClientResponse select(Query query, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
-    {        
-        ClientResponse cr = null;
-
-        try
-        {
-            if (getQueryURLLength(query, params) > getMaxGetRequestSize())
-                cr = post(query, getReadableMediaTypes(ResultSet.class), params, headers);
-            else
-                cr = get(query, getReadableMediaTypes(ResultSet.class), params, headers);
-            
-            if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
-            {
-                if (log.isErrorEnabled()) log.error("Query request to endpoint: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-                throw new ClientException(cr);
-            }
-
-            cr.bufferEntity();
-            return cr;
-        }
-        finally
-        {
-            if (cr != null) cr.close();
-        }
+        return query(query, ResultSet.class, null, null).getEntity(ResultSetRewindable.class);
     }
 
     public boolean ask(Query query)
     {
-        return parseBoolean(ask(query, null, null));
+        return parseBoolean(query(query, ResultSet.class, null, null));
     }
 
     public static boolean parseBoolean(ClientResponse cr)
@@ -269,32 +217,6 @@ public class SPARQLClient
             return XMLInput.booleanFromXML(is);
 
         throw new IllegalStateException("Unsupported ResultSet format");
-    }
-    
-    public ClientResponse ask(Query query, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
-    {
-        ClientResponse cr = null;
-        
-        try
-        {
-            if (getQueryURLLength(query, params) > getMaxGetRequestSize())
-                cr = post(query, getReadableMediaTypes(ResultSet.class), params, headers);
-            else
-                cr = get(query, getReadableMediaTypes(ResultSet.class), params, headers);
-            
-            if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
-            {
-                if (log.isErrorEnabled()) log.error("Query request to endpoint: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-                throw new ClientException(cr);
-            }
-
-            cr.bufferEntity();
-            return cr;
-        }
-        finally
-        {
-            if (cr != null) cr.close();
-        }
     }
 
     /**
