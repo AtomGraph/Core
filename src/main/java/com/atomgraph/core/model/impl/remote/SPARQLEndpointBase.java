@@ -73,7 +73,7 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
         for (URI namedGraphUri : namedGraphUris)
             params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
 
-        return getSPARQLClient().loadDataset(query, params, null);
+        return getSPARQLClient().loadDataset(query, params, null).getEntity(Dataset.class);
     }
     
     @Override
@@ -89,7 +89,7 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
         for (URI namedGraphUri : namedGraphUris)
             params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
 
-        return getSPARQLClient().loadModel(query, params, null);
+        return getSPARQLClient().loadModel(query, params, null).getEntity(Model.class);
     }
 
     @Override
@@ -105,7 +105,7 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
         for (URI namedGraphUri : namedGraphUris)
             params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
         
-        return getSPARQLClient().select(query, params, null);
+        return getSPARQLClient().select(query, params, null).getEntity(ResultSetRewindable.class);
     }
   
     @Override
@@ -121,7 +121,7 @@ public class SPARQLEndpointBase extends com.atomgraph.core.model.impl.SPARQLEndp
         for (URI namedGraphUri : namedGraphUris)
             params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
         
-        return getSPARQLClient().ask(query, params, null);
+        return SPARQLClient.parseBoolean(getSPARQLClient().ask(query, params, null));
     }
 
     @Override

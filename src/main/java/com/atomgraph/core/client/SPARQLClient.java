@@ -22,7 +22,6 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.uri.UriComponent;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
@@ -164,10 +163,10 @@ public class SPARQLClient
 
     public Model loadModel(Query query)
     {
-        return loadModel(query, null, null);
+        return loadModel(query, null, null).getEntity(Model.class);
     }
     
-    public Model loadModel(Query query, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
+    public ClientResponse loadModel(Query query, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
         ClientResponse cr = null;
         
@@ -184,7 +183,8 @@ public class SPARQLClient
                 throw new ClientException(cr);
             }
 
-            return cr.getEntity(Model.class);
+            cr.bufferEntity();
+            return cr;
         }
         finally
         {
@@ -194,10 +194,10 @@ public class SPARQLClient
 
     public Dataset loadDataset(Query query)
     {
-        return loadDataset(query, null, null);
+        return loadDataset(query, null, null).getEntity(Dataset.class);
     }
     
-    public Dataset loadDataset(Query query, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
+    public ClientResponse loadDataset(Query query, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
         ClientResponse cr = null;
         
@@ -214,7 +214,8 @@ public class SPARQLClient
                 throw new ClientException(cr);
             }
 
-            return cr.getEntity(Dataset.class);
+            cr.bufferEntity();
+            return cr;
         }
         finally
         {
@@ -224,10 +225,10 @@ public class SPARQLClient
     
     public ResultSetRewindable select(Query query)
     {
-        return select(query, null, null);
+        return select(query, null, null).getEntity(ResultSetRewindable.class);
     }
     
-    public ResultSetRewindable select(Query query, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
+    public ClientResponse select(Query query, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {        
         ClientResponse cr = null;
 
@@ -244,7 +245,8 @@ public class SPARQLClient
                 throw new ClientException(cr);
             }
 
-            return cr.getEntity(ResultSetRewindable.class);
+            cr.bufferEntity();
+            return cr;
         }
         finally
         {
@@ -254,10 +256,22 @@ public class SPARQLClient
 
     public boolean ask(Query query)
     {
-        return ask(query, null, null);
+        return parseBoolean(ask(query, null, null));
+    }
+
+    public static boolean parseBoolean(ClientResponse cr)
+    {
+        InputStream is = cr.getEntity(InputStream.class);
+        
+        if (cr.getType().isCompatible(MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
+            return JSONInput.booleanFromJSON(is);
+        if (cr.getType().isCompatible(MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE))
+            return XMLInput.booleanFromXML(is);
+
+        throw new IllegalStateException("Unsupported ResultSet format");
     }
     
-    public boolean ask(Query query, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
+    public ClientResponse ask(Query query, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
         ClientResponse cr = null;
         
@@ -274,20 +288,8 @@ public class SPARQLClient
                 throw new ClientException(cr);
             }
 
-            try (InputStream is = cr.getEntity(InputStream.class))
-            {
-                if (cr.getType().isCompatible(MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
-                    return JSONInput.booleanFromJSON(is);
-                if (cr.getType().isCompatible(MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE))
-                    return XMLInput.booleanFromXML(is);
-            }
-            catch (IOException ex)
-            {
-                if (log.isErrorEnabled()) log.error("Error closing ClientResponse entity stream");
-                throw new ClientException(cr);
-            }
-
-            throw new ClientException(cr); // TO-DO: refactor
+            cr.bufferEntity();
+            return cr;
         }
         finally
         {
@@ -322,7 +324,7 @@ public class SPARQLClient
         update(updateRequest, null, null);
     }
     
-    public void update(UpdateRequest updateRequest, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
+    public ClientResponse update(UpdateRequest updateRequest, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
         ClientResponse cr = null;
         
@@ -335,6 +337,9 @@ public class SPARQLClient
                 if (log.isErrorEnabled()) log.error("Query request to endpoint: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
                 throw new ClientException(cr);
             }
+            
+            cr.bufferEntity();
+            return cr;
         }
         finally
         {
