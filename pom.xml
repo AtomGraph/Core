@@ -43,6 +43,7 @@
         <url>https://github.com/AtomGraph/Core</url>
         <connection>scm:git:git@github.com:AtomGraph/Core.git</connection>
         <developerConnection>scm:git:git@github.com:AtomGraph/Core.git</developerConnection>
+        <tag>HEAD</tag>
     </scm>
 
     <repositories>
