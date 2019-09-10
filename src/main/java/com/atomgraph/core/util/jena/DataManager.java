@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 * @see org.apache.jena.util.FileManager
 * @see org.apache.jena.rdf.model.ModelGetter
 * @see com.atomgraph.core.client.LinkedDataClient
+* @see com.atomgraph.client.locator.PrefixMapper
 */
 
 public class DataManager extends FileManager implements ModelGetter
