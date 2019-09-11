@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
 public class QuadStoreBase extends com.atomgraph.core.model.impl.QuadStoreBase implements com.atomgraph.core.model.remote.QuadStore
 {

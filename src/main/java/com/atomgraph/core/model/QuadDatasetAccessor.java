@@ -21,7 +21,7 @@ import org.apache.jena.query.Dataset;
  * Quad-based accessor to an RDF dataset.
  * Quads can be retrieved, added, replaced, and removed.
  * 
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
 public interface QuadDatasetAccessor
 {

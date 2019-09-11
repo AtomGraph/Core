@@ -19,7 +19,7 @@ import com.atomgraph.core.client.QuadStoreClient;
 
 /**
  *
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
 public interface QuadStore extends com.atomgraph.core.model.QuadStore
 {

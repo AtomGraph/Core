@@ -28,7 +28,7 @@ import org.apache.jena.query.DatasetAccessor;
 /**
  * SPARQL 1.1 Graph Store HTTP Protocol interface extended to support quads
  * 
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
 public interface QuadStore extends DatasetAccessor, QuadDatasetAccessor
 {
