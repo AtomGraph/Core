@@ -25,7 +25,9 @@ import javax.ws.rs.core.Request;
 public interface Service
 {
     
-    SPARQLEndpoint getSPARQLEndpoint(Request request);
+    //SPARQLEndpoint getSPARQLEndpoint(Request request);
+    
+    EndpointAccessor getEndpointAccessor();
     
     GraphStore getGraphStore(Request request);
     

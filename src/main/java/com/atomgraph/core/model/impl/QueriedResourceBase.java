@@ -85,7 +85,8 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     public Object getSubResource()
     {
         if (getUriInfo().getAbsolutePath().equals(getUriInfo().getBaseUriBuilder().path("sparql").build()))
-            return getService().getSPARQLEndpoint(getRequest());
+            return new SPARQLEndpointBase(getRequest(), getService().getEndpointAccessor(), getMediaTypes());
+        
         if (getUriInfo().getAbsolutePath().equals(getUriInfo().getBaseUriBuilder().path("service").build()))
             return getService().getGraphStore(getRequest());
 
@@ -104,10 +105,7 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     @Override
     public Dataset describe()
     {
-        Object entity = getService().getSPARQLEndpoint(getRequest()).get(getQuery(), Collections.<URI>emptyList() , Collections.<URI>emptyList()).getEntity();
-        
-        if (entity instanceof Model) return DatasetFactory.create((Model)entity); // default graph
-        return (Dataset)entity;
+        return getService().getEndpointAccessor().loadDataset(getQuery(), Collections.<URI>emptyList() , Collections.<URI>emptyList());
     }
     
     /**

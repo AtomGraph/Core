@@ -35,7 +35,8 @@ import com.atomgraph.core.model.Service;
 import com.atomgraph.core.model.impl.ApplicationImpl;
 import com.atomgraph.core.model.impl.remote.GraphStoreBase;
 import com.atomgraph.core.model.impl.QueriedResourceBase;
-import com.atomgraph.core.model.impl.remote.SPARQLEndpointBase;
+import com.atomgraph.core.model.impl.SPARQLEndpointBase;
+import com.atomgraph.core.provider.EndpointAccessorProvider;
 import com.atomgraph.core.provider.MediaTypesProvider;
 import com.atomgraph.core.provider.ServiceProvider;
 import com.atomgraph.core.riot.RDFLanguages;
@@ -155,6 +156,7 @@ public class Application extends javax.ws.rs.core.Application implements com.ato
         singletons.add(new UpdateRequestReader());
         singletons.add(new DataManagerProvider(getDataManager()));
         singletons.add(new ServiceProvider(getService()));
+        singletons.add(new EndpointAccessorProvider(getService()));
         singletons.add(new MediaTypesProvider(getMediaTypes()));
         singletons.add(new ClientExceptionMapper());
         singletons.add(new NotFoundExceptionMapper());

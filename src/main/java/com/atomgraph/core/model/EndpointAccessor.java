@@ -1,0 +1,48 @@
+/*
+ * Copyright 2019 Martynas Jusevičius <martynas@atomgraph.com>.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.atomgraph.core.model;
+
+import java.net.URI;
+import java.util.List;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.ResultSetRewindable;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.update.UpdateRequest;
+
+/**
+ * Uniform interface for SPARQL endpoints and clients.
+ * 
+ * @author Martynas Jusevičius <martynas@atomgraph.com>
+ */
+public interface EndpointAccessor
+{
+    
+    Model describe(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris);
+    
+    Model construct(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris);
+    
+    Dataset loadDataset(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris);
+    
+    Model loadModel(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris);
+    
+    ResultSetRewindable select(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris);
+    
+    boolean ask(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris);
+    
+    void update(UpdateRequest updateRequest, List<URI> usingGraphUris, List<URI> usingNamedGraphUris);
+    
+}

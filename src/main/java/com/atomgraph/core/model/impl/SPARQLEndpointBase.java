@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import javax.ws.rs.core.*;
 import com.atomgraph.core.MediaTypes;
+import com.atomgraph.core.model.EndpointAccessor;
 import com.atomgraph.core.model.SPARQLEndpoint;
 import static com.atomgraph.core.model.SPARQLEndpoint.DEFAULT_GRAPH_URI;
 import static com.atomgraph.core.model.SPARQLEndpoint.NAMED_GRAPH_URI;
@@ -55,11 +56,12 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see com.atomgraph.core.model.SPARQLEndpoint
  */
-public abstract class SPARQLEndpointBase implements SPARQLEndpoint
+public class SPARQLEndpointBase implements SPARQLEndpoint
 {
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointBase.class);
     
     private final Request request;
+    private final EndpointAccessor accessor;
     private final MediaTypes mediaTypes;
     private final com.atomgraph.core.model.impl.Response response;
     
@@ -67,16 +69,19 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
      * Constructs SPARQL endpoint from request metadata.
      * 
      * @param request current request
+     * @param accessor endpoint accessor
      * @param mediaTypes supported media types
      */
-    public SPARQLEndpointBase(@Context Request request, @Context MediaTypes mediaTypes)
+    public SPARQLEndpointBase(@Context Request request, @Context EndpointAccessor accessor, @Context MediaTypes mediaTypes)
     {
-        //if (request == null) throw new IllegalArgumentException("Request cannot be null");
+        if (request == null) throw new IllegalArgumentException("Request cannot be null");
+        if (accessor == null) throw new IllegalArgumentException("EndpointAccessor cannot be null");
         if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
 
         this.request = request;
+        this.accessor = accessor;
         this.mediaTypes = mediaTypes;
-        this.response = request != null ? com.atomgraph.core.model.impl.Response.fromRequest(request) : null;
+        this.response = com.atomgraph.core.model.impl.Response.fromRequest(request);
         if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase");
     }
     
@@ -114,7 +119,7 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     @Consumes(com.atomgraph.core.MediaType.APPLICATION_SPARQL_UPDATE)
     public Response post(UpdateRequest update, @QueryParam(USING_GRAPH_URI) List<URI> usingGraphUris, @QueryParam(USING_NAMED_GRAPH_URI) List<URI> usingNamedGraphUris)
     {
-        update(update, usingGraphUris, usingNamedGraphUris);
+        getEndpointAccessor().update(update, usingGraphUris, usingNamedGraphUris);
 
         return Response.ok().build();
     }
@@ -142,7 +147,7 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
             */
 
             if (log.isDebugEnabled()) log.debug("Loading ResultSet using SELECT/ASK query: {}", query);
-            return getResponseBuilder(select(query, defaultGraphUris, namedGraphUris));
+            return getResponseBuilder(getEndpointAccessor().select(query, defaultGraphUris, namedGraphUris));
         }
 
         if (query.isConstructType() || query.isDescribeType())
@@ -151,12 +156,12 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
             if (variant == null)
             {
                 if (log.isDebugEnabled()) log.debug("Loading Model using CONSTRUCT/DESCRIBE query: {}", query);
-                return getResponseBuilder(loadModel(query, defaultGraphUris, namedGraphUris));
+                return getResponseBuilder(getEndpointAccessor().loadModel(query, defaultGraphUris, namedGraphUris));
             }
             else
             {
                 if (log.isDebugEnabled()) log.debug("Loading Dataset using CONSTRUCT/DESCRIBE query: {}", query);
-                return getResponseBuilder(loadDataset(query, defaultGraphUris, namedGraphUris));
+                return getResponseBuilder(getEndpointAccessor().loadDataset(query, defaultGraphUris, namedGraphUris));
             }
         }
         
@@ -201,96 +206,6 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     }
 
     /**
-     * Convenience method for <pre>DESCRIBE</pre> queries.
-     * 
-     * @param defaultGraphUris default graph URIs
-     * @param namedGraphUris named graph URIs
-     * @link #loadModel(query)
-     * @param query
-     * @return RDF model
-     */
-    public Model describe(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris)
-    {
-        if (query == null) throw new IllegalArgumentException("Query must be not null");
-        if (!query.isDescribeType()) throw new IllegalArgumentException("Query must be DESCRIBE");
-        
-        return loadModel(query, defaultGraphUris, namedGraphUris);
-    }
-
-    /**
-     * Convenience method for <pre>CONSTRUCT</pre> queries.
-     * 
-     * @param defaultGraphUris default graph URIs
-     * @param namedGraphUris named graph URIs
-     * @link #loadModel(query)
-     * @param query
-     * @return RDF model
-     */
-    public Model construct(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris)
-    {
-        if (query == null) throw new IllegalArgumentException("Query must be not null");
-        if (!query.isConstructType()) throw new IllegalArgumentException("Query must be CONSTRUCT");
-        
-        return loadModel(query, defaultGraphUris, namedGraphUris);
-    }
-
-    /**
-     * Loads RDF dataset from the endpoint by executing a SPARQL query (<code>DESCRIBE</code> or <code>CONSTRUCT</code>)
-     * 
-     * @param query SPARQL query
-     * @param defaultGraphUris default graph URIs
-     * @param namedGraphUris named graph URIs
-     * @return RDF model
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#describe">DESCRIBE</a>
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#construct">CONSTRUCT</a>
-     */
-    public abstract Dataset loadDataset(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris);
-
-    /**
-     * Loads RDF graph from the endpoint by executing a SPARQL query (<code>DESCRIBE</code> or <code>CONSTRUCT</code>)
-     * 
-     * @param query SPARQL query
-     * @param defaultGraphUris default graph URIs
-     * @param namedGraphUris named graph URIs
-     * @return RDF model
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#describe">DESCRIBE</a>
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#construct">CONSTRUCT</a>
-     */
-    public abstract Model loadModel(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris);
-    
-    /**
-     * Loads RDF model from the endpoint by executing a SPARQL query (<pre>SELECT</pre>)
-     * 
-     * @param query SPARQL query
-     * @param defaultGraphUris default graph URIs
-     * @param namedGraphUris named graph URIs
-     * @return SPARQL result set
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#select">SELECT</a>
-     */
-    public abstract ResultSetRewindable select(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris);
-
-    /**
-     * Asks boolean result from the endpoint by executing a SPARQL query (<pre>ASK</pre>)
-     * 
-     * @param query SPARQL query
-     * @param defaultGraphUris default graph URIs
-     * @param namedGraphUris named graph URIs
-     * @return boolean result
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-query-20130321/#ask">ASK</a>
-     */
-    public abstract boolean ask(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris);
-
-    /**
-     * Execute SPARQL update request
-     * 
-     * @param updateRequest update request
-     * @param usingGraphUris using graph URIs
-     * @param usingNamedGraphUris using named graph URIs
-     * @see <a href="http://www.w3.org/TR/2013/REC-sparql11-update-20130321/">SPARQL 1.1 Update</a>
-     */
-    public abstract void update(UpdateRequest updateRequest, List<URI> usingGraphUris, List<URI> usingNamedGraphUris);
-
-    /**
      * Builds a list of acceptable response variants
      * 
      * @param mediaTypes
@@ -325,6 +240,11 @@ public abstract class SPARQLEndpointBase implements SPARQLEndpoint
     public Request getRequest()
     {
         return request;
+    }
+    
+    public EndpointAccessor getEndpointAccessor()
+    {
+        return accessor;
     }
     
     public MediaTypes getMediaTypes()

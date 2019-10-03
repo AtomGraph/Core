@@ -16,8 +16,8 @@
 package com.atomgraph.core.model.impl.dataset;
 
 import com.atomgraph.core.MediaTypes;
+import com.atomgraph.core.model.EndpointAccessor;
 import com.atomgraph.core.model.GraphStore;
-import com.atomgraph.core.model.SPARQLEndpoint;
 import com.atomgraph.core.model.Service;
 import javax.ws.rs.core.Request;
 import org.apache.jena.query.Dataset;
@@ -45,10 +45,17 @@ public class ServiceImpl implements Service
     }
 
     @Override
-    public SPARQLEndpoint getSPARQLEndpoint(Request request)
+    public EndpointAccessor getEndpointAccessor()
     {
-        return new SPARQLEndpointBase(request, getMediaTypes(), getDataset());
+        return new EndpointAccessorBase(getDataset());
+        //return new SPARQLEndpointBase(request, getMediaTypes(), getDataset());
     }
+
+//    @Override
+//    public SPARQLEndpoint getSPARQLEndpoint(Request request)
+//    {
+//        return new SPARQLEndpointBase(request, getMediaTypes(), getDataset());
+//    }
 
     @Override
     public GraphStore getGraphStore(Request request)
@@ -65,5 +72,5 @@ public class ServiceImpl implements Service
     {
         return mediaTypes;
     }
-    
+
 }

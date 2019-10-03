@@ -18,11 +18,11 @@ package com.atomgraph.core.model.impl.remote;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.GraphStoreClient;
 import com.atomgraph.core.client.SPARQLClient;
+import com.atomgraph.core.model.EndpointAccessor;
 import com.atomgraph.core.model.GraphStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.atomgraph.core.model.RemoteService;
-import com.atomgraph.core.model.SPARQLEndpoint;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.ClientFilter;
@@ -132,10 +132,17 @@ public class ServiceImpl implements RemoteService
     }
     
     @Override
-    public SPARQLEndpoint getSPARQLEndpoint(Request request)
+    public EndpointAccessor getEndpointAccessor()
     {
-        return new SPARQLEndpointBase(getSPARQLClient(), getMediaTypes(), request);
+        return new EndpointAccessorBase(getSPARQLClient());
+        //return new SPARQLEndpointBase(request, getMediaTypes(), getDataset());
     }
+    
+//    @Override
+//    public SPARQLEndpoint getSPARQLEndpoint(Request request)
+//    {
+//        return new SPARQLEndpointBase(getSPARQLClient(), getMediaTypes(), request);
+//    }
 
     @Override
     public GraphStoreClient getGraphStoreClient()
@@ -161,5 +168,5 @@ public class ServiceImpl implements RemoteService
     {
         return new GraphStoreBase(getGraphStoreClient(), getMediaTypes(), request);
     }
-    
+
 }
