@@ -22,11 +22,13 @@ import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.ext.ContextResolver;
+import javax.ws.rs.ext.Provider;
 
 /**
  *
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
+@Provider
 public class DatasetQuadAccessorProvider extends PerRequestTypeInjectableProvider<Context, DatasetQuadAccessor> implements ContextResolver<DatasetQuadAccessor>
 {
 

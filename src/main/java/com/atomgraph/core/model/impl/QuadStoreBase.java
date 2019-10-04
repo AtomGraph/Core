@@ -37,7 +37,7 @@ import com.atomgraph.core.model.DatasetQuadAccessor;
  *
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
-public abstract class QuadStoreBase implements QuadStore
+public class QuadStoreBase implements QuadStore
 {
     private static final Logger log = LoggerFactory.getLogger(QuadStoreBase.class);
 
@@ -55,7 +55,8 @@ public abstract class QuadStoreBase implements QuadStore
      */
     public QuadStoreBase(@Context Request request, @Context DatasetQuadAccessor accessor, @Context MediaTypes mediaTypes)
     {
-         if (request == null) throw new IllegalArgumentException("Request cannot be null");
+        if (request == null) throw new IllegalArgumentException("Request cannot be null");
+        if (accessor == null) throw new IllegalArgumentException("DatasetQuadAccessor cannot be null");
         if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
         
         this.request = request;

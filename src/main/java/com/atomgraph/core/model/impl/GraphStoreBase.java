@@ -58,7 +58,7 @@ public class GraphStoreBase implements GraphStore
     public GraphStoreBase(@Context Request request, @Context DatasetAccessor accessor, @Context MediaTypes mediaTypes)
     {
         if (request == null) throw new IllegalArgumentException("Request cannot be null");
-        if (accessor == null) throw new IllegalArgumentException("EndpointAccessor cannot be null");
+        if (accessor == null) throw new IllegalArgumentException("DatasetAccessor cannot be null");
         if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
         
         this.request = request;

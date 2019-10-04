@@ -21,12 +21,14 @@ import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.ext.ContextResolver;
+import javax.ws.rs.ext.Provider;
 import org.apache.jena.query.DatasetAccessor;
 
 /**
  *
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
+@Provider
 public class DatasetAccessorProvider extends PerRequestTypeInjectableProvider<Context, DatasetAccessor> implements ContextResolver<DatasetAccessor>
 {
 
