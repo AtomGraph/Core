@@ -83,10 +83,10 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     public Object getSubResource()
     {
         if (getUriInfo().getAbsolutePath().equals(getUriInfo().getBaseUriBuilder().path("sparql").build()))
-            return new SPARQLEndpointBase(getRequest(), getService().getEndpointAccessor(), getMediaTypes());
+            return new SPARQLEndpointBase(getRequest(), getService(), getMediaTypes());
         
         if (getUriInfo().getAbsolutePath().equals(getUriInfo().getBaseUriBuilder().path("service").build()))
-            return new GraphStoreBase(getRequest(), getService().getDatasetAccessor(), getMediaTypes());
+            return new GraphStoreBase(getRequest(), getService(), getMediaTypes());
 
         return this;
     }

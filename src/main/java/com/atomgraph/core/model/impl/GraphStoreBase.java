@@ -28,6 +28,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.model.GraphStore;
+import com.atomgraph.core.model.Service;
 import org.apache.jena.query.DatasetAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,17 +53,17 @@ public class GraphStoreBase implements GraphStore
      * Constructs Graph Store from request metadata.
      * 
      * @param request request
-     * @param accessor dataset accessor
+     * @param service SPARQL service
      * @param mediaTypes supported media types
      */
-    public GraphStoreBase(@Context Request request, @Context DatasetAccessor accessor, @Context MediaTypes mediaTypes)
+    public GraphStoreBase(@Context Request request, @Context Service service, @Context MediaTypes mediaTypes)
     {
         if (request == null) throw new IllegalArgumentException("Request cannot be null");
-        if (accessor == null) throw new IllegalArgumentException("DatasetAccessor cannot be null");
+        if (service == null) throw new IllegalArgumentException("Service cannot be null");
         if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
         
         this.request = request;
-        this.accessor = accessor;
+        this.accessor = service.getDatasetAccessor();
         this.mediaTypes = mediaTypes;
         this.response = com.atomgraph.core.model.impl.Response.fromRequest(request);
     }

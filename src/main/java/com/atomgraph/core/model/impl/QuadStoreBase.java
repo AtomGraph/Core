@@ -32,6 +32,7 @@ import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.atomgraph.core.model.DatasetQuadAccessor;
+import com.atomgraph.core.model.Service;
 
 /**
  *
@@ -50,17 +51,17 @@ public class QuadStoreBase implements QuadStore
      * Constructs Graph Store from request metadata.
      * 
      * @param request request
-     * @param accessor dataset quad accessor
+     * @param service SPARQL service
      * @param mediaTypes supported media types
      */
-    public QuadStoreBase(@Context Request request, @Context DatasetQuadAccessor accessor, @Context MediaTypes mediaTypes)
+    public QuadStoreBase(@Context Request request, @Context Service service, @Context MediaTypes mediaTypes)
     {
         if (request == null) throw new IllegalArgumentException("Request cannot be null");
-        if (accessor == null) throw new IllegalArgumentException("DatasetQuadAccessor cannot be null");
+        if (service == null) throw new IllegalArgumentException("Service cannot be null");
         if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
         
         this.request = request;
-        this.accessor = accessor;
+        this.accessor = service.getDatasetQuadAccessor();
         this.mediaTypes = mediaTypes;
         this.response = com.atomgraph.core.model.impl.Response.fromRequest(request);
     }

@@ -34,6 +34,7 @@ import static com.atomgraph.core.model.SPARQLEndpoint.QUERY;
 import static com.atomgraph.core.model.SPARQLEndpoint.UPDATE;
 import static com.atomgraph.core.model.SPARQLEndpoint.USING_GRAPH_URI;
 import static com.atomgraph.core.model.SPARQLEndpoint.USING_NAMED_GRAPH_URI;
+import com.atomgraph.core.model.Service;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -69,17 +70,17 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
      * Constructs SPARQL endpoint from request metadata.
      * 
      * @param request current request
-     * @param accessor endpoint accessor
+     * @param service SPARQL service
      * @param mediaTypes supported media types
      */
-    public SPARQLEndpointBase(@Context Request request, @Context EndpointAccessor accessor, @Context MediaTypes mediaTypes)
+    public SPARQLEndpointBase(@Context Request request, @Context Service service, @Context MediaTypes mediaTypes)
     {
         if (request == null) throw new IllegalArgumentException("Request cannot be null");
-        if (accessor == null) throw new IllegalArgumentException("EndpointAccessor cannot be null");
+        if (service == null) throw new IllegalArgumentException("Service cannot be null");
         if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
 
         this.request = request;
-        this.accessor = accessor;
+        this.accessor = service.getEndpointAccessor();
         this.mediaTypes = mediaTypes;
         this.response = com.atomgraph.core.model.impl.Response.fromRequest(request);
         if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase");
