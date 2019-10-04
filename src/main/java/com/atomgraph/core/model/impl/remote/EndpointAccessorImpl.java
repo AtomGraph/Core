@@ -16,6 +16,7 @@
 package com.atomgraph.core.model.impl.remote;
 
 import com.atomgraph.core.client.SPARQLClient;
+import com.atomgraph.core.model.EndpointAccessor;
 import static com.atomgraph.core.model.SPARQLEndpoint.DEFAULT_GRAPH_URI;
 import static com.atomgraph.core.model.SPARQLEndpoint.NAMED_GRAPH_URI;
 import static com.atomgraph.core.model.SPARQLEndpoint.USING_GRAPH_URI;
@@ -35,14 +36,13 @@ import org.apache.jena.update.UpdateRequest;
  *
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
-public class EndpointAccessorBase extends com.atomgraph.core.model.impl.EndpointAccessorBase
+public class EndpointAccessorImpl implements EndpointAccessor
 {
     
     private final SPARQLClient sparqlClient;
     
-    public EndpointAccessorBase(SPARQLClient sparqlClient)
+    public EndpointAccessorImpl(SPARQLClient sparqlClient)
     {
-        super();
         if (sparqlClient == null) throw new IllegalArgumentException("SPARQLClient cannot be null");
         this.sparqlClient = sparqlClient;
     }

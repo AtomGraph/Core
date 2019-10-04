@@ -50,6 +50,8 @@ public final class A
     
     public static final ObjectProperty graphStore = m_model.createObjectProperty( NS + "graphStore" );
     
+    public static final ObjectProperty quadStore = m_model.createObjectProperty( NS + "quadStore" );
+    
     public static final DatatypeProperty cacheControl = m_model.createDatatypeProperty( NS + "cacheControl" );
 
     public static final DatatypeProperty resultLimit = m_model.createDatatypeProperty( NS + "resultLimit" );

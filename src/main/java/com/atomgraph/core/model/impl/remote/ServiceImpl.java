@@ -17,9 +17,10 @@ package com.atomgraph.core.model.impl.remote;
 
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.GraphStoreClient;
+import com.atomgraph.core.client.QuadStoreClient;
 import com.atomgraph.core.client.SPARQLClient;
+import com.atomgraph.core.model.DatasetQuadAccessor;
 import com.atomgraph.core.model.EndpointAccessor;
-import com.atomgraph.core.model.GraphStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.atomgraph.core.model.RemoteService;
@@ -27,7 +28,7 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.ClientFilter;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
-import javax.ws.rs.core.Request;
+import org.apache.jena.query.DatasetAccessor;
 
 /**
  *
@@ -38,14 +39,14 @@ public class ServiceImpl implements RemoteService
 
     private static final Logger log = LoggerFactory.getLogger(ServiceImpl.class);
     
-    private final org.apache.jena.rdf.model.Resource endpoint, graphStore;
+    private final org.apache.jena.rdf.model.Resource endpoint, graphStore, quadStore;
     private final Client client;
     private final MediaTypes mediaTypes;
     private final String authUser, authPwd;
     private final Integer maxGetRequestSize;
 
-    public ServiceImpl(Client client, MediaTypes mediaTypes, org.apache.jena.rdf.model.Resource endpoint, org.apache.jena.rdf.model.Resource graphStore, String authUser, String authPwd,
-            Integer maxGetRequestSize)
+    public ServiceImpl(Client client, MediaTypes mediaTypes, org.apache.jena.rdf.model.Resource endpoint, org.apache.jena.rdf.model.Resource graphStore, org.apache.jena.rdf.model.Resource quadStore,
+            String authUser, String authPwd, Integer maxGetRequestSize)
     {
         if (client == null) throw new IllegalArgumentException("Client must be not null");
         if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes must be not null");
@@ -58,55 +59,17 @@ public class ServiceImpl implements RemoteService
         this.mediaTypes = mediaTypes;
         this.endpoint = endpoint;
         this.graphStore = graphStore;
+        this.quadStore = quadStore;
         this.authUser = authUser;
         this.authPwd = authPwd;
         this.maxGetRequestSize = maxGetRequestSize;
     }
 
-    public ServiceImpl(Client client, MediaTypes mediaTypes, org.apache.jena.rdf.model.Resource endpoint, org.apache.jena.rdf.model.Resource graphStore)
+    public ServiceImpl(Client client, MediaTypes mediaTypes, org.apache.jena.rdf.model.Resource endpoint, org.apache.jena.rdf.model.Resource graphStore, org.apache.jena.rdf.model.Resource quadStore)
     {
-        this(client, mediaTypes, endpoint, graphStore, null, null, null);
+        this(client, mediaTypes, endpoint, graphStore, quadStore, null, null, null);
     }
         
-    @Override
-    public org.apache.jena.rdf.model.Resource getSPARQLEndpoint()
-    {
-        return endpoint;
-    }
-    
-    @Override
-    public org.apache.jena.rdf.model.Resource getGraphStore()
-    {
-        return graphStore;
-    }
-
-    public Client getClient()
-    {
-        return client;
-    }
-    
-    public MediaTypes getMediaTypes()
-    {
-        return mediaTypes;
-    }
-    
-    @Override
-    public String getAuthUser() // protected?
-    {
-        return authUser;
-    }
-    
-    @Override
-    public String getAuthPwd()  // protected?
-    {
-        return authPwd;
-    }
-    
-    public Integer getMaxGetRequestSize()
-    {
-        return maxGetRequestSize;
-    }
-    
     @Override
     public SPARQLClient getSPARQLClient()
     {
@@ -134,15 +97,8 @@ public class ServiceImpl implements RemoteService
     @Override
     public EndpointAccessor getEndpointAccessor()
     {
-        return new EndpointAccessorBase(getSPARQLClient());
-        //return new SPARQLEndpointBase(request, getMediaTypes(), getDataset());
+        return new EndpointAccessorImpl(getSPARQLClient());
     }
-    
-//    @Override
-//    public SPARQLEndpoint getSPARQLEndpoint(Request request)
-//    {
-//        return new SPARQLEndpointBase(getSPARQLClient(), getMediaTypes(), request);
-//    }
 
     @Override
     public GraphStoreClient getGraphStoreClient()
@@ -162,11 +118,81 @@ public class ServiceImpl implements RemoteService
         
         return graphStoreClient;
     }
+
+    @Override
+    public QuadStoreClient getQuadStoreClient()
+    {
+        return getQuadStoreClient(getClient().resource(getQuadStore().getURI()));
+    }
+    
+    public QuadStoreClient getQuadStoreClient(WebResource resource)
+    {
+        QuadStoreClient quadStoreClient = QuadStoreClient.create(resource);
+        
+        if (getAuthUser() != null && getAuthPwd() != null)
+        {
+            ClientFilter authFilter = new HTTPBasicAuthFilter(getAuthUser(), getAuthPwd());
+            quadStoreClient.getWebResource().addFilter(authFilter);
+        }
+        
+        return quadStoreClient;
+    }
     
     @Override
-    public GraphStore getGraphStore(Request request)
+    public DatasetAccessor getDatasetAccessor()
     {
-        return new GraphStoreBase(getGraphStoreClient(), getMediaTypes(), request);
+        return new DatasetAccessorImpl(getGraphStoreClient());
+    }
+
+    @Override
+    public DatasetQuadAccessor getDatasetQuadAccessor()
+    {
+        return new DatasetQuadAccessorImpl(getQuadStoreClient());
+    }
+
+    @Override
+    public org.apache.jena.rdf.model.Resource getSPARQLEndpoint()
+    {
+        return endpoint;
+    }
+    
+    @Override
+    public org.apache.jena.rdf.model.Resource getGraphStore()
+    {
+        return graphStore;
+    }
+
+    @Override
+    public org.apache.jena.rdf.model.Resource getQuadStore()
+    {
+        return quadStore;
+    }
+    
+    public Client getClient()
+    {
+        return client;
+    }
+    
+    public MediaTypes getMediaTypes()
+    {
+        return mediaTypes;
+    }
+    
+    @Override
+    public String getAuthUser() // protected?
+    {
+        return authUser;
+    }
+    
+    @Override
+    public String getAuthPwd()  // protected?
+    {
+        return authPwd;
+    }
+    
+    public Integer getMaxGetRequestSize()
+    {
+        return maxGetRequestSize;
     }
 
 }

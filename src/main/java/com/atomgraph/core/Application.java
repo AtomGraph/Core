@@ -33,9 +33,11 @@ import com.atomgraph.core.mapper.ClientExceptionMapper;
 import com.atomgraph.core.mapper.NotFoundExceptionMapper;
 import com.atomgraph.core.model.Service;
 import com.atomgraph.core.model.impl.ApplicationImpl;
-import com.atomgraph.core.model.impl.remote.GraphStoreBase;
+import com.atomgraph.core.model.impl.GraphStoreBase;
 import com.atomgraph.core.model.impl.QueriedResourceBase;
 import com.atomgraph.core.model.impl.SPARQLEndpointBase;
+import com.atomgraph.core.provider.DatasetAccessorProvider;
+import com.atomgraph.core.provider.DatasetQuadAccessorProvider;
 import com.atomgraph.core.provider.EndpointAccessorProvider;
 import com.atomgraph.core.provider.MediaTypesProvider;
 import com.atomgraph.core.provider.ServiceProvider;
@@ -96,6 +98,7 @@ public class Application extends javax.ws.rs.core.Application implements com.ato
             servletConfig.getInitParameter(A.dataset.getURI()) != null ? getDataset(servletConfig.getInitParameter(A.dataset.getURI()), null) : null,
             servletConfig.getInitParameter(SD.endpoint.getURI()) != null ? servletConfig.getInitParameter(SD.endpoint.getURI()) : null,
             servletConfig.getInitParameter(A.graphStore.getURI()) != null ? servletConfig.getInitParameter(A.graphStore.getURI()) : null,
+            servletConfig.getInitParameter(A.quadStore.getURI()) != null ? servletConfig.getInitParameter(A.quadStore.getURI()) : null,
             servletConfig.getInitParameter(org.apache.jena.sparql.engine.http.Service.queryAuthUser.getSymbol()) != null ? servletConfig.getInitParameter(org.apache.jena.sparql.engine.http.Service.queryAuthUser.getSymbol()) : null,
             servletConfig.getInitParameter(org.apache.jena.sparql.engine.http.Service.queryAuthPwd.getSymbol()) != null ? servletConfig.getInitParameter(org.apache.jena.sparql.engine.http.Service.queryAuthPwd.getSymbol()) : null,
             new MediaTypes(), getClient(new DefaultClientConfig()),
@@ -105,7 +108,8 @@ public class Application extends javax.ws.rs.core.Application implements com.ato
     }
     
     public Application(final Dataset dataset,
-            final String endpointURI, final String graphStoreURI, final String authUser, final String authPwd,
+            final String endpointURI, final String graphStoreURI, final String quadStoreURI,
+            final String authUser, final String authPwd,
             final MediaTypes mediaTypes, final Client client, final Integer maxGetRequestSize, final boolean preemptiveAuth)
     {
         this.dataset = dataset;
@@ -134,7 +138,7 @@ public class Application extends javax.ws.rs.core.Application implements com.ato
             }
 
             service = new com.atomgraph.core.model.impl.remote.ServiceImpl(client, mediaTypes,
-                    ResourceFactory.createResource(endpointURI), ResourceFactory.createResource(graphStoreURI),
+                    ResourceFactory.createResource(endpointURI), ResourceFactory.createResource(graphStoreURI), ResourceFactory.createResource(quadStoreURI),
                     authUser, authPwd, maxGetRequestSize);
         }
         
@@ -157,6 +161,8 @@ public class Application extends javax.ws.rs.core.Application implements com.ato
         singletons.add(new DataManagerProvider(getDataManager()));
         singletons.add(new ServiceProvider(getService()));
         singletons.add(new EndpointAccessorProvider(getService()));
+        singletons.add(new DatasetAccessorProvider(getService()));
+        singletons.add(new DatasetQuadAccessorProvider(getService()));
         singletons.add(new MediaTypesProvider(getMediaTypes()));
         singletons.add(new ClientExceptionMapper());
         singletons.add(new NotFoundExceptionMapper());

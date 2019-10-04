@@ -15,12 +15,9 @@
  */
 package com.atomgraph.core.model.impl.remote;
 
-import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.QuadStoreClient;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Request;
+import com.atomgraph.core.model.DatasetQuadAccessor;
 import org.apache.jena.query.Dataset;
-import org.apache.jena.rdf.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,9 +25,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
-public class QuadStoreBase extends com.atomgraph.core.model.impl.QuadStoreBase implements com.atomgraph.core.model.remote.QuadStore
+public class DatasetQuadAccessorImpl implements DatasetQuadAccessor
 {
-    private static final Logger log = LoggerFactory.getLogger(QuadStoreBase.class);
+    private static final Logger log = LoggerFactory.getLogger(DatasetQuadAccessorImpl.class);
 
     private final QuadStoreClient quadStoreClient;
 
@@ -38,14 +35,10 @@ public class QuadStoreBase extends com.atomgraph.core.model.impl.QuadStoreBase i
      * Constructs Quad Store proxy from request metadata and origin URI.
      * 
      * @param quadStoreClient SPARQL 1.1 Graph Store Protocol client extended with quad support
-     * @param mediaTypes supported media types
-     * @param request HTTP request
      */
-    public QuadStoreBase(@Context QuadStoreClient quadStoreClient, @Context MediaTypes mediaTypes, @Context Request request)
+    public DatasetQuadAccessorImpl(QuadStoreClient quadStoreClient)
     {
-        super(request, mediaTypes);
         if (quadStoreClient == null) throw new IllegalArgumentException("QuadStoreClient cannot be null");
-        
         this.quadStoreClient = quadStoreClient;
     }
 
@@ -72,71 +65,16 @@ public class QuadStoreBase extends com.atomgraph.core.model.impl.QuadStoreBase i
     {
         getQuadStoreClient().delete();
     }
-    
-    @Override
-    public Model getModel()
-    {
-        return getQuadStoreClient().getModel();
-    }
 
     @Override
-    public Model getModel(String uri)
+    public void patch(Dataset dataset)
     {
-        return getQuadStoreClient().getModel(uri);
-    }
-
-    @Override
-    public boolean containsModel(String uri)
-    {
-        return getQuadStoreClient().containsModel(uri);
+        getQuadStoreClient().patch(dataset);
     }
     
-    @Override
-    public void putModel(Model model)
-    {
-        getQuadStoreClient().putModel(model);
-    }
-
-    @Override
-    public void putModel(String uri, Model model)
-    {
-        getQuadStoreClient().putModel(uri, model);
-    }
-
-    @Override
-    public void deleteDefault()
-    {
-        getQuadStoreClient().deleteDefault();
-    }
-
-    @Override
-    public void deleteModel(String uri)
-    {
-        getQuadStoreClient().deleteModel(uri);
-    }
-
-    @Override
-    public void add(Model model)
-    {
-        getQuadStoreClient().add(model);
-    }
-
-    @Override
-    public void add(String uri, Model model)
-    {
-        getQuadStoreClient().add(uri, model);
-    }
-
-    @Override
-    public String getURI()  // needs to align with Jena's Resource.getURI() which returns String
-    {
-        return getQuadStoreClient().getWebResource().getURI().toString();
-    }
-    
-    @Override
     public QuadStoreClient getQuadStoreClient()
     {
         return quadStoreClient;
     }
-    
+
 }

@@ -18,10 +18,8 @@
 package com.atomgraph.core.model.impl.remote;
 
 import org.apache.jena.rdf.model.Model;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Request;
-import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.GraphStoreClient;
+import org.apache.jena.query.DatasetAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,9 +29,9 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
-public class GraphStoreBase extends com.atomgraph.core.model.impl.GraphStoreBase implements com.atomgraph.core.model.remote.GraphStore
+public class DatasetAccessorImpl implements DatasetAccessor
 {
-    private static final Logger log = LoggerFactory.getLogger(GraphStoreBase.class);
+    private static final Logger log = LoggerFactory.getLogger(DatasetAccessorImpl.class);
 
     private final GraphStoreClient graphStoreClient;
     
@@ -41,14 +39,10 @@ public class GraphStoreBase extends com.atomgraph.core.model.impl.GraphStoreBase
      * Constructs Graph Store proxy from request metadata and origin URI.
      * 
      * @param graphStoreClient SPARQL 1.1 Graph Store Protocol client
-     * @param mediaTypes supported media types
-     * @param request HTTP request
      */
-    public GraphStoreBase(@Context GraphStoreClient graphStoreClient, @Context MediaTypes mediaTypes, @Context Request request)
+    public DatasetAccessorImpl(GraphStoreClient graphStoreClient)
     {
-        super(request, mediaTypes);
         if (graphStoreClient == null) throw new IllegalArgumentException("GraphStoreClient cannot be null");
-        
         this.graphStoreClient = graphStoreClient;
     }
     
@@ -106,13 +100,11 @@ public class GraphStoreBase extends com.atomgraph.core.model.impl.GraphStoreBase
         getGraphStoreClient().add(uri, model);
     }
 
-    @Override
     public String getURI()  // needs to align with Jena's Resource.getURI() which returns String
     {
         return getGraphStoreClient().getWebResource().getURI().toString();
     }
     
-    @Override
     public GraphStoreClient getGraphStoreClient()
     {
         return graphStoreClient;

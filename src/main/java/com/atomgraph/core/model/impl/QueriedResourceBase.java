@@ -32,8 +32,6 @@ import com.atomgraph.core.model.QueriedResource;
 import com.atomgraph.core.model.Service;
 import java.util.Collections;
 import org.apache.jena.query.Dataset;
-import org.apache.jena.query.DatasetFactory;
-import org.apache.jena.rdf.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,7 +86,7 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
             return new SPARQLEndpointBase(getRequest(), getService().getEndpointAccessor(), getMediaTypes());
         
         if (getUriInfo().getAbsolutePath().equals(getUriInfo().getBaseUriBuilder().path("service").build()))
-            return getService().getGraphStore(getRequest());
+            return new GraphStoreBase(getRequest(), getService().getDatasetAccessor(), getMediaTypes());
 
         return this;
     }

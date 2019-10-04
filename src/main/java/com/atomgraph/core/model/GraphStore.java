@@ -16,7 +16,6 @@
  */
 package com.atomgraph.core.model;
 
-import org.apache.jena.query.DatasetAccessor;
 import org.apache.jena.rdf.model.Model;
 import java.net.URI;
 import javax.ws.rs.*;
@@ -28,7 +27,7 @@ import javax.ws.rs.core.Response;
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see <a href="http://www.w3.org/TR/sparql11-http-rdf-update/">SPARQL 1.1 Graph Store HTTP Protocol</a>
  */
-public interface GraphStore extends DatasetAccessor
+public interface GraphStore
 {
     /**
      * Handles GET query request and returns result as response

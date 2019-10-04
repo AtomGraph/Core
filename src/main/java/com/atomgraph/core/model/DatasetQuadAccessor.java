@@ -19,11 +19,11 @@ import org.apache.jena.query.Dataset;
 
 /**
  * Quad-based accessor to an RDF dataset.
- * Quads can be retrieved, added, replaced, and removed.
+ * Quads can be retrieved, added, replaced, patched, and removed.
  * 
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
-public interface QuadDatasetAccessor
+public interface DatasetQuadAccessor
 {
     
     Dataset get();
@@ -31,6 +31,8 @@ public interface QuadDatasetAccessor
     void add(Dataset dataset);
     
     void replace(Dataset dataset);
+    
+    void patch(Dataset dataset);
     
     void delete();
     

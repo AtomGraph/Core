@@ -15,12 +15,10 @@
  */
 package com.atomgraph.core.model.impl.dataset;
 
-import com.atomgraph.core.MediaTypes;
+import com.atomgraph.core.model.DatasetQuadAccessor;
 import java.util.Iterator;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Request;
 import org.apache.jena.query.Dataset;
-import org.apache.jena.rdf.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,15 +26,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
-public class QuadStoreBase extends com.atomgraph.core.model.impl.QuadStoreBase
+public class DatasetQuadAccessorImpl implements DatasetQuadAccessor
 {
-    private static final Logger log = LoggerFactory.getLogger(QuadStoreBase.class);
+    private static final Logger log = LoggerFactory.getLogger(DatasetQuadAccessorImpl.class);
 
     private final Dataset dataset;
     
-    public QuadStoreBase(@Context Request request, @Context MediaTypes mediaTypes, @Context Dataset dataset)
+    public DatasetQuadAccessorImpl(@Context Dataset dataset)
     {
-        super(request, mediaTypes);
         if (dataset == null) throw new IllegalArgumentException("Dataset cannot be null");
         this.dataset = dataset;
     }
@@ -77,64 +74,24 @@ public class QuadStoreBase extends com.atomgraph.core.model.impl.QuadStoreBase
         while (it.hasNext())
             getDataset().removeNamedModel(it.next());
     }
-    
-    @Override
-    public Model getModel()
-    {
-        return getDataset().getDefaultModel();
-    }
-    
-    @Override
-    public Model getModel(String uri)
-    {
-        return getDataset().getNamedModel(uri);
-    }
 
     @Override
-    public boolean containsModel(String uri)
+    public void patch(Dataset dataset)
     {
-        return getDataset().containsNamedModel(uri);
+        getDataset().getDefaultModel().removeAll();
+        getDataset().getDefaultModel().add(dataset.getDefaultModel());
+        
+        Iterator<String> it = dataset.listNames();
+        while (it.hasNext())
+        {
+            String graphURI = it.next();
+            getDataset().replaceNamedModel(graphURI, dataset.getNamedModel(graphURI));
+        }
     }
 
-    @Override
-    public void putModel(Model model)
-    {
-        getDataset().setDefaultModel(model);
-    }
-
-    @Override
-    public void putModel(String uri, Model model)
-    {
-        getDataset().replaceNamedModel(uri, model);
-    }
-
-    @Override
-    public void deleteDefault()
-    {
-        getDataset().setDefaultModel(null);
-    }
-
-    @Override
-    public void deleteModel(String uri)
-    {
-        getDataset().removeNamedModel(uri);
-    }
-
-    @Override
-    public void add(Model model)
-    {
-        getDataset().getDefaultModel().add(model);
-    }
-
-    @Override
-    public void add(String uri, Model model)
-    {
-        getDataset().addNamedModel(uri, model);
-    }
-    
     public Dataset getDataset()
     {
         return dataset;
     }
-    
+
 }

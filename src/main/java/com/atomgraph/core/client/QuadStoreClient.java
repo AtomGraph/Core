@@ -17,7 +17,6 @@ package com.atomgraph.core.client;
 
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.exception.ClientException;
-import com.atomgraph.core.model.QuadDatasetAccessor;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import javax.ws.rs.core.MultivaluedMap;
@@ -25,12 +24,13 @@ import javax.ws.rs.core.Response;
 import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.atomgraph.core.model.DatasetQuadAccessor;
 
 /**
  *
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
-public class QuadStoreClient extends GraphStoreClient implements QuadDatasetAccessor
+public class QuadStoreClient extends GraphStoreClient implements DatasetQuadAccessor
 {
     private static final Logger log = LoggerFactory.getLogger(QuadStoreClient.class);
 
@@ -57,10 +57,10 @@ public class QuadStoreClient extends GraphStoreClient implements QuadDatasetAcce
     @Override
     public Dataset get()
     {
-        return get(null, null);
+        return get(null, null).getEntity(Dataset.class);
     }
 
-    public Dataset get(MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
+    public ClientResponse get(MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
         ClientResponse cr = null;
         
@@ -75,7 +75,8 @@ public class QuadStoreClient extends GraphStoreClient implements QuadDatasetAcce
                 throw new ClientException(cr);
             }
 
-            return cr.getEntity(Dataset.class);
+            cr.bufferEntity();
+            return cr;
         }
         finally
         {
@@ -89,7 +90,7 @@ public class QuadStoreClient extends GraphStoreClient implements QuadDatasetAcce
         addDataset(dataset, null, null);
     }
 
-    public void addDataset(Dataset dataset, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
+    public ClientResponse addDataset(Dataset dataset, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
         ClientResponse cr = null;
         
@@ -103,6 +104,9 @@ public class QuadStoreClient extends GraphStoreClient implements QuadDatasetAcce
                 if (log.isErrorEnabled()) log.error("Request to quad store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
                 throw new ClientException(cr);
             }
+            
+            cr.bufferEntity();
+            return cr;
         }
         finally
         {
@@ -116,7 +120,7 @@ public class QuadStoreClient extends GraphStoreClient implements QuadDatasetAcce
         putDataset(dataset, null, null);
     }
 
-    public void putDataset(Dataset dataset, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
+    public ClientResponse putDataset(Dataset dataset, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
         ClientResponse cr = null;
         
@@ -130,6 +134,9 @@ public class QuadStoreClient extends GraphStoreClient implements QuadDatasetAcce
                 if (log.isErrorEnabled()) log.error("Request to quad store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
                 throw new ClientException(cr);
             }
+            
+            cr.bufferEntity();
+            return cr;
         }
         finally
         {
@@ -137,13 +144,13 @@ public class QuadStoreClient extends GraphStoreClient implements QuadDatasetAcce
         }
     }
     
-   @Override
+    @Override
     public void delete()
     {
         deleteDataset(null, null);
     }
     
-    public void deleteDataset(MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
+    public ClientResponse deleteDataset(MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
         ClientResponse cr = null;
         
@@ -157,6 +164,38 @@ public class QuadStoreClient extends GraphStoreClient implements QuadDatasetAcce
                 if (log.isErrorEnabled()) log.error("Request to quad store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
                 throw new ClientException(cr);
             }
+            
+            cr.bufferEntity();
+            return cr;
+        }
+        finally
+        {
+            if (cr != null) cr.close();
+        }
+    }
+
+    @Override
+    public void patch(Dataset dataset)
+    {
+        patch(dataset, null, null);
+    }
+    
+    public ClientResponse patch(Dataset dataset, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
+    {
+        ClientResponse cr = null;
+        try
+        {
+            cr = getWebResource().type(com.atomgraph.core.MediaType.TEXT_NQUADS_TYPE).
+                method("PATCH", ClientResponse.class, dataset);
+            
+            if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
+            {
+                if (log.isErrorEnabled()) log.error("Request to graph store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
+                throw new ClientException(cr);
+            }
+
+            cr.bufferEntity();
+            return cr;
         }
         finally
         {

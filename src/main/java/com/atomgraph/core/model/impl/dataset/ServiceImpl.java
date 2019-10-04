@@ -16,11 +16,11 @@
 package com.atomgraph.core.model.impl.dataset;
 
 import com.atomgraph.core.MediaTypes;
+import com.atomgraph.core.model.DatasetQuadAccessor;
 import com.atomgraph.core.model.EndpointAccessor;
-import com.atomgraph.core.model.GraphStore;
 import com.atomgraph.core.model.Service;
-import javax.ws.rs.core.Request;
 import org.apache.jena.query.Dataset;
+import org.apache.jena.query.DatasetAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,20 +47,19 @@ public class ServiceImpl implements Service
     @Override
     public EndpointAccessor getEndpointAccessor()
     {
-        return new EndpointAccessorBase(getDataset());
-        //return new SPARQLEndpointBase(request, getMediaTypes(), getDataset());
+        return new EndpointAccessorImpl(getDataset());
     }
 
-//    @Override
-//    public SPARQLEndpoint getSPARQLEndpoint(Request request)
-//    {
-//        return new SPARQLEndpointBase(request, getMediaTypes(), getDataset());
-//    }
+    @Override
+    public DatasetAccessor getDatasetAccessor()
+    {
+        return new DatasetAccessorImpl(getDataset());
+    }
 
     @Override
-    public GraphStore getGraphStore(Request request)
+    public DatasetQuadAccessor getDatasetQuadAccessor()
     {
-        return new GraphStoreBase(request, getMediaTypes(), getDataset());
+        return new DatasetQuadAccessorImpl(getDataset());
     }
     
     protected Dataset getDataset()

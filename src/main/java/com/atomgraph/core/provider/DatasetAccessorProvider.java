@@ -15,54 +15,52 @@
  */
 package com.atomgraph.core.provider;
 
-import com.atomgraph.core.model.EndpointAccessor;
 import com.atomgraph.core.model.Service;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.ext.ContextResolver;
-import javax.ws.rs.ext.Provider;
+import org.apache.jena.query.DatasetAccessor;
 
 /**
  *
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
-@Provider
-public class EndpointAccessorProvider extends PerRequestTypeInjectableProvider<Context, EndpointAccessor> implements ContextResolver<EndpointAccessor>
+public class DatasetAccessorProvider extends PerRequestTypeInjectableProvider<Context, DatasetAccessor> implements ContextResolver<DatasetAccessor>
 {
 
     private final Service service;
 
-    public EndpointAccessorProvider(Service service)
+    public DatasetAccessorProvider(Service service)
     {
-        super(EndpointAccessorProvider.class);
+        super(DatasetAccessorProvider.class);
         
         this.service = service;
     }
     
     @Override
-    public Injectable<EndpointAccessor> getInjectable(ComponentContext ic, Context a)
+    public Injectable<DatasetAccessor> getInjectable(ComponentContext ic, Context a)
     {
-        return new Injectable<EndpointAccessor>()
+        return new Injectable<DatasetAccessor>()
         {
             @Override
-            public EndpointAccessor getValue()
+            public DatasetAccessor getValue()
             {
-                return getEndpointAccessor();
+                return getDatasetAccessor();
             }
         };
     }
 
     @Override
-    public EndpointAccessor getContext(Class<?> type)
+    public DatasetAccessor getContext(Class<?> type)
     {
-        return getEndpointAccessor();
+        return getDatasetAccessor();
     }
     
-    public EndpointAccessor getEndpointAccessor()
+    public DatasetAccessor getDatasetAccessor()
     {
-        return getService().getEndpointAccessor();
+        return getService().getDatasetAccessor();
     }
     
     public Service getService()

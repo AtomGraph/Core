@@ -15,7 +15,7 @@
  */
 package com.atomgraph.core.model;
 
-import javax.ws.rs.core.Request;
+import org.apache.jena.query.DatasetAccessor;
 
 /**
  * SPARQL 1.1 service with endpoint and graph store.
@@ -25,10 +25,10 @@ import javax.ws.rs.core.Request;
 public interface Service
 {
     
-    //SPARQLEndpoint getSPARQLEndpoint(Request request);
-    
     EndpointAccessor getEndpointAccessor();
     
-    GraphStore getGraphStore(Request request);
+    DatasetAccessor getDatasetAccessor();
+    
+    DatasetQuadAccessor getDatasetQuadAccessor();
     
 }

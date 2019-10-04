@@ -15,6 +15,7 @@
  */
 package com.atomgraph.core.model.impl.dataset;
 
+import com.atomgraph.core.model.EndpointAccessor;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,16 +38,15 @@ import org.slf4j.LoggerFactory;
  *
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
-public class EndpointAccessorBase extends com.atomgraph.core.model.impl.EndpointAccessorBase
+public class EndpointAccessorImpl implements EndpointAccessor
 {
     
-    private static final Logger log = LoggerFactory.getLogger(EndpointAccessorBase.class);
+    private static final Logger log = LoggerFactory.getLogger(EndpointAccessorImpl.class);
 
     private final Dataset dataset;
     
-    public EndpointAccessorBase(Dataset dataset)
+    public EndpointAccessorImpl(Dataset dataset)
     {
-        super();
         if (dataset == null) throw new IllegalArgumentException("Dataset cannot be null");
         this.dataset = dataset;
     }

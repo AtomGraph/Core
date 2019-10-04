@@ -19,9 +19,7 @@ package com.atomgraph.core.model.impl.dataset;
 
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Request;
-import com.atomgraph.core.MediaTypes;
+import org.apache.jena.query.DatasetAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,15 +30,14 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see <a href="http://www.w3.org/TR/sparql11-http-rdf-update/">SPARQL 1.1 Graph Store HTTP Protocol</a>
  */
-public class GraphStoreBase extends com.atomgraph.core.model.impl.GraphStoreBase
+public class DatasetAccessorImpl implements DatasetAccessor
 {
-    private static final Logger log = LoggerFactory.getLogger(GraphStoreBase.class);
+    private static final Logger log = LoggerFactory.getLogger(DatasetAccessorImpl.class);
 
     private final Dataset dataset;
         
-    public GraphStoreBase(@Context Request request, @Context MediaTypes mediaTypes, @Context Dataset dataset)
+    public DatasetAccessorImpl(Dataset dataset)
     {
-        super(request, mediaTypes);
         if (dataset == null) throw new IllegalArgumentException("Dataset cannot be null");
         this.dataset = dataset;
     }

@@ -28,6 +28,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.model.GraphStore;
+import org.apache.jena.query.DatasetAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,11 +39,12 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see com.atomgraph.core.model.GraphStore
  */
-public abstract class GraphStoreBase implements GraphStore
+public class GraphStoreBase implements GraphStore
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreBase.class);
 
     private final Request request;
+    private final DatasetAccessor accessor;
     private final MediaTypes mediaTypes;
     private final com.atomgraph.core.model.impl.Response response;
     
@@ -50,16 +52,19 @@ public abstract class GraphStoreBase implements GraphStore
      * Constructs Graph Store from request metadata.
      * 
      * @param request request
-     * @param mediaTypes
+     * @param accessor dataset accessor
+     * @param mediaTypes supported media types
      */
-    public GraphStoreBase(@Context Request request, @Context MediaTypes mediaTypes)
+    public GraphStoreBase(@Context Request request, @Context DatasetAccessor accessor, @Context MediaTypes mediaTypes)
     {
-        // if (request == null) throw new IllegalArgumentException("Request cannot be null");
+        if (request == null) throw new IllegalArgumentException("Request cannot be null");
+        if (accessor == null) throw new IllegalArgumentException("EndpointAccessor cannot be null");
         if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
         
         this.request = request;
+        this.accessor = accessor;
         this.mediaTypes = mediaTypes;
-        this.response = request != null ? com.atomgraph.core.model.impl.Response.fromRequest(request) : null;
+        this.response = com.atomgraph.core.model.impl.Response.fromRequest(request);
     }
     
     /**
@@ -132,13 +137,13 @@ public abstract class GraphStoreBase implements GraphStore
 
         if (defaultGraph)
         {
-            Model model = getModel();
+            Model model = getDatasetAccessor().getModel();
             if (log.isDebugEnabled()) log.debug("GET Graph Store default graph, returning Model of size(): {}", model.size());
             return getResponse(model);
         }
         else
         {
-            Model model = getModel(graphUri.toString());
+            Model model = getDatasetAccessor().getModel(graphUri.toString());
             if (model == null)
             {
                 if (log.isDebugEnabled()) log.debug("GET Graph Store named graph with URI: {} not found", graphUri);
@@ -172,16 +177,16 @@ public abstract class GraphStoreBase implements GraphStore
         if (defaultGraph)
         {
             if (log.isDebugEnabled()) log.debug("POST Model to default graph");
-            add(model);
+            getDatasetAccessor().add(model);
             return Response.ok().build();
         }
         else
         {
-            boolean existingGraph = containsModel(graphUri.toString());
+            boolean existingGraph = getDatasetAccessor().containsModel(graphUri.toString());
 
             // is this implemented correctly? The specification is not very clear.
             if (log.isDebugEnabled()) log.debug("POST Model to named graph with URI: {} Did it already exist? {}", graphUri, existingGraph);
-            add(graphUri.toString(), model);
+            getDatasetAccessor().add(graphUri.toString(), model);
             
             if (existingGraph) return Response.ok().build();
             else return Response.created(graphUri).build();
@@ -206,15 +211,15 @@ public abstract class GraphStoreBase implements GraphStore
         if (defaultGraph)
         {
             if (log.isDebugEnabled()) log.debug("PUT Model to default graph");
-            putModel(model);
+            getDatasetAccessor().putModel(model);
             return Response.ok().build();
         }
         else
         {
-            boolean existingGraph = containsModel(graphUri.toString());
+            boolean existingGraph = getDatasetAccessor().containsModel(graphUri.toString());
             
             if (log.isDebugEnabled()) log.debug("PUT Model to named graph with URI: {} Did it already exist? {}", graphUri, existingGraph);
-            putModel(graphUri.toString(), model);
+            getDatasetAccessor().putModel(graphUri.toString(), model);
             
             if (existingGraph) return Response.ok().build();
             else return Response.created(graphUri).build();
@@ -236,13 +241,13 @@ public abstract class GraphStoreBase implements GraphStore
         
         if (defaultGraph)
         {
-            deleteDefault();
+            getDatasetAccessor().deleteDefault();
             if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store");
             return Response.noContent().build();
         }
         else
         {
-            if (!containsModel(graphUri.toString()))
+            if (!getDatasetAccessor().containsModel(graphUri.toString()))
             {
                 if (log.isDebugEnabled()) log.debug("DELETE named graph with URI {}: not found", graphUri);
                 return Response.status(Status.NOT_FOUND).build();
@@ -250,7 +255,7 @@ public abstract class GraphStoreBase implements GraphStore
             else
             {
                 if (log.isDebugEnabled()) log.debug("DELETE named graph with URI: {}", graphUri);
-                deleteModel(graphUri.toString());
+                getDatasetAccessor().deleteModel(graphUri.toString());
                 return Response.noContent().build();
             }
         }
@@ -259,6 +264,11 @@ public abstract class GraphStoreBase implements GraphStore
     public Request getRequest()
     {
         return request;
+    }
+    
+    public DatasetAccessor getDatasetAccessor()
+    {
+        return accessor;
     }
     
     public MediaTypes getMediaTypes()

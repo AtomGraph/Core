@@ -17,24 +17,21 @@ package com.atomgraph.core.model.impl;
 
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.model.QuadStore;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Variant;
 import org.apache.jena.query.Dataset;
-import org.apache.jena.query.DatasetFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.atomgraph.core.model.DatasetQuadAccessor;
 
 /**
  *
@@ -45,6 +42,7 @@ public abstract class QuadStoreBase implements QuadStore
     private static final Logger log = LoggerFactory.getLogger(QuadStoreBase.class);
 
     private final Request request;
+    private final DatasetQuadAccessor accessor;
     private final MediaTypes mediaTypes;
     private final com.atomgraph.core.model.impl.Response response;
     
@@ -52,16 +50,18 @@ public abstract class QuadStoreBase implements QuadStore
      * Constructs Graph Store from request metadata.
      * 
      * @param request request
-     * @param mediaTypes
+     * @param accessor dataset quad accessor
+     * @param mediaTypes supported media types
      */
-    public QuadStoreBase(@Context Request request, @Context MediaTypes mediaTypes)
+    public QuadStoreBase(@Context Request request, @Context DatasetQuadAccessor accessor, @Context MediaTypes mediaTypes)
     {
-        // if (request == null) throw new IllegalArgumentException("Request cannot be null");
+         if (request == null) throw new IllegalArgumentException("Request cannot be null");
         if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
         
         this.request = request;
+        this.accessor = accessor;
         this.mediaTypes = mediaTypes;
-        this.response = request != null ? com.atomgraph.core.model.impl.Response.fromRequest(request) : null;
+        this.response = com.atomgraph.core.model.impl.Response.fromRequest(request);
     }
     
     /**
@@ -122,71 +122,26 @@ public abstract class QuadStoreBase implements QuadStore
     /**
      * Implements GET method of SPARQL Graph Store Protocol.
      * 
-     * @param defaultGraph true if default graph is requested
-     * @param graphUri named graph URI
      * @return response
      */
     @GET
     @Override
-    public javax.ws.rs.core.Response get(@QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
+    public javax.ws.rs.core.Response get()
     {
-        if (defaultGraph)
-        {
-            Dataset dataset = DatasetFactory.create(getModel());
-            if (log.isDebugEnabled()) log.debug("GET Graph Store default graph, returning Model of size(): {}", dataset.getDefaultModel().size());
-            return getResponse(dataset);
-        }
-        
-        if (graphUri != null)
-        {
-            Dataset dataset = DatasetFactory.create(getModel(graphUri.toString()));
-            if (dataset == null)
-            {
-                if (log.isDebugEnabled()) log.debug("GET Graph Store named graph with URI: {} not found", graphUri);
-                return javax.ws.rs.core.Response.status(javax.ws.rs.core.Response.Status.NOT_FOUND).build();
-            }
-            else
-            {
-                if (log.isDebugEnabled()) log.debug("GET Graph Store named graph with URI: {} found, returning Model of size(): {}", graphUri, dataset.getDefaultModel().size());
-                return getResponse(dataset);
-            }
-        }
-        
-        return getResponse(get());
+        return getResponse(getQuadDatasetAccessor().get());
     }
 
     /**
      * Implements POST method of SPARQL Graph Store Protocol.
      * 
      * @param dataset RDF request body
-     * @param defaultGraph true if default graph is requested
-     * @param graphUri named graph URI
      * @return response
      */
     @POST
     @Override
-    public javax.ws.rs.core.Response post(Dataset dataset, @QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
+    public javax.ws.rs.core.Response post(Dataset dataset)
     {
-        if (defaultGraph)
-        {
-            if (log.isDebugEnabled()) log.debug("POST Model to default graph");
-            add(dataset.getDefaultModel());
-            return javax.ws.rs.core.Response.ok().build();
-        }
-
-        if (graphUri != null)
-        {
-            boolean existingGraph = containsModel(graphUri.toString());
-
-            // is this implemented correctly? The specification is not very clear.
-            if (log.isDebugEnabled()) log.debug("POST Model to named graph with URI: {} Did it already exist? {}", graphUri, existingGraph);
-            add(graphUri.toString(), dataset.getDefaultModel());
-            
-            if (existingGraph) return javax.ws.rs.core.Response.ok().build();
-            else return javax.ws.rs.core.Response.created(graphUri).build();
-        }
-        
-        add(dataset);
+        getQuadDatasetAccessor().add(dataset);
         return javax.ws.rs.core.Response.ok().build();
     }
 
@@ -194,76 +149,37 @@ public abstract class QuadStoreBase implements QuadStore
      * Implements PUT method of SPARQL Graph Store Protocol.
      * 
      * @param dataset RDF request body
-     * @param defaultGraph true if default graph is requested
-     * @param graphUri named graph URI
      * @return response
      */    
     @PUT
     @Override
-    public javax.ws.rs.core.Response put(Dataset dataset, @QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
+    public javax.ws.rs.core.Response put(Dataset dataset)
     {
-        if (defaultGraph)
-        {
-            if (log.isDebugEnabled()) log.debug("PUT Model to default graph");
-            putModel(dataset.getDefaultModel());
-            return javax.ws.rs.core.Response.ok().build();
-        }
-        
-        if (graphUri != null)
-        {
-            boolean existingGraph = containsModel(graphUri.toString());
-            
-            if (log.isDebugEnabled()) log.debug("PUT Model to named graph with URI: {} Did it already exist? {}", graphUri, existingGraph);
-            putModel(graphUri.toString(), dataset.getDefaultModel());
-            
-            if (existingGraph) return javax.ws.rs.core.Response.ok().build();
-            else return javax.ws.rs.core.Response.created(graphUri).build();
-        }
-        
-        replace(dataset);
+        getQuadDatasetAccessor().replace(dataset);
         return javax.ws.rs.core.Response.ok().build();
     }
 
     /**
      * Implements DELETE method of SPARQL Graph Store Protocol.
      * 
-     * @param defaultGraph true if default graph is requested
-     * @param graphUri named graph URI
      * @return response
      */
     @DELETE
     @Override
-    public javax.ws.rs.core.Response delete(@QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
+    public javax.ws.rs.core.Response delete()
     {
-        if (defaultGraph)
-        {
-            deleteDefault();
-            if (log.isDebugEnabled()) log.debug("DELETE default graph from Graph Store");
-            return javax.ws.rs.core.Response.noContent().build();
-        }
-        
-        if (graphUri != null)
-        {
-            if (!containsModel(graphUri.toString()))
-            {
-                if (log.isDebugEnabled()) log.debug("DELETE named graph with URI {}: not found", graphUri);
-                return javax.ws.rs.core.Response.status(javax.ws.rs.core.Response.Status.NOT_FOUND).build();
-            }
-            else
-            {
-                if (log.isDebugEnabled()) log.debug("DELETE named graph with URI: {}", graphUri);
-                deleteModel(graphUri.toString());
-                return javax.ws.rs.core.Response.noContent().build();
-            }
-        }
-        
-        delete();
+        getQuadDatasetAccessor().delete();
         return javax.ws.rs.core.Response.noContent().build();
     }
 
     public Request getRequest()
     {
         return request;
+    }
+    
+    public DatasetQuadAccessor getQuadDatasetAccessor()
+    {
+        return accessor;
     }
     
     public MediaTypes getMediaTypes()

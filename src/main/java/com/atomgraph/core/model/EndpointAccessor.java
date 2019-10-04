@@ -30,11 +30,7 @@ import org.apache.jena.update.UpdateRequest;
  */
 public interface EndpointAccessor
 {
-    
-    Model describe(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris);
-    
-    Model construct(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris);
-    
+
     Dataset loadDataset(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris);
     
     Model loadModel(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris);

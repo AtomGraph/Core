@@ -15,54 +15,52 @@
  */
 package com.atomgraph.core.provider;
 
-import com.atomgraph.core.model.EndpointAccessor;
+import com.atomgraph.core.model.DatasetQuadAccessor;
 import com.atomgraph.core.model.Service;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.ext.ContextResolver;
-import javax.ws.rs.ext.Provider;
 
 /**
  *
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
-@Provider
-public class EndpointAccessorProvider extends PerRequestTypeInjectableProvider<Context, EndpointAccessor> implements ContextResolver<EndpointAccessor>
+public class DatasetQuadAccessorProvider extends PerRequestTypeInjectableProvider<Context, DatasetQuadAccessor> implements ContextResolver<DatasetQuadAccessor>
 {
 
     private final Service service;
 
-    public EndpointAccessorProvider(Service service)
+    public DatasetQuadAccessorProvider(Service service)
     {
-        super(EndpointAccessorProvider.class);
+        super(DatasetQuadAccessorProvider.class);
         
         this.service = service;
     }
     
     @Override
-    public Injectable<EndpointAccessor> getInjectable(ComponentContext ic, Context a)
+    public Injectable<DatasetQuadAccessor> getInjectable(ComponentContext ic, Context a)
     {
-        return new Injectable<EndpointAccessor>()
+        return new Injectable<DatasetQuadAccessor>()
         {
             @Override
-            public EndpointAccessor getValue()
+            public DatasetQuadAccessor getValue()
             {
-                return getEndpointAccessor();
+                return getDatasetQuadAccessor();
             }
         };
     }
 
     @Override
-    public EndpointAccessor getContext(Class<?> type)
+    public DatasetQuadAccessor getContext(Class<?> type)
     {
-        return getEndpointAccessor();
+        return getDatasetQuadAccessor();
     }
     
-    public EndpointAccessor getEndpointAccessor()
+    public DatasetQuadAccessor getDatasetQuadAccessor()
     {
-        return getService().getEndpointAccessor();
+        return getService().getDatasetQuadAccessor();
     }
     
     public Service getService()
