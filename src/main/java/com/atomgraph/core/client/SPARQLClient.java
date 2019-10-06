@@ -169,7 +169,7 @@ public class SPARQLClient extends ClientBase
         if (params != null) formData.putAll(params);
         formData.putSingle("update", updateRequest.toString());
         
-        post(formData, MediaType.APPLICATION_FORM_URLENCODED_TYPE, null, formData);
+        post(formData, MediaType.APPLICATION_FORM_URLENCODED_TYPE, null, null);
     }
 
     public int getMaxGetRequestSize()
