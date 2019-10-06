@@ -60,7 +60,7 @@ public class EndpointAccessorImpl implements EndpointAccessor
         for (URI namedGraphUri : namedGraphUris)
             params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
 
-        return getSPARQLClient().query(query, Dataset.class, params, null).getEntity(Dataset.class);
+        return getSPARQLClient().query(query, Dataset.class, params).getEntity(Dataset.class);
     }
     
     @Override
@@ -76,7 +76,7 @@ public class EndpointAccessorImpl implements EndpointAccessor
         for (URI namedGraphUri : namedGraphUris)
             params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
 
-        return getSPARQLClient().query(query, Model.class, params, null).getEntity(Model.class);
+        return getSPARQLClient().query(query, Model.class, params).getEntity(Model.class);
     }
 
     @Override
@@ -92,7 +92,7 @@ public class EndpointAccessorImpl implements EndpointAccessor
         for (URI namedGraphUri : namedGraphUris)
             params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
         
-        return getSPARQLClient().query(query, ResultSet.class, params, null).getEntity(ResultSetRewindable.class);
+        return getSPARQLClient().query(query, ResultSet.class, params).getEntity(ResultSetRewindable.class);
     }
   
     @Override
@@ -108,7 +108,7 @@ public class EndpointAccessorImpl implements EndpointAccessor
         for (URI namedGraphUri : namedGraphUris)
             params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
         
-        return SPARQLClient.parseBoolean(getSPARQLClient().query(query, ResultSet.class, params, null));
+        return SPARQLClient.parseBoolean(getSPARQLClient().query(query, ResultSet.class, params));
     }
 
     @Override
@@ -124,7 +124,7 @@ public class EndpointAccessorImpl implements EndpointAccessor
         for (URI usingNamedGraphUri : usingNamedGraphUris)
             params.add(USING_NAMED_GRAPH_URI, usingNamedGraphUri.toString());
 
-        getSPARQLClient().update(updateRequest, params, null);
+        getSPARQLClient().update(updateRequest, params);
     }
     
     public SPARQLClient getSPARQLClient()

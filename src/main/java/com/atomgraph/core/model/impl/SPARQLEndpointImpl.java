@@ -57,9 +57,9 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see com.atomgraph.core.model.SPARQLEndpoint
  */
-public class SPARQLEndpointBase implements SPARQLEndpoint
+public class SPARQLEndpointImpl implements SPARQLEndpoint
 {
-    private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointBase.class);
+    private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointImpl.class);
     
     private final Request request;
     private final EndpointAccessor accessor;
@@ -73,14 +73,19 @@ public class SPARQLEndpointBase implements SPARQLEndpoint
      * @param service SPARQL service
      * @param mediaTypes supported media types
      */
-    public SPARQLEndpointBase(@Context Request request, @Context Service service, @Context MediaTypes mediaTypes)
+    public SPARQLEndpointImpl(@Context Request request, @Context Service service, @Context MediaTypes mediaTypes)
+    {
+        this(request, service.getEndpointAccessor(), mediaTypes);
+    }
+    
+    public SPARQLEndpointImpl(Request request, EndpointAccessor accessor, MediaTypes mediaTypes)
     {
         if (request == null) throw new IllegalArgumentException("Request cannot be null");
-        if (service == null) throw new IllegalArgumentException("Service cannot be null");
+        if (accessor == null) throw new IllegalArgumentException("EndpointAccessor cannot be null");
         if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
 
         this.request = request;
-        this.accessor = service.getEndpointAccessor();
+        this.accessor = accessor;
         this.mediaTypes = mediaTypes;
         this.response = com.atomgraph.core.model.impl.Response.fromRequest(request);
         if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase");
