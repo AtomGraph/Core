@@ -33,9 +33,9 @@ import com.atomgraph.core.mapper.ClientExceptionMapper;
 import com.atomgraph.core.mapper.NotFoundExceptionMapper;
 import com.atomgraph.core.model.Service;
 import com.atomgraph.core.model.impl.ApplicationImpl;
-import com.atomgraph.core.model.impl.GraphStoreBase;
+import com.atomgraph.core.model.impl.GraphStoreImpl;
 import com.atomgraph.core.model.impl.QueriedResourceBase;
-import com.atomgraph.core.model.impl.SPARQLEndpointBase;
+import com.atomgraph.core.model.impl.SPARQLEndpointImpl;
 import com.atomgraph.core.provider.MediaTypesProvider;
 import com.atomgraph.core.provider.ServiceProvider;
 import com.atomgraph.core.riot.RDFLanguages;
@@ -147,8 +147,8 @@ public class Application extends javax.ws.rs.core.Application implements com.ato
     public void init()
     {
         classes.add(QueriedResourceBase.class); // handles all
-        classes.add(SPARQLEndpointBase.class); // handles /sparql queries
-        classes.add(GraphStoreBase.class); // handles /service requests
+        classes.add(SPARQLEndpointImpl.class); // handles /sparql queries
+        classes.add(GraphStoreImpl.class); // handles /service requests
 
         singletons.add(new ModelProvider());
         singletons.add(new DatasetProvider());

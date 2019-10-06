@@ -25,15 +25,19 @@ import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.atomgraph.core.model.DatasetQuadAccessor;
+import com.sun.jersey.api.client.filter.ClientFilter;
+import javax.ws.rs.core.MediaType;
 
 /**
- *
+ * Quad Store client.
+ * 
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
+ * @see <a href="https://lists.w3.org/Archives/Public/public-sparql-dev/2014AprJun/0008.html">Extending SPARQL Graph Store HTTP Protocol with quad semantics</a>
  */
-public class QuadStoreClient extends GraphStoreClient implements DatasetQuadAccessor
+public class QuadStoreClient extends ClientBase implements DatasetQuadAccessor
 {
     private static final Logger log = LoggerFactory.getLogger(QuadStoreClient.class);
-
+    
     public QuadStoreClient(WebResource webResource, MediaTypes mediaTypes)
     {
         super(webResource, mediaTypes);
@@ -41,7 +45,7 @@ public class QuadStoreClient extends GraphStoreClient implements DatasetQuadAcce
 
     public QuadStoreClient(WebResource webResource)
     {
-        super(webResource);
+        this(webResource, new MediaTypes());
     }
 
     public static QuadStoreClient create(WebResource webResource, MediaTypes mediaTypes)
@@ -55,138 +59,60 @@ public class QuadStoreClient extends GraphStoreClient implements DatasetQuadAcce
     }
     
     @Override
+    public QuadStoreClient addFilter(ClientFilter authFilter)
+    {
+        if (authFilter == null) throw new IllegalArgumentException("ClientFilter cannot be null");
+
+        super.addFilter(authFilter);
+
+        return this;
+    }
+    
+    @Override
+    public MediaType getDefaultMediaType()
+    {
+        return com.atomgraph.core.MediaType.TEXT_NQUADS_TYPE;
+    }
+    
+    @Override
     public Dataset get()
     {
-        return get(null, null).getEntity(Dataset.class);
-    }
-
-    public ClientResponse get(MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
-    {
-        ClientResponse cr = null;
-        
-        try
-        {
-            if (log.isDebugEnabled()) log.debug("GET Dataset from quad store", getWebResource().getURI());
-            cr = get(getReadableMediaTypes(Dataset.class), params, headers);
-            
-            if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
-            {
-                if (log.isErrorEnabled()) log.error("Request to quad store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-                throw new ClientException(cr);
-            }
-
-            cr.bufferEntity();
-            return cr;
-        }
-        finally
-        {
-            if (cr != null) cr.close();
-        }
+        return get(getReadableMediaTypes(Dataset.class), null).getEntity(Dataset.class);
     }
     
     @Override
     public void add(Dataset dataset)
     {
-        addDataset(dataset, null, null);
-    }
-
-    public ClientResponse addDataset(Dataset dataset, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
-    {
-        ClientResponse cr = null;
-        
-        try
-        {
-            if (log.isDebugEnabled()) log.debug("POST Dataset from quad store", getWebResource().getURI());
-            cr = post(getDefaultMediaType(), dataset, params, headers);
-            
-            if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
-            {
-                if (log.isErrorEnabled()) log.error("Request to quad store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-                throw new ClientException(cr);
-            }
-            
-            cr.bufferEntity();
-            return cr;
-        }
-        finally
-        {
-            if (cr != null) cr.close();
-        }
+        post(dataset, getDefaultMediaType(), null, null);
     }
     
     @Override
     public void replace(Dataset dataset)
     {
-        putDataset(dataset, null, null);
-    }
-
-    public ClientResponse putDataset(Dataset dataset, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
-    {
-        ClientResponse cr = null;
-        
-        try
-        {
-            if (log.isDebugEnabled()) log.debug("PUT Dataset to quad store {}", getWebResource().getURI());
-            cr = put(getDefaultMediaType(), dataset, params, headers);
-            
-            if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
-            {
-                if (log.isErrorEnabled()) log.error("Request to quad store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-                throw new ClientException(cr);
-            }
-            
-            cr.bufferEntity();
-            return cr;
-        }
-        finally
-        {
-            if (cr != null) cr.close();
-        }
+        put(dataset, getDefaultMediaType(), null, null);
     }
     
     @Override
     public void delete()
     {
-        deleteDataset(null, null);
-    }
-    
-    public ClientResponse deleteDataset(MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
-    {
-        ClientResponse cr = null;
-        
-        try
-        {
-            if (log.isDebugEnabled()) log.debug("DELETE Dataset from quad store {}", getWebResource().getURI());
-            cr = delete(params, headers);
-            
-            if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
-            {
-                if (log.isErrorEnabled()) log.error("Request to quad store: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-                throw new ClientException(cr);
-            }
-            
-            cr.bufferEntity();
-            return cr;
-        }
-        finally
-        {
-            if (cr != null) cr.close();
-        }
+        delete(null, null);
     }
 
     @Override
     public void patch(Dataset dataset)
     {
-        patch(dataset, null, null);
+        patch(dataset, null);
     }
     
-    public ClientResponse patch(Dataset dataset, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
+    public ClientResponse patch(Dataset dataset, MultivaluedMap<String, String> params)
     {
         ClientResponse cr = null;
         try
         {
-            cr = getWebResource().type(com.atomgraph.core.MediaType.TEXT_NQUADS_TYPE).
-                method("PATCH", ClientResponse.class, dataset);
+            if (log.isDebugEnabled()) log.debug("PATCH Dataset to Quad Store {}", getWebResource().getURI());
+            
+            WebResource.Builder builder = applyParams(params).type(getDefaultMediaType());
+            cr = builder.method("PATCH", ClientResponse.class, dataset);
             
             if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
             {

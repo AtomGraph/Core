@@ -40,9 +40,9 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see com.atomgraph.core.model.GraphStore
  */
-public class GraphStoreBase implements GraphStore
+public class GraphStoreImpl implements GraphStore
 {
-    private static final Logger log = LoggerFactory.getLogger(GraphStoreBase.class);
+    private static final Logger log = LoggerFactory.getLogger(GraphStoreImpl.class);
 
     private final Request request;
     private final DatasetAccessor accessor;
@@ -56,14 +56,19 @@ public class GraphStoreBase implements GraphStore
      * @param service SPARQL service
      * @param mediaTypes supported media types
      */
-    public GraphStoreBase(@Context Request request, @Context Service service, @Context MediaTypes mediaTypes)
+    public GraphStoreImpl(@Context Request request, @Context Service service, @Context MediaTypes mediaTypes)
+    {
+        this(request, service.getDatasetAccessor(), mediaTypes);
+    }
+    
+    public GraphStoreImpl(Request request, DatasetAccessor accessor, MediaTypes mediaTypes)
     {
         if (request == null) throw new IllegalArgumentException("Request cannot be null");
-        if (service == null) throw new IllegalArgumentException("Service cannot be null");
+        if (accessor == null) throw new IllegalArgumentException("DatasetAccessor cannot be null");
         if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
         
         this.request = request;
-        this.accessor = service.getDatasetAccessor();
+        this.accessor = accessor;
         this.mediaTypes = mediaTypes;
         this.response = com.atomgraph.core.model.impl.Response.fromRequest(request);
     }

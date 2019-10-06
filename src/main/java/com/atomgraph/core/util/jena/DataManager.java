@@ -98,7 +98,7 @@ public class DataManager extends FileManager implements ModelGetter
     public ClientResponse get(String uri, javax.ws.rs.core.MediaType[] acceptedTypes)
     {
         return LinkedDataClient.create(getEndpoint(URI.create(uri)), getMediaTypes()).
-                get(acceptedTypes);
+                get(acceptedTypes, null);
     }
     
     public boolean usePreemptiveAuth()
