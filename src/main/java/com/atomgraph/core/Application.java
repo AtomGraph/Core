@@ -21,7 +21,7 @@ import com.atomgraph.core.io.DatasetProvider;
 import com.atomgraph.core.io.ResultSetProvider;
 import com.atomgraph.core.provider.DataManagerProvider;
 import com.atomgraph.core.io.ModelProvider;
-import com.atomgraph.core.io.QueryWriter;
+import com.atomgraph.core.io.QueryProvider;
 import com.atomgraph.core.provider.QueryParamProvider;
 import com.atomgraph.core.io.UpdateRequestReader;
 import java.util.HashSet;
@@ -154,6 +154,7 @@ public class Application extends javax.ws.rs.core.Application implements com.ato
         singletons.add(new DatasetProvider());
         singletons.add(new ResultSetProvider());
         singletons.add(new QueryParamProvider());
+        singletons.add(new QueryProvider());
         singletons.add(new UpdateRequestReader());
         singletons.add(new DataManagerProvider(getDataManager()));
         singletons.add(new ServiceProvider(getService()));
@@ -242,7 +243,7 @@ public class Application extends javax.ws.rs.core.Application implements com.ato
         clientConfig.getSingletons().add(new ModelProvider());
         clientConfig.getSingletons().add(new DatasetProvider());
         clientConfig.getSingletons().add(new ResultSetProvider());
-        clientConfig.getSingletons().add(new QueryWriter());
+        clientConfig.getSingletons().add(new QueryProvider());
         clientConfig.getSingletons().add(new UpdateRequestReader()); // TO-DO: UpdateRequestProvider
 
         Client client = Client.create(clientConfig);

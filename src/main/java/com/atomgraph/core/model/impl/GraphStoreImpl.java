@@ -27,6 +27,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import com.atomgraph.core.MediaTypes;
+import com.atomgraph.core.exception.ClientException;
 import com.atomgraph.core.model.GraphStore;
 import com.atomgraph.core.model.Service;
 import org.apache.jena.query.DatasetAccessor;
@@ -149,16 +150,20 @@ public class GraphStoreImpl implements GraphStore
         }
         else
         {
-            Model model = getDatasetAccessor().getModel(graphUri.toString());
-            if (model == null)
+            try
             {
-                if (log.isDebugEnabled()) log.debug("GET Graph Store named graph with URI: {} not found", graphUri);
-                return Response.status(Status.NOT_FOUND).build();
-            }
-            else
-            {
+                Model model = getDatasetAccessor().getModel(graphUri.toString());
                 if (log.isDebugEnabled()) log.debug("GET Graph Store named graph with URI: {} found, returning Model of size(): {}", graphUri, model.size());
                 return getResponse(model);
+            }
+            catch (ClientException ex)
+            {
+                if (ex.getClientResponse().getStatus() == Status.NOT_FOUND.getStatusCode())
+                {
+                    if (log.isDebugEnabled()) log.debug("GET Graph Store named graph with URI: {} not found", graphUri);
+                    return Response.status(Status.NOT_FOUND).build();
+                }
+                else throw ex;
             }
         }
     }

@@ -45,6 +45,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.QueryParseException;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.update.UpdateFactory;
 import org.slf4j.Logger;
@@ -106,9 +107,16 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
             @FormParam(DEFAULT_GRAPH_URI) List<URI> defaultGraphUris, @FormParam(NAMED_GRAPH_URI) List<URI> namedGraphUris,
             @FormParam(USING_GRAPH_URI) List<URI> usingGraphUris, @FormParam(USING_NAMED_GRAPH_URI) List<URI> usingNamedGraphUris)
     {
-        if (queryString != null) return get(QueryFactory.create(queryString), defaultGraphUris, namedGraphUris);
-        if (updateString != null) return post(UpdateFactory.create(updateString), usingGraphUris, usingNamedGraphUris);
-
+        try
+        {
+            if (queryString != null) return get(QueryFactory.create(queryString), defaultGraphUris, namedGraphUris);
+            if (updateString != null) return post(UpdateFactory.create(updateString), usingGraphUris, usingNamedGraphUris);
+        }
+        catch (QueryParseException ex)
+        {
+            throw new WebApplicationException(ex, Response.Status.BAD_REQUEST);
+        }
+        
         throw new WebApplicationException(Response.Status.BAD_REQUEST);
     }
     

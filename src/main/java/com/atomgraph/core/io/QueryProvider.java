@@ -27,22 +27,55 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 import com.atomgraph.core.MediaType;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.MessageBodyReader;
+import org.apache.commons.io.IOUtils;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.QueryParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * JAX-RS provider for writing SPARQL query into response.
+ * JAX-RS provider for reading/writing SPARQL queries.
  * Needs to be registered in the JAX-RS application.
  * 
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see org.apache.jena.query.Query
  */ 
 @Provider
+@Consumes(MediaType.APPLICATION_SPARQL_QUERY)
 @Produces(MediaType.APPLICATION_SPARQL_QUERY)
-public class QueryWriter implements MessageBodyWriter<Query>
+public class QueryProvider implements MessageBodyReader<Query>, MessageBodyWriter<Query>
 {
-    private static final Logger log = LoggerFactory.getLogger(QueryWriter.class);
+    private static final Logger log = LoggerFactory.getLogger(QueryProvider.class);
 
+    // READER
+    
+    @Override
+    public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, javax.ws.rs.core.MediaType mediaType)
+    {
+        return type == Query.class;
+    }
+
+    @Override
+    public Query readFrom(Class<Query> type, Type genericType, Annotation[] annotations, javax.ws.rs.core.MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException, WebApplicationException
+    {
+        try
+        {
+            return QueryFactory.create(IOUtils.toString(entityStream, StandardCharsets.UTF_8));
+        }
+        catch (QueryParseException ex)
+        {
+            throw new WebApplicationException(ex, Response.Status.BAD_REQUEST);
+        }
+    }
+
+    // WRITER
+    
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, javax.ws.rs.core.MediaType mediaType)
     {
