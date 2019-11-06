@@ -1,9 +1,11 @@
-Lower-level Linked Data server application that serves as a base for [AtomGraph Processor](../../../Processor). It is implemented as a Java Web application (uses Maven).
+Core is a Linked Data framework. It crosses Apache Jena RDF API with the JAX-RS REST API (Eclipse Jersey implementation), providing in a uniform Linked Data API.
+
+Core serves as a base for [AtomGraph Processor](../../../Processor). It is implemented as a Java Web application (uses Maven).
 
 Features
 --------
 
-AtomGraph Core provides features similar to that of [Pubby](http://wifo5-03.informatik.uni-mannheim.de/pubby/):
+AtomGraph Core server provides features similar to that of [Pubby](http://wifo5-03.informatik.uni-mannheim.de/pubby/):
 * serving Linked Data from a SPARQL endpoint
 * HTTP Basic authentication for endpoints
  
@@ -14,7 +16,7 @@ Configuration
 
 The Core is configured in [web.xml](../../blob/master/src/main/webapp/WEB-INF/web.xml)
 
-For developers
+Linked Data API
 --------------
 * low-level access to remote Linked Data resources and SPARQL endpoints
 * JAX-RS interfaces and implementations of a Linked Data platform (so far read-only)
@@ -22,11 +24,11 @@ For developers
 
 Documentation
 -------------
-* [JavaDoc](http://atomgraph.github.io/atomgraph-core/apidocs/)
+* [JavaDoc](https://atomgraph.github.io/Core/apidocs/)
 
 Dependencies
 --------------
 
 * [Apache Jena](http://jena.apache.org)
-* [Jersey](http://jersey.java.net)
+* [Jersey](https://eclipse-ee4j.github.io/jersey/)
 * [SL4J](http://www.slf4j.org)
