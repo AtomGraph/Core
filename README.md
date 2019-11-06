@@ -19,7 +19,7 @@ The Core is configured in [web.xml](../../blob/master/src/main/webapp/WEB-INF/we
 Linked Data API
 --------------
 * low-level access to remote Linked Data resources and SPARQL endpoints
-* JAX-RS interfaces and implementations of a Linked Data platform (so far read-only)
+* JAX-RS interfaces and implementations of a Linked Data resources
 * JAX-RS providers for input and output of RDF data
 
 Documentation
