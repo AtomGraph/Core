@@ -18,7 +18,7 @@
             <param-value>http://atomgraph.dydra.com/graphity/core/sparql</param-value>
         </init-param>
         <init-param>
-            <param-name>http://atomgraph.com/ns/core#graphStore</param-name>
+            <param-name>https://w3id.org/atomgraph/core#graphStore</param-name>
             <param-value>http://atomgraph.dydra.com/graphity/core/service</param-value>
         </init-param>
         <!--
@@ -32,19 +32,19 @@
         </init-param>
         -->
         <init-param>
-            <param-name>http://atomgraph.com/ns/core#preemptiveAuth</param-name>
+            <param-name>https://w3id.org/atomgraph/core#preemptiveAuth</param-name>
             <param-value>true</param-value>
         </init-param>
         <init-param>
-            <param-name>http://atomgraph.com/ns/core#cacheControl</param-name>
+            <param-name>https://w3id.org/atomgraph/core#cacheControl</param-name>
             <param-value>no-cache</param-value>
         </init-param>
         <init-param>
-            <param-name>http://atomgraph.com/ns/core#resultLimit</param-name>
+            <param-name>https://w3id.org/atomgraph/core#resultLimit</param-name>
             <param-value>100</param-value>
         </init-param>
         <init-param>
-            <param-name>http://atomgraph.com/ns/core#maxGetRequestSize</param-name>
+            <param-name>https://w3id.org/atomgraph/core#maxGetRequestSize</param-name>
             <param-value>8192</param-value>
         </init-param>
     </servlet>
