@@ -13,7 +13,7 @@
 : a owl:Ontology ;
     owl:imports sd:, http: ;
     rdfs:label "AtomGraph Core ontology" ;
-    owl:versionInfo "1.2.0" .
+    owl:versionInfo "2.1.0" .
 
 :graphStore a owl:ObjectProperty, owl:InverseFunctionalProperty ;
     rdfs:domain sd:Service ;

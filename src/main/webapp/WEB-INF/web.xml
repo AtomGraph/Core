@@ -5,7 +5,7 @@
     xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" 
     id="atomgraph-core" version="3.0">
     <display-name>AtomGraph Core</display-name>
-    <description>Generic Linked Data framework</description>    
+    <description>Generic Linked Data framework</description>
     <servlet>
         <servlet-name>index</servlet-name>
         <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
