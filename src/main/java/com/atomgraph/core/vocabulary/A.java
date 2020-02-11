@@ -33,7 +33,7 @@ public final class A
     private static OntModel m_model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, null);
     
     /** <p>The namespace of the vocabulary as a string</p> */
-    public static final String NS = "http://atomgraph.com/ns/core#";
+    public static final String NS = "https://w3id.org/atomgraph/core#";
     
     /** <p>The namespace of the vocabulary as a string</p>
      * @return namespace URI
