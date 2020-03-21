@@ -60,7 +60,7 @@ public class Response
      */
     public Response(Request request, Object entity, EntityTag entityTag, List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings)
     {
-        this(request, entity, entityTag, getVariantListBuilder(mediaTypes, languages, encodings).build());
+        this(request, entity, entityTag, getVariantListBuilder(mediaTypes, languages, encodings).add().build());
     }
 
     /**

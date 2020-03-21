@@ -166,7 +166,11 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
 
         if (query.isConstructType() || query.isDescribeType())
         {
-            List<Variant> variants = com.atomgraph.core.model.impl.Response.getVariantListBuilder(getMediaTypes().getWritable(Dataset.class), getLanguages(), getEncodings()).build();
+            List<Variant> variants = com.atomgraph.core.model.impl.Response.getVariantListBuilder(getMediaTypes().getWritable(Dataset.class),
+                    getLanguages(),
+                    getEncodings()).
+                add().
+                build();
             Variant variant = getRequest().selectVariant(variants);
             if (variant == null)
             {

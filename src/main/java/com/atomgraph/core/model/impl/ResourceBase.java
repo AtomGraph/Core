@@ -148,7 +148,7 @@ public abstract class ResourceBase implements Resource
      */
     public List<Variant> getVariants(List<MediaType> mediaTypes)
     {
-        return com.atomgraph.core.model.impl.Response.getVariantListBuilder(mediaTypes, getLanguages(), getEncodings()).build();
+        return com.atomgraph.core.model.impl.Response.getVariantListBuilder(mediaTypes, getLanguages(), getEncodings()).add().build();
     }
     
     public List<javax.ws.rs.core.MediaType> getWritableMediaTypes(Class clazz)
