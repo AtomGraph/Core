@@ -30,6 +30,8 @@ import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.exception.ClientException;
 import com.atomgraph.core.model.GraphStore;
 import com.atomgraph.core.model.Service;
+import com.atomgraph.core.util.ModelUtils;
+import java.util.Collections;
 import org.apache.jena.query.DatasetAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +50,6 @@ public class GraphStoreImpl implements GraphStore
     private final Request request;
     private final DatasetAccessor accessor;
     private final MediaTypes mediaTypes;
-    private final com.atomgraph.core.model.impl.Response response;
     
     /**
      * Constructs Graph Store from request metadata.
@@ -71,7 +72,6 @@ public class GraphStoreImpl implements GraphStore
         this.request = request;
         this.accessor = accessor;
         this.mediaTypes = mediaTypes;
-        this.response = com.atomgraph.core.model.impl.Response.fromRequest(request);
     }
     
     /**
@@ -93,21 +93,15 @@ public class GraphStoreImpl implements GraphStore
      */
     public ResponseBuilder getResponseBuilder(Model model)
     {
-        return com.atomgraph.core.model.impl.Response.fromRequest(getRequest()).
-                getResponseBuilder(model, getVariants(getMediaTypes().getWritable(Model.class)));
+        return new com.atomgraph.core.model.impl.Response(getRequest(),
+                model,
+                new EntityTag(Long.toHexString(ModelUtils.hashModel(model))),
+                getMediaTypes().getWritable(model.getClass()),
+                Collections.<Locale>emptyList(),
+                Collections.<String>emptyList()).
+            getResponseBuilder();
     }
     
-    /**
-     * Builds a list of acceptable response variants
-     * 
-     * @param mediaTypes
-     * @return supported variants
-     */
-    public List<Variant> getVariants(List<MediaType> mediaTypes)
-    {
-        return getResponse().getVariantListBuilder(mediaTypes, getLanguages(), getEncodings()).add().build();
-    }
-        
     /**
      * Returns a list of supported languages.
      * 
@@ -309,11 +303,6 @@ public class GraphStoreImpl implements GraphStore
     public MediaTypes getMediaTypes()
     {
         return mediaTypes;
-    }
-    
-    public com.atomgraph.core.model.impl.Response getResponse()
-    {
-        return response;
     }
     
 }

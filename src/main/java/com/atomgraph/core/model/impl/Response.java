@@ -17,9 +17,6 @@
 
 package com.atomgraph.core.model.impl;
 
-import org.apache.jena.query.ResultSet;
-import org.apache.jena.query.ResultSetRewindable;
-import org.apache.jena.rdf.model.Model;
 import java.util.List;
 import java.util.Locale;
 import javax.ws.rs.WebApplicationException;
@@ -29,7 +26,7 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Variant;
 import com.atomgraph.core.util.ModelUtils;
-import com.atomgraph.core.util.ResultSetUtils;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Iterator;
 import org.apache.jena.query.Dataset;
@@ -37,10 +34,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Encapsulates the content negotiation logic used to build HTTP response from RDF model.
+ * Encapsulates the content negotiation logic used to build HTTP response from RDF an dataset, model, or result set.
  * 
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
- * @see org.apache.jena.rdf.model.Model
  * @see javax.ws.rs.core.Variant
  */
 public class Response
@@ -48,26 +44,55 @@ public class Response
     private static final Logger log = LoggerFactory.getLogger(Response.class);
 
     private final Request request;
-    
+    private final Object entity;
+    private final Variant variant;
+    private final EntityTag entityTag;
+
     /**
      * Builds model response from request.
      * 
-     * @param request current request
+     * @param request response entity
+     * @param entity response dataset
+     * @param mediaTypes supported media type
+     * @param languages content languages
+     * @param encodings content type encodings
+     * @param entityTag entity tag
      */
-    protected Response(Request request)
+    public Response(Request request, Object entity, EntityTag entityTag, List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings)
     {
-        if (request == null) throw new IllegalArgumentException("Request cannot be null");
-        this.request = request;
+        this(request, entity, entityTag, getVariantListBuilder(mediaTypes, languages, encodings).build());
     }
 
-    public Request getRequest()
+    /**
+     * Builds model response from request.
+     * 
+     * @param request response entity
+     * @param entity response dataset
+     * @param variants media type variants
+     * @param entityTag entity tag
+     */
+    public Response(Request request, Object entity, EntityTag entityTag, List<Variant> variants)
     {
-        return request;
+        this(request, entity, entityTag, request.selectVariant(variants) != null ? request.selectVariant(variants) : request.selectVariant(removeLanguages(variants)));
     }
-    
-    public static Response fromRequest(Request request)
+
+    public Response(Request request, Object entity, EntityTag entityTag, Variant variant)
     {
-        return new Response(request);
+        if (request == null) throw new IllegalArgumentException("Request cannot be null");
+        if (entity == null) throw new IllegalArgumentException("Object cannot be null");
+        if (entityTag == null) throw new IllegalArgumentException("EntityTag cannot be null");
+        if (variant == null) throw new IllegalArgumentException("Variant cannot be null");
+        
+        if (variant == null)
+        {
+            if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants", variant);
+            throw new WebApplicationException(javax.ws.rs.core.Response.status(javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE).build());
+        }
+
+        this.request = request;
+        this.entity = entity;
+        this.entityTag = entityTag;
+        this.variant = variant;
     }
 
     public static MediaType[] mediaTypeListToArray(List<MediaType> list)
@@ -105,66 +130,12 @@ public class Response
      * @param encodings
      * @return variant builder
      */    
-    public Variant.VariantListBuilder getVariantListBuilder(List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings)
-    {        
+    public static Variant.VariantListBuilder getVariantListBuilder(List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings)
+    {
         return Variant.VariantListBuilder.newInstance().
                 mediaTypes(mediaTypeListToArray(mediaTypes)).
                 languages(localeListToArray(languages)).
                 encodings(stringListToArray(encodings));
-    }
-    
-    /**
-     * Returns response builder for an RDF model.
-     * 
-     * @param model RDF model
-     * @param variants supported response variants
-     * @return response builder
-     */
-    public ResponseBuilder getResponseBuilder(Model model, List<Variant> variants)
-    {
-        if (variants == null) throw new IllegalArgumentException("List<Variant> cannot be null");
-
-        Variant variant = getRequest().selectVariant(variants);
-        if (variant == null)
-        {
-            variant = getRequest().selectVariant(removeLanguages(variants));
-            if (log.isTraceEnabled()) log.trace("Conneg did not produce acceptable response Variants; attempting conneg without language");
-            
-            if (variant == null)
-            {
-                if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants: {}", variant, variants);
-                throw new WebApplicationException(javax.ws.rs.core.Response.status(javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE).build());
-            }
-        }
-
-        return getResponseBuilder(model, getEntityTag(model, variant), variant);
-    }
-
-    /**
-     * Returns response builder for an RDF dataset.
-     * 
-     * @param dataset RDF model
-     * @param variants supported response variants
-     * @return response builder
-     */
-    public ResponseBuilder getResponseBuilder(Dataset dataset, List<Variant> variants)
-    {
-        if (variants == null) throw new IllegalArgumentException("List<Variant> cannot be null");
-
-        Variant variant = getRequest().selectVariant(variants);
-        if (variant == null)
-        {
-            variant = getRequest().selectVariant(removeLanguages(variants));
-            if (log.isTraceEnabled()) log.trace("Conneg did not produce acceptable response Variants; attempting conneg without language");
-            
-            if (variant == null)
-            {
-                if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants: {}", variant, variants);
-                throw new WebApplicationException(javax.ws.rs.core.Response.status(javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE).build());
-            }
-        }
-
-        return getResponseBuilder(dataset, getEntityTag(dataset, variant), variant);
     }
     
     /**
@@ -173,7 +144,7 @@ public class Response
      * @param variants variant list
      * @return variant list
      */
-    public List<Variant> removeLanguages(List<Variant> variants)
+    public static List<Variant> removeLanguages(List<Variant> variants)
     {
         if (variants == null) throw new IllegalArgumentException("List<Variant> cannot be null");
         
@@ -186,142 +157,72 @@ public class Response
     }
     
     /**
-     * Returns response builder for SPARQL result set.
-     * 
-     * @param resultSet result set
-     * @param variants supported response variants
-     * @return response builder
-     */    
-    public ResponseBuilder getResponseBuilder(ResultSetRewindable resultSet, List<Variant> variants)
-    {
-        if (resultSet == null) throw new IllegalArgumentException("ResultSetRewindable cannot be null");
-        if (variants == null) throw new IllegalArgumentException("List<Variant> cannot be null");
-        
-        Variant variant = getRequest().selectVariant(variants);
-        if (variant == null)
-        {
-            if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants: {}", variant, variants);
-            return javax.ws.rs.core.Response.notAcceptable(variants);
-        }
-
-        resultSet.reset();
-        EntityTag entityTag = getEntityTag(resultSet, variant);
-        resultSet.reset(); // ResultSet needs to be rewinded back to the beginning
-        return getResponseBuilder(resultSet, entityTag, variant);
-    }
-
-    /**
      * Returns generic response builder.
      * 
-     * @param entity response entity
-     * @param entityTag entity tag
-     * @param variant response variant
      * @return response builder
-     */        
-    public ResponseBuilder getResponseBuilder(Object entity, EntityTag entityTag, Variant variant)
+     */
+    public ResponseBuilder getResponseBuilder()
     {
-        if (entity == null) throw new IllegalArgumentException("Object cannot be null");
-        if (entityTag == null) throw new IllegalArgumentException("EntityTag cannot be null");
-        if (variant == null) throw new IllegalArgumentException("Variant cannot be null");
-
-        ResponseBuilder rb = getRequest().evaluatePreconditions(entityTag);
+        // add variant hash to make it a strong ETag (i.e. the same RDF graph in different syntaxes produces different hashes)
+        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag
+        EntityTag newEntityTag = null;
+        if (getEntityTag() != null)
+        {
+            BigInteger entityTagHash = new BigInteger(getEntityTag().getValue(), 16);
+            entityTagHash = entityTagHash.add(BigInteger.valueOf(getVariant().hashCode()));
+            newEntityTag = new EntityTag(entityTagHash.toString(16));
+        }
+        
+        ResponseBuilder rb = getRequest().evaluatePreconditions(getEntityTag());
         if (rb != null)
         {
             if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
-            return rb.variant(variant); // Jersey doesn't seem to set "Vary" header
+            return rb.variant(getVariant()); // Jersey doesn't seem to set "Vary" header
         }
         else
         {
             if (log.isTraceEnabled()) log.trace("Generating RDF Response with Variant: {} and EntityTag: {}", variant, entityTag);
-            return javax.ws.rs.core.Response.ok(entity, variant).
-                    tag(entityTag);
+            return javax.ws.rs.core.Response.ok(getEntity(), getVariant()).
+                    tag(newEntityTag);
         }
     }
         
     /**
      * Calculates hash for an RDF dataset and a given response variant.
      * 
-     * @param dataset RDF model
-     * @param variant response variant
+     * @param dataset RDF dataset
      * @return hash code
      */
-    public long getDatasetVariantHash(Dataset dataset, Variant variant)
+    public static long hashDataset(Dataset dataset)
     {
         if (dataset == null) throw new IllegalArgumentException("Model cannot be null");
-        if (variant == null) throw new IllegalArgumentException("Variant cannot be null");
         
         long hash = ModelUtils.hashModel(dataset.getDefaultModel());
         
         Iterator<String> it = dataset.listNames();
         while (it.hasNext()) hash += ModelUtils.hashModel(dataset.getNamedModel(it.next()));
             
-        return hash + variant.hashCode();
+        return hash;
+    }
+
+    public Request getRequest()
+    {
+        return request;
     }
     
-    /**
-     * Calculates hash for an RDF model and a given response variant.
-     * 
-     * @param model RDF model
-     * @param variant response variant
-     * @return hash code
-     */
-    public long getModelVariantHash(Model model, Variant variant)
+    public Object getEntity()
     {
-        if (model == null) throw new IllegalArgumentException("Model cannot be null");
-        if (variant == null) throw new IllegalArgumentException("Variant cannot be null");
-        
-        return ModelUtils.hashModel(model) + variant.hashCode();
-    }
-
-    /**
-     * Calculates hash for a SPARQL result set and a given response variant.
-     * 
-     * @param resultSet result set
-     * @param variant response variant
-     * @return hash code
-     */    
-    public long getResultSetVariantHash(ResultSet resultSet, Variant variant)
-    {
-        if (resultSet == null) throw new IllegalArgumentException("ResultSet cannot be null");
-        if (variant == null) throw new IllegalArgumentException("Variant cannot be null");
-
-        return ResultSetUtils.hashResultSet(resultSet) + variant.hashCode();
-    }
-
-    /**
-     * Calculates ETag for an RDF dataset  and a given response variant.
-     * 
-     * @param dataset RDF model
-     * @param variant response variant
-     * @return entity tag object
-     */
-    public EntityTag getEntityTag(Dataset dataset, Variant variant)
-    {
-        return new EntityTag(Long.toHexString(getDatasetVariantHash(dataset, variant)));
+        return entity;
     }
     
-    /**
-     * Calculates ETag for an RDF model and a given response variant.
-     * 
-     * @param model RDF model
-     * @param variant response variant
-     * @return entity tag object
-     */
-    public EntityTag getEntityTag(Model model, Variant variant)
+    public Variant getVariant()
     {
-        return new EntityTag(Long.toHexString(getModelVariantHash(model, variant)));
+        return variant;
     }
-
-    /**
-     * Calculates ETag for a SPARQL result set and a given response variant.
-     * 
-     * @param resultSet result set
-     * @param variant response variant
-     * @return entity tag object
-     */    
-    public EntityTag getEntityTag(ResultSet resultSet, Variant variant)
+    
+    public EntityTag getEntityTag()
     {
-        return new EntityTag(Long.toHexString(getResultSetVariantHash(resultSet, variant)));
+        return entityTag;
     }
-
+    
 }

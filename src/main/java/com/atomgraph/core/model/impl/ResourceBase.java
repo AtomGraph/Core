@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -30,6 +29,10 @@ import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Variant;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.model.Resource;
+import com.atomgraph.core.util.ModelUtils;
+import java.util.Collections;
+import javax.ws.rs.core.EntityTag;
+import javax.ws.rs.core.MediaType;
 import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +51,6 @@ public abstract class ResourceBase implements Resource
     private final Request request;
     private final MediaTypes mediaTypes;
     private final URI uri;
-    private final com.atomgraph.core.model.impl.Response response;
 
     /** 
      * JAX-RS-compatible resource constructor with injected request metadata.
@@ -75,7 +77,6 @@ public abstract class ResourceBase implements Resource
         this.request = request;
         this.mediaTypes = mediaTypes;
         this.uri = uri;
-        this.response = com.atomgraph.core.model.impl.Response.fromRequest(request);
         if (log.isDebugEnabled()) log.debug("Request URI: {}", uriInfo.getRequestUri());
     }
 
@@ -98,7 +99,7 @@ public abstract class ResourceBase implements Resource
      */
     public Response getResponse(Dataset dataset)
     {
-        Variant variant = getRequest().selectVariant(getVariants(getWritableMediaTypes(Dataset.class)));
+        Variant variant = getRequest().selectVariant(getVariants(getMediaTypes().getWritable(Dataset.class)));
         
         if (variant == null) return getResponse(dataset.getDefaultModel()); // if quads are not acceptable, fallback to responding with the default graph
 
@@ -113,8 +114,13 @@ public abstract class ResourceBase implements Resource
      */
     public ResponseBuilder getResponseBuilder(Model model)
     {
-        return com.atomgraph.core.model.impl.Response.fromRequest(getRequest()).
-                getResponseBuilder(model, getVariants(getWritableMediaTypes(Model.class)));
+        return new com.atomgraph.core.model.impl.Response(getRequest(),
+                model,
+                new EntityTag(Long.toHexString(ModelUtils.hashModel(model))),
+                getMediaTypes().getWritable(model.getClass()),
+                Collections.<Locale>emptyList(),
+                Collections.<String>emptyList()).
+            getResponseBuilder();
     }
     
     /**
@@ -125,8 +131,13 @@ public abstract class ResourceBase implements Resource
      */
     public ResponseBuilder getResponseBuilder(Dataset dataset)
     {
-        return com.atomgraph.core.model.impl.Response.fromRequest(getRequest()).
-                getResponseBuilder(dataset, getVariants(getWritableMediaTypes(Dataset.class)));
+        return new com.atomgraph.core.model.impl.Response(getRequest(),
+                dataset,
+                new EntityTag(Long.toHexString(com.atomgraph.core.model.impl.Response.hashDataset(dataset))),
+                getMediaTypes().getWritable(dataset.getClass()),
+                Collections.<Locale>emptyList(),
+                Collections.<String>emptyList()).
+            getResponseBuilder();
     }
     
     /**
@@ -137,7 +148,7 @@ public abstract class ResourceBase implements Resource
      */
     public List<Variant> getVariants(List<MediaType> mediaTypes)
     {
-        return getResponse().getVariantListBuilder(mediaTypes, getLanguages(), getEncodings()).add().build();
+        return com.atomgraph.core.model.impl.Response.getVariantListBuilder(mediaTypes, getLanguages(), getEncodings()).build();
     }
     
     public List<javax.ws.rs.core.MediaType> getWritableMediaTypes(Class clazz)
@@ -189,11 +200,6 @@ public abstract class ResourceBase implements Resource
     public Request getRequest()
     {
         return request;
-    }
-
-    public com.atomgraph.core.model.impl.Response getResponse()
-    {
-        return response;
     }
     
 }

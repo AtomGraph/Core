@@ -25,14 +25,14 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Variant;
 import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.atomgraph.core.model.DatasetQuadAccessor;
 import com.atomgraph.core.model.Service;
+import java.util.Collections;
+import javax.ws.rs.core.EntityTag;
 
 /**
  *
@@ -45,7 +45,6 @@ public class QuadStoreImpl implements QuadStore
     private final Request request;
     private final DatasetQuadAccessor accessor;
     private final MediaTypes mediaTypes;
-    private final com.atomgraph.core.model.impl.Response response;
     
     /**
      * Constructs Graph Store from request metadata.
@@ -68,7 +67,6 @@ public class QuadStoreImpl implements QuadStore
         this.request = request;
         this.accessor = accessor;
         this.mediaTypes = mediaTypes;
-        this.response = com.atomgraph.core.model.impl.Response.fromRequest(request);
     }
     
     /**
@@ -90,21 +88,15 @@ public class QuadStoreImpl implements QuadStore
      */
     public javax.ws.rs.core.Response.ResponseBuilder getResponseBuilder(Dataset dataset)
     {
-        return com.atomgraph.core.model.impl.Response.fromRequest(getRequest()).
-                getResponseBuilder(dataset, getVariants(getMediaTypes().getWritable(Dataset.class)));
+        return new com.atomgraph.core.model.impl.Response(getRequest(),
+                dataset,
+                new EntityTag(Long.toHexString(com.atomgraph.core.model.impl.Response.hashDataset(dataset))),
+                getMediaTypes().getWritable(dataset.getClass()),
+                Collections.<Locale>emptyList(),
+                Collections.<String>emptyList()).
+            getResponseBuilder();
     }
     
-    /**
-     * Builds a list of acceptable response variants
-     * 
-     * @param mediaTypes
-     * @return supported variants
-     */
-    public List<Variant> getVariants(List<MediaType> mediaTypes)
-    {
-        return getResponse().getVariantListBuilder(mediaTypes, getLanguages(), getEncodings()).add().build();
-    }
-        
     /**
      * Returns a list of supported languages.
      * 
@@ -192,11 +184,6 @@ public class QuadStoreImpl implements QuadStore
     public MediaTypes getMediaTypes()
     {
         return mediaTypes;
-    }
-    
-    public com.atomgraph.core.model.impl.Response getResponse()
-    {
-        return response;
     }
     
 }

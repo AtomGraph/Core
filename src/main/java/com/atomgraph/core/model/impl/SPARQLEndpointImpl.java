@@ -35,6 +35,9 @@ import static com.atomgraph.core.model.SPARQLEndpoint.UPDATE;
 import static com.atomgraph.core.model.SPARQLEndpoint.USING_GRAPH_URI;
 import static com.atomgraph.core.model.SPARQLEndpoint.USING_NAMED_GRAPH_URI;
 import com.atomgraph.core.model.Service;
+import com.atomgraph.core.util.ModelUtils;
+import com.atomgraph.core.util.ResultSetUtils;
+import java.util.Collections;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -46,7 +49,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QueryParseException;
-import org.apache.jena.query.ResultSet;
 import org.apache.jena.update.UpdateFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +67,6 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
     private final Request request;
     private final EndpointAccessor accessor;
     private final MediaTypes mediaTypes;
-    private final com.atomgraph.core.model.impl.Response response;
     
     /**
      * Constructs SPARQL endpoint from request metadata.
@@ -88,7 +89,6 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
         this.request = request;
         this.accessor = accessor;
         this.mediaTypes = mediaTypes;
-        this.response = com.atomgraph.core.model.impl.Response.fromRequest(request);
         if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase");
     }
     
@@ -166,7 +166,8 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
 
         if (query.isConstructType() || query.isDescribeType())
         {
-            Variant variant = getRequest().selectVariant(getVariants(getMediaTypes().getWritable(Dataset.class)));
+            List<Variant> variants = com.atomgraph.core.model.impl.Response.getVariantListBuilder(getMediaTypes().getWritable(Dataset.class), getLanguages(), getEncodings()).build();
+            Variant variant = getRequest().selectVariant(variants);
             if (variant == null)
             {
                 if (log.isDebugEnabled()) log.debug("Loading Model using CONSTRUCT/DESCRIBE query: {}", query);
@@ -191,8 +192,13 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
      */
     public javax.ws.rs.core.Response.ResponseBuilder getResponseBuilder(Dataset dataset)
     {
-        return com.atomgraph.core.model.impl.Response.fromRequest(getRequest()).
-                getResponseBuilder(dataset, getVariants(getMediaTypes().getWritable(Dataset.class)));
+        return new com.atomgraph.core.model.impl.Response(getRequest(),
+                dataset,
+                new EntityTag(Long.toHexString(com.atomgraph.core.model.impl.Response.hashDataset(dataset))),
+                getMediaTypes().getWritable(dataset.getClass()),
+                Collections.<Locale>emptyList(),
+                Collections.<String>emptyList()).
+            getResponseBuilder();
     }
 
     /**
@@ -203,8 +209,13 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
      */
     public ResponseBuilder getResponseBuilder(Model model)
     {
-        return com.atomgraph.core.model.impl.Response.fromRequest(getRequest()).
-                getResponseBuilder(model, getVariants(getMediaTypes().getWritable(Model.class)));
+        return new com.atomgraph.core.model.impl.Response(getRequest(),
+                model,
+                new EntityTag(Long.toHexString(ModelUtils.hashModel(model))),
+                getMediaTypes().getWritable(model.getClass()),
+                Collections.<Locale>emptyList(),
+                Collections.<String>emptyList()).
+            getResponseBuilder();
     }
         
     /**
@@ -215,19 +226,16 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
      */
     public ResponseBuilder getResponseBuilder(ResultSetRewindable resultSet)
     {
-        return com.atomgraph.core.model.impl.Response.fromRequest(getRequest()).
-                getResponseBuilder(resultSet, getVariants(getMediaTypes().getWritable(ResultSet.class)));
-    }
-
-    /**
-     * Builds a list of acceptable response variants
-     * 
-     * @param mediaTypes
-     * @return supported variants
-     */
-    public List<Variant> getVariants(List<MediaType> mediaTypes)
-    {
-        return getResponse().getVariantListBuilder(mediaTypes, getLanguages(), getEncodings()).add().build();
+        long hash = ResultSetUtils.hashResultSet(resultSet);
+        resultSet.reset();
+        
+        return new com.atomgraph.core.model.impl.Response(getRequest(),
+                resultSet,
+                new EntityTag(Long.toHexString(hash)),
+                getMediaTypes().getWritable(resultSet.getClass()),
+                Collections.<Locale>emptyList(),
+                Collections.<String>emptyList()).
+            getResponseBuilder();
     }
         
     /**
@@ -264,11 +272,6 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
     public MediaTypes getMediaTypes()
     {
         return mediaTypes;
-    }
-    
-    public com.atomgraph.core.model.impl.Response getResponse()
-    {
-        return response;
     }
  
 }
