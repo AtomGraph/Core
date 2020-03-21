@@ -96,7 +96,7 @@ public class GraphStoreImpl implements GraphStore
         return new com.atomgraph.core.model.impl.Response(getRequest(),
                 model,
                 new EntityTag(Long.toHexString(ModelUtils.hashModel(model))),
-                getMediaTypes().getWritable(model.getClass()),
+                getMediaTypes().getWritable(Model.class),
                 Collections.<Locale>emptyList(),
                 Collections.<String>emptyList()).
             getResponseBuilder();

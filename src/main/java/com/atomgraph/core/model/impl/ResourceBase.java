@@ -117,7 +117,7 @@ public abstract class ResourceBase implements Resource
         return new com.atomgraph.core.model.impl.Response(getRequest(),
                 model,
                 new EntityTag(Long.toHexString(ModelUtils.hashModel(model))),
-                getMediaTypes().getWritable(model.getClass()),
+                getMediaTypes().getWritable(Model.class),
                 Collections.<Locale>emptyList(),
                 Collections.<String>emptyList()).
             getResponseBuilder();
@@ -134,7 +134,7 @@ public abstract class ResourceBase implements Resource
         return new com.atomgraph.core.model.impl.Response(getRequest(),
                 dataset,
                 new EntityTag(Long.toHexString(com.atomgraph.core.model.impl.Response.hashDataset(dataset))),
-                getMediaTypes().getWritable(dataset.getClass()),
+                getMediaTypes().getWritable(Dataset.class),
                 Collections.<Locale>emptyList(),
                 Collections.<String>emptyList()).
             getResponseBuilder();
