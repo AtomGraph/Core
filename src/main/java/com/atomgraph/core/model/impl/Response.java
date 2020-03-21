@@ -81,8 +81,6 @@ public class Response
         if (request == null) throw new IllegalArgumentException("Request cannot be null");
         if (entity == null) throw new IllegalArgumentException("Object cannot be null");
         if (entityTag == null) throw new IllegalArgumentException("EntityTag cannot be null");
-        if (variant == null) throw new IllegalArgumentException("Variant cannot be null");
-        
         if (variant == null)
         {
             if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants", variant);
@@ -165,15 +163,12 @@ public class Response
     {
         // add variant hash to make it a strong ETag (i.e. the same RDF graph in different syntaxes produces different hashes)
         // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag
-        EntityTag newEntityTag = null;
-        if (getEntityTag() != null)
-        {
-            BigInteger entityTagHash = new BigInteger(getEntityTag().getValue(), 16);
-            entityTagHash = entityTagHash.add(BigInteger.valueOf(getVariant().hashCode()));
-            newEntityTag = new EntityTag(entityTagHash.toString(16));
-        }
+        EntityTag newEntityTag = getEntityTag();
+        BigInteger entityTagHash = new BigInteger(newEntityTag.getValue(), 16);
+        entityTagHash = entityTagHash.add(BigInteger.valueOf(getVariant().hashCode()));
+        newEntityTag = new EntityTag(entityTagHash.toString(16));
         
-        ResponseBuilder rb = getRequest().evaluatePreconditions(getEntityTag());
+        ResponseBuilder rb = getRequest().evaluatePreconditions(newEntityTag);
         if (rb != null)
         {
             if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
