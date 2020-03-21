@@ -49,6 +49,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QueryParseException;
+import org.apache.jena.query.ResultSet;
 import org.apache.jena.update.UpdateFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -236,7 +237,7 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
         return new com.atomgraph.core.model.impl.Response(getRequest(),
                 resultSet,
                 new EntityTag(Long.toHexString(hash)),
-                getMediaTypes().getWritable(resultSet.getClass()),
+                getMediaTypes().getWritable(ResultSet.class),
                 Collections.<Locale>emptyList(),
                 Collections.<String>emptyList()).
             getResponseBuilder();
