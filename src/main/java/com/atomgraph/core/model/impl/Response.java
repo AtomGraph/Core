@@ -28,6 +28,7 @@ import javax.ws.rs.core.Variant;
 import com.atomgraph.core.util.ModelUtils;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
@@ -45,22 +46,24 @@ public class Response
 
     private final Request request;
     private final Object entity;
-    private final Variant variant;
+    private final Date lastModified;
     private final EntityTag entityTag;
+    private final Variant variant;
 
     /**
      * Builds model response from request.
      * 
      * @param request response entity
      * @param entity response dataset
+     * @param lastModified last modified date
      * @param mediaTypes supported media type
      * @param languages content languages
      * @param encodings content type encodings
      * @param entityTag entity tag
      */
-    public Response(Request request, Object entity, EntityTag entityTag, List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings)
+    public Response(Request request, Object entity, Date lastModified, EntityTag entityTag, List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings)
     {
-        this(request, entity, entityTag, getVariantListBuilder(mediaTypes, languages, encodings).add().build());
+        this(request, entity, lastModified, entityTag, getVariantListBuilder(mediaTypes, languages, encodings).add().build());
     }
 
     /**
@@ -68,19 +71,19 @@ public class Response
      * 
      * @param request response entity
      * @param entity response dataset
-     * @param variants media type variants
+     * @param lastModified last modified date
      * @param entityTag entity tag
+     * @param variants media type variants
      */
-    public Response(Request request, Object entity, EntityTag entityTag, List<Variant> variants)
+    public Response(Request request, Object entity, Date lastModified, EntityTag entityTag, List<Variant> variants)
     {
-        this(request, entity, entityTag, request.selectVariant(variants) != null ? request.selectVariant(variants) : request.selectVariant(removeLanguages(variants)));
+        this(request, entity, lastModified, entityTag, request.selectVariant(variants) != null ? request.selectVariant(variants) : request.selectVariant(removeLanguages(variants)));
     }
 
-    public Response(Request request, Object entity, EntityTag entityTag, Variant variant)
+    public Response(Request request, Object entity, Date lastModified, EntityTag entityTag, Variant variant)
     {
         if (request == null) throw new IllegalArgumentException("Request cannot be null");
         if (entity == null) throw new IllegalArgumentException("Object cannot be null");
-        if (entityTag == null) throw new IllegalArgumentException("EntityTag cannot be null");
         if (variant == null)
         {
             if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants", variant);
@@ -89,6 +92,7 @@ public class Response
 
         this.request = request;
         this.entity = entity;
+        this.lastModified = lastModified;
         this.entityTag = entityTag;
         this.variant = variant;
     }
@@ -161,14 +165,31 @@ public class Response
      */
     public ResponseBuilder getResponseBuilder()
     {
-        // add variant hash to make it a strong ETag (i.e. the same RDF graph in different syntaxes produces different hashes)
-        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag
-        EntityTag newEntityTag = getEntityTag();
-        BigInteger entityTagHash = new BigInteger(newEntityTag.getValue(), 16);
-        entityTagHash = entityTagHash.add(BigInteger.valueOf(getVariant().hashCode()));
-        newEntityTag = new EntityTag(entityTagHash.toString(16));
+        return getResponseBuilder(getLastModified(), getVariantEntityTag());
+    }
         
-        ResponseBuilder rb = getRequest().evaluatePreconditions(newEntityTag);
+    /**
+     * Returns generic response builder from last modified date and/or entity tag.
+     * 
+     * @param lastModified last modified date
+     * @param entityTag entity tag
+     * @return response builder
+     */
+    public ResponseBuilder getResponseBuilder(Date lastModified, EntityTag entityTag)
+    {
+        final ResponseBuilder rb;
+        
+        if (lastModified != null && entityTag != null) rb = getRequest().evaluatePreconditions(lastModified, entityTag);
+        else
+        {
+            if (lastModified != null) rb = getRequest().evaluatePreconditions(lastModified);
+            else
+            {
+                if (entityTag != null) rb = getRequest().evaluatePreconditions(entityTag);
+                else rb = getRequest().evaluatePreconditions();
+            }
+        }
+        
         if (rb != null)
         {
             if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
@@ -176,12 +197,27 @@ public class Response
         }
         else
         {
-            if (log.isTraceEnabled()) log.trace("Generating RDF Response with Variant: {} and EntityTag: {}", variant, entityTag);
+            if (log.isTraceEnabled()) log.trace("Generating RDF Response with Variant: {} and EntityTag: {}", getVariant(), entityTag);
             return javax.ws.rs.core.Response.ok(getEntity(), getVariant()).
-                    tag(newEntityTag);
+                lastModified(lastModified).
+                tag(entityTag);
         }
     }
+
+    public EntityTag getVariantEntityTag()
+    {
+        // add variant hash to make it a strong ETag (i.e. the same RDF graph in different syntaxes produces different ETags)
+        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag
+        if (getEntityTag() != null)
+        {
+            BigInteger entityTagHash = new BigInteger(getEntityTag().getValue(), 16);
+            entityTagHash = entityTagHash.add(BigInteger.valueOf(getVariant().hashCode()));
+            return new EntityTag(entityTagHash.toString(16));
+        }
         
+        return null;
+    }
+    
     /**
      * Calculates hash for an RDF dataset and a given response variant.
      * 
@@ -209,15 +245,20 @@ public class Response
     {
         return entity;
     }
+
+    public EntityTag getEntityTag()
+    {
+        return entityTag;
+    }
+
+    public Date getLastModified()
+    {
+        return lastModified;
+    }
     
     public Variant getVariant()
     {
         return variant;
-    }
-    
-    public EntityTag getEntityTag()
-    {
-        return entityTag;
     }
     
 }

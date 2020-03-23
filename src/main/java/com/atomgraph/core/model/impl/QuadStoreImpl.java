@@ -90,6 +90,7 @@ public class QuadStoreImpl implements QuadStore
     {
         return new com.atomgraph.core.model.impl.Response(getRequest(),
                 dataset,
+                null,
                 new EntityTag(Long.toHexString(com.atomgraph.core.model.impl.Response.hashDataset(dataset))),
                 getMediaTypes().getWritable(Dataset.class),
                 Collections.<Locale>emptyList(),
