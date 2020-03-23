@@ -193,7 +193,8 @@ public class Response
         if (rb != null)
         {
             if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
-            return rb.variant(getVariant()); // Jersey doesn't seem to set "Vary" header
+            return rb.variant(getVariant()). // Jersey doesn't seem to set "Vary" header
+                lastModified(lastModified); // if rb != null, Jersey sets ETag but not Last-Modified
         }
         else
         {
