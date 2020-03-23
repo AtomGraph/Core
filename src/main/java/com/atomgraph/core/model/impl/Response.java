@@ -204,10 +204,14 @@ public class Response
         }
     }
 
+    /**
+     * Calculates variant-specific (strong) <code>ETag</code> value by adding variant hash to the content hash.
+     * As a result, the same RDF graph in different syntaxes produces different <code>ETag</code>s.
+     * 
+     * @return entity tag
+     */
     public EntityTag getVariantEntityTag()
     {
-        // add variant hash to make it a strong ETag (i.e. the same RDF graph in different syntaxes produces different ETags)
-        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag
         if (getEntityTag() != null)
         {
             BigInteger entityTagHash = new BigInteger(getEntityTag().getValue(), 16);

@@ -31,6 +31,7 @@ import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.model.Resource;
 import com.atomgraph.core.util.ModelUtils;
 import java.util.Collections;
+import java.util.Date;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.MediaType;
 import org.apache.jena.query.Dataset;
@@ -83,7 +84,7 @@ public abstract class ResourceBase implements Resource
     /**
      * Returns response for the given RDF graph.
      * 
-     * @param model RDF dataset
+     * @param model RDF model
      * @return response object
      */
     public Response getResponse(Model model)
@@ -105,7 +106,29 @@ public abstract class ResourceBase implements Resource
 
         return getResponseBuilder(dataset).build();
     }
+    
+    /**
+     * Extract the <code>Last-Modified</code> response header value of the current resource from its RDF model.
+     * 
+     * @param model RDF model
+     * @return date of last modification
+     */
+    public Date getLastModified(Model model)
+    {
+        return null;
+    }
 
+    /**
+     * Generate the <code>ETag</code> response header value of the current resource from its RDF model.
+     * 
+     * @param model RDF model
+     * @return entity tag
+     */
+    public EntityTag getEntityTag(Model model)
+    {
+        return new EntityTag(Long.toHexString(ModelUtils.hashModel(model)));
+    }
+    
     /**
      * Returns response builder for the given RDF graph.
      * 
@@ -116,12 +139,34 @@ public abstract class ResourceBase implements Resource
     {
         return new com.atomgraph.core.model.impl.Response(getRequest(),
                 model,
-                null,
-                new EntityTag(Long.toHexString(ModelUtils.hashModel(model))),
+                getLastModified(model),
+                getEntityTag(model),
                 getMediaTypes().getWritable(Model.class),
                 Collections.<Locale>emptyList(),
                 Collections.<String>emptyList()).
             getResponseBuilder();
+    }
+    
+    /**
+     * Extract the <code>Last-Modified</code> response header value of the current resource from its RDF model.
+     * 
+     * @param dataset RDF dataset
+     * @return date of last modification
+     */
+    public Date getLastModified(Dataset dataset)
+    {
+        return null;
+    }
+
+    /**
+     * Generate the <code>ETag</code> response header value of the current resource from its RDF model.
+     * 
+     * @param dataset RDF dataset
+     * @return entity tag
+     */
+    public EntityTag getEntityTag(Dataset dataset)
+    {
+        return new EntityTag(Long.toHexString(com.atomgraph.core.model.impl.Response.hashDataset(dataset)));
     }
     
     /**
@@ -134,8 +179,8 @@ public abstract class ResourceBase implements Resource
     {
         return new com.atomgraph.core.model.impl.Response(getRequest(),
                 dataset,
-                null,
-                new EntityTag(Long.toHexString(com.atomgraph.core.model.impl.Response.hashDataset(dataset))),
+                getLastModified(dataset),
+                getEntityTag(dataset),
                 getMediaTypes().getWritable(Dataset.class),
                 Collections.<Locale>emptyList(),
                 Collections.<String>emptyList()).
