@@ -55,7 +55,7 @@ public class MediaTypes
     public static boolean isTriples(javax.ws.rs.core.MediaType mediaType)
     {
         javax.ws.rs.core.MediaType formatType = new javax.ws.rs.core.MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
-        Lang lang =RDFLanguages.contentTypeToLang(formatType.toString());
+        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
         return lang != null && RDFLanguages.isTriples(lang);
     }
     

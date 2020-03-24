@@ -97,7 +97,7 @@ public class GraphStoreImpl implements GraphStore
                 model,
                 null,
                 new EntityTag(Long.toHexString(ModelUtils.hashModel(model))),
-                getMediaTypes().getWritable(Model.class),
+                getWritableMediaTypes(Model.class),
                 Collections.<Locale>emptyList(),
                 Collections.<String>emptyList()).
             getResponseBuilder();
@@ -291,6 +291,11 @@ public class GraphStoreImpl implements GraphStore
         }
     }
 
+    public List<MediaType> getWritableMediaTypes(Class clazz)
+    {
+        return getMediaTypes().getWritable(clazz);
+    }
+    
     public Request getRequest()
     {
         return request;
