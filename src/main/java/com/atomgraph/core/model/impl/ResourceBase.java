@@ -100,7 +100,7 @@ public abstract class ResourceBase implements Resource
      */
     public Response getResponse(Dataset dataset)
     {
-        Variant variant = getRequest().selectVariant(getVariants(getMediaTypes().getWritable(Dataset.class)));
+        Variant variant = getRequest().selectVariant(getVariants(getWritableMediaTypes(Dataset.class)));
         
         if (variant == null) return getResponse(dataset.getDefaultModel()); // if quads are not acceptable, fallback to responding with the default graph
 
@@ -141,7 +141,7 @@ public abstract class ResourceBase implements Resource
                 model,
                 getLastModified(model),
                 getEntityTag(model),
-                getMediaTypes().getWritable(Model.class),
+                getWritableMediaTypes(Model.class),
                 Collections.<Locale>emptyList(),
                 Collections.<String>emptyList()).
             getResponseBuilder();
@@ -181,7 +181,7 @@ public abstract class ResourceBase implements Resource
                 dataset,
                 getLastModified(dataset),
                 getEntityTag(dataset),
-                getMediaTypes().getWritable(Dataset.class),
+                getWritableMediaTypes(Dataset.class),
                 Collections.<Locale>emptyList(),
                 Collections.<String>emptyList()).
             getResponseBuilder();

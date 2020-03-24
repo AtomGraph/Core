@@ -33,6 +33,7 @@ import com.atomgraph.core.model.DatasetQuadAccessor;
 import com.atomgraph.core.model.Service;
 import java.util.Collections;
 import javax.ws.rs.core.EntityTag;
+import javax.ws.rs.core.MediaType;
 
 /**
  *
@@ -92,7 +93,7 @@ public class QuadStoreImpl implements QuadStore
                 dataset,
                 null,
                 new EntityTag(Long.toHexString(com.atomgraph.core.model.impl.Response.hashDataset(dataset))),
-                getMediaTypes().getWritable(Dataset.class),
+                getWritableMediaTypes(Dataset.class),
                 Collections.<Locale>emptyList(),
                 Collections.<String>emptyList()).
             getResponseBuilder();
@@ -172,6 +173,11 @@ public class QuadStoreImpl implements QuadStore
         return javax.ws.rs.core.Response.noContent().build();
     }
 
+    public List<MediaType> getWritableMediaTypes(Class clazz)
+    {
+        return getMediaTypes().getWritable(clazz);
+    }
+    
     public Request getRequest()
     {
         return request;

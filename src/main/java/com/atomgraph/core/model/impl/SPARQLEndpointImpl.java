@@ -167,7 +167,7 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
 
         if (query.isConstructType() || query.isDescribeType())
         {
-            List<Variant> variants = com.atomgraph.core.model.impl.Response.getVariantListBuilder(getMediaTypes().getWritable(Dataset.class),
+            List<Variant> variants = com.atomgraph.core.model.impl.Response.getVariantListBuilder(getWritableMediaTypes(Dataset.class),
                     getLanguages(),
                     getEncodings()).
                 add().
@@ -201,7 +201,7 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
                 dataset,
                 null,
                 new EntityTag(Long.toHexString(com.atomgraph.core.model.impl.Response.hashDataset(dataset))),
-                getMediaTypes().getWritable(Dataset.class),
+                getWritableMediaTypes(Dataset.class),
                 Collections.<Locale>emptyList(),
                 Collections.<String>emptyList()).
             getResponseBuilder();
@@ -219,7 +219,7 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
                 model,
                 null,
                 new EntityTag(Long.toHexString(ModelUtils.hashModel(model))),
-                getMediaTypes().getWritable(Model.class),
+                getWritableMediaTypes(Model.class),
                 Collections.<Locale>emptyList(),
                 Collections.<String>emptyList()).
             getResponseBuilder();
@@ -240,7 +240,7 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
                 resultSet,
                 null,
                 new EntityTag(Long.toHexString(hash)),
-                getMediaTypes().getWritable(ResultSet.class),
+                getWritableMediaTypes(ResultSet.class),
                 Collections.<Locale>emptyList(),
                 Collections.<String>emptyList()).
             getResponseBuilder();
@@ -256,6 +256,17 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
         return new ArrayList<>();
     }
 
+    /**
+     * Get writable media types for a certain class.
+     * 
+     * @param clazz class
+     * @return list of media types
+     */
+    public List<MediaType> getWritableMediaTypes(Class clazz)
+    {
+        return getMediaTypes().getWritable(clazz);
+    }
+    
     /**
      * Returns supported HTTP encodings.
      * Note: this is different from content encodings such as UTF-8.
