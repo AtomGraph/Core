@@ -63,14 +63,14 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see <a href="http://www.lsrn.org/semweb/rdfpost.html">RDF/POST Encoding for RDF</a>
  */
-public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
+public class RDFPostReader extends ReaderRIOTBase
 {    
     private static final Logger log = LoggerFactory.getLogger(RDFPostReader.class);
 
     private ErrorHandler errorHandler = ErrorHandlerFactory.getDefaultErrorHandler();
     private ParserProfile parserProfile = null;
         
-    public Model parse(String body, String charsetName) throws URISyntaxException
+    public static Model parse(String body, String charsetName) throws URISyntaxException
     {
         List<String> keys = new ArrayList<>(), values = new ArrayList<>();
 
@@ -103,7 +103,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
         return parse(keys, values);
     }
 
-    public Model parse(List<String> k, List<String> v) throws URISyntaxException
+    public static Model parse(List<String> k, List<String> v) throws URISyntaxException
     {
         Model model = ModelFactory.createDefaultModel();
 
@@ -232,6 +232,12 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
         return model;
     }
 
+    public RDFPostReader(Lang lang, ParserProfile profile, ErrorHandler errorHandler)
+    {
+        this.parserProfile = profile;
+        this.errorHandler = errorHandler;
+    }
+    
     public boolean skipEmptyLiterals()
     {
         return true;
@@ -258,8 +264,8 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
     public void read(Reader in, String baseURI, Lang lang, StreamRDF output, Context context)
     {
         ParserProfile profile = getParserProfile();
-        if (profile == null) profile = RiotLib.profile(baseURI, false, false, errorHandler); 
-        if (getErrorHandler() == null) setErrorHandler(profile.getHandler());
+        if (profile == null) profile = RiotLib.profile(lang, baseURI, getErrorHandler()); 
+        if (getErrorHandler() == null) setErrorHandler(profile.getErrorHandler());
         
         Tokenizer tokens = new TokenizerRDFPost(PeekReader.make(in));
         
@@ -398,7 +404,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
         org.apache.jena.iri.IRI baseIRI = profile.makeIRI(baseStr, currLine, currCol);
         emitBase(baseIRI.toString(), dest);
         nextToken(tokens, peekIter);
-        profile.getPrologue().setBaseURI(baseIRI);
+        // parserProfile.setBaseURI(baseIRI);
     }
     
     protected void emitBase(String baseStr, StreamRDF dest)
@@ -421,7 +427,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
             exception(peekToken(tokens, peekIter), "'v' requires a IRI (found '" + peekToken(tokens, peekIter) + "')");
         String iriStr = peekToken(tokens, peekIter).getImage();
         org.apache.jena.iri.IRI iri = profile.makeIRI(iriStr, currLine, currCol);
-        profile.getPrologue().getPrefixMap().add(prefix, iri);
+        profile.getPrefixMap().add(prefix, iri);
         emitPrefix(prefix, iri.toString(), dest);
         nextToken(tokens, peekIter);
     }
@@ -788,7 +794,7 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
     
     protected final Node tokenAsNode(ParserProfile profile, Token token)
     {
-        return profile.create(null, token); // return profile.create(currentGraph, token);
+        return profile.create(null, token); // return parserProfile.create(currentGraph, token);
     }
     
     protected final void exception(Token token, String msg, Object... args)
@@ -811,19 +817,17 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
         throw ex ;
     }
 
-    @Override
     public ErrorHandler getErrorHandler()
     {
         return errorHandler;
     }
     
-    @Override
     public void setErrorHandler(ErrorHandler errorHandler)
     {
         this.errorHandler = errorHandler;
     }
 
-    @Override    
+    @Override
     public ParserProfile getParserProfile()
     {
         return parserProfile;
@@ -833,6 +837,6 @@ public class RDFPostReader extends ReaderRIOTBase // implements ReaderRIOT
     public void setParserProfile(ParserProfile parserProfile)
     {
         this.parserProfile = parserProfile;
-    }    
+    }
 
 }

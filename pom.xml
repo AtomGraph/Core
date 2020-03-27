@@ -87,8 +87,7 @@
         <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-arq</artifactId>
-            <version>3.0.1</version>
-            <!-- excluding HTTP Client as we are using Jersey Client instead -->
+            <version>3.14.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.httpcomponents</groupId>

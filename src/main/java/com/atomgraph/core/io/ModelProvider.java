@@ -32,13 +32,10 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFLanguages;
-import org.apache.jena.riot.ReaderRIOT;
+import org.apache.jena.riot.RDFParser;
 import org.apache.jena.riot.system.ErrorHandler;
 import org.apache.jena.riot.system.ErrorHandlerFactory;
-import org.apache.jena.riot.system.ParserProfile;
-import org.apache.jena.riot.system.RiotLib;
 import org.apache.jena.riot.system.StreamRDFLib;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,20 +92,26 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     public Model read(Model model, InputStream is, Lang lang, String baseURI)
     {
         ErrorHandler errorHandler = ErrorHandlerFactory.errorHandlerStd; // throw exceptions on all parse errors
-        ParserProfile parserProfile = RiotLib.profile(baseURI, true, true, errorHandler);
-        return read(model, is, lang, baseURI, errorHandler, parserProfile);
+        //ParserProfile parserProfile = RiotLib.profile(baseURI, true, true, errorHandler);
+        return read(model, is, lang, baseURI, errorHandler);
     }
     
-    public Model read(Model model, InputStream is, Lang lang, String baseURI, ErrorHandler errorHandler, ParserProfile parserProfile)
+    public Model read(Model model, InputStream is, Lang lang, String baseURI, ErrorHandler errorHandler)
     {
         if (model == null) throw new IllegalArgumentException("Model must be not null");
         if (is == null) throw new IllegalArgumentException("InputStream must be not null");
         if (lang == null) throw new IllegalArgumentException("Lang must be not null");
 
-        ReaderRIOT parser = RDFDataMgr.createReader(lang);
-        parser.setErrorHandler(errorHandler);
-        parser.setParserProfile(parserProfile);
-        parser.read(is, baseURI, null, StreamRDFLib.graph(model.getGraph()), null);
+        RDFParser parser =  RDFParser.create().
+            lang(lang).
+            errorHandler(errorHandler).
+            base(baseURI).
+            source(is).
+            build();
+        //parser.setErrorHandler(errorHandler);
+        //parser.setParserProfile(parserProfile);
+        
+        parser.parse(StreamRDFLib.graph(model.getGraph()));
         
         return model;
     }

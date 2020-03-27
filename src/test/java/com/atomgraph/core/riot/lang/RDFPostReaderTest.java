@@ -17,7 +17,8 @@
 package com.atomgraph.core.riot.lang;
 
 import com.atomgraph.core.riot.RDFLanguages;
-import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import org.apache.jena.rdf.model.AnonId;
@@ -29,12 +30,6 @@ import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFParserRegistry;
-import org.apache.jena.riot.ReaderRIOT;
-import org.apache.jena.riot.system.ErrorHandler;
-import org.apache.jena.riot.system.ErrorHandlerFactory;
-import org.apache.jena.riot.system.ParserProfile;
-import org.apache.jena.riot.system.RiotLib;
-import org.apache.jena.riot.system.StreamRDFLib;
 import org.junit.*;
 import static org.junit.Assert.*;
 
@@ -93,19 +88,9 @@ public class RDFPostReaderTest
     @Test
     public void testValidBodySimpleParse() throws URISyntaxException
     {
-        Model parsed = new RDFPostReader().parse(validRDFPost, ENC);
+        Model parsed = RDFPostReader.parse(validRDFPost, ENC);
         
         assertIsomorphic(validExpected, parsed);
-    }
-    
-    public ReaderRIOT createRIOTParser()
-    {
-        ErrorHandler errorHandler = ErrorHandlerFactory.errorHandlerStrict; // throw exceptions on all parse errors
-        ParserProfile parserProfile = RiotLib.profile("http://base", true, true, errorHandler);
-        ReaderRIOT parser = RDFDataMgr.createReader(RDFLanguages.RDFPOST);
-        parser.setErrorHandler(errorHandler);
-        parser.setParserProfile(parserProfile);
-        return parser;
     }
     
     /**
@@ -115,32 +100,40 @@ public class RDFPostReaderTest
     public void testValidBodyStreamingParse()
     {
         Model parsed = ModelFactory.createDefaultModel();
+        try (StringReader reader = new StringReader(validRDFPost))
+        {
+            RDFDataMgr.read(parsed, reader, "http://base", RDFLanguages.RDFPOST);
+        }
 
-        createRIOTParser().read(new ByteArrayInputStream(validRDFPost.getBytes()), "http://base", null, StreamRDFLib.graph(parsed.getGraph()), null);
-        
         assertIsomorphic(validExpected, parsed);
     }
 
     @Test
-    public void testWithRandomParams() throws UnsupportedEncodingException
+    public void testWithRandomParams() throws UnsupportedEncodingException, IOException
     {
-        String random = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&x=123" + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&ol=" + URLEncoder.encode("literal", ENC) + "&ZZZ=pu" +
+        String rdfPost = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&x=123" + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&ol=" + URLEncoder.encode("literal", ENC) + "&ZZZ=pu" +
             "&su=" + URLEncoder.encode("http://subject2", ENC) +  "&q=42" + "&pu=" + URLEncoder.encode("http://predicate3", ENC) + "&ol=" + URLEncoder.encode("literal1", ENC);
-        Model randomParsed = ModelFactory.createDefaultModel();
-        createRIOTParser().read(new ByteArrayInputStream(random.getBytes()), "http://base", null, StreamRDFLib.graph(randomParsed.getGraph()), null);
+        Model parsed = ModelFactory.createDefaultModel();
+        try (StringReader reader = new StringReader(rdfPost))
+        {
+            parsed.read(reader, "http://base", "RDF/POST");
+        }
         
-        assertTrue(randomParsed.isEmpty());
+        assertTrue(parsed.isEmpty());
     }
     
     @Test
-    public void testSkipMissingPredicate() throws UnsupportedEncodingException
+    public void testSkipMissingPredicate() throws UnsupportedEncodingException, IOException
     {
-        String skipToNextSubject = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&ol=" + URLEncoder.encode("literal", ENC) +
+        String rdfPost = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&ol=" + URLEncoder.encode("literal", ENC) +
             "&su=" + URLEncoder.encode("http://subject2", ENC) + "&pu=" + URLEncoder.encode("http://predicate3", ENC) + "&ol=" + URLEncoder.encode("literal1", ENC);
         Model expected = ModelFactory.createDefaultModel();
         expected.add(expected.createResource("http://subject2"), expected.createProperty("http://predicate3"), expected.createLiteral("literal1"));
         Model parsed = ModelFactory.createDefaultModel();
-        createRIOTParser().read(new ByteArrayInputStream(skipToNextSubject.getBytes()), "http://base", null, StreamRDFLib.graph(parsed.getGraph()), null);
+        try (StringReader reader = new StringReader(rdfPost))
+        {
+            parsed.read(reader, "http://base", "RDF/POST");
+        }
         
         assertIsomorphic(expected, parsed);
     }
@@ -148,12 +141,15 @@ public class RDFPostReaderTest
     @Test
     public void testSkipMissingPredicateLocalName() throws UnsupportedEncodingException
     {
-        String skipToNextSubject = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pn=" + URLEncoder.encode("http://ns/", ENC) + "&ol=" + URLEncoder.encode("literal", ENC) +
+        String rdfPost = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pn=" + URLEncoder.encode("http://ns/", ENC) + "&ol=" + URLEncoder.encode("literal", ENC) +
             "&su=" + URLEncoder.encode("http://subject2", ENC) + "&pu=" + URLEncoder.encode("http://predicate3", ENC) + "&ol=" + URLEncoder.encode("literal1", ENC);
         Model expected = ModelFactory.createDefaultModel();
         expected.add(expected.createResource("http://subject2"), expected.createProperty("http://predicate3"), expected.createLiteral("literal1"));
         Model parsed = ModelFactory.createDefaultModel();
-        createRIOTParser().read(new ByteArrayInputStream(skipToNextSubject.getBytes()), "http://base", null, StreamRDFLib.graph(parsed.getGraph()), null);
+        try (StringReader reader = new StringReader(rdfPost))
+        {
+            parsed.read(reader, "http://base", "RDF/POST");
+        }
         
         assertIsomorphic(expected, parsed);
     }
@@ -161,99 +157,142 @@ public class RDFPostReaderTest
     @Test
     public void testSkipMissingObject() throws UnsupportedEncodingException
     {
-        String skipToNextSubject = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://dc.org/#title", ENC) + 
+        String rdfPost = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://dc.org/#title", ENC) + 
             "&su=" + URLEncoder.encode("http://subject2", ENC) + "&pu=" + URLEncoder.encode("http://predicate3", ENC) + "&ol=" + URLEncoder.encode("literal1", ENC);
-        Model skipToNextSubjectExp = ModelFactory.createDefaultModel();
-        skipToNextSubjectExp.add(skipToNextSubjectExp.createResource("http://subject2"), skipToNextSubjectExp.createProperty("http://predicate3"), skipToNextSubjectExp.createLiteral("literal1"));
-        Model skipToNextSubjectParsed = ModelFactory.createDefaultModel();
-        createRIOTParser().read(new ByteArrayInputStream(skipToNextSubject.getBytes()), "http://base", null, StreamRDFLib.graph(skipToNextSubjectParsed.getGraph()), null);
+        Model expected = ModelFactory.createDefaultModel();
+        expected.add(expected.createResource("http://subject2"), expected.createProperty("http://predicate3"), expected.createLiteral("literal1"));
+        Model parsed = ModelFactory.createDefaultModel();
+        try (StringReader reader = new StringReader(rdfPost))
+        {
+            parsed.read(reader, "http://base", "RDF/POST");
+        }
         
-        assertIsomorphic(skipToNextSubjectExp, skipToNextSubjectParsed);
+        assertIsomorphic(expected, parsed);
+    }
+    
+    @Test
+    public void testSkipMissingObject1() throws UnsupportedEncodingException
+    {
+        String rdfPost = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://dc.org/#title", ENC) + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&ol=" + URLEncoder.encode("literal", ENC);
+        Model expected = ModelFactory.createDefaultModel();
+        expected.add(expected.createResource("http://subject1"), expected.createProperty("http://predicate1"), expected.createLiteral("literal"));
+        Model parsed = ModelFactory.createDefaultModel();
+        try (StringReader reader = new StringReader(rdfPost))
+        {
+            parsed.read(reader, "http://base", "RDF/POST");
+        }
         
-        String skipToNextPredicate = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://dc.org/#title", ENC) + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&ol=" + URLEncoder.encode("literal", ENC);
-        Model skipToNextPredicateExp = ModelFactory.createDefaultModel();
-        skipToNextPredicateExp.add(skipToNextPredicateExp.createResource("http://subject1"), skipToNextPredicateExp.createProperty("http://predicate1"), skipToNextPredicateExp.createLiteral("literal"));
-        Model skipToNextPredicateParsed = ModelFactory.createDefaultModel();
-        createRIOTParser().read(new ByteArrayInputStream(skipToNextPredicate.getBytes()), "http://base", null, StreamRDFLib.graph(skipToNextPredicateParsed.getGraph()), null);
-        
-        assertIsomorphic(skipToNextPredicateExp, skipToNextPredicateParsed);
+        assertIsomorphic(expected, parsed);
     }
     
     @Test
     public void testSkipMissingObjectLocalName() throws UnsupportedEncodingException
     {
-        String skipToNextSubject = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&on=" + URLEncoder.encode("http://ns/", ENC) +
+        String rdfPost = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&on=" + URLEncoder.encode("http://ns/", ENC) +
             "&su=" + URLEncoder.encode("http://subject2", ENC) + "&pu=" + URLEncoder.encode("http://predicate3", ENC) + "&ol=" + URLEncoder.encode("literal1", ENC);
-        Model skipToNextSubjectExp = ModelFactory.createDefaultModel();
-        skipToNextSubjectExp.add(skipToNextSubjectExp.createResource("http://subject2"), skipToNextSubjectExp.createProperty("http://predicate3"), skipToNextSubjectExp.createLiteral("literal1"));
-        Model skipToNextSubjectParsed = ModelFactory.createDefaultModel();
-        createRIOTParser().read(new ByteArrayInputStream(skipToNextSubject.getBytes()), "http://base", null, StreamRDFLib.graph(skipToNextSubjectParsed.getGraph()), null);
+        Model expected = ModelFactory.createDefaultModel();
+        expected.add(expected.createResource("http://subject2"), expected.createProperty("http://predicate3"), expected.createLiteral("literal1"));
+        Model parsed = ModelFactory.createDefaultModel();
+        try (StringReader reader = new StringReader(rdfPost))
+        {
+            parsed.read(reader, "http://base", "RDF/POST");
+        }
         
-        assertIsomorphic(skipToNextSubjectExp, skipToNextSubjectParsed);
-
-        String skipToNextPredicate = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&on=" + URLEncoder.encode("http://ns/", ENC) +
+        assertIsomorphic(expected, parsed);
+    }
+    
+    @Test
+    public void testSkipMissingObjectLocalName1() throws UnsupportedEncodingException
+    {
+        String rdfPost = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&on=" + URLEncoder.encode("http://ns/", ENC) +
             "&pu=" + URLEncoder.encode("http://predicate3", ENC) + "&ol=" + URLEncoder.encode("literal1", ENC);
-        Model skipToNextPredicateExp = ModelFactory.createDefaultModel();
-        skipToNextPredicateExp.add(skipToNextPredicateExp.createResource("http://subject1"), skipToNextPredicateExp.createProperty("http://predicate3"), skipToNextPredicateExp.createLiteral("literal1"));
-        Model skipToNextPredicateParsed = ModelFactory.createDefaultModel();
-        createRIOTParser().read(new ByteArrayInputStream(skipToNextPredicate.getBytes()), "http://base", null, StreamRDFLib.graph(skipToNextPredicateParsed.getGraph()), null);
+        Model expected = ModelFactory.createDefaultModel();
+        expected.add(expected.createResource("http://subject1"), expected.createProperty("http://predicate3"), expected.createLiteral("literal1"));
+        Model parsed = ModelFactory.createDefaultModel();
+        try (StringReader reader = new StringReader(rdfPost))
+        {
+            parsed.read(reader, "http://base", "RDF/POST");
+        }
         
-        assertIsomorphic(skipToNextPredicateExp, skipToNextPredicateParsed);
+        assertIsomorphic(expected, parsed);
     }
     
     @Test
     public void testSkipMissingDatatype() throws UnsupportedEncodingException
     {
-        String skipToNextNonLiteralObject = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&lt=" + URLEncoder.encode("http://type", ENC) + "ll=da" +
+        String rdfPost = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&lt=" + URLEncoder.encode("http://type", ENC) + "ll=da" +
             "&ou=" + URLEncoder.encode("http://object1", ENC);
-        Model skipToNextNonLiteralObjectExp = ModelFactory.createDefaultModel();
-        skipToNextNonLiteralObjectExp.add(skipToNextNonLiteralObjectExp.createResource("http://subject1"), skipToNextNonLiteralObjectExp.createProperty("http://predicate1"), skipToNextNonLiteralObjectExp.createResource("http://object1"));
-        Model skipToNextNonLiteralObjectParsed = ModelFactory.createDefaultModel();
-        createRIOTParser().read(new ByteArrayInputStream(skipToNextNonLiteralObject.getBytes()), "http://base", null, StreamRDFLib.graph(skipToNextNonLiteralObjectParsed.getGraph()), null);
+        Model expected = ModelFactory.createDefaultModel();
+        expected.add(expected.createResource("http://subject1"), expected.createProperty("http://predicate1"), expected.createResource("http://object1"));
+        Model parsed = ModelFactory.createDefaultModel();
+        try (StringReader reader = new StringReader(rdfPost))
+        {
+            parsed.read(reader, "http://base", "RDF/POST");
+        }
         
-        assertIsomorphic(skipToNextNonLiteralObjectExp, skipToNextNonLiteralObjectParsed);
-
-        String skipToNextPredicate = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&lt=" + URLEncoder.encode("http://type", ENC) + "ll=da" +
+        assertIsomorphic(expected, parsed);
+    }
+    
+    @Test
+    public void testSkipMissingDatatype1() throws UnsupportedEncodingException
+    {
+        String rdfPost = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&lt=" + URLEncoder.encode("http://type", ENC) + "ll=da" +
             "&pu=" + URLEncoder.encode("http://predicate3", ENC) + "&ou=" + URLEncoder.encode("http://object1", ENC);
-        Model skipToNextPredicateExp = ModelFactory.createDefaultModel();
-        skipToNextPredicateExp.add(skipToNextPredicateExp.createResource("http://subject1"), skipToNextPredicateExp.createProperty("http://predicate3"), skipToNextPredicateExp.createResource("http://object1"));
-        Model skipToNextPredicateParsed = ModelFactory.createDefaultModel();
-        createRIOTParser().read(new ByteArrayInputStream(skipToNextPredicate.getBytes()), "http://base", null, StreamRDFLib.graph(skipToNextPredicateParsed.getGraph()), null);
+        Model expected = ModelFactory.createDefaultModel();
+        expected.add(expected.createResource("http://subject1"), expected.createProperty("http://predicate3"), expected.createResource("http://object1"));
+        Model parsed = ModelFactory.createDefaultModel();
+        try (StringReader reader = new StringReader(rdfPost))
+        {
+            parsed.read(reader, "http://base", "RDF/POST");
+        }
         
-        assertIsomorphic(skipToNextPredicateExp, skipToNextPredicateParsed);
+        assertIsomorphic(expected, parsed);
     }
     
     @Test
     public void testSkipMissingLangTag() throws UnsupportedEncodingException
     {
-        String skipToNextNonLiteralObject = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&ll=da" + "&lt=" + URLEncoder.encode("http://type", ENC) +
+        String rdfPost = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&ll=da" + "&lt=" + URLEncoder.encode("http://type", ENC) +
             "&ou=" + URLEncoder.encode("http://object1", ENC);
-        Model skipToNextNonLiteralObjectExp = ModelFactory.createDefaultModel();
-        skipToNextNonLiteralObjectExp.add(skipToNextNonLiteralObjectExp.createResource("http://subject1"), skipToNextNonLiteralObjectExp.createProperty("http://predicate1"), skipToNextNonLiteralObjectExp.createResource("http://object1"));
-        Model skipToNextNonLiteralObjectParsed = ModelFactory.createDefaultModel();
-        createRIOTParser().read(new ByteArrayInputStream(skipToNextNonLiteralObject.getBytes()), "http://base", null, StreamRDFLib.graph(skipToNextNonLiteralObjectParsed.getGraph()), null);
+        Model expected = ModelFactory.createDefaultModel();
+        expected.add(expected.createResource("http://subject1"), expected.createProperty("http://predicate1"), expected.createResource("http://object1"));
+        Model parsed = ModelFactory.createDefaultModel();
+        try (StringReader reader = new StringReader(rdfPost))
+        {
+            parsed.read(reader, "http://base", "RDF/POST");
+        }
         
-        assertIsomorphic(skipToNextNonLiteralObjectExp, skipToNextNonLiteralObjectParsed);
-
-        String skipToNextPredicate = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&ll=da" + "&lt=" + URLEncoder.encode("http://type", ENC) +
+        assertIsomorphic(expected, parsed);
+    }
+    
+    @Test
+    public void testSkipMissingLangTag1() throws UnsupportedEncodingException
+    {
+        String rdfPost = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://predicate1", ENC) + "&ll=da" + "&lt=" + URLEncoder.encode("http://type", ENC) +
             "&pu=" + URLEncoder.encode("http://predicate3", ENC) + "&ou=" + URLEncoder.encode("http://object1", ENC);
-        Model skipToNextPredicateExp = ModelFactory.createDefaultModel();
-        skipToNextPredicateExp.add(skipToNextPredicateExp.createResource("http://subject1"), skipToNextPredicateExp.createProperty("http://predicate3"), skipToNextPredicateExp.createResource("http://object1"));
-        Model skipToNextPredicateParsed = ModelFactory.createDefaultModel();
-        createRIOTParser().read(new ByteArrayInputStream(skipToNextPredicate.getBytes()), "http://base", null, StreamRDFLib.graph(skipToNextPredicateParsed.getGraph()), null);
+        Model expected = ModelFactory.createDefaultModel();
+        expected.add(expected.createResource("http://subject1"), expected.createProperty("http://predicate3"), expected.createResource("http://object1"));
+        Model parsed = ModelFactory.createDefaultModel();
+        try (StringReader reader = new StringReader(rdfPost))
+        {
+            parsed.read(reader, "http://base", "RDF/POST");
+        }
         
-        assertIsomorphic(skipToNextPredicateExp, skipToNextPredicateParsed);
+        assertIsomorphic(expected, parsed);
     }
 
     @Test
     public void testSkipMissingObjectToEOF() throws UnsupportedEncodingException
     {
-        String skipToEOF = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://dc.org/#title", ENC) + "&lt=" + URLEncoder.encode("http://type", ENC);
-        Model skipToEOFExp = ModelFactory.createDefaultModel();
-        Model skiptToEOFParsed = ModelFactory.createDefaultModel();
-        createRIOTParser().read(new ByteArrayInputStream(skipToEOF.getBytes()), "http://base", null, StreamRDFLib.graph(skiptToEOFParsed.getGraph()), null);
+        String rdfPost = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://dc.org/#title", ENC) + "&lt=" + URLEncoder.encode("http://type", ENC);
+        Model expected = ModelFactory.createDefaultModel();
+        Model parsed = ModelFactory.createDefaultModel();
+        try (StringReader reader = new StringReader(rdfPost))
+        {
+            parsed.read(reader, "http://base", "RDF/POST");
+        }
         
-        assertIsomorphic(skipToEOFExp, skiptToEOFParsed);
+        assertIsomorphic(expected, parsed);
     }
     
     public static void assertIsomorphic(Model wanted, Model got)

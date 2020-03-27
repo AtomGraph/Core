@@ -16,9 +16,12 @@
 
 package com.atomgraph.core.riot.lang;
 
+import com.atomgraph.core.riot.RDFLanguages;
+import org.apache.jena.atlas.lib.InternalErrorException;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.ReaderRIOT;
 import org.apache.jena.riot.ReaderRIOTFactory;
+import org.apache.jena.riot.system.ParserProfile;
 
 /**
  * RDF/POST reader factory.
@@ -29,9 +32,11 @@ public class RDFPostReaderFactory implements ReaderRIOTFactory
 {
 
     @Override
-    public ReaderRIOT create(Lang language)
+    public ReaderRIOT create(Lang language, ParserProfile profile)
     {
-        return new RDFPostReader();
+        if ( !RDFLanguages.RDFPOST.equals(language) )
+            throw new InternalErrorException("Attempt to parse " + language + " as RDF/POST") ;
+        return new RDFPostReader(language, profile, profile.getErrorHandler());
     }
     
 }
