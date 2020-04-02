@@ -18,9 +18,9 @@ package com.atomgraph.core.client;
 
 import com.atomgraph.core.MediaType;
 import com.atomgraph.core.MediaTypes;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.filter.ClientFilter;
 import java.net.URI;
+import javax.ws.rs.client.ClientRequestFilter;
+import javax.ws.rs.client.WebTarget;
 import org.apache.jena.rdf.model.Model;
 
 /**
@@ -31,29 +31,29 @@ import org.apache.jena.rdf.model.Model;
 public class LinkedDataClient extends ClientBase
 {
     
-    protected LinkedDataClient(WebResource webResource, MediaTypes mediaTypes)
+    protected LinkedDataClient(WebTarget webResource, MediaTypes mediaTypes)
     {
         super(webResource, mediaTypes);
     }
     
-    public static LinkedDataClient create(WebResource webResource, MediaTypes mediaTypes)
+    public static LinkedDataClient create(WebTarget webResource, MediaTypes mediaTypes)
     {
         return new LinkedDataClient(webResource, mediaTypes);
     }
 
     @Override
-    public LinkedDataClient addFilter(ClientFilter authFilter)
+    public LinkedDataClient register(ClientRequestFilter filter)
     {
-        if (authFilter == null) throw new IllegalArgumentException("ClientFilter cannot be null");
+        if (filter == null) throw new IllegalArgumentException("ClientRequestFilter cannot be null");
 
-        super.addFilter(authFilter);
+        super.register(filter);
 
         return this;
     }
     
     public Model get()
     {
-        return get(getReadableMediaTypes(Model.class), null).getEntity(Model.class);
+        return get(getReadableMediaTypes(Model.class), null).readEntity(Model.class);
     }
     
     public void post(Model model)
@@ -71,9 +71,9 @@ public class LinkedDataClient extends ClientBase
         delete(null, null);
     }
     
-    public URI getWebResourceURI()
+    public URI getWebTargetURI()
     {
-        return getWebResource().getURI();
+        return getWebTarget().getUri();
     }
 
     @Override

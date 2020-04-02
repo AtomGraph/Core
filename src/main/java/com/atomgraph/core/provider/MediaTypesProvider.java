@@ -16,13 +16,8 @@
 
 package com.atomgraph.core.provider;
 
-import com.sun.jersey.core.spi.component.ComponentContext;
-import com.sun.jersey.spi.inject.Injectable;
-import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.ext.ContextResolver;
-import javax.ws.rs.ext.Provider;
 import com.atomgraph.core.MediaTypes;
+import org.glassfish.hk2.api.Factory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,8 +29,7 @@ import org.slf4j.LoggerFactory;
  * @see com.atomgraph.core.MediaTypes
  * @see javax.ws.rs.core.Context
  */
-@Provider
-public class MediaTypesProvider extends PerRequestTypeInjectableProvider<Context, MediaTypes> implements ContextResolver<MediaTypes>
+public class MediaTypesProvider implements Factory<MediaTypes>
 {
 
     private static final Logger log = LoggerFactory.getLogger(MediaTypesProvider.class);
@@ -44,33 +38,23 @@ public class MediaTypesProvider extends PerRequestTypeInjectableProvider<Context
     
     public MediaTypesProvider(final MediaTypes mediaTypes)
     {
-        super(MediaTypes.class);
-        
         this.mediaTypes = mediaTypes;
     }
-
+    
     @Override
-    public Injectable<MediaTypes> getInjectable(ComponentContext ic, Context context)
-    {
-        return new Injectable<MediaTypes>()
-        {
-            @Override
-            public MediaTypes getValue()
-            {
-                return getMediaTypes();
-            }
-        };
-    }
-
-    @Override
-    public MediaTypes getContext(Class<?> type)
+    public MediaTypes provide()
     {
         return getMediaTypes();
     }
-    
+
+    @Override
+    public void dispose(MediaTypes t)
+    {
+    }
+
     public MediaTypes getMediaTypes()
     {
         return mediaTypes;
     }
-
+    
 }

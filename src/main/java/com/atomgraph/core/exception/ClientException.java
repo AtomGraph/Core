@@ -16,7 +16,7 @@
 
 package com.atomgraph.core.exception;
 
-import com.sun.jersey.api.client.ClientResponse;
+import javax.ws.rs.core.Response;
 
 /**
  * A runtime exception thrown by a client that signals a failure to process the HTTP request or HTTP response.
@@ -26,15 +26,15 @@ import com.sun.jersey.api.client.ClientResponse;
 public class ClientException extends RuntimeException
 {
     
-    private final ClientResponse cr;
+    private final Response cr;
     
-    public ClientException(ClientResponse cr)
+    public ClientException(Response cr)
     {
         super(cr.getStatusInfo().getReasonPhrase());
         this.cr = cr;
     }
     
-    public ClientResponse getClientResponse()
+    public Response getResponse()
     {
         return cr;
     }

@@ -102,7 +102,7 @@ public class DatasetAccessorImpl implements DatasetAccessor
 
     public String getURI()  // needs to align with Jena's Resource.getURI() which returns String
     {
-        return getGraphStoreClient().getWebResource().getURI().toString();
+        return getGraphStoreClient().getWebTarget().getUri().toString();
     }
     
     public GraphStoreClient getGraphStoreClient()

@@ -17,9 +17,9 @@ package com.atomgraph.core.client;
 
 import com.atomgraph.core.MediaType;
 import com.atomgraph.core.MediaTypes;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.filter.ClientFilter;
-import com.sun.jersey.core.util.MultivaluedMapImpl;
+import javax.ws.rs.client.ClientRequestFilter;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import org.apache.jena.query.DatasetAccessor;
@@ -37,32 +37,32 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreClient.class);
     
-    protected GraphStoreClient(WebResource webResource, MediaTypes mediaTypes)
+    protected GraphStoreClient(WebTarget webTarget, MediaTypes mediaTypes)
     {
-        super(webResource, mediaTypes);
+        super(webTarget, mediaTypes);
     }
 
-    protected GraphStoreClient(WebResource webResource)
+    protected GraphStoreClient(WebTarget webTarget)
     {
-        this(webResource, new MediaTypes());
+        this(webTarget, new MediaTypes());
     }
 
-    public static GraphStoreClient create(WebResource webResource, MediaTypes mediaTypes)
+    public static GraphStoreClient create(WebTarget webTarget, MediaTypes mediaTypes)
     {
-        return new GraphStoreClient(webResource, mediaTypes);
+        return new GraphStoreClient(webTarget, mediaTypes);
     }
 
-    public static GraphStoreClient create(WebResource webResource)
+    public static GraphStoreClient create(WebTarget webTarget)
     {
-        return new GraphStoreClient(webResource);
+        return new GraphStoreClient(webTarget);
     }
 
     @Override
-    public GraphStoreClient addFilter(ClientFilter authFilter)
+    public GraphStoreClient register(ClientRequestFilter filter)
     {
-        if (authFilter == null) throw new IllegalArgumentException("ClientFilter cannot be null");
+        if (filter == null) throw new IllegalArgumentException("ClientRequestFilter cannot be null");
 
-        super.addFilter(authFilter);
+        super.register(filter);
 
         return this;
     }
@@ -76,7 +76,7 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
     @Override
     public boolean containsModel(String uri)
     {
-        MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+        MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.putSingle("graph", uri);
 
         return head(Model.class, getReadableMediaTypes(Model.class), uri, params, null).
@@ -88,25 +88,25 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
     @Override
     public Model getModel()
     {
-        MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+        MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.putSingle("default", "");
 
-        return get(getReadableMediaTypes(Model.class), params).getEntity(Model.class);
+        return get(getReadableMediaTypes(Model.class), params).readEntity(Model.class);
     }
 
     @Override
     public Model getModel(String uri)
     {
-        MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+        MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.putSingle("graph", uri);
 
-        return get(getReadableMediaTypes(Model.class), params).getEntity(Model.class);
+        return get(getReadableMediaTypes(Model.class), params).readEntity(Model.class);
     }
     
     @Override
     public void add(Model model)
     {
-        MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+        MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.putSingle("default", "");
 
         post(model, getDefaultMediaType(), null, params);
@@ -115,7 +115,7 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
     @Override
     public void add(String uri, Model model)
     {
-        MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+        MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.putSingle("graph", uri);
 
         post(model, getDefaultMediaType(), null, params);
@@ -124,7 +124,7 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
     @Override
     public void putModel(Model model)
     {
-        MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+        MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.putSingle("default", "");
 
         put(model, getDefaultMediaType(), null, params);
@@ -133,7 +133,7 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
     @Override
     public void putModel(String uri, Model model)
     {
-        MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+        MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.putSingle("graph", uri);
 
         put(model, getDefaultMediaType(), null, params);
@@ -142,7 +142,7 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
     @Override
     public void deleteDefault()
     {
-        MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+        MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.putSingle("default", "");
 
         delete(null, params);
@@ -151,7 +151,7 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
     @Override
     public void deleteModel(String uri)
     {
-        MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+        MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.putSingle("graph", uri);
 
         delete(null, params);

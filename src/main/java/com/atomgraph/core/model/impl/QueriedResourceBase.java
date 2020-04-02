@@ -31,6 +31,7 @@ import com.atomgraph.core.exception.NotFoundException;
 import com.atomgraph.core.model.QueriedResource;
 import com.atomgraph.core.model.Service;
 import java.util.Collections;
+import javax.inject.Inject;
 import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +62,8 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
      * @see <a href="http://docs.oracle.com/javaee/7/api/javax/servlet/ServletContext.html">ServletContext</a>
      * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceContext.html">Jersey ResourceContext</a>
      */
-    public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context MediaTypes mediaTypes, @Context Service service)
+    @Inject
+    public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, MediaTypes mediaTypes, Service service)
     {
         this(uriInfo, request, mediaTypes, uriInfo.getAbsolutePath(), service);
     }

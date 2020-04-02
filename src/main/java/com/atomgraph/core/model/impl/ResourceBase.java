@@ -32,6 +32,7 @@ import com.atomgraph.core.model.Resource;
 import com.atomgraph.core.util.ModelUtils;
 import java.util.Collections;
 import java.util.Date;
+import javax.inject.Inject;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.MediaType;
 import org.apache.jena.query.Dataset;
@@ -62,7 +63,8 @@ public abstract class ResourceBase implements Resource
      * @param mediaTypes media types
      * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html#getAbsolutePath()">JAX-RS UriInfo.getAbsolutePath()</a>
      */
-    public ResourceBase(@Context UriInfo uriInfo, @Context Request request, @Context MediaTypes mediaTypes)
+    @Inject
+    public ResourceBase(@Context UriInfo uriInfo, @Context Request request, MediaTypes mediaTypes)
     {
         this(uriInfo, request, mediaTypes, uriInfo.getAbsolutePath());
     }

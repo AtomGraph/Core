@@ -16,15 +16,14 @@
  */
 package com.atomgraph.core.provider;
 
-import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryFactory;
-import com.sun.jersey.api.core.HttpContext;
-import com.sun.jersey.core.spi.component.ComponentContext;
-import com.sun.jersey.spi.inject.Injectable;
-import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
+import javax.ws.rs.ext.ParamConverter;
+import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Provider;
+import org.apache.jena.query.QueryException;
+import org.apache.jena.query.QueryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,47 +37,42 @@ import org.slf4j.LoggerFactory;
  * @see javax.ws.rs.core.Context
  */
 @Provider
-public class QueryParamProvider extends PerRequestTypeInjectableProvider<QueryParam, Query>
+public class QueryParamProvider implements ParamConverterProvider // InjectableProvider<QueryParam, Query>
 {
     private static final Logger log = LoggerFactory.getLogger(QueryParamProvider.class);
-    
-    @Context HttpContext httpContext;
-
-    public QueryParamProvider()
-    {
-        super(Query.class);
-    }
 
     @Override
-    public Injectable<Query> getInjectable(ComponentContext ic, QueryParam qp)
+    public <T> ParamConverter<T> getConverter(final Class<T> rawType, Type type, Annotation[] antns)
     {
-        final String paramName = qp.value();
-        return new Injectable<Query>()
+        if(rawType.equals(QueryParam.class))
         {
-            @Override
-            public Query getValue()
+            return new ParamConverter<T>()
             {
-                String value = getHttpContext().getUriInfo().getQueryParameters().getFirst(paramName);
-                if (value == null || value.isEmpty()) return null;
-                    
-                if (log.isTraceEnabled()) log.trace("Providing Injectable<Query> with @QueryParam({}) and value: {}", paramName, value);
-                try
-                {
-                    return QueryFactory.create(value);
-                }
-                catch (Exception ex)
-                {
-                    if (log.isWarnEnabled()) log.warn("Supplied SPARQL query string could not be parsed, check syntax: {}", value);
-                    //throw new WebApplicationException(ex, Response.Status.BAD_REQUEST);
-                    return null;
-                }
-            }
-        };
-    }
 
-    public HttpContext getHttpContext()
-    {
-        return httpContext;
+                @Override
+                public T fromString(final String value)
+                {
+                    try
+                    {
+                        return rawType.cast(QueryFactory.create(value));
+                    }
+                    catch (QueryException ex)
+                    {
+                        if (log.isWarnEnabled()) log.warn("Supplied SPARQL query string could not be parsed, check syntax: {}", value);
+                        //throw new WebApplicationException(ex, Response.Status.BAD_REQUEST);
+                        return null;
+                    }
+                }
+
+                @Override
+                public String toString(final T query)
+                {
+                    return query.toString();
+                }
+            };
+        }
+
+        return null;
     }
 
 } 

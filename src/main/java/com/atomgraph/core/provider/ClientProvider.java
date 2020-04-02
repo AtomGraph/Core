@@ -16,14 +16,9 @@
 
 package com.atomgraph.core.provider;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.core.spi.component.ComponentContext;
-import com.sun.jersey.spi.inject.Injectable;
-import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
-import com.sun.jersey.spi.resource.Singleton;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.ext.ContextResolver;
-import javax.ws.rs.ext.Provider;
+import org.glassfish.hk2.api.Factory;
+import javax.inject.Singleton;
+import javax.ws.rs.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,9 +30,8 @@ import org.slf4j.LoggerFactory;
  * @see com.sun.jersey.api.client.Client
  * @see javax.ws.rs.core.Context
  */
-@Provider
 @Singleton
-public class ClientProvider extends PerRequestTypeInjectableProvider<Context, Client> implements ContextResolver<Client>
+public class ClientProvider implements Factory<Client>
 {
     private static final Logger log = LoggerFactory.getLogger(ClientProvider.class);
     
@@ -45,29 +39,21 @@ public class ClientProvider extends PerRequestTypeInjectableProvider<Context, Cl
     
     public ClientProvider(final Client client)
     {
-        super(Client.class);
         this.client = client;
-    }
-    
-    @Override
-    public Injectable<Client> getInjectable(ComponentContext ic, Context a)
-    {
-        return new Injectable<Client>()
-        {
-            @Override
-            public Client getValue()
-            {
-                return getClient();
-            }
-        };
     }
 
     @Override
-    public Client getContext(Class<?> type)
+    public Client provide()
     {
         return getClient();
     }
 
+    @Override
+    public void dispose(Client t)
+    {
+        t.close();
+    }
+    
     public Client getClient()
     {
         return client;

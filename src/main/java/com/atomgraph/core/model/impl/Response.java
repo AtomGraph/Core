@@ -153,7 +153,7 @@ public class Response
         List<Variant> list = new ArrayList<>();
         
         for (Variant variant : variants)
-            list.add(new Variant(variant.getMediaType(), null, variant.getEncoding()));
+            list.add(new Variant(variant.getMediaType(), (Locale)null, variant.getEncoding()));
         
         return list;
     }

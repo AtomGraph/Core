@@ -24,11 +24,10 @@ import com.atomgraph.core.model.EndpointAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.atomgraph.core.model.RemoteService;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.filter.ClientFilter;
-import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.WebTarget;
 import org.apache.jena.query.DatasetAccessor;
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 
 /**
  *
@@ -73,10 +72,10 @@ public class ServiceImpl implements RemoteService
     @Override
     public SPARQLClient getSPARQLClient()
     {
-        return getSPARQLClient(getClient().resource(getSPARQLEndpoint().getURI()));
+        return getSPARQLClient(getClient().target(getSPARQLEndpoint().getURI()));
     }
     
-    public SPARQLClient getSPARQLClient(WebResource resource)
+    public SPARQLClient getSPARQLClient(WebTarget resource)
     {
         SPARQLClient sparqlClient;
         
@@ -87,8 +86,11 @@ public class ServiceImpl implements RemoteService
         
         if (getAuthUser() != null && getAuthPwd() != null)
         {
-            ClientFilter authFilter = new HTTPBasicAuthFilter(getAuthUser(), getAuthPwd());
-            sparqlClient.getWebResource().addFilter(authFilter);
+            HttpAuthenticationFeature authFeature = HttpAuthenticationFeature.basicBuilder().
+                credentials(getAuthUser(), getAuthPwd()).
+                build();
+            
+            sparqlClient.getWebTarget().register(authFeature);
         }
         
         return sparqlClient;
@@ -103,17 +105,20 @@ public class ServiceImpl implements RemoteService
     @Override
     public GraphStoreClient getGraphStoreClient()
     {
-        return getGraphStoreClient(getClient().resource(getGraphStore().getURI()));
+        return getGraphStoreClient(getClient().target(getGraphStore().getURI()));
     }
     
-    public GraphStoreClient getGraphStoreClient(WebResource resource)
+    public GraphStoreClient getGraphStoreClient(WebTarget resource)
     {
         GraphStoreClient graphStoreClient = GraphStoreClient.create(resource);
         
         if (getAuthUser() != null && getAuthPwd() != null)
         {
-            ClientFilter authFilter = new HTTPBasicAuthFilter(getAuthUser(), getAuthPwd());
-            graphStoreClient.getWebResource().addFilter(authFilter);
+            HttpAuthenticationFeature authFeature = HttpAuthenticationFeature.basicBuilder().
+                credentials(getAuthUser(), getAuthPwd()).
+                build();
+
+            graphStoreClient.getWebTarget().register(authFeature);
         }
         
         return graphStoreClient;
@@ -122,17 +127,20 @@ public class ServiceImpl implements RemoteService
     @Override
     public QuadStoreClient getQuadStoreClient()
     {
-        return getQuadStoreClient(getClient().resource(getQuadStore().getURI()));
+        return getQuadStoreClient(getClient().target(getQuadStore().getURI()));
     }
     
-    public QuadStoreClient getQuadStoreClient(WebResource resource)
+    public QuadStoreClient getQuadStoreClient(WebTarget resource)
     {
         QuadStoreClient quadStoreClient = QuadStoreClient.create(resource);
         
         if (getAuthUser() != null && getAuthPwd() != null)
         {
-            ClientFilter authFilter = new HTTPBasicAuthFilter(getAuthUser(), getAuthPwd());
-            quadStoreClient.getWebResource().addFilter(authFilter);
+            HttpAuthenticationFeature authFeature = HttpAuthenticationFeature.basicBuilder().
+                credentials(getAuthUser(), getAuthPwd()).
+                build();
+
+            quadStoreClient.getWebTarget().register(authFeature);
         }
         
         return quadStoreClient;

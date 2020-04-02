@@ -16,12 +16,8 @@
 package com.atomgraph.core.provider;
 
 import com.atomgraph.core.model.Service;
-import com.sun.jersey.core.spi.component.ComponentContext;
-import com.sun.jersey.spi.inject.Injectable;
-import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
+import org.glassfish.hk2.api.Factory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * @see com.atomgraph.core.model.Service
  */
 @Provider
-public class ServiceProvider extends PerRequestTypeInjectableProvider<Context, Service> implements ContextResolver<Service>
+public class ServiceProvider implements Factory<Service>
 {
     
     private static final Logger log = LoggerFactory.getLogger(ServiceProvider.class);
@@ -42,32 +38,23 @@ public class ServiceProvider extends PerRequestTypeInjectableProvider<Context, S
     
     public ServiceProvider(final Service service)
     {
-        super(Service.class);
         this.service = service;
     }
     
     @Override
-    public Injectable<Service> getInjectable(ComponentContext ic, Context a)
-    {
-        return new Injectable<Service>()
-        {
-            @Override
-            public Service getValue()
-            {
-                return getService();
-            }
-        };
-    }
-
-    @Override
-    public Service getContext(Class<?> type)
+    public Service provide()
     {
         return getService();
     }
-    
+
+    @Override
+    public void dispose(Service t)
+    {
+    }
+
     public Service getService()
     {
         return service;
     }
-
+    
 }

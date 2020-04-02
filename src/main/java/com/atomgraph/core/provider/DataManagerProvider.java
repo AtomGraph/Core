@@ -17,13 +17,8 @@
 
 package com.atomgraph.core.provider;
 
-import com.sun.jersey.core.spi.component.ComponentContext;
-import com.sun.jersey.spi.inject.Injectable;
-import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.ext.ContextResolver;
-import javax.ws.rs.ext.Provider;
 import com.atomgraph.core.util.jena.DataManager;
+import org.glassfish.hk2.api.Factory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,8 +30,7 @@ import org.slf4j.LoggerFactory;
  * @see com.atomgraph.core.util.jena.DataManager
  * @see javax.ws.rs.core.Context
  */
-@Provider
-public class DataManagerProvider extends PerRequestTypeInjectableProvider<Context, DataManager> implements ContextResolver<DataManager>
+public class DataManagerProvider implements Factory<DataManager>
 {
 
     private static final Logger log = LoggerFactory.getLogger(DataManagerProvider.class);
@@ -45,30 +39,20 @@ public class DataManagerProvider extends PerRequestTypeInjectableProvider<Contex
         
     public DataManagerProvider(final DataManager dataManager)
     {
-        super(DataManager.class);
-        
         this.dataManager = dataManager;
     }
 
     @Override
-    public Injectable<DataManager> getInjectable(ComponentContext cc, Context a)
-    {
-        return new Injectable<DataManager>()
-        {
-            @Override
-            public DataManager getValue()
-            {
-                return getDataManager();
-            }
-        };
-    }
-
-    @Override
-    public DataManager getContext(Class<?> type)
+    public DataManager provide()
     {
         return getDataManager();
     }
 
+    @Override
+    public void dispose(DataManager dataManager)
+    {
+    }
+    
     /**
      * Returns default data manager instance.
      * @return data manager instance
@@ -77,5 +61,5 @@ public class DataManagerProvider extends PerRequestTypeInjectableProvider<Contex
     {
         return dataManager;
     }
-    
+
 }

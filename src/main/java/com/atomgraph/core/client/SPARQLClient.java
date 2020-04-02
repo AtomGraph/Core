@@ -17,12 +17,11 @@ package com.atomgraph.core.client;
 
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.exception.ClientException;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.filter.ClientFilter;
-import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.io.InputStream;
+import javax.ws.rs.client.ClientRequestFilter;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import org.apache.jena.query.Dataset;
@@ -49,95 +48,86 @@ public class SPARQLClient extends ClientBase
 
     private final int maxGetRequestSize;
 
-    protected SPARQLClient(WebResource webResource, MediaTypes mediaTypes, int maxGetRequestSize)
+    protected SPARQLClient(WebTarget webResource, MediaTypes mediaTypes, int maxGetRequestSize)
     {
         super(webResource, mediaTypes);
         this.maxGetRequestSize = maxGetRequestSize;
     }
 
-    protected SPARQLClient(WebResource webResource, MediaTypes mediaTypes)
+    protected SPARQLClient(WebTarget webResource, MediaTypes mediaTypes)
     {
         this(webResource, mediaTypes, 8192);
     }
 
-    protected SPARQLClient(WebResource webResource)
+    protected SPARQLClient(WebTarget webResource)
     {
         this(webResource, new MediaTypes());
     }
 
-    public static SPARQLClient create(WebResource webResource, MediaTypes mediaTypes, int maxGetRequestSize)
+    public static SPARQLClient create(WebTarget webResource, MediaTypes mediaTypes, int maxGetRequestSize)
     {
         return new SPARQLClient(webResource, mediaTypes, maxGetRequestSize);
     }
 
-    public static SPARQLClient create(WebResource webResource, MediaTypes mediaTypes)
+    public static SPARQLClient create(WebTarget webResource, MediaTypes mediaTypes)
     {
         return new SPARQLClient(webResource, mediaTypes);
     }
 
-    public static SPARQLClient create(WebResource webResource)
+    public static SPARQLClient create(WebTarget webResource)
     {
         return new SPARQLClient(webResource);
     }
     
     @Override
-    public SPARQLClient addFilter(ClientFilter authFilter)
+    public SPARQLClient register(ClientRequestFilter filter)
     {
-        if (authFilter == null) throw new IllegalArgumentException("ClientFilter cannot be null");
+        if (filter == null) throw new IllegalArgumentException("ClientRequestFilter cannot be null");
 
-        super.addFilter(authFilter);
+        super.register(filter);
 
         return this;
     }
     
     public int getQueryURLLength(MultivaluedMap<String, String> params)
     {        
-        return applyParams(params).getURI().toString().length();
+        return applyParams(params).getUri().toString().length();
     }
 
-    public ClientResponse query(Query query, Class clazz, MultivaluedMap<String, String> params)
+    public Response query(Query query, Class clazz, MultivaluedMap<String, String> params)
     {
-        ClientResponse cr = null;
-        
-        try
-        {
-            MultivaluedMap<String, String> mergedParams = new MultivaluedMapImpl();
-            if (params != null) mergedParams.putAll(params);
-            mergedParams.putSingle("query", query.toString());
-            
-            if (getQueryURLLength(mergedParams) > getMaxGetRequestSize())
-                cr = post(query, MediaType.APPLICATION_FORM_URLENCODED_TYPE, getReadableMediaTypes(clazz), params);
-            else
-                cr = get(getBuilder(getReadableMediaTypes(clazz), mergedParams));
+        MultivaluedMap<String, String> mergedParams = new MultivaluedHashMap();
+        if (params != null) mergedParams.putAll(params);
+        mergedParams.putSingle("query", query.toString());
 
-            if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
-            {
-                if (log.isErrorEnabled()) log.error("Query request to endpoint: {} unsuccessful. Reason: {}", getWebResource().getURI(), cr.getStatusInfo().getReasonPhrase());
-                throw new ClientException(cr);
-            }
+        Response cr;
+        if (getQueryURLLength(mergedParams) > getMaxGetRequestSize())
+            cr = post(query, MediaType.APPLICATION_FORM_URLENCODED_TYPE, getReadableMediaTypes(clazz), params);
+        else
+            cr = get(getReadableMediaTypes(clazz), mergedParams);
 
-            cr.bufferEntity();
-            return cr;
-        }
-        finally
+        if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
         {
-            if (cr != null) cr.close();
+            if (log.isErrorEnabled()) log.error("Query request to endpoint: {} unsuccessful. Reason: {}", getWebTarget().getUri(), cr.getStatusInfo().getReasonPhrase());
+            throw new ClientException(cr);
         }
+
+        return cr;
     }
     
     public Model loadModel(Query query)
     {
-        return query(query, Model.class, null).getEntity(Model.class);
+        return query(query, Model.class, null).readEntity(Model.class);
     }
 
     public Dataset loadDataset(Query query)
     {
-        return query(query, Dataset.class, null).getEntity(Dataset.class);
+        return query(query, Dataset.class, null).readEntity(Dataset.class);
     }
     
     public ResultSetRewindable select(Query query)
     {
-        return query(query, ResultSet.class, null).getEntity(ResultSetRewindable.class);
+        return query(query, ResultSet.class, null).readEntity(ResultSetRewindable.class);
     }
 
     public boolean ask(Query query)
@@ -145,13 +135,13 @@ public class SPARQLClient extends ClientBase
         return parseBoolean(query(query, ResultSet.class, null));
     }
 
-    public static boolean parseBoolean(ClientResponse cr)
+    public static boolean parseBoolean(Response cr)
     {
-        InputStream is = cr.getEntity(InputStream.class);
+        InputStream is = cr.readEntity(InputStream.class);
         
-        if (cr.getType().isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
+        if (cr.getMediaType().isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
             return JSONInput.booleanFromJSON(is);
-        if (cr.getType().isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE))
+        if (cr.getMediaType().isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE))
             return XMLInput.booleanFromXML(is);
 
         throw new IllegalStateException("Unsupported ResultSet format");
@@ -165,7 +155,7 @@ public class SPARQLClient extends ClientBase
      */
     public void update(UpdateRequest updateRequest, MultivaluedMap<String, String> params)
     {
-        MultivaluedMap formData = new MultivaluedMapImpl();
+        MultivaluedMap formData = new MultivaluedHashMap();
         if (params != null) formData.putAll(params);
         formData.putSingle("update", updateRequest.toString());
         

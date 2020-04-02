@@ -21,9 +21,9 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.util.ResourceUtils;
-import com.sun.jersey.api.uri.UriComponent;
 import java.net.URI;
 import javax.ws.rs.core.UriBuilder;
+import org.glassfish.jersey.uri.UriComponent;
 
 /**
  * Builds application state as RDF resource from URL query parameters.

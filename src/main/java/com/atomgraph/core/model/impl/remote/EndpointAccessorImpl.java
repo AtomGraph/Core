@@ -21,9 +21,9 @@ import static com.atomgraph.core.model.SPARQLEndpoint.DEFAULT_GRAPH_URI;
 import static com.atomgraph.core.model.SPARQLEndpoint.NAMED_GRAPH_URI;
 import static com.atomgraph.core.model.SPARQLEndpoint.USING_GRAPH_URI;
 import static com.atomgraph.core.model.SPARQLEndpoint.USING_NAMED_GRAPH_URI;
-import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.net.URI;
 import java.util.List;
+import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
@@ -53,14 +53,14 @@ public class EndpointAccessorImpl implements EndpointAccessor
         if (defaultGraphUris == null) throw new IllegalArgumentException("List<URI> cannot be null");
         if (namedGraphUris == null) throw new IllegalArgumentException("List<URI> cannot be null");
 
-        MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+        MultivaluedMap<String, String> params = new MultivaluedHashMap();
         
         for (URI defaultGraphUri : defaultGraphUris)
             params.add(DEFAULT_GRAPH_URI, defaultGraphUri.toString());
         for (URI namedGraphUri : namedGraphUris)
             params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
 
-        return getSPARQLClient().query(query, Dataset.class, params).getEntity(Dataset.class);
+        return getSPARQLClient().query(query, Dataset.class, params).readEntity(Dataset.class);
     }
     
     @Override
@@ -69,14 +69,14 @@ public class EndpointAccessorImpl implements EndpointAccessor
         if (defaultGraphUris == null) throw new IllegalArgumentException("List<URI> cannot be null");
         if (namedGraphUris == null) throw new IllegalArgumentException("List<URI> cannot be null");
 
-        MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+        MultivaluedMap<String, String> params = new MultivaluedHashMap();
         
         for (URI defaultGraphUri : defaultGraphUris)
             params.add(DEFAULT_GRAPH_URI, defaultGraphUri.toString());
         for (URI namedGraphUri : namedGraphUris)
             params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
 
-        return getSPARQLClient().query(query, Model.class, params).getEntity(Model.class);
+        return getSPARQLClient().query(query, Model.class, params).readEntity(Model.class);
     }
 
     @Override
@@ -85,14 +85,14 @@ public class EndpointAccessorImpl implements EndpointAccessor
         if (defaultGraphUris == null) throw new IllegalArgumentException("List<URI> cannot be null");
         if (namedGraphUris == null) throw new IllegalArgumentException("List<URI> cannot be null");
         
-        MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+        MultivaluedMap<String, String> params = new MultivaluedHashMap();
         
         for (URI defaultGraphUri : defaultGraphUris)
             params.add(DEFAULT_GRAPH_URI, defaultGraphUri.toString());
         for (URI namedGraphUri : namedGraphUris)
             params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
         
-        return getSPARQLClient().query(query, ResultSet.class, params).getEntity(ResultSetRewindable.class);
+        return getSPARQLClient().query(query, ResultSet.class, params).readEntity(ResultSetRewindable.class);
     }
   
     @Override
@@ -101,7 +101,7 @@ public class EndpointAccessorImpl implements EndpointAccessor
         if (defaultGraphUris == null) throw new IllegalArgumentException("List<URI> cannot be null");
         if (namedGraphUris == null) throw new IllegalArgumentException("List<URI> cannot be null");
         
-        MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+        MultivaluedMap<String, String> params = new MultivaluedHashMap();
         
         for (URI defaultGraphUri : defaultGraphUris)
             params.add(DEFAULT_GRAPH_URI, defaultGraphUri.toString());
@@ -117,7 +117,7 @@ public class EndpointAccessorImpl implements EndpointAccessor
         if (usingGraphUris == null) throw new IllegalArgumentException("List<URI> cannot be null");
         if (usingNamedGraphUris == null) throw new IllegalArgumentException("List<URI> cannot be null");
         
-        MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+        MultivaluedMap<String, String> params = new MultivaluedHashMap();
         
         for (URI usingGraphUri : usingGraphUris)
             params.add(USING_GRAPH_URI, usingGraphUri.toString());

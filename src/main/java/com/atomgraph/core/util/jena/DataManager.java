@@ -19,13 +19,13 @@ package com.atomgraph.core.util.jena;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.util.FileManager;
 import org.apache.jena.util.LocationMapper;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
 import java.net.URI;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.LinkedDataClient;
 import java.net.URISyntaxException;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.ModelGetter;
 import org.apache.jena.rdf.model.ModelReader;
@@ -78,7 +78,7 @@ public class DataManager extends FileManager implements ModelGetter
         return mediaTypes;
     }
     
-    public WebResource getEndpoint(URI endpointURI)
+    public WebTarget getEndpoint(URI endpointURI)
     {
         if (endpointURI == null) throw new IllegalArgumentException("Endpoint URI must be not null");
 
@@ -92,10 +92,10 @@ public class DataManager extends FileManager implements ModelGetter
             // should not happen, this a URI to URI conversion
         }
         
-        return getClient().resource(endpointURI.normalize());
+        return getClient().target(endpointURI.normalize());
     }
     
-    public ClientResponse get(String uri, javax.ws.rs.core.MediaType[] acceptedTypes)
+    public Response get(String uri, javax.ws.rs.core.MediaType[] acceptedTypes)
     {
         return LinkedDataClient.create(getEndpoint(URI.create(uri)), getMediaTypes()).
                 get(acceptedTypes, null);

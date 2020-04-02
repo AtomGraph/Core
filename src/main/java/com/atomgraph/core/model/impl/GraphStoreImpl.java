@@ -153,7 +153,7 @@ public class GraphStoreImpl implements GraphStore
             }
             catch (ClientException ex)
             {
-                if (ex.getClientResponse().getStatus() == Status.NOT_FOUND.getStatusCode())
+                if (ex.getResponse().getStatus() == Status.NOT_FOUND.getStatusCode())
                 {
                     if (log.isDebugEnabled()) log.debug("GET Graph Store named graph with URI: {} not found", graphUri);
                     return Response.status(Status.NOT_FOUND).build();
@@ -234,7 +234,7 @@ public class GraphStoreImpl implements GraphStore
             }
             catch (ClientException ex)
             {
-                if (ex.getClientResponse().getStatus() == Status.NOT_FOUND.getStatusCode())
+                if (ex.getResponse().getStatus() == Status.NOT_FOUND.getStatusCode())
                 {
                     if (log.isDebugEnabled()) log.debug("PUT Graph Store named graph with URI: {} not found", graphUri);
                     return Response.status(Status.NOT_FOUND).build();
@@ -281,7 +281,7 @@ public class GraphStoreImpl implements GraphStore
             }
             catch (ClientException ex)
             {
-                if (ex.getClientResponse().getStatus() == Status.NOT_FOUND.getStatusCode())
+                if (ex.getResponse().getStatus() == Status.NOT_FOUND.getStatusCode())
                 {
                     if (log.isDebugEnabled()) log.debug("DELETE Graph Store named graph with URI: {} not found", graphUri);
                     return Response.status(Status.NOT_FOUND).build();

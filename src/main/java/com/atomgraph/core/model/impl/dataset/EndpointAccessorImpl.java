@@ -199,6 +199,8 @@ public class EndpointAccessorImpl implements EndpointAccessor
      * Executes update on dataset.
      * 
      * @param updateRequest update request
+     * @param usingGraphUris default graph URIs
+     * @param usingNamedGraphUris named graph URIs
      */
     @Override
     public void update(UpdateRequest updateRequest, List<URI> usingGraphUris, List<URI> usingNamedGraphUris)
@@ -212,16 +214,21 @@ public class EndpointAccessorImpl implements EndpointAccessor
         if (defaultGraphUris == null) throw new IllegalArgumentException("List<URI> cannot be null");
         if (namedGraphUris == null) throw new IllegalArgumentException("List<URI> cannot be null");
         
-        List<String> defaultGraphUriStrings = new ArrayList<>();
-            for (URI defaultGraphUri : defaultGraphUris)
-                defaultGraphUriStrings.add(defaultGraphUri.toString());
+        if (!defaultGraphUris.isEmpty() || !namedGraphUris.isEmpty())
+        {
+            List<String> defaultGraphUriStrings = new ArrayList<>();
+                for (URI defaultGraphUri : defaultGraphUris)
+                    defaultGraphUriStrings.add(defaultGraphUri.toString());
+
+            List<String> namedGraphUriStrings = new ArrayList<>();
+                for (URI namedGraphUri : namedGraphUris)
+                    namedGraphUriStrings.add(namedGraphUri.toString());
+                
+            DatasetDescription desc = DatasetDescription.create(defaultGraphUriStrings, namedGraphUriStrings);
+            return DynamicDatasets.dynamicDataset(desc, dataset, false);
+        }
             
-        List<String> namedGraphUriStrings = new ArrayList<>();
-            for (URI namedGraphUri : namedGraphUris)
-                namedGraphUriStrings.add(namedGraphUri.toString());
-            
-        DatasetDescription desc = DatasetDescription.create(defaultGraphUriStrings, namedGraphUriStrings);
-        return DynamicDatasets.dynamicDataset(desc, dataset, false);
+        return dataset;
     }
     
     public Dataset getDataset()
