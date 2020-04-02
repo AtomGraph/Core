@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import com.atomgraph.core.model.DatasetQuadAccessor;
 import com.atomgraph.core.model.Service;
 import java.util.Collections;
+import javax.inject.Inject;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.MediaType;
 
@@ -54,7 +55,8 @@ public class QuadStoreImpl implements QuadStore
      * @param service SPARQL service
      * @param mediaTypes supported media types
      */
-    public QuadStoreImpl(@Context Request request, @Context Service service, @Context MediaTypes mediaTypes)
+    @Inject
+    public QuadStoreImpl(@Context Request request, Service service, MediaTypes mediaTypes)
     {
         this(request, service.getDatasetQuadAccessor(), mediaTypes);
     }

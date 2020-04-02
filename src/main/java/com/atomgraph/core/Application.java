@@ -31,7 +31,6 @@ import com.atomgraph.core.model.Service;
 import com.atomgraph.core.model.impl.GraphStoreImpl;
 import com.atomgraph.core.model.impl.QueriedResourceBase;
 import com.atomgraph.core.model.impl.SPARQLEndpointImpl;
-import com.atomgraph.core.provider.MediaTypesProvider;
 import com.atomgraph.core.riot.RDFLanguages;
 import com.atomgraph.core.riot.lang.RDFPostReaderFactory;
 import com.atomgraph.core.util.jena.DataManager;
@@ -49,7 +48,6 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.util.LocationMapper;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.process.internal.RequestScoped;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -149,7 +147,7 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
         register(new ModelProvider());
         register(new DatasetProvider());
         register(new ResultSetProvider());
-        register(new QueryParamProvider());
+        register(QueryParamProvider.class);
         register(new QueryProvider());
         register(new UpdateRequestReader());
 //        register(new DataManagerProvider(getDataManager()));
@@ -262,11 +260,11 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
     
     public static Client getClient(ClientConfig clientConfig)
     {
-        clientConfig.register(ModelProvider.class);
-        clientConfig.register(DatasetProvider.class);
-        clientConfig.register(ResultSetProvider.class);
-        clientConfig.register(QueryProvider.class);
-        clientConfig.register(UpdateRequestReader.class); // TO-DO: UpdateRequestProvider
+        clientConfig.register(new ModelProvider());
+        clientConfig.register(new DatasetProvider());
+        clientConfig.register(new ResultSetProvider());
+        clientConfig.register(new QueryProvider());
+        clientConfig.register(new UpdateRequestReader()); // TO-DO: UpdateRequestProvider
 
         Client client = ClientBuilder.newClient(clientConfig);
         //if (log.isDebugEnabled()) client.register(new LoggingFeature(log));

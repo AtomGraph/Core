@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Martynas Jusevičius <martynas@atomgraph.com>.
+ * Copyright 2020 Martynas Jusevičius <martynas@atomgraph.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,29 +15,13 @@
  */
 package com.atomgraph.core.model.impl;
 
-import com.atomgraph.core.model.Application;
-import com.atomgraph.core.model.Service;
+import org.glassfish.jersey.test.JerseyTest;
 
 /**
  *
- * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
+ * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
-@Deprecated
-public class ApplicationImpl implements Application
+public class GraphStoreImplTest extends JerseyTest
 {
-
-    private final Service service;
-    
-    public ApplicationImpl(Service service)
-    {
-        if (service == null) throw new IllegalArgumentException("Service cannot be null");
-        this.service = service;
-    }
-    
-    @Override
-    public Service getService()
-    {
-        return service;
-    }
     
 }

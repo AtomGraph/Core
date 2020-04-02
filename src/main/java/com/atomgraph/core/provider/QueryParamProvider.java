@@ -22,6 +22,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.ext.ParamConverter;
 import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Provider;
+import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryException;
 import org.apache.jena.query.QueryFactory;
 import org.slf4j.Logger;
@@ -44,7 +45,7 @@ public class QueryParamProvider implements ParamConverterProvider // InjectableP
     @Override
     public <T> ParamConverter<T> getConverter(final Class<T> rawType, Type type, Annotation[] antns)
     {
-        if(rawType.equals(QueryParam.class))
+        if (rawType.equals(Query.class))
         {
             return new ParamConverter<T>()
             {
@@ -52,6 +53,8 @@ public class QueryParamProvider implements ParamConverterProvider // InjectableP
                 @Override
                 public T fromString(final String value)
                 {
+                    if (value == null) throw new IllegalArgumentException("Cannot parse Query from null String");
+                    
                     try
                     {
                         return rawType.cast(QueryFactory.create(value));

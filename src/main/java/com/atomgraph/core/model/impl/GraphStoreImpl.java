@@ -32,6 +32,7 @@ import com.atomgraph.core.model.GraphStore;
 import com.atomgraph.core.model.Service;
 import com.atomgraph.core.util.ModelUtils;
 import java.util.Collections;
+import javax.inject.Inject;
 import org.apache.jena.query.DatasetAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +59,8 @@ public class GraphStoreImpl implements GraphStore
      * @param service SPARQL service
      * @param mediaTypes supported media types
      */
-    public GraphStoreImpl(@Context Request request, @Context Service service, @Context MediaTypes mediaTypes)
+    @Inject
+    public GraphStoreImpl(@Context Request request, Service service, MediaTypes mediaTypes)
     {
         this(request, service.getDatasetAccessor(), mediaTypes);
     }

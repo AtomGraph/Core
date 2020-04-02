@@ -16,24 +16,21 @@
 package com.atomgraph.core.model.impl;
 
 import com.atomgraph.core.MediaTypes;
-import com.atomgraph.core.client.LinkedDataClient;
-import com.atomgraph.core.model.Service;
+import com.atomgraph.core.client.SPARQLClient;
 import java.net.URI;
-import javax.inject.Inject;
-import javax.ws.rs.Path;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Application;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.UriInfo;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.sparql.vocabulary.FOAF;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.test.JerseyTest;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Test;
 
@@ -41,24 +38,12 @@ import org.junit.Test;
  *
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
-public class QueriedResourceBaseTest extends JerseyTest
+public class SPARQLEndpointImplTest extends JerseyTest
 {
     
     public final String RELATIVE_PATH = "test";
-    
+
     public com.atomgraph.core.Application system;
-    
-    @Path(RELATIVE_PATH)
-    public static class TestResource extends QueriedResourceBase
-    {
-
-        @Inject
-        public TestResource(@Context UriInfo uriInfo, @Context Request request, MediaTypes mediaTypes, Service service)
-        {
-            super(uriInfo, request, mediaTypes, service);
-        }
-
-    }
     
     protected Dataset getDataset()
     {
@@ -74,17 +59,38 @@ public class QueriedResourceBaseTest extends JerseyTest
                 new MediaTypes(), com.atomgraph.core.Application.getClient(new ClientConfig()),
                 null, false);
         system.init();
-        system.register(TestResource.class);
         
         return system;
     }
- 
+    
     @Test
-    public void testGet()
+    public void testDescribe()
     {
-        WebTarget target = system.getClient().target(getBaseUri().resolve(RELATIVE_PATH));
-        LinkedDataClient ldc = LinkedDataClient.create(target, new MediaTypes());
-        assertIsomorphic(getDataset().getDefaultModel(), ldc.get());
+        WebTarget target = system.getClient().target(getBaseUri().resolve("sparql"));
+        Query query = QueryFactory.create("DESCRIBE <" + getBaseUri().resolve(RELATIVE_PATH).toString() + ">");
+        
+        SPARQLClient sc = SPARQLClient.create(target, new MediaTypes());
+        assertIsomorphic(getDataset().getDefaultModel(), sc.loadModel(query));
+    }
+    
+    @Test
+    public void testSelect()
+    {
+        WebTarget target = system.getClient().target(getBaseUri().resolve("sparql"));
+        Query query = QueryFactory.create("SELECT * { <" + getBaseUri().resolve(RELATIVE_PATH).toString() + "> ?p ?o }");
+        
+        SPARQLClient sc = SPARQLClient.create(target, new MediaTypes());
+        assertTrue(sc.select(query).hasNext());
+    }
+
+    @Test
+    public void testAsk()
+    {
+        WebTarget target = system.getClient().target(getBaseUri().resolve("sparql"));
+        Query query = QueryFactory.create("ASK { <" + getBaseUri().resolve(RELATIVE_PATH).toString() + "> ?p ?o }");
+        
+        SPARQLClient sc = SPARQLClient.create(target, new MediaTypes());
+        assertTrue(sc.ask(query));
     }
     
     public static void assertIsomorphic(Model wanted, Model got)
@@ -92,4 +98,5 @@ public class QueriedResourceBaseTest extends JerseyTest
         if (!wanted.isIsomorphicWith(got))
             fail("Models not isomorphic (not structurally equal))");
     }
+    
 }

@@ -38,6 +38,7 @@ import com.atomgraph.core.model.Service;
 import com.atomgraph.core.util.ModelUtils;
 import com.atomgraph.core.util.ResultSetUtils;
 import java.util.Collections;
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -50,7 +51,10 @@ import org.apache.jena.query.Dataset;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QueryParseException;
 import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetFactory;
+import org.apache.jena.sparql.vocabulary.ResultSetGraphVocab;
 import org.apache.jena.update.UpdateFactory;
+import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,7 +80,8 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
      * @param service SPARQL service
      * @param mediaTypes supported media types
      */
-    public SPARQLEndpointImpl(@Context Request request, @Context Service service, @Context MediaTypes mediaTypes)
+    @Inject
+    public SPARQLEndpointImpl(@Context Request request, Service service, MediaTypes mediaTypes)
     {
         this(request, service.getEndpointAccessor(), mediaTypes);
     }
@@ -155,14 +160,18 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
 
         if (query.isSelectType())
         {
-            /*
-            if (log.isDebugEnabled()) log.debug("SPARQL endpoint executing SELECT query: {}", query);
-            if (getServletConfig().getInitParameter(A.resultLimit.getURI()) != null)
-                query.setLimit(Long.parseLong(getServletConfig().getInitParameter(A.resultLimit.getURI())));
-            */
-
             if (log.isDebugEnabled()) log.debug("Loading ResultSet using SELECT/ASK query: {}", query);
             return getResponseBuilder(getEndpointAccessor().select(query, defaultGraphUris, namedGraphUris));
+        }
+        if (query.isAskType())
+        {
+            Model model = ModelFactory.createDefaultModel();
+            model.createResource().
+                addProperty(RDF.type, ResultSetGraphVocab.ResultSet).
+                addLiteral(ResultSetGraphVocab.p_boolean, getEndpointAccessor().ask(query, defaultGraphUris, namedGraphUris));
+                
+            if (log.isDebugEnabled()) log.debug("Loading ResultSet using SELECT/ASK query: {}", query);
+            return getResponseBuilder(ResultSetFactory.copyResults(ResultSetFactory.makeResults(model)));
         }
 
         if (query.isConstructType() || query.isDescribeType())

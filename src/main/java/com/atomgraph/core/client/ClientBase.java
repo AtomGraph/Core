@@ -68,15 +68,15 @@ public abstract class ClientBase
         return applyParams(getWebTarget(), params);
     }
     
-    protected WebTarget applyParams(WebTarget webResource, MultivaluedMap<String, String> params)
+    protected WebTarget applyParams(WebTarget webTarget, MultivaluedMap<String, String> params)
     {
         if (params != null)
             for (Map.Entry<String, List<String>> entry : params.entrySet())
                 for (String value : entry.getValue())
-                    webResource.queryParam(UriComponent.encode(entry.getKey(), UriComponent.Type.UNRESERVED),
+                    webTarget = webTarget.queryParam(UriComponent.encode(entry.getKey(), UriComponent.Type.UNRESERVED),
                         UriComponent.encode(value, UriComponent.Type.UNRESERVED));
         
-        return webResource;
+        return webTarget;
     }
     
     public Response head(Class clazz, javax.ws.rs.core.MediaType[] acceptedTypes, String uri, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
