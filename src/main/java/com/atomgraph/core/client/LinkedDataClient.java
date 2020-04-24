@@ -21,6 +21,7 @@ import com.atomgraph.core.MediaTypes;
 import java.net.URI;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
 import org.apache.jena.rdf.model.Model;
 
 /**
@@ -53,22 +54,25 @@ public class LinkedDataClient extends ClientBase
     
     public Model get()
     {
-        return get(getReadableMediaTypes(Model.class), null).readEntity(Model.class);
+        try (Response cr = get(getReadableMediaTypes(Model.class), null))
+        {
+            return cr.readEntity(Model.class);
+        }
     }
     
     public void post(Model model)
     {
-        post(model, getDefaultMediaType(), null, null);
+        post(model, getDefaultMediaType(), new javax.ws.rs.core.MediaType[]{}, null).close();
     }
 
     public void put(Model model)
     {
-        put(model, getDefaultMediaType(), null, null);
+        put(model, getDefaultMediaType(), new javax.ws.rs.core.MediaType[]{}, null).close();
     }
 
     public void delete()
     {
-        delete(null, null);
+        delete(null, null).close();
     }
     
     public URI getWebTargetURI()

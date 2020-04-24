@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A common base class for all HTTP-based protocol clients.
+ * Note that <code>Response</code> objects returned by methods of this class <em>are not</em> closed.
  * 
  * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
@@ -102,7 +103,7 @@ public abstract class ClientBase
     public Response get(Invocation.Builder builder)
     {
         if (log.isDebugEnabled()) log.debug("GET {}", getWebTarget().getUri());
-        Response cr = builder.get(Response.class);
+        Response cr = builder.get();
 
         if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
         {
@@ -121,7 +122,7 @@ public abstract class ClientBase
     public Response post(Invocation.Builder builder, Object body, MediaType contentType)
     {
         if (log.isDebugEnabled()) log.debug("POST {}", getWebTarget().getUri());
-        Response cr = builder.post(Entity.entity(body, contentType)); // builder.post(Response.class, body);
+        Response cr = builder.post(Entity.entity(body, contentType));
 
         if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
         {

@@ -117,22 +117,34 @@ public class SPARQLClient extends ClientBase
     
     public Model loadModel(Query query)
     {
-        return query(query, Model.class, null).readEntity(Model.class);
+        try (Response cr = query(query, Model.class, null))
+        {
+            return cr.readEntity(Model.class);
+        }
     }
 
     public Dataset loadDataset(Query query)
     {
-        return query(query, Dataset.class, null).readEntity(Dataset.class);
+        try (Response cr = query(query, Dataset.class, null))
+        {
+            return cr.readEntity(Dataset.class);
+        }
     }
     
     public ResultSetRewindable select(Query query)
     {
-        return query(query, ResultSet.class, null).readEntity(ResultSetRewindable.class);
+        try (Response cr = query(query, ResultSet.class, null))
+        {
+            return cr.readEntity(ResultSetRewindable.class);
+        }
     }
 
     public boolean ask(Query query)
     {
-        return parseBoolean(query(query, ResultSet.class, null));
+        try (Response cr = query(query, ResultSet.class, null))
+        {
+            return parseBoolean(cr);
+        }
     }
 
     public static boolean parseBoolean(Response cr)
@@ -159,7 +171,7 @@ public class SPARQLClient extends ClientBase
         if (params != null) formData.putAll(params);
         formData.putSingle("update", updateRequest.toString());
         
-        post(formData, MediaType.APPLICATION_FORM_URLENCODED_TYPE, null, null);
+        post(formData, MediaType.APPLICATION_FORM_URLENCODED_TYPE, new MediaType[]{}, null).close();
     }
 
     public int getMaxGetRequestSize()

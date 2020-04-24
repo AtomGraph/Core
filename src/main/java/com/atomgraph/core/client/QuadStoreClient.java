@@ -78,31 +78,34 @@ public class QuadStoreClient extends ClientBase implements DatasetQuadAccessor
     @Override
     public Dataset get()
     {
-        return get(getReadableMediaTypes(Dataset.class), null).readEntity(Dataset.class);
+        try (Response cr = get(getReadableMediaTypes(Dataset.class), null))
+        {
+            return cr.readEntity(Dataset.class);
+        }
     }
     
     @Override
     public void add(Dataset dataset)
     {
-        post(dataset, getDefaultMediaType(), null, null);
+        post(dataset, getDefaultMediaType(), new javax.ws.rs.core.MediaType[]{}, null).close();
     }
     
     @Override
     public void replace(Dataset dataset)
     {
-        put(dataset, getDefaultMediaType(), null, null);
+        put(dataset, getDefaultMediaType(), new javax.ws.rs.core.MediaType[]{}, null).close();
     }
     
     @Override
     public void delete()
     {
-        delete(null, null);
+        delete(null, null).close();
     }
 
     @Override
     public void patch(Dataset dataset)
     {
-        patch(dataset, null);
+        patch(dataset, null).close();
     }
     
     public Response patch(Dataset dataset, MultivaluedMap<String, String> params)

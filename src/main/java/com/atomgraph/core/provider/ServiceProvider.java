@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see com.atomgraph.core.model.Service
  */
-@Provider
+//@Provider
 public class ServiceProvider implements Factory<Service>
 {
     

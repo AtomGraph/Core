@@ -25,6 +25,7 @@ import java.net.URI;
 import java.util.List;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.ResultSet;
@@ -60,7 +61,10 @@ public class EndpointAccessorImpl implements EndpointAccessor
         for (URI namedGraphUri : namedGraphUris)
             params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
 
-        return getSPARQLClient().query(query, Dataset.class, params).readEntity(Dataset.class);
+        try (Response cr = getSPARQLClient().query(query, Dataset.class, params))
+        {
+            return cr.readEntity(Dataset.class);
+        }
     }
     
     @Override
@@ -76,7 +80,10 @@ public class EndpointAccessorImpl implements EndpointAccessor
         for (URI namedGraphUri : namedGraphUris)
             params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
 
-        return getSPARQLClient().query(query, Model.class, params).readEntity(Model.class);
+        try (Response cr = getSPARQLClient().query(query, Model.class, params))
+        {
+            return cr.readEntity(Model.class);
+        }
     }
 
     @Override
@@ -92,7 +99,10 @@ public class EndpointAccessorImpl implements EndpointAccessor
         for (URI namedGraphUri : namedGraphUris)
             params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
         
-        return getSPARQLClient().query(query, ResultSet.class, params).readEntity(ResultSetRewindable.class);
+        try (Response cr = getSPARQLClient().query(query, ResultSet.class, params))
+        {
+            return cr.readEntity(ResultSetRewindable.class);
+        }
     }
   
     @Override
@@ -108,7 +118,10 @@ public class EndpointAccessorImpl implements EndpointAccessor
         for (URI namedGraphUri : namedGraphUris)
             params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
         
-        return SPARQLClient.parseBoolean(getSPARQLClient().query(query, ResultSet.class, params));
+        try (Response cr = getSPARQLClient().query(query, ResultSet.class, params))
+        {
+            return SPARQLClient.parseBoolean(cr);
+        }
     }
 
     @Override

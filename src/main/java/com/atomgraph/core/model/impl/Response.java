@@ -19,7 +19,6 @@ package com.atomgraph.core.model.impl;
 
 import java.util.List;
 import java.util.Locale;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
@@ -30,6 +29,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import javax.ws.rs.NotAcceptableException;
 import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,14 +80,14 @@ public class Response
         this(request, entity, lastModified, entityTag, request.selectVariant(variants) != null ? request.selectVariant(variants) : request.selectVariant(removeLanguages(variants)));
     }
 
-    public Response(Request request, Object entity, Date lastModified, EntityTag entityTag, Variant variant)
+    public Response(Request request, Object entity, Date lastModified, EntityTag entityTag, Variant variant) throws NotAcceptableException
     {
         if (request == null) throw new IllegalArgumentException("Request cannot be null");
         if (entity == null) throw new IllegalArgumentException("Object cannot be null");
         if (variant == null)
         {
             if (log.isTraceEnabled()) log.trace("Requested Variant {} is not on the list of acceptable Response Variants", variant);
-            throw new WebApplicationException(javax.ws.rs.core.Response.status(javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE).build());
+            throw new NotAcceptableException();
         }
 
         this.request = request;
