@@ -91,7 +91,7 @@ public class MediaType extends javax.ws.rs.core.MediaType
     /** "application/rdf+x-www-form-urlencoded" */
     public final static String APPLICATION_RDF_URLENCODED = "application/rdf+x-www-form-urlencoded";
     /** "application/rdf+x-www-form-urlencoded" */
-    public final static MediaType APPLICATION_RDF_URLENCODED_TYPE = new MediaType("application","application/rdf+x-www-form-urlencoded");
+    public final static MediaType APPLICATION_RDF_URLENCODED_TYPE = new MediaType("application","rdf+x-www-form-urlencoded");
 
     public MediaType(Lang lang)
     {
