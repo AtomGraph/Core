@@ -16,7 +16,6 @@
 package com.atomgraph.core.client;
 
 import com.atomgraph.core.MediaTypes;
-import com.atomgraph.core.exception.ClientException;
 import java.io.InputStream;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.WebTarget;
@@ -48,35 +47,35 @@ public class SPARQLClient extends ClientBase
 
     private final int maxGetRequestSize;
 
-    protected SPARQLClient(WebTarget webResource, MediaTypes mediaTypes, int maxGetRequestSize)
+    protected SPARQLClient(WebTarget endpoint, MediaTypes mediaTypes, int maxGetRequestSize)
     {
-        super(webResource, mediaTypes);
+        super(endpoint, mediaTypes);
         this.maxGetRequestSize = maxGetRequestSize;
     }
 
-    protected SPARQLClient(WebTarget webResource, MediaTypes mediaTypes)
+    protected SPARQLClient(WebTarget endpoint, MediaTypes mediaTypes)
     {
-        this(webResource, mediaTypes, 8192);
+        this(endpoint, mediaTypes, 8192);
     }
 
-    protected SPARQLClient(WebTarget webResource)
+    protected SPARQLClient(WebTarget endpoint)
     {
-        this(webResource, new MediaTypes());
+        this(endpoint, new MediaTypes());
     }
 
-    public static SPARQLClient create(WebTarget webResource, MediaTypes mediaTypes, int maxGetRequestSize)
+    public static SPARQLClient create(WebTarget endpoint, MediaTypes mediaTypes, int maxGetRequestSize)
     {
-        return new SPARQLClient(webResource, mediaTypes, maxGetRequestSize);
+        return new SPARQLClient(endpoint, mediaTypes, maxGetRequestSize);
     }
 
-    public static SPARQLClient create(WebTarget webResource, MediaTypes mediaTypes)
+    public static SPARQLClient create(WebTarget endpoint, MediaTypes mediaTypes)
     {
-        return new SPARQLClient(webResource, mediaTypes);
+        return new SPARQLClient(endpoint, mediaTypes);
     }
 
-    public static SPARQLClient create(WebTarget webResource)
+    public static SPARQLClient create(WebTarget endpoint)
     {
-        return new SPARQLClient(webResource);
+        return new SPARQLClient(endpoint);
     }
     
     @Override
@@ -100,19 +99,10 @@ public class SPARQLClient extends ClientBase
         if (params != null) mergedParams.putAll(params);
         mergedParams.putSingle("query", query.toString());
 
-        Response cr;
         if (getQueryURLLength(mergedParams) > getMaxGetRequestSize())
-            cr = post(query, MediaType.APPLICATION_FORM_URLENCODED_TYPE, getReadableMediaTypes(clazz), params);
+            return post(query, MediaType.APPLICATION_FORM_URLENCODED_TYPE, getReadableMediaTypes(clazz), params);
         else
-            cr = get(getReadableMediaTypes(clazz), mergedParams);
-
-        if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
-        {
-            if (log.isErrorEnabled()) log.error("Query request to endpoint: {} unsuccessful. Reason: {}", getWebTarget().getUri(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr);
-        }
-
-        return cr;
+            return get(getReadableMediaTypes(clazz), mergedParams);
     }
     
     public Model loadModel(Query query)

@@ -18,7 +18,6 @@ package com.atomgraph.core.model.impl;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.LinkedDataClient;
 import com.atomgraph.core.model.Service;
-import java.net.URI;
 import javax.inject.Inject;
 import javax.ws.rs.Path;
 import javax.ws.rs.client.WebTarget;
@@ -35,6 +34,8 @@ import org.apache.jena.sparql.vocabulary.FOAF;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import static org.junit.Assert.fail;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -43,10 +44,26 @@ import org.junit.Test;
  */
 public class QueriedResourceBaseTest extends JerseyTest
 {
-    
-    public final String RELATIVE_PATH = "test";
+
+    public static final String RELATIVE_PATH = "test";
+    public static final String RESOURCE_URI = "http://localhost:9998/" + RELATIVE_PATH; // assume that base URI is http://localhost:9998/ - has to match getBaseUri()
+    public static Dataset dataset;
     
     public com.atomgraph.core.Application system;
+    public WebTarget endpoint;
+    
+    @BeforeClass
+    public static void initClass()
+    {
+        dataset = DatasetFactory.createTxnMem();
+        dataset.setDefaultModel(ModelFactory.createDefaultModel().add(ResourceFactory.createResource(RESOURCE_URI), FOAF.name, "Smth"));
+    }
+    
+    @Before
+    public void init()
+    {
+        endpoint = system.getClient().target(getBaseUri().resolve(RELATIVE_PATH));
+    }
     
     @Path(RELATIVE_PATH)
     public static class TestResource extends QueriedResourceBase
@@ -62,8 +79,7 @@ public class QueriedResourceBaseTest extends JerseyTest
     
     protected Dataset getDataset()
     {
-        URI base = getBaseUri().resolve(RELATIVE_PATH);
-        return DatasetFactory.create(ModelFactory.createDefaultModel().add(ResourceFactory.createResource(base.toString()), FOAF.name, "Smth"));
+        return dataset;
     }
     
     @Override
@@ -82,8 +98,7 @@ public class QueriedResourceBaseTest extends JerseyTest
     @Test
     public void testGet()
     {
-        WebTarget target = system.getClient().target(getBaseUri().resolve(RELATIVE_PATH));
-        LinkedDataClient ldc = LinkedDataClient.create(target, new MediaTypes());
+        LinkedDataClient ldc = LinkedDataClient.create(endpoint, new MediaTypes());
         assertIsomorphic(getDataset().getDefaultModel(), ldc.get());
     }
     

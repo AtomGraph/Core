@@ -37,24 +37,24 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreClient.class);
     
-    protected GraphStoreClient(WebTarget webTarget, MediaTypes mediaTypes)
+    protected GraphStoreClient(WebTarget endpoint, MediaTypes mediaTypes)
     {
-        super(webTarget, mediaTypes);
+        super(endpoint, mediaTypes);
     }
 
-    protected GraphStoreClient(WebTarget webTarget)
+    protected GraphStoreClient(WebTarget endpoint)
     {
-        this(webTarget, new MediaTypes());
+        this(endpoint, new MediaTypes());
     }
 
-    public static GraphStoreClient create(WebTarget webTarget, MediaTypes mediaTypes)
+    public static GraphStoreClient create(WebTarget endpoint, MediaTypes mediaTypes)
     {
-        return new GraphStoreClient(webTarget, mediaTypes);
+        return new GraphStoreClient(endpoint, mediaTypes);
     }
 
-    public static GraphStoreClient create(WebTarget webTarget)
+    public static GraphStoreClient create(WebTarget endpoint)
     {
-        return new GraphStoreClient(webTarget);
+        return new GraphStoreClient(endpoint);
     }
 
     @Override
@@ -91,7 +91,7 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
     public Model getModel()
     {
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle("default", "");
+        params.putSingle("default", Boolean.TRUE.toString());
 
         try (Response cr = get(getReadableMediaTypes(Model.class), params))
         {
@@ -115,7 +115,7 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
     public void add(Model model)
     {
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle("default", "");
+        params.putSingle("default", Boolean.TRUE.toString());
 
         post(model, getDefaultMediaType(), new javax.ws.rs.core.MediaType[]{}, params).close();
     }
@@ -133,7 +133,7 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
     public void putModel(Model model)
     {
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle("default", "");
+        params.putSingle("default", Boolean.TRUE.toString());
 
         put(model, getDefaultMediaType(), new javax.ws.rs.core.MediaType[]{}, params).close();
     }
@@ -151,9 +151,9 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
     public void deleteDefault()
     {
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle("default", "");
+        params.putSingle("default", Boolean.TRUE.toString());
 
-        delete(null, params).close();
+        delete(new javax.ws.rs.core.MediaType[]{}, params).close();
     }
 
     @Override
@@ -162,7 +162,7 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.putSingle("graph", uri);
 
-        delete(null, params).close();
+        delete(new javax.ws.rs.core.MediaType[]{}, params).close();
     }
 
 }

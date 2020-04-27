@@ -16,12 +16,11 @@
 package com.atomgraph.core.client;
 
 import com.atomgraph.core.MediaTypes;
-import com.atomgraph.core.exception.ClientException;
 import java.util.List;
 import java.util.Map;
+import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -41,15 +40,15 @@ public abstract class ClientBase
     
     private static final Logger log = LoggerFactory.getLogger(ClientBase.class);
 
-    private final WebTarget webTarget;
+    private final WebTarget endpoint;
     private final MediaTypes mediaTypes;
     
-    protected ClientBase(WebTarget webTarget, MediaTypes mediaTypes)
+    protected ClientBase(WebTarget endpoint, MediaTypes mediaTypes)
     {
-        if (webTarget == null) throw new IllegalArgumentException("WebTarget cannot be null");
+        if (endpoint == null) throw new IllegalArgumentException("WebTarget cannot be null");
         if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
 
-        this.webTarget = webTarget;
+        this.endpoint = endpoint;
         this.mediaTypes = mediaTypes;
     }
     
@@ -59,14 +58,14 @@ public abstract class ClientBase
     {
         if (filter == null) throw new IllegalArgumentException("ClientRequestFilter cannot be null");
 
-        getWebTarget().register(filter);
+        getEndpoint().register(filter);
 
         return this;
     }
     
     protected WebTarget applyParams(MultivaluedMap<String, String> params)
     {
-        return applyParams(getWebTarget(), params);
+        return applyParams(getEndpoint(), params);
     }
     
     protected WebTarget applyParams(WebTarget webTarget, MultivaluedMap<String, String> params)
@@ -82,14 +81,14 @@ public abstract class ClientBase
     
     public Response head(Class clazz, javax.ws.rs.core.MediaType[] acceptedTypes, String uri, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
     {
-        if (log.isDebugEnabled()) log.debug("HEAD {}", getWebTarget().getUri(), uri);
-        Invocation.Builder builder = applyParams(params).request(acceptedTypes);
-        Response cr = builder.method("HEAD", Response.class);
-
+        WebTarget target = applyParams(params);
+        if (log.isDebugEnabled()) log.debug("HEAD {}", target.getUri());
+        
+        Response cr = target.request(acceptedTypes).method("HEAD", Response.class);
         if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
         {
-            if (log.isErrorEnabled()) log.error("Request to Graph Store: {} unsuccessful. Reason: {}", getWebTarget().getUri(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr);
+            if (log.isErrorEnabled()) log.error("Request to Graph Store: {} unsuccessful. Reason: {}", target.getUri(), cr.getStatusInfo().getReasonPhrase());
+            throw new ClientErrorException(cr);
         }
 
         return cr;
@@ -97,18 +96,14 @@ public abstract class ClientBase
 
     public Response get(javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
     {
-        return get(applyParams(params).request().accept(acceptedTypes));
-    }
-    
-    public Response get(Invocation.Builder builder)
-    {
-        if (log.isDebugEnabled()) log.debug("GET {}", getWebTarget().getUri());
-        Response cr = builder.get();
-
+        WebTarget target = applyParams(params);
+        if (log.isDebugEnabled()) log.debug("GET {}", target.getUri());
+        
+        Response cr = target.request(acceptedTypes).get();
         if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
         {
-            if (log.isErrorEnabled()) log.error("GET {} request unsuccessful. Reason: {}", getWebTarget().getUri(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr);
+            if (log.isErrorEnabled()) log.error("GET {} request unsuccessful. Reason: {}", target.getUri(), cr.getStatusInfo().getReasonPhrase());
+            throw new ClientErrorException(cr);
         }
 
         return cr;
@@ -116,18 +111,14 @@ public abstract class ClientBase
     
     public Response post(Object body, MediaType contentType, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
     {
-        return post(applyParams(params).request().accept(acceptedTypes), body, contentType);
-    }
-    
-    public Response post(Invocation.Builder builder, Object body, MediaType contentType)
-    {
-        if (log.isDebugEnabled()) log.debug("POST {}", getWebTarget().getUri());
-        Response cr = builder.post(Entity.entity(body, contentType));
-
+        WebTarget target = applyParams(params);
+        if (log.isDebugEnabled()) log.debug("POST {}", target.getUri());
+        
+        Response cr = target.request(acceptedTypes).post(Entity.entity(body, contentType));
         if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
         {
-            if (log.isErrorEnabled()) log.error("Request to {} unsuccessful. Reason: {}", getWebTarget().getUri(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr);
+            if (log.isErrorEnabled()) log.error("Request to {} unsuccessful. Reason: {}", target.getUri(), cr.getStatusInfo().getReasonPhrase());
+            throw new ClientErrorException(cr);
         }
         
         return cr;
@@ -135,44 +126,29 @@ public abstract class ClientBase
     
     public Response put(Object body, MediaType contentType, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
     {
-        return put(applyParams(params).request().accept(acceptedTypes), body, contentType);
-    }
-
-    public Response put(Invocation.Builder builder, Object body, MediaType contentType)
-    {
-        if (log.isDebugEnabled()) log.debug("PUT {}", getWebTarget().getUri());
-        Response cr = builder.put(Entity.entity(body, contentType)); // put(Response.class, body);
-
+        WebTarget target = applyParams(params);
+        if (log.isDebugEnabled()) log.debug("PUT {}", target.getUri());
+        
+        Response cr = target.request(acceptedTypes).put(Entity.entity(body, contentType));
         if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
         {
-            if (log.isErrorEnabled()) log.error("PUT {} request unsuccessful. Reason: {}", getWebTarget().getUri(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr);
+            if (log.isErrorEnabled()) log.error("PUT {} request unsuccessful. Reason: {}", target.getUri(), cr.getStatusInfo().getReasonPhrase());
+            throw new ClientErrorException(cr);
         }
 
         return cr;
     }
-    
-    public Invocation.Builder deleteBuilder(javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
-    {
-        Invocation.Builder builder = applyParams(params).request();
-        if (acceptedTypes != null) builder.accept(acceptedTypes);
-        return builder;
-    }
 
     public Response delete(javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
     {
-        return delete(deleteBuilder(acceptedTypes, params));
-    }
-
-    public Response delete(Invocation.Builder builder)
-    {
-        if (log.isDebugEnabled()) log.debug("DELETE {}", getWebTarget().getUri());
-        Response cr = builder.delete(Response.class);
-
+        WebTarget target = applyParams(params);
+        if (log.isDebugEnabled()) log.debug("DELETE {}", target.getUri());
+        
+        Response cr = target.request(acceptedTypes).delete();
         if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
         {
-            if (log.isErrorEnabled()) log.error("DELETE {} request unsuccessful. Reason: {}", getWebTarget().getUri(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientException(cr);
+            if (log.isErrorEnabled()) log.error("DELETE {} request unsuccessful. Reason: {}", target.getUri(), cr.getStatusInfo().getReasonPhrase());
+            throw new ClientErrorException(cr);
         }
 
         return cr;
@@ -184,9 +160,9 @@ public abstract class ClientBase
         return getMediaTypes().getReadable(clazz).toArray(new javax.ws.rs.core.MediaType[0]);
     }
 
-    public final WebTarget getWebTarget()
+    public final WebTarget getEndpoint()
     {
-        return webTarget;
+        return endpoint;
     }
     
     public MediaTypes getMediaTypes()

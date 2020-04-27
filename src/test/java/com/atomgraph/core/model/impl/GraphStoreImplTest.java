@@ -15,7 +15,23 @@
  */
 package com.atomgraph.core.model.impl;
 
+import com.atomgraph.core.MediaTypes;
+import com.atomgraph.core.client.GraphStoreClient;
+import static com.atomgraph.core.model.impl.SPARQLEndpointImplTest.assertIsomorphic;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Application;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.query.DatasetFactory;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.sparql.vocabulary.FOAF;
+import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.test.JerseyTest;
+import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 /**
  *
@@ -23,5 +39,114 @@ import org.glassfish.jersey.test.JerseyTest;
  */
 public class GraphStoreImplTest extends JerseyTest
 {
+    public static final String NAMED_GRAPH_URI = "http://named/graph";
+    public static Dataset dataset;
+    
+    public com.atomgraph.core.Application system;
+    public WebTarget endpoint;
+
+    @BeforeClass
+    public static void initClass()
+    {
+        dataset = DatasetFactory.createTxnMem();
+        dataset.setDefaultModel(ModelFactory.createDefaultModel().add(ResourceFactory.createResource("http://default/graph/resource"), FOAF.name, "Smth"));
+        dataset.addNamedModel(NAMED_GRAPH_URI, ModelFactory.createDefaultModel().add(ResourceFactory.createResource("http://default/graph/resource"), FOAF.name, "Whateverest"));
+    }
+    
+    @Before
+    public void init()
+    {
+        endpoint = system.getClient().target(getBaseUri().resolve("service"));
+    }
+    
+    protected Dataset getDataset()
+    {
+        return dataset;
+    }
+    
+    protected Model getRequestModel()
+    {
+        return ModelFactory.createDefaultModel().add(ResourceFactory.createResource("http://default/graph/resource"), FOAF.based_near, "Copenhagen");
+    }
+    
+    @Override
+    protected Application configure()
+    {
+        system = new com.atomgraph.core.Application(getDataset(),
+                null, null, null, null, null,
+                new MediaTypes(), com.atomgraph.core.Application.getClient(new ClientConfig()),
+                null, false);
+        system.init();
+        
+        return system;
+    }
+    
+    @Test
+    public void testGetDefaultModel()
+    {
+        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
+        assertIsomorphic(getDataset().getDefaultModel(), gsc.getModel());
+    }
+
+    @Test
+    public void testGetNamedModel()
+    {
+        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
+        
+        assertIsomorphic(getDataset().getNamedModel(NAMED_GRAPH_URI), gsc.getModel(NAMED_GRAPH_URI));
+    }
+
+    @Test
+    public void testAddModel()
+    {
+        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
+        gsc.add(getRequestModel());
+        
+        assertIsomorphic(getDataset().getDefaultModel(), gsc.getModel());
+    }
+    
+    @Test
+    public void testAddNamedModel()
+    {
+        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
+        gsc.add(NAMED_GRAPH_URI, getRequestModel());
+        
+        assertIsomorphic(getDataset().getNamedModel(NAMED_GRAPH_URI), gsc.getModel(NAMED_GRAPH_URI));
+    }
+    
+    @Test
+    public void testPutModel()
+    {
+        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
+        gsc.putModel(getRequestModel());
+        
+        assertIsomorphic(getDataset().getDefaultModel(), gsc.getModel());
+    }
+    
+    @Test
+    public void testPutNamedModel()
+    {
+        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
+        gsc.putModel(NAMED_GRAPH_URI, getRequestModel());
+        
+        assertIsomorphic(getDataset().getNamedModel(NAMED_GRAPH_URI), gsc.getModel(NAMED_GRAPH_URI));
+    }
+    
+    @Test
+    public void testDefaultModel()
+    {
+        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
+        gsc.deleteDefault();
+        
+        assertIsomorphic(getDataset().getDefaultModel(), gsc.getModel());
+    }
+    
+    public void testDeleteNamedModel()
+    {
+        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
+        gsc.deleteModel(NAMED_GRAPH_URI);
+        
+        assertEquals(0, gsc.getModel(NAMED_GRAPH_URI).size());
+    }
     
 }

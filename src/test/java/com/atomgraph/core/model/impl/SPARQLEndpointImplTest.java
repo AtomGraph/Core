@@ -17,7 +17,6 @@ package com.atomgraph.core.model.impl;
 
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.SPARQLClient;
-import java.net.URI;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Application;
 import org.apache.jena.query.Dataset;
@@ -32,6 +31,8 @@ import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -41,15 +42,29 @@ import org.junit.Test;
  */
 public class SPARQLEndpointImplTest extends JerseyTest
 {
-    
-    public final String RELATIVE_PATH = "test";
+
+    public static final String RESOURCE_URI = "http://default/graph/resource";
+    public static Dataset dataset;
 
     public com.atomgraph.core.Application system;
+    public WebTarget endpoint;
+    
+    @BeforeClass
+    public static void initClass()
+    {
+        dataset = DatasetFactory.createTxnMem();
+        dataset.setDefaultModel(ModelFactory.createDefaultModel().add(ResourceFactory.createResource(RESOURCE_URI), FOAF.name, "Smth"));
+    }
+    
+    @Before
+    public void init()
+    {
+        endpoint = system.getClient().target(getBaseUri().resolve("sparql"));
+    }
     
     protected Dataset getDataset()
     {
-        URI base = getBaseUri().resolve(RELATIVE_PATH);
-        return DatasetFactory.create(ModelFactory.createDefaultModel().add(ResourceFactory.createResource(base.toString()), FOAF.name, "Smth"));
+        return dataset;
     }
     
     @Override
@@ -67,30 +82,27 @@ public class SPARQLEndpointImplTest extends JerseyTest
     @Test
     public void testDescribe()
     {
-        WebTarget target = system.getClient().target(getBaseUri().resolve("sparql"));
-        Query query = QueryFactory.create("DESCRIBE <" + getBaseUri().resolve(RELATIVE_PATH).toString() + ">");
+        Query query = QueryFactory.create("DESCRIBE <" + RESOURCE_URI + ">");
         
-        SPARQLClient sc = SPARQLClient.create(target, new MediaTypes());
+        SPARQLClient sc = SPARQLClient.create(endpoint, new MediaTypes());
         assertIsomorphic(getDataset().getDefaultModel(), sc.loadModel(query));
     }
     
     @Test
     public void testConstruct()
     {
-        WebTarget target = system.getClient().target(getBaseUri().resolve("sparql"));
-        Query query = QueryFactory.create("CONSTRUCT WHERE { <" + getBaseUri().resolve(RELATIVE_PATH).toString() + "> ?p ?o }");
+        Query query = QueryFactory.create("CONSTRUCT WHERE { <" + RESOURCE_URI + "> ?p ?o }");
         
-        SPARQLClient sc = SPARQLClient.create(target, new MediaTypes());
+        SPARQLClient sc = SPARQLClient.create(endpoint, new MediaTypes());
         assertIsomorphic(getDataset().getDefaultModel(), sc.loadModel(query));
     }
     
     @Test
     public void testSelect()
     {
-        WebTarget target = system.getClient().target(getBaseUri().resolve("sparql"));
-        Query query = QueryFactory.create("SELECT * { <" + getBaseUri().resolve(RELATIVE_PATH).toString() + "> ?p ?o }");
+        Query query = QueryFactory.create("SELECT * { <" + RESOURCE_URI + "> ?p ?o }");
         
-        SPARQLClient sc = SPARQLClient.create(target, new MediaTypes());
+        SPARQLClient sc = SPARQLClient.create(endpoint, new MediaTypes());
         assertTrue(sc.select(query).hasNext());
     }
 
@@ -100,12 +112,13 @@ public class SPARQLEndpointImplTest extends JerseyTest
     // https://jena.apache.org/documentation/javadoc/arq/org/apache/jena/sparql/resultset/SPARQLResult.html
     public void testAsk()
     {
-        WebTarget target = system.getClient().target(getBaseUri().resolve("sparql"));
-        Query query = QueryFactory.create("ASK { <" + getBaseUri().resolve(RELATIVE_PATH).toString() + "> ?p ?o }");
+        Query query = QueryFactory.create("ASK { <" + RESOURCE_URI + "> ?p ?o }");
         
-        SPARQLClient sc = SPARQLClient.create(target, new MediaTypes());
+        SPARQLClient sc = SPARQLClient.create(endpoint, new MediaTypes());
         assertTrue(sc.ask(query));
     }
+    
+    // TO-DO: testUpdate()
     
     public static void assertIsomorphic(Model wanted, Model got)
     {

@@ -16,10 +16,10 @@
 
 package com.atomgraph.core.mapper;
 
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
-import com.atomgraph.core.exception.NotFoundException;
 
 /**
  * Maps resource not found exception to response.

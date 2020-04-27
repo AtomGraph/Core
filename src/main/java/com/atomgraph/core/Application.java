@@ -25,7 +25,7 @@ import com.atomgraph.core.provider.QueryParamProvider;
 import com.atomgraph.core.io.UpdateRequestReader;
 import javax.ws.rs.core.Context;
 import org.apache.jena.riot.RDFParserRegistry;
-import com.atomgraph.core.mapper.ClientExceptionMapper;
+import com.atomgraph.core.mapper.ClientErrorExceptionMapper;
 import com.atomgraph.core.mapper.NotFoundExceptionMapper;
 import com.atomgraph.core.model.Service;
 import com.atomgraph.core.model.impl.GraphStoreImpl;
@@ -66,12 +66,8 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
 
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
-//    private final Set<Class<?>> classes = new HashSet<>();
-//    private final Set<Object> singletons = new HashSet<>();
-
     private final Dataset dataset;
     private final Service service;
-//    private final com.atomgraph.core.model.Application application;
     private final MediaTypes mediaTypes;
     private final Client client;
     private final DataManager dataManager;
@@ -133,7 +129,6 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
                     authUser, authPwd, maxGetRequestSize);
         }
         
-//        application = new ApplicationImpl(service);
         dataManager = new DataManager(LocationMapper.get(), client, mediaTypes, preemptiveAuth);
     }
     
@@ -150,21 +145,8 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
         register(QueryParamProvider.class);
         register(new QueryProvider());
         register(new UpdateRequestReader());
-//        register(new DataManagerProvider(getDataManager()));
-//        register(new ServiceProvider(getService()));
-//        register(new MediaTypesProvider(getMediaTypes()));
-        register(new ClientExceptionMapper());
+        register(new ClientErrorExceptionMapper());
         register(new NotFoundExceptionMapper());
-        
-//        register(new AbstractBinder()
-//        {
-//            @Override
-//            protected void configure()
-//            {
-//                bindFactory(MediaTypesProvider.class).to(MediaTypes.class).
-//                proxy(true).proxyForSameScope(false).in(RequestScoped.class);
-//            }
-//        });
 
         register(new AbstractBinder()
         {
@@ -183,32 +165,6 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
             }
         });
     }
-    
-//    /**
-//     * Provides JAX-RS root resource classes.
-//     * 
-//     * @return set of root resource classes
-//     * @see com.atomgraph.core.model
-//     * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/Application.html#getClasses()">Application.getClasses()</a>
-//     */
-//    @Override
-//    public Set<Class<?>> getClasses()
-//    {        
-//        return classes;
-//    }
-//
-//    /**
-//     * Provides JAX-RS singleton objects (e.g. resources or Providers)
-//     * 
-//     * @return set of singleton objects
-//     * @see com.atomgraph.core.provider
-//     * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/Application.html#getSingletons()">Application.getSingletons()</a>
-//     */
-//    @Override
-//    public Set<Object> getSingletons()
-//    {
-//        return singletons;
-//    }
 
     public Dataset getDataset()
     {
@@ -220,11 +176,6 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
     {
         return service;
     }
-    
-//    public com.atomgraph.core.model.Application getApplication()
-//    {
-//        return application;
-//    }
     
     public Client getClient()
     {

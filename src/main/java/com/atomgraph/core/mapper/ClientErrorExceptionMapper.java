@@ -14,29 +14,25 @@
  * limitations under the License.
  */
 
-package com.atomgraph.core.exception;
+package com.atomgraph.core.mapper;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ClientErrorException;
 
 /**
- * A runtime exception thrown by a client that signals a failure to process the HTTP request or HTTP response.
+ * Maps client exception to response.
+ * Needs to be registered in the JAX-RS application.
  * 
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
-public class ClientException extends RuntimeException
+public class ClientErrorExceptionMapper implements ExceptionMapper<ClientErrorException>
 {
-    
-    private final Response cr;
-    
-    public ClientException(Response cr)
+
+    @Override
+    public Response toResponse(ClientErrorException exception)
     {
-        super(cr.getStatusInfo().getReasonPhrase());
-        this.cr = cr;
-    }
-    
-    public Response getResponse()
-    {
-        return cr;
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
     
 }

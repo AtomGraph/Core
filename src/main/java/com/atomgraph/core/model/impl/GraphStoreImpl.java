@@ -27,7 +27,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import com.atomgraph.core.MediaTypes;
-import com.atomgraph.core.exception.ClientException;
 import com.atomgraph.core.model.GraphStore;
 import com.atomgraph.core.model.Service;
 import com.atomgraph.core.util.ModelUtils;
@@ -137,7 +136,7 @@ public class GraphStoreImpl implements GraphStore
     @Override
     public Response get(@QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
     {
-        if (!defaultGraph && graphUri == null) throw new WebApplicationException(Status.BAD_REQUEST);
+        if (!defaultGraph && graphUri == null) throw new BadRequestException("Neither default nor named graph specified");
 
         if (defaultGraph)
         {
@@ -153,7 +152,7 @@ public class GraphStoreImpl implements GraphStore
                 if (log.isDebugEnabled()) log.debug("GET Graph Store named graph with URI: {} found, returning Model of size(): {}", graphUri, model.size());
                 return getResponse(model);
             }
-            catch (ClientException ex)
+            catch (ClientErrorException ex)
             {
                 if (ex.getResponse().getStatus() == Status.NOT_FOUND.getStatusCode())
                 {
@@ -177,7 +176,7 @@ public class GraphStoreImpl implements GraphStore
     @Override
     public Response post(Model model, @QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
     {
-        if (!defaultGraph && graphUri == null) throw new WebApplicationException(Status.BAD_REQUEST);
+        if (!defaultGraph && graphUri == null) throw new BadRequestException("Neither default nor named graph specified");
         if (log.isDebugEnabled()) log.debug("POST Graph Store request with RDF payload: {} payload size(): {}", model, model.size());
         
         if (model.isEmpty()) return Response.noContent().build();
@@ -213,7 +212,7 @@ public class GraphStoreImpl implements GraphStore
     @Override
     public Response put(Model model, @QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
     {
-        if (!defaultGraph && graphUri == null) throw new WebApplicationException(Status.BAD_REQUEST);
+        if (!defaultGraph && graphUri == null) throw new BadRequestException("Neither default nor named graph specified");
         if (log.isDebugEnabled()) log.debug("PUT Graph Store request with RDF payload: {} payload size(): {}", model, model.size());
         
         if (defaultGraph)
@@ -234,7 +233,7 @@ public class GraphStoreImpl implements GraphStore
                 if (existingGraph) return Response.ok().build();
                 else return Response.created(graphUri).build();
             }
-            catch (ClientException ex)
+            catch (ClientErrorException ex)
             {
                 if (ex.getResponse().getStatus() == Status.NOT_FOUND.getStatusCode())
                 {
@@ -257,7 +256,7 @@ public class GraphStoreImpl implements GraphStore
     @Override
     public Response delete(@QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
     {
-        if (!defaultGraph && graphUri == null) throw new WebApplicationException(Status.BAD_REQUEST);
+        if (!defaultGraph && graphUri == null) throw new BadRequestException("Neither default nor named graph specified");
         
         if (defaultGraph)
         {
@@ -281,7 +280,7 @@ public class GraphStoreImpl implements GraphStore
                     return Response.noContent().build();
                 }
             }
-            catch (ClientException ex)
+            catch (ClientErrorException ex)
             {
                 if (ex.getResponse().getStatus() == Status.NOT_FOUND.getStatusCode())
                 {

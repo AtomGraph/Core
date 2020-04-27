@@ -90,7 +90,7 @@ public class ServiceImpl implements RemoteService
                 credentials(getAuthUser(), getAuthPwd()).
                 build();
             
-            sparqlClient.getWebTarget().register(authFeature);
+            sparqlClient.getEndpoint().register(authFeature);
         }
         
         return sparqlClient;
@@ -118,7 +118,7 @@ public class ServiceImpl implements RemoteService
                 credentials(getAuthUser(), getAuthPwd()).
                 build();
 
-            graphStoreClient.getWebTarget().register(authFeature);
+            graphStoreClient.getEndpoint().register(authFeature);
         }
         
         return graphStoreClient;
@@ -140,7 +140,7 @@ public class ServiceImpl implements RemoteService
                 credentials(getAuthUser(), getAuthPwd()).
                 build();
 
-            quadStoreClient.getWebTarget().register(authFeature);
+            quadStoreClient.getEndpoint().register(authFeature);
         }
         
         return quadStoreClient;
