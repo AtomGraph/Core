@@ -16,7 +16,9 @@
 package com.atomgraph.core.client;
 
 import com.atomgraph.core.MediaTypes;
+import java.io.IOException;
 import java.io.InputStream;
+import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
@@ -133,20 +135,29 @@ public class SPARQLClient extends ClientBase
     {
         try (Response cr = query(query, ResultSet.class, null))
         {
-            return parseBoolean(cr);
+            try
+            {
+                return parseBoolean(cr);
+            }
+            catch (IOException ex)
+            {
+                if (log.isErrorEnabled()) log.error("Could not parse ASK result: {}", ex);
+                throw new ClientErrorException(cr, ex);
+            }
         }
     }
 
-    public static boolean parseBoolean(Response cr)
+    public static boolean parseBoolean(Response cr) throws IOException
     {
-        InputStream is = cr.readEntity(InputStream.class);
-        
-        if (cr.getMediaType().isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
-            return JSONInput.booleanFromJSON(is);
-        if (cr.getMediaType().isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE))
-            return XMLInput.booleanFromXML(is);
+        try (InputStream is = cr.readEntity(InputStream.class))
+        {
+            if (cr.getMediaType().isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
+                return JSONInput.booleanFromJSON(is);
+            if (cr.getMediaType().isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE))
+                return XMLInput.booleanFromXML(is);
 
-        throw new IllegalStateException("Unsupported ResultSet format");
+            throw new IllegalStateException("Unsupported ResultSet format");
+        }
     }
 
     /**

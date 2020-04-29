@@ -34,6 +34,7 @@ import com.atomgraph.core.model.impl.SPARQLEndpointImpl;
 import com.atomgraph.core.riot.RDFLanguages;
 import com.atomgraph.core.riot.lang.RDFPostReaderFactory;
 import com.atomgraph.core.util.jena.DataManager;
+import com.atomgraph.core.util.jena.DataManagerImpl;
 import com.atomgraph.core.vocabulary.A;
 import com.atomgraph.core.vocabulary.SD;
 import javax.annotation.PostConstruct;
@@ -129,7 +130,7 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
                     authUser, authPwd, maxGetRequestSize);
         }
         
-        dataManager = new DataManager(LocationMapper.get(), client, mediaTypes, preemptiveAuth);
+        dataManager = new DataManagerImpl(LocationMapper.get(), client, mediaTypes, preemptiveAuth);
     }
     
     @PostConstruct

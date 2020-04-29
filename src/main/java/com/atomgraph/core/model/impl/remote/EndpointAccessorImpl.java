@@ -16,13 +16,16 @@
 package com.atomgraph.core.model.impl.remote;
 
 import com.atomgraph.core.client.SPARQLClient;
+import static com.atomgraph.core.client.SPARQLClient.parseBoolean;
 import com.atomgraph.core.model.EndpointAccessor;
 import static com.atomgraph.core.model.SPARQLEndpoint.DEFAULT_GRAPH_URI;
 import static com.atomgraph.core.model.SPARQLEndpoint.NAMED_GRAPH_URI;
 import static com.atomgraph.core.model.SPARQLEndpoint.USING_GRAPH_URI;
 import static com.atomgraph.core.model.SPARQLEndpoint.USING_NAMED_GRAPH_URI;
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -120,7 +123,14 @@ public class EndpointAccessorImpl implements EndpointAccessor
         
         try (Response cr = getSPARQLClient().query(query, ResultSet.class, params))
         {
-            return SPARQLClient.parseBoolean(cr);
+            try
+            {
+                return parseBoolean(cr);
+            }
+            catch (IOException ex)
+            {
+                throw new ClientErrorException(cr, ex);
+            }
         }
     }
 

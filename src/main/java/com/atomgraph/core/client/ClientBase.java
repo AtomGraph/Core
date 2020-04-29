@@ -84,7 +84,7 @@ public abstract class ClientBase
         WebTarget target = applyParams(params);
         if (log.isDebugEnabled()) log.debug("HEAD {}", target.getUri());
         
-        Response cr = target.request(acceptedTypes).method("HEAD", Response.class);
+        Response cr = target.request(acceptedTypes).head();
         if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
         {
             if (log.isErrorEnabled()) log.error("Request to Graph Store: {} unsuccessful. Reason: {}", target.getUri(), cr.getStatusInfo().getReasonPhrase());
