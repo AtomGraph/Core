@@ -20,6 +20,7 @@ import com.atomgraph.core.MediaType;
 import com.atomgraph.core.MediaTypes;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 import org.apache.jena.rdf.model.Model;
 
@@ -41,6 +42,14 @@ public class LinkedDataClient extends ClientBase
         return new LinkedDataClient(endpoint, mediaTypes);
     }
 
+    /**
+     * Registers client filter.
+     * Can cause performance problems with <code>ApacheConnector</code>.
+     * 
+     * @param filter client request filter
+     * @return this SPARQL client
+     * @see <a href="https://blogs.oracle.com/japod/how-to-use-jersey-client-efficiently">How To Use Jersey Client Efficiently</a>
+     */
     @Override
     public LinkedDataClient register(ClientRequestFilter filter)
     {
@@ -53,7 +62,7 @@ public class LinkedDataClient extends ClientBase
     
     public Model get()
     {
-        try (Response cr = get(getReadableMediaTypes(Model.class), null))
+        try (Response cr = get(getReadableMediaTypes(Model.class), new MultivaluedHashMap()))
         {
             return cr.readEntity(Model.class);
         }
@@ -61,17 +70,17 @@ public class LinkedDataClient extends ClientBase
     
     public void post(Model model)
     {
-        post(model, getDefaultMediaType(), new javax.ws.rs.core.MediaType[]{}, null).close();
+        post(model, getDefaultMediaType(), new javax.ws.rs.core.MediaType[]{}).close();
     }
 
     public void put(Model model)
     {
-        put(model, getDefaultMediaType(), new javax.ws.rs.core.MediaType[]{}, null).close();
+        put(model, getDefaultMediaType(), new javax.ws.rs.core.MediaType[]{}).close();
     }
 
     public void delete()
     {
-        delete(new javax.ws.rs.core.MediaType[]{}, null).close();
+        delete(new javax.ws.rs.core.MediaType[]{}).close();
     }
 
     @Override

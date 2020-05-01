@@ -22,12 +22,12 @@ import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.atomgraph.core.model.DatasetQuadAccessor;
-import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
 
 /**
  * Quad Store client.
@@ -59,6 +59,14 @@ public class QuadStoreClient extends ClientBase implements DatasetQuadAccessor
         return new QuadStoreClient(endpoint);
     }
     
+    /**
+     * Registers client filter.
+     * Can cause performance problems with <code>ApacheConnector</code>.
+     * 
+     * @param filter client request filter
+     * @return this SPARQL client
+     * @see <a href="https://blogs.oracle.com/japod/how-to-use-jersey-client-efficiently">How To Use Jersey Client Efficiently</a>
+     */
     @Override
     public QuadStoreClient register(ClientRequestFilter filter)
     {
@@ -78,7 +86,7 @@ public class QuadStoreClient extends ClientBase implements DatasetQuadAccessor
     @Override
     public Dataset get()
     {
-        try (Response cr = get(getReadableMediaTypes(Dataset.class), null))
+        try (Response cr = get(getReadableMediaTypes(Dataset.class)))
         {
             return cr.readEntity(Dataset.class);
         }
@@ -87,25 +95,25 @@ public class QuadStoreClient extends ClientBase implements DatasetQuadAccessor
     @Override
     public void add(Dataset dataset)
     {
-        post(dataset, getDefaultMediaType(), new javax.ws.rs.core.MediaType[]{}, null).close();
+        post(dataset, getDefaultMediaType(), new MediaType[]{}).close();
     }
     
     @Override
     public void replace(Dataset dataset)
     {
-        put(dataset, getDefaultMediaType(), new javax.ws.rs.core.MediaType[]{}, null).close();
+        put(dataset, getDefaultMediaType(), new MediaType[]{}).close();
     }
     
     @Override
     public void delete()
     {
-        delete(null, null).close();
+        delete(new MediaType[]{}).close();
     }
 
     @Override
     public void patch(Dataset dataset)
     {
-        patch(dataset, null).close();
+        patch(dataset, new MultivaluedHashMap()).close();
     }
     
     public Response patch(Dataset dataset, MultivaluedMap<String, String> params)
@@ -113,14 +121,7 @@ public class QuadStoreClient extends ClientBase implements DatasetQuadAccessor
         WebTarget target = applyParams(params);
         if (log.isDebugEnabled()) log.debug("PATCH Dataset to Quad Store {}", getEndpoint().getUri());
 
-        Response cr = target.request().method(HttpMethod.PATCH, Entity.entity(dataset, getDefaultMediaType()));
-        if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
-        {
-            if (log.isErrorEnabled()) log.error("Request to graph store: {} unsuccessful. Reason: {}", target.getUri(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientErrorException(cr);
-        }
-
-        return cr;
+        return target.request().method(HttpMethod.PATCH, Entity.entity(dataset, getDefaultMediaType()));
     }
     
 }

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.ClientRequestFilter;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
@@ -46,6 +47,9 @@ public class SPARQLClient extends ClientBase
 {
     
     private static final Logger log = LoggerFactory.getLogger(SPARQLClient.class);
+    
+    private static final String QUERY_PARAM_NAME = "query";
+    private static final String UPDATE_PARAM_NAME = "update";
 
     private final int maxGetRequestSize;
 
@@ -80,6 +84,14 @@ public class SPARQLClient extends ClientBase
         return new SPARQLClient(endpoint);
     }
     
+    /**
+     * Registers client filter.
+     * Can cause performance problems with <code>ApacheConnector</code>.
+     * 
+     * @param filter client request filter
+     * @return this SPARQL client
+     * @see <a href="https://blogs.oracle.com/japod/how-to-use-jersey-client-efficiently">How To Use Jersey Client Efficiently</a>
+     */
     @Override
     public SPARQLClient register(ClientRequestFilter filter)
     {
@@ -95,21 +107,36 @@ public class SPARQLClient extends ClientBase
         return applyParams(params).getUri().toString().length();
     }
 
+    public Response query(Query query, Class clazz)
+    {
+        return query(query, clazz, new MultivaluedHashMap());
+    }
+    
     public Response query(Query query, Class clazz, MultivaluedMap<String, String> params)
     {
+        return query(query, clazz, params, new MultivaluedHashMap());
+    }
+    
+    public Response query(Query query, Class clazz, MultivaluedMap<String, String> params, MultivaluedMap<String, Object> headers)
+    {
+        if (params == null) throw new IllegalArgumentException("MultivaluedMap<String, String> params cannot be null");
+        if (headers == null) throw new IllegalArgumentException("MultivaluedMap<String, Object> headers cannot be null");
+        
         MultivaluedMap<String, String> mergedParams = new MultivaluedHashMap();
-        if (params != null) mergedParams.putAll(params);
-        mergedParams.putSingle("query", query.toString());
-
-        if (getQueryURLLength(mergedParams) > getMaxGetRequestSize())
-            return post(query, MediaType.APPLICATION_FORM_URLENCODED_TYPE, getReadableMediaTypes(clazz), params);
+        mergedParams.putAll(params);
+        mergedParams.putSingle(QUERY_PARAM_NAME, query.toString());
+        
+        if (getQueryURLLength(params) > getMaxGetRequestSize())
+            return applyHeaders(getEndpoint().request(getReadableMediaTypes(clazz)), headers).
+                    post(Entity.form(mergedParams));
         else
-            return get(getReadableMediaTypes(clazz), mergedParams);
+            return applyHeaders(applyParams(mergedParams).request(getReadableMediaTypes(clazz)), headers).
+                    get();
     }
     
     public Model loadModel(Query query)
     {
-        try (Response cr = query(query, Model.class, null))
+        try (Response cr = query(query, Model.class))
         {
             return cr.readEntity(Model.class);
         }
@@ -117,7 +144,7 @@ public class SPARQLClient extends ClientBase
 
     public Dataset loadDataset(Query query)
     {
-        try (Response cr = query(query, Dataset.class, null))
+        try (Response cr = query(query, Dataset.class))
         {
             return cr.readEntity(Dataset.class);
         }
@@ -125,7 +152,7 @@ public class SPARQLClient extends ClientBase
     
     public ResultSetRewindable select(Query query)
     {
-        try (Response cr = query(query, ResultSet.class, null))
+        try (Response cr = query(query, ResultSet.class))
         {
             return cr.readEntity(ResultSetRewindable.class);
         }
@@ -133,7 +160,7 @@ public class SPARQLClient extends ClientBase
 
     public boolean ask(Query query)
     {
-        try (Response cr = query(query, ResultSet.class, null))
+        try (Response cr = query(query, ResultSet.class))
         {
             try
             {
@@ -170,7 +197,7 @@ public class SPARQLClient extends ClientBase
     {
         MultivaluedMap formData = new MultivaluedHashMap();
         if (params != null) formData.putAll(params);
-        formData.putSingle("update", updateRequest.toString());
+        formData.putSingle(UPDATE_PARAM_NAME, updateRequest.toString());
         
         post(formData, MediaType.APPLICATION_FORM_URLENCODED_TYPE, new MediaType[]{}, null).close();
     }

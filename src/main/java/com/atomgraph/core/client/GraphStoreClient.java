@@ -17,11 +17,13 @@ package com.atomgraph.core.client;
 
 import com.atomgraph.core.MediaType;
 import com.atomgraph.core.MediaTypes;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import org.apache.jena.query.DatasetAccessor;
 import org.apache.jena.rdf.model.Model;
 import org.slf4j.Logger;
@@ -36,6 +38,9 @@ import org.slf4j.LoggerFactory;
 public class GraphStoreClient extends ClientBase implements DatasetAccessor
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreClient.class);
+    
+    private static final String DEFAULT_PARAM_NAME = "default";
+    private static final String GRAPH_PARAM_NAME = "graph";
     
     protected GraphStoreClient(WebTarget endpoint, MediaTypes mediaTypes)
     {
@@ -57,6 +62,14 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
         return new GraphStoreClient(endpoint);
     }
 
+    /**
+     * Registers client filter.
+     * Can cause performance problems with <code>ApacheConnector</code>.
+     * 
+     * @param filter client request filter
+     * @return this SPARQL client
+     * @see <a href="https://blogs.oracle.com/japod/how-to-use-jersey-client-efficiently">How To Use Jersey Client Efficiently</a>
+     */
     @Override
     public GraphStoreClient register(ClientRequestFilter filter)
     {
@@ -77,9 +90,9 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
     public boolean containsModel(String uri)
     {
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle("graph", uri);
+        params.putSingle(GRAPH_PARAM_NAME, uri);
 
-        try (Response cr = head(Model.class, getReadableMediaTypes(Model.class), uri, params, null))
+        try (Response cr = head(getReadableMediaTypes(Model.class), params))
         {
             return cr.getStatusInfo().
                 getFamily().
@@ -91,10 +104,13 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
     public Model getModel()
     {
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle("default", Boolean.TRUE.toString());
+        params.putSingle(DEFAULT_PARAM_NAME, Boolean.TRUE.toString());
 
         try (Response cr = get(getReadableMediaTypes(Model.class), params))
         {
+            // some endpoints might include response body which will not cause NotFoundException in Jersey
+            if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
+            
             return cr.readEntity(Model.class);
         }
     }
@@ -103,10 +119,13 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
     public Model getModel(String uri)
     {
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle("graph", uri);
+        params.putSingle(GRAPH_PARAM_NAME, uri);
 
         try (Response cr = get(getReadableMediaTypes(Model.class), params))
         {
+            // some endpoints might include response body which will not cause NotFoundException in Jersey
+            if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
+            
             return cr.readEntity(Model.class);
         }
     }
@@ -115,54 +134,78 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
     public void add(Model model)
     {
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle("default", Boolean.TRUE.toString());
+        params.putSingle(DEFAULT_PARAM_NAME, Boolean.TRUE.toString());
 
-        post(model, getDefaultMediaType(), new javax.ws.rs.core.MediaType[]{}, params).close();
+        try (Response cr = post(model, getDefaultMediaType(), new javax.ws.rs.core.MediaType[]{}, params))
+        {
+            // some endpoints might include response body which will not cause NotFoundException in Jersey
+            if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
+        }
     }
     
     @Override
     public void add(String uri, Model model)
     {
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle("graph", uri);
+        params.putSingle(GRAPH_PARAM_NAME, uri);
 
-        post(model, getDefaultMediaType(), new javax.ws.rs.core.MediaType[]{}, params).close();
+        try (Response cr = post(model, getDefaultMediaType(), new javax.ws.rs.core.MediaType[]{}, params))
+        {
+            // some endpoints might include response body which will not cause NotFoundException in Jersey
+            if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
+        }
     }
     
     @Override
     public void putModel(Model model)
     {
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle("default", Boolean.TRUE.toString());
+        params.putSingle(DEFAULT_PARAM_NAME, Boolean.TRUE.toString());
 
-        put(model, getDefaultMediaType(), new javax.ws.rs.core.MediaType[]{}, params).close();
+        try (Response cr = put(model, getDefaultMediaType(), new javax.ws.rs.core.MediaType[]{}, params))
+        {
+            // some endpoints might include response body which will not cause NotFoundException in Jersey
+            if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
+        }
     }
 
     @Override
     public void putModel(String uri, Model model)
     {
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle("graph", uri);
+        params.putSingle(GRAPH_PARAM_NAME, uri);
 
-        put(model, getDefaultMediaType(), new javax.ws.rs.core.MediaType[]{}, params).close();
+        try (Response cr = put(model, getDefaultMediaType(), new javax.ws.rs.core.MediaType[]{}, params))
+        {
+            // some endpoints might include response body which will not cause NotFoundException in Jersey
+            if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
+        }
     }
     
     @Override
     public void deleteDefault()
     {
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle("default", Boolean.TRUE.toString());
+        params.putSingle(DEFAULT_PARAM_NAME, Boolean.TRUE.toString());
 
-        delete(new javax.ws.rs.core.MediaType[]{}, params).close();
+        try (Response cr = delete(new javax.ws.rs.core.MediaType[]{}, params))
+        {
+            // some endpoints might include response body which will not cause NotFoundException in Jersey
+            if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
+        }
     }
 
     @Override
     public void deleteModel(String uri)
     {
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle("graph", uri);
+        params.putSingle(GRAPH_PARAM_NAME, uri);
 
-        delete(new javax.ws.rs.core.MediaType[]{}, params).close();
+        try (Response cr = delete(new javax.ws.rs.core.MediaType[]{}, params))
+        {
+            // some endpoints might include response body which will not cause NotFoundException in Jersey
+            if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
+        }
     }
 
 }

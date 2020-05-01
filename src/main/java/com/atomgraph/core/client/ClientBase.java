@@ -18,11 +18,12 @@ package com.atomgraph.core.client;
 import com.atomgraph.core.MediaTypes;
 import java.util.List;
 import java.util.Map;
-import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import org.glassfish.jersey.uri.UriComponent;
@@ -78,82 +79,91 @@ public abstract class ClientBase
         
         return webTarget;
     }
-    
-    public Response head(Class clazz, javax.ws.rs.core.MediaType[] acceptedTypes, String uri, MultivaluedMap<String, String> params, MultivaluedMap<String, String> headers)
-    {
-        WebTarget target = applyParams(params);
-        if (log.isDebugEnabled()) log.debug("HEAD {}", target.getUri());
-        
-        Response cr = target.request(acceptedTypes).head();
-        if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
-        {
-            if (log.isErrorEnabled()) log.error("Request to Graph Store: {} unsuccessful. Reason: {}", target.getUri(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientErrorException(cr);
-        }
 
-        return cr;
+    protected Invocation.Builder applyHeaders(Invocation.Builder builder, MultivaluedMap<String, Object> headers)
+    {
+        if (headers != null)
+            for (Map.Entry<String, List<Object>> entry : headers.entrySet())
+                for (Object value : entry.getValue())
+                    builder = builder.header(entry.getKey(), value);
+        
+        return builder;
+    }
+
+    public Response head(javax.ws.rs.core.MediaType[] acceptedTypes)
+    {
+        return head(acceptedTypes, new MultivaluedHashMap(), new MultivaluedHashMap());
+    }
+
+    public Response head(javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
+    {
+        return head(acceptedTypes, params, new MultivaluedHashMap());
+    }
+
+    public Response head(javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, Object> headers)
+    {
+        return applyHeaders(applyParams(params).request(acceptedTypes), headers).head();
+    }
+
+    public Response get(javax.ws.rs.core.MediaType[] acceptedTypes)
+    {
+        return get(acceptedTypes, new MultivaluedHashMap(), new MultivaluedHashMap());
     }
 
     public Response get(javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
     {
-        WebTarget target = applyParams(params);
-        if (log.isDebugEnabled()) log.debug("GET {}", target.getUri());
-        
-        Response cr = target.request(acceptedTypes).get();
-        if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
-        {
-            if (log.isErrorEnabled()) log.error("GET {} request unsuccessful. Reason: {}", target.getUri(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientErrorException(cr);
-        }
+        return get(acceptedTypes, params, new MultivaluedHashMap());
+    }
+    
+    public Response get(javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, Object> headers)
+    {
+        return applyHeaders(applyParams(params).request(acceptedTypes), headers).get();
+    }
 
-        return cr;
+    public Response post(Object body, MediaType contentType, javax.ws.rs.core.MediaType[] acceptedTypes)
+    {
+        return post(body, contentType, acceptedTypes, new MultivaluedHashMap(), new MultivaluedHashMap());
     }
     
     public Response post(Object body, MediaType contentType, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
     {
-        WebTarget target = applyParams(params);
-        if (log.isDebugEnabled()) log.debug("POST {}", target.getUri());
-        
-        Response cr = target.request(acceptedTypes).post(Entity.entity(body, contentType));
-        if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
-        {
-            if (log.isErrorEnabled()) log.error("Request to {} unsuccessful. Reason: {}", target.getUri(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientErrorException(cr);
-        }
-        
-        return cr;
+        return post(body, contentType, acceptedTypes, params, new MultivaluedHashMap());
     }
     
+    public Response post(Object body, MediaType contentType, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, Object> headers)
+    {
+        return applyHeaders(applyParams(params).request(acceptedTypes), headers).post(Entity.entity(body, contentType));
+    }
+
+    public Response put(Object body, MediaType contentType, javax.ws.rs.core.MediaType[] acceptedTypes)
+    {
+        return put(body, contentType, acceptedTypes, new MultivaluedHashMap(), new MultivaluedHashMap());
+    }
+
     public Response put(Object body, MediaType contentType, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
     {
-        WebTarget target = applyParams(params);
-        if (log.isDebugEnabled()) log.debug("PUT {}", target.getUri());
-        
-        Response cr = target.request(acceptedTypes).put(Entity.entity(body, contentType));
-        if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
-        {
-            if (log.isErrorEnabled()) log.error("PUT {} request unsuccessful. Reason: {}", target.getUri(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientErrorException(cr);
-        }
-
-        return cr;
+        return put(body, contentType, acceptedTypes, params, new MultivaluedHashMap());
+    }
+    
+    public Response put(Object body, MediaType contentType, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, Object> headers)
+    {
+        return applyHeaders(applyParams(params).request(acceptedTypes), headers).put(Entity.entity(body, contentType));
     }
 
+    public Response delete(javax.ws.rs.core.MediaType[] acceptedTypes)
+    {
+        return delete(acceptedTypes, new MultivaluedHashMap(), new MultivaluedHashMap());
+    }
+    
     public Response delete(javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
     {
-        WebTarget target = applyParams(params);
-        if (log.isDebugEnabled()) log.debug("DELETE {}", target.getUri());
-        
-        Response cr = target.request(acceptedTypes).delete();
-        if (!cr.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL))
-        {
-            if (log.isErrorEnabled()) log.error("DELETE {} request unsuccessful. Reason: {}", target.getUri(), cr.getStatusInfo().getReasonPhrase());
-            throw new ClientErrorException(cr);
-        }
-
-        return cr;
+        return delete(acceptedTypes, params, new MultivaluedHashMap());
     }
-
+    
+    public Response delete(javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, Object> headers)
+    {
+        return applyHeaders(applyParams(params).request(acceptedTypes), headers).delete();
+    }
     
     public MediaType[] getReadableMediaTypes(Class clazz)
     {
