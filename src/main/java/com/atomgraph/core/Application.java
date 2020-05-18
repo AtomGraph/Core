@@ -87,8 +87,8 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
             servletConfig.getInitParameter(SD.endpoint.getURI()) != null ? servletConfig.getInitParameter(SD.endpoint.getURI()) : null,
             servletConfig.getInitParameter(A.graphStore.getURI()) != null ? servletConfig.getInitParameter(A.graphStore.getURI()) : null,
             servletConfig.getInitParameter(A.quadStore.getURI()) != null ? servletConfig.getInitParameter(A.quadStore.getURI()) : null,
-            servletConfig.getInitParameter(org.apache.jena.sparql.engine.http.Service.queryAuthUser.getSymbol()) != null ? servletConfig.getInitParameter(org.apache.jena.sparql.engine.http.Service.queryAuthUser.getSymbol()) : null,
-            servletConfig.getInitParameter(org.apache.jena.sparql.engine.http.Service.queryAuthPwd.getSymbol()) != null ? servletConfig.getInitParameter(org.apache.jena.sparql.engine.http.Service.queryAuthPwd.getSymbol()) : null,
+            servletConfig.getInitParameter(A.authUser.getURI()) != null ? servletConfig.getInitParameter(A.authUser.getURI()) : null,
+            servletConfig.getInitParameter(A.authPwd.getURI()) != null ? servletConfig.getInitParameter(A.authPwd.getURI()) : null,
             new MediaTypes(), getClient(new ClientConfig()),
             servletConfig.getInitParameter(A.maxGetRequestSize.getURI()) != null ? Integer.parseInt(servletConfig.getInitParameter(A.maxGetRequestSize.getURI())) : null,
             servletConfig.getInitParameter(A.preemptiveAuth.getURI()) != null ? Boolean.parseBoolean(servletConfig.getInitParameter(A.preemptiveAuth.getURI())) : false

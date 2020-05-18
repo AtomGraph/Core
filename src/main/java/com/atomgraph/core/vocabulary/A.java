@@ -60,4 +60,8 @@ public final class A
     
     public static final DatatypeProperty maxGetRequestSize = m_model.createDatatypeProperty( NS + "maxGetRequestSize" );
     
+    public static final DatatypeProperty authUser = m_model.createDatatypeProperty( NS + "authUser" );
+    
+    public static final DatatypeProperty authPwd = m_model.createDatatypeProperty( NS + "authPwd" );
+
 }
