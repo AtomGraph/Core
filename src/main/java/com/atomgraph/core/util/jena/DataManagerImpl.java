@@ -17,7 +17,6 @@
 package com.atomgraph.core.util.jena;
 
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.util.FileManager;
 import org.apache.jena.util.LocationMapper;
 import java.net.URI;
 import com.atomgraph.core.MediaTypes;
@@ -28,6 +27,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.ModelReader;
+import org.apache.jena.util.FileManagerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 * @see com.atomgraph.core.client.LinkedDataClient
 */
 
-public class DataManagerImpl extends FileManager implements DataManager
+public class DataManagerImpl extends FileManagerImpl implements DataManager
 {
 
     private static final Logger log = LoggerFactory.getLogger(DataManagerImpl.class);
@@ -65,6 +65,10 @@ public class DataManagerImpl extends FileManager implements DataManager
         this.client = client;
         this.mediaTypes = mediaTypes;
         this.preemptiveAuth = preemptiveAuth;
+        
+        addLocatorFile() ;
+        addLocatorURL() ;
+        addLocatorClassLoader(getClass().getClassLoader()) ;
     }
     
     @Override

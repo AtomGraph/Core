@@ -29,27 +29,27 @@ import org.apache.jena.riot.Lang;
 public class MediaType extends javax.ws.rs.core.MediaType
 {
     /** "application/rdf+xml" */
-    public final static String APPLICATION_RDF_XML = Lang.RDFXML.getContentType().getContentType();
+    public final static String APPLICATION_RDF_XML = Lang.RDFXML.getContentType().getContentTypeStr();
     /** "application/rdf+xml" */
     public final static MediaType APPLICATION_RDF_XML_TYPE = new MediaType(Lang.RDFXML.getContentType().getType(), Lang.RDFXML.getContentType().getSubType());
 
     /** "text/turtle" */
-    public final static String TEXT_TURTLE = Lang.TURTLE.getContentType().getContentType();
+    public final static String TEXT_TURTLE = Lang.TURTLE.getContentType().getContentTypeStr();
     /** "text/turtle" */
     public final static MediaType TEXT_TURTLE_TYPE = new MediaType(Lang.TURTLE.getContentType().getType(), Lang.TURTLE.getContentType().getSubType());
 
     /** "text/trig" */
-    public final static String TEXT_TRIG = Lang.TRIG.getContentType().getContentType();
+    public final static String TEXT_TRIG = Lang.TRIG.getContentType().getContentTypeStr();
     /** "text/trig" */
     public final static MediaType TEXT_TRIG_TYPE = new MediaType(Lang.TRIG.getContentType().getType(), Lang.TRIG.getContentType().getSubType());
 
     /** "application/n-triples" */
-    public final static String TEXT_NTRIPLES = Lang.NTRIPLES.getContentType().getContentType();
+    public final static String TEXT_NTRIPLES = Lang.NTRIPLES.getContentType().getContentTypeStr();
     /** "application/n-triples" */
     public final static MediaType TEXT_NTRIPLES_TYPE = new MediaType(Lang.NTRIPLES.getContentType().getType(), Lang.NTRIPLES.getContentType().getSubType());
 
     /** "application/n-quads" */
-    public final static String TEXT_NQUADS = Lang.NQUADS.getContentType().getContentType();
+    public final static String TEXT_NQUADS = Lang.NQUADS.getContentType().getContentTypeStr();
     /** "application/n-quads" */
     public final static MediaType TEXT_NQUADS_TYPE = new MediaType(Lang.NQUADS.getContentType().getType(), Lang.NQUADS.getContentType().getSubType());
 

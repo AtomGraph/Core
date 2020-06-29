@@ -102,14 +102,12 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
         if (is == null) throw new IllegalArgumentException("InputStream must be not null");
         if (lang == null) throw new IllegalArgumentException("Lang must be not null");
 
-        RDFParser parser =  RDFParser.create().
+        RDFParser parser = RDFParser.create().
             lang(lang).
             errorHandler(errorHandler).
             base(baseURI).
             source(is).
             build();
-        //parser.setErrorHandler(errorHandler);
-        //parser.setParserProfile(parserProfile);
         
         parser.parse(StreamRDFLib.graph(model.getGraph()));
         

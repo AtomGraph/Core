@@ -52,4 +52,7 @@
         <servlet-name>com.atomgraph.core.Application</servlet-name>
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
+    <listener>
+        <listener-class>com.atomgraph.core.util.jena.StartupListener</listener-class>
+    </listener>
 </web-app>
