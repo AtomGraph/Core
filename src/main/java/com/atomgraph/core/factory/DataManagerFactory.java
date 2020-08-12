@@ -15,7 +15,7 @@
  *
  */
 
-package com.atomgraph.core.provider;
+package com.atomgraph.core.factory;
 
 import com.atomgraph.core.util.jena.DataManager;
 import org.glassfish.hk2.api.Factory;
@@ -30,14 +30,14 @@ import org.slf4j.LoggerFactory;
  * @see com.atomgraph.core.util.jena.DataManager
  * @see javax.ws.rs.core.Context
  */
-public class DataManagerProvider implements Factory<DataManager>
+public class DataManagerFactory implements Factory<DataManager>
 {
 
-    private static final Logger log = LoggerFactory.getLogger(DataManagerProvider.class);
+    private static final Logger log = LoggerFactory.getLogger(DataManagerFactory.class);
 
     private final DataManager dataManager;
         
-    public DataManagerProvider(final DataManager dataManager)
+    public DataManagerFactory(final DataManager dataManager)
     {
         this.dataManager = dataManager;
     }

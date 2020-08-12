@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.atomgraph.core.provider;
+package com.atomgraph.core.factory;
 
 import com.atomgraph.core.model.Service;
 import javax.ws.rs.ext.Provider;
@@ -29,14 +29,14 @@ import org.slf4j.LoggerFactory;
  * @see com.atomgraph.core.model.Service
  */
 //@Provider
-public class ServiceProvider implements Factory<Service>
+public class ServiceFactory implements Factory<Service>
 {
     
-    private static final Logger log = LoggerFactory.getLogger(ServiceProvider.class);
+    private static final Logger log = LoggerFactory.getLogger(ServiceFactory.class);
     
     private final Service service;
     
-    public ServiceProvider(final Service service)
+    public ServiceFactory(final Service service)
     {
         this.service = service;
     }

@@ -14,47 +14,49 @@
  * limitations under the License.
  */
 
-package com.atomgraph.core.provider;
+package com.atomgraph.core.factory;
 
-import com.atomgraph.core.MediaTypes;
 import org.glassfish.hk2.api.Factory;
+import javax.inject.Singleton;
+import javax.ws.rs.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * JAX-RS provider for media type registry.
+ * JAX-RS provider for HTTP client.
  * Needs to be registered in the JAX-RS application.
  * 
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
- * @see com.atomgraph.core.MediaTypes
+ * @see com.sun.jersey.api.client.Client
  * @see javax.ws.rs.core.Context
  */
-public class MediaTypesProvider implements Factory<MediaTypes>
+@Singleton
+public class ClientFactory implements Factory<Client>
 {
-
-    private static final Logger log = LoggerFactory.getLogger(MediaTypesProvider.class);
+    private static final Logger log = LoggerFactory.getLogger(ClientFactory.class);
     
-    private final MediaTypes mediaTypes;
+    private final Client client;
     
-    public MediaTypesProvider(final MediaTypes mediaTypes)
+    public ClientFactory(final Client client)
     {
-        this.mediaTypes = mediaTypes;
-    }
-    
-    @Override
-    public MediaTypes provide()
-    {
-        return getMediaTypes();
+        this.client = client;
     }
 
     @Override
-    public void dispose(MediaTypes t)
+    public Client provide()
     {
+        return getClient();
     }
 
-    public MediaTypes getMediaTypes()
+    @Override
+    public void dispose(Client t)
     {
-        return mediaTypes;
+        t.close();
+    }
+    
+    public Client getClient()
+    {
+        return client;
     }
     
 }

@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see <a href="http://shop.oreilly.com/product/9780596158057.do">RESTful Java with JAX-RS</a>
  */
+@Deprecated
 public class Link
 {
     private static Pattern PATTERN = Pattern.compile("<(.+)>\\s*;\\s*(.+)");
