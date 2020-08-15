@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * @see javax.ws.rs.core.Context
  */
 @Provider
-public class QueryParamProvider implements ParamConverterProvider // InjectableProvider<QueryParam, Query>
+public class QueryParamProvider implements ParamConverterProvider
 {
     private static final Logger log = LoggerFactory.getLogger(QueryParamProvider.class);
 

@@ -22,7 +22,7 @@ import com.atomgraph.core.io.ResultSetProvider;
 import com.atomgraph.core.io.ModelProvider;
 import com.atomgraph.core.io.QueryProvider;
 import com.atomgraph.core.provider.QueryParamProvider;
-import com.atomgraph.core.io.UpdateRequestReader;
+import com.atomgraph.core.io.UpdateRequestProvider;
 import javax.ws.rs.core.Context;
 import org.apache.jena.riot.RDFParserRegistry;
 import com.atomgraph.core.mapper.ClientErrorExceptionMapper;
@@ -145,7 +145,7 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
         register(new ResultSetProvider());
         register(QueryParamProvider.class);
         register(new QueryProvider());
-        register(new UpdateRequestReader());
+        register(new UpdateRequestProvider());
         register(new ClientErrorExceptionMapper());
         register(new NotFoundExceptionMapper());
 
@@ -216,7 +216,7 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
         clientConfig.register(new DatasetProvider());
         clientConfig.register(new ResultSetProvider());
         clientConfig.register(new QueryProvider());
-        clientConfig.register(new UpdateRequestReader()); // TO-DO: UpdateRequestProvider
+        clientConfig.register(new UpdateRequestProvider()); // TO-DO: UpdateRequestProvider
 
         Client client = ClientBuilder.newClient(clientConfig);
         //if (log.isDebugEnabled()) client.register(new LoggingFeature(log));

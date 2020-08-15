@@ -28,6 +28,11 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Provider;
 import com.atomgraph.core.MediaType;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import javax.ws.rs.Produces;
+import javax.ws.rs.ext.MessageBodyWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,10 +46,11 @@ import org.slf4j.LoggerFactory;
  */
 @Provider
 @Consumes(MediaType.APPLICATION_SPARQL_UPDATE)
-public class UpdateRequestReader implements MessageBodyReader<UpdateRequest>
+@Produces(MediaType.APPLICATION_SPARQL_UPDATE)
+public class UpdateRequestProvider implements MessageBodyReader<UpdateRequest>, MessageBodyWriter<UpdateRequest>
 {
 
-    private static final Logger log = LoggerFactory.getLogger(UpdateRequestReader.class);
+    private static final Logger log = LoggerFactory.getLogger(UpdateRequestProvider.class);
 
     @Override
     public boolean isReadable(Class<?> type, Type type1, Annotation[] antns, javax.ws.rs.core.MediaType mt)
@@ -57,6 +63,19 @@ public class UpdateRequestReader implements MessageBodyReader<UpdateRequest>
     {
         if (log.isTraceEnabled()) log.trace("Reading UpdateRequest with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
         return UpdateFactory.read(in);
+    }
+
+    @Override
+    public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, javax.ws.rs.core.MediaType mediaType)
+    {
+        return UpdateRequest.class.isAssignableFrom(type);
+    }
+
+    @Override
+    public void writeTo(UpdateRequest updateRequest, Class<?> type, Type genericType, Annotation[] annotations, javax.ws.rs.core.MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException
+    {
+        if (log.isTraceEnabled()) log.trace("Writing UpdateRequest with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
+        new OutputStreamWriter(entityStream, StandardCharsets.UTF_8).write(updateRequest.toString());
     }
     
 }
