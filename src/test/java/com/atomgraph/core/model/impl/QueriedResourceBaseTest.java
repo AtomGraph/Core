@@ -88,7 +88,7 @@ public class QueriedResourceBaseTest extends JerseyTest
         system = new com.atomgraph.core.Application(getDataset(),
                 null, null, null, null, null,
                 new MediaTypes(), com.atomgraph.core.Application.getClient(new ClientConfig()),
-                null, false);
+                null, false, false);
         system.init();
         system.register(TestResource.class);
         

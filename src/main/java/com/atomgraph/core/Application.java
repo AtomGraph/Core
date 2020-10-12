@@ -37,6 +37,7 @@ import com.atomgraph.core.util.jena.DataManager;
 import com.atomgraph.core.util.jena.DataManagerImpl;
 import com.atomgraph.core.vocabulary.A;
 import com.atomgraph.core.vocabulary.SD;
+import java.util.HashMap;
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.client.Client;
@@ -91,6 +92,7 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
             servletConfig.getInitParameter(A.authPwd.getURI()) != null ? servletConfig.getInitParameter(A.authPwd.getURI()) : null,
             new MediaTypes(), getClient(new ClientConfig()),
             servletConfig.getInitParameter(A.maxGetRequestSize.getURI()) != null ? Integer.parseInt(servletConfig.getInitParameter(A.maxGetRequestSize.getURI())) : null,
+            servletConfig.getInitParameter(A.cacheModelLoads.getURI()) != null ? Boolean.parseBoolean(servletConfig.getInitParameter(A.cacheModelLoads.getURI())) : false,
             servletConfig.getInitParameter(A.preemptiveAuth.getURI()) != null ? Boolean.parseBoolean(servletConfig.getInitParameter(A.preemptiveAuth.getURI())) : false
         );
     }
@@ -98,7 +100,8 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
     public Application(final Dataset dataset,
             final String endpointURI, final String graphStoreURI, final String quadStoreURI,
             final String authUser, final String authPwd,
-            final MediaTypes mediaTypes, final Client client, final Integer maxGetRequestSize, final boolean preemptiveAuth)
+            final MediaTypes mediaTypes, final Client client, final Integer maxGetRequestSize,
+            final boolean cacheModelLoads, final boolean preemptiveAuth)
     {
         this.dataset = dataset;
         this.mediaTypes = mediaTypes;
@@ -130,7 +133,7 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
                     authUser, authPwd, maxGetRequestSize);
         }
         
-        dataManager = new DataManagerImpl(LocationMapper.get(), client, mediaTypes, preemptiveAuth);
+        dataManager = new DataManagerImpl(LocationMapper.get(), new HashMap<>(), client, mediaTypes, cacheModelLoads, preemptiveAuth);
     }
     
     @PostConstruct

@@ -22,9 +22,11 @@ import java.net.URI;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.LinkedDataClient;
 import java.net.URISyntaxException;
+import java.util.Map;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
+import org.apache.jena.ext.com.google.common.collect.ImmutableMap;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.ModelReader;
 import org.apache.jena.util.FileManagerImpl;
@@ -48,22 +50,31 @@ public class DataManagerImpl extends FileManagerImpl implements DataManager
     private final boolean preemptiveAuth;
     private final Client client;
     private final MediaTypes mediaTypes;
-            
+    private boolean cacheModelLoads;
+    private final Map<String, Model> modelCache;
+
     /**
      * Creates data manager.
      * 
      * @param mapper location mapper
+     * @param modelCache
      * @param client HTTP client
      * @param mediaTypes supported readable and writable media types
+     * @param cacheModelLoads if true, cache models after loading, using locations as keys
      * @param preemptiveAuth if true, preemptive HTTP authentication will be used
      */
-    public DataManagerImpl(LocationMapper mapper, Client client, MediaTypes mediaTypes, boolean preemptiveAuth)
+    public DataManagerImpl(LocationMapper mapper, Map<String, Model> modelCache,
+            Client client, MediaTypes mediaTypes,
+            boolean cacheModelLoads, boolean preemptiveAuth)
     {
         super(mapper);
-        if (client == null) throw new IllegalArgumentException("Client must be not null");
+        if (client == null) throw new IllegalArgumentException("Model cache Map must be not null");
+        if (modelCache == null) throw new IllegalArgumentException("Client must be not null");
         if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes must be not null");
+        this.modelCache = modelCache;
         this.client = client;
         this.mediaTypes = mediaTypes;
+        this.cacheModelLoads = cacheModelLoads;
         this.preemptiveAuth = preemptiveAuth;
         
         addLocatorFile() ;
@@ -160,4 +171,99 @@ public class DataManagerImpl extends FileManagerImpl implements DataManager
         return super.readModel(model, uri);
     }
 
+    /**
+     * Returns an immutable copy of the model cache
+     * 
+     * @return immutable cache map
+     */
+    @Override
+    public ImmutableMap<String, Model> getModelCache()
+    {
+        return ImmutableMap.copyOf(modelCache);
+    }
+    
+    /**
+     * Reset the model cache
+     */
+    @Override
+    public void resetCache()
+    {
+        modelCache.clear() ;
+    }
+    
+    /**
+     * Change the state of model cache : does not clear the cache.
+     * Deprecated - use constructor argument instead.
+     * 
+     * @param state true to enable caching
+     */ 
+    @Override
+    @Deprecated
+    public void setModelCaching(boolean state)
+    {
+        this.cacheModelLoads = state;
+    }
+
+    /**
+     * Return whether caching is on of off
+     * 
+     * @return true if caching is enabled
+     */
+    @Override
+    public boolean isCachingModels()
+    {
+        return cacheModelLoads;
+    }
+    
+    /**
+     * Read out of the cache - return null if not in the cache
+     * 
+     * @param filenameOrURI the location to load model from
+     * @return model instance or null if it's not cached or caching is off
+     */
+    @Override
+    public Model getFromCache(String filenameOrURI)
+    { 
+        if (!isCachingModels()) return null; 
+        
+        return modelCache.get(filenameOrURI);
+    }
+    
+    /**
+     * Check if model is cached for a given URI
+     * 
+     * @param filenameOrURI model location
+     * @return true if cached, if it's not cached or caching is off
+     */
+    @Override
+    public boolean hasCachedModel(String filenameOrURI)
+    { 
+        if (!isCachingModels()) return false;
+        
+        return modelCache.containsKey(filenameOrURI) ;
+    }
+    
+    /**
+     * Add model to cache using given URI as key
+     * 
+     * @param uri model URI (cache key)
+     * @param m the model
+     */
+    @Override
+    public void addCacheModel(String uri, Model m)
+    { 
+        if (isCachingModels()) modelCache.put(uri, m);
+    }
+
+    /**
+     * Remove cache from model using given URI key
+     * 
+     * @param uri cache key
+     */
+    @Override
+    public void removeCacheModel(String uri)
+    { 
+        if (isCachingModels()) modelCache.remove(uri) ;
+    }
+    
 }

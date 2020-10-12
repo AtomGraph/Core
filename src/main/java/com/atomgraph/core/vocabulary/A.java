@@ -56,6 +56,8 @@ public final class A
 
     public static final DatatypeProperty resultLimit = m_model.createDatatypeProperty( NS + "resultLimit" );
 
+    public static final DatatypeProperty cacheModelLoads = m_model.createDatatypeProperty( NS + "cacheModelLoads" );
+    
     public static final DatatypeProperty preemptiveAuth = m_model.createDatatypeProperty( NS + "preemptiveAuth" );
     
     public static final DatatypeProperty maxGetRequestSize = m_model.createDatatypeProperty( NS + "maxGetRequestSize" );

@@ -20,6 +20,7 @@ import java.net.URI;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
+import org.apache.jena.ext.com.google.common.collect.ImmutableMap;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelGetter;
 
@@ -29,6 +30,8 @@ import org.apache.jena.rdf.model.ModelGetter;
  */
 public interface DataManager extends ModelGetter
 {
+    
+    ImmutableMap<String, Model> getModelCache();
     
     Client getClient();
     
