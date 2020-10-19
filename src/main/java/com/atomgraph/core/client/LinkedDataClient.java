@@ -86,7 +86,7 @@ public class LinkedDataClient extends ClientBase
     @Override
     public MediaType getDefaultMediaType()
     {
-        return MediaType.TEXT_NTRIPLES_TYPE;
+        return MediaType.APPLICATION_NTRIPLES_TYPE;
     }
 
 }

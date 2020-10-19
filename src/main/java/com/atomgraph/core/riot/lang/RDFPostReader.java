@@ -401,8 +401,8 @@ public class RDFPostReader extends ReaderRIOTBase
         if ( !lookingAt(tokens, peekIter, IRI) )
             exception(token, "@base requires an IRI (found '" + token + "')");
         String baseStr = token.getImage();
-        org.apache.jena.iri.IRI baseIRI = profile.makeIRI(baseStr, currLine, currCol);
-        emitBase(baseIRI.toString(), dest);
+        String baseIRI = profile.resolveIRI(baseStr, currLine, currCol);
+        emitBase(baseIRI, dest);
         nextToken(tokens, peekIter);
         // parserProfile.setBaseURI(baseIRI);
     }
@@ -426,9 +426,9 @@ public class RDFPostReader extends ReaderRIOTBase
         if ( !lookingAt(tokens, peekIter, IRI) )
             exception(peekToken(tokens, peekIter), "'v' requires a IRI (found '" + peekToken(tokens, peekIter) + "')");
         String iriStr = peekToken(tokens, peekIter).getImage();
-        org.apache.jena.iri.IRI iri = profile.makeIRI(iriStr, currLine, currCol);
+        String iri = profile.resolveIRI(iriStr, currLine, currCol);
         profile.getPrefixMap().add(prefix, iri);
-        emitPrefix(prefix, iri.toString(), dest);
+        emitPrefix(prefix, iri, dest);
         nextToken(tokens, peekIter);
     }
     

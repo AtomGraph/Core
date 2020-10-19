@@ -56,7 +56,6 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
 
     public static final String REQUEST_URI_HEADER = "X-Request-URI";
     public static final String RESPONSE_URI_HEADER = "X-Response-URI";
-
     
     // READER
     

@@ -83,7 +83,7 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
     @Override
     public MediaType getDefaultMediaType()
     {
-        return MediaType.TEXT_NTRIPLES_TYPE;
+        return MediaType.APPLICATION_NTRIPLES_TYPE;
     }
     
     @Override
