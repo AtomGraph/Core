@@ -119,7 +119,7 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     {
         final Dataset dataset = describe();
         
-        if (dataset.getDefaultModel().isEmpty() && !dataset.listNames().hasNext())
+        if (dataset.isEmpty())
         {
             if (log.isDebugEnabled()) log.debug("Query result Dataset is empty; returning 404 Not Found");
             throw new NotFoundException("Query result Dataset is empty");
