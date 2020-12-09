@@ -33,7 +33,6 @@
     </licenses>
     
     <properties>
-        <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <netbeans.hint.license>apache20</netbeans.hint.license>
         <netbeans.hint.deploy.server>Tomcat</netbeans.hint.deploy.server>
@@ -131,9 +130,6 @@
                 <version>3.8.1</version>
                 <configuration>
                     <release>11</release>
-                    <compilerArguments>
-                        <endorseddirs>${endorsed.dir}</endorseddirs>
-                    </compilerArguments>
                 </configuration>
             </plugin>
             <plugin>
