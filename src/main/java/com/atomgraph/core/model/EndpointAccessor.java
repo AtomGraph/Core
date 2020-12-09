@@ -26,7 +26,7 @@ import org.apache.jena.update.UpdateRequest;
 /**
  * Uniform interface for SPARQL endpoints and clients.
  * 
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
 public interface EndpointAccessor
 {

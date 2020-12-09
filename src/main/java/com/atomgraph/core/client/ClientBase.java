@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * A common base class for all HTTP-based protocol clients.
  * Note that <code>Response</code> objects returned by methods of this class <em>are not</em> closed.
  * 
- * @author Martynas Jusevičius <martynas@atomgraph.com>
+ * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
 public abstract class ClientBase
 {
