@@ -61,7 +61,7 @@ public class QueryParamProvider implements ParamConverterProvider
                     catch (QueryException ex)
                     {
                         if (log.isWarnEnabled()) log.warn("Supplied SPARQL query string could not be parsed, check syntax: {}", value);
-                        //throw new WebApplicationException(ex, Response.Status.BAD_REQUEST);
+                        //throw new BadRequestException(ex);
                         return null;
                     }
                 }

@@ -29,9 +29,9 @@ import javax.ws.rs.ext.Provider;
 import com.atomgraph.core.MediaType;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyReader;
 import org.apache.commons.io.IOUtils;
 import org.apache.jena.query.QueryFactory;
@@ -70,7 +70,7 @@ public class QueryProvider implements MessageBodyReader<Query>, MessageBodyWrite
         }
         catch (QueryParseException ex)
         {
-            throw new WebApplicationException(ex, Response.Status.BAD_REQUEST);
+            throw new BadRequestException(ex);
         }
     }
 

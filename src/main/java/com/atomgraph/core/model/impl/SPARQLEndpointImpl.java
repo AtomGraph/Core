@@ -39,6 +39,7 @@ import com.atomgraph.core.util.ModelUtils;
 import com.atomgraph.core.util.ResultSetUtils;
 import java.util.Collections;
 import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -120,10 +121,10 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
         }
         catch (QueryParseException ex)
         {
-            throw new WebApplicationException(ex, Response.Status.BAD_REQUEST);
+            throw new BadRequestException(ex);
         }
         
-        throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        throw new BadRequestException("Neither query nor update provided");
     }
     
     @Override
@@ -156,7 +157,7 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
      */
     public ResponseBuilder getResponseBuilder(Query query, List<URI> defaultGraphUris, List<URI> namedGraphUris)
     {
-        if (query == null) throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        if (query == null) throw new BadRequestException("Query string not provided");
 
         if (query.isSelectType())
         {
@@ -195,7 +196,7 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
         }
         
         if (log.isWarnEnabled()) log.warn("SPARQL endpoint received unknown type of query: {}", query);
-        throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        throw new BadRequestException("Unknown query type");
     }
 
     /**

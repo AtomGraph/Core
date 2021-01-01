@@ -95,9 +95,7 @@ public class MediaTypes
         while (langIt.hasNext())
         {
             Lang lang = langIt.next();
-            // we ignore TriX for now because of Jena bug: https://issues.apache.org/jira/browse/JENA-1211
-            // also ignore JSON-LD because the reader attempts to make HTTP calls: https://mail-archives.apache.org/mod_mbox/jena-users/201712.mbox/%3CCAE35VmyGk-biQ1Fayp3zoOyiMikZhvjA8dTuGEd3JaYR98uYOA@mail.gmail.com%3E
-            if (!lang.equals(Lang.RDFNULL) && !lang.equals(Lang.TRIX) && !lang.equals(Lang.JSONLD))
+            if (!lang.equals(Lang.RDFNULL))
             {
                 if (RDFLanguages.isTriples(lang))
                 {
