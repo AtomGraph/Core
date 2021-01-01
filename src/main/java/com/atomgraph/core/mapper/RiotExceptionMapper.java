@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Martynas Jusevičius <martynas@atomgraph.com>.
+ * Copyright 2021 Martynas Jusevičius <martynas@atomgraph.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,26 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.atomgraph.core.mapper;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ClientErrorException;
+import org.apache.jena.riot.RiotException;
 
 /**
- * Maps client exception to response.
- * Needs to be registered in the JAX-RS application.
- * 
- * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
+ *
+ * @author Martynas Jusevičius <martynas@atomgraph.com>
  */
-public class ClientErrorExceptionMapper implements ExceptionMapper<ClientErrorException>
+public class RiotExceptionMapper implements ExceptionMapper<RiotException>
 {
 
     @Override
-    public Response toResponse(ClientErrorException exception)
+    public Response toResponse(RiotException ex)
     {
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        return Response.status(Response.Status.BAD_REQUEST).build();
     }
     
 }

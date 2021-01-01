@@ -16,24 +16,23 @@
 
 package com.atomgraph.core.mapper;
 
-import javax.ws.rs.NotFoundException;
+import com.atomgraph.core.exception.BadGatewayException;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 
 /**
- * Maps resource not found exception to response.
+ * Maps client exception to response.
  * Needs to be registered in the JAX-RS application.
  * 
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
-public class NotFoundExceptionMapper implements ExceptionMapper<NotFoundException>
+public class BadGatewayExceptionMapper implements ExceptionMapper<BadGatewayException>
 {
 
     @Override
-    public Response toResponse(NotFoundException e)
+    public Response toResponse(BadGatewayException exception)
     {
-        return Response.status(Status.NOT_FOUND).build();
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
     
 }

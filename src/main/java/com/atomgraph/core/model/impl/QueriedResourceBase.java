@@ -22,7 +22,6 @@ import org.apache.jena.query.QueryFactory;
 import java.net.URI;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
@@ -31,6 +30,7 @@ import com.atomgraph.core.model.QueriedResource;
 import com.atomgraph.core.model.Service;
 import java.util.Collections;
 import javax.inject.Inject;
+import javax.ws.rs.NotAllowedException;
 import javax.ws.rs.NotFoundException;
 import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
@@ -138,7 +138,7 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     public Response post(Dataset dataset)
     {
         if (log.isWarnEnabled()) log.warn("POST request with RDF payload: {}. AtomGraph Core is read-only!  Only GET is supported", dataset);
-        throw new WebApplicationException(405);
+        throw new NotAllowedException("POST is not allowed");
     }
 
     /**
@@ -151,7 +151,7 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     public Response put(Dataset dataset)
     {
         if (log.isWarnEnabled()) log.warn("PUT request with RDF payload: {}. AtomGraph Core is read-only! Only GET is supported", dataset);
-        throw new WebApplicationException(405);
+        throw new NotAllowedException("PUT is not allowed");
     }
 
     /**
@@ -164,7 +164,7 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     public Response delete()
     {
         if (log.isWarnEnabled()) log.warn("DELETE request with RDF payload: {}. AtomGraph Core is read-only! Only GET is supported");
-        throw new WebApplicationException(405);
+        throw new NotAllowedException("DELETE is not allowed");
     }
 
     /**

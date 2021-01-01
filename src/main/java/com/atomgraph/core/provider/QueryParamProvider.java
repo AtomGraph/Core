@@ -18,6 +18,7 @@ package com.atomgraph.core.provider;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ext.ParamConverter;
 import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Provider;
@@ -61,8 +62,7 @@ public class QueryParamProvider implements ParamConverterProvider
                     catch (QueryException ex)
                     {
                         if (log.isWarnEnabled()) log.warn("Supplied SPARQL query string could not be parsed, check syntax: {}", value);
-                        //throw new BadRequestException(ex);
-                        return null;
+                        throw new BadRequestException(ex);
                     }
                 }
 

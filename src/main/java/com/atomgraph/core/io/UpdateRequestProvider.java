@@ -31,8 +31,10 @@ import com.atomgraph.core.MediaType;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Produces;
 import javax.ws.rs.ext.MessageBodyWriter;
+import org.apache.jena.query.QueryParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +64,15 @@ public class UpdateRequestProvider implements MessageBodyReader<UpdateRequest>, 
     public UpdateRequest readFrom(Class<UpdateRequest> type, Type type1, Annotation[] antns, javax.ws.rs.core.MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream in) throws IOException, WebApplicationException
     {
         if (log.isTraceEnabled()) log.trace("Reading UpdateRequest with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
-        return UpdateFactory.read(in);
+        try
+        {
+            return UpdateFactory.read(in);
+        }
+        catch (QueryParseException ex)
+        {
+            if (log.isWarnEnabled()) log.warn("Supplied SPARQL update string could not be parsed, check syntax");
+            throw new BadRequestException(ex);
+        }
     }
 
     @Override

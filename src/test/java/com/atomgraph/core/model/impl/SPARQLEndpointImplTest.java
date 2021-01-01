@@ -15,20 +15,33 @@
  */
 package com.atomgraph.core.model.impl;
 
+import static com.atomgraph.core.MediaType.APPLICATION_SPARQL_QUERY_TYPE;
+import static com.atomgraph.core.MediaType.APPLICATION_SPARQL_UPDATE_TYPE;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.SPARQLClient;
+import static com.atomgraph.core.client.SPARQLClient.QUERY_PARAM_NAME;
+import static com.atomgraph.core.client.SPARQLClient.UPDATE_PARAM_NAME;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Application;
+import javax.ws.rs.core.Form;
+import javax.ws.rs.core.MediaType;
+import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED_TYPE;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.sparql.vocabulary.FOAF;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.test.JerseyTest;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Before;
@@ -118,8 +131,111 @@ public class SPARQLEndpointImplTest extends JerseyTest
         assertTrue(sc.ask(query));
     }
     
-    // TO-DO: testUpdate()
+    @Test
+    public void testMissingGetQuery()
+    {
+        SPARQLClient sc = SPARQLClient.create(endpoint, new MediaTypes());
+        try (javax.ws.rs.core.Response cr = sc.get(sc.getReadableMediaTypes(Model.class)))
+        {
+            assertEquals(BAD_REQUEST.getStatusCode(), cr.getStatusInfo().getStatusCode());
+        }
+    }
     
+    @Test
+    public void testInvalidGetQuery()
+    {
+        MultivaluedMap<String, String> params = new MultivaluedHashMap();
+        params.add(QUERY_PARAM_NAME, "BAD QUERY");
+        
+        SPARQLClient sc = SPARQLClient.create(endpoint, new MediaTypes());
+        try (javax.ws.rs.core.Response cr = sc.get(sc.getReadableMediaTypes(Model.class), params))
+        {
+            assertEquals(BAD_REQUEST.getStatusCode(), cr.getStatusInfo().getStatusCode());
+        }
+    }
+    
+    @Test
+    public void testNotAcceptableSelectResultType()
+    {
+        MultivaluedMap<String, String> params = new MultivaluedHashMap();
+        params.add(QUERY_PARAM_NAME, "SELECT * { ?s ?p ?o }");
+        
+        SPARQLClient sc = SPARQLClient.create(endpoint, new MediaTypes());
+        try (javax.ws.rs.core.Response cr = sc.get(sc.getReadableMediaTypes(Model.class), params))
+        {
+            assertEquals(NOT_ACCEPTABLE.getStatusCode(), cr.getStatusInfo().getStatusCode());
+        }
+    }
+
+    @Test
+    public void testNotAcceptableConstructResultType()
+    {
+        MultivaluedMap<String, String> params = new MultivaluedHashMap();
+        params.add(QUERY_PARAM_NAME, "CONSTRUCT WHERE { ?s ?p ?o }");
+        
+        SPARQLClient sc = SPARQLClient.create(endpoint, new MediaTypes());
+        try (javax.ws.rs.core.Response cr = sc.get(sc.getReadableMediaTypes(ResultSet.class), params))
+        {
+            assertEquals(NOT_ACCEPTABLE.getStatusCode(), cr.getStatusInfo().getStatusCode());
+        }
+    }
+
+    @Test
+    public void testMissingPostQuery()
+    {
+        SPARQLClient sc = SPARQLClient.create(endpoint, new MediaTypes());
+        try (javax.ws.rs.core.Response cr = sc.post(new Form(), APPLICATION_FORM_URLENCODED_TYPE, sc.getReadableMediaTypes(Model.class)))
+        {
+            assertEquals(BAD_REQUEST.getStatusCode(), cr.getStatusInfo().getStatusCode());
+        }
+    }
+
+    @Test
+    public void testInvalidPostQuery()
+    {
+        Form params = new Form();
+        params.param(QUERY_PARAM_NAME, "BAD QUERY");
+        
+        SPARQLClient sc = SPARQLClient.create(endpoint, new MediaTypes());
+        try (javax.ws.rs.core.Response cr = sc.post(params, APPLICATION_FORM_URLENCODED_TYPE, sc.getReadableMediaTypes(Model.class)))
+        {
+            assertEquals(BAD_REQUEST.getStatusCode(), cr.getStatusInfo().getStatusCode());
+        }
+    }
+    
+    @Test
+    public void testInvalidPostUpdate()
+    {
+        Form params = new Form();
+        params.param(UPDATE_PARAM_NAME, "BAD UPDATE");
+        
+        SPARQLClient sc = SPARQLClient.create(endpoint, new MediaTypes());
+        try (javax.ws.rs.core.Response cr = sc.post(params, APPLICATION_FORM_URLENCODED_TYPE, new MediaType[]{}))
+        {
+            assertEquals(BAD_REQUEST.getStatusCode(), cr.getStatusInfo().getStatusCode());
+        }
+    }
+    
+    @Test
+    public void testInvalidPostDirectQuery()
+    {
+        SPARQLClient sc = SPARQLClient.create(endpoint, new MediaTypes());
+        try (javax.ws.rs.core.Response cr = sc.post("BAD QUERY", APPLICATION_SPARQL_QUERY_TYPE, new MediaType[]{}))
+        {
+            assertEquals(BAD_REQUEST.getStatusCode(), cr.getStatusInfo().getStatusCode());
+        }
+    }
+    
+    @Test
+    public void testInvalidPostDirectUpdate()
+    {
+        SPARQLClient sc = SPARQLClient.create(endpoint, new MediaTypes());
+        try (javax.ws.rs.core.Response cr = sc.post("BAD UPDATE", APPLICATION_SPARQL_UPDATE_TYPE, new MediaType[]{}))
+        {
+            assertEquals(BAD_REQUEST.getStatusCode(), cr.getStatusInfo().getStatusCode());
+        }
+    }
+        
     public static void assertIsomorphic(Model wanted, Model got)
     {
         if (!wanted.isIsomorphicWith(got))

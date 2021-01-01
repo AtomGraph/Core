@@ -15,11 +15,21 @@
  */
 package com.atomgraph.core.mapper;
 
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
+import org.apache.jena.shared.NoReaderForLangException;
+
 /**
  *
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
-public class NoReaderForLangExceptionMapper
+public class NoReaderForLangExceptionMapper implements ExceptionMapper<NoReaderForLangException>
 {
+
+    @Override
+    public Response toResponse(NoReaderForLangException ex)
+    {
+        return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).build();
+    }
     
 }

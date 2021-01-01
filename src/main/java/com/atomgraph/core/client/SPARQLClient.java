@@ -18,7 +18,7 @@ package com.atomgraph.core.client;
 import com.atomgraph.core.MediaTypes;
 import java.io.IOException;
 import java.io.InputStream;
-import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
@@ -48,8 +48,8 @@ public class SPARQLClient extends ClientBase
     
     private static final Logger log = LoggerFactory.getLogger(SPARQLClient.class);
     
-    private static final String QUERY_PARAM_NAME = "query";
-    private static final String UPDATE_PARAM_NAME = "update";
+    public static final String QUERY_PARAM_NAME = "query";
+    public static final String UPDATE_PARAM_NAME = "update";
 
     private final int maxGetRequestSize;
 
@@ -127,11 +127,9 @@ public class SPARQLClient extends ClientBase
         mergedParams.putSingle(QUERY_PARAM_NAME, query.toString());
         
         if (getQueryURLLength(params) > getMaxGetRequestSize())
-            return applyHeaders(getEndpoint().request(getReadableMediaTypes(clazz)), headers).
-                    post(Entity.form(mergedParams));
+            return applyHeaders(getEndpoint().request(getReadableMediaTypes(clazz)), headers).post(Entity.form(mergedParams));
         else
-            return applyHeaders(applyParams(mergedParams).request(getReadableMediaTypes(clazz)), headers).
-                    get();
+            return applyHeaders(applyParams(mergedParams).request(getReadableMediaTypes(clazz)), headers).get();
     }
     
     public Model loadModel(Query query)
@@ -169,7 +167,7 @@ public class SPARQLClient extends ClientBase
             catch (IOException ex)
             {
                 if (log.isErrorEnabled()) log.error("Could not parse ASK result: {}", ex);
-                throw new ClientErrorException(cr, ex);
+                throw new ServerErrorException(cr, ex);
             }
         }
     }

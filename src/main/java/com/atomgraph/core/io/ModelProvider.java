@@ -76,8 +76,8 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
         Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
         if (lang == null)
         {
-            if (log.isErrorEnabled()) log.error("MediaType '{}' not supported by Jena", formatType);
-            throw new NoReaderForLangException("MediaType not supported: " + formatType);
+            if (log.isDebugEnabled()) log.debug("MediaType '{}' not supported by Jena", formatType);
+            throw new NoReaderForLangException(formatType.toString());
         }
         if (log.isDebugEnabled()) log.debug("RDF language used to read Model: {}", lang);
         

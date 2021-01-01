@@ -17,6 +17,7 @@ package com.atomgraph.core.model.impl.remote;
 
 import com.atomgraph.core.client.SPARQLClient;
 import static com.atomgraph.core.client.SPARQLClient.parseBoolean;
+import com.atomgraph.core.exception.BadGatewayException;
 import com.atomgraph.core.model.EndpointAccessor;
 import static com.atomgraph.core.model.SPARQLEndpoint.DEFAULT_GRAPH_URI;
 import static com.atomgraph.core.model.SPARQLEndpoint.NAMED_GRAPH_URI;
@@ -59,14 +60,16 @@ public class EndpointAccessorImpl implements EndpointAccessor
 
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
         
-        for (URI defaultGraphUri : defaultGraphUris)
-            params.add(DEFAULT_GRAPH_URI, defaultGraphUri.toString());
-        for (URI namedGraphUri : namedGraphUris)
-            params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
+        defaultGraphUris.forEach(defaultGraphUri -> { params.add(DEFAULT_GRAPH_URI, defaultGraphUri.toString()); });
+        namedGraphUris.forEach(namedGraphUri -> { params.add(NAMED_GRAPH_URI, namedGraphUri.toString()); });
 
         try (Response cr = getSPARQLClient().query(query, Dataset.class, params))
         {
             return cr.readEntity(Dataset.class);
+        }
+        catch (ClientErrorException ex)
+        {
+            throw new BadGatewayException(ex);
         }
     }
     
@@ -78,14 +81,16 @@ public class EndpointAccessorImpl implements EndpointAccessor
 
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
         
-        for (URI defaultGraphUri : defaultGraphUris)
-            params.add(DEFAULT_GRAPH_URI, defaultGraphUri.toString());
-        for (URI namedGraphUri : namedGraphUris)
-            params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
+        defaultGraphUris.forEach(defaultGraphUri -> { params.add(DEFAULT_GRAPH_URI, defaultGraphUri.toString()); });
+        namedGraphUris.forEach(namedGraphUri -> { params.add(NAMED_GRAPH_URI, namedGraphUri.toString()); });
 
         try (Response cr = getSPARQLClient().query(query, Model.class, params))
         {
             return cr.readEntity(Model.class);
+        }
+        catch (ClientErrorException ex)
+        {
+            throw new BadGatewayException(ex);
         }
     }
 
@@ -97,14 +102,16 @@ public class EndpointAccessorImpl implements EndpointAccessor
         
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
         
-        for (URI defaultGraphUri : defaultGraphUris)
-            params.add(DEFAULT_GRAPH_URI, defaultGraphUri.toString());
-        for (URI namedGraphUri : namedGraphUris)
-            params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
+        defaultGraphUris.forEach(defaultGraphUri -> { params.add(DEFAULT_GRAPH_URI, defaultGraphUri.toString()); });
+        namedGraphUris.forEach(namedGraphUri -> { params.add(NAMED_GRAPH_URI, namedGraphUri.toString()); });
         
         try (Response cr = getSPARQLClient().query(query, ResultSet.class, params))
         {
             return cr.readEntity(ResultSetRewindable.class);
+        }
+        catch (ClientErrorException ex)
+        {
+            throw new BadGatewayException(ex);
         }
     }
   
@@ -116,21 +123,16 @@ public class EndpointAccessorImpl implements EndpointAccessor
         
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
         
-        for (URI defaultGraphUri : defaultGraphUris)
-            params.add(DEFAULT_GRAPH_URI, defaultGraphUri.toString());
-        for (URI namedGraphUri : namedGraphUris)
-            params.add(NAMED_GRAPH_URI, namedGraphUri.toString());
+        defaultGraphUris.forEach(defaultGraphUri -> { params.add(DEFAULT_GRAPH_URI, defaultGraphUri.toString()); });
+        namedGraphUris.forEach(namedGraphUri -> { params.add(NAMED_GRAPH_URI, namedGraphUri.toString()); });
         
         try (Response cr = getSPARQLClient().query(query, ResultSet.class, params))
         {
-            try
-            {
-                return parseBoolean(cr);
-            }
-            catch (IOException ex)
-            {
-                throw new ClientErrorException(cr, ex);
-            }
+            return parseBoolean(cr);
+        }
+        catch (IOException | ClientErrorException ex)
+        {
+            throw new BadGatewayException(ex);
         }
     }
 
@@ -142,12 +144,17 @@ public class EndpointAccessorImpl implements EndpointAccessor
         
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
         
-        for (URI usingGraphUri : usingGraphUris)
-            params.add(USING_GRAPH_URI, usingGraphUri.toString());
-        for (URI usingNamedGraphUri : usingNamedGraphUris)
-            params.add(USING_NAMED_GRAPH_URI, usingNamedGraphUri.toString());
+        usingGraphUris.forEach(usingGraphUri -> { params.add(USING_GRAPH_URI, usingGraphUri.toString()); });
+        usingNamedGraphUris.forEach(usingNamedGraphUri -> { params.add(USING_NAMED_GRAPH_URI, usingNamedGraphUri.toString()); });
 
-        getSPARQLClient().update(updateRequest, params);
+        try
+        {
+            getSPARQLClient().update(updateRequest, params);
+        }
+        catch (ClientErrorException ex)
+        {
+            throw new BadGatewayException(ex);
+        }
     }
     
     public SPARQLClient getSPARQLClient()

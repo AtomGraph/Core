@@ -23,10 +23,11 @@ import com.atomgraph.core.io.ModelProvider;
 import com.atomgraph.core.io.QueryProvider;
 import com.atomgraph.core.provider.QueryParamProvider;
 import com.atomgraph.core.io.UpdateRequestProvider;
+import com.atomgraph.core.mapper.NoReaderForLangExceptionMapper;
 import javax.ws.rs.core.Context;
 import org.apache.jena.riot.RDFParserRegistry;
-import com.atomgraph.core.mapper.ClientErrorExceptionMapper;
-import com.atomgraph.core.mapper.NotFoundExceptionMapper;
+import com.atomgraph.core.mapper.BadGatewayExceptionMapper;
+import com.atomgraph.core.mapper.RiotExceptionMapper;
 import com.atomgraph.core.model.Service;
 import com.atomgraph.core.model.impl.GraphStoreImpl;
 import com.atomgraph.core.model.impl.QueriedResourceBase;
@@ -149,8 +150,9 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
         register(QueryParamProvider.class);
         register(new QueryProvider());
         register(new UpdateRequestProvider());
-        register(new ClientErrorExceptionMapper());
-        register(new NotFoundExceptionMapper());
+        register(new BadGatewayExceptionMapper());
+        register(new NoReaderForLangExceptionMapper());
+        register(new RiotExceptionMapper());
 
         register(new AbstractBinder()
         {

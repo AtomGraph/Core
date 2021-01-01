@@ -16,7 +16,9 @@
 package com.atomgraph.core.model.impl.remote;
 
 import com.atomgraph.core.client.QuadStoreClient;
+import com.atomgraph.core.exception.BadGatewayException;
 import com.atomgraph.core.model.DatasetQuadAccessor;
+import javax.ws.rs.ClientErrorException;
 import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,31 +47,66 @@ public class DatasetQuadAccessorImpl implements DatasetQuadAccessor
     @Override
     public Dataset get()
     {
-        return getQuadStoreClient().get();
+        try
+        {
+            return getQuadStoreClient().get();
+        }
+        catch (ClientErrorException ex)
+        {
+            throw new BadGatewayException(ex);
+        }
     }
 
     @Override
     public void add(Dataset dataset)
     {
-        getQuadStoreClient().add(dataset);
+        try
+        {
+            getQuadStoreClient().add(dataset);
+        }
+        catch (ClientErrorException ex)
+        {
+            throw new BadGatewayException(ex);
+        }
     }
 
     @Override
     public void replace(Dataset dataset)
     {
-        getQuadStoreClient().replace(dataset);
+        try
+        {
+            getQuadStoreClient().replace(dataset);
+        }
+        catch (ClientErrorException ex)
+        {
+            throw new BadGatewayException(ex);
+        }
     }
 
     @Override
     public void delete()
     {
-        getQuadStoreClient().delete();
+        try
+        {
+            getQuadStoreClient().delete();
+        }
+        catch (ClientErrorException ex)
+        {
+            throw new BadGatewayException(ex);
+        }
     }
 
     @Override
     public void patch(Dataset dataset)
     {
-        getQuadStoreClient().patch(dataset);
+        try
+        {
+            getQuadStoreClient().patch(dataset);
+        }
+        catch (ClientErrorException ex)
+        {
+            throw new BadGatewayException(ex);
+        }
     }
     
     public QuadStoreClient getQuadStoreClient()

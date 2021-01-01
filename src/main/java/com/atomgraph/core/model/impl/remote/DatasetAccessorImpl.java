@@ -19,6 +19,8 @@ package com.atomgraph.core.model.impl.remote;
 
 import org.apache.jena.rdf.model.Model;
 import com.atomgraph.core.client.GraphStoreClient;
+import com.atomgraph.core.exception.BadGatewayException;
+import javax.ws.rs.ClientErrorException;
 import org.apache.jena.query.DatasetAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,55 +51,127 @@ public class DatasetAccessorImpl implements DatasetAccessor
     @Override
     public Model getModel()
     {
-        return getGraphStoreClient().getModel();
+        try
+        {
+            return getGraphStoreClient().getModel();
+        }
+        catch (ClientErrorException ex)
+        {
+            if (log.isDebugEnabled()) log.debug("Graph Store backend client error", ex);
+            throw new BadGatewayException(ex);
+        }
     }
 
     @Override
     public Model getModel(String uri)
     {
-        return getGraphStoreClient().getModel(uri);
+        try
+        {
+            return getGraphStoreClient().getModel(uri);
+        }
+        catch (ClientErrorException ex)
+        {
+            if (log.isDebugEnabled()) log.debug("Graph Store backend client error", ex);
+            throw new BadGatewayException(ex);
+        }
     }
 
     @Override
     public boolean containsModel(String uri)
     {
-        return getGraphStoreClient().containsModel(uri);
+        try
+        {
+            return getGraphStoreClient().containsModel(uri);
+        }
+        catch (ClientErrorException ex)
+        {
+            if (log.isDebugEnabled()) log.debug("Graph Store backend client error", ex);
+            throw new BadGatewayException(ex);
+        }
     }
     
     @Override
     public void putModel(Model model)
     {
-        getGraphStoreClient().putModel(model);
+        try
+        {
+            getGraphStoreClient().putModel(model);
+        }
+        catch (ClientErrorException ex)
+        {
+            if (log.isDebugEnabled()) log.debug("Graph Store backend client error", ex);
+            throw new BadGatewayException(ex);
+        }
     }
 
     @Override
     public void putModel(String uri, Model model)
     {
-        getGraphStoreClient().putModel(uri, model);
+        try
+        {
+            getGraphStoreClient().putModel(uri, model);
+        }
+        catch (ClientErrorException ex)
+        {
+            if (log.isDebugEnabled()) log.debug("Graph Store backend client error", ex);
+            throw new BadGatewayException(ex);
+        }
     }
 
     @Override
     public void deleteDefault()
     {
-        getGraphStoreClient().deleteDefault();
+        try
+        {
+            getGraphStoreClient().deleteDefault();
+        }
+        catch (ClientErrorException ex)
+        {
+            if (log.isDebugEnabled()) log.debug("Graph Store backend client error", ex);
+            throw new BadGatewayException(ex);
+        }
     }
 
     @Override
     public void deleteModel(String uri)
     {
-        getGraphStoreClient().deleteModel(uri);
+        try
+        {
+            getGraphStoreClient().deleteModel(uri);
+        }
+        catch (ClientErrorException ex)
+        {
+            if (log.isDebugEnabled()) log.debug("Graph Store backend client error", ex);
+            throw new BadGatewayException(ex);
+        }
     }
 
     @Override
     public void add(Model model)
     {
-        getGraphStoreClient().add(model);
+        try
+        {
+            getGraphStoreClient().add(model);
+        }
+        catch (ClientErrorException ex)
+        {
+            if (log.isDebugEnabled()) log.debug("Graph Store backend client error", ex);
+            throw new BadGatewayException(ex);
+        }
     }
 
     @Override
     public void add(String uri, Model model)
     {
-        getGraphStoreClient().add(uri, model);
+        try
+        {
+            getGraphStoreClient().add(uri, model);
+        }
+        catch (ClientErrorException ex)
+        {
+            if (log.isDebugEnabled()) log.debug("Graph Store backend client error", ex);
+            throw new BadGatewayException(ex);
+        }
     }
 
     public String getURI()  // needs to align with Jena's Resource.getURI() which returns String

@@ -76,9 +76,8 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
         Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
         if (lang == null)
         {
-            Throwable ex = new NoReaderForLangException("Media type not supported");
-            if (log.isErrorEnabled()) log.error("MediaType {} not supported by Jena", mediaType);
-            throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);
+            if (log.isDebugEnabled()) log.debug("MediaType '{}' not supported by Jena", formatType);
+            throw new NoReaderForLangException(formatType.toString());
         }
 
         String baseURI = null;

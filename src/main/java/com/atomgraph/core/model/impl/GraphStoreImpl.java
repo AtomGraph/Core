@@ -25,7 +25,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Response.Status;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.model.GraphStore;
 import com.atomgraph.core.model.Service;
@@ -146,21 +145,15 @@ public class GraphStoreImpl implements GraphStore
         }
         else
         {
-            try
+            if (!getDatasetAccessor().containsModel(graphUri.toString()))
             {
-                Model model = getDatasetAccessor().getModel(graphUri.toString());
-                if (log.isDebugEnabled()) log.debug("GET Graph Store named graph with URI: {} found, returning Model of size(): {}", graphUri, model.size());
-                return getResponse(model);
+                if (log.isDebugEnabled()) log.debug("GET Graph Store named graph with URI: {} not found", graphUri);
+                throw new NotFoundException("Named graph not found");
             }
-            catch (ClientErrorException ex)
-            {
-                if (ex.getResponse().getStatus() == Status.NOT_FOUND.getStatusCode())
-                {
-                    if (log.isDebugEnabled()) log.debug("GET Graph Store named graph with URI: {} not found", graphUri);
-                    return Response.status(Status.NOT_FOUND).build();
-                }
-                else throw ex;
-            }
+
+            Model model = getDatasetAccessor().getModel(graphUri.toString());
+            if (log.isDebugEnabled()) log.debug("GET Graph Store named graph with URI: {} found, returning Model of size(): {}", graphUri, model.size());
+            return getResponse(model);
         }
     }
 
@@ -223,25 +216,13 @@ public class GraphStoreImpl implements GraphStore
         }
         else
         {
-            try
-            {
-                boolean existingGraph = getDatasetAccessor().containsModel(graphUri.toString());
+            boolean existingGraph = getDatasetAccessor().containsModel(graphUri.toString());
 
-                if (log.isDebugEnabled()) log.debug("PUT Model to named graph with URI: {} Did it already exist? {}", graphUri, existingGraph);
-                getDatasetAccessor().putModel(graphUri.toString(), model);
+            if (log.isDebugEnabled()) log.debug("PUT Model to named graph with URI: {} Did it already exist? {}", graphUri, existingGraph);
+            getDatasetAccessor().putModel(graphUri.toString(), model);
 
-                if (existingGraph) return Response.ok().build();
-                else return Response.created(graphUri).build();
-            }
-            catch (ClientErrorException ex)
-            {
-                if (ex.getResponse().getStatus() == Status.NOT_FOUND.getStatusCode())
-                {
-                    if (log.isDebugEnabled()) log.debug("PUT Graph Store named graph with URI: {} not found", graphUri);
-                    return Response.status(Status.NOT_FOUND).build();
-                }
-                else throw ex;
-            }
+            if (existingGraph) return Response.ok().build();
+            else return Response.created(graphUri).build();
         }
     }
 
@@ -266,28 +247,16 @@ public class GraphStoreImpl implements GraphStore
         }
         else
         {
-            try
+            if (!getDatasetAccessor().containsModel(graphUri.toString()))
             {
-                if (!getDatasetAccessor().containsModel(graphUri.toString()))
-                {
-                    if (log.isDebugEnabled()) log.debug("DELETE named graph with URI {}: not found", graphUri);
-                    return Response.status(Status.NOT_FOUND).build();
-                }
-                else
-                {
-                    if (log.isDebugEnabled()) log.debug("DELETE named graph with URI: {}", graphUri);
-                    getDatasetAccessor().deleteModel(graphUri.toString());
-                    return Response.noContent().build();
-                }
+                if (log.isDebugEnabled()) log.debug("DELETE named graph with URI {}: not found", graphUri);
+                throw new NotFoundException("Named graph not found");
             }
-            catch (ClientErrorException ex)
+            else
             {
-                if (ex.getResponse().getStatus() == Status.NOT_FOUND.getStatusCode())
-                {
-                    if (log.isDebugEnabled()) log.debug("DELETE Graph Store named graph with URI: {} not found", graphUri);
-                    return Response.status(Status.NOT_FOUND).build();
-                }
-                else throw ex;
+                if (log.isDebugEnabled()) log.debug("DELETE named graph with URI: {}", graphUri);
+                getDatasetAccessor().deleteModel(graphUri.toString());
+                return Response.noContent().build(); // TO-DO: NoContentException?
             }
         }
     }

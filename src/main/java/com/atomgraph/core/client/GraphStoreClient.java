@@ -39,8 +39,8 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreClient.class);
     
-    private static final String DEFAULT_PARAM_NAME = "default";
-    private static final String GRAPH_PARAM_NAME = "graph";
+    public static final String DEFAULT_PARAM_NAME = "default";
+    public static final String GRAPH_PARAM_NAME = "graph";
     
     protected GraphStoreClient(WebTarget endpoint, MediaTypes mediaTypes)
     {

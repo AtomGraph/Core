@@ -23,16 +23,23 @@ import javax.ws.rs.Path;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static javax.ws.rs.core.Response.Status.UNSUPPORTED_MEDIA_TYPE;
 import javax.ws.rs.core.UriInfo;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
+import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.sparql.vocabulary.FOAF;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.test.JerseyTest;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -102,6 +109,42 @@ public class QueriedResourceBaseTest extends JerseyTest
         assertIsomorphic(getDataset().getDefaultModel(), ldc.get());
     }
     
+    @Test
+    public void testNotAcceptableGetType()
+    {
+        LinkedDataClient ldc = LinkedDataClient.create(endpoint, new MediaTypes());
+        assertEquals(NOT_ACCEPTABLE.getStatusCode(), ldc.get(ldc.getReadableMediaTypes(ResultSet.class)).getStatus());
+    }
+    
+    @Test
+    public void testNotFound()
+    {
+        WebTarget nonExisting = system.getClient().target(getBaseUri().resolve("non-existing"));
+        LinkedDataClient ldc = LinkedDataClient.create(nonExisting, new MediaTypes());
+        assertEquals(NOT_FOUND.getStatusCode(), ldc.get(ldc.getReadableMediaTypes(Model.class)).getStatus());
+    }
+    
+    @Test
+    public void testNotUnsupportedPostType()
+    {
+        LinkedDataClient ldc = LinkedDataClient.create(endpoint, new MediaTypes());
+        assertEquals(UNSUPPORTED_MEDIA_TYPE.getStatusCode(), ldc.post("BAD RDF", MediaType.TEXT_XML_TYPE, new MediaType[]{}).getStatus());
+    }
+
+    @Test
+    public void testInvalidTurtlePost()
+    {
+        LinkedDataClient ldc = LinkedDataClient.create(endpoint, new MediaTypes());
+        assertEquals(BAD_REQUEST.getStatusCode(), ldc.post("BAD TURTLE", com.atomgraph.core.MediaType.TEXT_TURTLE_TYPE, new MediaType[]{}).getStatus());
+    }
+
+    @Test
+    public void testInvalidTurtlePut()
+    {
+        LinkedDataClient ldc = LinkedDataClient.create(endpoint, new MediaTypes());
+        assertEquals(BAD_REQUEST.getStatusCode(), ldc.put("BAD TURTLE", com.atomgraph.core.MediaType.TEXT_TURTLE_TYPE, new MediaType[]{}).getStatus());
+    }
+
     public static void assertIsomorphic(Model wanted, Model got)
     {
         if (!wanted.isIsomorphicWith(got))
