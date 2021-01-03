@@ -68,7 +68,7 @@ public class MediaTypes
     
     public MediaTypes()
     {
-        this(RDFLanguages.getRegisteredLanguages(), UTF8_PARAM);
+        this(RDFLanguages.getRegisteredLanguages());
     }
     
     public MediaTypes(Map<Class, List<javax.ws.rs.core.MediaType>> readable, Map<Class, List<javax.ws.rs.core.MediaType>> writable)
@@ -80,7 +80,7 @@ public class MediaTypes
         this.writable = Collections.unmodifiableMap(writable);
     }
     
-    protected MediaTypes(Collection<Lang> registered, Map<String, String> parameters)
+    protected MediaTypes(Collection<Lang> registered)
     {
         if (registered == null) throw new IllegalArgumentException("Collection of Langs must be not null");
         
@@ -99,7 +99,26 @@ public class MediaTypes
             {
                 if (RDFLanguages.isTriples(lang))
                 {
-                    MediaType mt = new MediaType(lang); // don't add charset=UTF-8 param on readable types
+                    final MediaType mt;
+                    // prioritize reading RDF Thrift and N-Triples because they're most efficient
+                    // don't add charset=UTF-8 param on readable types
+                    if (lang.equals(RDFLanguages.RDFTHRIFT)) mt = new MediaType(lang); // q=1
+                    else
+                    {
+                        if (lang.equals(RDFLanguages.NTRIPLES))
+                        {
+                            Map<String, String> qParams = new HashMap<>();
+                            qParams.put("q", "0.9");
+                            mt = new MediaType(lang, qParams);
+                        }
+                        else
+                        {
+                            Map<String, String> qParams = new HashMap<>();
+                            qParams.put("q", "0.8");
+                            mt = new MediaType(lang, qParams);
+                        }
+                    }
+                    
                     // avoid adding duplicates. Cannot use Set because ordering is important
                     if (!readableModelList.contains(mt)) readableModelList.add(mt);
 
@@ -110,7 +129,26 @@ public class MediaTypes
                 
                 if (RDFLanguages.isQuads(lang))
                 {
-                    MediaType mt = new MediaType(lang); // don't add charset=UTF-8 param on readable types
+                    final MediaType mt;
+                    // prioritize reading RDF Thrift and N-Triples because they're most efficient
+                    // don't add charset=UTF-8 param on readable types
+                    if (lang.equals(RDFLanguages.RDFTHRIFT)) mt = new MediaType(lang); // q=1
+                    else
+                    {
+                        if (lang.equals(RDFLanguages.NQUADS))
+                        {
+                            Map<String, String> qParams = new HashMap<>();
+                            qParams.put("q", "0.9");
+                            mt = new MediaType(lang, qParams);
+                        }
+                        else
+                        {
+                            Map<String, String> qParams = new HashMap<>();
+                            qParams.put("q", "0.8");
+                            mt = new MediaType(lang, qParams);
+                        }
+                    }
+                    
                     // avoid adding duplicates. Cannot use Set because ordering is important
                     if (!readableDatasetList.contains(mt)) readableDatasetList.add(mt);
                     
@@ -121,10 +159,10 @@ public class MediaTypes
             }
         }
         
-        // first MediaType becomes default:
-        readableModelList.add(0, MediaType.APPLICATION_RDF_XML_TYPE); // don't add charset=UTF-8 param on readable types
-        MediaType rdfXmlUtf8 = new MediaType(MediaType.APPLICATION_RDF_XML_TYPE.getType(), MediaType.APPLICATION_RDF_XML_TYPE.getSubtype(), parameters);
-        writableModelList.add(0, rdfXmlUtf8);
+//        // first MediaType becomes default:
+//        readableModelList.add(0, MediaType.APPLICATION_RDF_XML_TYPE); // don't add charset=UTF-8 param on readable types
+//        MediaType rdfXmlUtf8 = new MediaType(MediaType.APPLICATION_RDF_XML_TYPE.getType(), MediaType.APPLICATION_RDF_XML_TYPE.getSubtype(), UTF8_PARAM);
+//        writableModelList.add(0, rdfXmlUtf8);
         
         readableMap.put(Model.class, Collections.unmodifiableList(readableModelList));
         writableMap.put(Model.class, Collections.unmodifiableList(writableModelList));
@@ -140,8 +178,8 @@ public class MediaTypes
         while (resultSetLangIt.hasNext())
         {
             javax.ws.rs.core.MediaType resultSetType = resultSetLangIt.next();
-            readableResultSetList.add(new MediaType(resultSetType.getType(), resultSetType.getSubtype(), parameters));
-            writableResultSetList.add(new MediaType(resultSetType.getType(), resultSetType.getSubtype(), parameters));
+            readableResultSetList.add(new MediaType(resultSetType.getType(), resultSetType.getSubtype())); // don't add charset=UTF-8 param on readable types
+            writableResultSetList.add(new MediaType(resultSetType.getType(), resultSetType.getSubtype(), UTF8_PARAM));
         }
 
         readableMap.put(ResultSet.class, Collections.unmodifiableList(readableResultSetList));

@@ -18,6 +18,7 @@ package com.atomgraph.core.model.impl;
 import com.atomgraph.core.MediaType;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.GraphStoreClient;
+import static com.atomgraph.core.client.GraphStoreClient.DEFAULT_PARAM_NAME;
 import static com.atomgraph.core.client.GraphStoreClient.GRAPH_PARAM_NAME;
 import static com.atomgraph.core.model.impl.SPARQLEndpointImplTest.assertIsomorphic;
 import java.util.UUID;
@@ -27,6 +28,7 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.CREATED;
+import static javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static javax.ws.rs.core.Response.Status.UNSUPPORTED_MEDIA_TYPE;
@@ -117,8 +119,19 @@ public class GraphStoreImplTest extends JerseyTest
     }
 
     @Test
+    public void testGetNotAcceptableType()
+    {
+        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
+        MultivaluedMap<String, String> params = new MultivaluedHashMap();
+        params.putSingle(DEFAULT_PARAM_NAME, Boolean.TRUE.toString());
+        
+        assertEquals(NOT_ACCEPTABLE.getStatusCode(), gsc.get(new javax.ws.rs.core.MediaType[]{ MediaType.APPLICATION_SVG_XML_TYPE}, params).getStatus());
+    }
+    
+    @Test
     public void testAddModel()
     {
+        getDataset().getDefaultModel().removeAll();
         GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
         gsc.add(getRequestModel());
         

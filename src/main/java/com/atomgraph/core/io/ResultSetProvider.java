@@ -63,8 +63,7 @@ public class ResultSetProvider implements MessageBodyReader<ResultSetRewindable>
     
     public static boolean isResultSetType(MediaType mediaType)
     {
-        for (MediaType mt : RESULT_SET_TYPES)
-            if (mediaType.isCompatible(mt)) return true;
+        if (RESULT_SET_TYPES.stream().anyMatch(mt -> (mediaType.isCompatible(mt)))) return true;
 
         return false;
     }

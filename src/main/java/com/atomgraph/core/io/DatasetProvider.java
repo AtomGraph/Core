@@ -29,7 +29,6 @@ import java.lang.reflect.Type;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
@@ -112,9 +111,8 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
         Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
         if (lang == null)
         {
-            Throwable ex = new NoWriterForLangException("Media type not supported");
-            if (log.isErrorEnabled()) log.error("MediaType {} not supported by Jena", formatType);
-            throw new WebApplicationException(ex, Response.Status.INTERNAL_SERVER_ERROR);
+            if (log.isDebugEnabled()) log.debug("MediaType '{}' not supported by Jena", formatType);
+            throw new NoWriterForLangException(formatType.toString());
         }
         
         // if we need to provide triples, then we write only the default graph of the dataset
