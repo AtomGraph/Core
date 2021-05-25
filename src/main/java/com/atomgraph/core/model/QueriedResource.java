@@ -16,8 +16,8 @@
  */
 package com.atomgraph.core.model;
 
-import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
+import org.apache.jena.rdf.model.Model;
 
 /**
  * RDF resource, representation of which was queried from a SPARQL endpoint.
@@ -41,6 +41,6 @@ public interface QueriedResource
      * 
      * @return description RDF model
      */
-    Dataset describe();
+    Model describe();
     
 }

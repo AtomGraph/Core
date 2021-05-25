@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
  * Reads RDF from RDF/POST-encoded string.
  * 
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
- * @see <a href="http://www.lsrn.org/semweb/rdfpost.html">RDF/POST Encoding for RDF</a>
+ * @see <a href="https://atomgraph.github.io/RDF-POST/">RDF/POST Encoding for RDF</a>
  */
 public class RDFPostReader extends ReaderRIOTBase
 {    

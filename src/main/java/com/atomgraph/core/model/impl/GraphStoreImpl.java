@@ -169,7 +169,6 @@ public class GraphStoreImpl implements GraphStore
     @Override
     public Response post(Model model, @QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
     {
-        if (!defaultGraph && graphUri == null) throw new BadRequestException("Neither default nor named graph specified");
         if (log.isDebugEnabled()) log.debug("POST Graph Store request with RDF payload: {} payload size(): {}", model, model.size());
         
         if (model.isEmpty()) return Response.noContent().build();

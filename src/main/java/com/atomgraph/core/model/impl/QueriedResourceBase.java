@@ -32,7 +32,7 @@ import java.util.Collections;
 import javax.inject.Inject;
 import javax.ws.rs.NotAllowedException;
 import javax.ws.rs.NotFoundException;
-import org.apache.jena.query.Dataset;
+import org.apache.jena.rdf.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,9 +103,9 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
      * @see getQuery()
      */
     @Override
-    public Dataset describe()
+    public Model describe()
     {
-        return getService().getEndpointAccessor().loadDataset(getQuery(), Collections.<URI>emptyList() , Collections.<URI>emptyList());
+        return getService().getEndpointAccessor().loadModel(getQuery(), Collections.<URI>emptyList() , Collections.<URI>emptyList());
     }
     
     /**
@@ -117,40 +117,40 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
     @Override
     public Response get()
     {
-        final Dataset dataset = describe();
+        final Model model = describe();
         
-        if (dataset.isEmpty())
+        if (model.isEmpty())
         {
             if (log.isDebugEnabled()) log.debug("Query result Dataset is empty; returning 404 Not Found");
             throw new NotFoundException("Query result Dataset is empty");
         }
 
-        return getResponse(dataset);
+        return getResponse(model);
     }
 
     /**
      * Handles POST method, stores the submitted RDF model in the SPARQL endpoint, and returns response.
      * 
-     * @param dataset RDF payload
+     * @param model RDF payload
      * @return response
      */
     @Override
-    public Response post(Dataset dataset)
+    public Response post(Model model)
     {
-        if (log.isWarnEnabled()) log.warn("POST request with RDF payload: {}. AtomGraph Core is read-only!  Only GET is supported", dataset);
+        if (log.isWarnEnabled()) log.warn("POST request is not allowed. AtomGraph Core is read-only! Only GET is supported");
         throw new NotAllowedException("POST is not allowed");
     }
 
     /**
      * Handles PUT method, stores the submitted RDF model in the SPARQL endpoint, and returns response.
      * 
-     * @param dataset RDF payload
+     * @param model RDF payload
      * @return response
      */
     @Override
-    public Response put(Dataset dataset)
+    public Response put(Model model)
     {
-        if (log.isWarnEnabled()) log.warn("PUT request with RDF payload: {}. AtomGraph Core is read-only! Only GET is supported", dataset);
+        if (log.isWarnEnabled()) log.warn("PUT request is not allowed. AtomGraph Core is read-only! Only GET is supported");
         throw new NotAllowedException("PUT is not allowed");
     }
 

@@ -22,7 +22,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.core.Response;
-import org.apache.jena.query.Dataset;
+import org.apache.jena.rdf.model.Model;
 
 /**
  * Read-write Linked Data resource.
@@ -50,20 +50,20 @@ public interface Resource
     /**
      * Handles POST methods with RDF request body and returns response
      * 
-     * @param dataset the RDF payload
+     * @param model the RDF payload
      * @return response to current request
      * @see <a href="http://tools.ietf.org/html/draft-ietf-httpbis-p2-semantics-21#section-5.3.3">Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content 5.3.3. POST</a>
      */
-    @POST Response post(Dataset dataset);
+    @POST Response post(Model model);
 
     /**
      * Handles PUT methods with RDF request body and returns response
      * 
-     * @param dataset the RDF payload
+     * @param model the RDF payload
      * @return response to current request
      * @see <a href="http://tools.ietf.org/html/draft-ietf-httpbis-p2-semantics-21#section-5.3.4">Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content 5.3.4. PUT</a>
      */
-    @PUT Response put(Dataset dataset);
+    @PUT Response put(Model model);
     
     /**
      * Handles DELETE methods
