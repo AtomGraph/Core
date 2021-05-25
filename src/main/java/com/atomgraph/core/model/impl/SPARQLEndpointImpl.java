@@ -45,10 +45,8 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import org.apache.jena.query.Dataset;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QueryParseException;
 import org.apache.jena.query.ResultSet;
@@ -177,44 +175,12 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
 
         if (query.isConstructType() || query.isDescribeType())
         {
-            List<Variant> variants = com.atomgraph.core.model.impl.Response.getVariantListBuilder(getWritableMediaTypes(Dataset.class),
-                    getLanguages(),
-                    getEncodings()).
-                add().
-                build();
-            Variant variant = getRequest().selectVariant(variants);
-            if (variant == null)
-            {
-                if (log.isDebugEnabled()) log.debug("Loading Model using CONSTRUCT/DESCRIBE query: {}", query);
-                return getResponseBuilder(getEndpointAccessor().loadModel(query, defaultGraphUris, namedGraphUris));
-            }
-            else
-            {
-                if (log.isDebugEnabled()) log.debug("Loading Dataset using CONSTRUCT/DESCRIBE query: {}", query);
-                return getResponseBuilder(getEndpointAccessor().loadDataset(query, defaultGraphUris, namedGraphUris));
-            }
+            if (log.isDebugEnabled()) log.debug("Loading Model using CONSTRUCT/DESCRIBE query: {}", query);
+            return getResponseBuilder(getEndpointAccessor().loadModel(query, defaultGraphUris, namedGraphUris));
         }
         
         if (log.isWarnEnabled()) log.warn("SPARQL endpoint received unknown type of query: {}", query);
         throw new BadRequestException("Unknown query type");
-    }
-
-    /**
-     * Returns response builder for the given RDF dataset.
-     * 
-     * @param dataset RDF dataset
-     * @return response builder
-     */
-    public javax.ws.rs.core.Response.ResponseBuilder getResponseBuilder(Dataset dataset)
-    {
-        return new com.atomgraph.core.model.impl.Response(getRequest(),
-                dataset,
-                null,
-                new EntityTag(Long.toHexString(com.atomgraph.core.model.impl.Response.hashDataset(dataset))),
-                getWritableMediaTypes(Dataset.class),
-                Collections.<Locale>emptyList(),
-                Collections.<String>emptyList()).
-            getResponseBuilder();
     }
 
     /**

@@ -93,21 +93,6 @@ public abstract class ResourceBase implements Resource
     {
         return getResponseBuilder(model).build();
     }
-
-    /**
-     * Returns response for the given RDF dataset.
-     * 
-     * @param dataset RDF dataset
-     * @return response object
-     */
-    public Response getResponse(Dataset dataset)
-    {
-        Variant variant = getRequest().selectVariant(getVariants(getWritableMediaTypes(Dataset.class)));
-        
-        if (variant == null) return getResponse(dataset.getDefaultModel()); // if quads are not acceptable, fallback to responding with the default graph
-
-        return getResponseBuilder(dataset).build();
-    }
     
     /**
      * Extract the <code>Last-Modified</code> response header value of the current resource from its RDF model.
@@ -169,24 +154,6 @@ public abstract class ResourceBase implements Resource
     public EntityTag getEntityTag(Dataset dataset)
     {
         return new EntityTag(Long.toHexString(com.atomgraph.core.model.impl.Response.hashDataset(dataset)));
-    }
-    
-    /**
-     * Returns response builder for the given RDF dataset.
-     * 
-     * @param dataset RDF dataset
-     * @return response builder
-     */
-    public ResponseBuilder getResponseBuilder(Dataset dataset)
-    {
-        return new com.atomgraph.core.model.impl.Response(getRequest(),
-                dataset,
-                getLastModified(dataset),
-                getEntityTag(dataset),
-                getWritableMediaTypes(Dataset.class),
-                Collections.<Locale>emptyList(),
-                Collections.<String>emptyList()).
-            getResponseBuilder();
     }
     
     /**
