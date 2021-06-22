@@ -32,7 +32,7 @@ public class BadGatewayExceptionMapper implements ExceptionMapper<BadGatewayExce
     @Override
     public Response toResponse(BadGatewayException exception)
     {
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        return Response.status(Response.Status.BAD_GATEWAY).build();
     }
     
 }

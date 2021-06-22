@@ -35,7 +35,6 @@ import java.util.Date;
 import javax.inject.Inject;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.MediaType;
-import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,7 +118,7 @@ public abstract class ResourceBase implements Resource
     /**
      * Returns response builder for the given RDF graph.
      * 
-     * @param model RDF dataset
+     * @param model RDF model
      * @return response builder
      */
     public ResponseBuilder getResponseBuilder(Model model)
@@ -132,28 +131,6 @@ public abstract class ResourceBase implements Resource
                 Collections.<Locale>emptyList(),
                 Collections.<String>emptyList()).
             getResponseBuilder();
-    }
-    
-    /**
-     * Extract the <code>Last-Modified</code> response header value of the current resource from its RDF model.
-     * 
-     * @param dataset RDF dataset
-     * @return date of last modification
-     */
-    public Date getLastModified(Dataset dataset)
-    {
-        return null;
-    }
-
-    /**
-     * Generate the <code>ETag</code> response header value of the current resource from its RDF model.
-     * 
-     * @param dataset RDF dataset
-     * @return entity tag
-     */
-    public EntityTag getEntityTag(Dataset dataset)
-    {
-        return new EntityTag(Long.toHexString(com.atomgraph.core.model.impl.Response.hashDataset(dataset)));
     }
     
     /**
