@@ -68,8 +68,8 @@ public class DataManagerImpl extends FileManagerImpl implements DataManager
             boolean cacheModelLoads, boolean preemptiveAuth)
     {
         super(mapper);
-        if (client == null) throw new IllegalArgumentException("Model cache Map must be not null");
-        if (modelCache == null) throw new IllegalArgumentException("Client must be not null");
+        if (client == null) throw new IllegalArgumentException("Client must be not null");
+        if (modelCache == null) throw new IllegalArgumentException("Model cache Map must be not null");
         if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes must be not null");
         this.modelCache = modelCache;
         this.client = client;
