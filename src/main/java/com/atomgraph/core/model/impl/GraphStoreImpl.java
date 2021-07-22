@@ -96,11 +96,22 @@ public class GraphStoreImpl implements GraphStore
         return new com.atomgraph.core.model.impl.Response(getRequest(),
                 model,
                 null,
-                new EntityTag(Long.toHexString(ModelUtils.hashModel(model))),
+                getEntityTag(model),
                 getWritableMediaTypes(Model.class),
                 Collections.<Locale>emptyList(),
                 Collections.<String>emptyList()).
             getResponseBuilder();
+    }
+    
+    /**
+     * Generate the <code>ETag</code> response header value of the current RDF graph.
+     * 
+     * @param model RDF model
+     * @return hash value
+     */
+    public EntityTag getEntityTag(Model model)
+    {
+        return new EntityTag(Long.toHexString(ModelUtils.hashModel(model)));
     }
     
     /**

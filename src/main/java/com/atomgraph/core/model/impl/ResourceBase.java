@@ -26,7 +26,6 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.core.Variant;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.model.Resource;
 import com.atomgraph.core.util.ModelUtils;
@@ -34,7 +33,6 @@ import java.util.Collections;
 import java.util.Date;
 import javax.inject.Inject;
 import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,17 +129,6 @@ public abstract class ResourceBase implements Resource
                 Collections.<Locale>emptyList(),
                 Collections.<String>emptyList()).
             getResponseBuilder();
-    }
-    
-    /**
-     * Builds a list of acceptable response variants
-     * 
-     * @param mediaTypes
-     * @return supported variants
-     */
-    public List<Variant> getVariants(List<MediaType> mediaTypes)
-    {
-        return com.atomgraph.core.model.impl.Response.getVariantListBuilder(mediaTypes, getLanguages(), getEncodings()).add().build();
     }
     
     public List<javax.ws.rs.core.MediaType> getWritableMediaTypes(Class clazz)

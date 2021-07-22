@@ -94,11 +94,22 @@ public class QuadStoreImpl implements QuadStore
         return new com.atomgraph.core.model.impl.Response(getRequest(),
                 dataset,
                 null,
-                new EntityTag(Long.toHexString(com.atomgraph.core.model.impl.Response.hashDataset(dataset))),
+                getEntityTag(dataset),
                 getWritableMediaTypes(Dataset.class),
                 Collections.<Locale>emptyList(),
                 Collections.<String>emptyList()).
             getResponseBuilder();
+    }
+    
+    /**
+     * Generate the <code>ETag</code> response header value of the current RDF dataset.
+     * 
+     * @param model RDF dataset
+     * @return hash value
+     */
+    public EntityTag getEntityTag(Dataset dataset)
+    {
+        return new EntityTag(Long.toHexString(com.atomgraph.core.model.impl.Response.hashDataset(dataset)));
     }
     
     /**
