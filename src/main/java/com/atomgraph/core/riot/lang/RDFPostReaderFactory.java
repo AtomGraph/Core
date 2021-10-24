@@ -32,11 +32,11 @@ public class RDFPostReaderFactory implements ReaderRIOTFactory
 {
 
     @Override
-    public ReaderRIOT create(Lang language, ParserProfile profile)
+    public ReaderRIOT create(Lang lang, ParserProfile profile)
     {
-        if ( !RDFLanguages.RDFPOST.equals(language) )
-            throw new InternalErrorException("Attempt to parse " + language + " as RDF/POST") ;
-        return new RDFPostReader(language, profile, profile.getErrorHandler());
+        if ( !RDFLanguages.RDFPOST.equals(lang) )
+            throw new InternalErrorException("Attempt to parse " + lang + " as RDF/POST") ;
+        return new RDFPostReader(lang, profile, profile.getErrorHandler());
     }
     
 }

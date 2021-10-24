@@ -682,7 +682,7 @@ public class RDFPostReader extends ReaderRIOTBase
                 literal.setType(LITERAL_LANG);
                 literal.setImage2(langToken.getImage2());
                 return tokenAsNode(profile, literal);
-            }            
+            }
         }
             
         nextToken(tokens, peekIter); // skip ol
