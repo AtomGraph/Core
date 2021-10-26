@@ -18,6 +18,7 @@ package com.atomgraph.core.client;
 
 import com.atomgraph.core.MediaType;
 import com.atomgraph.core.MediaTypes;
+import com.atomgraph.core.io.ModelProvider;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MultivaluedHashMap;
@@ -64,6 +65,7 @@ public class LinkedDataClient extends ClientBase
     {
         try (Response cr = get(getReadableMediaTypes(Model.class), new MultivaluedHashMap()))
         {
+            cr.getHeaders().putSingle(ModelProvider.REQUEST_URI_HEADER, getEndpoint().getUri().toString()); // provide a base URI hint to ModelProvider
             return cr.readEntity(Model.class);
         }
     }
