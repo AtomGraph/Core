@@ -30,6 +30,7 @@ import com.atomgraph.core.model.GraphStore;
 import com.atomgraph.core.model.Service;
 import com.atomgraph.core.util.ModelUtils;
 import java.util.Collections;
+import java.util.Date;
 import javax.inject.Inject;
 import org.apache.jena.query.DatasetAccessor;
 import org.slf4j.Logger;
@@ -78,29 +79,43 @@ public class GraphStoreImpl implements GraphStore
      * Returns response for the given RDF model.
      * 
      * @param model RDF model
+     * @param graphUri graph URI
      * @return response object
      */
-    public Response getResponse(Model model)
+    public Response getResponse(Model model, URI graphUri)
     {
-        return getResponseBuilder(model).build();
+        return getResponseBuilder(model, graphUri).build();
     }
 
     /**
      * Returns response builder for the given RDF model.
      * 
      * @param model RDF model
+     * @param graphUri graph URI
      * @return response builder
      */
-    public ResponseBuilder getResponseBuilder(Model model)
+    public ResponseBuilder getResponseBuilder(Model model, URI graphUri)
     {
         return new com.atomgraph.core.model.impl.Response(getRequest(),
                 model,
-                null,
+                getLastModified(model, graphUri),
                 getEntityTag(model),
                 getWritableMediaTypes(Model.class),
                 Collections.<Locale>emptyList(),
                 Collections.<String>emptyList()).
             getResponseBuilder();
+    }
+    
+    /**
+     * Extract the <code>Last-Modified</code> response header value of the current resource from its RDF model.
+     * 
+     * @param model RDF model
+     * @param graphUri graph URI
+     * @return date of last modification
+     */
+    public Date getLastModified(Model model, URI graphUri)
+    {
+        return null;
     }
     
     /**
@@ -152,7 +167,7 @@ public class GraphStoreImpl implements GraphStore
         {
             Model model = getDatasetAccessor().getModel();
             if (log.isDebugEnabled()) log.debug("GET Graph Store default graph, returning Model of size(): {}", model.size());
-            return getResponse(model);
+            return getResponse(model, graphUri);
         }
         else
         {
@@ -164,7 +179,7 @@ public class GraphStoreImpl implements GraphStore
 
             Model model = getDatasetAccessor().getModel(graphUri.toString());
             if (log.isDebugEnabled()) log.debug("GET Graph Store named graph with URI: {} found, returning Model of size(): {}", graphUri, model.size());
-            return getResponse(model);
+            return getResponse(model, graphUri);
         }
     }
 
