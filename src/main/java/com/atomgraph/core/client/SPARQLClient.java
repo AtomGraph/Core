@@ -31,8 +31,8 @@ import org.apache.jena.query.Query;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetRewindable;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.sparql.resultset.JSONInput;
-import org.apache.jena.sparql.resultset.XMLInput;
+import org.apache.jena.riot.resultset.ResultSetLang;
+import org.apache.jena.riot.resultset.rw.ResultsReader;
 import org.apache.jena.update.UpdateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -177,9 +177,10 @@ public class SPARQLClient extends ClientBase
         try (InputStream is = cr.readEntity(InputStream.class))
         {
             if (cr.getMediaType().isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
-                return JSONInput.booleanFromJSON(is);
+                return ResultsReader.create().lang(ResultSetLang.RS_JSON).build().readAny(is).getBooleanResult();
+            
             if (cr.getMediaType().isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE))
-                return XMLInput.booleanFromXML(is);
+                return ResultsReader.create().lang(ResultSetLang.RS_XML).build().readAny(is).getBooleanResult();
 
             throw new IllegalStateException("Unsupported ResultSet format");
         }

@@ -3,7 +3,7 @@
 
     <groupId>com.atomgraph</groupId>
     <artifactId>core</artifactId>
-    <version>3.0.21-SNAPSHOT</version>
+    <version>3.1.0-SNAPSHOT</version>
     <packaging>${packaging.type}</packaging>
 
     <name>AtomGraph Core</name>
@@ -105,7 +105,7 @@
         <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-arq</artifactId>
-            <version>3.16.0</version>
+            <version>4.3.2</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

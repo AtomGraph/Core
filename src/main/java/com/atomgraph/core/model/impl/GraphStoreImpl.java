@@ -26,13 +26,13 @@ import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import com.atomgraph.core.MediaTypes;
+import com.atomgraph.core.model.DatasetAccessor;
 import com.atomgraph.core.model.GraphStore;
 import com.atomgraph.core.model.Service;
 import com.atomgraph.core.util.ModelUtils;
 import java.util.Collections;
 import java.util.Date;
 import javax.inject.Inject;
-import org.apache.jena.query.DatasetAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -15,8 +15,6 @@
  */
 package com.atomgraph.core.model;
 
-import org.apache.jena.query.DatasetAccessor;
-
 /**
  * SPARQL 1.1 service with endpoint and graph store.
  * 

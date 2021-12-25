@@ -373,7 +373,7 @@ public class TokenizerText implements Tokenizer
             case CH_SLASH:      getReader().readChar(); token.setType(TokenType.SLASH);     /*token.setImage(CH_SLASH);*/ return token;
             case CH_RSLASH:     getReader().readChar(); token.setType(TokenType.RSLASH);    /*token.setImage(CH_RSLASH);*/ return token;
             case CH_VBAR:       getReader().readChar(); token.setType(TokenType.VBAR);      /*token.setImage(CH_VBAR);*/ return token;
-            case CH_AMPHERSAND: getReader().readChar(); token.setType(TokenType.AMPHERSAND);/*token.setImage(CH_AMPHERSAND);*/ return token;
+            case CH_AMPHERSAND: getReader().readChar(); token.setType(TokenType.AMPERSAND);/*token.setImage(CH_AMPHERSAND);*/ return token;
             // Specials (if blank node processing off)
             //case CH_COLON:      getReader().readChar(); token.setType(TokenType.COLON); return token;
 
@@ -516,7 +516,7 @@ public class TokenizerText implements Tokenizer
     }
     
     // Read a unicode escape : does not allow \\ bypass
-    private final int readUnicodeEscape() {
+    private int readUnicodeEscape() {
         int ch = getReader().readChar();
         if ( ch == EOF )
             error("Broken escape sequence");
@@ -1152,7 +1152,7 @@ public class TokenizerText implements Tokenizer
 
     // ---- Escape sequences
 
-    private final int readLiteralEscape() {
+    private int readLiteralEscape() {
         int c = getReader().readChar();
         if ( c == EOF )
             error("Escape sequence not completed");
@@ -1174,7 +1174,7 @@ public class TokenizerText implements Tokenizer
         }
     }
 
-    private final int readCharEscape() {
+    private int readCharEscape() {
         // PN_LOCAL_ESC ::= '\' ( '_' | '~' | '.' | '-' | '!' | '$' | '&' | "'"
         // | '(' | ')' | '*' | '+' | ',' | ';' | '=' | '/' | '?' | '#' | '@' |
         // '%' )
@@ -1195,17 +1195,16 @@ public class TokenizerText implements Tokenizer
         }
     }
     
-    private final
-    int readUnicode4Escape() { return readHexSequence(4); }
+    private int readUnicode4Escape() { return readHexSequence(4); }
     
-    private final int readUnicode8Escape() {
+    private int readUnicode8Escape() {
         int ch8 = readHexSequence(8);
         if ( ch8 > Character.MAX_CODE_POINT )
             error("Illegal code point in \\U sequence value: 0x%08X", ch8);
         return ch8;
     }
 
-    private final int readHexSequence(int N) {
+    private int readHexSequence(int N) {
         int x = 0;
         for (int i = 0; i < N; i++) {
             int d = readHexChar();
@@ -1216,7 +1215,7 @@ public class TokenizerText implements Tokenizer
         return x;
     }
 
-    private final int readHexChar() {
+    private int readHexChar() {
         int ch = getReader().readChar();
         if ( ch == EOF )
             error("Not a hexadecimal character (end of file)");

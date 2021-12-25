@@ -20,8 +20,8 @@ package com.atomgraph.core.model.impl.remote;
 import org.apache.jena.rdf.model.Model;
 import com.atomgraph.core.client.GraphStoreClient;
 import com.atomgraph.core.exception.BadGatewayException;
+import com.atomgraph.core.model.DatasetAccessor;
 import javax.ws.rs.ClientErrorException;
-import org.apache.jena.query.DatasetAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

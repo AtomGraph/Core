@@ -827,16 +827,15 @@ public class RDFPostReader extends ReaderRIOTBase
         this.errorHandler = errorHandler;
     }
 
-    @Override
     public ParserProfile getParserProfile()
     {
         return parserProfile;
     } 
-
-    @Override
-    public void setParserProfile(ParserProfile parserProfile)
-    {
-        this.parserProfile = parserProfile;
-    }
+//
+//    @Override
+//    public void setParserProfile(ParserProfile parserProfile)
+//    {
+//        this.parserProfile = parserProfile;
+//    }
 
 }

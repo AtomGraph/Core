@@ -17,6 +17,7 @@ package com.atomgraph.core.client;
 
 import com.atomgraph.core.MediaType;
 import com.atomgraph.core.MediaTypes;
+import com.atomgraph.core.model.DatasetAccessor;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.WebTarget;
@@ -24,7 +25,6 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import org.apache.jena.query.DatasetAccessor;
 import org.apache.jena.rdf.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

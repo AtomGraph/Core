@@ -19,6 +19,7 @@ import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.GraphStoreClient;
 import com.atomgraph.core.client.QuadStoreClient;
 import com.atomgraph.core.client.SPARQLClient;
+import com.atomgraph.core.model.DatasetAccessor;
 import com.atomgraph.core.model.DatasetQuadAccessor;
 import com.atomgraph.core.model.EndpointAccessor;
 import org.slf4j.Logger;
@@ -26,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import com.atomgraph.core.model.RemoteService;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
-import org.apache.jena.query.DatasetAccessor;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 
 /**
