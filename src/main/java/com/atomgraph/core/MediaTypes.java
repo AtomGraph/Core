@@ -16,6 +16,7 @@
 
 package com.atomgraph.core;
 
+import java.nio.charset.StandardCharsets;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import java.util.ArrayList;
@@ -47,7 +48,7 @@ public class MediaTypes
     public static final Map<String, String> UTF8_PARAM = new HashMap<>();
     static
     {
-        UTF8_PARAM.put("charset", "UTF-8");
+        UTF8_PARAM.put(javax.ws.rs.core.MediaType.CHARSET_PARAMETER, StandardCharsets.UTF_8.name());
     }
     
     private final Map<Class, List<javax.ws.rs.core.MediaType>> readable, writable;
