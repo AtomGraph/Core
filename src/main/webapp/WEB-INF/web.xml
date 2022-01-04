@@ -8,11 +8,6 @@
     <description>Generic Linked Data framework</description>
     <servlet>
         <servlet-name>com.atomgraph.core.Application</servlet-name>
-<!--        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
-        <init-param>
-            <param-name>javax.ws.rs.Application</param-name>
-            <param-value>com.atomgraph.core.Application</param-value>
-        </init-param>-->
         <init-param>
             <param-name>http://www.w3.org/ns/sparql-service-description#endpoint</param-name>
             <param-value>http://atomgraph.dydra.com/graphity/core/sparql</param-value>
