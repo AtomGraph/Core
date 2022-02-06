@@ -24,7 +24,6 @@ import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecException;
 import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.ResultSetFactory;
 import org.apache.jena.query.ResultSetRewindable;
 import org.apache.jena.rdf.model.Model;
@@ -84,7 +83,7 @@ public class EndpointAccessorImpl implements EndpointAccessor
         if (dataset == null) throw new IllegalArgumentException("Dataset must be not null");
         if (query == null) throw new IllegalArgumentException("Query must be not null");
         
-        try (QueryExecution qex = QueryExecutionFactory.create(query, dataset))
+        try (QueryExecution qex = QueryExecution.create(query, dataset))
         {        
             if (query.isConstructType()) return DatasetFactory.create(qex.execConstruct()); // subject to change if/when SPARQL can return quads
             if (query.isDescribeType()) return DatasetFactory.create(qex.execDescribe());
@@ -114,7 +113,7 @@ public class EndpointAccessorImpl implements EndpointAccessor
         if (dataset == null) throw new IllegalArgumentException("Dataset must be not null");
         if (query == null) throw new IllegalArgumentException("Query must be not null");
         
-        try (QueryExecution qex = QueryExecutionFactory.create(query, dataset))
+        try (QueryExecution qex = QueryExecution.create(query, dataset))
         {
             if (query.isConstructType()) return qex.execConstruct();
             if (query.isDescribeType()) return qex.execDescribe();
@@ -150,7 +149,7 @@ public class EndpointAccessorImpl implements EndpointAccessor
         if (dataset == null) throw new IllegalArgumentException("Dataset must be not null");
         if (query == null) throw new IllegalArgumentException("Query must be not null");
         
-        try (QueryExecution qex = QueryExecutionFactory.create(query, dataset))
+        try (QueryExecution qex = QueryExecution.create(query, dataset))
         {
             if (query.isSelectType()) return ResultSetFactory.copyResults(qex.execSelect());
             if (query.isAskType())
@@ -194,7 +193,7 @@ public class EndpointAccessorImpl implements EndpointAccessor
         if (dataset == null) throw new IllegalArgumentException("Dataset must be not null");
         if (query == null) throw new IllegalArgumentException("Query must be not null");
 
-        try (QueryExecution qex = QueryExecutionFactory.create(query, dataset))
+        try (QueryExecution qex = QueryExecution.create(query, dataset))
         {
             if (query.isAskType()) return qex.execAsk();
 
