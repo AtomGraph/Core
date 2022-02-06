@@ -26,10 +26,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
@@ -59,8 +57,6 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     public static final String REQUEST_URI_HEADER = "X-Request-URI";
     public static final String RESPONSE_URI_HEADER = "X-Response-URI";
     
-    @Context UriInfo uriInfo;
-
     // READER
     
     @Override
@@ -85,10 +81,9 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
         }
         if (log.isDebugEnabled()) log.debug("RDF language used to read Model: {}", lang);
         
-        final String baseURI;
+        String baseURI = null;
         // attempt to retrieve base URI from a special-purpose header (workaround for JAX-RS 1.x limitation)
         if (httpHeaders.containsKey(REQUEST_URI_HEADER)) baseURI = httpHeaders.getFirst(REQUEST_URI_HEADER);
-        else baseURI = getUriInfo().getAbsolutePath().toString();
 
         return read(model, entityStream, lang, baseURI); // extract base URI from httpHeaders?
     }
@@ -146,10 +141,9 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
         }
         if (log.isDebugEnabled()) log.debug("RDF language used to read Model: {}", lang);
         
-        final String baseURI;
+        String baseURI = null;
         // attempt to retrieve base URI from a special-purpose header (workaround for JAX-RS 1.x limitation)
         if (httpHeaders.containsKey(RESPONSE_URI_HEADER)) baseURI = httpHeaders.getFirst(RESPONSE_URI_HEADER).toString();
-        else baseURI = getUriInfo().getAbsolutePath().toString();
 
         write(model, entityStream, lang, baseURI);
     }
@@ -164,11 +158,6 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
         if (log.isDebugEnabled()) log.debug("Syntax used to write Model: {}", syntax);
         
         return model.write(os, syntax);
-    }
-    
-    public UriInfo getUriInfo()
-    {
-        return uriInfo;
     }
     
 }
