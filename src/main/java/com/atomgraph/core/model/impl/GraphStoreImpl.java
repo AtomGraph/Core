@@ -151,7 +151,7 @@ public class GraphStoreImpl implements GraphStore
     }
     
     /**
-     * Implements GET method of SPARQL Graph Store Protocol.
+     * Implements <code>GET</code> method of SPARQL Graph Store Protocol.
      * 
      * @param defaultGraph true if default graph is requested
      * @param graphUri named graph URI
@@ -184,7 +184,7 @@ public class GraphStoreImpl implements GraphStore
     }
 
     /**
-     * Implements POST method of SPARQL Graph Store Protocol.
+     * Implements <code>POST</code> method of SPARQL Graph Store Protocol.
      * 
      * @param model RDF request body
      * @param defaultGraph true if default graph is requested
@@ -219,7 +219,7 @@ public class GraphStoreImpl implements GraphStore
     }
 
     /**
-     * Implements PUT method of SPARQL Graph Store Protocol.
+     * Implements <code>PUT</code> method of SPARQL Graph Store Protocol.
      * 
      * @param model RDF request body
      * @param defaultGraph true if default graph is requested
@@ -252,7 +252,7 @@ public class GraphStoreImpl implements GraphStore
     }
 
     /**
-     * Implements DELETE method of SPARQL Graph Store Protocol.
+     * Implements <code>DELETE</code> method of SPARQL Graph Store Protocol.
      * 
      * @param defaultGraph true if default graph is requested
      * @param graphUri named graph URI
