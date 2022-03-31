@@ -97,33 +97,6 @@ public class Response
         this.variant = variant;
     }
 
-    public static MediaType[] mediaTypeListToArray(List<MediaType> list)
-    {
-        if (list == null) throw new IllegalArgumentException("List cannot be null");
-        
-        MediaType[] array = new MediaType[list.size()];
-        list.toArray(array);
-        return array;
-    }
-
-    public static Locale[] localeListToArray(List<Locale> list)
-    {
-        if (list == null) throw new IllegalArgumentException("List cannot be null");
-        
-        Locale[] array = new Locale[list.size()];
-        list.toArray(array);
-        return array;
-    }
-
-    public static String[] stringListToArray(List<String> list)
-    {
-        if (list == null) throw new IllegalArgumentException("List cannot be null");
-        
-        String[] array = new String[list.size()];
-        list.toArray(array);
-        return array;
-    }
-
     /**
      * Produces a Variant builder from a list of media types.
      * 
@@ -135,9 +108,9 @@ public class Response
     public static Variant.VariantListBuilder getVariantListBuilder(List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings)
     {
         return Variant.VariantListBuilder.newInstance().
-                mediaTypes(mediaTypeListToArray(mediaTypes)).
-                languages(localeListToArray(languages)).
-                encodings(stringListToArray(encodings));
+                mediaTypes(mediaTypes.toArray(MediaType[]::new)).
+                languages(languages.toArray(Locale[]::new)).
+                encodings(encodings.toArray(String[]::new));
     }
     
     /**

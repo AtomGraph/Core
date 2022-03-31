@@ -10,19 +10,19 @@
         <servlet-name>com.atomgraph.core.Application</servlet-name>
         <init-param>
             <param-name>http://www.w3.org/ns/sparql-service-description#endpoint</param-name>
-            <param-value>http://atomgraph.dydra.com/graphity/core/sparql</param-value>
+            <!-- <param-value>http://localhost:3030/ds</param-value> -->
         </init-param>
         <init-param>
             <param-name>https://w3id.org/atomgraph/core#graphStore</param-name>
-            <param-value>http://atomgraph.dydra.com/graphity/core/service</param-value>
+            <!-- <param-value>http://localhost:3030/ds</param-value> -->
         </init-param>
         <!--
         <init-param>
-            <param-name>http://jena.hpl.hp.com/Service#queryAuthUser</param-name>
+            <param-name>https://w3id.org/atomgraph/core#authUser</param-name>
             <param-value>username</param-value>
         </init-param>
         <init-param>
-            <param-name>http://jena.hpl.hp.com/Service#queryAuthPwd</param-name>
+            <param-name>https://w3id.org/atomgraph/core#authPwd</param-name>
             <param-value>password</param-value>
         </init-param>
         -->

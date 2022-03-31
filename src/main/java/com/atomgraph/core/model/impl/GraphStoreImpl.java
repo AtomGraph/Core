@@ -30,7 +30,6 @@ import com.atomgraph.core.model.DatasetAccessor;
 import com.atomgraph.core.model.GraphStore;
 import com.atomgraph.core.model.Service;
 import com.atomgraph.core.util.ModelUtils;
-import java.util.Collections;
 import java.util.Date;
 import javax.inject.Inject;
 import org.slf4j.Logger;
@@ -101,8 +100,8 @@ public class GraphStoreImpl implements GraphStore
                 getLastModified(model, graphUri),
                 getEntityTag(model),
                 getWritableMediaTypes(Model.class),
-                Collections.<Locale>emptyList(),
-                Collections.<String>emptyList()).
+                getLanguages(),
+                getEncodings()).
             getResponseBuilder();
     }
     

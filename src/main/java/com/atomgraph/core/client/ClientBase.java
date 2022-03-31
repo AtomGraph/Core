@@ -167,7 +167,7 @@ public abstract class ClientBase
     
     public MediaType[] getReadableMediaTypes(Class clazz)
     {
-        return getMediaTypes().getReadable(clazz).toArray(new javax.ws.rs.core.MediaType[0]);
+        return getMediaTypes().getReadable(clazz).toArray(javax.ws.rs.core.MediaType[]::new);
     }
 
     public final WebTarget getEndpoint()
