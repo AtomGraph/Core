@@ -16,6 +16,8 @@ Configuration
 
 The Core is configured in [web.xml](../../blob/master/src/main/webapp/WEB-INF/web.xml)
 
+Uncomment `http://www.w3.org/ns/sparql-service-description#endpoint` and `https://w3id.org/atomgraph/core#graphStore` init parameters and provide their values. Otherwise the server will not start.
+
 Linked Data API
 --------------
 * low-level access to remote Linked Data resources and SPARQL endpoints
