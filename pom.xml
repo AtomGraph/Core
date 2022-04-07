@@ -3,7 +3,7 @@
 
     <groupId>com.atomgraph</groupId>
     <artifactId>core</artifactId>
-    <version>3.1.5-SNAPSHOT</version>
+    <version>3.1.6-SNAPSHOT</version>
     <packaging>${packaging.type}</packaging>
 
     <name>AtomGraph Core</name>
@@ -108,6 +108,10 @@
             <version>4.3.2</version>
             <exclusions>
                 <!-- exclude HTTP Client as its version clashes with Jersey's -->
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpcore</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>org.apache.httpcomponents</groupId>
                     <artifactId>httpclient-cache</artifactId>
