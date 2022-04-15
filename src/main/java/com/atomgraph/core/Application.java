@@ -16,6 +16,7 @@
  */
 package com.atomgraph.core;
 
+import com.atomgraph.core.client.LinkedDataClient;
 import com.atomgraph.core.exception.ConfigurationException;
 import com.atomgraph.core.io.DatasetProvider;
 import com.atomgraph.core.io.ResultSetProvider;
@@ -134,7 +135,8 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
                     authUser, authPwd, maxGetRequestSize);
         }
         
-        dataManager = new DataManagerImpl(LocationMapper.get(), new HashMap<>(), client, mediaTypes, cacheModelLoads, preemptiveAuth);
+        dataManager = new DataManagerImpl(LocationMapper.get(), new HashMap<>(), LinkedDataClient.create(client, mediaTypes),
+                cacheModelLoads, preemptiveAuth);
     }
     
     @PostConstruct

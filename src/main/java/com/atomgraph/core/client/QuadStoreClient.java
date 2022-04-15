@@ -35,23 +35,23 @@ import javax.ws.rs.core.MultivaluedHashMap;
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see <a href="https://lists.w3.org/Archives/Public/public-sparql-dev/2014AprJun/0008.html">Extending SPARQL Graph Store HTTP Protocol with quad semantics</a>
  */
-public class QuadStoreClient extends ClientBase implements DatasetQuadAccessor
+public class QuadStoreClient extends EndpointClientBase implements DatasetQuadAccessor
 {
     private static final Logger log = LoggerFactory.getLogger(QuadStoreClient.class);
     
-    public QuadStoreClient(WebTarget endpoint, MediaTypes mediaTypes)
+    public QuadStoreClient(MediaTypes mediaTypes, WebTarget endpoint)
     {
-        super(endpoint, mediaTypes);
+        super(mediaTypes, endpoint);
     }
 
     public QuadStoreClient(WebTarget endpoint)
     {
-        this(endpoint, new MediaTypes());
+        this(new MediaTypes(), endpoint);
     }
 
-    public static QuadStoreClient create(WebTarget endpoint, MediaTypes mediaTypes)
+    public static QuadStoreClient create(MediaTypes mediaTypes, WebTarget endpoint)
     {
-        return new QuadStoreClient(endpoint, mediaTypes);
+        return new QuadStoreClient(mediaTypes, endpoint);
     }
 
     public static QuadStoreClient create(WebTarget endpoint)

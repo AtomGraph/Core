@@ -33,13 +33,13 @@ public interface DataManager extends ModelGetter
     
     ImmutableMap<String, Model> getModelCache();
     
-    Client getClient();
+//    Client getClient();
     
-    MediaTypes getMediaTypes();
+//    MediaTypes getMediaTypes();
     
-    WebTarget getEndpoint(URI endpointURI);
+    //WebTarget getEndpoint(URI endpointURI);
     
-    Response get(String uri, javax.ws.rs.core.MediaType[] acceptedTypes);
+    Response get(String uri, javax.ws.rs.core.MediaType[] acceptedTypes); // TO-DO: deprecate?
     
     boolean usePreemptiveAuth();
     

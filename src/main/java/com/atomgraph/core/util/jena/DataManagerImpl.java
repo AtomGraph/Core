@@ -19,12 +19,9 @@ package com.atomgraph.core.util.jena;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.util.LocationMapper;
 import java.net.URI;
-import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.LinkedDataClient;
 import java.net.URISyntaxException;
 import java.util.Map;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import org.apache.jena.ext.com.google.common.collect.ImmutableMap;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -48,8 +45,7 @@ public class DataManagerImpl extends FileManagerImpl implements DataManager
     private static final Logger log = LoggerFactory.getLogger(DataManagerImpl.class);
 
     private final boolean preemptiveAuth;
-    private final Client client;
-    private final MediaTypes mediaTypes;
+    private final LinkedDataClient ldc;
     private boolean cacheModelLoads;
     private final Map<String, Model> modelCache;
 
@@ -57,45 +53,28 @@ public class DataManagerImpl extends FileManagerImpl implements DataManager
      * Creates data manager.
      * 
      * @param mapper location mapper
-     * @param modelCache
-     * @param client HTTP client
-     * @param mediaTypes supported readable and writable media types
+     * @param modelCache model cache map
+     * @param ldc Linked Data client
      * @param cacheModelLoads if true, cache models after loading, using locations as keys
      * @param preemptiveAuth if true, preemptive HTTP authentication will be used
      */
     public DataManagerImpl(LocationMapper mapper, Map<String, Model> modelCache,
-            Client client, MediaTypes mediaTypes,
+            LinkedDataClient ldc,
             boolean cacheModelLoads, boolean preemptiveAuth)
     {
         super(mapper);
-        if (client == null) throw new IllegalArgumentException("Client must be not null");
         if (modelCache == null) throw new IllegalArgumentException("Model cache Map must be not null");
-        if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes must be not null");
         this.modelCache = modelCache;
-        this.client = client;
-        this.mediaTypes = mediaTypes;
         this.cacheModelLoads = cacheModelLoads;
         this.preemptiveAuth = preemptiveAuth;
+        this.ldc = ldc;
         
         addLocatorFile() ;
         addLocatorURL() ;
         addLocatorClassLoader(getClass().getClassLoader()) ;
     }
     
-    @Override
-    public Client getClient()
-    {
-        return client;
-    }
-
-    @Override
-    public MediaTypes getMediaTypes()
-    {
-        return mediaTypes;
-    }
-    
-    @Override
-    public WebTarget getEndpoint(URI endpointURI)
+    public URI getEndpoint(URI endpointURI)
     {
         if (endpointURI == null) throw new IllegalArgumentException("Endpoint URI must be not null");
 
@@ -109,22 +88,15 @@ public class DataManagerImpl extends FileManagerImpl implements DataManager
             // should not happen, this a URI to URI conversion
         }
         
-        return getClient().target(endpointURI.normalize());
+        return endpointURI.normalize();
     }
     
     @Override
     public Response get(String uri, javax.ws.rs.core.MediaType[] acceptedTypes)
     {
-        return LinkedDataClient.create(getEndpoint(URI.create(uri)), getMediaTypes()).
-                get(acceptedTypes, null);
+        return getLinkedDataClient().get(getEndpoint(URI.create(uri)), acceptedTypes);
     }
     
-    @Override
-    public boolean usePreemptiveAuth()
-    {
-        return preemptiveAuth;
-    }
-        
     @Override
     public Model loadModel(String uri)
     {
@@ -134,7 +106,7 @@ public class DataManagerImpl extends FileManagerImpl implements DataManager
             String mappedURI = mapURI(uri);
             if (mappedURI.startsWith("http") || mappedURI.startsWith("https"))
             {
-                Model model = LinkedDataClient.create(getEndpoint(URI.create(uri)), getMediaTypes()).get();
+                Model model = getLinkedDataClient().get(getEndpoint(URI.create(uri)));
 
                 if (isCachingModels()) addCacheModel(uri, model) ;
 
@@ -166,7 +138,7 @@ public class DataManagerImpl extends FileManagerImpl implements DataManager
     {
         String mappedURI = mapURI(uri);
         if (mappedURI.startsWith("http") || mappedURI.startsWith("https"))
-            return model.add(LinkedDataClient.create(getEndpoint(URI.create(uri)), getMediaTypes()).get());
+            return model.add(getLinkedDataClient().get(getEndpoint(URI.create(uri))));
         
         return super.readModel(model, uri);
     }
@@ -264,6 +236,22 @@ public class DataManagerImpl extends FileManagerImpl implements DataManager
     public void removeCacheModel(String uri)
     { 
         if (isCachingModels()) modelCache.remove(uri) ;
+    }
+    
+    @Override
+    public boolean usePreemptiveAuth()
+    {
+        return preemptiveAuth;
+    }
+    
+    /**
+     * Returns Linked Data client.
+     * 
+     * @return client instance
+     */
+    public LinkedDataClient getLinkedDataClient()
+    {
+        return ldc;
     }
     
 }

@@ -19,9 +19,11 @@ package com.atomgraph.core.client;
 import com.atomgraph.core.MediaType;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.io.ModelProvider;
+import java.net.URI;
+import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientRequestFilter;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 import org.apache.jena.rdf.model.Model;
 
@@ -33,14 +35,17 @@ import org.apache.jena.rdf.model.Model;
 public class LinkedDataClient extends ClientBase
 {
     
-    protected LinkedDataClient(WebTarget endpoint, MediaTypes mediaTypes)
+    private final Client client;
+    
+    protected LinkedDataClient(Client client, MediaTypes mediaTypes)
     {
-        super(endpoint, mediaTypes);
+        super(mediaTypes);
+        this.client = client;
     }
     
-    public static LinkedDataClient create(WebTarget endpoint, MediaTypes mediaTypes)
+    public static LinkedDataClient create(Client client, MediaTypes mediaTypes)
     {
-        return new LinkedDataClient(endpoint, mediaTypes);
+        return new LinkedDataClient(client, mediaTypes);
     }
 
     /**
@@ -51,44 +56,78 @@ public class LinkedDataClient extends ClientBase
      * @return this SPARQL client
      * @see <a href="https://blogs.oracle.com/japod/how-to-use-jersey-client-efficiently">How To Use Jersey Client Efficiently</a>
      */
-    @Override
     public LinkedDataClient register(ClientRequestFilter filter)
     {
         if (filter == null) throw new IllegalArgumentException("ClientRequestFilter cannot be null");
 
-        super.register(filter);
+        getClient().register(filter);
 
         return this;
     }
     
-    public Model get()
+    public WebTarget getWebTarget(URI uri)
     {
-        try (Response cr = get(getReadableMediaTypes(Model.class), new MultivaluedHashMap()))
+        return getClient().target(uri);
+    }
+    
+    public Response head(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes)
+    {
+        return getWebTarget(uri).request(acceptedTypes).head();
+    }
+    
+    public Response get(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes)
+    {
+        return getWebTarget(uri).request(acceptedTypes).get();
+    }
+    
+    public Model get(URI uri)
+    {
+        try (Response cr = get(uri, getReadableMediaTypes(Model.class)))
         {
-            cr.getHeaders().putSingle(ModelProvider.REQUEST_URI_HEADER, getEndpoint().getUri().toString()); // provide a base URI hint to ModelProvider
+            cr.getHeaders().putSingle(ModelProvider.REQUEST_URI_HEADER, uri.toString()); // provide a base URI hint to ModelProvider
             return cr.readEntity(Model.class);
         }
     }
     
-    public void post(Model model)
+    public Response post(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes, Object body, javax.ws.rs.core.MediaType contentType)
     {
-        post(model, getDefaultMediaType(), new javax.ws.rs.core.MediaType[]{}).close();
+        return getWebTarget(uri).request(acceptedTypes).post(Entity.entity(body, contentType));
+    }
+    
+    public void post(URI uri, Model model)
+    {
+        post(uri, getReadableMediaTypes(Model.class), model, getDefaultMediaType()).close();
     }
 
-    public void put(Model model)
+    public Response put(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes, Object body, javax.ws.rs.core.MediaType contentType)
     {
-        put(model, getDefaultMediaType(), new javax.ws.rs.core.MediaType[]{}).close();
+        return getWebTarget(uri).request(acceptedTypes).put(Entity.entity(body, contentType));
+    }
+    
+    public void put(URI uri, Model model)
+    {
+        put(uri, getReadableMediaTypes(Model.class), model, getDefaultMediaType()).close();
     }
 
-    public void delete()
+    public Response delete(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes)
     {
-        delete(new javax.ws.rs.core.MediaType[]{}).close();
+        return getWebTarget(uri).request(getReadableMediaTypes(Model.class)).delete();
+    }
+    
+    public void delete(URI uri)
+    {
+        delete(uri, getReadableMediaTypes(Model.class)).close();
     }
 
     @Override
     public MediaType getDefaultMediaType()
     {
         return MediaType.APPLICATION_NTRIPLES_TYPE;
+    }
+    
+    public Client getClient()
+    {
+        return client;
     }
 
 }

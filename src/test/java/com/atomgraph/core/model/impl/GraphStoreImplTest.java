@@ -56,6 +56,7 @@ public class GraphStoreImplTest extends JerseyTest
     
     public com.atomgraph.core.Application system;
     public WebTarget endpoint;
+    public GraphStoreClient gsc;
 
     @BeforeClass
     public static void initClass()
@@ -69,6 +70,7 @@ public class GraphStoreImplTest extends JerseyTest
     public void init()
     {
         endpoint = system.getClient().target(getBaseUri().resolve("service"));
+        gsc = GraphStoreClient.create(new MediaTypes(), endpoint);
     }
     
     protected Dataset getDataset()
@@ -96,22 +98,18 @@ public class GraphStoreImplTest extends JerseyTest
     @Test
     public void testGetDefaultModel()
     {
-        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
         assertIsomorphic(getDataset().getDefaultModel(), gsc.getModel());
     }
 
     @Test
     public void testGetNamedModel()
-    {
-        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
-        
+    {        
         assertIsomorphic(getDataset().getNamedModel(NAMED_GRAPH_URI), gsc.getModel(NAMED_GRAPH_URI));
     }
 
     @Test
     public void testGetNotFoundNamedModel()
     {
-        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.putSingle(GRAPH_PARAM_NAME, "http://host/" + UUID.randomUUID().toString());
         
@@ -121,7 +119,6 @@ public class GraphStoreImplTest extends JerseyTest
     @Test
     public void testGetNotAcceptableType()
     {
-        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.putSingle(DEFAULT_PARAM_NAME, Boolean.TRUE.toString());
         
@@ -132,7 +129,6 @@ public class GraphStoreImplTest extends JerseyTest
     public void testAddModel()
     {
         getDataset().getDefaultModel().removeAll();
-        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
         gsc.add(getRequestModel());
         
         assertIsomorphic(getDataset().getDefaultModel(), gsc.getModel());
@@ -141,7 +137,6 @@ public class GraphStoreImplTest extends JerseyTest
     @Test
     public void testAddNamedModel()
     {
-        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
         gsc.add(NAMED_GRAPH_URI, getRequestModel());
         
         assertIsomorphic(getDataset().getNamedModel(NAMED_GRAPH_URI), gsc.getModel(NAMED_GRAPH_URI));
@@ -150,7 +145,6 @@ public class GraphStoreImplTest extends JerseyTest
     @Test
     public void testPostEmptyNamedModel()
     {
-        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.putSingle(GRAPH_PARAM_NAME, "http://host/" + UUID.randomUUID().toString());
         
@@ -160,7 +154,6 @@ public class GraphStoreImplTest extends JerseyTest
     @Test
     public void testPostNotFoundNamedModel()
     {
-        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.putSingle(GRAPH_PARAM_NAME, "http://host/" + UUID.randomUUID().toString());
         
@@ -171,21 +164,18 @@ public class GraphStoreImplTest extends JerseyTest
     @Test
     public void testPostUnsupportedAddType()
     {
-        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
         assertEquals(UNSUPPORTED_MEDIA_TYPE.getStatusCode(), gsc.post("BAD RDF", javax.ws.rs.core.MediaType.TEXT_XML_TYPE, new javax.ws.rs.core.MediaType[]{}).getStatus());
     }
     
     @Test
     public void testInvalidTurtlePost()
     {
-        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
         assertEquals(BAD_REQUEST.getStatusCode(), gsc.post("BAD TURTLE", com.atomgraph.core.MediaType.TEXT_TURTLE_TYPE, new MediaType[]{}).getStatus());
     }
     
     @Test
     public void testPutModel()
     {
-        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
         gsc.putModel(getRequestModel());
         
         assertIsomorphic(getDataset().getDefaultModel(), gsc.getModel());
@@ -194,7 +184,6 @@ public class GraphStoreImplTest extends JerseyTest
     @Test
     public void testPutNamedModel()
     {
-        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
         gsc.putModel(NAMED_GRAPH_URI, getRequestModel());
         
         assertIsomorphic(getDataset().getNamedModel(NAMED_GRAPH_URI), gsc.getModel(NAMED_GRAPH_URI));
@@ -203,7 +192,6 @@ public class GraphStoreImplTest extends JerseyTest
     @Test
     public void testPutNotFoundNamedModel()
     {
-        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.putSingle(GRAPH_PARAM_NAME, "http://host/" + UUID.randomUUID().toString());
         
@@ -213,21 +201,18 @@ public class GraphStoreImplTest extends JerseyTest
     @Test
     public void testNotUnsupportedPutType()
     {
-        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
         assertEquals(UNSUPPORTED_MEDIA_TYPE.getStatusCode(), gsc.put("BAD RDF", javax.ws.rs.core.MediaType.TEXT_XML_TYPE, new javax.ws.rs.core.MediaType[]{}).getStatus());
     }
 
     @Test
     public void testInvalidTurtlePut()
     {
-        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
         assertEquals(BAD_REQUEST.getStatusCode(), gsc.put("BAD TURTLE", com.atomgraph.core.MediaType.TEXT_TURTLE_TYPE, new MediaType[]{}).getStatus());
     }
 
     @Test
     public void testDefaultModel()
     {
-        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
         gsc.deleteDefault();
         
         assertIsomorphic(getDataset().getDefaultModel(), gsc.getModel());
@@ -235,7 +220,6 @@ public class GraphStoreImplTest extends JerseyTest
     
     public void testDeleteNamedModel()
     {
-        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
         gsc.deleteModel(NAMED_GRAPH_URI);
         
         assertEquals(0, gsc.getModel(NAMED_GRAPH_URI).size());
@@ -244,7 +228,6 @@ public class GraphStoreImplTest extends JerseyTest
     @Test
     public void testDeleteNotFoundNamedModel()
     {
-        GraphStoreClient gsc = GraphStoreClient.create(endpoint, new MediaTypes());
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.putSingle(GRAPH_PARAM_NAME, "http://host/" + UUID.randomUUID().toString());
         

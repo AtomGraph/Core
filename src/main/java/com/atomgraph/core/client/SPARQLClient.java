@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see <a href="https://www.w3.org/TR/sparql11-protocol/">SPARQL 1.1 Protocol</a>
  */
-public class SPARQLClient extends ClientBase
+public class SPARQLClient extends EndpointClientBase
 {
     
     private static final Logger log = LoggerFactory.getLogger(SPARQLClient.class);
@@ -53,30 +53,30 @@ public class SPARQLClient extends ClientBase
 
     private final int maxGetRequestSize;
 
-    protected SPARQLClient(WebTarget endpoint, MediaTypes mediaTypes, int maxGetRequestSize)
+    protected SPARQLClient(MediaTypes mediaTypes, WebTarget endpoint, int maxGetRequestSize)
     {
-        super(endpoint, mediaTypes);
+        super(mediaTypes, endpoint);
         this.maxGetRequestSize = maxGetRequestSize;
     }
 
-    protected SPARQLClient(WebTarget endpoint, MediaTypes mediaTypes)
+    protected SPARQLClient(MediaTypes mediaTypes, WebTarget endpoint)
     {
-        this(endpoint, mediaTypes, 8192);
+        this(mediaTypes, endpoint, 8192);
     }
 
     protected SPARQLClient(WebTarget endpoint)
     {
-        this(endpoint, new MediaTypes());
+        this(new MediaTypes(), endpoint);
     }
 
-    public static SPARQLClient create(WebTarget endpoint, MediaTypes mediaTypes, int maxGetRequestSize)
+    public static SPARQLClient create(MediaTypes mediaTypes, WebTarget endpoint, int maxGetRequestSize)
     {
-        return new SPARQLClient(endpoint, mediaTypes, maxGetRequestSize);
+        return new SPARQLClient(mediaTypes, endpoint, maxGetRequestSize);
     }
 
-    public static SPARQLClient create(WebTarget endpoint, MediaTypes mediaTypes)
+    public static SPARQLClient create(MediaTypes mediaTypes, WebTarget endpoint)
     {
-        return new SPARQLClient(endpoint, mediaTypes);
+        return new SPARQLClient(mediaTypes, endpoint);
     }
 
     public static SPARQLClient create(WebTarget endpoint)

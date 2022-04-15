@@ -18,9 +18,9 @@ package com.atomgraph.core.model.impl;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.LinkedDataClient;
 import com.atomgraph.core.model.Service;
+import java.net.URI;
 import javax.inject.Inject;
 import javax.ws.rs.Path;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -57,7 +57,8 @@ public class QueriedResourceBaseTest extends JerseyTest
     public static Dataset dataset;
     
     public com.atomgraph.core.Application system;
-    public WebTarget endpoint;
+    public LinkedDataClient ldc;
+    public URI uri;
     
     @BeforeClass
     public static void initClass()
@@ -69,7 +70,8 @@ public class QueriedResourceBaseTest extends JerseyTest
     @Before
     public void init()
     {
-        endpoint = system.getClient().target(getBaseUri().resolve(RELATIVE_PATH));
+        uri = getBaseUri().resolve(RELATIVE_PATH);
+        ldc = LinkedDataClient.create(system.getClient(), new MediaTypes());
     }
     
     @Path(RELATIVE_PATH)
@@ -105,44 +107,38 @@ public class QueriedResourceBaseTest extends JerseyTest
     @Test
     public void testGet()
     {
-        LinkedDataClient ldc = LinkedDataClient.create(endpoint, new MediaTypes());
-        assertIsomorphic(getDataset().getDefaultModel(), ldc.get());
+        assertIsomorphic(getDataset().getDefaultModel(), ldc.get(uri));
     }
     
     @Test
     public void testNotAcceptableGetType()
     {
-        LinkedDataClient ldc = LinkedDataClient.create(endpoint, new MediaTypes());
-        assertEquals(NOT_ACCEPTABLE.getStatusCode(), ldc.get(ldc.getReadableMediaTypes(ResultSet.class)).getStatus());
+        assertEquals(NOT_ACCEPTABLE.getStatusCode(), ldc.get(uri, ldc.getReadableMediaTypes(ResultSet.class)).getStatus());
     }
     
     @Test
     public void testNotFound()
     {
-        WebTarget nonExisting = system.getClient().target(getBaseUri().resolve("non-existing"));
-        LinkedDataClient ldc = LinkedDataClient.create(nonExisting, new MediaTypes());
-        assertEquals(NOT_FOUND.getStatusCode(), ldc.get(ldc.getReadableMediaTypes(Model.class)).getStatus());
+        URI nonExisting = getBaseUri().resolve("non-existing");
+        assertEquals(NOT_FOUND.getStatusCode(), ldc.get(nonExisting, ldc.getReadableMediaTypes(Model.class)).getStatus());
     }
     
     @Test
     public void testNotUnsupportedPostType()
     {
-        LinkedDataClient ldc = LinkedDataClient.create(endpoint, new MediaTypes());
-        assertEquals(UNSUPPORTED_MEDIA_TYPE.getStatusCode(), ldc.post("BAD RDF", MediaType.TEXT_XML_TYPE, new MediaType[]{}).getStatus());
+        assertEquals(UNSUPPORTED_MEDIA_TYPE.getStatusCode(), ldc.post(uri, ldc.getReadableMediaTypes(Model.class), "BAD RDF", MediaType.TEXT_XML_TYPE).getStatus());
     }
 
     @Test
     public void testInvalidTurtlePost()
     {
-        LinkedDataClient ldc = LinkedDataClient.create(endpoint, new MediaTypes());
-        assertEquals(BAD_REQUEST.getStatusCode(), ldc.post("BAD TURTLE", com.atomgraph.core.MediaType.TEXT_TURTLE_TYPE, new MediaType[]{}).getStatus());
+        assertEquals(BAD_REQUEST.getStatusCode(), ldc.post(uri, ldc.getReadableMediaTypes(Model.class), "BAD TURTLE", com.atomgraph.core.MediaType.TEXT_TURTLE_TYPE).getStatus());
     }
 
     @Test
     public void testInvalidTurtlePut()
     {
-        LinkedDataClient ldc = LinkedDataClient.create(endpoint, new MediaTypes());
-        assertEquals(BAD_REQUEST.getStatusCode(), ldc.put("BAD TURTLE", com.atomgraph.core.MediaType.TEXT_TURTLE_TYPE, new MediaType[]{}).getStatus());
+        assertEquals(BAD_REQUEST.getStatusCode(), ldc.put(uri, ldc.getReadableMediaTypes(Model.class), "BAD TURTLE", com.atomgraph.core.MediaType.TEXT_TURTLE_TYPE).getStatus());
     }
 
     public static void assertIsomorphic(Model wanted, Model got)

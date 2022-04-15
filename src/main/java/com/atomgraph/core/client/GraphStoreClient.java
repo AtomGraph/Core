@@ -35,26 +35,26 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see <a href="https://www.w3.org/TR/sparql11-http-rdf-update/">SPARQL 1.1 Graph Store HTTP Protocol</a>
  */
-public class GraphStoreClient extends ClientBase implements DatasetAccessor
+public class GraphStoreClient extends EndpointClientBase implements DatasetAccessor
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreClient.class);
     
     public static final String DEFAULT_PARAM_NAME = "default";
     public static final String GRAPH_PARAM_NAME = "graph";
     
-    protected GraphStoreClient(WebTarget endpoint, MediaTypes mediaTypes)
+    protected GraphStoreClient(MediaTypes mediaTypes, WebTarget endpoint)
     {
-        super(endpoint, mediaTypes);
+        super(mediaTypes, endpoint);
     }
 
     protected GraphStoreClient(WebTarget endpoint)
     {
-        this(endpoint, new MediaTypes());
+        this(new MediaTypes(), endpoint);
     }
 
-    public static GraphStoreClient create(WebTarget endpoint, MediaTypes mediaTypes)
+    public static GraphStoreClient create(MediaTypes mediaTypes, WebTarget endpoint)
     {
-        return new GraphStoreClient(endpoint, mediaTypes);
+        return new GraphStoreClient(mediaTypes, endpoint);
     }
 
     public static GraphStoreClient create(WebTarget endpoint)

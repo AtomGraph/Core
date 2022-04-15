@@ -80,9 +80,9 @@ public class ServiceImpl implements RemoteService
         SPARQLClient sparqlClient;
         
         if (getMaxGetRequestSize() != null)
-            sparqlClient = SPARQLClient.create(resource, getMediaTypes(), getMaxGetRequestSize());
+            sparqlClient = SPARQLClient.create(getMediaTypes(), resource, getMaxGetRequestSize());
         else
-            sparqlClient = SPARQLClient.create(resource, getMediaTypes());
+            sparqlClient = SPARQLClient.create(getMediaTypes(), resource);
         
         if (getAuthUser() != null && getAuthPwd() != null)
         {

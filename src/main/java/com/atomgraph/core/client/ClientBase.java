@@ -41,138 +41,19 @@ public abstract class ClientBase
     
     private static final Logger log = LoggerFactory.getLogger(ClientBase.class);
 
-    private final WebTarget endpoint;
     private final MediaTypes mediaTypes;
     
-    protected ClientBase(WebTarget endpoint, MediaTypes mediaTypes)
+    protected ClientBase(MediaTypes mediaTypes)
     {
-        if (endpoint == null) throw new IllegalArgumentException("WebTarget cannot be null");
         if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
-
-        this.endpoint = endpoint;
         this.mediaTypes = mediaTypes;
     }
     
     public abstract MediaType getDefaultMediaType();
     
-    public ClientBase register(ClientRequestFilter filter)
-    {
-        if (filter == null) throw new IllegalArgumentException("ClientRequestFilter cannot be null");
-
-        getEndpoint().register(filter);
-
-        return this;
-    }
-    
-    protected WebTarget applyParams(MultivaluedMap<String, String> params)
-    {
-        return applyParams(getEndpoint(), params);
-    }
-    
-    protected WebTarget applyParams(WebTarget webTarget, MultivaluedMap<String, String> params)
-    {
-        if (params != null)
-            for (Map.Entry<String, List<String>> entry : params.entrySet())
-                for (String value : entry.getValue())
-                    webTarget = webTarget.queryParam(UriComponent.encode(entry.getKey(), UriComponent.Type.UNRESERVED),
-                        UriComponent.encode(value, UriComponent.Type.UNRESERVED));
-        
-        return webTarget;
-    }
-
-    protected Invocation.Builder applyHeaders(Invocation.Builder builder, MultivaluedMap<String, Object> headers)
-    {
-        if (headers != null)
-            for (Map.Entry<String, List<Object>> entry : headers.entrySet())
-                for (Object value : entry.getValue())
-                    builder = builder.header(entry.getKey(), value);
-        
-        return builder;
-    }
-
-    public Response head(javax.ws.rs.core.MediaType[] acceptedTypes)
-    {
-        return head(acceptedTypes, new MultivaluedHashMap(), new MultivaluedHashMap());
-    }
-
-    public Response head(javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
-    {
-        return head(acceptedTypes, params, new MultivaluedHashMap());
-    }
-
-    public Response head(javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, Object> headers)
-    {
-        return applyHeaders(applyParams(params).request(acceptedTypes), headers).head();
-    }
-
-    public Response get(javax.ws.rs.core.MediaType[] acceptedTypes)
-    {
-        return get(acceptedTypes, new MultivaluedHashMap(), new MultivaluedHashMap());
-    }
-
-    public Response get(javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
-    {
-        return get(acceptedTypes, params, new MultivaluedHashMap());
-    }
-    
-    public Response get(javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, Object> headers)
-    {
-        return applyHeaders(applyParams(params).request(acceptedTypes), headers).get();
-    }
-
-    public Response post(Object body, MediaType contentType, javax.ws.rs.core.MediaType[] acceptedTypes)
-    {
-        return post(body, contentType, acceptedTypes, new MultivaluedHashMap(), new MultivaluedHashMap());
-    }
-    
-    public Response post(Object body, MediaType contentType, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
-    {
-        return post(body, contentType, acceptedTypes, params, new MultivaluedHashMap());
-    }
-    
-    public Response post(Object body, MediaType contentType, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, Object> headers)
-    {
-        return applyHeaders(applyParams(params).request(acceptedTypes), headers).post(Entity.entity(body, contentType));
-    }
-
-    public Response put(Object body, MediaType contentType, javax.ws.rs.core.MediaType[] acceptedTypes)
-    {
-        return put(body, contentType, acceptedTypes, new MultivaluedHashMap(), new MultivaluedHashMap());
-    }
-
-    public Response put(Object body, MediaType contentType, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
-    {
-        return put(body, contentType, acceptedTypes, params, new MultivaluedHashMap());
-    }
-    
-    public Response put(Object body, MediaType contentType, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, Object> headers)
-    {
-        return applyHeaders(applyParams(params).request(acceptedTypes), headers).put(Entity.entity(body, contentType));
-    }
-
-    public Response delete(javax.ws.rs.core.MediaType[] acceptedTypes)
-    {
-        return delete(acceptedTypes, new MultivaluedHashMap(), new MultivaluedHashMap());
-    }
-    
-    public Response delete(javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
-    {
-        return delete(acceptedTypes, params, new MultivaluedHashMap());
-    }
-    
-    public Response delete(javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, Object> headers)
-    {
-        return applyHeaders(applyParams(params).request(acceptedTypes), headers).delete();
-    }
-    
     public MediaType[] getReadableMediaTypes(Class clazz)
     {
         return getMediaTypes().getReadable(clazz).toArray(javax.ws.rs.core.MediaType[]::new);
-    }
-
-    public final WebTarget getEndpoint()
-    {
-        return endpoint;
     }
     
     public MediaTypes getMediaTypes()
