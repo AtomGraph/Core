@@ -75,6 +75,11 @@ public class LinkedDataClient extends ClientBase
         return getWebTarget(uri).request(acceptedTypes).head();
     }
     
+    public Response head(URI uri)
+    {
+        return head(uri, getReadableMediaTypes(Model.class));
+    }
+
     public Response get(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes)
     {
         return getWebTarget(uri).request(acceptedTypes).get();
@@ -94,6 +99,21 @@ public class LinkedDataClient extends ClientBase
         return getWebTarget(uri).request(acceptedTypes).post(Entity.entity(body, contentType));
     }
     
+    public Response post(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes, Object body)
+    {
+        return post(uri, acceptedTypes, body, getDefaultMediaType());
+    }
+    
+    public Response post(URI uri, Object body, javax.ws.rs.core.MediaType contentType)
+    {
+        return post(uri, getReadableMediaTypes(Model.class), body, contentType);
+    }
+    
+    public Response post(URI uri, Object body)
+    {
+        return post(uri, body, getDefaultMediaType());
+    }
+    
     public void post(URI uri, Model model)
     {
         post(uri, getReadableMediaTypes(Model.class), model, getDefaultMediaType()).close();
@@ -102,6 +122,21 @@ public class LinkedDataClient extends ClientBase
     public Response put(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes, Object body, javax.ws.rs.core.MediaType contentType)
     {
         return getWebTarget(uri).request(acceptedTypes).put(Entity.entity(body, contentType));
+    }
+    
+    public Response put(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes, Object body)
+    {
+        return put(uri, acceptedTypes, body, getDefaultMediaType());
+    }
+    
+    public Response put(URI uri, Object body, javax.ws.rs.core.MediaType contentType)
+    {
+        return put(uri, getReadableMediaTypes(Model.class), body, contentType);
+    }
+    
+    public Response put(URI uri, Object body)
+    {
+        return put(uri, body, getDefaultMediaType());
     }
     
     public void put(URI uri, Model model)
