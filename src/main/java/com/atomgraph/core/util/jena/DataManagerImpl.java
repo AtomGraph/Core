@@ -106,7 +106,7 @@ public class DataManagerImpl extends FileManagerImpl implements DataManager
             String mappedURI = mapURI(uri);
             if (mappedURI.startsWith("http") || mappedURI.startsWith("https"))
             {
-                Model model = getLinkedDataClient().get(getEndpoint(URI.create(uri)));
+                Model model = getLinkedDataClient().getModel(getEndpoint(URI.create(uri)).toString());
 
                 if (isCachingModels()) addCacheModel(uri, model) ;
 
@@ -138,7 +138,7 @@ public class DataManagerImpl extends FileManagerImpl implements DataManager
     {
         String mappedURI = mapURI(uri);
         if (mappedURI.startsWith("http") || mappedURI.startsWith("https"))
-            return model.add(getLinkedDataClient().get(getEndpoint(URI.create(uri))));
+            return model.add(getLinkedDataClient().getModel(getEndpoint(URI.create(uri)).toString()));
         
         return super.readModel(model, uri);
     }

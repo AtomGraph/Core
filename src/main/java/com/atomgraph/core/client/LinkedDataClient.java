@@ -19,12 +19,14 @@ package com.atomgraph.core.client;
 import com.atomgraph.core.MediaType;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.io.ModelProvider;
+import com.atomgraph.core.model.DatasetAccessor;
 import java.net.URI;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import org.apache.jena.rdf.model.Model;
 
 /**
@@ -32,7 +34,7 @@ import org.apache.jena.rdf.model.Model;
  * 
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
-public class LinkedDataClient extends ClientBase
+public class LinkedDataClient extends ClientBase implements DatasetAccessor
 {
     
     private final Client client;
@@ -65,6 +67,32 @@ public class LinkedDataClient extends ClientBase
         return this;
     }
     
+    // default graph is not supported
+    
+    @Override
+    public Model getModel()
+    {
+        throw new UnsupportedOperationException("Default graph is not supported -- all RDF graphs in Linked Data are named");
+    }
+    
+    @Override
+    public void add(Model model)
+    {
+        throw new UnsupportedOperationException("Default graph is not supported -- all RDF graphs in Linked Data are named");
+    }
+    
+    @Override
+    public void deleteDefault()
+    {
+        throw new UnsupportedOperationException("Default graph is not supported -- all RDF graphs in Linked Data are named");
+    }
+    
+    @Override
+    public void putModel(Model model)
+    {
+        throw new UnsupportedOperationException("Default graph is not supported -- all RDF graphs in Linked Data are named");
+    }
+    
     protected WebTarget getWebTarget(URI uri)
     {
         return getClient().target(uri);
@@ -80,28 +108,48 @@ public class LinkedDataClient extends ClientBase
         return head(uri, getReadableMediaTypes(Model.class));
     }
 
+    @Override
+    public boolean containsModel(String uri)
+    {
+        try (Response cr = head(URI.create(uri)))
+        {
+            return cr.getStatusInfo().equals(Status.OK);
+        }
+    }
+    
     public Response get(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes)
     {
         return getWebTarget(uri).request(acceptedTypes).get();
     }
     
-    public Model get(URI uri)
+    public Response get(URI uri)
     {
-        try (Response cr = get(uri, getReadableMediaTypes(Model.class)))
+        return get(uri, getReadableMediaTypes(Model.class));
+    }
+
+    @Override
+    public Model getModel(String uri)
+    {
+        try (Response cr = get(URI.create(uri)))
         {
-            cr.getHeaders().putSingle(ModelProvider.REQUEST_URI_HEADER, uri.toString()); // provide a base URI hint to ModelProvider
+            cr.getHeaders().putSingle(ModelProvider.REQUEST_URI_HEADER, uri); // provide a base URI hint to ModelProvider
             return cr.readEntity(Model.class);
         }
     }
     
-    public Response post(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes, Object body, javax.ws.rs.core.MediaType contentType)
+    public Response post(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes, Entity entity)
     {
-        return getWebTarget(uri).request(acceptedTypes).post(Entity.entity(body, contentType));
+        return getWebTarget(uri).request(acceptedTypes).post(entity);
     }
     
-    public Response post(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes, Object body)
+    public Response post(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes, Object body, javax.ws.rs.core.MediaType contentType)
     {
-        return post(uri, acceptedTypes, body, getDefaultMediaType());
+        return post(uri, acceptedTypes, Entity.entity(body, contentType));
+    }
+    
+    public Response post(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes, Model model)
+    {
+        return post(uri, acceptedTypes, model, getDefaultMediaType());
     }
     
     public Response post(URI uri, Object body, javax.ws.rs.core.MediaType contentType)
@@ -109,24 +157,30 @@ public class LinkedDataClient extends ClientBase
         return post(uri, getReadableMediaTypes(Model.class), body, contentType);
     }
     
-    public Response post(URI uri, Object body)
+    public Response post(URI uri, Model model)
     {
-        return post(uri, body, getDefaultMediaType());
+        return post(uri, model, getDefaultMediaType());
     }
     
-    public void post(URI uri, Model model)
+    @Override
+    public void add(String uri, Model model)
     {
-        post(uri, getReadableMediaTypes(Model.class), model, getDefaultMediaType()).close();
+        post(URI.create(uri), getReadableMediaTypes(Model.class), model, getDefaultMediaType()).close();
     }
 
-    public Response put(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes, Object body, javax.ws.rs.core.MediaType contentType)
+    public Response put(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes, Entity entity)
     {
-        return getWebTarget(uri).request(acceptedTypes).put(Entity.entity(body, contentType));
+        return getWebTarget(uri).request(acceptedTypes).put(entity);
     }
     
-    public Response put(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes, Object body)
+    public Response put(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes, Object body, javax.ws.rs.core.MediaType contentType)
     {
-        return put(uri, acceptedTypes, body, getDefaultMediaType());
+        return put(uri, acceptedTypes, Entity.entity(body, contentType));
+    }
+    
+    public Response put(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes, Model model)
+    {
+        return put(uri, acceptedTypes, model, getDefaultMediaType());
     }
     
     public Response put(URI uri, Object body, javax.ws.rs.core.MediaType contentType)
@@ -134,14 +188,15 @@ public class LinkedDataClient extends ClientBase
         return put(uri, getReadableMediaTypes(Model.class), body, contentType);
     }
     
-    public Response put(URI uri, Object body)
+    public Response put(URI uri, Model model)
     {
-        return put(uri, body, getDefaultMediaType());
+        return put(uri, model, getDefaultMediaType());
     }
     
-    public void put(URI uri, Model model)
+    @Override
+    public void putModel(String uri, Model model)
     {
-        put(uri, getReadableMediaTypes(Model.class), model, getDefaultMediaType()).close();
+        put(URI.create(uri), getReadableMediaTypes(Model.class), model, getDefaultMediaType()).close();
     }
 
     public Response delete(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes)
@@ -149,11 +204,17 @@ public class LinkedDataClient extends ClientBase
         return getWebTarget(uri).request(getReadableMediaTypes(Model.class)).delete();
     }
     
-    public void delete(URI uri)
+    public Response delete(URI uri)
     {
-        delete(uri, getReadableMediaTypes(Model.class)).close();
+        return delete(uri, getReadableMediaTypes(Model.class));
     }
 
+    @Override
+    public void deleteModel(String uri)
+    {
+        delete(URI.create(uri)).close();
+    }
+    
     @Override
     public MediaType getDefaultMediaType()
     {
