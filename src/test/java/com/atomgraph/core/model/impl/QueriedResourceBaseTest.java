@@ -107,7 +107,7 @@ public class QueriedResourceBaseTest extends JerseyTest
     @Test
     public void testGet()
     {
-        assertIsomorphic(getDataset().getDefaultModel(), ldc.get(uri));
+        assertIsomorphic(getDataset().getDefaultModel(), ldc.getModel(uri.toString()));
     }
     
     @Test
