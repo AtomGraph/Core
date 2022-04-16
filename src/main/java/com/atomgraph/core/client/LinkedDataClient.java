@@ -65,7 +65,7 @@ public class LinkedDataClient extends ClientBase
         return this;
     }
     
-    public WebTarget getWebTarget(URI uri)
+    protected WebTarget getWebTarget(URI uri)
     {
         return getClient().target(uri);
     }
