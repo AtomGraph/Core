@@ -92,71 +92,69 @@ public class MediaTypes
         List<javax.ws.rs.core.MediaType> readableModelList = new ArrayList<>(), writableModelList = new ArrayList<>(),
                 readableDatasetList = new ArrayList<>(), writableDatasetList = new ArrayList<>();
 
-        Iterator<Lang> langIt = registered.iterator();
-        while (langIt.hasNext())
+        for (Lang lang : registered)
         {
-            Lang lang = langIt.next();
-            if (!lang.equals(Lang.RDFNULL))
+            if (lang.equals(Lang.RDFNULL)) continue;
+            if (lang.equals(Lang.SHACLC)) continue;
+            
+            if (RDFLanguages.isTriples(lang))
             {
-                if (RDFLanguages.isTriples(lang))
+                final MediaType mt;
+                // prioritize reading RDF Thrift and N-Triples because they're most efficient
+                // don't add charset=UTF-8 param on readable types
+                if (lang.equals(RDFLanguages.RDFTHRIFT)) mt = new MediaType(lang); // q=1
+                else
                 {
-                    final MediaType mt;
-                    // prioritize reading RDF Thrift and N-Triples because they're most efficient
-                    // don't add charset=UTF-8 param on readable types
-                    if (lang.equals(RDFLanguages.RDFTHRIFT)) mt = new MediaType(lang); // q=1
+                    if (lang.equals(RDFLanguages.NTRIPLES))
+                    {
+                        Map<String, String> qParams = new HashMap<>();
+                        qParams.put("q", "0.9");
+                        mt = new MediaType(lang, qParams);
+                    }
                     else
                     {
-                        if (lang.equals(RDFLanguages.NTRIPLES))
-                        {
-                            Map<String, String> qParams = new HashMap<>();
-                            qParams.put("q", "0.9");
-                            mt = new MediaType(lang, qParams);
-                        }
-                        else
-                        {
-                            Map<String, String> qParams = new HashMap<>();
-                            qParams.put("q", "0.8");
-                            mt = new MediaType(lang, qParams);
-                        }
+                        Map<String, String> qParams = new HashMap<>();
+                        qParams.put("q", "0.8");
+                        mt = new MediaType(lang, qParams);
                     }
-                    
-                    // avoid adding duplicates. Cannot use Set because ordering is important
-                    if (!readableModelList.contains(mt)) readableModelList.add(mt);
+                }
 
-                    MediaType mtUTF8 = new MediaType(lang, UTF8_PARAM);
-                    // avoid adding duplicates. Cannot use Set because ordering is important
-                    if (!writableModelList.contains(mtUTF8)) writableModelList.add(mtUTF8);
-                }
-                
-                if (RDFLanguages.isQuads(lang))
+                // avoid adding duplicates. Cannot use Set because ordering is important
+                if (!readableModelList.contains(mt)) readableModelList.add(mt);
+
+                MediaType mtUTF8 = new MediaType(lang, UTF8_PARAM);
+                // avoid adding duplicates. Cannot use Set because ordering is important
+                if (!writableModelList.contains(mtUTF8)) writableModelList.add(mtUTF8);
+            }
+
+            if (RDFLanguages.isQuads(lang))
+            {
+                final MediaType mt;
+                // prioritize reading RDF Thrift and N-Triples because they're most efficient
+                // don't add charset=UTF-8 param on readable types
+                if (lang.equals(RDFLanguages.RDFTHRIFT)) mt = new MediaType(lang); // q=1
+                else
                 {
-                    final MediaType mt;
-                    // prioritize reading RDF Thrift and N-Triples because they're most efficient
-                    // don't add charset=UTF-8 param on readable types
-                    if (lang.equals(RDFLanguages.RDFTHRIFT)) mt = new MediaType(lang); // q=1
+                    if (lang.equals(RDFLanguages.NQUADS))
+                    {
+                        Map<String, String> qParams = new HashMap<>();
+                        qParams.put("q", "0.9");
+                        mt = new MediaType(lang, qParams);
+                    }
                     else
                     {
-                        if (lang.equals(RDFLanguages.NQUADS))
-                        {
-                            Map<String, String> qParams = new HashMap<>();
-                            qParams.put("q", "0.9");
-                            mt = new MediaType(lang, qParams);
-                        }
-                        else
-                        {
-                            Map<String, String> qParams = new HashMap<>();
-                            qParams.put("q", "0.8");
-                            mt = new MediaType(lang, qParams);
-                        }
+                        Map<String, String> qParams = new HashMap<>();
+                        qParams.put("q", "0.8");
+                        mt = new MediaType(lang, qParams);
                     }
-                    
-                    // avoid adding duplicates. Cannot use Set because ordering is important
-                    if (!readableDatasetList.contains(mt)) readableDatasetList.add(mt);
-                    
-                    MediaType mtUTF8 = new MediaType(lang, UTF8_PARAM);
-                    // avoid adding duplicates. Cannot use Set because ordering is important
-                    if (!writableDatasetList.contains(mtUTF8)) writableDatasetList.add(mtUTF8);
                 }
+
+                // avoid adding duplicates. Cannot use Set because ordering is important
+                if (!readableDatasetList.contains(mt)) readableDatasetList.add(mt);
+
+                MediaType mtUTF8 = new MediaType(lang, UTF8_PARAM);
+                // avoid adding duplicates. Cannot use Set because ordering is important
+                if (!writableDatasetList.contains(mtUTF8)) writableDatasetList.add(mtUTF8);
             }
         }
         
