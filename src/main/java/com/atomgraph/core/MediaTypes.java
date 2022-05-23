@@ -173,10 +173,8 @@ public class MediaTypes
         List<javax.ws.rs.core.MediaType> readableResultSetList = new ArrayList<>();
         List<javax.ws.rs.core.MediaType> writableResultSetList = new ArrayList<>();
 
-        Iterator<javax.ws.rs.core.MediaType> resultSetLangIt = Arrays.asList(RESULT_SET_MEDIA_TYPES).iterator();
-        while (resultSetLangIt.hasNext())
+        for (javax.ws.rs.core.MediaType resultSetType : Arrays.asList(RESULT_SET_MEDIA_TYPES))
         {
-            javax.ws.rs.core.MediaType resultSetType = resultSetLangIt.next();
             readableResultSetList.add(new MediaType(resultSetType.getType(), resultSetType.getSubtype())); // don't add charset=UTF-8 param on readable types
             writableResultSetList.add(new MediaType(resultSetType.getType(), resultSetType.getSubtype(), UTF8_PARAM));
         }
