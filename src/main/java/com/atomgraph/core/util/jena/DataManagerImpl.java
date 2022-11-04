@@ -78,8 +78,7 @@ public class DataManagerImpl extends FileManagerImpl implements DataManager
     {
         if (endpointURI == null) throw new IllegalArgumentException("Endpoint URI must be not null");
 
-        // using UriBuilder because URI::getSchemeSpecificPart does not guarantee identical roundtrip with special characters such as '+'
-        return UriBuilder.fromUri(endpointURI).fragment(null).build().normalize();
+        return UriBuilder.fromUri(endpointURI).fragment(null).build().normalize(); // cannot use the URI class because query string with special chars such as '+' gets decoded
     }
     
     @Override
