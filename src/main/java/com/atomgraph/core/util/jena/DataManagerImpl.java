@@ -81,7 +81,7 @@ public class DataManagerImpl extends FileManagerImpl implements DataManager
         try
         {
             // remove fragment and normalize
-            endpointURI = new URI(endpointURI.getScheme(), endpointURI.getSchemeSpecificPart(), null).normalize();
+            endpointURI = new URI(endpointURI.getScheme(), endpointURI.getRawSchemeSpecificPart(), null).normalize();
         }
         catch (URISyntaxException ex)
         {
