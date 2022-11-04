@@ -20,9 +20,9 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.util.LocationMapper;
 import java.net.URI;
 import com.atomgraph.core.client.LinkedDataClient;
-import java.net.URISyntaxException;
 import java.util.Map;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 import org.apache.jena.ext.com.google.common.collect.ImmutableMap;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.ModelReader;
@@ -78,17 +78,8 @@ public class DataManagerImpl extends FileManagerImpl implements DataManager
     {
         if (endpointURI == null) throw new IllegalArgumentException("Endpoint URI must be not null");
 
-        try
-        {
-            // remove fragment and normalize
-            endpointURI = new URI(endpointURI.getScheme(), endpointURI.getRawSchemeSpecificPart(), null).normalize();
-        }
-        catch (URISyntaxException ex)
-        {
-            // should not happen, this a URI to URI conversion
-        }
-        
-        return endpointURI.normalize();
+        // using UriBuilder because URI::getSchemeSpecificPart does not guarantee identical roundtrip with special characters such as '+'
+        return UriBuilder.fromUri(endpointURI).fragment(null).build().normalize();
     }
     
     @Override
