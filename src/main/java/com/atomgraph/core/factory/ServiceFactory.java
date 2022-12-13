@@ -16,7 +16,7 @@
 package com.atomgraph.core.factory;
 
 import com.atomgraph.core.model.Service;
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.ext.Provider;
 import org.glassfish.hk2.api.Factory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

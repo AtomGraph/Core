@@ -18,13 +18,13 @@ package com.atomgraph.core.client;
 import com.atomgraph.core.MediaType;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.model.DatasetAccessor;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.client.ClientRequestFilter;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.client.ClientRequestFilter;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 import org.apache.jena.rdf.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,7 +136,7 @@ public class GraphStoreClient extends EndpointClientBase implements DatasetAcces
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.putSingle(DEFAULT_PARAM_NAME, Boolean.TRUE.toString());
 
-        try (Response cr = post(model, getDefaultMediaType(), new javax.ws.rs.core.MediaType[]{}, params))
+        try (Response cr = post(model, getDefaultMediaType(), new jakarta.ws.rs.core.MediaType[]{}, params))
         {
             // some endpoints might include response body which will not cause NotFoundException in Jersey
             if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
@@ -149,7 +149,7 @@ public class GraphStoreClient extends EndpointClientBase implements DatasetAcces
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.putSingle(GRAPH_PARAM_NAME, uri);
 
-        try (Response cr = post(model, getDefaultMediaType(), new javax.ws.rs.core.MediaType[]{}, params))
+        try (Response cr = post(model, getDefaultMediaType(), new jakarta.ws.rs.core.MediaType[]{}, params))
         {
             // some endpoints might include response body which will not cause NotFoundException in Jersey
             if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
@@ -162,7 +162,7 @@ public class GraphStoreClient extends EndpointClientBase implements DatasetAcces
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.putSingle(DEFAULT_PARAM_NAME, Boolean.TRUE.toString());
 
-        try (Response cr = put(model, getDefaultMediaType(), new javax.ws.rs.core.MediaType[]{}, params))
+        try (Response cr = put(model, getDefaultMediaType(), new jakarta.ws.rs.core.MediaType[]{}, params))
         {
             // some endpoints might include response body which will not cause NotFoundException in Jersey
             if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
@@ -175,7 +175,7 @@ public class GraphStoreClient extends EndpointClientBase implements DatasetAcces
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.putSingle(GRAPH_PARAM_NAME, uri);
 
-        try (Response cr = put(model, getDefaultMediaType(), new javax.ws.rs.core.MediaType[]{}, params))
+        try (Response cr = put(model, getDefaultMediaType(), new jakarta.ws.rs.core.MediaType[]{}, params))
         {
             // some endpoints might include response body which will not cause NotFoundException in Jersey
             if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
@@ -188,7 +188,7 @@ public class GraphStoreClient extends EndpointClientBase implements DatasetAcces
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.putSingle(DEFAULT_PARAM_NAME, Boolean.TRUE.toString());
 
-        try (Response cr = delete(new javax.ws.rs.core.MediaType[]{}, params))
+        try (Response cr = delete(new jakarta.ws.rs.core.MediaType[]{}, params))
         {
             // some endpoints might include response body which will not cause NotFoundException in Jersey
             if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
@@ -201,7 +201,7 @@ public class GraphStoreClient extends EndpointClientBase implements DatasetAcces
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.putSingle(GRAPH_PARAM_NAME, uri);
 
-        try (Response cr = delete(new javax.ws.rs.core.MediaType[]{}, params))
+        try (Response cr = delete(new jakarta.ws.rs.core.MediaType[]{}, params))
         {
             // some endpoints might include response body which will not cause NotFoundException in Jersey
             if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();

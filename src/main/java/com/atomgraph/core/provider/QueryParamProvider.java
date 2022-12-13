@@ -18,10 +18,10 @@ package com.atomgraph.core.provider;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ext.ParamConverter;
-import javax.ws.rs.ext.ParamConverterProvider;
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.ext.ParamConverter;
+import jakarta.ws.rs.ext.ParamConverterProvider;
+import jakarta.ws.rs.ext.Provider;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryException;
 import org.apache.jena.query.QueryFactory;
@@ -34,8 +34,8 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see org.apache.jena.query.Query
- * @see javax.ws.rs.QueryParam
- * @see javax.ws.rs.core.Context
+ * @see jakarta.ws.rs.QueryParam
+ * @see jakarta.ws.rs.core.Context
  */
 @Provider
 public class QueryParamProvider implements ParamConverterProvider

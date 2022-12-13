@@ -18,7 +18,7 @@ package com.atomgraph.core.model.impl.remote;
 import com.atomgraph.core.client.QuadStoreClient;
 import com.atomgraph.core.exception.BadGatewayException;
 import com.atomgraph.core.model.DatasetQuadAccessor;
-import javax.ws.rs.ClientErrorException;
+import jakarta.ws.rs.ClientErrorException;
 import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -17,7 +17,7 @@ package com.atomgraph.core.model.impl.dataset;
 
 import com.atomgraph.core.model.DatasetQuadAccessor;
 import java.util.Iterator;
-import javax.ws.rs.core.Context;
+import jakarta.ws.rs.core.Context;
 import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

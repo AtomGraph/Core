@@ -19,17 +19,17 @@ package com.atomgraph.core.model.impl;
 
 import java.util.List;
 import java.util.Locale;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Variant;
+import jakarta.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Request;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.Variant;
 import com.atomgraph.core.util.ModelUtils;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
-import javax.ws.rs.NotAcceptableException;
+import jakarta.ws.rs.NotAcceptableException;
 import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * Encapsulates the content negotiation logic used to build HTTP response from RDF an dataset, model, or result set.
  * 
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
- * @see javax.ws.rs.core.Variant
+ * @see jakarta.ws.rs.core.Variant
  */
 public class Response
 {
@@ -172,7 +172,7 @@ public class Response
         else
         {
             if (log.isTraceEnabled()) log.trace("Generating RDF Response with Variant: {} and EntityTag: {}", getVariant(), entityTag);
-            return javax.ws.rs.core.Response.ok(getEntity(), getVariant()).
+            return jakarta.ws.rs.core.Response.ok(getEntity(), getVariant()).
                 lastModified(lastModified).
                 tag(entityTag);
         }

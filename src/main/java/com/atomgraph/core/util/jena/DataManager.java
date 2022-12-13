@@ -17,9 +17,9 @@ package com.atomgraph.core.util.jena;
 
 import com.atomgraph.core.MediaTypes;
 import java.net.URI;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.Response;
 import org.apache.jena.ext.com.google.common.collect.ImmutableMap;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelGetter;
@@ -39,7 +39,7 @@ public interface DataManager extends ModelGetter
     
     //WebTarget getEndpoint(URI endpointURI);
     
-    Response get(String uri, javax.ws.rs.core.MediaType[] acceptedTypes); // TO-DO: deprecate?
+    Response get(String uri, jakarta.ws.rs.core.MediaType[] acceptedTypes); // TO-DO: deprecate?
     
     boolean usePreemptiveAuth();
     

@@ -18,8 +18,8 @@ package com.atomgraph.core.model;
 
 import org.apache.jena.rdf.model.Model;
 import java.net.URI;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Generic SPARQL 1.1 Graph Store HTTP Protocol interface

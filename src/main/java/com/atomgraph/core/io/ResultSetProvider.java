@@ -27,13 +27,13 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.ext.MessageBodyReader;
-import javax.ws.rs.ext.MessageBodyWriter;
-import javax.ws.rs.ext.Provider;
-import org.apache.jena.sparql.resultset.CSVInput;
-import org.apache.jena.sparql.resultset.TSVInput;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.ext.MessageBodyReader;
+import jakarta.ws.rs.ext.MessageBodyWriter;
+import jakarta.ws.rs.ext.Provider;
+import org.apache.jena.riot.ResultSetMgr;
+import org.apache.jena.riot.resultset.ResultSetLang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,8 +44,8 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see <a href="http://www.w3.org/TR/rdf-sparql-XMLres/">SPARQL Query Results XML Format</a>
  * @see org.apache.jena.query.ResultSet
- * @see javax.ws.rs.ext.MessageBodyReader
- * @see javax.ws.rs.ext.MessageBodyWriter
+ * @see jakarta.ws.rs.ext.MessageBodyReader
+ * @see jakarta.ws.rs.ext.MessageBodyWriter
  */
 @Provider
 public class ResultSetProvider implements MessageBodyReader<ResultSetRewindable>, MessageBodyWriter<ResultSet>
@@ -67,25 +67,24 @@ public class ResultSetProvider implements MessageBodyReader<ResultSetRewindable>
     }
     
     @Override
-    public boolean isReadable(Class<?> type, Type type1, Annotation[] antns, javax.ws.rs.core.MediaType mediaType)
+    public boolean isReadable(Class<?> type, Type type1, Annotation[] antns, jakarta.ws.rs.core.MediaType mediaType)
     {
         return type == ResultSetRewindable.class && isResultSetType(mediaType);
     }
 
     @Override
-    public ResultSetRewindable readFrom(Class<ResultSetRewindable> type, Type type1, Annotation[] antns, javax.ws.rs.core.MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream in) throws IOException
+    public ResultSetRewindable readFrom(Class<ResultSetRewindable> type, Type type1, Annotation[] antns, jakarta.ws.rs.core.MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream in) throws IOException
     {
         if (log.isTraceEnabled()) log.trace("Reading ResultSet with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
         // result set needs to be rewindable because results might be processed multiple times, e.g. to calculate hash and write response
-        // TO-DO: construct Jena's ResultFormat and then pass to ResultSet.load(in, format)
         if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE))
-            return ResultSetFactory.makeRewindable(ResultSetFactory.fromXML(in));
+            return ResultSetFactory.makeRewindable(ResultSetMgr.read(in, ResultSetLang.RS_XML));
         if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
-            return ResultSetFactory.makeRewindable(ResultSetFactory.fromJSON(in));
+            return ResultSetFactory.makeRewindable(ResultSetMgr.read(in, ResultSetLang.RS_JSON));
         if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_CSV_TYPE))
-            return ResultSetFactory.makeRewindable(CSVInput.fromCSV(in));
-        if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_CSV_TYPE))
-            return ResultSetFactory.makeRewindable(TSVInput.fromTSV(in));
+            return ResultSetFactory.makeRewindable(ResultSetMgr.read(in, ResultSetLang.RS_CSV));
+        if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_TSV_TYPE))
+            return ResultSetFactory.makeRewindable(ResultSetMgr.read(in, ResultSetLang.RS_TSV));
         
         throw new IllegalStateException("ResultSet MediaType should be readable but no Jena reader matched");
     }

@@ -21,12 +21,12 @@ import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.io.ModelProvider;
 import com.atomgraph.core.model.DatasetAccessor;
 import java.net.URI;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientRequestFilter;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientRequestFilter;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 import org.apache.jena.rdf.model.Model;
 
 /**
@@ -98,7 +98,7 @@ public class LinkedDataClient extends ClientBase implements DatasetAccessor
         return getClient().target(uri);
     }
     
-    public Response head(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes)
+    public Response head(URI uri, jakarta.ws.rs.core.MediaType[] acceptedTypes)
     {
         return getWebTarget(uri).request(acceptedTypes).head();
     }
@@ -117,7 +117,7 @@ public class LinkedDataClient extends ClientBase implements DatasetAccessor
         }
     }
     
-    public Response get(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes)
+    public Response get(URI uri, jakarta.ws.rs.core.MediaType[] acceptedTypes)
     {
         return getWebTarget(uri).request(acceptedTypes).get();
     }
@@ -137,22 +137,22 @@ public class LinkedDataClient extends ClientBase implements DatasetAccessor
         }
     }
     
-    public Response post(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes, Entity entity)
+    public Response post(URI uri, jakarta.ws.rs.core.MediaType[] acceptedTypes, Entity entity)
     {
         return getWebTarget(uri).request(acceptedTypes).post(entity);
     }
     
-    public Response post(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes, Object body, javax.ws.rs.core.MediaType contentType)
+    public Response post(URI uri, jakarta.ws.rs.core.MediaType[] acceptedTypes, Object body, jakarta.ws.rs.core.MediaType contentType)
     {
         return post(uri, acceptedTypes, Entity.entity(body, contentType));
     }
     
-    public Response post(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes, Model model)
+    public Response post(URI uri, jakarta.ws.rs.core.MediaType[] acceptedTypes, Model model)
     {
         return post(uri, acceptedTypes, model, getDefaultMediaType());
     }
     
-    public Response post(URI uri, Object body, javax.ws.rs.core.MediaType contentType)
+    public Response post(URI uri, Object body, jakarta.ws.rs.core.MediaType contentType)
     {
         return post(uri, getReadableMediaTypes(Model.class), body, contentType);
     }
@@ -168,22 +168,22 @@ public class LinkedDataClient extends ClientBase implements DatasetAccessor
         post(URI.create(uri), getReadableMediaTypes(Model.class), model, getDefaultMediaType()).close();
     }
 
-    public Response put(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes, Entity entity)
+    public Response put(URI uri, jakarta.ws.rs.core.MediaType[] acceptedTypes, Entity entity)
     {
         return getWebTarget(uri).request(acceptedTypes).put(entity);
     }
     
-    public Response put(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes, Object body, javax.ws.rs.core.MediaType contentType)
+    public Response put(URI uri, jakarta.ws.rs.core.MediaType[] acceptedTypes, Object body, jakarta.ws.rs.core.MediaType contentType)
     {
         return put(uri, acceptedTypes, Entity.entity(body, contentType));
     }
     
-    public Response put(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes, Model model)
+    public Response put(URI uri, jakarta.ws.rs.core.MediaType[] acceptedTypes, Model model)
     {
         return put(uri, acceptedTypes, model, getDefaultMediaType());
     }
     
-    public Response put(URI uri, Object body, javax.ws.rs.core.MediaType contentType)
+    public Response put(URI uri, Object body, jakarta.ws.rs.core.MediaType contentType)
     {
         return put(uri, getReadableMediaTypes(Model.class), body, contentType);
     }
@@ -199,7 +199,7 @@ public class LinkedDataClient extends ClientBase implements DatasetAccessor
         put(URI.create(uri), getReadableMediaTypes(Model.class), model, getDefaultMediaType()).close();
     }
 
-    public Response delete(URI uri, javax.ws.rs.core.MediaType[] acceptedTypes)
+    public Response delete(URI uri, jakarta.ws.rs.core.MediaType[] acceptedTypes)
     {
         return getWebTarget(uri).request(getReadableMediaTypes(Model.class)).delete();
     }

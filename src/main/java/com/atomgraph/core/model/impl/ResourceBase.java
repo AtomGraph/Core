@@ -21,18 +21,18 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.UriInfo;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Request;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.UriInfo;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.model.Resource;
 import com.atomgraph.core.util.ModelUtils;
 import java.util.Collections;
 import java.util.Date;
 import javax.inject.Inject;
-import javax.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.EntityTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,7 +131,7 @@ public abstract class ResourceBase implements Resource
             getResponseBuilder();
     }
     
-    public List<javax.ws.rs.core.MediaType> getWritableMediaTypes(Class clazz)
+    public List<jakarta.ws.rs.core.MediaType> getWritableMediaTypes(Class clazz)
     {
         return getMediaTypes().getWritable(clazz);
     }

@@ -42,27 +42,27 @@ public class MediaTypes
     /**
      * Registry of readable/writable RDF model and SPARQL result set media types
      */
-    private static final javax.ws.rs.core.MediaType[] RESULT_SET_MEDIA_TYPES = new MediaType[]{MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE,
+    private static final jakarta.ws.rs.core.MediaType[] RESULT_SET_MEDIA_TYPES = new MediaType[]{MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE,
                             MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE};
     
     public static final Map<String, String> UTF8_PARAM = new HashMap<>();
     static
     {
-        UTF8_PARAM.put(javax.ws.rs.core.MediaType.CHARSET_PARAMETER, StandardCharsets.UTF_8.name());
+        UTF8_PARAM.put(jakarta.ws.rs.core.MediaType.CHARSET_PARAMETER, StandardCharsets.UTF_8.name());
     }
     
-    private final Map<Class, List<javax.ws.rs.core.MediaType>> readable, writable;
+    private final Map<Class, List<jakarta.ws.rs.core.MediaType>> readable, writable;
     
-    public static boolean isTriples(javax.ws.rs.core.MediaType mediaType)
+    public static boolean isTriples(jakarta.ws.rs.core.MediaType mediaType)
     {
-        javax.ws.rs.core.MediaType formatType = new javax.ws.rs.core.MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
+        jakarta.ws.rs.core.MediaType formatType = new jakarta.ws.rs.core.MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
         Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
         return lang != null && RDFLanguages.isTriples(lang);
     }
     
-    public static boolean isQuads(javax.ws.rs.core.MediaType mediaType)
+    public static boolean isQuads(jakarta.ws.rs.core.MediaType mediaType)
     {
-        javax.ws.rs.core.MediaType formatType = new javax.ws.rs.core.MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
+        jakarta.ws.rs.core.MediaType formatType = new jakarta.ws.rs.core.MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
         Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
         return lang != null && RDFLanguages.isQuads(lang);
     }
@@ -72,7 +72,7 @@ public class MediaTypes
         this(RDFLanguages.getRegisteredLanguages());
     }
     
-    public MediaTypes(Map<Class, List<javax.ws.rs.core.MediaType>> readable, Map<Class, List<javax.ws.rs.core.MediaType>> writable)
+    public MediaTypes(Map<Class, List<jakarta.ws.rs.core.MediaType>> readable, Map<Class, List<jakarta.ws.rs.core.MediaType>> writable)
     {
         if (readable == null) throw new IllegalArgumentException("Map of readable MediaTypes must be not null");
         if (writable == null) throw new IllegalArgumentException("Map of writable MediaTypes must be not null");
@@ -85,11 +85,11 @@ public class MediaTypes
     {
         if (registered == null) throw new IllegalArgumentException("Collection of Langs must be not null");
         
-        Map<Class, List<javax.ws.rs.core.MediaType>> readableMap = new HashMap<>(), writableMap = new HashMap<>();
+        Map<Class, List<jakarta.ws.rs.core.MediaType>> readableMap = new HashMap<>(), writableMap = new HashMap<>();
 
         // Model/Dataset
 
-        List<javax.ws.rs.core.MediaType> readableModelList = new ArrayList<>(), writableModelList = new ArrayList<>(),
+        List<jakarta.ws.rs.core.MediaType> readableModelList = new ArrayList<>(), writableModelList = new ArrayList<>(),
                 readableDatasetList = new ArrayList<>(), writableDatasetList = new ArrayList<>();
 
         for (Lang lang : registered)
@@ -170,10 +170,10 @@ public class MediaTypes
         
         // ResultSet
         
-        List<javax.ws.rs.core.MediaType> readableResultSetList = new ArrayList<>();
-        List<javax.ws.rs.core.MediaType> writableResultSetList = new ArrayList<>();
+        List<jakarta.ws.rs.core.MediaType> readableResultSetList = new ArrayList<>();
+        List<jakarta.ws.rs.core.MediaType> writableResultSetList = new ArrayList<>();
 
-        for (javax.ws.rs.core.MediaType resultSetType : Arrays.asList(RESULT_SET_MEDIA_TYPES))
+        for (jakarta.ws.rs.core.MediaType resultSetType : Arrays.asList(RESULT_SET_MEDIA_TYPES))
         {
             readableResultSetList.add(new MediaType(resultSetType.getType(), resultSetType.getSubtype())); // don't add charset=UTF-8 param on readable types
             writableResultSetList.add(new MediaType(resultSetType.getType(), resultSetType.getSubtype(), UTF8_PARAM));
@@ -193,22 +193,22 @@ public class MediaTypes
      * 
      * @return class/type map
      */
-    public Map<Class, List<javax.ws.rs.core.MediaType>> getReadable()
+    public Map<Class, List<jakarta.ws.rs.core.MediaType>> getReadable()
     {
         return readable;
     }
 
-    public Map<Class, List<javax.ws.rs.core.MediaType>> getWritable()
+    public Map<Class, List<jakarta.ws.rs.core.MediaType>> getWritable()
     {
         return writable;
     }
     
-    public List<javax.ws.rs.core.MediaType> getReadable(Class clazz)
+    public List<jakarta.ws.rs.core.MediaType> getReadable(Class clazz)
     {
         return getReadable().get(clazz);
     }
 
-    public List<javax.ws.rs.core.MediaType> getWritable(Class clazz)
+    public List<jakarta.ws.rs.core.MediaType> getWritable(Class clazz)
     {
         return getWritable().get(clazz);
     }

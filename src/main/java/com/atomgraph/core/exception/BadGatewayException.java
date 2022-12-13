@@ -15,8 +15,8 @@
  */
 package com.atomgraph.core.exception;
 
-import javax.ws.rs.InternalServerErrorException;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.core.Response;
 
 /**
  *

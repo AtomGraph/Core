@@ -21,15 +21,15 @@ import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.SPARQLClient;
 import static com.atomgraph.core.client.SPARQLClient.QUERY_PARAM_NAME;
 import static com.atomgraph.core.client.SPARQLClient.UPDATE_PARAM_NAME;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Application;
-import javax.ws.rs.core.Form;
-import javax.ws.rs.core.MediaType;
-import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED_TYPE;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.Application;
+import jakarta.ws.rs.core.Form;
+import jakarta.ws.rs.core.MediaType;
+import static jakarta.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED_TYPE;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
+import static jakarta.ws.rs.core.Response.Status.BAD_REQUEST;
+import static jakarta.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
@@ -132,7 +132,7 @@ public class SPARQLEndpointImplTest extends JerseyTest
     @Test
     public void testMissingGetQuery()
     {
-        try (javax.ws.rs.core.Response cr = sc.get(sc.getReadableMediaTypes(Model.class)))
+        try (jakarta.ws.rs.core.Response cr = sc.get(sc.getReadableMediaTypes(Model.class)))
         {
             assertEquals(BAD_REQUEST.getStatusCode(), cr.getStatusInfo().getStatusCode());
         }
@@ -144,7 +144,7 @@ public class SPARQLEndpointImplTest extends JerseyTest
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.add(QUERY_PARAM_NAME, "BAD QUERY");
         
-        try (javax.ws.rs.core.Response cr = sc.get(sc.getReadableMediaTypes(Model.class), params))
+        try (jakarta.ws.rs.core.Response cr = sc.get(sc.getReadableMediaTypes(Model.class), params))
         {
             assertEquals(BAD_REQUEST.getStatusCode(), cr.getStatusInfo().getStatusCode());
         }
@@ -156,7 +156,7 @@ public class SPARQLEndpointImplTest extends JerseyTest
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.add(QUERY_PARAM_NAME, "SELECT * { ?s ?p ?o }");
         
-        try (javax.ws.rs.core.Response cr = sc.get(sc.getReadableMediaTypes(Model.class), params))
+        try (jakarta.ws.rs.core.Response cr = sc.get(sc.getReadableMediaTypes(Model.class), params))
         {
             assertEquals(NOT_ACCEPTABLE.getStatusCode(), cr.getStatusInfo().getStatusCode());
         }
@@ -168,7 +168,7 @@ public class SPARQLEndpointImplTest extends JerseyTest
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.add(QUERY_PARAM_NAME, "CONSTRUCT WHERE { ?s ?p ?o }");
         
-        try (javax.ws.rs.core.Response cr = sc.get(sc.getReadableMediaTypes(ResultSet.class), params))
+        try (jakarta.ws.rs.core.Response cr = sc.get(sc.getReadableMediaTypes(ResultSet.class), params))
         {
             assertEquals(NOT_ACCEPTABLE.getStatusCode(), cr.getStatusInfo().getStatusCode());
         }
@@ -177,7 +177,7 @@ public class SPARQLEndpointImplTest extends JerseyTest
     @Test
     public void testMissingPostQuery()
     {
-        try (javax.ws.rs.core.Response cr = sc.post(new Form(), APPLICATION_FORM_URLENCODED_TYPE, sc.getReadableMediaTypes(Model.class)))
+        try (jakarta.ws.rs.core.Response cr = sc.post(new Form(), APPLICATION_FORM_URLENCODED_TYPE, sc.getReadableMediaTypes(Model.class)))
         {
             assertEquals(BAD_REQUEST.getStatusCode(), cr.getStatusInfo().getStatusCode());
         }
@@ -189,7 +189,7 @@ public class SPARQLEndpointImplTest extends JerseyTest
         Form params = new Form();
         params.param(QUERY_PARAM_NAME, "BAD QUERY");
         
-        try (javax.ws.rs.core.Response cr = sc.post(params, APPLICATION_FORM_URLENCODED_TYPE, sc.getReadableMediaTypes(Model.class)))
+        try (jakarta.ws.rs.core.Response cr = sc.post(params, APPLICATION_FORM_URLENCODED_TYPE, sc.getReadableMediaTypes(Model.class)))
         {
             assertEquals(BAD_REQUEST.getStatusCode(), cr.getStatusInfo().getStatusCode());
         }
@@ -201,7 +201,7 @@ public class SPARQLEndpointImplTest extends JerseyTest
         Form params = new Form();
         params.param(UPDATE_PARAM_NAME, "BAD UPDATE");
         
-        try (javax.ws.rs.core.Response cr = sc.post(params, APPLICATION_FORM_URLENCODED_TYPE, new MediaType[]{}))
+        try (jakarta.ws.rs.core.Response cr = sc.post(params, APPLICATION_FORM_URLENCODED_TYPE, new MediaType[]{}))
         {
             assertEquals(BAD_REQUEST.getStatusCode(), cr.getStatusInfo().getStatusCode());
         }
@@ -210,7 +210,7 @@ public class SPARQLEndpointImplTest extends JerseyTest
     @Test
     public void testInvalidPostDirectQuery()
     {
-        try (javax.ws.rs.core.Response cr = sc.post("BAD QUERY", APPLICATION_SPARQL_QUERY_TYPE, new MediaType[]{}))
+        try (jakarta.ws.rs.core.Response cr = sc.post("BAD QUERY", APPLICATION_SPARQL_QUERY_TYPE, new MediaType[]{}))
         {
             assertEquals(BAD_REQUEST.getStatusCode(), cr.getStatusInfo().getStatusCode());
         }
@@ -219,7 +219,7 @@ public class SPARQLEndpointImplTest extends JerseyTest
     @Test
     public void testInvalidPostDirectUpdate()
     {
-        try (javax.ws.rs.core.Response cr = sc.post("BAD UPDATE", APPLICATION_SPARQL_UPDATE_TYPE, new MediaType[]{}))
+        try (jakarta.ws.rs.core.Response cr = sc.post("BAD UPDATE", APPLICATION_SPARQL_UPDATE_TYPE, new MediaType[]{}))
         {
             assertEquals(BAD_REQUEST.getStatusCode(), cr.getStatusInfo().getStatusCode());
         }

@@ -21,8 +21,8 @@ import org.apache.jena.util.LocationMapper;
 import java.net.URI;
 import com.atomgraph.core.client.LinkedDataClient;
 import java.util.Map;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriBuilder;
 import org.apache.jena.ext.com.google.common.collect.ImmutableMap;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.ModelReader;
@@ -82,7 +82,7 @@ public class DataManagerImpl extends FileManagerImpl implements DataManager
     }
     
     @Override
-    public Response get(String uri, javax.ws.rs.core.MediaType[] acceptedTypes)
+    public Response get(String uri, jakarta.ws.rs.core.MediaType[] acceptedTypes)
     {
         return getLinkedDataClient().get(getEndpoint(URI.create(uri)), acceptedTypes);
     }

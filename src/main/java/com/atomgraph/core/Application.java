@@ -25,7 +25,7 @@ import com.atomgraph.core.io.QueryProvider;
 import com.atomgraph.core.provider.QueryParamProvider;
 import com.atomgraph.core.io.UpdateRequestProvider;
 import com.atomgraph.core.mapper.NoReaderForLangExceptionMapper;
-import javax.ws.rs.core.Context;
+import jakarta.ws.rs.core.Context;
 import org.apache.jena.riot.RDFParserRegistry;
 import com.atomgraph.core.mapper.BadGatewayExceptionMapper;
 import com.atomgraph.core.mapper.RiotExceptionMapper;
@@ -42,8 +42,8 @@ import com.atomgraph.core.vocabulary.SD;
 import java.util.HashMap;
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletConfig;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.ResourceFactory;
@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
  * Needs to register JAX-RS root resource classes and providers.
  * 
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
- * @see javax.ws.rs.core.Application
+ * @see jakarta.ws.rs.core.Application
  * @see <a href="http://docs.oracle.com/cd/E24329_01/web.1211/e24983/configure.htm#CACEAEGG">Packaging the RESTful Web Service Application Using web.xml With Application Subclass</a>
  */
 public class Application extends ResourceConfig implements com.atomgraph.core.model.Application

@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see com.atomgraph.core.util.jena.DataManager
- * @see javax.ws.rs.core.Context
+ * @see jakarta.ws.rs.core.Context
  */
 public class DataManagerFactory implements Factory<DataManager>
 {

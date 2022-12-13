@@ -19,14 +19,14 @@ package com.atomgraph.core.client;
 import com.atomgraph.core.MediaTypes;
 import java.util.List;
 import java.util.Map;
-import javax.ws.rs.client.ClientRequestFilter;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.ClientRequestFilter;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import org.glassfish.jersey.uri.UriComponent;
 
 /**
@@ -79,77 +79,77 @@ public abstract class EndpointClientBase extends ClientBase
         return builder;
     }
 
-    public Response head(javax.ws.rs.core.MediaType[] acceptedTypes)
+    public Response head(jakarta.ws.rs.core.MediaType[] acceptedTypes)
     {
         return head(acceptedTypes, new MultivaluedHashMap(), new MultivaluedHashMap());
     }
 
-    public Response head(javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
+    public Response head(jakarta.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
     {
         return head(acceptedTypes, params, new MultivaluedHashMap());
     }
 
-    public Response head(javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, Object> headers)
+    public Response head(jakarta.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, Object> headers)
     {
         return applyHeaders(applyParams(params).request(acceptedTypes), headers).head();
     }
 
-    public Response get(javax.ws.rs.core.MediaType[] acceptedTypes)
+    public Response get(jakarta.ws.rs.core.MediaType[] acceptedTypes)
     {
         return get(acceptedTypes, new MultivaluedHashMap(), new MultivaluedHashMap());
     }
 
-    public Response get(javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
+    public Response get(jakarta.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
     {
         return get(acceptedTypes, params, new MultivaluedHashMap());
     }
     
-    public Response get(javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, Object> headers)
+    public Response get(jakarta.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, Object> headers)
     {
         return applyHeaders(applyParams(params).request(acceptedTypes), headers).get();
     }
 
-    public Response post(Object body, MediaType contentType, javax.ws.rs.core.MediaType[] acceptedTypes)
+    public Response post(Object body, MediaType contentType, jakarta.ws.rs.core.MediaType[] acceptedTypes)
     {
         return post(body, contentType, acceptedTypes, new MultivaluedHashMap(), new MultivaluedHashMap());
     }
     
-    public Response post(Object body, MediaType contentType, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
+    public Response post(Object body, MediaType contentType, jakarta.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
     {
         return post(body, contentType, acceptedTypes, params, new MultivaluedHashMap());
     }
     
-    public Response post(Object body, MediaType contentType, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, Object> headers)
+    public Response post(Object body, MediaType contentType, jakarta.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, Object> headers)
     {
         return applyHeaders(applyParams(params).request(acceptedTypes), headers).post(Entity.entity(body, contentType));
     }
 
-    public Response put(Object body, MediaType contentType, javax.ws.rs.core.MediaType[] acceptedTypes)
+    public Response put(Object body, MediaType contentType, jakarta.ws.rs.core.MediaType[] acceptedTypes)
     {
         return put(body, contentType, acceptedTypes, new MultivaluedHashMap(), new MultivaluedHashMap());
     }
 
-    public Response put(Object body, MediaType contentType, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
+    public Response put(Object body, MediaType contentType, jakarta.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
     {
         return put(body, contentType, acceptedTypes, params, new MultivaluedHashMap());
     }
     
-    public Response put(Object body, MediaType contentType, javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, Object> headers)
+    public Response put(Object body, MediaType contentType, jakarta.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, Object> headers)
     {
         return applyHeaders(applyParams(params).request(acceptedTypes), headers).put(Entity.entity(body, contentType));
     }
 
-    public Response delete(javax.ws.rs.core.MediaType[] acceptedTypes)
+    public Response delete(jakarta.ws.rs.core.MediaType[] acceptedTypes)
     {
         return delete(acceptedTypes, new MultivaluedHashMap(), new MultivaluedHashMap());
     }
     
-    public Response delete(javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
+    public Response delete(jakarta.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
     {
         return delete(acceptedTypes, params, new MultivaluedHashMap());
     }
     
-    public Response delete(javax.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, Object> headers)
+    public Response delete(jakarta.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, Object> headers)
     {
         return applyHeaders(applyParams(params).request(acceptedTypes), headers).delete();
     }

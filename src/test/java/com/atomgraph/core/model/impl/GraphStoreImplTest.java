@@ -22,16 +22,16 @@ import static com.atomgraph.core.client.GraphStoreClient.DEFAULT_PARAM_NAME;
 import static com.atomgraph.core.client.GraphStoreClient.GRAPH_PARAM_NAME;
 import static com.atomgraph.core.model.impl.SPARQLEndpointImplTest.assertIsomorphic;
 import java.util.UUID;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Application;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.CREATED;
-import static javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
-import static javax.ws.rs.core.Response.Status.NO_CONTENT;
-import static javax.ws.rs.core.Response.Status.UNSUPPORTED_MEDIA_TYPE;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.Application;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
+import static jakarta.ws.rs.core.Response.Status.BAD_REQUEST;
+import static jakarta.ws.rs.core.Response.Status.CREATED;
+import static jakarta.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
+import static jakarta.ws.rs.core.Response.Status.NOT_FOUND;
+import static jakarta.ws.rs.core.Response.Status.NO_CONTENT;
+import static jakarta.ws.rs.core.Response.Status.UNSUPPORTED_MEDIA_TYPE;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Model;
@@ -122,7 +122,7 @@ public class GraphStoreImplTest extends JerseyTest
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.putSingle(DEFAULT_PARAM_NAME, Boolean.TRUE.toString());
         
-        assertEquals(NOT_ACCEPTABLE.getStatusCode(), gsc.get(new javax.ws.rs.core.MediaType[]{ MediaType.APPLICATION_SVG_XML_TYPE}, params).getStatus());
+        assertEquals(NOT_ACCEPTABLE.getStatusCode(), gsc.get(new jakarta.ws.rs.core.MediaType[]{ MediaType.APPLICATION_SVG_XML_TYPE}, params).getStatus());
     }
     
     @Test
@@ -148,7 +148,7 @@ public class GraphStoreImplTest extends JerseyTest
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.putSingle(GRAPH_PARAM_NAME, "http://host/" + UUID.randomUUID().toString());
         
-        assertEquals(NO_CONTENT.getStatusCode(), gsc.post(ModelFactory.createDefaultModel(), MediaType.TEXT_TURTLE_TYPE, new javax.ws.rs.core.MediaType[]{}, params).getStatus());
+        assertEquals(NO_CONTENT.getStatusCode(), gsc.post(ModelFactory.createDefaultModel(), MediaType.TEXT_TURTLE_TYPE, new jakarta.ws.rs.core.MediaType[]{}, params).getStatus());
     }
 
     @Test
@@ -158,13 +158,13 @@ public class GraphStoreImplTest extends JerseyTest
         params.putSingle(GRAPH_PARAM_NAME, "http://host/" + UUID.randomUUID().toString());
         
         assertEquals(CREATED.getStatusCode(), gsc.post(ModelFactory.createDefaultModel().createResource().addLiteral(ResourceFactory.createProperty("http://prop"), "obj").getModel(),
-                MediaType.TEXT_TURTLE_TYPE, new javax.ws.rs.core.MediaType[]{}, params).getStatus());
+                MediaType.TEXT_TURTLE_TYPE, new jakarta.ws.rs.core.MediaType[]{}, params).getStatus());
     }
     
     @Test
     public void testPostUnsupportedAddType()
     {
-        assertEquals(UNSUPPORTED_MEDIA_TYPE.getStatusCode(), gsc.post("BAD RDF", javax.ws.rs.core.MediaType.TEXT_XML_TYPE, new javax.ws.rs.core.MediaType[]{}).getStatus());
+        assertEquals(UNSUPPORTED_MEDIA_TYPE.getStatusCode(), gsc.post("BAD RDF", jakarta.ws.rs.core.MediaType.TEXT_XML_TYPE, new jakarta.ws.rs.core.MediaType[]{}).getStatus());
     }
     
     @Test
@@ -195,13 +195,13 @@ public class GraphStoreImplTest extends JerseyTest
         MultivaluedMap<String, String> params = new MultivaluedHashMap();
         params.putSingle(GRAPH_PARAM_NAME, "http://host/" + UUID.randomUUID().toString());
         
-        assertEquals(CREATED.getStatusCode(), gsc.put(ModelFactory.createDefaultModel(), MediaType.TEXT_TURTLE_TYPE, new javax.ws.rs.core.MediaType[]{}, params).getStatus());
+        assertEquals(CREATED.getStatusCode(), gsc.put(ModelFactory.createDefaultModel(), MediaType.TEXT_TURTLE_TYPE, new jakarta.ws.rs.core.MediaType[]{}, params).getStatus());
     }
     
     @Test
     public void testNotUnsupportedPutType()
     {
-        assertEquals(UNSUPPORTED_MEDIA_TYPE.getStatusCode(), gsc.put("BAD RDF", javax.ws.rs.core.MediaType.TEXT_XML_TYPE, new javax.ws.rs.core.MediaType[]{}).getStatus());
+        assertEquals(UNSUPPORTED_MEDIA_TYPE.getStatusCode(), gsc.put("BAD RDF", jakarta.ws.rs.core.MediaType.TEXT_XML_TYPE, new jakarta.ws.rs.core.MediaType[]{}).getStatus());
     }
 
     @Test

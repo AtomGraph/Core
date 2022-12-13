@@ -18,7 +18,7 @@ package com.atomgraph.core.factory;
 
 import org.glassfish.hk2.api.Factory;
 import javax.inject.Singleton;
-import javax.ws.rs.client.Client;
+import jakarta.ws.rs.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,8 +27,8 @@ import org.slf4j.LoggerFactory;
  * Needs to be registered in the JAX-RS application.
  * 
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
- * @see javax.ws.rs.client.Client
- * @see javax.ws.rs.core.Context
+ * @see jakarta.ws.rs.client.Client
+ * @see jakarta.ws.rs.core.Context
  */
 @Singleton
 public class ClientFactory implements Factory<Client>

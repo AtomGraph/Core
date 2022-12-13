@@ -20,12 +20,12 @@ import com.atomgraph.core.model.QuadStore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Request;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Request;
 import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +33,8 @@ import com.atomgraph.core.model.DatasetQuadAccessor;
 import com.atomgraph.core.model.Service;
 import java.util.Collections;
 import javax.inject.Inject;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.MediaType;
 
 /**
  *
@@ -78,7 +78,7 @@ public class QuadStoreImpl implements QuadStore
      * @param dataset RDF dataset
      * @return response object
      */
-    public javax.ws.rs.core.Response getResponse(Dataset dataset)
+    public jakarta.ws.rs.core.Response getResponse(Dataset dataset)
     {
         return getResponseBuilder(dataset).build();
     }
@@ -89,7 +89,7 @@ public class QuadStoreImpl implements QuadStore
      * @param dataset RDF dataset
      * @return response builder
      */
-    public javax.ws.rs.core.Response.ResponseBuilder getResponseBuilder(Dataset dataset)
+    public jakarta.ws.rs.core.Response.ResponseBuilder getResponseBuilder(Dataset dataset)
     {
         return new com.atomgraph.core.model.impl.Response(getRequest(),
                 dataset,
@@ -140,7 +140,7 @@ public class QuadStoreImpl implements QuadStore
      */
     @GET
     @Override
-    public javax.ws.rs.core.Response get()
+    public jakarta.ws.rs.core.Response get()
     {
         return getResponse(getQuadDatasetAccessor().get());
     }
@@ -153,10 +153,10 @@ public class QuadStoreImpl implements QuadStore
      */
     @POST
     @Override
-    public javax.ws.rs.core.Response post(Dataset dataset)
+    public jakarta.ws.rs.core.Response post(Dataset dataset)
     {
         getQuadDatasetAccessor().add(dataset);
-        return javax.ws.rs.core.Response.ok().build();
+        return jakarta.ws.rs.core.Response.ok().build();
     }
 
     /**
@@ -167,10 +167,10 @@ public class QuadStoreImpl implements QuadStore
      */    
     @PUT
     @Override
-    public javax.ws.rs.core.Response put(Dataset dataset)
+    public jakarta.ws.rs.core.Response put(Dataset dataset)
     {
         getQuadDatasetAccessor().replace(dataset);
-        return javax.ws.rs.core.Response.ok().build();
+        return jakarta.ws.rs.core.Response.ok().build();
     }
 
     /**
@@ -180,10 +180,10 @@ public class QuadStoreImpl implements QuadStore
      */
     @DELETE
     @Override
-    public javax.ws.rs.core.Response delete()
+    public jakarta.ws.rs.core.Response delete()
     {
         getQuadDatasetAccessor().delete();
-        return javax.ws.rs.core.Response.noContent().build();
+        return jakarta.ws.rs.core.Response.noContent().build();
     }
 
     public List<MediaType> getWritableMediaTypes(Class clazz)

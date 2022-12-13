@@ -22,18 +22,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.ext.MessageBodyReader;
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.ext.MessageBodyReader;
+import jakarta.ws.rs.ext.Provider;
 import com.atomgraph.core.MediaType;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.Produces;
-import javax.ws.rs.ext.MessageBodyWriter;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.ext.MessageBodyWriter;
 import org.apache.jena.query.QueryParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see org.apache.jena.update.UpdateRequest
- * @see javax.ws.rs.ext.MessageBodyReader
+ * @see jakarta.ws.rs.ext.MessageBodyReader
  */
 @Provider
 @Consumes(MediaType.APPLICATION_SPARQL_UPDATE)
@@ -55,13 +55,13 @@ public class UpdateRequestProvider implements MessageBodyReader<UpdateRequest>, 
     private static final Logger log = LoggerFactory.getLogger(UpdateRequestProvider.class);
 
     @Override
-    public boolean isReadable(Class<?> type, Type type1, Annotation[] antns, javax.ws.rs.core.MediaType mt)
+    public boolean isReadable(Class<?> type, Type type1, Annotation[] antns, jakarta.ws.rs.core.MediaType mt)
     {
         return type == UpdateRequest.class;
     }
 
     @Override
-    public UpdateRequest readFrom(Class<UpdateRequest> type, Type type1, Annotation[] antns, javax.ws.rs.core.MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream in) throws IOException, WebApplicationException
+    public UpdateRequest readFrom(Class<UpdateRequest> type, Type type1, Annotation[] antns, jakarta.ws.rs.core.MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream in) throws IOException, WebApplicationException
     {
         if (log.isTraceEnabled()) log.trace("Reading UpdateRequest with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
         try
@@ -76,13 +76,13 @@ public class UpdateRequestProvider implements MessageBodyReader<UpdateRequest>, 
     }
 
     @Override
-    public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, javax.ws.rs.core.MediaType mediaType)
+    public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, jakarta.ws.rs.core.MediaType mediaType)
     {
         return UpdateRequest.class.isAssignableFrom(type);
     }
 
     @Override
-    public void writeTo(UpdateRequest updateRequest, Class<?> type, Type genericType, Annotation[] annotations, javax.ws.rs.core.MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException
+    public void writeTo(UpdateRequest updateRequest, Class<?> type, Type genericType, Annotation[] annotations, jakarta.ws.rs.core.MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException
     {
         if (log.isTraceEnabled()) log.trace("Writing UpdateRequest with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
         new OutputStreamWriter(entityStream, StandardCharsets.UTF_8).write(updateRequest.toString());

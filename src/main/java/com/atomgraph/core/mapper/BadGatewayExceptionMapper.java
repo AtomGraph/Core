@@ -17,8 +17,8 @@
 package com.atomgraph.core.mapper;
 
 import com.atomgraph.core.exception.BadGatewayException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.ExceptionMapper;
 
 /**
  * Maps client exception to response.
