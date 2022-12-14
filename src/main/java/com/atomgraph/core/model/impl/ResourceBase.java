@@ -31,7 +31,7 @@ import com.atomgraph.core.model.Resource;
 import com.atomgraph.core.util.ModelUtils;
 import java.util.Collections;
 import java.util.Date;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.core.EntityTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +58,7 @@ public abstract class ResourceBase implements Resource
      * @param uriInfo URI information of the request
      * @param request current request object
      * @param mediaTypes media types
-     * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html#getAbsolutePath()">JAX-RS UriInfo.getAbsolutePath()</a>
+     * @see <a href="https://tomee.apache.org/jakartaee-10.0/javadoc/jakarta/ws/rs/core/UriInfo.html#getAbsolutePath--">JAX-RS UriInfo.getAbsolutePath()</a>
      */
     @Inject
     public ResourceBase(@Context UriInfo uriInfo, @Context Request request, MediaTypes mediaTypes)

@@ -19,7 +19,7 @@ import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.LinkedDataClient;
 import com.atomgraph.core.model.Service;
 import java.net.URI;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Context;

@@ -17,7 +17,7 @@
 package com.atomgraph.core.factory;
 
 import org.glassfish.hk2.api.Factory;
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import jakarta.ws.rs.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class ClientFactory implements Factory<Client>
 {
+    
     private static final Logger log = LoggerFactory.getLogger(ClientFactory.class);
     
     private final Client client;

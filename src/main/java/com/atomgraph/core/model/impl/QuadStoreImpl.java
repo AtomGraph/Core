@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import com.atomgraph.core.model.DatasetQuadAccessor;
 import com.atomgraph.core.model.Service;
 import java.util.Collections;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.MediaType;
 

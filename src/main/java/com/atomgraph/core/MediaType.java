@@ -23,11 +23,12 @@ import org.apache.jena.riot.Lang;
 /**
  * Extends standard JAX-RS media type with RDF media types
  * 
- * @see <a href="http://jackson.codehaus.org/javadoc/jax-rs/1.0/javax/ws/rs/core/MediaType.html">jakarta.ws.rs.core.MediaType</a>
+ * @see <a href="https://jakarta.ee/specifications/restful-ws/3.0/apidocs/jakarta/ws/rs/core/mediatype">jakarta.ws.rs.core.MediaType</a>
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
 public class MediaType extends jakarta.ws.rs.core.MediaType
 {
+    
     /** "application/rdf+xml" */
     public final static String APPLICATION_RDF_XML = Lang.RDFXML.getContentType().getContentTypeStr();
     /** "application/rdf+xml" */

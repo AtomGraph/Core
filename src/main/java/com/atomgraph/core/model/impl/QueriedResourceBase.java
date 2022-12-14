@@ -29,7 +29,7 @@ import jakarta.ws.rs.core.UriInfo;
 import com.atomgraph.core.model.QueriedResource;
 import com.atomgraph.core.model.Service;
 import java.util.Collections;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.NotAllowedException;
 import jakarta.ws.rs.NotFoundException;
 import org.apache.jena.rdf.model.Model;
@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see com.atomgraph.core.model.SPARQLEndpoint
- * @see <a href="http://jena.apache.org/documentation/javadoc/arq/com/hp/hpl/jena/query/Query.html">ARQ Query</a>
+ * @see <a href="https://jena.apache.org/documentation/javadoc/arq/org.apache.jena.arq/org/apache/jena/query/Query.html">ARQ Query</a>
  */
 @Path("/")
 public class QueriedResourceBase extends ResourceBase implements QueriedResource
@@ -58,9 +58,7 @@ public class QueriedResourceBase extends ResourceBase implements QueriedResource
      * @param uriInfo URI information of the request
      * @param request current request object
      * @param service SPARQL service
-     * @see <a href="http://docs.oracle.com/javaee/6/api/javax/ws/rs/core/UriInfo.html">JAX-RS UriInfo</a>
-     * @see <a href="http://docs.oracle.com/javaee/7/api/javax/servlet/ServletContext.html">ServletContext</a>
-     * @see <a href="https://jersey.java.net/nonav/apidocs/1.16/jersey/com/sun/jersey/api/core/ResourceContext.html">Jersey ResourceContext</a>
+     * @see <a href="http://docs.oracle.com/javaee/6/api/jakarta/ws/rs/core/UriInfo.html">JAX-RS UriInfo</a>
      */
     @Inject
     public QueriedResourceBase(@Context UriInfo uriInfo, @Context Request request, MediaTypes mediaTypes, Service service)
