@@ -24,12 +24,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFLanguages;
+import static org.apache.jena.riot.lang.extra.TurtleJCC.TTLJCC;
 
 /**
  * As class providing access to supported media types.
@@ -42,8 +42,12 @@ public class MediaTypes
     /**
      * Registry of readable/writable RDF model and SPARQL result set media types
      */
-    private static final jakarta.ws.rs.core.MediaType[] RESULT_SET_MEDIA_TYPES = new MediaType[]{MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE,
-                            MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE};
+    private static final jakarta.ws.rs.core.MediaType[] RESULT_SET_MEDIA_TYPES = new MediaType[]{
+        MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE,
+        MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE,
+        MediaType.APPLICATION_SPARQL_RESULTS_CSV_TYPE,
+        MediaType.APPLICATION_SPARQL_RESULTS_TSV_TYPE
+    };
     
     public static final Map<String, String> UTF8_PARAM = new HashMap<>();
     static
@@ -96,6 +100,7 @@ public class MediaTypes
         {
             if (lang.equals(Lang.RDFNULL)) continue;
             if (lang.equals(Lang.SHACLC)) continue;
+            if (lang.equals(TTLJCC)) continue;
             
             if (RDFLanguages.isTriples(lang))
             {
