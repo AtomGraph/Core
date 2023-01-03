@@ -21,6 +21,7 @@ import com.atomgraph.core.client.GraphStoreClient;
 import static com.atomgraph.core.client.GraphStoreClient.DEFAULT_PARAM_NAME;
 import static com.atomgraph.core.client.GraphStoreClient.GRAPH_PARAM_NAME;
 import static com.atomgraph.core.model.impl.SPARQLEndpointImplTest.assertIsomorphic;
+import jakarta.ws.rs.NotFoundException;
 import java.util.UUID;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Application;
@@ -218,11 +219,12 @@ public class GraphStoreImplTest extends JerseyTest
         assertIsomorphic(getDataset().getDefaultModel(), gsc.getModel());
     }
     
+    @Test(expected = NotFoundException.class)
     public void testDeleteNamedModel()
     {
         gsc.deleteModel(NAMED_GRAPH_URI);
         
-        assertEquals(0, gsc.getModel(NAMED_GRAPH_URI).size());
+        assertEquals(null, gsc.getModel(NAMED_GRAPH_URI));
     }
     
     @Test
