@@ -81,11 +81,30 @@ public class GraphStoreImpl implements GraphStore
      * @param graphUri graph URI
      * @return response object
      */
-    public Response getResponse(Model model, URI graphUri)
+    public Response getResponse(Model model, URI graphUri) // TO-DO: graphUri not required?
     {
         return getResponseBuilder(model, graphUri).build();
     }
 
+    /**
+     * Evaluates request preconditions for the given RDF model.
+     * 
+     * @param model RDF model
+     * @param graphUri graph URI
+     * @return response builder
+     */
+    public ResponseBuilder evaluatePreconditions(Model model, URI graphUri) // TO-DO: graphUri not required?
+    {
+        return new com.atomgraph.core.model.impl.Response(getRequest(),
+                model,
+                getLastModified(model, graphUri),
+                getEntityTag(model),
+                getWritableMediaTypes(Model.class),
+                getLanguages(),
+                getEncodings()).
+            evaluatePreconditions();
+    }
+    
     /**
      * Returns response builder for the given RDF model.
      * 
@@ -93,7 +112,7 @@ public class GraphStoreImpl implements GraphStore
      * @param graphUri graph URI
      * @return response builder
      */
-    public ResponseBuilder getResponseBuilder(Model model, URI graphUri)
+    public ResponseBuilder getResponseBuilder(Model model, URI graphUri) // TO-DO: graphUri not required?
     {
         return new com.atomgraph.core.model.impl.Response(getRequest(),
                 model,
@@ -112,7 +131,7 @@ public class GraphStoreImpl implements GraphStore
      * @param graphUri graph URI
      * @return date of last modification
      */
-    public Date getLastModified(Model model, URI graphUri)
+    public Date getLastModified(Model model, URI graphUri) // TO-DO: graphUri not required?
     {
         return null;
     }
@@ -160,7 +179,7 @@ public class GraphStoreImpl implements GraphStore
     @Override
     public Response get(@QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
     {
-        if (!defaultGraph && graphUri == null) throw new BadRequestException("Neither default nor named graph specified");
+        if (!defaultGraph ^ graphUri == null) throw new BadRequestException("Either default or named graph has to be specified");
 
         if (defaultGraph)
         {
@@ -194,9 +213,10 @@ public class GraphStoreImpl implements GraphStore
     @Override
     public Response post(Model model, @QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
     {
+        if (!defaultGraph ^ graphUri == null) throw new BadRequestException("Either default or named graph has to be specified");
         if (log.isTraceEnabled()) log.trace("POST Graph Store request with RDF payload: {} payload size(): {}", model, model.size());
         
-        if (model.isEmpty()) return Response.noContent().build();
+        if (model.isEmpty()) return Response.noContent().build(); // as per the Graph Store Protocol
         
         if (defaultGraph)
         {
@@ -229,7 +249,7 @@ public class GraphStoreImpl implements GraphStore
     @Override
     public Response put(Model model, @QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
     {
-        if (!defaultGraph && graphUri == null) throw new BadRequestException("Neither default nor named graph specified");
+        if (!defaultGraph ^ graphUri == null) throw new BadRequestException("Either default or named graph has to be specified");
         if (log.isTraceEnabled()) log.trace("PUT Graph Store request with RDF payload: {} payload size(): {}", model, model.size());
         
         if (defaultGraph)
@@ -261,7 +281,7 @@ public class GraphStoreImpl implements GraphStore
     @Override
     public Response delete(@QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
     {
-        if (!defaultGraph && graphUri == null) throw new BadRequestException("Neither default nor named graph specified");
+        if (!defaultGraph ^ graphUri == null) throw new BadRequestException("Either default or named graph has to be specified");
         
         if (defaultGraph)
         {

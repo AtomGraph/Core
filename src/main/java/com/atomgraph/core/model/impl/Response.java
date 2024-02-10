@@ -132,6 +132,16 @@ public class Response
     }
     
     /**
+     * Evaluates request preconditions.
+     * 
+     * @return response builder or null if the preconditions were met
+     */
+    public ResponseBuilder evaluatePreconditions()
+    {
+        return getResponseBuilder(getLastModified(), getVariantEntityTag());
+    }
+    
+    /**
      * Returns generic response builder.
      * 
      * @return response builder
@@ -142,13 +152,13 @@ public class Response
     }
         
     /**
-     * Returns generic response builder from last modified date and/or entity tag.
+     * Evaluates request preconditions based on last modified date and/or entity tag.
      * 
      * @param lastModified last modified date
      * @param entityTag entity tag
-     * @return response builder
+     * @return response builder or null if the preconditions were met
      */
-    public ResponseBuilder getResponseBuilder(Date lastModified, EntityTag entityTag)
+    public ResponseBuilder evaluatePreconditions(Date lastModified, EntityTag entityTag)
     {
         final ResponseBuilder rb;
         
@@ -163,6 +173,20 @@ public class Response
             }
         }
         
+        return rb;
+    }
+    
+    /**
+     * Returns generic response builder from last modified date and/or entity tag.
+     * 
+     * @param lastModified last modified date
+     * @param entityTag entity tag
+     * @return response builder
+     */
+    public ResponseBuilder getResponseBuilder(Date lastModified, EntityTag entityTag)
+    {
+        final ResponseBuilder rb = evaluatePreconditions(lastModified, entityTag);
+
         if (rb != null)
         {
             if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
