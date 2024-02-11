@@ -179,7 +179,7 @@ public class GraphStoreImpl implements GraphStore
     @Override
     public Response get(@QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
     {
-        if (!defaultGraph ^ graphUri == null) throw new BadRequestException("Either default or named graph has to be specified");
+        if (!(defaultGraph ^ graphUri != null)) throw new BadRequestException("Either default or named graph has to be specified");
 
         if (defaultGraph)
         {
@@ -213,7 +213,7 @@ public class GraphStoreImpl implements GraphStore
     @Override
     public Response post(Model model, @QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
     {
-        if (!defaultGraph ^ graphUri == null) throw new BadRequestException("Either default or named graph has to be specified");
+        if (!(defaultGraph ^ graphUri != null)) throw new BadRequestException("Either default or named graph has to be specified");
         if (log.isTraceEnabled()) log.trace("POST Graph Store request with RDF payload: {} payload size(): {}", model, model.size());
         
         if (model.isEmpty()) return Response.noContent().build(); // as per the Graph Store Protocol
@@ -249,7 +249,7 @@ public class GraphStoreImpl implements GraphStore
     @Override
     public Response put(Model model, @QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
     {
-        if (!defaultGraph ^ graphUri == null) throw new BadRequestException("Either default or named graph has to be specified");
+        if (!(defaultGraph ^ graphUri != null)) throw new BadRequestException("Either default or named graph has to be specified");
         if (log.isTraceEnabled()) log.trace("PUT Graph Store request with RDF payload: {} payload size(): {}", model, model.size());
         
         if (defaultGraph)
@@ -281,7 +281,7 @@ public class GraphStoreImpl implements GraphStore
     @Override
     public Response delete(@QueryParam("default") @DefaultValue("false") Boolean defaultGraph, @QueryParam("graph") URI graphUri)
     {
-        if (!defaultGraph ^ graphUri == null) throw new BadRequestException("Either default or named graph has to be specified");
+        if (!(defaultGraph ^ graphUri != null)) throw new BadRequestException("Either default or named graph has to be specified");
         
         if (defaultGraph)
         {
