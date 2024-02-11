@@ -138,7 +138,7 @@ public class Response
      */
     public ResponseBuilder evaluatePreconditions()
     {
-        return getResponseBuilder(getLastModified(), getVariantEntityTag());
+        return evaluatePreconditions(getLastModified(), getVariantEntityTag());
     }
     
     /**
