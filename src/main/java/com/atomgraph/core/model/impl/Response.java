@@ -158,7 +158,7 @@ public class Response
      * @param entityTag entity tag
      * @return response builder or null if the preconditions were met
      */
-    public ResponseBuilder evaluatePreconditions(Date lastModified, EntityTag entityTag)
+    protected ResponseBuilder evaluatePreconditions(Date lastModified, EntityTag entityTag)
     {
         final ResponseBuilder rb;
         
@@ -183,7 +183,7 @@ public class Response
      * @param entityTag entity tag
      * @return response builder
      */
-    public ResponseBuilder getResponseBuilder(Date lastModified, EntityTag entityTag)
+    protected ResponseBuilder getResponseBuilder(Date lastModified, EntityTag entityTag)
     {
         final ResponseBuilder rb = evaluatePreconditions(lastModified, entityTag);
 
@@ -196,7 +196,7 @@ public class Response
         else
         {
             if (log.isTraceEnabled()) log.trace("Generating RDF Response with Variant: {} and EntityTag: {}", getVariant(), entityTag);
-            return jakarta.ws.rs.core.Response.ok(getEntity(), getVariant()).
+            return jakarta.ws.rs.core.Response.ok(getEntity(), getVariant()). // status will be overriden if necessary
                 lastModified(lastModified).
                 tag(entityTag);
         }

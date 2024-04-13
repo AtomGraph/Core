@@ -22,6 +22,7 @@ import com.atomgraph.core.client.GraphStoreClient;
 import com.atomgraph.core.exception.BadGatewayException;
 import com.atomgraph.core.model.DatasetAccessor;
 import jakarta.ws.rs.ClientErrorException;
+import jakarta.ws.rs.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
+@Deprecated
 public class DatasetAccessorImpl implements DatasetAccessor
 {
     private static final Logger log = LoggerFactory.getLogger(DatasetAccessorImpl.class);
@@ -69,6 +71,11 @@ public class DatasetAccessorImpl implements DatasetAccessor
         {
             return getGraphStoreClient().getModel(uri);
         }
+        catch (NotFoundException ex)
+        {
+            if (log.isDebugEnabled()) log.debug("Graph with URI <{}> not found", ex, uri);
+            throw ex;
+        }
         catch (ClientErrorException ex)
         {
             if (log.isDebugEnabled()) log.debug("Graph Store backend client error", ex);
@@ -82,6 +89,11 @@ public class DatasetAccessorImpl implements DatasetAccessor
         try
         {
             return getGraphStoreClient().containsModel(uri);
+        }
+        catch (NotFoundException ex)
+        {
+            if (log.isDebugEnabled()) log.debug("Graph with URI <{}> not found", ex, uri);
+            throw ex;
         }
         catch (ClientErrorException ex)
         {
@@ -138,6 +150,11 @@ public class DatasetAccessorImpl implements DatasetAccessor
         try
         {
             getGraphStoreClient().deleteModel(uri);
+        }
+        catch (NotFoundException ex)
+        {
+            if (log.isDebugEnabled()) log.debug("Graph with URI <{}> not found", ex, uri);
+            throw ex;
         }
         catch (ClientErrorException ex)
         {

@@ -32,6 +32,7 @@ import org.apache.jena.riot.RDFWriterRegistry;
 import static org.apache.jena.riot.lang.extra.TurtleJCC.TTLJCC;
 import org.apache.jena.riot.resultset.ResultSetLang;
 import org.apache.jena.riot.resultset.ResultSetReaderRegistry;
+import org.apache.jena.riot.resultset.ResultSetWriterRegistry;
 
 /**
  * As class providing access to supported media types.
@@ -93,17 +94,9 @@ public class MediaTypes
             else
             {
                 if (lang.equals(RDFLanguages.NTRIPLES))
-                {
-                    Map<String, String> qParams = new HashMap<>();
-                    qParams.put("q", "0.9");
-                    mt = new MediaType(lang.getContentType(), qParams);
-                }
+                    mt = new MediaType(lang.getContentType(), Map.ofEntries(Map.entry("q", "0.9")));
                 else
-                {
-                    Map<String, String> qParams = new HashMap<>();
-                    qParams.put("q", "0.8");
-                    mt = new MediaType(lang.getContentType(), qParams);
-                }
+                    mt = new MediaType(lang.getContentType(), Map.ofEntries(Map.entry("q", "0.8")));
             }
 
             // avoid adding duplicates. Cannot use Set because ordering is important
@@ -122,17 +115,9 @@ public class MediaTypes
             else
             {
                 if (lang.equals(RDFLanguages.NQUADS))
-                {
-                    Map<String, String> qParams = new HashMap<>();
-                    qParams.put("q", "0.9");
-                    mt = new MediaType(lang.getContentType(), qParams);
-                }
+                    mt = new MediaType(lang.getContentType(), Map.ofEntries(Map.entry("q", "0.9")));
                 else
-                {
-                    Map<String, String> qParams = new HashMap<>();
-                    qParams.put("q", "0.8");
-                    mt = new MediaType(lang.getContentType(), qParams);
-                }
+                    mt = new MediaType(lang.getContentType(), Map.ofEntries(Map.entry("q", "0.8")));
             }
 
             // avoid adding duplicates. Cannot use Set because ordering is important
@@ -166,9 +151,29 @@ public class MediaTypes
         {
             if (lang.equals(ResultSetLang.RS_None)) continue;
             
-            jakarta.ws.rs.core.MediaType resultSetType = new MediaType(lang.getContentType());
-            readableResultSetList.add(new MediaType(resultSetType.getType(), resultSetType.getSubtype())); // don't add charset=UTF-8 param on readable types
-            writableResultSetList.add(new MediaType(resultSetType.getType(), resultSetType.getSubtype(), UTF8_PARAM));
+            final MediaType mt;
+            // prioritize reading SPARQL-Results-Protobuf because they're most efficient
+            // don't add charset=UTF-8 param on readable types
+            if (lang.equals(ResultSetLang.RS_Protobuf))
+                mt = new MediaType(lang.getContentType(), Map.ofEntries(Map.entry("q", "0.7")));
+            else
+            {
+                if (lang.equals(ResultSetLang.RS_JSON) || lang.equals(ResultSetLang.RS_XML))
+                    mt = new MediaType(lang.getContentType(), Map.ofEntries(Map.entry("q", "0.6")));
+                else
+                    mt = new MediaType(lang.getContentType(), Map.ofEntries(Map.entry("q", "0.5")));
+            }
+            
+            if (!readableResultSetList.contains(mt)) readableResultSetList.add(mt);
+        }
+
+        for (Lang lang : ResultSetWriterRegistry.registered())
+        {
+            if (lang.equals(ResultSetLang.RS_None)) continue;
+            
+            MediaType mtUTF8 = new MediaType(lang.getContentType(), UTF8_PARAM);
+            // avoid adding duplicates. Cannot use Set because ordering is important
+            if (!writableResultSetList.contains(mtUTF8)) writableResultSetList.add(mtUTF8);
         }
 
         readableMap.put(ResultSet.class, Collections.unmodifiableList(readableResultSetList));

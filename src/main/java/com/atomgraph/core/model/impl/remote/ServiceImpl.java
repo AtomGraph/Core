@@ -147,12 +147,14 @@ public class ServiceImpl implements RemoteService
     }
     
     @Override
+    @Deprecated
     public DatasetAccessor getDatasetAccessor()
     {
         return new DatasetAccessorImpl(getGraphStoreClient());
     }
 
     @Override
+    @Deprecated
     public DatasetQuadAccessor getDatasetQuadAccessor()
     {
         return new DatasetQuadAccessorImpl(getQuadStoreClient());
