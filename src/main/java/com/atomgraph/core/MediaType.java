@@ -19,6 +19,7 @@ package com.atomgraph.core;
 import java.util.Map;
 import org.apache.jena.atlas.web.ContentType;
 import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.resultset.ResultSetLang;
 
 /**
  * Extends standard JAX-RS media type with RDF media types
@@ -54,41 +55,41 @@ public class MediaType extends jakarta.ws.rs.core.MediaType
     /** "application/n-quads" */
     public final static MediaType TEXT_NQUADS_TYPE = new MediaType(Lang.NQUADS.getContentType().getType(), Lang.NQUADS.getContentType().getSubType());
 
+    /** "application/ld+json" */
+    public final static String APPLICATION_LD_JSON = Lang.JSONLD.getContentType().getContentTypeStr();
+    /** "application/ld+json" */
+    public final static MediaType APPLICATION_LD_JSON_TYPE = new MediaType(Lang.JSONLD.getContentType().getType(), Lang.JSONLD.getContentType().getSubType());
+
     /** "application/sparql-results+xml" */
-    public final static String APPLICATION_SPARQL_RESULTS_XML = "application/sparql-results+xml";
+    public final static String APPLICATION_SPARQL_RESULTS_XML = ResultSetLang.RS_XML.getContentType().getContentTypeStr();
     /** "application/sparql-results+xml" */
-    public final static MediaType APPLICATION_SPARQL_RESULTS_XML_TYPE = new MediaType("application","sparql-results+xml");
+    public final static MediaType APPLICATION_SPARQL_RESULTS_XML_TYPE = new MediaType(ResultSetLang.RS_XML.getContentType().getType(), ResultSetLang.RS_XML.getContentType().getSubType());
 
     /** "application/sparql-results+json" */
-    public final static String APPLICATION_SPARQL_RESULTS_JSON = "application/sparql-results+json";
+    public final static String APPLICATION_SPARQL_RESULTS_JSON = ResultSetLang.RS_JSON.getContentType().getContentTypeStr();
     /** "application/sparql-results+json" */
-    public final static MediaType APPLICATION_SPARQL_RESULTS_JSON_TYPE = new MediaType("application","sparql-results+json");
+    public final static MediaType APPLICATION_SPARQL_RESULTS_JSON_TYPE = new MediaType(ResultSetLang.RS_JSON.getContentType().getType(), ResultSetLang.RS_JSON.getContentType().getSubType());
 
     /** "text/csv" */
-    public final static String APPLICATION_SPARQL_RESULTS_CSV = "text/csv";
+    public final static String APPLICATION_SPARQL_RESULTS_CSV = ResultSetLang.RS_CSV.getContentType().getContentTypeStr();
     /** "text/csv" */
-    public final static MediaType APPLICATION_SPARQL_RESULTS_CSV_TYPE = new MediaType("text","csv");
+    public final static MediaType APPLICATION_SPARQL_RESULTS_CSV_TYPE = new MediaType(ResultSetLang.RS_CSV.getContentType().getType(), ResultSetLang.RS_CSV.getContentType().getSubType());
     
     /** "text/tab-separated-values" */
-    public final static String APPLICATION_SPARQL_RESULTS_TSV = "text/tab-separated-values";
+    public final static String APPLICATION_SPARQL_RESULTS_TSV = ResultSetLang.RS_TSV.getContentType().getContentTypeStr();
     /** "text/tab-separated-values" */
-    public final static MediaType APPLICATION_SPARQL_RESULTS_TSV_TYPE = new MediaType("text","tab-separated-values");
+    public final static MediaType APPLICATION_SPARQL_RESULTS_TSV_TYPE = new MediaType(ResultSetLang.RS_TSV.getContentType().getType(), ResultSetLang.RS_TSV.getContentType().getSubType());
 
     /** "application/sparql-query" */
     public final static String APPLICATION_SPARQL_QUERY = "application/sparql-query";
     /** "application/sparql-query" */
-    public final static MediaType APPLICATION_SPARQL_QUERY_TYPE = new MediaType("application","sparql-query");
+    public final static MediaType APPLICATION_SPARQL_QUERY_TYPE = new MediaType("application", "sparql-query");
 
     /** "application/sparql-update" */
     public final static String APPLICATION_SPARQL_UPDATE = "application/sparql-update";
     /** "application/sparql-update" */
-    public final static MediaType APPLICATION_SPARQL_UPDATE_TYPE = new MediaType("application","sparql-update");
+    public final static MediaType APPLICATION_SPARQL_UPDATE_TYPE = new MediaType("application", "sparql-update");
     
-    /** "application/ld+json" */
-    public final static String APPLICATION_LD_JSON = "application/ld+json";
-    /** "application/ld+json" */
-    public final static MediaType APPLICATION_LD_JSON_TYPE = new MediaType("application","ld+json");
-
     /** "application/rdf+x-www-form-urlencoded" */
     public final static String APPLICATION_RDF_URLENCODED = "application/rdf+x-www-form-urlencoded";
     /** "application/rdf+x-www-form-urlencoded" */
