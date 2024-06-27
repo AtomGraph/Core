@@ -49,28 +49,7 @@ public class MediaTypes
     }
     
     private final Map<Class, List<jakarta.ws.rs.core.MediaType>> readable, writable;
-    
-    public static boolean isTriples(jakarta.ws.rs.core.MediaType mediaType)
-    {
-        jakarta.ws.rs.core.MediaType formatType = new jakarta.ws.rs.core.MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
-        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
-        return lang != null && RDFLanguages.isTriples(lang);
-    }
-    
-    public static boolean isQuads(jakarta.ws.rs.core.MediaType mediaType)
-    {
-        jakarta.ws.rs.core.MediaType formatType = new jakarta.ws.rs.core.MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
-        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
-        return lang != null && RDFLanguages.isQuads(lang);
-    }
-    
-    public static boolean isResultSet(jakarta.ws.rs.core.MediaType mediaType)
-    {
-        jakarta.ws.rs.core.MediaType formatType = new jakarta.ws.rs.core.MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
-        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
-        return lang != null;
-    }
-    
+
     public MediaTypes(Map<Class, List<jakarta.ws.rs.core.MediaType>> readable, Map<Class, List<jakarta.ws.rs.core.MediaType>> writable)
     {
         if (readable == null) throw new IllegalArgumentException("Map of readable MediaTypes must be not null");

@@ -16,11 +16,8 @@
 
 package com.atomgraph.core.io;
 
-import com.atomgraph.core.MediaTypes;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
-import org.apache.jena.shared.NoReaderForLangException;
-import org.apache.jena.shared.NoWriterForLangException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -32,9 +29,12 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.MessageBodyWriter;
 import jakarta.ws.rs.ext.Provider;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFLanguages;
+import org.apache.jena.riot.RDFParserRegistry;
+import org.apache.jena.riot.RDFWriterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +61,10 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-        return (type == Dataset.class && (MediaTypes.isQuads(mediaType) || MediaTypes.isTriples(mediaType)));
+        MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
+        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
+        if (lang == null) return false;
+        return type == Model.class && RDFParserRegistry.isRegistered(lang); // can write both quads and triples (default graph)
     }
 
     @Override
@@ -72,12 +75,7 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
         Dataset dataset = DatasetFactory.create();
 
         MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
-        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
-        if (lang == null)
-        {
-            if (log.isDebugEnabled()) log.debug("MediaType '{}' not supported by Jena", formatType);
-            throw new NoReaderForLangException(formatType.toString());
-        }
+        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString()); // cannot be null - isReadable() checks that
 
         String baseURI = null;
         // attempt to retrieve base URI from a special-purpose header (workaround for JAX-RS 1.x limitation)
@@ -93,7 +91,10 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-        return (Dataset.class.isAssignableFrom(type) && (MediaTypes.isQuads(mediaType) || MediaTypes.isTriples(mediaType)));
+        MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
+        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
+        if (lang == null) return false;
+        return Model.class.isAssignableFrom(type) && RDFWriterRegistry.contains(lang); // can write both quads and triples (default graph)
     }
 
     @Override
@@ -108,15 +109,10 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
         if (log.isTraceEnabled()) log.trace("Writing Dataset with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
 
         MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
-        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
-        if (lang == null)
-        {
-            if (log.isDebugEnabled()) log.debug("MediaType '{}' not supported by Jena", formatType);
-            throw new NoWriterForLangException(formatType.toString());
-        }
+        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString()); // cannot be null - isWritable() checks that
         
         // if we need to provide triples, then we write only the default graph of the dataset
-        if (MediaTypes.isTriples(mediaType)) dataset.getDefaultModel().write(entityStream, lang.getName());
+        if (RDFLanguages.isTriples(lang)) dataset.getDefaultModel().write(entityStream, lang.getName());
         else RDFDataMgr.write(entityStream, dataset, lang);
     }
     

@@ -35,7 +35,6 @@ import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.ResultSetMgr;
 import org.apache.jena.riot.resultset.ResultSetReaderRegistry;
 import org.apache.jena.riot.resultset.ResultSetWriterRegistry;
-import org.apache.jena.shared.NoReaderForLangException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +58,7 @@ public class ResultSetProvider implements MessageBodyReader<ResultSetRewindable>
     {
         MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
         Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
+        if (lang == null) return false;
         return type == ResultSetRewindable.class && ResultSetReaderRegistry.isRegistered(lang);
     }
 
@@ -68,12 +68,7 @@ public class ResultSetProvider implements MessageBodyReader<ResultSetRewindable>
         if (log.isTraceEnabled()) log.trace("Reading ResultSet with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
         
         MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
-        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
-        if (lang == null)
-        {
-            if (log.isDebugEnabled()) log.debug("MediaType '{}' not supported by Jena", formatType);
-            throw new NoReaderForLangException(formatType.toString());
-        }
+        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString()); // cannot be null - isReadable() checks that
         if (log.isDebugEnabled()) log.debug("RDF language used to read ResultSet: {}", lang);
 
         // result set needs to be rewindable because results might be processed multiple times, e.g. to calculate hash and write response
@@ -85,6 +80,7 @@ public class ResultSetProvider implements MessageBodyReader<ResultSetRewindable>
     {
         MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
         Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
+        if (lang == null) return false;
         return ResultSet.class.isAssignableFrom(type) && ResultSetWriterRegistry.isRegistered(lang);
     }
 
@@ -100,12 +96,7 @@ public class ResultSetProvider implements MessageBodyReader<ResultSetRewindable>
         if (log.isTraceEnabled()) log.trace("Writing ResultSet with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
 
         MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
-        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
-        if (lang == null)
-        {
-            if (log.isDebugEnabled()) log.debug("MediaType '{}' not supported by Jena", formatType);
-            throw new NoReaderForLangException(formatType.toString());
-        }
+        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString()); // cannot be null - isWritable() checks that
         if (log.isDebugEnabled()) log.debug("RDF language used to write ResultSet: {}", lang);
         
         ResultSetFormatter.output(entityStream, results, lang);

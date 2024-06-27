@@ -16,11 +16,8 @@
  */
 package com.atomgraph.core.io;
 
-import com.atomgraph.core.MediaTypes;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.shared.NoReaderForLangException;
-import org.apache.jena.shared.NoWriterForLangException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -34,6 +31,8 @@ import jakarta.ws.rs.ext.Provider;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.RDFParser;
+import org.apache.jena.riot.RDFParserRegistry;
+import org.apache.jena.riot.RDFWriterRegistry;
 import org.apache.jena.riot.system.ErrorHandler;
 import org.apache.jena.riot.system.ErrorHandlerFactory;
 import org.apache.jena.riot.system.StreamRDFLib;
@@ -62,7 +61,10 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-        return type == Model.class && MediaTypes.isTriples(mediaType);
+        MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
+        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
+        if (lang == null) return false;
+        return type == Model.class && RDFParserRegistry.isRegistered(lang) && RDFLanguages.isTriples(lang);
     }
 
     @Override
@@ -73,12 +75,7 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
         Model model = ModelFactory.createDefaultModel();
 
         MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
-        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
-        if (lang == null)
-        {
-            if (log.isDebugEnabled()) log.debug("MediaType '{}' not supported by Jena", formatType);
-            throw new NoReaderForLangException(formatType.toString());
-        }
+        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString()); // cannot be null - isReadable() checks that
         if (log.isDebugEnabled()) log.debug("RDF language used to read Model: {}", lang);
         
         String baseURI = null;
@@ -118,7 +115,10 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-        return Model.class.isAssignableFrom(type) && MediaTypes.isTriples(mediaType);
+        MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
+        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
+        if (lang == null) return false;
+        return Model.class.isAssignableFrom(type) && RDFWriterRegistry.contains(lang) && RDFLanguages.isTriples(lang);
     }
 
     @Override
@@ -133,12 +133,7 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
         if (log.isTraceEnabled()) log.trace("Writing Model with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
 
         MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
-        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
-        if (lang == null)
-        {
-            if (log.isErrorEnabled()) log.error("MediaType '{}' not supported by Jena", formatType);
-            throw new NoWriterForLangException("MediaType not supported: " + formatType);
-        }
+        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString()); // cannot be null - isWritable() checks that
         if (log.isDebugEnabled()) log.debug("RDF language used to read Model: {}", lang);
         
         String baseURI = null;
