@@ -64,6 +64,13 @@ public class MediaTypes
         return lang != null && RDFLanguages.isQuads(lang);
     }
     
+    public static boolean isResultSet(jakarta.ws.rs.core.MediaType mediaType)
+    {
+        jakarta.ws.rs.core.MediaType formatType = new jakarta.ws.rs.core.MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
+        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
+        return lang != null;
+    }
+    
     public MediaTypes(Map<Class, List<jakarta.ws.rs.core.MediaType>> readable, Map<Class, List<jakarta.ws.rs.core.MediaType>> writable)
     {
         if (readable == null) throw new IllegalArgumentException("Map of readable MediaTypes must be not null");
@@ -154,7 +161,7 @@ public class MediaTypes
             final MediaType mt;
             // prioritize reading SPARQL-Results-Protobuf because they're most efficient
             // don't add charset=UTF-8 param on readable types
-            if (lang.equals(ResultSetLang.RS_Protobuf))
+            if (lang.equals(ResultSetLang.RS_Protobuf) || lang.equals(ResultSetLang.RS_Thrift))
                 mt = new MediaType(lang.getContentType(), Map.ofEntries(Map.entry("q", "0.7")));
             else
             {

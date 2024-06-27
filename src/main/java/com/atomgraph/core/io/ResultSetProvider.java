@@ -25,15 +25,17 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.MessageBodyWriter;
 import jakarta.ws.rs.ext.Provider;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.ResultSetMgr;
-import org.apache.jena.riot.resultset.ResultSetLang;
+import org.apache.jena.riot.resultset.ResultSetReaderRegistry;
+import org.apache.jena.riot.resultset.ResultSetWriterRegistry;
+import org.apache.jena.shared.NoReaderForLangException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,47 +54,38 @@ public class ResultSetProvider implements MessageBodyReader<ResultSetRewindable>
 {
     private static final Logger log = LoggerFactory.getLogger(ResultSetProvider.class);
     
-    public static final List<MediaType> RESULT_SET_TYPES = new ArrayList<>();
-    static
-    {
-        RESULT_SET_TYPES.add(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE);
-        RESULT_SET_TYPES.add(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE);
-        RESULT_SET_TYPES.add(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_CSV_TYPE);
-        RESULT_SET_TYPES.add(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_TSV_TYPE);
-    }
-    
-    public static boolean isResultSetType(MediaType mediaType)
-    {
-        return RESULT_SET_TYPES.stream().anyMatch(mt -> (mt.isCompatible(mediaType)));
-    }
-    
     @Override
     public boolean isReadable(Class<?> type, Type type1, Annotation[] antns, jakarta.ws.rs.core.MediaType mediaType)
     {
-        return type == ResultSetRewindable.class && isResultSetType(mediaType);
+        MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
+        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
+        return type == ResultSetRewindable.class && ResultSetReaderRegistry.isRegistered(lang);
     }
 
     @Override
     public ResultSetRewindable readFrom(Class<ResultSetRewindable> type, Type type1, Annotation[] antns, jakarta.ws.rs.core.MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream in) throws IOException
     {
         if (log.isTraceEnabled()) log.trace("Reading ResultSet with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
-        // result set needs to be rewindable because results might be processed multiple times, e.g. to calculate hash and write response
-        if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE))
-            return ResultSetFactory.makeRewindable(ResultSetMgr.read(in, ResultSetLang.RS_XML));
-        if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
-            return ResultSetFactory.makeRewindable(ResultSetMgr.read(in, ResultSetLang.RS_JSON));
-        if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_CSV_TYPE))
-            return ResultSetFactory.makeRewindable(ResultSetMgr.read(in, ResultSetLang.RS_CSV));
-        if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_TSV_TYPE))
-            return ResultSetFactory.makeRewindable(ResultSetMgr.read(in, ResultSetLang.RS_TSV));
         
-        throw new IllegalStateException("ResultSet MediaType should be readable but no Jena reader matched");
+        MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
+        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
+        if (lang == null)
+        {
+            if (log.isDebugEnabled()) log.debug("MediaType '{}' not supported by Jena", formatType);
+            throw new NoReaderForLangException(formatType.toString());
+        }
+        if (log.isDebugEnabled()) log.debug("RDF language used to read ResultSet: {}", lang);
+
+        // result set needs to be rewindable because results might be processed multiple times, e.g. to calculate hash and write response
+        return ResultSetFactory.makeRewindable(ResultSetMgr.read(in, lang));
     }
     
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-        return ResultSet.class.isAssignableFrom(type) && isResultSetType(mediaType);
+        MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
+        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
+        return ResultSet.class.isAssignableFrom(type) && ResultSetWriterRegistry.isRegistered(lang);
     }
 
     @Override
@@ -106,29 +99,16 @@ public class ResultSetProvider implements MessageBodyReader<ResultSetRewindable>
     {
         if (log.isTraceEnabled()) log.trace("Writing ResultSet with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
 
-        //  TO-DO: construct Jena's ResultFormat and then pass to ResultSetFormatter.output(outStream, resultSet, rFmt)
-        if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE))
+        MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
+        Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
+        if (lang == null)
         {
-            ResultSetFormatter.outputAsXML(entityStream, results);
-            return;
+            if (log.isDebugEnabled()) log.debug("MediaType '{}' not supported by Jena", formatType);
+            throw new NoReaderForLangException(formatType.toString());
         }
-        if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
-        {
-            ResultSetFormatter.outputAsJSON(entityStream, results);
-            return;
-        }
-        if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_CSV_TYPE))
-        {
-            ResultSetFormatter.outputAsCSV(entityStream, results);
-            return;
-        }
-        if (mediaType.isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_TSV_TYPE))
-        {
-            ResultSetFormatter.outputAsTSV(entityStream, results);
-            return;
-        }
+        if (log.isDebugEnabled()) log.debug("RDF language used to write ResultSet: {}", lang);
         
-        throw new IllegalStateException("ResultSet MediaType should be writable but no Jena writer matched");
+        ResultSetFormatter.output(entityStream, results, lang);
     }
     
 }

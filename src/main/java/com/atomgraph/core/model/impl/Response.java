@@ -150,7 +150,7 @@ public class Response
     {
         return getResponseBuilder(getLastModified(), getVariantEntityTag());
     }
-        
+    
     /**
      * Evaluates request preconditions based on last modified date and/or entity tag.
      * 

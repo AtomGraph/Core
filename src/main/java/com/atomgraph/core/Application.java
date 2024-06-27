@@ -49,6 +49,7 @@ import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.resultset.ResultSetLang;
 import org.apache.jena.util.LocationMapper;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.client.ClientConfig;
@@ -93,7 +94,7 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
             servletConfig.getInitParameter(A.authUser.getURI()) != null ? servletConfig.getInitParameter(A.authUser.getURI()) : null,
             servletConfig.getInitParameter(A.authPwd.getURI()) != null ? servletConfig.getInitParameter(A.authPwd.getURI()) : null,
             new MediaTypes(), getClient(new ClientConfig()),
-            servletConfig.getInitParameter(A.maxGetRequestSize.getURI()) != null ? Integer.parseInt(servletConfig.getInitParameter(A.maxGetRequestSize.getURI())) : null,
+            servletConfig.getInitParameter(A.maxGetRequestSize.getURI()) != null ? Integer.valueOf(servletConfig.getInitParameter(A.maxGetRequestSize.getURI())) : null,
             servletConfig.getInitParameter(A.cacheModelLoads.getURI()) != null ? Boolean.parseBoolean(servletConfig.getInitParameter(A.cacheModelLoads.getURI())) : false,
             servletConfig.getInitParameter(A.preemptiveAuth.getURI()) != null ? Boolean.parseBoolean(servletConfig.getInitParameter(A.preemptiveAuth.getURI())) : false
         );
@@ -114,6 +115,16 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
         // add RDF/POST serializer
         RDFLanguages.register(RDFLanguages.RDFPOST);
         RDFParserRegistry.registerLangTriples(RDFLanguages.RDFPOST, new RDFPostReaderFactory());
+        
+        // register ResultSet languages until we start using Jena 5.x with https://github.com/apache/jena/pull/2510
+        RDFLanguages.register(ResultSetLang.RS_XML);
+        RDFLanguages.register(ResultSetLang.RS_JSON);
+        RDFLanguages.register(ResultSetLang.RS_CSV);
+        RDFLanguages.register(ResultSetLang.RS_TSV);
+        RDFLanguages.register(ResultSetLang.RS_Thrift);
+        RDFLanguages.register(ResultSetLang.RS_Protobuf);
+        // Not output-only text.
+        RDFLanguages.register(ResultSetLang.RS_None);
         
         if (dataset != null)
             service = new com.atomgraph.core.model.impl.dataset.ServiceImpl(dataset, mediaTypes);

@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see <a href="https://www.w3.org/TR/sparql11-http-rdf-update/">SPARQL 1.1 Graph Store HTTP Protocol</a>
  */
-public class GraphStoreClient extends EndpointClientBase implements DatasetAccessor
+public class GraphStoreClient extends EndpointClientBase implements DatasetAccessor // TO-DO: make DatasetAccessor a subclass of this and return nulls
 {
     private static final Logger log = LoggerFactory.getLogger(GraphStoreClient.class);
     
