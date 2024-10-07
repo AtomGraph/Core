@@ -76,13 +76,14 @@ public class MediaTypes
             final MediaType mt;
             // prioritize reading RDF Thrift and N-Triples because they're most efficient
             // don't add charset=UTF-8 param on readable types
-            if (lang.equals(RDFLanguages.RDFTHRIFT)) mt = new MediaType(lang.getContentType()); // q=1
+            if (lang.equals(RDFLanguages.RDFTHRIFT))
+                mt = new MediaType(lang.getContentType(), Map.ofEntries(Map.entry("q", "0.7")));
             else
             {
                 if (lang.equals(RDFLanguages.NTRIPLES))
-                    mt = new MediaType(lang.getContentType(), Map.ofEntries(Map.entry("q", "0.9")));
+                    mt = new MediaType(lang.getContentType(), Map.ofEntries(Map.entry("q", "0.6")));
                 else
-                    mt = new MediaType(lang.getContentType(), Map.ofEntries(Map.entry("q", "0.8")));
+                    mt = new MediaType(lang.getContentType(), Map.ofEntries(Map.entry("q", "0.5")));
             }
 
             // avoid adding duplicates. Cannot use Set because ordering is important
@@ -97,13 +98,14 @@ public class MediaTypes
             final MediaType mt;
             // prioritize reading RDF Thrift and N-Triples because they're most efficient
             // don't add charset=UTF-8 param on readable types
-            if (lang.equals(RDFLanguages.RDFTHRIFT)) mt = new MediaType(lang.getContentType()); // q=1
+            if (lang.equals(RDFLanguages.RDFTHRIFT))
+                mt = new MediaType(lang.getContentType(), Map.ofEntries(Map.entry("q", "0.7")));
             else
             {
                 if (lang.equals(RDFLanguages.NQUADS))
-                    mt = new MediaType(lang.getContentType(), Map.ofEntries(Map.entry("q", "0.9")));
+                    mt = new MediaType(lang.getContentType(), Map.ofEntries(Map.entry("q", "0.6")));
                 else
-                    mt = new MediaType(lang.getContentType(), Map.ofEntries(Map.entry("q", "0.8")));
+                    mt = new MediaType(lang.getContentType(), Map.ofEntries(Map.entry("q", "0.5")));
             }
 
             // avoid adding duplicates. Cannot use Set because ordering is important
@@ -133,6 +135,7 @@ public class MediaTypes
         List<jakarta.ws.rs.core.MediaType> readableResultSetList = new ArrayList<>();
         List<jakarta.ws.rs.core.MediaType> writableResultSetList = new ArrayList<>();
 
+        // SPARQL results formats need to be prioritized above RDF graph formats!
         for (Lang lang : ResultSetReaderRegistry.registered())
         {
             if (lang.equals(ResultSetLang.RS_None)) continue;
@@ -141,13 +144,13 @@ public class MediaTypes
             // prioritize reading SPARQL-Results-Protobuf because they're most efficient
             // don't add charset=UTF-8 param on readable types
             if (lang.equals(ResultSetLang.RS_Protobuf) || lang.equals(ResultSetLang.RS_Thrift))
-                mt = new MediaType(lang.getContentType(), Map.ofEntries(Map.entry("q", "0.7")));
+                mt = new MediaType(lang.getContentType()); // q=1
             else
             {
                 if (lang.equals(ResultSetLang.RS_JSON) || lang.equals(ResultSetLang.RS_XML))
-                    mt = new MediaType(lang.getContentType(), Map.ofEntries(Map.entry("q", "0.6")));
+                    mt = new MediaType(lang.getContentType(), Map.ofEntries(Map.entry("q", "0.9")));
                 else
-                    mt = new MediaType(lang.getContentType(), Map.ofEntries(Map.entry("q", "0.5")));
+                    mt = new MediaType(lang.getContentType(), Map.ofEntries(Map.entry("q", "0.8")));
             }
             
             if (!readableResultSetList.contains(mt)) readableResultSetList.add(mt);
