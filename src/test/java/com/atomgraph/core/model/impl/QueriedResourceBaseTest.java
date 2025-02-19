@@ -23,6 +23,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Request;
 import static jakarta.ws.rs.core.Response.Status.BAD_REQUEST;
@@ -30,6 +31,7 @@ import static jakarta.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
 import static jakarta.ws.rs.core.Response.Status.NOT_FOUND;
 import static jakarta.ws.rs.core.Response.Status.UNSUPPORTED_MEDIA_TYPE;
 import jakarta.ws.rs.core.UriInfo;
+import java.util.Arrays;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.ResultSet;
@@ -40,6 +42,7 @@ import org.apache.jena.sparql.vocabulary.FOAF;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -146,4 +149,19 @@ public class QueriedResourceBaseTest extends JerseyTest
         if (!wanted.isIsomorphicWith(got))
             fail("Models not isomorphic (not structurally equal))");
     }
+
+    @Test
+    public void testDifferentMediaTypesDifferentETags()
+    {
+        jakarta.ws.rs.core.Response nTriplesResp = ldc.get(uri, Arrays.asList(com.atomgraph.core.MediaType.APPLICATION_NTRIPLES_TYPE).toArray(com.atomgraph.core.MediaType[]::new));
+        EntityTag nTriplesETag = nTriplesResp.getEntityTag();
+        assertEquals(nTriplesResp.getLanguage(), null);
+
+        jakarta.ws.rs.core.Response rdfXmlResp = ldc.get(uri, Arrays.asList(com.atomgraph.core.MediaType.APPLICATION_RDF_XML_TYPE).toArray(com.atomgraph.core.MediaType[]::new));
+        EntityTag rdfXmlETag = rdfXmlResp.getEntityTag();
+        assertEquals(rdfXmlResp.getLanguage(), null);
+        
+        assertNotEquals(nTriplesETag, rdfXmlETag);
+    }
+    
 }

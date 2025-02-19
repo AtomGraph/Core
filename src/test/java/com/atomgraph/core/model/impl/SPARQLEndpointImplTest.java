@@ -18,11 +18,14 @@ package com.atomgraph.core.model.impl;
 import static com.atomgraph.core.MediaType.APPLICATION_SPARQL_QUERY_TYPE;
 import static com.atomgraph.core.MediaType.APPLICATION_SPARQL_UPDATE_TYPE;
 import com.atomgraph.core.MediaTypes;
+import static com.atomgraph.core.client.GraphStoreClient.GRAPH_PARAM_NAME;
 import com.atomgraph.core.client.SPARQLClient;
 import static com.atomgraph.core.client.SPARQLClient.QUERY_PARAM_NAME;
 import static com.atomgraph.core.client.SPARQLClient.UPDATE_PARAM_NAME;
+import static com.atomgraph.core.model.impl.GraphStoreImplTest.NAMED_GRAPH_URI;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Application;
+import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.Form;
 import jakarta.ws.rs.core.MediaType;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED_TYPE;
@@ -30,6 +33,7 @@ import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import static jakarta.ws.rs.core.Response.Status.BAD_REQUEST;
 import static jakarta.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
+import java.util.Arrays;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
@@ -42,6 +46,7 @@ import org.apache.jena.sparql.vocabulary.FOAF;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Before;
@@ -229,6 +234,23 @@ public class SPARQLEndpointImplTest extends JerseyTest
     {
         if (!wanted.isIsomorphicWith(got))
             fail("Models not isomorphic (not structurally equal))");
+    }
+    
+    @Test
+    public void testDifferentMediaTypesDifferentETags()
+    {
+        MultivaluedMap<String, String> params = new MultivaluedHashMap();
+        params.add(QUERY_PARAM_NAME, "CONSTRUCT WHERE { ?s ?p ?o }");
+        
+        jakarta.ws.rs.core.Response nTriplesResp = sc.get(Arrays.asList(com.atomgraph.core.MediaType.APPLICATION_NTRIPLES_TYPE).toArray(com.atomgraph.core.MediaType[]::new), params);
+        EntityTag nTriplesETag = nTriplesResp.getEntityTag();
+        assertEquals(nTriplesResp.getLanguage(), null);
+
+        jakarta.ws.rs.core.Response rdfXmlResp = sc.get(Arrays.asList(com.atomgraph.core.MediaType.APPLICATION_RDF_XML_TYPE).toArray(com.atomgraph.core.MediaType[]::new), params);
+        EntityTag rdfXmlETag = rdfXmlResp.getEntityTag();
+        assertEquals(rdfXmlResp.getLanguage(), null);
+        
+        assertNotEquals(nTriplesETag, rdfXmlETag);
     }
     
 }

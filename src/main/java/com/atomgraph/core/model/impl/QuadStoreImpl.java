@@ -96,15 +96,15 @@ public class QuadStoreImpl implements QuadStore
                 null,
                 getEntityTag(dataset),
                 getWritableMediaTypes(Dataset.class),
-                Collections.<Locale>emptyList(),
-                Collections.<String>emptyList()).
+                getLanguages(),
+                getEncodings()).
             getResponseBuilder();
     }
     
     /**
      * Generate the <code>ETag</code> response header value of the current RDF dataset.
      * 
-     * @param model RDF dataset
+     * @param dataset RDF dataset
      * @return hash value
      */
     public EntityTag getEntityTag(Dataset dataset)
