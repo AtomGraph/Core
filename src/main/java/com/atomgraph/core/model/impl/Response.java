@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import jakarta.ws.rs.NotAcceptableException;
+import java.util.function.Predicate;
 import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,13 +44,24 @@ import org.slf4j.LoggerFactory;
 public class Response
 {
     private static final Logger log = LoggerFactory.getLogger(Response.class);
-
+ 
     private final Request request;
     private final Object entity;
     private final Date lastModified;
     private final EntityTag entityTag;
     private final Variant variant;
 
+    /**
+     * A predicate to decide if a media type is language-significant.
+     * When true, the language is preserved in the ETag calculation.
+     */
+    private final Predicate<MediaType> isMediaTypeLangSignificant;
+    
+    public Response(Request request, Object entity, Date lastModified, EntityTag entityTag, List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings)
+    {
+        this(request, entity, lastModified, entityTag, getVariants(mediaTypes, languages, encodings), mediaType -> false);
+    }
+    
     /**
      * Builds model response from request.
      * 
@@ -60,10 +72,11 @@ public class Response
      * @param languages content languages
      * @param encodings content type encodings
      * @param entityTag entity tag
+     * @param isMediaTypeLangSignificant predicate indicating if language is significant
      */
-    public Response(Request request, Object entity, Date lastModified, EntityTag entityTag, List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings)
+    public Response(Request request, Object entity, Date lastModified, EntityTag entityTag, List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings, Predicate<MediaType> isMediaTypeLangSignificant)
     {
-        this(request, entity, lastModified, entityTag, getVariantListBuilder(mediaTypes, languages, encodings).add().build());
+        this(request, entity, lastModified, entityTag, getVariants(mediaTypes, languages, encodings, isMediaTypeLangSignificant), isMediaTypeLangSignificant);
     }
 
     /**
@@ -74,13 +87,14 @@ public class Response
      * @param lastModified last modified date
      * @param entityTag entity tag
      * @param variants media type variants
+     * @param isMediaTypeLangSignificant predicate indicating if language is significant
      */
-    public Response(Request request, Object entity, Date lastModified, EntityTag entityTag, List<Variant> variants)
+    public Response(Request request, Object entity, Date lastModified, EntityTag entityTag, List<Variant> variants, Predicate<MediaType> isMediaTypeLangSignificant)
     {
-        this(request, entity, lastModified, entityTag, request.selectVariant(variants) != null ? request.selectVariant(variants) : request.selectVariant(removeLanguages(variants)));
+        this(request, entity, lastModified, entityTag, request.selectVariant(variants) != null ? request.selectVariant(variants) : request.selectVariant(removeLanguages(variants)), isMediaTypeLangSignificant);
     }
 
-    public Response(Request request, Object entity, Date lastModified, EntityTag entityTag, Variant variant) throws NotAcceptableException
+    public Response(Request request, Object entity, Date lastModified, EntityTag entityTag, Variant variant, Predicate<MediaType> isMediaTypeLangSignificant) throws NotAcceptableException
     {
         if (request == null) throw new IllegalArgumentException("Request cannot be null");
         if (entity == null) throw new IllegalArgumentException("Object cannot be null");
@@ -95,24 +109,103 @@ public class Response
         this.lastModified = lastModified;
         this.entityTag = entityTag;
         this.variant = variant;
+        this.isMediaTypeLangSignificant = isMediaTypeLangSignificant;
+    }
+
+    public static List<Variant> getVariants(List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings)
+    {
+        return getVariants(mediaTypes, languages, encodings, mediaType -> false);
     }
 
     /**
-     * Produces a Variant builder from a list of media types.
-     * 
-     * @param mediaTypes
-     * @param languages
-     * @param encodings
-     * @return variant builder
-     */    
-    public static Variant.VariantListBuilder getVariantListBuilder(List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings)
+     * Builds the list of Variants based on the provided media types, languages, and encodings.
+     * For media types that are language-significant (as determined by isMediaTypeLangSignificant), the provided languages are included.
+     * Otherwise, the language is ignored.
+     *
+     * @param mediaTypes the list of media types
+     * @param languages the list of locales
+     * @param encodings the list of encodings
+     * @param isMediaTypeLangSignificant determines whether language is significant for given media type
+     * @return a list of Variants to be used for content negotiation
+     */
+    public static List<Variant> getVariants(List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings, Predicate<MediaType> isMediaTypeLangSignificant)
     {
-        return Variant.VariantListBuilder.newInstance().
-                mediaTypes(mediaTypes.toArray(MediaType[]::new)).
-                languages(languages.toArray(Locale[]::new)).
-                encodings(encodings.toArray(String[]::new));
+        Variant.VariantListBuilder builder = Variant.VariantListBuilder.newInstance();
+
+        for (MediaType mediaType : mediaTypes)
+        {
+            // Determine whether to include languages based on the predicate.
+            if (isMediaTypeLangSignificant.test(mediaType))
+            {
+                if (languages != null && !languages.isEmpty())
+                {
+                    for (Locale locale : languages)
+                    {
+                        if (encodings != null && !encodings.isEmpty())
+                        {
+                            for (String encoding : encodings)
+                            {
+                                builder.mediaTypes(mediaType)
+                                       .languages(locale)
+                                       .encodings(encoding)
+                                       .add();
+                            }
+                        }
+                        else
+                        {
+                            builder.mediaTypes(mediaType)
+                                   .languages(locale)
+                                   .add();
+                        }
+                    }
+                }
+                else
+                {
+                    // Media type is language-significant but no locales provided.
+                    if (encodings != null && !encodings.isEmpty())
+                    {
+                        for (String encoding : encodings)
+                        {
+                            builder.mediaTypes(mediaType)
+                                   .languages((Locale) null)
+                                   .encodings(encoding)
+                                   .add();
+                        }
+                    }
+                    else
+                    {
+                        builder.mediaTypes(mediaType)
+                               .languages((Locale) null)
+                               .add();
+                    }
+                }
+            }
+            else
+            {
+                // For non-language-significant media types, always set language to null.
+                if (encodings != null && !encodings.isEmpty())
+                {
+                    for (String encoding : encodings)
+                    {
+                        builder.mediaTypes(mediaType)
+                               .languages((Locale) null)
+                               .encodings(encoding)
+                               .add();
+                    }
+                }
+                else
+                {
+                    builder.mediaTypes(mediaType)
+                           .languages((Locale) null)
+                           .add();
+                }
+            }
+        }
+        
+        // Build and return the list of variants.
+        return builder.build();
     }
-    
+
     /**
      * Clones variants while stripping languages.
      * 
@@ -213,7 +306,8 @@ public class Response
         if (getEntityTag() != null)
         {
             BigInteger entityTagHash = new BigInteger(getEntityTag().getValue(), 16);
-            entityTagHash = entityTagHash.add(BigInteger.valueOf(getVariant().hashCode()));
+            BigInteger variantHash = BigInteger.valueOf(getVariant().hashCode());
+            entityTagHash = entityTagHash.add(variantHash);
             return new EntityTag(entityTagHash.toString(16));
         }
         
@@ -238,6 +332,11 @@ public class Response
         return hash;
     }
 
+    public Predicate<MediaType> getIsMediaTypeLangSignificant()
+    {
+        return isMediaTypeLangSignificant;
+    }
+    
     public Request getRequest()
     {
         return request;

@@ -196,8 +196,8 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
                 null,
                 new EntityTag(Long.toHexString(ModelUtils.hashModel(model))),
                 getWritableMediaTypes(Model.class),
-                Collections.<Locale>emptyList(),
-                Collections.<String>emptyList()).
+                getLanguages(),
+                getEncodings()).
             getResponseBuilder();
     }
         
@@ -217,8 +217,8 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
                 null,
                 new EntityTag(Long.toHexString(hash)),
                 getWritableMediaTypes(ResultSet.class),
-                Collections.<Locale>emptyList(),
-                Collections.<String>emptyList()).
+                getLanguages(),
+                getEncodings()).
             getResponseBuilder();
     }
         

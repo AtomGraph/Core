@@ -29,7 +29,6 @@ import jakarta.ws.rs.core.UriInfo;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.model.Resource;
 import com.atomgraph.core.util.ModelUtils;
-import java.util.Collections;
 import java.util.Date;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.EntityTag;
@@ -126,8 +125,8 @@ public abstract class ResourceBase implements Resource
                 getLastModified(model),
                 getEntityTag(model),
                 getWritableMediaTypes(Model.class),
-                Collections.<Locale>emptyList(),
-                Collections.<String>emptyList()).
+                getLanguages(),
+                getEncodings()).
             getResponseBuilder();
     }
     

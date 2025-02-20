@@ -25,6 +25,7 @@ import jakarta.ws.rs.NotFoundException;
 import java.util.UUID;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Application;
+import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import static jakarta.ws.rs.core.Response.Status.BAD_REQUEST;
@@ -33,6 +34,7 @@ import static jakarta.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
 import static jakarta.ws.rs.core.Response.Status.NOT_FOUND;
 import static jakarta.ws.rs.core.Response.Status.NO_CONTENT;
 import static jakarta.ws.rs.core.Response.Status.UNSUPPORTED_MEDIA_TYPE;
+import java.util.Arrays;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Model;
@@ -42,6 +44,7 @@ import org.apache.jena.sparql.vocabulary.FOAF;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -234,6 +237,23 @@ public class GraphStoreImplTest extends JerseyTest
         params.putSingle(GRAPH_PARAM_NAME, "http://host/" + UUID.randomUUID().toString());
         
         assertEquals(NOT_FOUND.getStatusCode(), gsc.delete(gsc.getReadableMediaTypes(Model.class), params).getStatus());
+    }
+    
+    @Test
+    public void testDifferentMediaTypesDifferentETags()
+    {
+        MultivaluedMap<String, String> params = new MultivaluedHashMap();
+        params.putSingle(GRAPH_PARAM_NAME, NAMED_GRAPH_URI);
+        
+        jakarta.ws.rs.core.Response nTriplesResp = gsc.get(Arrays.asList(MediaType.APPLICATION_NTRIPLES_TYPE).toArray(MediaType[]::new), params);
+        EntityTag nTriplesETag = nTriplesResp.getEntityTag();
+        assertEquals(nTriplesResp.getLanguage(), null);
+
+        jakarta.ws.rs.core.Response rdfXmlResp = gsc.get(Arrays.asList(MediaType.APPLICATION_RDF_XML_TYPE).toArray(MediaType[]::new), params);
+        EntityTag rdfXmlETag = rdfXmlResp.getEntityTag();
+        assertEquals(rdfXmlResp.getLanguage(), null);
+        
+        assertNotEquals(nTriplesETag, rdfXmlETag);
     }
     
 }
