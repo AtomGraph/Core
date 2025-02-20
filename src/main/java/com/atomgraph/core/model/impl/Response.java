@@ -59,7 +59,7 @@ public class Response
     
     public Response(Request request, Object entity, Date lastModified, EntityTag entityTag, List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings)
     {
-        this(request, entity, lastModified, entityTag, getVariants(mediaTypes, languages, encodings), new MediaTypePredicate());
+        this(request, entity, lastModified, entityTag, getVariants(mediaTypes, languages, encodings), mediaType -> false);
     }
     
     /**
@@ -114,7 +114,7 @@ public class Response
 
     public static List<Variant> getVariants(List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings)
     {
-        return getVariants(mediaTypes, languages, encodings, new MediaTypePredicate());
+        return getVariants(mediaTypes, languages, encodings, mediaType -> false);
     }
 
     /**
@@ -362,15 +362,4 @@ public class Response
         return variant;
     }
     
-    public static class MediaTypePredicate implements Predicate<MediaType> 
-    {
-
-        @Override
-        public boolean test(MediaType mediaType)
-        {
-            return false;
-        }
-
-    }
-
 }
