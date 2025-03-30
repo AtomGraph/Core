@@ -16,6 +16,7 @@
  */
 package com.atomgraph.core.io;
 
+import jakarta.ws.rs.core.Context;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import java.io.IOException;
@@ -25,6 +26,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.MessageBodyWriter;
 import jakarta.ws.rs.ext.Provider;
@@ -56,6 +58,8 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
     public static final String REQUEST_URI_HEADER = "X-Request-URI";
     public static final String RESPONSE_URI_HEADER = "X-Response-URI";
     
+    @Context UriInfo uriInfo;
+    
     // READER
     
     @Override
@@ -81,14 +85,14 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
         String baseURI = null;
         // attempt to retrieve base URI from a special-purpose header (workaround for JAX-RS 1.x limitation)
         if (httpHeaders.containsKey(REQUEST_URI_HEADER)) baseURI = httpHeaders.getFirst(REQUEST_URI_HEADER);
+        if (getUriInfo() != null) baseURI = getUriInfo().getAbsolutePath().toString();
 
         return read(model, entityStream, lang, baseURI); // extract base URI from httpHeaders?
     }
 
     public Model read(Model model, InputStream is, Lang lang, String baseURI)
     {
-        ErrorHandler errorHandler = ErrorHandlerFactory.errorHandlerStd; // throw exceptions on all parse errors
-        //ParserProfile parserProfile = RiotLib.profile(baseURI, true, true, errorHandler);
+        ErrorHandler errorHandler = ErrorHandlerFactory.errorHandlerStrict; // throw exceptions on all parse errors
         return read(model, is, lang, baseURI, errorHandler);
     }
     
@@ -101,6 +105,7 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
         RDFParser parser = RDFParser.create().
             lang(lang).
             errorHandler(errorHandler).
+            checking(true). // otherwise exceptions will not be thrown for invalid URIs!
             base(baseURI).
             source(is).
             build();
@@ -139,6 +144,7 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
         String baseURI = null;
         // attempt to retrieve base URI from a special-purpose header (workaround for JAX-RS 1.x limitation)
         if (httpHeaders.containsKey(RESPONSE_URI_HEADER)) baseURI = httpHeaders.getFirst(RESPONSE_URI_HEADER).toString();
+        if (getUriInfo() != null) baseURI = getUriInfo().getAbsolutePath().toString();
 
         write(model, entityStream, lang, baseURI);
     }
@@ -153,6 +159,11 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
         if (log.isDebugEnabled()) log.debug("Syntax used to write Model: {}", syntax);
         
         return model.write(os, syntax);
+    }
+    
+    public UriInfo getUriInfo()
+    {
+        return uriInfo;
     }
     
 }
