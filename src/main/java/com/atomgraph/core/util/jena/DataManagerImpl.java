@@ -19,7 +19,7 @@ package com.atomgraph.core.util.jena;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.util.LocationMapper;
 import java.net.URI;
-import com.atomgraph.core.client.LinkedDataClient;
+import com.atomgraph.core.client.GraphStoreClient;
 import java.util.Map;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
 * @see org.apache.jena.util.FileManager
 * @see org.apache.jena.rdf.model.ModelGetter
-* @see com.atomgraph.core.client.LinkedDataClient
+* @see com.atomgraph.core.client.GraphStoreClient
 */
 
 public class DataManagerImpl extends FileManagerImpl implements DataManager
@@ -45,7 +45,7 @@ public class DataManagerImpl extends FileManagerImpl implements DataManager
     private static final Logger log = LoggerFactory.getLogger(DataManagerImpl.class);
 
     private final boolean preemptiveAuth;
-    private final LinkedDataClient ldc;
+    private final GraphStoreClient ldc;
     private boolean cacheModelLoads;
     private final Map<String, Model> modelCache;
 
@@ -59,7 +59,7 @@ public class DataManagerImpl extends FileManagerImpl implements DataManager
      * @param preemptiveAuth if true, preemptive HTTP authentication will be used
      */
     public DataManagerImpl(LocationMapper mapper, Map<String, Model> modelCache,
-            LinkedDataClient ldc,
+            GraphStoreClient ldc,
             boolean cacheModelLoads, boolean preemptiveAuth)
     {
         super(mapper);
@@ -239,7 +239,7 @@ public class DataManagerImpl extends FileManagerImpl implements DataManager
      * 
      * @return client instance
      */
-    public LinkedDataClient getLinkedDataClient()
+    public GraphStoreClient getLinkedDataClient()
     {
         return ldc;
     }

@@ -16,7 +16,7 @@
 package com.atomgraph.core.model.impl;
 
 import com.atomgraph.core.MediaTypes;
-import com.atomgraph.core.client.LinkedDataClient;
+import com.atomgraph.core.client.GraphStoreClient;
 import com.atomgraph.core.model.Service;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -61,7 +61,7 @@ public class LocaleEntityTagTest extends JerseyTest
     public static Dataset dataset;
 
     private com.atomgraph.core.Application system;
-    private LinkedDataClient ldc;
+    private GraphStoreClient ldc;
     private URI uri, uriLang;
     
     @BeforeClass
@@ -79,7 +79,7 @@ public class LocaleEntityTagTest extends JerseyTest
     {
         uri = getBaseUri().resolve(RELATIVE_PATH);
         uriLang = getBaseUri().resolve(RELATIVE_PATH_LANG);
-        ldc = LinkedDataClient.create(system.getClient(), new MediaTypes());
+        ldc = GraphStoreClient.create(system.getClient(), new MediaTypes());
     }
     
     @Path(RELATIVE_PATH)
@@ -204,7 +204,7 @@ public class LocaleEntityTagTest extends JerseyTest
         return uri;
     }
     
-    protected LinkedDataClient getLinkedDataClient()
+    protected GraphStoreClient getLinkedDataClient()
     {
         return ldc;
     }

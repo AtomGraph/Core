@@ -16,11 +16,12 @@
 package com.atomgraph.core.model.impl;
 
 import com.atomgraph.core.MediaTypes;
-import com.atomgraph.core.client.LinkedDataClient;
+import com.atomgraph.core.client.GraphStoreClient;
 import com.atomgraph.core.model.Service;
 import java.net.URI;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.EntityTag;
@@ -60,7 +61,7 @@ public class QueriedResourceBaseTest extends JerseyTest
     public static Dataset dataset;
     
     public com.atomgraph.core.Application system;
-    public LinkedDataClient ldc;
+    public GraphStoreClient ldc;
     public URI uri;
     
     @BeforeClass
@@ -74,7 +75,7 @@ public class QueriedResourceBaseTest extends JerseyTest
     public void init()
     {
         uri = getBaseUri().resolve(RELATIVE_PATH);
-        ldc = LinkedDataClient.create(system.getClient(), new MediaTypes());
+        ldc = GraphStoreClient.create(system.getClient(), new MediaTypes());
     }
     
     @Path(RELATIVE_PATH)
@@ -129,19 +130,19 @@ public class QueriedResourceBaseTest extends JerseyTest
     @Test
     public void testNotUnsupportedPostType()
     {
-        assertEquals(UNSUPPORTED_MEDIA_TYPE.getStatusCode(), ldc.post(uri, ldc.getReadableMediaTypes(Model.class), "BAD RDF", MediaType.TEXT_XML_TYPE).getStatus());
+        assertEquals(UNSUPPORTED_MEDIA_TYPE.getStatusCode(), ldc.post(uri, Entity.entity("BAD RDF", MediaType.TEXT_XML_TYPE), ldc.getReadableMediaTypes(Model.class)).getStatus());
     }
 
     @Test
     public void testInvalidTurtlePost()
     {
-        assertEquals(BAD_REQUEST.getStatusCode(), ldc.post(uri, ldc.getReadableMediaTypes(Model.class), "BAD TURTLE", com.atomgraph.core.MediaType.TEXT_TURTLE_TYPE).getStatus());
+        assertEquals(BAD_REQUEST.getStatusCode(), ldc.post(uri, Entity.entity("BAD TURTLE", com.atomgraph.core.MediaType.TEXT_TURTLE_TYPE), ldc.getReadableMediaTypes(Model.class)).getStatus());
     }
 
     @Test
     public void testInvalidTurtlePut()
     {
-        assertEquals(BAD_REQUEST.getStatusCode(), ldc.put(uri, ldc.getReadableMediaTypes(Model.class), "BAD TURTLE", com.atomgraph.core.MediaType.TEXT_TURTLE_TYPE).getStatus());
+        assertEquals(BAD_REQUEST.getStatusCode(), ldc.put(uri, Entity.entity("BAD TURTLE", com.atomgraph.core.MediaType.TEXT_TURTLE_TYPE), ldc.getReadableMediaTypes(Model.class)).getStatus());
     }
 
     public static void assertIsomorphic(Model wanted, Model got)
