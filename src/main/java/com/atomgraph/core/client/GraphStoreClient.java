@@ -64,6 +64,11 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
         this.endpoint = endpoint;
     }
     
+    protected GraphStoreClient(Client client, MediaTypes mediaTypes)
+    {
+        this(client, mediaTypes, null);
+    }
+    
     public static GraphStoreClient create(Client client, MediaTypes mediaTypes, URI endpoint)
     {
         return new GraphStoreClient(client, mediaTypes, endpoint);
@@ -71,7 +76,7 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
     
     public static GraphStoreClient create(Client client, MediaTypes mediaTypes)
     {
-        return new GraphStoreClient(client, mediaTypes, null);
+        return new GraphStoreClient(client, mediaTypes);
     }
 
     /**
@@ -237,6 +242,11 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
         }
     }
     
+    public Response post(URI uri, Model model)
+    {
+        return post(uri, Entity.entity(model, getDefaultMediaType()), new jakarta.ws.rs.core.MediaType[]{}, new MultivaluedHashMap());
+    }
+    
     public Response post(URI uri, Entity entity)
     {
         return post(uri, entity, new jakarta.ws.rs.core.MediaType[]{}, new MultivaluedHashMap());
@@ -262,6 +272,11 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
         }
     }
 
+    public Response put(URI uri, Model model)
+    {
+        return put(uri, Entity.entity(model, getDefaultMediaType()), getReadableMediaTypes(Model.class), new MultivaluedHashMap());
+    } 
+    
     public Response put(URI uri, Entity entity)
     {
         return put(uri, entity, getReadableMediaTypes(Model.class), new MultivaluedHashMap());
