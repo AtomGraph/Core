@@ -129,19 +129,28 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
     @Override
     public void add(Model model)
     {
-        post(null, Entity.entity(model, getDefaultMediaType()), new jakarta.ws.rs.core.MediaType[]{}).close();
+        try (Response response = post(null, Entity.entity(model, getDefaultMediaType()), new jakarta.ws.rs.core.MediaType[]{}))
+        {
+            // Response automatically closed by try-with-resources
+        }
     }
     
     @Override
     public void deleteDefault()
     {
-        delete(null).close();
+        try (Response response = delete(null))
+        {
+            // Response automatically closed by try-with-resources
+        }
     }
     
     @Override
     public void putModel(Model model)
     {
-        put(null, Entity.entity(model, getDefaultMediaType()), new jakarta.ws.rs.core.MediaType[]{}).close();
+        try (Response response = put(null, Entity.entity(model, getDefaultMediaType()), new jakarta.ws.rs.core.MediaType[]{}))
+        {
+            // Response automatically closed by try-with-resources
+        }
     }
     
     protected WebTarget getWebTarget(URI uri)
@@ -280,7 +289,10 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
     @Override
     public void putModel(String uri, Model model)
     {
-        put(URI.create(uri), Entity.entity(model, getDefaultMediaType())).close();
+        try (Response response = put(URI.create(uri), Entity.entity(model, getDefaultMediaType())))
+        {
+            // Response automatically closed by try-with-resources
+        }
     }
 
     public Response delete(URI uri)

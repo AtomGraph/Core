@@ -197,8 +197,11 @@ public class SPARQLClient extends EndpointClientBase
         MultivaluedMap formData = new MultivaluedHashMap();
         if (params != null) formData.putAll(params);
         formData.putSingle(UPDATE_PARAM_NAME, updateRequest.toString());
-        
-        post(formData, MediaType.APPLICATION_FORM_URLENCODED_TYPE, new MediaType[]{}, null).close();
+
+        try (Response response = post(formData, MediaType.APPLICATION_FORM_URLENCODED_TYPE, new MediaType[]{}, null))
+        {
+            // Response automatically closed by try-with-resources
+        }
     }
 
     public int getMaxGetRequestSize()
