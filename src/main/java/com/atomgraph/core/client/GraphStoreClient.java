@@ -122,9 +122,6 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
     {
         try (Response cr = get(null))
         {
-            // some endpoints might include response body which will not cause NotFoundException in Jersey
-            if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
-
             return cr.readEntity(Model.class);
         }    
     }
@@ -132,31 +129,19 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
     @Override
     public void add(Model model)
     {
-        try (Response cr = post(null, Entity.entity(model, getDefaultMediaType()), new jakarta.ws.rs.core.MediaType[]{}))
-        {
-            // some endpoints might include response body which will not cause NotFoundException in Jersey
-            if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
-        }
+        post(null, Entity.entity(model, getDefaultMediaType()), new jakarta.ws.rs.core.MediaType[]{}).close();
     }
     
     @Override
     public void deleteDefault()
     {
-        try (Response cr = delete(null))
-        {
-            // some endpoints might include response body which will not cause NotFoundException in Jersey
-            if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
-        }
+        delete(null).close();
     }
     
     @Override
     public void putModel(Model model)
     {
-        try (Response cr = put(null, Entity.entity(model, getDefaultMediaType()), new jakarta.ws.rs.core.MediaType[]{}))
-        {
-            // some endpoints might include response body which will not cause NotFoundException in Jersey
-            if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
-        }
+        put(null, Entity.entity(model, getDefaultMediaType()), new jakarta.ws.rs.core.MediaType[]{}).close();
     }
     
     protected WebTarget getWebTarget(URI uri)
@@ -190,7 +175,7 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
     
     public Response head(URI uri)
     {
-        return head(uri, null);
+        return head(uri, getReadableMediaTypes(Model.class));
     }
     
     public Response head(URI uri, jakarta.ws.rs.core.MediaType[] acceptedTypes)
@@ -295,11 +280,7 @@ public class GraphStoreClient extends ClientBase implements DatasetAccessor
     @Override
     public void putModel(String uri, Model model)
     {
-        try (Response cr = put(URI.create(uri), Entity.entity(model, getDefaultMediaType())))
-        {
-            // some endpoints might include response body which will not cause NotFoundException in Jersey
-            if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();                
-        }
+        put(URI.create(uri), Entity.entity(model, getDefaultMediaType())).close();
     }
 
     public Response delete(URI uri)
