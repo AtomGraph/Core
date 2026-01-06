@@ -18,11 +18,8 @@ package com.atomgraph.core.io;
 import com.atomgraph.core.MediaType;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.GraphStoreClient;
-import static com.atomgraph.core.client.GraphStoreClient.DEFAULT_PARAM_NAME;
-import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.Application;
-import jakarta.ws.rs.core.MultivaluedHashMap;
-import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -49,14 +46,14 @@ public class ModelProviderTest extends JerseyTest
 {
 
     public com.atomgraph.core.Application system;
-    public WebTarget endpoint;
+    public URI endpoint;
     public GraphStoreClient gsc;
 
     @Before
     public void init()
     {
-        endpoint = system.getClient().target(getBaseUri().resolve("service"));
-        gsc = GraphStoreClient.create(new MediaTypes(), endpoint);
+        endpoint = getBaseUri().resolve("service");
+        gsc = GraphStoreClient.create(system.getClient(), new MediaTypes(), endpoint);
     }
     
     @Override
@@ -115,11 +112,8 @@ public class ModelProviderTest extends JerseyTest
         Model modelWithRelativeURIs = ModelFactory.createDefaultModel().
             add(ResourceFactory.createResource(relativeUri), FOAF.name, "Smth");
         
-        MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle(DEFAULT_PARAM_NAME, Boolean.TRUE.toString());
-
         // needs to use Turtle in order to allow relative URIs
-        try (Response cr = gsc.post(modelWithRelativeURIs, MediaType.TEXT_TURTLE_TYPE, new jakarta.ws.rs.core.MediaType[]{}, params))
+        try (Response cr = gsc.post(null, Entity.entity(modelWithRelativeURIs, MediaType.TEXT_TURTLE_TYPE), new jakarta.ws.rs.core.MediaType[]{}))
         {
             URI absoluteUri = getBaseUri().resolve(relativeUri);
             Model expected = ModelFactory.createDefaultModel().

@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import com.atomgraph.core.model.RemoteService;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.WebTarget;
+import java.net.URI;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 
 /**
@@ -105,22 +106,22 @@ public class ServiceImpl implements RemoteService
     @Override
     public GraphStoreClient getGraphStoreClient()
     {
-        return getGraphStoreClient(getClient().target(getGraphStore().getURI()));
+        return getGraphStoreClient(URI.create(getGraphStore().getURI()));
     }
     
-    public GraphStoreClient getGraphStoreClient(WebTarget resource)
+    public GraphStoreClient getGraphStoreClient(URI uri)
     {
-        GraphStoreClient graphStoreClient = GraphStoreClient.create(resource);
-        
+        GraphStoreClient graphStoreClient = GraphStoreClient.create(getClient(), getMediaTypes(), uri);
+
         if (getAuthUser() != null && getAuthPwd() != null)
         {
             HttpAuthenticationFeature authFeature = HttpAuthenticationFeature.basicBuilder().
                 credentials(getAuthUser(), getAuthPwd()).
                 build();
 
-            graphStoreClient.getEndpoint().register(authFeature);
+            graphStoreClient.register(authFeature);
         }
-        
+
         return graphStoreClient;
     }
 

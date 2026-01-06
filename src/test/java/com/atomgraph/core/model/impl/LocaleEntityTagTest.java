@@ -16,7 +16,7 @@
 package com.atomgraph.core.model.impl;
 
 import com.atomgraph.core.MediaTypes;
-import com.atomgraph.core.client.LinkedDataClient;
+import com.atomgraph.core.client.GraphStoreClient;
 import com.atomgraph.core.model.Service;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -61,7 +61,7 @@ public class LocaleEntityTagTest extends JerseyTest
     public static Dataset dataset;
 
     private com.atomgraph.core.Application system;
-    private LinkedDataClient ldc;
+    private GraphStoreClient gsc;
     private URI uri, uriLang;
     
     @BeforeClass
@@ -79,7 +79,7 @@ public class LocaleEntityTagTest extends JerseyTest
     {
         uri = getBaseUri().resolve(RELATIVE_PATH);
         uriLang = getBaseUri().resolve(RELATIVE_PATH_LANG);
-        ldc = LinkedDataClient.create(system.getClient(), new MediaTypes());
+        gsc = GraphStoreClient.create(system.getClient(), new MediaTypes());
     }
     
     @Path(RELATIVE_PATH)
@@ -164,14 +164,14 @@ public class LocaleEntityTagTest extends JerseyTest
     {
         Locale locale = Locale.ENGLISH;
         
-        jakarta.ws.rs.core.Response resp = ldc.getClient().
+        jakarta.ws.rs.core.Response resp = gsc.getClient().
                 target(uri).
                 request(com.atomgraph.core.MediaType.APPLICATION_RDF_XML_TYPE).
                 get();
         assertEquals(200, resp.getStatus());
         assertEquals(null, resp.getLanguage());
 
-        jakarta.ws.rs.core.Response langSpecificResp = ldc.getClient().
+        jakarta.ws.rs.core.Response langSpecificResp = gsc.getClient().
                 target(uriLang).
                 request(com.atomgraph.core.MediaType.APPLICATION_RDF_XML_TYPE). // RDF/XML media type marked as language significant on this endpoint!
                 header(HttpHeaders.ACCEPT_LANGUAGE, locale.getLanguage()).
@@ -204,9 +204,9 @@ public class LocaleEntityTagTest extends JerseyTest
         return uri;
     }
     
-    protected LinkedDataClient getLinkedDataClient()
+    protected GraphStoreClient getGraphStoreClient()
     {
-        return ldc;
+        return gsc;
     }
     
 }

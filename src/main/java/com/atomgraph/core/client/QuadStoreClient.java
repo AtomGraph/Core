@@ -95,25 +95,37 @@ public class QuadStoreClient extends EndpointClientBase implements DatasetQuadAc
     @Override
     public void add(Dataset dataset)
     {
-        post(dataset, getDefaultMediaType(), new MediaType[]{}).close();
+        try (Response response = post(dataset, getDefaultMediaType(), new MediaType[]{}))
+        {
+            // Response automatically closed by try-with-resources
+        }
     }
     
     @Override
     public void replace(Dataset dataset)
     {
-        put(dataset, getDefaultMediaType(), new MediaType[]{}).close();
+        try (Response response = put(dataset, getDefaultMediaType(), new MediaType[]{}))
+        {
+            // Response automatically closed by try-with-resources
+        }
     }
     
     @Override
     public void delete()
     {
-        delete(new MediaType[]{}).close();
+        try (Response response = delete(new MediaType[]{}))
+        {
+            // Response automatically closed by try-with-resources
+        }
     }
 
     @Override
     public void patch(Dataset dataset)
     {
-        patch(dataset, new MultivaluedHashMap()).close();
+        try (Response response = patch(dataset, new MultivaluedHashMap()))
+        {
+            // Response automatically closed by try-with-resources
+        }
     }
     
     public Response patch(Dataset dataset, MultivaluedMap<String, String> params)

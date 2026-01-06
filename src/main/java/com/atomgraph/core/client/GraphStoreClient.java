@@ -13,19 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.atomgraph.core.client;
 
 import com.atomgraph.core.MediaType;
 import com.atomgraph.core.MediaTypes;
+import com.atomgraph.core.io.ModelProvider;
 import com.atomgraph.core.model.DatasetAccessor;
 import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.client.ClientRequestFilter;
+import java.net.URI;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import org.apache.jena.rdf.model.Model;
+import org.glassfish.jersey.uri.UriComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,49 +44,295 @@ import org.slf4j.LoggerFactory;
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  * @see <a href="https://www.w3.org/TR/sparql11-http-rdf-update/">SPARQL 1.1 Graph Store HTTP Protocol</a>
  */
-public class GraphStoreClient extends EndpointClientBase implements DatasetAccessor // TO-DO: make DatasetAccessor a subclass of this and return nulls
+
+public class GraphStoreClient extends ClientBase implements DatasetAccessor
 {
+    
     private static final Logger log = LoggerFactory.getLogger(GraphStoreClient.class);
     
     public static final String DEFAULT_PARAM_NAME = "default";
     public static final String GRAPH_PARAM_NAME = "graph";
+
+    private final Client client;
+    private final URI endpoint;
+    private final List<Object> components = new ArrayList<>();
     
-    protected GraphStoreClient(MediaTypes mediaTypes, WebTarget endpoint)
+    protected GraphStoreClient(Client client, MediaTypes mediaTypes, URI endpoint)
     {
-        super(mediaTypes, endpoint);
+        super(mediaTypes);
+        this.client = client;
+        this.endpoint = endpoint;
     }
-
-    protected GraphStoreClient(WebTarget endpoint)
+    
+    protected GraphStoreClient(Client client, MediaTypes mediaTypes)
     {
-        this(new MediaTypes(), endpoint);
+        this(client, mediaTypes, null);
     }
-
-    public static GraphStoreClient create(MediaTypes mediaTypes, WebTarget endpoint)
+    
+    public static GraphStoreClient create(Client client, MediaTypes mediaTypes, URI endpoint)
     {
-        return new GraphStoreClient(mediaTypes, endpoint);
+        return new GraphStoreClient(client, mediaTypes, endpoint);
     }
-
-    public static GraphStoreClient create(WebTarget endpoint)
+    
+    public static GraphStoreClient create(Client client, MediaTypes mediaTypes)
     {
-        return new GraphStoreClient(endpoint);
+        return new GraphStoreClient(client, mediaTypes);
     }
 
     /**
-     * Registers client filter.
-     * Can cause performance problems with <code>ApacheConnector</code>.
-     * 
-     * @param filter client request filter
-     * @return this SPARQL client
-     * @see <a href="https://blogs.oracle.com/japod/how-to-use-jersey-client-efficiently">How To Use Jersey Client Efficiently</a>
+     * Register a JAX-RS component (provider) instance to be applied to all requests.
+     * Components are applied to each WebTarget created by this client.
+     * Supports Features, Filters, Interceptors, and other JAX-RS providers.
+     *
+     * @param component the component instance to register
+     * @return this GraphStoreClient instance for method chaining
+     * @throws IllegalArgumentException if component is null
      */
-    @Override
-    public GraphStoreClient register(ClientRequestFilter filter)
+    public GraphStoreClient register(Object component)
     {
-        if (filter == null) throw new IllegalArgumentException("ClientRequestFilter cannot be null");
+        if (component == null) throw new IllegalArgumentException("Component cannot be null");
 
-        super.register(filter);
+        components.add(component);
 
         return this;
+    }
+
+    /**
+     * Register a JAX-RS component (provider) class to be applied to all requests.
+     * Components are applied to each WebTarget created by this client.
+     * Supports Features, Filters, Interceptors, and other JAX-RS providers.
+     *
+     * @param componentClass the component class to register
+     * @return this GraphStoreClient instance for method chaining
+     * @throws IllegalArgumentException if componentClass is null
+     */
+    public GraphStoreClient register(Class<?> componentClass)
+    {
+        if (componentClass == null) throw new IllegalArgumentException("Component class cannot be null");
+
+        components.add(componentClass);
+
+        return this;
+    }
+
+    // default graph is not supported
+    
+    @Override
+    public Model getModel()
+    {
+        try (Response cr = get(null))
+        {
+            return cr.readEntity(Model.class);
+        }    
+    }
+    
+    @Override
+    public void add(Model model)
+    {
+        try (Response response = post(null, Entity.entity(model, getDefaultMediaType()), new jakarta.ws.rs.core.MediaType[]{}))
+        {
+            // Response automatically closed by try-with-resources
+        }
+    }
+    
+    @Override
+    public void deleteDefault()
+    {
+        try (Response response = delete(null))
+        {
+            // Response automatically closed by try-with-resources
+        }
+    }
+    
+    @Override
+    public void putModel(Model model)
+    {
+        try (Response response = put(null, Entity.entity(model, getDefaultMediaType()), new jakarta.ws.rs.core.MediaType[]{}))
+        {
+            // Response automatically closed by try-with-resources
+        }
+    }
+    
+    protected WebTarget getWebTarget(URI uri)
+    {
+        WebTarget target;
+
+        // indirect graph identification
+        if (getEndpoint() != null)
+        {
+            if (uri == null) // default graph - only possible with endpoint
+                target = getClient().target(getEndpoint()).queryParam(DEFAULT_PARAM_NAME, Boolean.TRUE.toString());
+            else // named graph
+                target = getClient().target(getEndpoint()).queryParam(UriComponent.encode(GRAPH_PARAM_NAME, UriComponent.Type.UNRESERVED),
+                    UriComponent.encode(uri.toString(), UriComponent.Type.UNRESERVED));
+        }
+        // direct graph idntification
+        else
+        {
+            if (uri == null)
+                throw new UnsupportedOperationException("Default graph is not supported without endpoint -- all RDF graphs in Linked Data are named");
+
+            target = getClient().target(uri);
+        }
+
+        // Apply all registered components to this WebTarget
+        for (Object component : components)
+            target = target.register(component);
+
+        return target;
+    }
+    
+    public Response head(URI uri)
+    {
+        return head(uri, getReadableMediaTypes(Model.class));
+    }
+    
+    public Response head(URI uri, jakarta.ws.rs.core.MediaType[] acceptedTypes)
+    {
+        return head(uri, acceptedTypes, new MultivaluedHashMap());
+    }
+
+    public Response head(URI uri, jakarta.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, Object> headers)
+    {
+        return applyHeaders(getWebTarget(uri).request(acceptedTypes), headers).head();
+    }
+    
+    @Override
+    public boolean containsModel(String uri)
+    {
+        try (Response cr = head(URI.create(uri)))
+        {
+            return cr.getStatusInfo().
+                getFamily().
+                equals(Response.Status.Family.SUCCESSFUL);
+        }
+    }
+    
+    public Response get(URI uri)
+    {
+        return get(uri, getReadableMediaTypes(Model.class));
+    }
+
+    public Response get(URI uri, jakarta.ws.rs.core.MediaType[] acceptedTypes)
+    {
+        return get(uri, acceptedTypes, new MultivaluedHashMap());
+    }
+    
+    public Response get(URI uri, jakarta.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, Object> headers)
+    {
+        return applyHeaders(getWebTarget(uri).request(acceptedTypes), headers).get();
+    }
+    
+    @Override
+    public Model getModel(String uri)
+    {
+        try (Response cr = get(URI.create(uri)))
+        {
+            // some endpoints might include response body which will not cause NotFoundException in Jersey
+            if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
+
+            cr.getHeaders().putSingle(ModelProvider.REQUEST_URI_HEADER, uri); // provide a base URI hint to ModelProvider
+            return cr.readEntity(Model.class);
+        }
+    }
+    
+    public Response post(URI uri, Model model)
+    {
+        return post(uri, Entity.entity(model, getDefaultMediaType()), new jakarta.ws.rs.core.MediaType[]{}, new MultivaluedHashMap());
+    }
+    
+    public Response post(URI uri, Entity entity)
+    {
+        return post(uri, entity, new jakarta.ws.rs.core.MediaType[]{}, new MultivaluedHashMap());
+    }
+    
+    public Response post(URI uri, Entity entity, jakarta.ws.rs.core.MediaType[] acceptedTypes)
+    {
+        return post(uri, entity, acceptedTypes, new MultivaluedHashMap());
+    }
+        
+    public Response post(URI uri, Entity entity, jakarta.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, Object> headers)
+    {
+        return applyHeaders(getWebTarget(uri).request(acceptedTypes), headers).post(entity);
+    }
+    
+    @Override
+    public void add(String uri, Model model)
+    {
+        try (Response cr = post(URI.create(uri), Entity.entity(model, getDefaultMediaType())))
+        {
+            // some endpoints might include response body which will not cause NotFoundException in Jersey
+            if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
+        }
+    }
+
+    public Response put(URI uri, Model model)
+    {
+        return put(uri, Entity.entity(model, getDefaultMediaType()), getReadableMediaTypes(Model.class), new MultivaluedHashMap());
+    } 
+    
+    public Response put(URI uri, Entity entity)
+    {
+        return put(uri, entity, getReadableMediaTypes(Model.class), new MultivaluedHashMap());
+    } 
+
+    public Response put(URI uri, Entity entity, jakarta.ws.rs.core.MediaType[] acceptedTypes)
+    {
+        return put(uri, entity, acceptedTypes, new MultivaluedHashMap());
+    }
+    
+    public Response put(URI uri, Entity entity, jakarta.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, Object> headers)
+    {
+        return applyHeaders(getWebTarget(uri).request(acceptedTypes), headers).put(entity);
+    }
+    
+    @Override
+    public void putModel(String uri, Model model)
+    {
+        try (Response response = put(URI.create(uri), Entity.entity(model, getDefaultMediaType())))
+        {
+            // Response automatically closed by try-with-resources
+        }
+    }
+
+    public Response delete(URI uri)
+    {
+        return delete(uri, new jakarta.ws.rs.core.MediaType[]{}, new MultivaluedHashMap(), new MultivaluedHashMap());
+    }
+    
+    public Response delete(URI uri, jakarta.ws.rs.core.MediaType[] acceptedTypes)
+    {
+        return delete(uri, acceptedTypes, new MultivaluedHashMap(), new MultivaluedHashMap());
+    }
+    
+    public Response delete(URI uri, jakarta.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params)
+    {
+        return delete(uri, acceptedTypes, params, new MultivaluedHashMap());
+    }
+    
+    public Response delete(URI uri, jakarta.ws.rs.core.MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, Object> headers)
+    {
+        return applyHeaders(getWebTarget(uri).request(acceptedTypes), headers).delete();
+    }
+
+    @Override
+    public void deleteModel(String uri)
+    {
+        try (Response cr = delete(URI.create(uri)))
+        {
+            // some endpoints might include response body which will not cause NotFoundException in Jersey
+            if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();                
+        }
+    }
+
+    protected Invocation.Builder applyHeaders(Invocation.Builder builder, MultivaluedMap<String, Object> headers)
+    {
+        if (headers != null)
+            for (Map.Entry<String, List<Object>> entry : headers.entrySet())
+                for (Object value : entry.getValue())
+                    builder = builder.header(entry.getKey(), value);
+        
+        return builder;
     }
     
     @Override
@@ -86,126 +341,14 @@ public class GraphStoreClient extends EndpointClientBase implements DatasetAcces
         return MediaType.APPLICATION_NTRIPLES_TYPE;
     }
     
-    @Override
-    public boolean containsModel(String uri)
+    public Client getClient()
     {
-        MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle(GRAPH_PARAM_NAME, uri);
-
-        try (Response cr = head(getReadableMediaTypes(Model.class), params))
-        {
-            return cr.getStatusInfo().
-                getFamily().
-                equals(Response.Status.Family.SUCCESSFUL);
-        }
+        return client;
     }
 
-    @Override
-    public Model getModel()
+    public URI getEndpoint()
     {
-        MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle(DEFAULT_PARAM_NAME, Boolean.TRUE.toString());
-
-        try (Response cr = get(getReadableMediaTypes(Model.class), params))
-        {
-            // some endpoints might include response body which will not cause NotFoundException in Jersey
-            if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
-            
-            return cr.readEntity(Model.class);
-        }
-    }
-
-    @Override
-    public Model getModel(String uri)
-    {
-        MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle(GRAPH_PARAM_NAME, uri);
-
-        try (Response cr = get(getReadableMediaTypes(Model.class), params))
-        {
-            // some endpoints might include response body which will not cause NotFoundException in Jersey
-            if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
-            
-            return cr.readEntity(Model.class);
-        }
+        return endpoint;
     }
     
-    @Override
-    public void add(Model model)
-    {
-        MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle(DEFAULT_PARAM_NAME, Boolean.TRUE.toString());
-
-        try (Response cr = post(model, getDefaultMediaType(), new jakarta.ws.rs.core.MediaType[]{}, params))
-        {
-            // some endpoints might include response body which will not cause NotFoundException in Jersey
-            if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
-        }
-    }
-    
-    @Override
-    public void add(String uri, Model model)
-    {
-        MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle(GRAPH_PARAM_NAME, uri);
-
-        try (Response cr = post(model, getDefaultMediaType(), new jakarta.ws.rs.core.MediaType[]{}, params))
-        {
-            // some endpoints might include response body which will not cause NotFoundException in Jersey
-            if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
-        }
-    }
-    
-    @Override
-    public void putModel(Model model)
-    {
-        MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle(DEFAULT_PARAM_NAME, Boolean.TRUE.toString());
-
-        try (Response cr = put(model, getDefaultMediaType(), new jakarta.ws.rs.core.MediaType[]{}, params))
-        {
-            // some endpoints might include response body which will not cause NotFoundException in Jersey
-            if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
-        }
-    }
-
-    @Override
-    public void putModel(String uri, Model model)
-    {
-        MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle(GRAPH_PARAM_NAME, uri);
-
-        try (Response cr = put(model, getDefaultMediaType(), new jakarta.ws.rs.core.MediaType[]{}, params))
-        {
-            // some endpoints might include response body which will not cause NotFoundException in Jersey
-            if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
-        }
-    }
-    
-    @Override
-    public void deleteDefault()
-    {
-        MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle(DEFAULT_PARAM_NAME, Boolean.TRUE.toString());
-
-        try (Response cr = delete(new jakarta.ws.rs.core.MediaType[]{}, params))
-        {
-            // some endpoints might include response body which will not cause NotFoundException in Jersey
-            if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
-        }
-    }
-
-    @Override
-    public void deleteModel(String uri)
-    {
-        MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle(GRAPH_PARAM_NAME, uri);
-
-        try (Response cr = delete(new jakarta.ws.rs.core.MediaType[]{}, params))
-        {
-            // some endpoints might include response body which will not cause NotFoundException in Jersey
-            if (cr.getStatus() == Status.NOT_FOUND.getStatusCode()) throw new NotFoundException();
-        }
-    }
-
 }

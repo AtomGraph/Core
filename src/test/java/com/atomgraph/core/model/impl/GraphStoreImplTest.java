@@ -18,22 +18,19 @@ package com.atomgraph.core.model.impl;
 import com.atomgraph.core.MediaType;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.GraphStoreClient;
-import static com.atomgraph.core.client.GraphStoreClient.DEFAULT_PARAM_NAME;
-import static com.atomgraph.core.client.GraphStoreClient.GRAPH_PARAM_NAME;
 import static com.atomgraph.core.model.impl.SPARQLEndpointImplTest.assertIsomorphic;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.client.Entity;
 import java.util.UUID;
-import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.EntityTag;
-import jakarta.ws.rs.core.MultivaluedHashMap;
-import jakarta.ws.rs.core.MultivaluedMap;
 import static jakarta.ws.rs.core.Response.Status.BAD_REQUEST;
 import static jakarta.ws.rs.core.Response.Status.CREATED;
 import static jakarta.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
 import static jakarta.ws.rs.core.Response.Status.NOT_FOUND;
 import static jakarta.ws.rs.core.Response.Status.NO_CONTENT;
 import static jakarta.ws.rs.core.Response.Status.UNSUPPORTED_MEDIA_TYPE;
+import java.net.URI;
 import java.util.Arrays;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
@@ -59,7 +56,7 @@ public class GraphStoreImplTest extends JerseyTest
     public static Dataset dataset;
     
     public com.atomgraph.core.Application system;
-    public WebTarget endpoint;
+    public URI endpoint;
     public GraphStoreClient gsc;
 
     @BeforeClass
@@ -73,8 +70,8 @@ public class GraphStoreImplTest extends JerseyTest
     @Before
     public void init()
     {
-        endpoint = system.getClient().target(getBaseUri().resolve("service"));
-        gsc = GraphStoreClient.create(new MediaTypes(), endpoint);
+        endpoint = getBaseUri().resolve("service");
+        gsc = GraphStoreClient.create(system.getClient(), new MediaTypes(), endpoint);
     }
     
     protected Dataset getDataset()
@@ -114,19 +111,13 @@ public class GraphStoreImplTest extends JerseyTest
     @Test
     public void testGetNotFoundNamedModel()
     {
-        MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle(GRAPH_PARAM_NAME, "http://host/" + UUID.randomUUID().toString());
-        
-        assertEquals(NOT_FOUND.getStatusCode(), gsc.get(gsc.getReadableMediaTypes(Model.class), params).getStatus());
+        assertEquals(NOT_FOUND.getStatusCode(), gsc.get(URI.create("http://host/" + UUID.randomUUID().toString())).getStatus());
     }
 
     @Test
     public void testGetNotAcceptableType()
     {
-        MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle(DEFAULT_PARAM_NAME, Boolean.TRUE.toString());
-        
-        assertEquals(NOT_ACCEPTABLE.getStatusCode(), gsc.get(new jakarta.ws.rs.core.MediaType[]{ MediaType.APPLICATION_SVG_XML_TYPE}, params).getStatus());
+        assertEquals(NOT_ACCEPTABLE.getStatusCode(), gsc.get(null, new jakarta.ws.rs.core.MediaType[]{ MediaType.APPLICATION_SVG_XML_TYPE}).getStatus());
     }
     
     @Test
@@ -149,32 +140,37 @@ public class GraphStoreImplTest extends JerseyTest
     @Test
     public void testPostEmptyNamedModel()
     {
-        MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle(GRAPH_PARAM_NAME, "http://host/" + UUID.randomUUID().toString());
-        
-        assertEquals(NO_CONTENT.getStatusCode(), gsc.post(ModelFactory.createDefaultModel(), MediaType.TEXT_TURTLE_TYPE, new jakarta.ws.rs.core.MediaType[]{}, params).getStatus());
+        assertEquals(NO_CONTENT.getStatusCode(), gsc.post(URI.create("http://host/" + UUID.randomUUID().toString()),
+                Entity.entity(ModelFactory.createDefaultModel(), MediaType.TEXT_TURTLE_TYPE), 
+                new jakarta.ws.rs.core.MediaType[]{}).
+            getStatus());
     }
 
     @Test
     public void testPostNotFoundNamedModel()
     {
-        MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle(GRAPH_PARAM_NAME, "http://host/" + UUID.randomUUID().toString());
-        
-        assertEquals(CREATED.getStatusCode(), gsc.post(ModelFactory.createDefaultModel().createResource().addLiteral(ResourceFactory.createProperty("http://prop"), "obj").getModel(),
-                MediaType.TEXT_TURTLE_TYPE, new jakarta.ws.rs.core.MediaType[]{}, params).getStatus());
+        assertEquals(CREATED.getStatusCode(), gsc.post(URI.create("http://host/" + UUID.randomUUID().toString()),
+                Entity.entity(ModelFactory.createDefaultModel().createResource().addLiteral(ResourceFactory.createProperty("http://prop"), "obj").getModel(),
+                MediaType.TEXT_TURTLE_TYPE),
+                new jakarta.ws.rs.core.MediaType[]{}).
+            getStatus());
     }
     
     @Test
     public void testPostUnsupportedAddType()
     {
-        assertEquals(UNSUPPORTED_MEDIA_TYPE.getStatusCode(), gsc.post("BAD RDF", jakarta.ws.rs.core.MediaType.TEXT_XML_TYPE, new jakarta.ws.rs.core.MediaType[]{}).getStatus());
+        assertEquals(UNSUPPORTED_MEDIA_TYPE.getStatusCode(),
+                gsc.post(URI.create(NAMED_GRAPH_URI), Entity.entity("BAD RDF", jakarta.ws.rs.core.MediaType.TEXT_XML_TYPE),
+                new jakarta.ws.rs.core.MediaType[]{}).getStatus());
     }
     
     @Test
     public void testInvalidTurtlePost()
     {
-        assertEquals(BAD_REQUEST.getStatusCode(), gsc.post("BAD TURTLE", com.atomgraph.core.MediaType.TEXT_TURTLE_TYPE, new MediaType[]{}).getStatus());
+        assertEquals(BAD_REQUEST.getStatusCode(), gsc.post(URI.create(NAMED_GRAPH_URI),
+                Entity.entity("BAD TURTLE", com.atomgraph.core.MediaType.TEXT_TURTLE_TYPE),
+                new MediaType[]{}).
+            getStatus());
     }
     
     @Test
@@ -196,22 +192,28 @@ public class GraphStoreImplTest extends JerseyTest
     @Test
     public void testPutNotFoundNamedModel()
     {
-        MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle(GRAPH_PARAM_NAME, "http://host/" + UUID.randomUUID().toString());
-        
-        assertEquals(CREATED.getStatusCode(), gsc.put(ModelFactory.createDefaultModel(), MediaType.TEXT_TURTLE_TYPE, new jakarta.ws.rs.core.MediaType[]{}, params).getStatus());
+        assertEquals(CREATED.getStatusCode(), gsc.put(URI.create("http://host/" + UUID.randomUUID().toString()),
+                Entity.entity(ModelFactory.createDefaultModel(), MediaType.TEXT_TURTLE_TYPE),
+                new jakarta.ws.rs.core.MediaType[]{}).
+            getStatus());
     }
     
     @Test
     public void testNotUnsupportedPutType()
     {
-        assertEquals(UNSUPPORTED_MEDIA_TYPE.getStatusCode(), gsc.put("BAD RDF", jakarta.ws.rs.core.MediaType.TEXT_XML_TYPE, new jakarta.ws.rs.core.MediaType[]{}).getStatus());
+        assertEquals(UNSUPPORTED_MEDIA_TYPE.getStatusCode(), gsc.put(URI.create(NAMED_GRAPH_URI),
+                Entity.entity("BAD RDF", jakarta.ws.rs.core.MediaType.TEXT_XML_TYPE),
+                new jakarta.ws.rs.core.MediaType[]{}).
+            getStatus());
     }
 
     @Test
     public void testInvalidTurtlePut()
     {
-        assertEquals(BAD_REQUEST.getStatusCode(), gsc.put("BAD TURTLE", com.atomgraph.core.MediaType.TEXT_TURTLE_TYPE, new MediaType[]{}).getStatus());
+        assertEquals(BAD_REQUEST.getStatusCode(), gsc.put(URI.create(NAMED_GRAPH_URI),
+                Entity.entity("BAD TURTLE", com.atomgraph.core.MediaType.TEXT_TURTLE_TYPE),
+                new MediaType[]{}).
+            getStatus());
     }
 
     @Test
@@ -233,23 +235,21 @@ public class GraphStoreImplTest extends JerseyTest
     @Test
     public void testDeleteNotFoundNamedModel()
     {
-        MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle(GRAPH_PARAM_NAME, "http://host/" + UUID.randomUUID().toString());
-        
-        assertEquals(NOT_FOUND.getStatusCode(), gsc.delete(gsc.getReadableMediaTypes(Model.class), params).getStatus());
+        assertEquals(NOT_FOUND.getStatusCode(), gsc.delete(URI.create("http://host/" + UUID.randomUUID().toString()),
+                gsc.getReadableMediaTypes(Model.class)).
+            getStatus());
     }
     
     @Test
     public void testDifferentMediaTypesDifferentETags()
     {
-        MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.putSingle(GRAPH_PARAM_NAME, NAMED_GRAPH_URI);
-        
-        jakarta.ws.rs.core.Response nTriplesResp = gsc.get(Arrays.asList(MediaType.APPLICATION_NTRIPLES_TYPE).toArray(MediaType[]::new), params);
+        jakarta.ws.rs.core.Response nTriplesResp = gsc.get(URI.create(NAMED_GRAPH_URI),
+                Arrays.asList(MediaType.APPLICATION_NTRIPLES_TYPE).toArray(MediaType[]::new));
         EntityTag nTriplesETag = nTriplesResp.getEntityTag();
         assertEquals(nTriplesResp.getLanguage(), null);
 
-        jakarta.ws.rs.core.Response rdfXmlResp = gsc.get(Arrays.asList(MediaType.APPLICATION_RDF_XML_TYPE).toArray(MediaType[]::new), params);
+        jakarta.ws.rs.core.Response rdfXmlResp = gsc.get(URI.create(NAMED_GRAPH_URI),
+                Arrays.asList(MediaType.APPLICATION_RDF_XML_TYPE).toArray(MediaType[]::new));
         EntityTag rdfXmlETag = rdfXmlResp.getEntityTag();
         assertEquals(rdfXmlResp.getLanguage(), null);
         

@@ -19,8 +19,8 @@ import com.atomgraph.core.MediaTypes;
 import static com.atomgraph.core.model.impl.GraphStoreImplTest.NAMED_GRAPH_URI;
 import static com.atomgraph.core.model.impl.GraphStoreImplTest.dataset;
 import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Application;
+import java.net.URI;
 import java.util.UUID;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
@@ -41,7 +41,7 @@ public class GraphStoreClientTest extends JerseyTest
 {
     
     public com.atomgraph.core.Application system;
-    public WebTarget endpoint;
+    public URI endpoint;
     public GraphStoreClient gsc;
 
     @BeforeClass
@@ -55,8 +55,8 @@ public class GraphStoreClientTest extends JerseyTest
     @Before
     public void init()
     {
-        endpoint = system.getClient().target(getBaseUri().resolve("service"));
-        gsc = GraphStoreClient.create(new MediaTypes(), endpoint);
+        endpoint = getBaseUri().resolve("service");
+        gsc = GraphStoreClient.create(system.getClient(), new MediaTypes(), endpoint);
     }
     
     protected Dataset getDataset()
