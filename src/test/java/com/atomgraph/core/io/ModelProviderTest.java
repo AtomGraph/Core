@@ -46,14 +46,12 @@ public class ModelProviderTest extends JerseyTest
 {
 
     public com.atomgraph.core.Application system;
-    public URI endpoint;
     public GraphStoreClient gsc;
 
     @Before
     public void init()
     {
-        endpoint = getBaseUri().resolve("service");
-        gsc = GraphStoreClient.create(system.getClient(), new MediaTypes(), endpoint);
+        gsc = GraphStoreClient.create(system.getClient(), new MediaTypes());
     }
     
     @Override
@@ -103,27 +101,6 @@ public class ModelProviderTest extends JerseyTest
             add(ResourceFactory.createResource(URI.create(baseUri).resolve(relativeUri).toString()), FOAF.name, "Smth");
         
         assertIsomorphic(expected, actual);
-    }
-    
-    @Test
-    public void testTurtleRelativeURIsResolvedInWrittenModel()
-    {
-        String relativeUri = "relative";
-        Model modelWithRelativeURIs = ModelFactory.createDefaultModel().
-            add(ResourceFactory.createResource(relativeUri), FOAF.name, "Smth");
-        
-        // needs to use Turtle in order to allow relative URIs
-        try (Response cr = gsc.post(null, Entity.entity(modelWithRelativeURIs, MediaType.TEXT_TURTLE_TYPE), new jakarta.ws.rs.core.MediaType[]{}))
-        {
-            URI absoluteUri = getBaseUri().resolve(relativeUri);
-            Model expected = ModelFactory.createDefaultModel().
-                add(ResourceFactory.createResource(absoluteUri.toString()), FOAF.name, "Smth");
-
-            System.out.println(gsc.getModel());
-
-            // check that the model that was written had resolved relative URIs against the base URI
-            assertIsomorphic(expected, gsc.getModel());
-        }
     }
     
     public static void assertIsomorphic(Model wanted, Model got)

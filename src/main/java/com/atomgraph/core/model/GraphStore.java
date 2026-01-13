@@ -22,10 +22,10 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 
 /**
- * Generic SPARQL 1.1 Graph Store HTTP Protocol interface
+ * Indirectly-identified SPARQL 1.1 Graph Store HTTP Protocol interface
  * 
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
- * @see <a href="http://www.w3.org/TR/sparql11-http-rdf-update/">SPARQL 1.1 Graph Store HTTP Protocol</a>
+ * @see <a href="https://www.w3.org/TR/sparql11-http-rdf-update/#indirect-graph-identification">SPARQL 1.1 Graph Store HTTP Protocol</a>
  */
 public interface GraphStore
 {

@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.atomgraph.core.model.DatasetQuadAccessor;
 import com.atomgraph.core.model.Service;
-import java.util.Collections;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.MediaType;
