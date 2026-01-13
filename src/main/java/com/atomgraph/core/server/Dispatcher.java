@@ -40,6 +40,7 @@ public class Dispatcher
         return GraphStoreImpl.class;
     }
     
+    @Path("{path: .*}")
     public Class getDirectGraphStore()
     {
         return DirectGraphStoreImpl.class;
