@@ -19,8 +19,6 @@ import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.GraphStoreClient;
 import com.atomgraph.core.model.Service;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Context;
@@ -56,8 +54,6 @@ public class LocaleEntityTagTest extends JerseyTest
 {
     
     public static final String RELATIVE_PATH = "test", RELATIVE_PATH_LANG = "test-lang";
-    public static final String RESOURCE_URI = "http://localhost:9998/" + RELATIVE_PATH; // assume that base URI is http://localhost:9998/ - has to match getBaseUri()
-    public static final String RESOURCE_URI_LANG = "http://localhost:9998/" + RELATIVE_PATH_LANG; // assume that base URI is http://localhost:9998/ - has to match getBaseUri()
     public static Dataset dataset;
 
     private com.atomgraph.core.Application system;
@@ -68,10 +64,6 @@ public class LocaleEntityTagTest extends JerseyTest
     public static void initClass()
     {
         dataset = DatasetFactory.createTxnMem();
-        Model defaultModel = ModelFactory.createDefaultModel().
-                add(ResourceFactory.createResource(RESOURCE_URI), FOAF.name, "Smth").
-                add(ResourceFactory.createResource(RESOURCE_URI_LANG), FOAF.name, "Whateverest");
-        dataset.setDefaultModel(defaultModel);
     }
     
     @Before
@@ -80,42 +72,33 @@ public class LocaleEntityTagTest extends JerseyTest
         uri = getBaseUri().resolve(RELATIVE_PATH);
         uriLang = getBaseUri().resolve(RELATIVE_PATH_LANG);
         gsc = GraphStoreClient.create(system.getClient(), new MediaTypes());
+        
+        dataset.addNamedModel(uri.toString(), ModelFactory.createDefaultModel().
+                add(ResourceFactory.createResource(uri.toString()), FOAF.name, "Smth"));
+        dataset.addNamedModel(uriLang.toString(), ModelFactory.createDefaultModel().
+                add(ResourceFactory.createResource(uriLang.toString()), FOAF.name, "Whateverest"));
     }
     
     @Path(RELATIVE_PATH)
-    public static class TestResource extends QueriedResourceBase
+    public static class TestResource extends DirectGraphStoreImpl
     {
 
         @Inject
-        public TestResource(@Context UriInfo uriInfo, @Context Request request, MediaTypes mediaTypes, Service service)
+        public TestResource(@Context Request request, Service service, MediaTypes mediaTypes, @Context UriInfo uriInfo)
         {
-            super(uriInfo, request, mediaTypes, service);
+            super(request, service, mediaTypes, uriInfo);
         }
 
     }
     
     @Path(RELATIVE_PATH_LANG)
-    public static class LangSpecificTestResource extends QueriedResourceBase
+    public static class LangSpecificTestResource extends DirectGraphStoreImpl
     {
 
         @Inject
-        public LangSpecificTestResource(@Context UriInfo uriInfo, @Context Request request, MediaTypes mediaTypes, Service service)
+        public LangSpecificTestResource(@Context Request request, Service service, MediaTypes mediaTypes, @Context UriInfo uriInfo)
         {
-            super(uriInfo, request, mediaTypes, service);
-        }
-
-        @GET
-        @Override
-        public jakarta.ws.rs.core.Response get()
-        {
-            final Model model = describe();
-
-            if (model.isEmpty())
-            {
-                throw new NotFoundException("Query result Dataset is empty");
-            }
-
-            return getResponse(model);
+            super(request, service, mediaTypes, uriInfo);
         }
         
         @Override
@@ -125,12 +108,11 @@ public class LocaleEntityTagTest extends JerseyTest
         }
     
         @Override
-        // 
-        public ResponseBuilder getResponseBuilder(Model model)
+        public ResponseBuilder getResponseBuilder(Model model, URI graphUri)
         {
             return new com.atomgraph.core.model.impl.Response(getRequest(),
                     model,
-                    getLastModified(model),
+                    getLastModified(model, graphUri),
                     getEntityTag(model),
                     getWritableMediaTypes(Model.class),
                     getLanguages(),

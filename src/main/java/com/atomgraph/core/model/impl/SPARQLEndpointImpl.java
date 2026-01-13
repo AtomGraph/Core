@@ -37,7 +37,6 @@ import static com.atomgraph.core.model.SPARQLEndpoint.USING_NAMED_GRAPH_URI;
 import com.atomgraph.core.model.Service;
 import com.atomgraph.core.util.ModelUtils;
 import com.atomgraph.core.util.ResultSetUtils;
-import java.util.Collections;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.Consumes;

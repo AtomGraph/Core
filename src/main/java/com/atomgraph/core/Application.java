@@ -30,11 +30,9 @@ import org.apache.jena.riot.RDFParserRegistry;
 import com.atomgraph.core.mapper.BadGatewayExceptionMapper;
 import com.atomgraph.core.mapper.RiotExceptionMapper;
 import com.atomgraph.core.model.Service;
-import com.atomgraph.core.model.impl.GraphStoreImpl;
-import com.atomgraph.core.model.impl.QueriedResourceBase;
-import com.atomgraph.core.model.impl.SPARQLEndpointImpl;
 import com.atomgraph.core.riot.RDFLanguages;
 import com.atomgraph.core.riot.lang.RDFPostReaderFactory;
+import com.atomgraph.core.server.Dispatcher;
 import com.atomgraph.core.util.jena.DataManager;
 import com.atomgraph.core.util.jena.DataManagerImpl;
 import com.atomgraph.core.vocabulary.A;
@@ -153,9 +151,7 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
     @PostConstruct
     public void init()
     {
-        register(QueriedResourceBase.class); // handles all
-        register(SPARQLEndpointImpl.class); // handles /sparql queries
-        register(GraphStoreImpl.class); // handles /service requests
+        register(Dispatcher.class); // handles all
 
         register(new ModelProvider());
         register(new DatasetProvider());

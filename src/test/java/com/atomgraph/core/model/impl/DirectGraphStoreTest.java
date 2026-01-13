@@ -53,11 +53,10 @@ import org.junit.Test;
  *
  * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
  */
-public class QueriedResourceBaseTest extends JerseyTest
+public class DirectGraphStoreTest extends JerseyTest
 {
 
     public static final String RELATIVE_PATH = "test";
-    public static final String RESOURCE_URI = "http://localhost:9998/" + RELATIVE_PATH; // assume that base URI is http://localhost:9998/ - has to match getBaseUri()
     public static Dataset dataset;
     
     public com.atomgraph.core.Application system;
@@ -68,7 +67,6 @@ public class QueriedResourceBaseTest extends JerseyTest
     public static void initClass()
     {
         dataset = DatasetFactory.createTxnMem();
-        dataset.setDefaultModel(ModelFactory.createDefaultModel().add(ResourceFactory.createResource(RESOURCE_URI), FOAF.name, "Smth"));
     }
     
     @Before
@@ -76,16 +74,20 @@ public class QueriedResourceBaseTest extends JerseyTest
     {
         uri = getBaseUri().resolve(RELATIVE_PATH);
         gsc = GraphStoreClient.create(system.getClient(), new MediaTypes());
+        
+        dataset = DatasetFactory.createTxnMem().
+                addNamedModel(uri.toString(), ModelFactory.createDefaultModel().
+                        add(ResourceFactory.createResource(uri.toString()), FOAF.name, "Smth"));
     }
     
     @Path(RELATIVE_PATH)
-    public static class TestResource extends QueriedResourceBase
+    public static class TestResource extends DirectGraphStoreImpl
     {
 
         @Inject
-        public TestResource(@Context UriInfo uriInfo, @Context Request request, MediaTypes mediaTypes, Service service)
+        public TestResource(@Context Request request, Service service, MediaTypes mediaTypes, @Context UriInfo uriInfo)
         {
-            super(uriInfo, request, mediaTypes, service);
+            super(request, service, mediaTypes, uriInfo);
         }
 
     }
@@ -111,7 +113,7 @@ public class QueriedResourceBaseTest extends JerseyTest
     @Test
     public void testGet()
     {
-        assertIsomorphic(getDataset().getDefaultModel(), gsc.getModel(uri.toString()));
+        assertIsomorphic(getDataset().getNamedModel(uri.toString()), gsc.getModel(uri.toString()));
     }
     
     @Test
@@ -163,6 +165,26 @@ public class QueriedResourceBaseTest extends JerseyTest
         assertEquals(rdfXmlResp.getLanguage(), null);
         
         assertNotEquals(nTriplesETag, rdfXmlETag);
+    }
+ 
+    
+    @Test
+    public void testTurtleRelativeURIsResolvedInWrittenModel()
+    {
+        String relativeUri = "relative";
+        Model modelWithRelativeURIs = ModelFactory.createDefaultModel().
+            add(ResourceFactory.createResource(relativeUri), FOAF.name, "Smth");
+        
+        // needs to use Turtle in order to allow relative URIs
+        try (jakarta.ws.rs.core.Response cr = gsc.put(uri, Entity.entity(modelWithRelativeURIs, com.atomgraph.core.MediaType.TEXT_TURTLE_TYPE), new jakarta.ws.rs.core.MediaType[]{}))
+        {
+            URI absoluteUri = getBaseUri().resolve(relativeUri);
+            Model expected = ModelFactory.createDefaultModel().
+                add(ResourceFactory.createResource(absoluteUri.toString()), FOAF.name, "Smth");
+
+            // check that the model that was written had resolved relative URIs against the base URI
+            assertIsomorphic(expected, gsc.getModel(uri.toString()));
+        }
     }
     
 }
