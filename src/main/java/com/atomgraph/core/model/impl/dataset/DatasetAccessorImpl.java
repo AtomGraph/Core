@@ -20,6 +20,7 @@ package com.atomgraph.core.model.impl.dataset;
 import com.atomgraph.core.model.DatasetAccessor;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +76,7 @@ public class DatasetAccessorImpl implements DatasetAccessor
     @Override
     public void deleteDefault()
     {
-        getDataset().setDefaultModel(null);
+        getDataset().setDefaultModel(ModelFactory.createDefaultModel());
     }
 
     @Override
