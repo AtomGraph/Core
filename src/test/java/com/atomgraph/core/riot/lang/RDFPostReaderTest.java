@@ -47,6 +47,7 @@ public class RDFPostReaderTest
     @BeforeClass
     public static void setUpClass() throws Exception
     {
+        org.apache.jena.sys.JenaSystem.init();
         RDFLanguages.register(RDFLanguages.RDFPOST);
         RDFParserRegistry.registerLangTriples(RDFLanguages.RDFPOST, new RDFPostReaderFactory());
     }

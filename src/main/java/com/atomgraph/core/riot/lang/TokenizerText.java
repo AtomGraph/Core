@@ -329,7 +329,7 @@ public class TokenizerText implements Tokenizer
             token.setType(TokenType.DIRECTIVE);
             token.setImage(readWord(false));
             if ( Checking )
-                checkDirective(token.cntrlCode);
+                checkDirective(token.getImage());
             return token;
         }
 
@@ -1130,9 +1130,9 @@ public class TokenizerText implements Tokenizer
             checker.checkVariable(tokenImage);
     }
 
-    protected void checkDirective(int cntrlCode) {
+    protected void checkDirective(String tokenImage) {
         if ( checker != null )
-            checker.checkDirective(cntrlCode);
+            checker.checkDirective(tokenImage);
     }
 
     protected void checkKeyword(String tokenImage) {
