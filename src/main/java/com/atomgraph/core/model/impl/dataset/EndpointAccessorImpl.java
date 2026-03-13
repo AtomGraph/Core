@@ -31,6 +31,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.sparql.core.DatasetDescription;
 import org.apache.jena.sparql.core.DynamicDatasets;
 import org.apache.jena.sparql.vocabulary.ResultSetGraphVocab;
+import org.apache.jena.update.UpdateExecution;
 import org.apache.jena.update.UpdateRequest;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
@@ -216,7 +217,8 @@ public class EndpointAccessorImpl implements EndpointAccessor
     @Override
     public void update(UpdateRequest updateRequest, List<URI> usingGraphUris, List<URI> usingNamedGraphUris)
     {
-        if (log.isDebugEnabled()) log.debug("Attempting to update local Dataset, discarding UpdateRequest: {}", updateRequest);
+        if (log.isDebugEnabled()) log.debug("Updating local Dataset using UpdateRequest: {}", updateRequest);
+        UpdateExecution.dataset(getDataset()).update(updateRequest).execute();
     }
 
     // TO-DO: rewrite using Java 8 streams/lambdas

@@ -24,7 +24,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
 import com.atomgraph.core.MediaType;
@@ -34,6 +36,7 @@ import java.nio.charset.StandardCharsets;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.ext.MessageBodyWriter;
+import org.apache.commons.io.IOUtils;
 import org.apache.jena.query.QueryParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +57,9 @@ public class UpdateRequestProvider implements MessageBodyReader<UpdateRequest>, 
 
     private static final Logger log = LoggerFactory.getLogger(UpdateRequestProvider.class);
 
+    @Context
+    private UriInfo uriInfo;
+
     @Override
     public boolean isReadable(Class<?> type, Type type1, Annotation[] antns, jakarta.ws.rs.core.MediaType mt)
     {
@@ -66,7 +72,8 @@ public class UpdateRequestProvider implements MessageBodyReader<UpdateRequest>, 
         if (log.isTraceEnabled()) log.trace("Reading UpdateRequest with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
         try
         {
-            return UpdateFactory.read(in);
+            String updateString = IOUtils.toString(in, StandardCharsets.UTF_8);
+            return UpdateFactory.create(updateString, getUriInfo().getAbsolutePath().toString());
         }
         catch (QueryParseException ex)
         {
@@ -86,6 +93,11 @@ public class UpdateRequestProvider implements MessageBodyReader<UpdateRequest>, 
     {
         if (log.isTraceEnabled()) log.trace("Writing UpdateRequest with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
         new OutputStreamWriter(entityStream, StandardCharsets.UTF_8).write(updateRequest.toString());
+    }
+    
+    public UriInfo getUriInfo()
+    {
+        return uriInfo;
     }
     
 }

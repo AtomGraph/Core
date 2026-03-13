@@ -19,6 +19,8 @@ package com.atomgraph.core.provider;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.ParamConverter;
 import jakarta.ws.rs.ext.ParamConverterProvider;
 import jakarta.ws.rs.ext.Provider;
@@ -42,6 +44,9 @@ public class QueryParamProvider implements ParamConverterProvider
 {
     private static final Logger log = LoggerFactory.getLogger(QueryParamProvider.class);
 
+    @Context
+    private UriInfo uriInfo;
+
     @Override
     public <T> ParamConverter<T> getConverter(final Class<T> rawType, Type type, Annotation[] antns)
     {
@@ -54,10 +59,10 @@ public class QueryParamProvider implements ParamConverterProvider
                 public T fromString(final String value)
                 {
                     if (value == null) throw new IllegalArgumentException("Cannot parse Query from null String");
-                    
+
                     try
                     {
-                        return rawType.cast(QueryFactory.create(value));
+                        return rawType.cast(QueryFactory.create(value, getUriInfo().getAbsolutePath().toString()));
                     }
                     catch (QueryException ex)
                     {
@@ -77,4 +82,9 @@ public class QueryParamProvider implements ParamConverterProvider
         return null;
     }
 
+    public UriInfo getUriInfo()
+    {
+        return uriInfo;
+    }
+    
 } 

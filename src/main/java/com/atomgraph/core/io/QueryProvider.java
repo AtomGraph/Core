@@ -23,7 +23,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.MessageBodyWriter;
 import jakarta.ws.rs.ext.Provider;
 import com.atomgraph.core.MediaType;
@@ -53,8 +55,11 @@ public class QueryProvider implements MessageBodyReader<Query>, MessageBodyWrite
 {
     private static final Logger log = LoggerFactory.getLogger(QueryProvider.class);
 
+    @Context
+    private UriInfo uriInfo;
+
     // READER
-    
+
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, jakarta.ws.rs.core.MediaType mediaType)
     {
@@ -66,7 +71,8 @@ public class QueryProvider implements MessageBodyReader<Query>, MessageBodyWrite
     {
         try
         {
-            return QueryFactory.create(IOUtils.toString(entityStream, StandardCharsets.UTF_8));
+            String queryString = IOUtils.toString(entityStream, StandardCharsets.UTF_8);
+            return QueryFactory.create(queryString, getUriInfo().getAbsolutePath().toString());
         }
         catch (QueryParseException ex)
         {
@@ -92,6 +98,11 @@ public class QueryProvider implements MessageBodyReader<Query>, MessageBodyWrite
     public void writeTo(Query query, Class<?> type, Type genericType, Annotation[] annotations, jakarta.ws.rs.core.MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException
     {
         entityStream.write(query.toString().getBytes(Charset.forName("UTF-8")));
+    }
+    
+    public UriInfo getUriInfo()
+    {
+        return uriInfo;
     }
 
 }
