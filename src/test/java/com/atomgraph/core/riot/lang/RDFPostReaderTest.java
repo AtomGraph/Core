@@ -30,8 +30,8 @@ import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFParserRegistry;
-import org.junit.*;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  *
@@ -44,7 +44,7 @@ public class RDFPostReaderTest
     public String validRDFPost;
     private Model validExpected;
     
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass() throws Exception
     {
         org.apache.jena.sys.JenaSystem.init();
@@ -52,7 +52,7 @@ public class RDFPostReaderTest
         RDFParserRegistry.registerLangTriples(RDFLanguages.RDFPOST, new RDFPostReaderFactory());
     }
     
-    @Before
+    @BeforeEach
     public void setUp() throws UnsupportedEncodingException
     {
         validRDFPost = "&rdf=&su=" + URLEncoder.encode("http://subject1", ENC) + "&pu=" + URLEncoder.encode("http://dc.org/#title", ENC) + "&ol=" + URLEncoder.encode("title", ENC) + "&ll=da" +

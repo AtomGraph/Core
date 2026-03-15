@@ -43,14 +43,14 @@ import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.sparql.vocabulary.FOAF;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.test.JerseyTest;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -66,14 +66,14 @@ public class SPARQLEndpointImplTest extends JerseyTest
     public WebTarget endpoint;
     public SPARQLClient sc;
     
-    @BeforeClass
+    @BeforeAll
     public static void initClass()
     {
         dataset = DatasetFactory.createTxnMem();
         dataset.setDefaultModel(ModelFactory.createDefaultModel().add(ResourceFactory.createResource(RESOURCE_URI), FOAF.name, "Smth"));
     }
     
-    @Before
+    @BeforeEach
     public void init()
     {
         endpoint = system.getClient().target(getBaseUri().resolve("sparql"));
@@ -122,7 +122,7 @@ public class SPARQLEndpointImplTest extends JerseyTest
     }
 
     @Test
-    @Ignore
+    @Disabled
     // TO-DO: fix after Jena is upgraded using MessageBodyReader<SPARQLResult> instead of MessageBodyReader<ResultSet>
     // https://jena.apache.org/documentation/javadoc/arq/org/apache/jena/sparql/resultset/SPARQLResult.html
     public void testAsk()

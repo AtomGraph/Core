@@ -40,11 +40,11 @@ import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.sparql.vocabulary.FOAF;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.test.JerseyTest;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -60,13 +60,13 @@ public class LocaleEntityTagTest extends JerseyTest
     private GraphStoreClient gsc;
     private URI uri, uriLang;
     
-    @BeforeClass
+    @BeforeAll
     public static void initClass()
     {
         dataset = DatasetFactory.createTxnMem();
     }
     
-    @Before
+    @BeforeEach
     public void init()
     {
         uri = getBaseUri().resolve(RELATIVE_PATH);
