@@ -157,8 +157,8 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
         register(new DatasetProvider());
         register(new ResultSetProvider());
         register(QueryParamProvider.class);
-        register(QueryProvider.class);
-        register(UpdateRequestProvider.class);
+        register(new QueryProvider());
+        register(new UpdateRequestProvider());
         register(new BadGatewayExceptionMapper());
         register(new NoReaderForLangExceptionMapper());
         register(new RiotExceptionMapper());
