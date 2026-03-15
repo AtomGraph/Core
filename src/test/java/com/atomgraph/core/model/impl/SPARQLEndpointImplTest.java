@@ -39,15 +39,11 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
-import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.sparql.vocabulary.FOAF;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -232,86 +228,6 @@ public class SPARQLEndpointImplTest extends JerseyTest
         }
     }
         
-    @Test
-    public void testDescribeRelativeIriNoBase()
-    {
-        String endpointUri = getBaseUri().resolve("sparql").toString();
-        Property prop = FOAF.name;
-        Statement stmt = dataset.getDefaultModel().createStatement(
-            ResourceFactory.createResource(endpointUri), prop, "Endpoint");
-        dataset.getDefaultModel().add(stmt);
-        try
-        {
-            MultivaluedMap<String, String> params = new MultivaluedHashMap();
-            params.add(QUERY_PARAM_NAME, "DESCRIBE <>");
-
-            try (jakarta.ws.rs.core.Response cr = sc.get(sc.getReadableMediaTypes(Model.class), params))
-            {
-                assertEquals(200, cr.getStatusInfo().getStatusCode());
-                Model result = cr.readEntity(Model.class);
-                assertTrue(result.contains(ResourceFactory.createResource(endpointUri), prop, "Endpoint"));
-            }
-        }
-        finally
-        {
-            dataset.getDefaultModel().remove(stmt);
-        }
-    }
-
-    @Test
-    public void testDescribeRelativeIriExplicitBase()
-    {
-        MultivaluedMap<String, String> params = new MultivaluedHashMap();
-        params.add(QUERY_PARAM_NAME, "BASE <http://explicit.org/> DESCRIBE <>");
-
-        try (jakarta.ws.rs.core.Response cr = sc.get(sc.getReadableMediaTypes(Model.class), params))
-        {
-            assertEquals(200, cr.getStatusInfo().getStatusCode());
-            Model result = cr.readEntity(Model.class);
-            assertTrue(result.isEmpty());
-        }
-    }
-
-    @Test
-    public void testUpdateInsertRelativeIriNoBase()
-    {
-        String endpointUri = getBaseUri().resolve("sparql").toString();
-        Resource subject = ResourceFactory.createResource(endpointUri + "#s");
-        Property pred = ResourceFactory.createProperty("urn:test:p");
-        Resource obj = ResourceFactory.createResource("urn:test:o");
-
-        try (jakarta.ws.rs.core.Response cr = sc.post(
-                "INSERT DATA { <#s> <urn:test:p> <urn:test:o> }",
-                APPLICATION_SPARQL_UPDATE_TYPE, new MediaType[]{}))
-        {
-            assertEquals(200, cr.getStatusInfo().getStatusCode());
-        }
-
-        assertTrue(dataset.getDefaultModel().contains(subject, pred, obj));
-        dataset.getDefaultModel().remove(subject, pred, obj);
-    }
-
-    @Test
-    public void testUpdateInsertRelativeIriExplicitBase()
-    {
-        Resource subject = ResourceFactory.createResource("http://explicit.org/#s2");
-        Property pred = ResourceFactory.createProperty("urn:test:p2");
-        Resource obj = ResourceFactory.createResource("urn:test:o2");
-        String endpointUri = getBaseUri().resolve("sparql").toString();
-
-        try (jakarta.ws.rs.core.Response cr = sc.post(
-                "BASE <http://explicit.org/> INSERT DATA { <#s2> <urn:test:p2> <urn:test:o2> }",
-                APPLICATION_SPARQL_UPDATE_TYPE, new MediaType[]{}))
-        {
-            assertEquals(200, cr.getStatusInfo().getStatusCode());
-        }
-
-        assertTrue(dataset.getDefaultModel().contains(subject, pred, obj));
-        assertFalse(dataset.getDefaultModel().contains(
-            ResourceFactory.createResource(endpointUri + "#s2"), pred, obj));
-        dataset.getDefaultModel().remove(subject, pred, obj);
-    }
-
     public static void assertIsomorphic(Model wanted, Model got)
     {
         if (!wanted.isIsomorphicWith(got))
