@@ -99,7 +99,7 @@ public class ResultSetProvider implements MessageBodyReader<ResultSetRewindable>
         Lang lang = RDFLanguages.contentTypeToLang(formatType.toString()); // cannot be null - isWritable() checks that
         if (log.isDebugEnabled()) log.debug("RDF language used to write ResultSet: {}", lang);
         
-        ResultSetFormatter.output(entityStream, results, lang);
+        ResultSetMgr.write(entityStream, results, lang);
     }
     
 }
