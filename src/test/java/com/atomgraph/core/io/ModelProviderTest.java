@@ -34,9 +34,10 @@ import org.apache.jena.riot.RiotException;
 import org.apache.jena.sparql.vocabulary.FOAF;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.test.JerseyTest;
-import static org.junit.Assert.fail;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -48,7 +49,7 @@ public class ModelProviderTest extends JerseyTest
     public com.atomgraph.core.Application system;
     public GraphStoreClient gsc;
 
-    @Before
+    @BeforeEach
     public void init()
     {
         gsc = GraphStoreClient.create(system.getClient(), new MediaTypes());
@@ -67,7 +68,7 @@ public class ModelProviderTest extends JerseyTest
     }
     
 
-    @Test(expected = RiotException.class)
+    @Test
     public void testRelativeURIsInNTriples()
     {
         String invalidNTriples = """
@@ -79,7 +80,7 @@ public class ModelProviderTest extends JerseyTest
         Model model = ModelFactory.createDefaultModel();
 
         ModelProvider modelProvider = new ModelProvider();
-        modelProvider.read(model, inputStream, Lang.NTRIPLES, null);
+        assertThrows(RiotException.class, () -> modelProvider.read(model, inputStream, Lang.NTRIPLES, null));
     }
 
     @Test

@@ -23,7 +23,7 @@ import com.atomgraph.core.client.GraphStoreClient;
 import java.util.Map;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
-import org.apache.jena.ext.com.google.common.collect.ImmutableMap;
+import java.util.Collections;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.ModelReader;
 import org.apache.jena.util.FileManagerImpl;
@@ -104,7 +104,7 @@ public class DataManagerImpl extends FileManagerImpl implements DataManager
             }
         }
         
-        return super.loadModel(uri);
+        return super.loadModelInternal(uri);
     }
     
     @Override
@@ -130,7 +130,7 @@ public class DataManagerImpl extends FileManagerImpl implements DataManager
         if (mappedURI.startsWith("http") || mappedURI.startsWith("https"))
             return model.add(getGraphStoreClient().getModel(getEndpoint(URI.create(uri)).toString()));
         
-        return super.readModel(model, uri);
+        return super.readModelInternal(model, uri);
     }
 
     /**
@@ -139,9 +139,9 @@ public class DataManagerImpl extends FileManagerImpl implements DataManager
      * @return immutable cache map
      */
     @Override
-    public ImmutableMap<String, Model> getModelCache()
+    public Map<String, Model> getModelCache()
     {
-        return ImmutableMap.copyOf(modelCache);
+        return Collections.unmodifiableMap(modelCache);
     }
     
     /**
