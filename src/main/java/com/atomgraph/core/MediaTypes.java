@@ -29,7 +29,7 @@ import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.RDFParserRegistry;
 import org.apache.jena.riot.RDFWriterRegistry;
-import static org.apache.jena.riot.lang.extra.TurtleJCC.TTLJCC;
+import static org.apache.jena.riot.lang.turtlejcc.TurtleJCC.TTLJCC;
 import org.apache.jena.riot.resultset.ResultSetLang;
 import org.apache.jena.riot.resultset.ResultSetReaderRegistry;
 import org.apache.jena.riot.resultset.ResultSetWriterRegistry;

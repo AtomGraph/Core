@@ -20,9 +20,9 @@ import java.net.URI;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Response;
-import org.apache.jena.ext.com.google.common.collect.ImmutableMap;
+import java.util.Map;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelGetter;
+import org.apache.jena.ontology.models.ModelGetter;
 
 /**
  *
@@ -30,8 +30,8 @@ import org.apache.jena.rdf.model.ModelGetter;
  */
 public interface DataManager extends ModelGetter
 {
-    
-    ImmutableMap<String, Model> getModelCache();
+
+    Map<String, Model> getModelCache();
     
 //    Client getClient();
     

@@ -40,11 +40,12 @@ import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.sparql.vocabulary.FOAF;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.test.JerseyTest;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -59,7 +60,7 @@ public class GraphStoreImplTest extends JerseyTest
     public URI endpoint;
     public GraphStoreClient gsc;
 
-    @BeforeClass
+    @BeforeAll
     public static void initClass()
     {
         dataset = DatasetFactory.createTxnMem();
@@ -67,7 +68,7 @@ public class GraphStoreImplTest extends JerseyTest
         dataset.addNamedModel(NAMED_GRAPH_URI, ModelFactory.createDefaultModel().add(ResourceFactory.createResource("http://default/graph/resource"), FOAF.name, "Whateverest"));
     }
     
-    @Before
+    @BeforeEach
     public void init()
     {
         endpoint = getBaseUri().resolve("service");
@@ -224,12 +225,11 @@ public class GraphStoreImplTest extends JerseyTest
         assertIsomorphic(getDataset().getDefaultModel(), gsc.getModel());
     }
     
-    @Test(expected = NotFoundException.class)
+    @Test
     public void testDeleteNamedModel()
     {
         gsc.deleteModel(NAMED_GRAPH_URI);
-        
-        assertEquals(null, gsc.getModel(NAMED_GRAPH_URI));
+        assertThrows(NotFoundException.class, () -> gsc.getModel(NAMED_GRAPH_URI));
     }
     
     @Test

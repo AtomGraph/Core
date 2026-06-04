@@ -29,9 +29,10 @@ import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.sparql.vocabulary.FOAF;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.test.JerseyTest;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -44,7 +45,7 @@ public class GraphStoreClientTest extends JerseyTest
     public URI endpoint;
     public GraphStoreClient gsc;
 
-    @BeforeClass
+    @BeforeAll
     public static void initClass()
     {
         dataset = DatasetFactory.createTxnMem();
@@ -52,7 +53,7 @@ public class GraphStoreClientTest extends JerseyTest
         dataset.addNamedModel(NAMED_GRAPH_URI, ModelFactory.createDefaultModel().add(ResourceFactory.createResource("http://default/graph/resource"), FOAF.name, "Whateverest"));
     }
     
-    @Before
+    @BeforeEach
     public void init()
     {
         endpoint = getBaseUri().resolve("service");
@@ -76,16 +77,16 @@ public class GraphStoreClientTest extends JerseyTest
         return system;
     }
     
-    @Test(expected = NotFoundException.class)
+    @Test
     public void testGetNotFoundNamedModel()
     {
-        gsc.getModel("http://host/" + UUID.randomUUID().toString());
+        assertThrows(NotFoundException.class, () -> gsc.getModel("http://host/" + UUID.randomUUID().toString()));
     }
-    
-    @Test(expected = NotFoundException.class)
+
+    @Test
     public void testDeleteNotFoundNamedModel()
     {
-        gsc.deleteModel("http://host/" + UUID.randomUUID().toString());
+        assertThrows(NotFoundException.class, () -> gsc.deleteModel("http://host/" + UUID.randomUUID().toString()));
     }
     
 }

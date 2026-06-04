@@ -3,7 +3,7 @@
 
     <groupId>com.atomgraph</groupId>
     <artifactId>core</artifactId>
-    <version>4.0.17-SNAPSHOT</version>
+    <version>4.1.0-SNAPSHOT</version>
     <packaging>${packaging.type}</packaging>
 
     <name>AtomGraph Core</name>
@@ -70,15 +70,15 @@
 
     <dependencies>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.2</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.11.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
-            <version>5.0.0</version>
+            <version>6.0.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -95,28 +95,28 @@
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-servlet</artifactId>
-            <version>3.1.0</version>
+            <version>3.1.11</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-client</artifactId>
-            <version>3.1.0</version>
+            <version>3.1.11</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.inject</groupId>
             <artifactId>jersey-hk2</artifactId>
-            <version>3.1.0</version>
+            <version>3.1.11</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.test-framework.providers</groupId>
             <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
-            <version>3.1.0</version>
+            <version>3.1.11</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-arq</artifactId>
-            <version>4.7.0</version>
+            <version>6.1.0</version>
             <exclusions>
                 <!-- exclude HTTP Client as its version clashes with Jersey's -->
                 <exclusion>
@@ -153,7 +153,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>2.5.3</version>
+                <version>3.3.1</version>
                 <configuration>
                     <releaseProfiles>release</releaseProfiles>
                 </configuration>
@@ -161,15 +161,15 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.10.0</version>
+                <version>3.14.1</version>
                 <configuration>
-                    <release>17</release>
+                    <release>21</release>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>3.3.2</version>
+                <version>3.5.1</version>
                 <configuration>
                     <failOnMissingWebXml>true</failOnMissingWebXml>
                 </configuration>
@@ -177,7 +177,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.12.0</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
                     <excludePackageNames>*.impl</excludePackageNames>
@@ -186,7 +186,7 @@
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
-                <version>0.9.0</version>
+                <version>0.10.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <publishingServerId>central-portal-snapshots</publishingServerId>
@@ -240,7 +240,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>3.2.1</version>
+                        <version>3.4.0</version>
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
@@ -253,7 +253,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.2.0</version>
+                        <version>3.12.0</version>
                         <configuration>
                             <encoding>UTF-8</encoding>
                             <excludePackageNames>*.impl</excludePackageNames>
