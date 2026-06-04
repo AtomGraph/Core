@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 *
 * @author Martynas Jusevičius {@literal <martynas@atomgraph.com>}
 * @see org.apache.jena.util.FileManager
-* @see org.apache.jena.rdf.model.ModelGetter
 * @see com.atomgraph.core.client.GraphStoreClient
 */
 
