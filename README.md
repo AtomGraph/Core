@@ -1,6 +1,8 @@
 Core is a Linked Data framework. It crosses Apache Jena RDF API with the JAX-RS REST API (Eclipse Jersey implementation), providing in a uniform Linked Data API.
 
-Core serves as a base for [AtomGraph Processor](../../../Processor). It is implemented as a Java Web application (uses Maven).
+Core serves as a base for [AtomGraph Processor](../../../Processor), [AtomGraph Web-Client](../../../Web-Client), and, indirectly, [AtomGraph LinkedDataHub](../../../LinkedDataHub).
+
+Core is implemented as a JAX-RS Web application (uses Maven).
 
 Features
 --------
