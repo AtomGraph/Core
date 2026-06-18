@@ -33,11 +33,8 @@ import com.atomgraph.core.model.Service;
 import com.atomgraph.core.riot.RDFLanguages;
 import com.atomgraph.core.riot.lang.RDFPostReaderFactory;
 import com.atomgraph.core.server.Dispatcher;
-import com.atomgraph.core.util.jena.DataManager;
-import com.atomgraph.core.util.jena.DataManagerImpl;
 import com.atomgraph.core.vocabulary.A;
 import com.atomgraph.core.vocabulary.SD;
-import java.util.HashMap;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.ServletConfig;
 import jakarta.ws.rs.client.Client;
@@ -48,7 +45,6 @@ import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.resultset.ResultSetLang;
-import org.apache.jena.util.LocationMapper;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -73,7 +69,6 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
     private final Service service;
     private final MediaTypes mediaTypes;
     private final Client client;
-    private final DataManager dataManager;
     private final Integer maxGetRequestSize;
     private final boolean preemptiveAuth;
 
@@ -143,9 +138,6 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
                     ResourceFactory.createResource(endpointURI), ResourceFactory.createResource(graphStoreURI), ResourceFactory.createResource(quadStoreURI),
                     authUser, authPwd, maxGetRequestSize);
         }
-        
-        dataManager = new DataManagerImpl(LocationMapper.get(), new HashMap<>(), GraphStoreClient.create(client, mediaTypes),
-                cacheModelLoads, preemptiveAuth);
     }
     
     @PostConstruct
@@ -207,10 +199,6 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
         return maxGetRequestSize;
     }    
 
-    public DataManager getDataManager()
-    {
-        return dataManager;
-    }
     
     public boolean isPreemptiveAuth()
     {
