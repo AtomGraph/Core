@@ -145,6 +145,26 @@ public class PrefixGraphRepository extends DocumentGraphRepository
     }
 
     /**
+     * Returns the exact URI→location mappings (live view).
+     *
+     * @return exact mappings
+     */
+    public Map<String, String> getLocationMappings()
+    {
+        return exactLocations;
+    }
+
+    /**
+     * Returns the namespace-prefix→location mappings (live view).
+     *
+     * @return prefix mappings
+     */
+    public Map<String, String> getPrefixMappings()
+    {
+        return prefixLocations;
+    }
+
+    /**
      * Returns true if the ID has a (non-HTTP) document mapping — e.g. a bundled local ontology.
      *
      * @param id graph ID
