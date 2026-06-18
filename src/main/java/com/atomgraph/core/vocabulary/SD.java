@@ -16,12 +16,11 @@
  */
 package com.atomgraph.core.vocabulary;
 
-import org.apache.jena.ontology.Individual;
-import org.apache.jena.ontology.ObjectProperty;
-import org.apache.jena.ontology.OntClass;
-import org.apache.jena.ontology.OntModel;
-import org.apache.jena.ontology.OntModelSpec;
-import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.ontapi.OntModelFactory;
+import org.apache.jena.ontapi.OntSpecification;
+import org.apache.jena.ontapi.model.OntClass;
+import org.apache.jena.ontapi.model.OntModel;
+import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 
 /**
@@ -30,12 +29,18 @@ import org.apache.jena.rdf.model.Resource;
  */
 public class SD
 {
+
+    static
+    {
+        org.apache.jena.sys.JenaSystem.init(); // ensure Jena (RDFS vocab) is initialized before ontapi touches it
+    }
+
     /** <p>The RDF model that holds the vocabulary terms</p> */
-    private static OntModel m_model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, null);
-    
+    private static OntModel m_model = OntModelFactory.createModel(OntSpecification.OWL2_DL_MEM);
+
     /** <p>The namespace of the vocabulary as a string</p> */
     public static final String NS = "http://www.w3.org/ns/sparql-service-description#";
-    
+
     /** <p>The namespace of the vocabulary as a string</p>
      * @return namespace URI
      *  @see #NS */
@@ -43,36 +48,36 @@ public class SD
     {
         return NS;
     }
-    
+
     /** <p>The namespace of the vocabulary as a resource</p> */
     public static final Resource NAMESPACE = m_model.createResource( NS );
-    
-    public static final OntClass Dataset = m_model.createClass( NS + "Dataset" );
 
-    public static final OntClass Service = m_model.createClass( NS + "Service" );
+    public static final OntClass Dataset = m_model.createOntClass( NS + "Dataset" );
 
-    public static final OntClass Graph = m_model.createClass( NS + "Graph" );
-    
-    public static final OntClass NamedGraph = m_model.createClass( NS + "NamedGraph" );
-    
-    public static final OntClass Language = m_model.createClass( NS + "Language" );
-    
-    public static final ObjectProperty endpoint = m_model.createObjectProperty( NS + "endpoint" );
+    public static final OntClass Service = m_model.createOntClass( NS + "Service" );
 
-    public static final ObjectProperty graph = m_model.createObjectProperty( NS + "graph" );
+    public static final OntClass Graph = m_model.createOntClass( NS + "Graph" );
 
-    public static final ObjectProperty name = m_model.createObjectProperty( NS + "name" );
+    public static final OntClass NamedGraph = m_model.createOntClass( NS + "NamedGraph" );
 
-    public static final ObjectProperty defaultGraph = m_model.createObjectProperty( NS + "defaultGraph" );
+    public static final OntClass Language = m_model.createOntClass( NS + "Language" );
 
-    public static final ObjectProperty namedGraph = m_model.createObjectProperty( NS + "namedGraph" );
-    
-    public static final ObjectProperty supportedLanguage = m_model.createObjectProperty( NS + "supportedLanguage" );
-    
-    public static final Individual SPARQL10Query = m_model.createIndividual(NS + "SPARQL10Query", Language);
-    
-    public static final Individual SPARQL11Query = m_model.createIndividual(NS + "SPARQL11Query", Language);
+    public static final Property endpoint = m_model.createObjectProperty( NS + "endpoint" );
 
-    public static final Individual SPARQL11Update = m_model.createIndividual(NS + "SPARQL11Update", Language);
+    public static final Property graph = m_model.createObjectProperty( NS + "graph" );
+
+    public static final Property name = m_model.createObjectProperty( NS + "name" );
+
+    public static final Property defaultGraph = m_model.createObjectProperty( NS + "defaultGraph" );
+
+    public static final Property namedGraph = m_model.createObjectProperty( NS + "namedGraph" );
+
+    public static final Property supportedLanguage = m_model.createObjectProperty( NS + "supportedLanguage" );
+
+    public static final Resource SPARQL10Query = m_model.createIndividual(NS + "SPARQL10Query", Language);
+
+    public static final Resource SPARQL11Query = m_model.createIndividual(NS + "SPARQL11Query", Language);
+
+    public static final Resource SPARQL11Update = m_model.createIndividual(NS + "SPARQL11Update", Language);
 
 }
