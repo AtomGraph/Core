@@ -194,25 +194,28 @@ public class PrefixGraphRepository extends DocumentGraphRepository
 
         String location = resolve(id);
         if (log.isDebugEnabled()) log.debug("Loading graph '{}' from location '{}'", id, location);
-        Graph graph = load(location);
+        Graph graph = load(id, location);
         put(id, graph);
         return graph;
     }
 
     /**
      * Loads a graph from a document location. HTTP/HTTPS via the Graph Store client; everything
-     * else (classpath, file) via the RIOT stream manager.
+     * else (classpath, file) via the RIOT stream manager. The graph id is used as the parser base so that
+     * relative URIs in the document (e.g. {@code rdf:about=""} for the ontology resource) resolve against the
+     * graph URI rather than the (classpath/file) location.
      *
+     * @param base parser base URI (the graph id)
      * @param location document location
      * @return loaded graph
      */
-    protected Graph load(String location)
+    protected Graph load(String base, String location)
     {
         if (location.startsWith("http://") || location.startsWith("https://"))
             return getGraphStoreClient().getModel(location).getGraph();
 
         Model model = ModelFactory.createDefaultModel();
-        RDFParser.create().source(location).streamManager(getStreamManager()).build().parse(model);
+        RDFParser.create().source(location).base(base).streamManager(getStreamManager()).build().parse(model);
         return model.getGraph();
     }
 
