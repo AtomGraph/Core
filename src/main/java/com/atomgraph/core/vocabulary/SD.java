@@ -22,6 +22,7 @@ import org.apache.jena.ontapi.model.OntClass;
 import org.apache.jena.ontapi.model.OntModel;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.vocabulary.RDF;
 
 /**
  *
@@ -74,10 +75,12 @@ public class SD
 
     public static final Property supportedLanguage = m_model.createObjectProperty( NS + "supportedLanguage" );
 
-    public static final Resource SPARQL10Query = m_model.createIndividual(NS + "SPARQL10Query", Language);
+    // created as plain typed resources rather than via createIndividual(): the OWL1 profile (OWL1_FULL_MEM, needed
+    // for rdfs:Class recognition) rejects named individuals — ontapi throws OntJenaException$Creation otherwise
+    public static final Resource SPARQL10Query = m_model.createResource(NS + "SPARQL10Query").addProperty(RDF.type, Language);
 
-    public static final Resource SPARQL11Query = m_model.createIndividual(NS + "SPARQL11Query", Language);
+    public static final Resource SPARQL11Query = m_model.createResource(NS + "SPARQL11Query").addProperty(RDF.type, Language);
 
-    public static final Resource SPARQL11Update = m_model.createIndividual(NS + "SPARQL11Update", Language);
+    public static final Resource SPARQL11Update = m_model.createResource(NS + "SPARQL11Update").addProperty(RDF.type, Language);
 
 }
