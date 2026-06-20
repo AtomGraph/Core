@@ -32,8 +32,10 @@ import jakarta.ws.rs.ext.Provider;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.RDFParserRegistry;
+import org.apache.jena.riot.RDFWriter;
 import org.apache.jena.riot.RDFWriterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,7 +114,14 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
         Lang lang = RDFLanguages.contentTypeToLang(formatType.toString()); // cannot be null - isWritable() checks that
         
         // if we need to provide triples, then we write only the default graph of the dataset
-        if (RDFLanguages.isTriples(lang)) dataset.getDefaultModel().write(entityStream, lang.getName());
+        if (RDFLanguages.isTriples(lang))
+        {
+            RDFFormat format = Lang.RDFXML.equals(lang) ? RDFFormat.RDFXML_PLAIN : RDFWriterRegistry.defaultSerialization(lang); // keep basic (plain) RDF/XML, not the abbreviated default
+            RDFWriter.create().
+                format(format).
+                source(dataset.getDefaultModel()).
+                output(entityStream);
+        }
         else RDFDataMgr.write(entityStream, dataset, lang);
     }
     

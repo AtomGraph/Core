@@ -31,9 +31,11 @@ import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.MessageBodyWriter;
 import jakarta.ws.rs.ext.Provider;
 import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.RDFParser;
 import org.apache.jena.riot.RDFParserRegistry;
+import org.apache.jena.riot.RDFWriter;
 import org.apache.jena.riot.RDFWriterRegistry;
 import org.apache.jena.riot.system.ErrorHandler;
 import org.apache.jena.riot.system.ErrorHandlerFactory;
@@ -158,7 +160,12 @@ public class ModelProvider implements MessageBodyReader<Model>, MessageBodyWrite
         String syntax = lang.getName();
         if (log.isDebugEnabled()) log.debug("Syntax used to write Model: {}", syntax);
         
-        return model.write(os, syntax);
+        RDFFormat format = Lang.RDFXML.equals(lang) ? RDFFormat.RDFXML_PLAIN : RDFWriterRegistry.defaultSerialization(lang); // keep basic (plain) RDF/XML, not the abbreviated default
+        RDFWriter.create().
+            format(format).
+            source(model).
+            output(os);
+        return model;
     }
     
     public UriInfo getUriInfo()
