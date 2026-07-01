@@ -15,12 +15,9 @@
  */
 package com.atomgraph.core.io;
 
-import com.atomgraph.core.MediaType;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.GraphStoreClient;
-import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.Application;
-import jakarta.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;

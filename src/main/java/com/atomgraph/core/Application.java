@@ -16,7 +16,6 @@
  */
 package com.atomgraph.core;
 
-import com.atomgraph.core.client.GraphStoreClient;
 import com.atomgraph.core.exception.ConfigurationException;
 import com.atomgraph.core.io.DatasetProvider;
 import com.atomgraph.core.io.ResultSetProvider;
