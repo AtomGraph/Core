@@ -18,7 +18,6 @@ package com.atomgraph.core.io;
 
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetFactory;
-import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.query.ResultSetRewindable;
 import java.io.IOException;
 import java.io.InputStream;

@@ -3,7 +3,7 @@
 
     <groupId>com.atomgraph</groupId>
     <artifactId>core</artifactId>
-    <version>4.1.1-SNAPSHOT</version>
+    <version>5.0.0-SNAPSHOT</version>
     <packaging>${packaging.type}</packaging>
 
     <name>AtomGraph Core</name>
@@ -140,6 +140,12 @@
                     <artifactId>httpcore-osgi</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <!-- new Jena ontology API (org.apache.jena.ontapi), replaces the deprecated-for-removal org.apache.jena.ontology -->
+            <groupId>org.apache.jena</groupId>
+            <artifactId>jena-ontapi</artifactId>
+            <version>6.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

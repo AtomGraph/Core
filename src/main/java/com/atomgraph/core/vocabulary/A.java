@@ -16,11 +16,11 @@
  */
 package com.atomgraph.core.vocabulary;
 
-import org.apache.jena.ontology.DatatypeProperty;
-import org.apache.jena.ontology.ObjectProperty;
-import org.apache.jena.ontology.OntModel;
-import org.apache.jena.ontology.OntModelSpec;
-import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.ontapi.OntModelFactory;
+import org.apache.jena.ontapi.OntSpecification;
+import org.apache.jena.ontapi.model.OntModel;
+import org.apache.jena.rdf.model.Property;
+
 import org.apache.jena.rdf.model.Resource;
 
 /**
@@ -29,8 +29,13 @@ import org.apache.jena.rdf.model.Resource;
  */
 public final class A
 {
+
+    static
+    {
+        org.apache.jena.sys.JenaSystem.init(); // ensure Jena (RDFS vocab) is initialized before ontapi touches it
+    }
     /** <p>The RDF model that holds the vocabulary terms</p> */
-    private static OntModel m_model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM, null);
+    private static OntModel m_model = OntModelFactory.createModel(OntSpecification.OWL2_FULL_MEM);
     
     /** <p>The namespace of the vocabulary as a string</p> */
     public static final String NS = "https://w3id.org/atomgraph/core#";
@@ -47,33 +52,33 @@ public final class A
     public static final Resource NAMESPACE = m_model.createResource( NS );
 
     /** Dataset file property */
-    public static final DatatypeProperty dataset = m_model.createDatatypeProperty( NS + "dataset" );
+    public static final Property dataset = m_model.createDataProperty( NS + "dataset" );
     
     /** Graph Store URL property */
-    public static final ObjectProperty graphStore = m_model.createObjectProperty( NS + "graphStore" );
+    public static final Property graphStore = m_model.createObjectProperty( NS + "graphStore" );
     
     /** Quad store URL property */
-    public static final ObjectProperty quadStore = m_model.createObjectProperty( NS + "quadStore" );
+    public static final Property quadStore = m_model.createObjectProperty( NS + "quadStore" );
     
     /** <code>Cache-Control</code> property **/
-    public static final DatatypeProperty cacheControl = m_model.createDatatypeProperty( NS + "cacheControl" );
+    public static final Property cacheControl = m_model.createDataProperty( NS + "cacheControl" );
 
     /** Result limit property */
-    public static final DatatypeProperty resultLimit = m_model.createDatatypeProperty( NS + "resultLimit" );
+    public static final Property resultLimit = m_model.createDataProperty( NS + "resultLimit" );
 
     /** Cache models property */
-    public static final DatatypeProperty cacheModelLoads = m_model.createDatatypeProperty( NS + "cacheModelLoads" );
+    public static final Property cacheModelLoads = m_model.createDataProperty( NS + "cacheModelLoads" );
     
     /** Preemptive HTTP Basic auth property */
-    public static final DatatypeProperty preemptiveAuth = m_model.createDatatypeProperty( NS + "preemptiveAuth" );
+    public static final Property preemptiveAuth = m_model.createDataProperty( NS + "preemptiveAuth" );
     
     /** Max <code>GET</code> request size property */
-    public static final DatatypeProperty maxGetRequestSize = m_model.createDatatypeProperty( NS + "maxGetRequestSize" );
+    public static final Property maxGetRequestSize = m_model.createDataProperty( NS + "maxGetRequestSize" );
     
     /** HTTP Basic auth user property */
-    public static final DatatypeProperty authUser = m_model.createDatatypeProperty( NS + "authUser" );
+    public static final Property authUser = m_model.createDataProperty( NS + "authUser" );
     
     /** HTTP Basic auth password property */
-    public static final DatatypeProperty authPwd = m_model.createDatatypeProperty( NS + "authPwd" );
+    public static final Property authPwd = m_model.createDataProperty( NS + "authPwd" );
 
 }
