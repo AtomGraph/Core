@@ -69,7 +69,6 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
     private final MediaTypes mediaTypes;
     private final Client client;
     private final Integer maxGetRequestSize;
-    private final boolean preemptiveAuth;
 
     /**
      * Initializes root resource classes and provider singletons
@@ -86,24 +85,20 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
             servletConfig.getInitParameter(A.authUser.getURI()) != null ? servletConfig.getInitParameter(A.authUser.getURI()) : null,
             servletConfig.getInitParameter(A.authPwd.getURI()) != null ? servletConfig.getInitParameter(A.authPwd.getURI()) : null,
             new MediaTypes(), getClient(new ClientConfig()),
-            servletConfig.getInitParameter(A.maxGetRequestSize.getURI()) != null ? Integer.valueOf(servletConfig.getInitParameter(A.maxGetRequestSize.getURI())) : null,
-            servletConfig.getInitParameter(A.cacheModelLoads.getURI()) != null ? Boolean.parseBoolean(servletConfig.getInitParameter(A.cacheModelLoads.getURI())) : false,
-            servletConfig.getInitParameter(A.preemptiveAuth.getURI()) != null ? Boolean.parseBoolean(servletConfig.getInitParameter(A.preemptiveAuth.getURI())) : false
+            servletConfig.getInitParameter(A.maxGetRequestSize.getURI()) != null ? Integer.valueOf(servletConfig.getInitParameter(A.maxGetRequestSize.getURI())) : null
         );
     }
-    
+
     public Application(final Dataset dataset,
             final String endpointURI, final String graphStoreURI, final String quadStoreURI,
             final String authUser, final String authPwd,
-            final MediaTypes mediaTypes, final Client client, final Integer maxGetRequestSize,
-            final boolean cacheModelLoads, final boolean preemptiveAuth)
+            final MediaTypes mediaTypes, final Client client, final Integer maxGetRequestSize)
     {
         this.dataset = dataset;
         this.mediaTypes = mediaTypes;
         this.client = client;
         this.maxGetRequestSize = maxGetRequestSize;
-        this.preemptiveAuth = preemptiveAuth;
-        
+
         // add RDF/POST serializer
         RDFLanguages.register(RDFLanguages.RDFPOST);
         RDFParserRegistry.registerLangTriples(RDFLanguages.RDFPOST, new RDFPostReaderFactory());
@@ -199,11 +194,6 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
     }    
 
     
-    public boolean isPreemptiveAuth()
-    {
-        return preemptiveAuth;
-    }
-
     public static Dataset getDataset(String location, Lang lang)
     {
         Dataset dataset = DatasetFactory.createTxnMem();

@@ -21,12 +21,6 @@
     rdfs:seeAlso sd:service ;
     rdfs:isDefinedBy <#> .
 
-:preemptiveAuth a owl:DatatypeProperty ;
-    rdfs:range xsd:boolean ;
-    rdfs:label "Preemptive authentication" ;
-    rdfs:seeAlso <http://tools.ietf.org/html/rfc2617#section-2> ;
-    rdfs:isDefinedBy <#> .
-
 :cacheControl a owl:DatatypeProperty ;
     rdfs:subPropertyOf http:fieldValue ;
     rdfs:range xsd:string ;
