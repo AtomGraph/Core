@@ -29,10 +29,6 @@
         </init-param>
         -->
         <init-param>
-            <param-name>https://w3id.org/atomgraph/core#preemptiveAuth</param-name>
-            <param-value>true</param-value>
-        </init-param>
-        <init-param>
             <param-name>https://w3id.org/atomgraph/core#cacheControl</param-name>
             <param-value>no-cache</param-value>
         </init-param>

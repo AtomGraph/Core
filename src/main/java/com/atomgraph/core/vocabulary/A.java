@@ -66,12 +66,6 @@ public final class A
     /** Result limit property */
     public static final Property resultLimit = m_model.createDataProperty( NS + "resultLimit" );
 
-    /** Cache models property */
-    public static final Property cacheModelLoads = m_model.createDataProperty( NS + "cacheModelLoads" );
-    
-    /** Preemptive HTTP Basic auth property */
-    public static final Property preemptiveAuth = m_model.createDataProperty( NS + "preemptiveAuth" );
-    
     /** Max <code>GET</code> request size property */
     public static final Property maxGetRequestSize = m_model.createDataProperty( NS + "maxGetRequestSize" );
     

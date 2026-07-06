@@ -103,7 +103,7 @@ public class DirectGraphStoreTest extends JerseyTest
         system = new com.atomgraph.core.Application(getDataset(),
                 null, null, null, null, null,
                 new MediaTypes(), com.atomgraph.core.Application.getClient(new ClientConfig()),
-                null, false, false);
+                null);
         system.init();
         system.register(TestResource.class);
         
