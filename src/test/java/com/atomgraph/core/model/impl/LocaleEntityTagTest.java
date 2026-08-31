@@ -42,6 +42,8 @@ import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -164,7 +166,47 @@ public class LocaleEntityTagTest extends JerseyTest
 
         assertNotEquals(langSpecificResp.getEntityTag(), resp.getEntityTag());
     }
-    
+
+    // a language-negotiated entity has to advertise Accept-Language as a cache key dimension whether or not one of the
+    // offered languages was acceptable - otherwise a shared cache may serve one language's representation to a client
+    // that asked for another
+    @Test
+    public void testVaryIncludesAcceptLanguage()
+    {
+        jakarta.ws.rs.core.Response acceptable = gsc.getClient().
+                target(uriLang).
+                request(com.atomgraph.core.MediaType.APPLICATION_RDF_XML_TYPE).
+                header(HttpHeaders.ACCEPT_LANGUAGE, Locale.ENGLISH.getLanguage()). // the only language this resource offers
+                get();
+
+        assertEquals(200, acceptable.getStatus());
+        assertNotNull(acceptable.getHeaderString(HttpHeaders.VARY));
+        assertTrue(acceptable.getHeaderString(HttpHeaders.VARY).toLowerCase(Locale.ROOT).contains(HttpHeaders.ACCEPT_LANGUAGE.toLowerCase(Locale.ROOT)));
+
+        // no offered language matches, so the variant falls back to a language-neutral one. The entity was still
+        // negotiated over Accept-Language and its content still depends on it, so the dimension has to survive
+        jakarta.ws.rs.core.Response unacceptable = gsc.getClient().
+                target(uriLang).
+                request(com.atomgraph.core.MediaType.APPLICATION_RDF_XML_TYPE).
+                header(HttpHeaders.ACCEPT_LANGUAGE, Locale.forLanguageTag("lt").getLanguage()).
+                get();
+
+        assertEquals(200, unacceptable.getStatus());
+        assertNotNull(unacceptable.getHeaderString(HttpHeaders.VARY));
+        assertTrue(unacceptable.getHeaderString(HttpHeaders.VARY).toLowerCase(Locale.ROOT).contains(HttpHeaders.ACCEPT_LANGUAGE.toLowerCase(Locale.ROOT)));
+
+        // a multi-entry header, as sent by every real browser, negotiates the same way
+        jakarta.ws.rs.core.Response multiple = gsc.getClient().
+                target(uriLang).
+                request(com.atomgraph.core.MediaType.APPLICATION_RDF_XML_TYPE).
+                header(HttpHeaders.ACCEPT_LANGUAGE, "en-US,en;q=0.9,da;q=0.8,lt;q=0.7").
+                get();
+
+        assertEquals(200, multiple.getStatus());
+        assertNotNull(multiple.getHeaderString(HttpHeaders.VARY));
+        assertTrue(multiple.getHeaderString(HttpHeaders.VARY).toLowerCase(Locale.ROOT).contains(HttpHeaders.ACCEPT_LANGUAGE.toLowerCase(Locale.ROOT)));
+    }
+
     // make Accept-Language/Content-Language significant for RDF/XML (just as a test)
     public static class RDFXMLMediaTypePredicate implements Predicate<MediaType>
     {

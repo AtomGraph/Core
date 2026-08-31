@@ -91,7 +91,35 @@ public class Response
      */
     public Response(Request request, Object entity, Date lastModified, EntityTag entityTag, List<Variant> variants, Predicate<MediaType> isMediaTypeLangSignificant)
     {
-        this(request, entity, lastModified, entityTag, request.selectVariant(variants) != null ? request.selectVariant(variants) : request.selectVariant(removeLanguages(variants)), isMediaTypeLangSignificant);
+        this(request, entity, lastModified, entityTag, selectVariant(request, variants), isMediaTypeLangSignificant);
+    }
+
+    /**
+     * Selects the response variant, falling back to a language-neutral representation when the request accepts none of
+     * the offered languages.
+     *
+     * The language-neutral representations are offered alongside the language-specific ones in a single selection pass,
+     * rather than retried in a second pass over a language-stripped list. <code>ContainerRequest.selectVariant</code>
+     * overwrites its <code>varyValue</code> field on every call, and Jersey builds the <code>Vary</code> response header
+     * from whatever the most recent call left behind - dropping the header entirely when that call matched nothing. A
+     * second pass therefore published either a <code>Vary</code> with no <code>Accept-Language</code> dimension or no
+     * <code>Vary</code> at all, advertising a cache key that ignores a language the entity was in fact negotiated over,
+     * and leaving a shared cache free to serve one language's representation to a client that asked for another. Offering
+     * both in one list keeps the dimension in <code>Vary</code> and still serves a representation when no offered
+     * language is acceptable.
+     *
+     * @param request current request
+     * @param variants variant list
+     * @return selected variant, or null if not even a language-neutral representation is acceptable
+     */
+    protected static Variant selectVariant(Request request, List<Variant> variants)
+    {
+        List<Variant> offer = new ArrayList<>(variants);
+
+        for (Variant languageNeutral : removeLanguages(variants))
+            if (!offer.contains(languageNeutral)) offer.add(languageNeutral);
+
+        return request.selectVariant(offer);
     }
 
     public Response(Request request, Object entity, Date lastModified, EntityTag entityTag, Variant variant, Predicate<MediaType> isMediaTypeLangSignificant) throws NotAcceptableException
