@@ -85,7 +85,31 @@ public class Response
      */
     public Response(Request request, Object entity, Date lastModified, EntityTag entityTag, List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings, Predicate<MediaType> isMediaTypeLangSignificant)
     {
-        this(request, entity, lastModified, entityTag, getVariants(mediaTypes, languages, encodings, isMediaTypeLangSignificant), isMediaTypeLangSignificant);
+        this(request, entity, lastModified, entityTag, mediaTypes, languages, encodings, isMediaTypeLangSignificant, List.of());
+    }
+
+    /**
+     * Builds model response from request, carrying the languages the request accepts.
+     *
+     * Supplying them makes the entity tag distinguish representations that differ only by accepted language - a
+     * language-significant entity is rendered against the whole list, not against the single language of the selected
+     * variant. See the seven-argument variant constructor for why the variant alone is the wrong granularity.
+     *
+     * @param request response entity
+     * @param entity response dataset
+     * @param lastModified last modified date
+     * @param entityTag entity tag
+     * @param mediaTypes supported media types
+     * @param languages content languages offered
+     * @param encodings content type encodings
+     * @param isMediaTypeLangSignificant predicate indicating if language is significant
+     * @param acceptableLanguages languages the request accepts, in priority order
+     */
+    public Response(Request request, Object entity, Date lastModified, EntityTag entityTag, List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings, Predicate<MediaType> isMediaTypeLangSignificant, List<Locale> acceptableLanguages)
+    {
+        this(request, entity, lastModified, entityTag,
+            selectVariant(request, getVariants(mediaTypes, languages, encodings, isMediaTypeLangSignificant)),
+            isMediaTypeLangSignificant, acceptableLanguages);
     }
 
     /**
