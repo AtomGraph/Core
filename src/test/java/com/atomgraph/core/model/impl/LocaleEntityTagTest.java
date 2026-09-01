@@ -42,6 +42,8 @@ import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import jakarta.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.Variant;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
@@ -165,6 +167,55 @@ public class LocaleEntityTagTest extends JerseyTest
         assertEquals(locale, langSpecificResp.getLanguage());
 
         assertNotEquals(langSpecificResp.getEntityTag(), resp.getEntityTag());
+    }
+
+    /**
+     * Two requests that select the same language-neutral variant but accept different languages are different
+     * representations - the renderer falls back per value over the whole acceptable list - so they must not share a strong
+     * entity tag. Before the acceptable languages were folded in, "lt" and "de" produced byte-different pages under one ETag,
+     * and a conditional request could be answered 304 with the wrong language.
+     */
+    @Test
+    public void testEntityTagVariesByAcceptableLanguages()
+    {
+        Variant variant = new Variant(com.atomgraph.core.MediaType.APPLICATION_RDF_XML_TYPE, (java.util.Locale) null, null);
+        EntityTag base = new EntityTag("cafe");
+        java.util.function.Predicate<jakarta.ws.rs.core.MediaType> significant = new RDFXMLMediaTypePredicate();
+
+        EntityTag lt = tagFor(variant, base, significant, List.of(java.util.Locale.forLanguageTag("lt")));
+        EntityTag de = tagFor(variant, base, significant, List.of(java.util.Locale.forLanguageTag("de")));
+        EntityTag alsoLt = tagFor(variant, base, significant, List.of(java.util.Locale.forLanguageTag("lt")));
+
+        assertNotEquals(lt, de);   // different representations, different validators
+        assertEquals(alsoLt, lt);  // same request, stable validator
+
+        // a media type whose rendering does not depend on language is unaffected
+        EntityTag plainLt = tagFor(variant, base, mediaType -> false, List.of(java.util.Locale.forLanguageTag("lt")));
+        EntityTag plainDe = tagFor(variant, base, mediaType -> false, List.of(java.util.Locale.forLanguageTag("de")));
+        assertEquals(plainLt, plainDe);
+
+        // callers that supply no acceptable languages keep the previous entity tag exactly
+        assertEquals(tagFor(variant, base, significant, List.of()), tagFor(variant, base, mediaType -> false, List.of()));
+    }
+
+    /** The entity tag calculation touches no request state, so a stub keeps the test to the thing under test. */
+    private Request getRequestStub()
+    {
+        return new Request()
+        {
+            @Override public String getMethod() { return "GET"; }
+            @Override public Variant selectVariant(List<Variant> variants) { return null; }
+            @Override public jakarta.ws.rs.core.Response.ResponseBuilder evaluatePreconditions(EntityTag eTag) { return null; }
+            @Override public jakarta.ws.rs.core.Response.ResponseBuilder evaluatePreconditions(java.util.Date lastModified) { return null; }
+            @Override public jakarta.ws.rs.core.Response.ResponseBuilder evaluatePreconditions(java.util.Date lastModified, EntityTag eTag) { return null; }
+            @Override public jakarta.ws.rs.core.Response.ResponseBuilder evaluatePreconditions() { return null; }
+        };
+    }
+
+    private EntityTag tagFor(Variant variant, EntityTag base, java.util.function.Predicate<jakarta.ws.rs.core.MediaType> significant, List<java.util.Locale> acceptable)
+    {
+        return new com.atomgraph.core.model.impl.Response(getRequestStub(), "entity", null, base, variant, significant, acceptable).
+            getVariantEntityTag();
     }
 
     // a language-negotiated entity has to advertise Accept-Language as a cache key dimension whether or not one of the

@@ -56,6 +56,15 @@ public class Response
      * When true, the language is preserved in the ETag calculation.
      */
     private final Predicate<MediaType> isMediaTypeLangSignificant;
+
+    /**
+     * The languages the request accepts, in priority order.
+     *
+     * Distinct from the languages offered: a language-significant entity is rendered against the whole acceptable list,
+     * falling back per value, so two requests selecting the same variant can still differ in content. Empty when the
+     * caller does not supply it, in which case the entity tag ignores language as it did before.
+     */
+    private final List<Locale> acceptableLanguages;
     
     public Response(Request request, Object entity, Date lastModified, EntityTag entityTag, List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings)
     {
@@ -124,6 +133,26 @@ public class Response
 
     public Response(Request request, Object entity, Date lastModified, EntityTag entityTag, Variant variant, Predicate<MediaType> isMediaTypeLangSignificant) throws NotAcceptableException
     {
+        this(request, entity, lastModified, entityTag, variant, isMediaTypeLangSignificant, List.of());
+    }
+
+    /**
+     * Builds model response from a selected variant and the languages the request accepts.
+     *
+     * The acceptable languages are what a language-significant entity is actually rendered against - the renderer falls
+     * back per value over the whole list - so they, not the selected variant's single language, are what makes one
+     * representation different from another. Supplying them makes the entity tag distinguish those representations.
+     *
+     * @param request response entity
+     * @param entity response dataset
+     * @param lastModified last modified date
+     * @param entityTag entity tag
+     * @param variant selected variant
+     * @param isMediaTypeLangSignificant predicate indicating if language is significant
+     * @param acceptableLanguages languages the request accepts, in priority order
+     */
+    public Response(Request request, Object entity, Date lastModified, EntityTag entityTag, Variant variant, Predicate<MediaType> isMediaTypeLangSignificant, List<Locale> acceptableLanguages) throws NotAcceptableException
+    {
         if (request == null) throw new IllegalArgumentException("Request cannot be null");
         if (entity == null) throw new IllegalArgumentException("Object cannot be null");
         if (variant == null)
@@ -138,6 +167,7 @@ public class Response
         this.entityTag = entityTag;
         this.variant = variant;
         this.isMediaTypeLangSignificant = isMediaTypeLangSignificant;
+        this.acceptableLanguages = acceptableLanguages;
     }
 
     public static List<Variant> getVariants(List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings)
@@ -336,6 +366,15 @@ public class Response
             BigInteger entityTagHash = new BigInteger(getEntityTag().getValue(), 16);
             BigInteger variantHash = BigInteger.valueOf(getVariant().hashCode());
             entityTagHash = entityTagHash.add(variantHash);
+
+            // a language-significant entity is rendered against the whole acceptable-language list, not the one language the
+            // selected variant carries. Two requests selecting the same language-neutral variant still differ: with "lt" and
+            // "de" against an offer of English, one renders the Lithuanian values the data holds and the other falls back to
+            // English. Hashing the variant alone gave those two representations one strong ETag, so a conditional request
+            // could be answered 304 with the wrong language
+            if (!getAcceptableLanguages().isEmpty() && getIsMediaTypeLangSignificant().test(getVariant().getMediaType()))
+                entityTagHash = entityTagHash.add(BigInteger.valueOf(getAcceptableLanguages().hashCode()));
+
             return new EntityTag(entityTagHash.toString(16));
         }
         
@@ -363,6 +402,16 @@ public class Response
     public Predicate<MediaType> getIsMediaTypeLangSignificant()
     {
         return isMediaTypeLangSignificant;
+    }
+
+    /**
+     * Returns the languages the request accepts, in priority order, or an empty list when the caller did not supply them.
+     *
+     * @return acceptable languages
+     */
+    public List<Locale> getAcceptableLanguages()
+    {
+        return acceptableLanguages;
     }
     
     public Request getRequest()
