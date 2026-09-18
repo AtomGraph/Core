@@ -119,7 +119,17 @@ public class MediaTypes
             if (RDFLanguages.isTriples(lang) && !writableModelList.contains(mtUTF8)) writableModelList.add(mtUTF8);
             if (RDFLanguages.isQuads(lang) && !writableDatasetList.contains(mtUTF8)) writableDatasetList.add(mtUTF8);
         }
-        
+
+        // a dataset also writes as triples, which DatasetProvider reduces to its default graph.
+        // Second pass, so every quad language precedes them: these variants carry no q of their own,
+        // so their order is what a client accepting anything gets - and that must not be the lossy one
+        for (Lang lang : RDFWriterRegistry.registeredLangs())
+        {
+            MediaType mtUTF8 = new MediaType(lang.getContentType(), UTF8_PARAM);
+            if (RDFLanguages.isTriples(lang) && !RDFLanguages.isQuads(lang) && !writableDatasetList.contains(mtUTF8))
+                writableDatasetList.add(mtUTF8);
+        }
+
 //        // first MediaType becomes default:
 //        readableModelList.add(0, MediaType.APPLICATION_RDF_XML_TYPE); // don't add charset=UTF-8 param on readable types
 //        MediaType rdfXmlUtf8 = new MediaType(MediaType.APPLICATION_RDF_XML_TYPE.getType(), MediaType.APPLICATION_RDF_XML_TYPE.getSubtype(), UTF8_PARAM);
