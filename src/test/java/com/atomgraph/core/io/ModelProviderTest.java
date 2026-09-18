@@ -31,7 +31,9 @@ import org.apache.jena.riot.RiotException;
 import org.apache.jena.sparql.vocabulary.FOAF;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.test.JerseyTest;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,6 +66,32 @@ public class ModelProviderTest extends JerseyTest
         return system;
     }
     
+
+    /**
+     * ModelProvider and DatasetProvider are both registered and neither declares @Consumes, so both
+     * are candidates for every media type. They never compete because the isReadable/isWriteable
+     * guards are exclusive: this one handles Model in triples languages, the other Dataset. When
+     * DatasetProvider's guards named Model (they did), both claimed Model entities and nothing
+     * claimed Dataset — which is a provider-selection ordering away from a ClassCastException.
+     */
+    @Test
+    public void testHandlesModelTypeOnly()
+    {
+        ModelProvider provider = new ModelProvider();
+        jakarta.ws.rs.core.MediaType turtle = jakarta.ws.rs.core.MediaType.valueOf("text/turtle");
+        jakarta.ws.rs.core.MediaType nquads = jakarta.ws.rs.core.MediaType.valueOf("application/n-quads");
+
+        assertTrue(provider.isReadable(Model.class, null, null, turtle), "cannot read a Model");
+        assertTrue(provider.isWriteable(Model.class, null, null, turtle), "cannot write a Model");
+
+        assertFalse(provider.isReadable(org.apache.jena.query.Dataset.class, null, null, turtle),
+            "reads a Dataset, which is DatasetProvider's");
+        assertFalse(provider.isWriteable(org.apache.jena.query.Dataset.class, null, null, turtle),
+            "writes a Dataset, which is DatasetProvider's");
+
+        assertFalse(provider.isReadable(Model.class, null, null, nquads), "reads quads into a Model");
+        assertFalse(provider.isWriteable(Model.class, null, null, nquads), "writes a Model as quads");
+    }
 
     @Test
     public void testRelativeURIsInNTriples()
