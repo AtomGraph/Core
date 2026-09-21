@@ -126,7 +126,11 @@ public class SPARQLClient extends EndpointClientBase
         mergedParams.putAll(params);
         mergedParams.putSingle(QUERY_PARAM_NAME, query.toString());
         
-        if (getQueryURLLength(params) > getMaxGetRequestSize())
+        // the query string is what overflows the URL, so measure the params it was merged into.
+        // Measuring params left the POST branch unreachable: it carries only the (usually absent)
+        // graph URIs, so the length was that of the bare endpoint URI and every query, however
+        // large, went out as GET
+        if (getQueryURLLength(mergedParams) > getMaxGetRequestSize())
             return applyHeaders(getEndpoint().request(getReadableMediaTypes(clazz)), headers).post(Entity.form(mergedParams));
         else
             return applyHeaders(applyParams(mergedParams).request(getReadableMediaTypes(clazz)), headers).get();
