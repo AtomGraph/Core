@@ -66,7 +66,7 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
         MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
         Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
         if (lang == null) return false;
-        return type == Model.class && RDFParserRegistry.isRegistered(lang); // can write both quads and triples (default graph)
+        return type == Dataset.class && RDFParserRegistry.isRegistered(lang); // can read both quads and triples (default graph)
     }
 
     @Override
@@ -96,7 +96,7 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
         MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
         Lang lang = RDFLanguages.contentTypeToLang(formatType.toString());
         if (lang == null) return false;
-        return Model.class.isAssignableFrom(type) && RDFWriterRegistry.contains(lang); // can write both quads and triples (default graph)
+        return Dataset.class.isAssignableFrom(type) && RDFWriterRegistry.contains(lang); // can write both quads and triples (default graph)
     }
 
     @Override
@@ -113,8 +113,12 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
         MediaType formatType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // discard charset param
         Lang lang = RDFLanguages.contentTypeToLang(formatType.toString()); // cannot be null - isWritable() checks that
         
-        // if we need to provide triples, then we write only the default graph of the dataset
-        if (RDFLanguages.isTriples(lang))
+        // a language that can carry quads gets the whole dataset. Asking isTriples() first loses
+        // every named graph in the languages Jena registers as BOTH (JSON-LD is triples and quads),
+        // and which one is negotiated varies with the media type ordering
+        if (RDFLanguages.isQuads(lang)) RDFDataMgr.write(entityStream, dataset, lang);
+        // triples-only: only the default graph can be written
+        else
         {
             RDFFormat format = Lang.RDFXML.equals(lang) ? RDFFormat.RDFXML_PLAIN : RDFWriterRegistry.defaultSerialization(lang); // keep basic (plain) RDF/XML, not the abbreviated default
             RDFWriter.create().
@@ -122,7 +126,6 @@ public class DatasetProvider implements MessageBodyReader<Dataset>, MessageBodyW
                 source(dataset.getDefaultModel()).
                 output(entityStream);
         }
-        else RDFDataMgr.write(entityStream, dataset, lang);
     }
     
 }
