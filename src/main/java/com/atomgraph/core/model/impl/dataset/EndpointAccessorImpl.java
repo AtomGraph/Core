@@ -27,12 +27,9 @@ import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ResultSetFactory;
 import org.apache.jena.query.ResultSetRewindable;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.sparql.core.DatasetDescription;
 import org.apache.jena.sparql.core.DynamicDatasets;
-import org.apache.jena.sparql.vocabulary.ResultSetGraphVocab;
 import org.apache.jena.update.UpdateRequest;
-import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -152,17 +149,8 @@ public class EndpointAccessorImpl implements EndpointAccessor
         try (QueryExecution qex = QueryExecution.create(query, dataset))
         {
             if (query.isSelectType()) return ResultSetFactory.copyResults(qex.execSelect());
-            if (query.isAskType())
-            {
-                Model model = ModelFactory.createDefaultModel();
-                model.createResource().
-                    addProperty(RDF.type, ResultSetGraphVocab.ResultSet).
-                    addLiteral(ResultSetGraphVocab.p_boolean, qex.execAsk());
-                
-                return ResultSetFactory.copyResults(ResultSetFactory.makeResults(model));
-            }
             
-            throw new QueryExecException("Query to load ResultSet must be SELECT or ASK");
+            throw new QueryExecException("Query to load ResultSet must be SELECT");
         }
         catch (QueryExecException ex)
         {
@@ -197,7 +185,7 @@ public class EndpointAccessorImpl implements EndpointAccessor
         {
             if (query.isAskType()) return qex.execAsk();
 
-            throw new QueryExecException("Query to load ResultSet must be SELECT");
+            throw new QueryExecException("Query to load boolean result must be ASK");
         }
         catch (QueryExecException ex)
         {

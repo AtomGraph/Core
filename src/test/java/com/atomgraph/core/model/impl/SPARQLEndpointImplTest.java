@@ -16,11 +16,21 @@
 package com.atomgraph.core.model.impl;
 
 import static com.atomgraph.core.MediaType.APPLICATION_SPARQL_QUERY_TYPE;
+import static com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_CSV_TYPE;
+import static com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE;
+import static com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE;
 import static com.atomgraph.core.MediaType.APPLICATION_SPARQL_UPDATE_TYPE;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.client.SPARQLClient;
 import static com.atomgraph.core.client.SPARQLClient.QUERY_PARAM_NAME;
 import static com.atomgraph.core.client.SPARQLClient.UPDATE_PARAM_NAME;
+import static com.atomgraph.core.client.SPARQLClient.parseBoolean;
+import com.atomgraph.core.io.SPARQLResultProvider;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import org.apache.jena.riot.resultset.ResultSetLang;
+import org.apache.jena.sparql.resultset.ResultsReader;
+import org.apache.jena.sparql.resultset.SPARQLResult;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.EntityTag;
@@ -31,6 +41,7 @@ import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import static jakarta.ws.rs.core.Response.Status.BAD_REQUEST;
 import static jakarta.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
+import static jakarta.ws.rs.core.Response.Status.OK;
 import java.util.Arrays;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
@@ -44,12 +55,13 @@ import org.apache.jena.sparql.vocabulary.FOAF;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -121,15 +133,113 @@ public class SPARQLEndpointImplTest extends JerseyTest
         assertTrue(sc.select(query).hasNext());
     }
 
+    public static final String ASK_TRUE = "ASK { <" + RESOURCE_URI + "> ?p ?o }";
+    public static final String ASK_FALSE = "ASK { <http://default/graph/absent> ?p ?o }";
+    public static final MediaType PROTOBUF = MediaType.valueOf(ResultSetLang.RS_Protobuf.getContentType().getContentTypeStr());
+
+    private static MultivaluedMap<String, String> query(String query)
+    {
+        MultivaluedMap<String, String> params = new MultivaluedHashMap<>();
+        params.add(QUERY_PARAM_NAME, query);
+        return params;
+    }
+
     @Test
-    @Disabled
-    // TO-DO: fix after Jena is upgraded using MessageBodyReader<SPARQLResult> instead of MessageBodyReader<ResultSet>
-    // https://jena.apache.org/documentation/javadoc/arq/org/apache/jena/sparql/resultset/SPARQLResult.html
     public void testAsk()
     {
-        Query query = QueryFactory.create("ASK { <" + RESOURCE_URI + "> ?p ?o }");
-        
-        assertTrue(sc.ask(query));
+        assertTrue(sc.ask(QueryFactory.create(ASK_TRUE)));
+    }
+
+    @Test
+    public void testAskFalse()
+    {
+        assertFalse(sc.ask(QueryFactory.create(ASK_FALSE)));
+    }
+
+    /** The body is the boolean in the format asked for, read back with Jena and, as a second opinion, by eye */
+    @Test
+    public void testAskBodies() throws IOException
+    {
+        for (MediaType mediaType : Arrays.asList(APPLICATION_SPARQL_RESULTS_JSON_TYPE, APPLICATION_SPARQL_RESULTS_XML_TYPE, APPLICATION_SPARQL_RESULTS_CSV_TYPE))
+            try (jakarta.ws.rs.core.Response cr = sc.get(new MediaType[]{ mediaType }, query(ASK_TRUE)))
+            {
+                assertEquals(OK.getStatusCode(), cr.getStatus(), mediaType.toString());
+                assertTrue(cr.getMediaType().isCompatible(mediaType), cr.getMediaType() + " for " + mediaType);
+                String body = cr.readEntity(String.class);
+                SPARQLResult result = ResultsReader.create().lang(SPARQLResultProvider.getLang(cr.getMediaType())).build().readAny(new java.io.ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)));
+                assertTrue(result.isBoolean() && result.getBooleanResult(), mediaType + ": " + body);
+                if (mediaType.equals(APPLICATION_SPARQL_RESULTS_JSON_TYPE)) assertTrue(body.replace(" ", "").contains("\"boolean\":true"), body);
+                if (mediaType.equals(APPLICATION_SPARQL_RESULTS_XML_TYPE)) assertTrue(body.contains("<boolean>true</boolean>"), body);
+                if (mediaType.equals(APPLICATION_SPARQL_RESULTS_CSV_TYPE)) assertTrue(body.startsWith("_askResult"), body);
+            }
+    }
+
+    /** True, false and a result set tag differently at one media type, and one ASK tags differently across media types */
+    @Test
+    public void testAskETags()
+    {
+        EntityTag trueTag, falseTag, selectTag, trueXmlTag;
+        try (jakarta.ws.rs.core.Response cr = sc.get(new MediaType[]{ APPLICATION_SPARQL_RESULTS_JSON_TYPE }, query(ASK_TRUE))) { trueTag = cr.getEntityTag(); }
+        try (jakarta.ws.rs.core.Response cr = sc.get(new MediaType[]{ APPLICATION_SPARQL_RESULTS_JSON_TYPE }, query(ASK_FALSE))) { falseTag = cr.getEntityTag(); }
+        try (jakarta.ws.rs.core.Response cr = sc.get(new MediaType[]{ APPLICATION_SPARQL_RESULTS_JSON_TYPE }, query("SELECT * { <http://default/graph/absent> ?p ?o }"))) { selectTag = cr.getEntityTag(); }
+        try (jakarta.ws.rs.core.Response cr = sc.get(new MediaType[]{ APPLICATION_SPARQL_RESULTS_XML_TYPE }, query(ASK_TRUE))) { trueXmlTag = cr.getEntityTag(); }
+
+        assertNotEquals(trueTag, falseTag);
+        assertNotEquals(trueTag, selectTag, "an empty result set and a boolean are different answers");
+        assertNotEquals(falseTag, selectTag);
+        assertNotEquals(trueTag, trueXmlTag, "a different representation is a different entity");
+    }
+
+    /** The client's full result set preference ranks the binary formats first; the endpoint offers only what carries a boolean */
+    @Test
+    public void testAskNegotiatesAFormatThatCarriesABoolean()
+    {
+        try (jakarta.ws.rs.core.Response cr = sc.get(sc.getReadableMediaTypes(ResultSet.class), query(ASK_TRUE)))
+        {
+            assertEquals(OK.getStatusCode(), cr.getStatus());
+            assertTrue(SPARQLResultProvider.isBooleanReadable(cr.getMediaType()), cr.getMediaType().toString());
+        }
+        try (jakarta.ws.rs.core.Response cr = sc.get(new MediaType[]{ PROTOBUF }, query(ASK_TRUE)))
+        {
+            assertEquals(NOT_ACCEPTABLE.getStatusCode(), cr.getStatus(), "Jena has no boolean encoding in Protobuf");
+        }
+    }
+
+    @Test
+    public void testParseBoolean() throws IOException
+    {
+        for (MediaType mediaType : Arrays.asList(APPLICATION_SPARQL_RESULTS_JSON_TYPE, APPLICATION_SPARQL_RESULTS_XML_TYPE, APPLICATION_SPARQL_RESULTS_CSV_TYPE))
+        {
+            try (jakarta.ws.rs.core.Response cr = sc.get(new MediaType[]{ mediaType }, query(ASK_TRUE))) { assertTrue(parseBoolean(cr), mediaType.toString()); }
+            try (jakarta.ws.rs.core.Response cr = sc.get(new MediaType[]{ mediaType }, query(ASK_FALSE))) { assertFalse(parseBoolean(cr), mediaType.toString()); }
+        }
+        // a result set is not a boolean, whatever the format
+        try (jakarta.ws.rs.core.Response cr = sc.get(new MediaType[]{ PROTOBUF }, query("SELECT * { ?s ?p ?o }")))
+        {
+            IllegalStateException ex = assertThrows(IllegalStateException.class, () -> parseBoolean(cr));
+            assertTrue(ex.getMessage().contains("not a boolean result"), ex.getMessage());
+        }
+        // RDF is not a results format
+        try (jakarta.ws.rs.core.Response cr = sc.get(new MediaType[]{ MediaType.valueOf("text/turtle") }, query("CONSTRUCT WHERE { ?s ?p ?o }")))
+        {
+            IllegalStateException ex = assertThrows(IllegalStateException.class, () -> parseBoolean(cr));
+            assertTrue(ex.getMessage().contains("Unsupported SPARQL results format"), ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testSelectStillRewindable()
+    {
+        assertTrue(sc.select(QueryFactory.create("SELECT * { <" + RESOURCE_URI + "> ?p ?o }")) instanceof org.apache.jena.query.ResultSetRewindable);
+    }
+
+    /** The remote accessor is what a proxying endpoint asks through: its ask goes over HTTP and reads the boolean back */
+    @Test
+    public void testRemoteAccessorAsk()
+    {
+        com.atomgraph.core.model.impl.remote.EndpointAccessorImpl remote = new com.atomgraph.core.model.impl.remote.EndpointAccessorImpl(sc);
+        assertTrue(remote.ask(QueryFactory.create(ASK_TRUE), java.util.List.of(), java.util.List.of()));
+        assertFalse(remote.ask(QueryFactory.create(ASK_FALSE), java.util.List.of(), java.util.List.of()));
     }
     
     @Test

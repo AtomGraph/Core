@@ -35,6 +35,7 @@ import org.apache.jena.query.Query;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetRewindable;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.shared.JenaException;
 import org.apache.jena.update.UpdateRequest;
 
 /**
@@ -126,12 +127,13 @@ public class EndpointAccessorImpl implements EndpointAccessor
         defaultGraphUris.forEach(defaultGraphUri -> { params.add(DEFAULT_GRAPH_URI, defaultGraphUri.toString()); });
         namedGraphUris.forEach(namedGraphUri -> { params.add(NAMED_GRAPH_URI, namedGraphUri.toString()); });
         
-        try (Response cr = getSPARQLClient().query(query, ResultSet.class, params))
+        try (Response cr = getSPARQLClient().query(query, getSPARQLClient().getReadableBooleanMediaTypes(), params, new MultivaluedHashMap()))
         {
             return parseBoolean(cr);
         }
-        catch (IOException | ClientErrorException ex)
+        catch (IOException | ClientErrorException | IllegalStateException | JenaException ex)
         {
+            // an upstream that answers without a boolean, or with one that cannot be read, is a gateway failure
             throw new BadGatewayException(ex);
         }
     }

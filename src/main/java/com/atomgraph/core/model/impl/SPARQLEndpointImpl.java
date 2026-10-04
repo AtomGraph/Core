@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import jakarta.ws.rs.core.*;
 import com.atomgraph.core.MediaTypes;
+import com.atomgraph.core.io.SPARQLResultProvider;
 import com.atomgraph.core.model.EndpointAccessor;
 import com.atomgraph.core.model.SPARQLEndpoint;
 import static com.atomgraph.core.model.SPARQLEndpoint.DEFAULT_GRAPH_URI;
@@ -49,10 +50,8 @@ import jakarta.ws.rs.core.Response.ResponseBuilder;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QueryParseException;
 import org.apache.jena.query.ResultSet;
-import org.apache.jena.query.ResultSetFactory;
-import org.apache.jena.sparql.vocabulary.ResultSetGraphVocab;
+import org.apache.jena.sparql.resultset.SPARQLResult;
 import org.apache.jena.update.UpdateFactory;
-import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -158,18 +157,13 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
 
         if (query.isSelectType())
         {
-            if (log.isDebugEnabled()) log.debug("Loading ResultSet using SELECT/ASK query: {}", query);
+            if (log.isDebugEnabled()) log.debug("Loading ResultSet using SELECT query: {}", query);
             return getResponseBuilder(getEndpointAccessor().select(query, defaultGraphUris, namedGraphUris));
         }
         if (query.isAskType())
         {
-            Model model = ModelFactory.createDefaultModel();
-            model.createResource().
-                addProperty(RDF.type, ResultSetGraphVocab.ResultSet).
-                addLiteral(ResultSetGraphVocab.p_boolean, getEndpointAccessor().ask(query, defaultGraphUris, namedGraphUris));
-                
-            if (log.isDebugEnabled()) log.debug("Loading ResultSet using SELECT/ASK query: {}", query);
-            return getResponseBuilder(ResultSetFactory.copyResults(ResultSetFactory.makeResults(model)));
+            if (log.isDebugEnabled()) log.debug("Loading boolean using ASK query: {}", query);
+            return getResponseBuilder(new SPARQLResult(getEndpointAccessor().ask(query, defaultGraphUris, namedGraphUris)));
         }
 
         if (query.isConstructType() || query.isDescribeType())
@@ -221,6 +215,41 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
             getResponseBuilder();
     }
         
+    /**
+     * Returns response builder for the boolean result of an ASK query.
+     * The result set and model arms of {@link SPARQLResult} have their own overloads, since the entity tag of
+     * a result set is a hash of its rows, which needs a rewindable result set, and a model answers in RDF.
+     * 
+     * @param result boolean result
+     * @return response builder
+     */
+    public ResponseBuilder getResponseBuilder(SPARQLResult result)
+    {
+        if (!result.isBoolean()) throw new IllegalArgumentException("Only a boolean SPARQLResult is supported here: a result set goes through getResponseBuilder(ResultSetRewindable), a model through getResponseBuilder(Model)");
+
+        return new com.atomgraph.core.model.impl.Response(getRequest(),
+                result,
+                null,
+                new EntityTag(Long.toHexString(ResultSetUtils.hashBoolean(result.getBooleanResult()))),
+                getWritableBooleanMediaTypes(),
+                getLanguages(),
+                getEncodings()).
+            getResponseBuilder();
+    }
+
+    /**
+     * The writable result set media types a boolean can be written in. Jena has no boolean encoding in
+     * Thrift and Protobuf, and a type of no results language at all (HTML, where an application adds it to
+     * the result set types) has no boolean writer either; leaving them out of the offer makes a request for
+     * one of them not acceptable rather than a failure to write.
+     * 
+     * @return list of media types
+     */
+    public List<MediaType> getWritableBooleanMediaTypes()
+    {
+        return getWritableMediaTypes(ResultSet.class).stream().filter(SPARQLResultProvider::isBooleanWriteable).toList();
+    }
+
     /**
      * Returns supported languages.
      * 

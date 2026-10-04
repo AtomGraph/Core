@@ -16,8 +16,10 @@
 package com.atomgraph.core.client;
 
 import com.atomgraph.core.MediaTypes;
+import com.atomgraph.core.io.SPARQLResultProvider;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import jakarta.ws.rs.ServerErrorException;
 import jakarta.ws.rs.client.ClientRequestFilter;
 import jakarta.ws.rs.client.Entity;
@@ -31,8 +33,10 @@ import org.apache.jena.query.Query;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetRewindable;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.riot.resultset.ResultSetLang;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.resultset.ResultSetReaderRegistry;
 import org.apache.jena.sparql.resultset.ResultsReader;
+import org.apache.jena.sparql.resultset.SPARQLResult;
 import org.apache.jena.update.UpdateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,6 +123,21 @@ public class SPARQLClient extends EndpointClientBase
     
     public Response query(Query query, Class clazz, MultivaluedMap<String, String> params, MultivaluedMap<String, Object> headers)
     {
+        return query(query, getReadableMediaTypes(clazz), params, headers);
+    }
+
+    /**
+     * Executes the query, asking for the result in the given media types.
+     * 
+     * @param query the query
+     * @param acceptedTypes the media types the result is acceptable in, in order of preference
+     * @param params request parameters
+     * @param headers request headers
+     * @return response
+     */
+    public Response query(Query query, MediaType[] acceptedTypes, MultivaluedMap<String, String> params, MultivaluedMap<String, Object> headers)
+    {
+        if (acceptedTypes == null) throw new IllegalArgumentException("MediaType[] acceptedTypes cannot be null");
         if (params == null) throw new IllegalArgumentException("MultivaluedMap<String, String> params cannot be null");
         if (headers == null) throw new IllegalArgumentException("MultivaluedMap<String, Object> headers cannot be null");
         
@@ -131,9 +150,9 @@ public class SPARQLClient extends EndpointClientBase
         // graph URIs, so the length was that of the bare endpoint URI and every query, however
         // large, went out as GET
         if (getQueryURLLength(mergedParams) > getMaxGetRequestSize())
-            return applyHeaders(getEndpoint().request(getReadableMediaTypes(clazz)), headers).post(Entity.form(mergedParams));
+            return applyHeaders(getEndpoint().request(acceptedTypes), headers).post(Entity.form(mergedParams));
         else
-            return applyHeaders(applyParams(mergedParams).request(getReadableMediaTypes(clazz)), headers).get();
+            return applyHeaders(applyParams(mergedParams).request(acceptedTypes), headers).get();
     }
     
     public Model loadModel(Query query)
@@ -160,9 +179,19 @@ public class SPARQLClient extends EndpointClientBase
         }
     }
 
+    /**
+     * The readable result set media types a boolean can be read from: what an ASK query asks for.
+     * 
+     * @return media types, in order of preference
+     */
+    public MediaType[] getReadableBooleanMediaTypes()
+    {
+        return Arrays.stream(getReadableMediaTypes(ResultSet.class)).filter(SPARQLResultProvider::isBooleanReadable).toArray(MediaType[]::new);
+    }
+
     public boolean ask(Query query)
     {
-        try (Response cr = query(query, ResultSet.class))
+        try (Response cr = query(query, getReadableBooleanMediaTypes(), new MultivaluedHashMap(), new MultivaluedHashMap()))
         {
             try
             {
@@ -176,17 +205,28 @@ public class SPARQLClient extends EndpointClientBase
         }
     }
 
+    /**
+     * Reads the boolean result of an ASK query from the response, in whichever registered results format
+     * it came in.
+     * 
+     * @param cr the response
+     * @return the boolean result
+     * @throws IOException if the body cannot be read
+     * @throws IllegalStateException if the response is not in a results format, or holds no boolean
+     */
     public static boolean parseBoolean(Response cr) throws IOException
     {
+        MediaType mediaType = cr.getMediaType();
+        if (mediaType == null) throw new IllegalStateException("Response has no Content-Type");
+        Lang lang = SPARQLResultProvider.getLang(mediaType);
+        if (lang == null || !ResultSetReaderRegistry.isRegistered(lang)) throw new IllegalStateException("Unsupported SPARQL results format: " + mediaType);
+
         try (InputStream is = cr.readEntity(InputStream.class))
         {
-            if (cr.getMediaType().isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_JSON_TYPE))
-                return ResultsReader.create().lang(ResultSetLang.RS_JSON).build().readAny(is).getBooleanResult();
-            
-            if (cr.getMediaType().isCompatible(com.atomgraph.core.MediaType.APPLICATION_SPARQL_RESULTS_XML_TYPE))
-                return ResultsReader.create().lang(ResultSetLang.RS_XML).build().readAny(is).getBooleanResult();
-
-            throw new IllegalStateException("Unsupported ResultSet format");
+            SPARQLResult result = ResultsReader.create().lang(lang).build().readAny(is);
+            // the TSV, Thrift and Protobuf readers never yield a boolean, so an ASK answered in them lands here
+            if (!result.isBoolean()) throw new IllegalStateException("Response in " + lang + " is not a boolean result");
+            return result.getBooleanResult();
         }
     }
 

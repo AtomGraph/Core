@@ -63,6 +63,20 @@ public class ResultSetUtils
         return ModelUtils.digest(canonical.toString().getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * Returns a hash of the boolean result of an ASK query.
+     *
+     * Digests a string no result set canonicalizes to: a solution line carries '=' and ends in a newline,
+     * and an empty result set digests the empty string.
+     *
+     * @param result the boolean result
+     * @return hash value
+     */
+    public static long hashBoolean(boolean result)
+    {
+        return ModelUtils.digest(("ASK " + result).getBytes(StandardCharsets.UTF_8));
+    }
+
     public static long hashQuerySolution(QuerySolution solution)
     {
         return ModelUtils.digest(canonicalize(solution).getBytes(StandardCharsets.UTF_8));
