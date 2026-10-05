@@ -19,6 +19,7 @@ package com.atomgraph.core;
 import com.atomgraph.core.exception.ConfigurationException;
 import com.atomgraph.core.io.DatasetProvider;
 import com.atomgraph.core.io.ResultSetProvider;
+import com.atomgraph.core.io.SPARQLResultProvider;
 import com.atomgraph.core.io.ModelProvider;
 import com.atomgraph.core.io.QueryProvider;
 import com.atomgraph.core.provider.QueryParamProvider;
@@ -142,6 +143,7 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
         register(new ModelProvider());
         register(new DatasetProvider());
         register(new ResultSetProvider());
+        register(new SPARQLResultProvider());
         register(QueryParamProvider.class);
         register(new QueryProvider());
         register(new UpdateRequestProvider());
@@ -206,6 +208,7 @@ public class Application extends ResourceConfig implements com.atomgraph.core.mo
         clientConfig.register(new ModelProvider());
         clientConfig.register(new DatasetProvider());
         clientConfig.register(new ResultSetProvider());
+        clientConfig.register(new SPARQLResultProvider());
         clientConfig.register(new QueryProvider());
         clientConfig.register(new UpdateRequestProvider()); // TO-DO: UpdateRequestProvider
 
