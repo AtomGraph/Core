@@ -24,6 +24,8 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Stream;
 import jakarta.ws.rs.core.*;
 import com.atomgraph.core.MediaTypes;
 import com.atomgraph.core.io.SPARQLResultProvider;
@@ -38,6 +40,7 @@ import static com.atomgraph.core.model.SPARQLEndpoint.USING_NAMED_GRAPH_URI;
 import com.atomgraph.core.model.Service;
 import com.atomgraph.core.util.ModelUtils;
 import com.atomgraph.core.util.ResultSetUtils;
+import com.atomgraph.core.vocabulary.SD;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.Consumes;
@@ -50,6 +53,9 @@ import jakarta.ws.rs.core.Response.ResponseBuilder;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QueryParseException;
 import org.apache.jena.query.ResultSet;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.resultset.ResultSetLang;
+import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.sparql.resultset.SPARQLResult;
 import org.apache.jena.update.UpdateFactory;
 import org.slf4j.Logger;
@@ -65,8 +71,25 @@ import org.slf4j.LoggerFactory;
 public class SPARQLEndpointImpl implements SPARQLEndpoint
 {
     private static final Logger log = LoggerFactory.getLogger(SPARQLEndpointImpl.class);
+
+    /**
+     * <a href="https://www.w3.org/ns/formats/">W3C format IRIs</a> of the languages that have one.
+     * A service description names its result formats by them.
+     */
+    public static final Map<Lang, String> FORMATS = Map.ofEntries(
+        Map.entry(ResultSetLang.RS_XML, "http://www.w3.org/ns/formats/SPARQL_Results_XML"),
+        Map.entry(ResultSetLang.RS_JSON, "http://www.w3.org/ns/formats/SPARQL_Results_JSON"),
+        Map.entry(ResultSetLang.RS_CSV, "http://www.w3.org/ns/formats/SPARQL_Results_CSV"),
+        Map.entry(ResultSetLang.RS_TSV, "http://www.w3.org/ns/formats/SPARQL_Results_TSV"),
+        Map.entry(Lang.RDFXML, "http://www.w3.org/ns/formats/RDF_XML"),
+        Map.entry(Lang.TURTLE, "http://www.w3.org/ns/formats/Turtle"),
+        Map.entry(Lang.NTRIPLES, "http://www.w3.org/ns/formats/N-Triples"),
+        Map.entry(Lang.N3, "http://www.w3.org/ns/formats/N3"),
+        Map.entry(Lang.JSONLD, "http://www.w3.org/ns/formats/JSON-LD"),
+        Map.entry(Lang.RDFJSON, "http://www.w3.org/ns/formats/RDF_JSON"));
     
     private final Request request;
+    private final UriInfo uriInfo;
     private final EndpointAccessor accessor;
     private final MediaTypes mediaTypes;
     
@@ -74,32 +97,46 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
      * Constructs SPARQL endpoint from request metadata.
      * 
      * @param request current request
+     * @param uriInfo current request URI information
      * @param service SPARQL service
      * @param mediaTypes supported media types
      */
     @Inject
-    public SPARQLEndpointImpl(@Context Request request, Service service, MediaTypes mediaTypes)
+    public SPARQLEndpointImpl(@Context Request request, @Context UriInfo uriInfo, Service service, MediaTypes mediaTypes)
     {
-        this(request, service.getEndpointAccessor(), mediaTypes);
+        this(request, uriInfo, service.getEndpointAccessor(), mediaTypes);
     }
     
-    public SPARQLEndpointImpl(Request request, EndpointAccessor accessor, MediaTypes mediaTypes)
+    public SPARQLEndpointImpl(Request request, UriInfo uriInfo, EndpointAccessor accessor, MediaTypes mediaTypes)
     {
         if (request == null) throw new IllegalArgumentException("Request cannot be null");
+        if (uriInfo == null) throw new IllegalArgumentException("UriInfo cannot be null");
         if (accessor == null) throw new IllegalArgumentException("EndpointAccessor cannot be null");
         if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
 
         this.request = request;
+        this.uriInfo = uriInfo;
         this.accessor = accessor;
         this.mediaTypes = mediaTypes;
         if (log.isDebugEnabled()) log.debug("Constructing SPARQLEndpointBase");
     }
     
+    /**
+     * Returns the result of the SPARQL query or, if no query is provided, the service description.
+     * 
+     * @param query SPARQL query (optional)
+     * @param defaultGraphUris default graph URIs
+     * @param namedGraphUris named graph URIs
+     * @return response
+     * @see <a href="https://www.w3.org/TR/sparql11-service-description/#accessing">SPARQL 1.1 Service Description: Accessing a Service Description</a>
+     */
     @Override
     @GET
     public Response get(@QueryParam(QUERY) Query query,
             @QueryParam(DEFAULT_GRAPH_URI) List<URI> defaultGraphUris, @QueryParam(NAMED_GRAPH_URI) List<URI> namedGraphUris)
     {
+        if (query == null) return getResponseBuilder(getServiceDescription()).build();
+        
         return getResponseBuilder(query, defaultGraphUris, namedGraphUris).build();
     }
     
@@ -176,6 +213,49 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
         throw new BadRequestException("Unknown query type");
     }
 
+    /**
+     * Returns the service description of this endpoint.
+     * 
+     * @return RDF model
+     */
+    public Model getServiceDescription()
+    {
+        Model model = ModelFactory.createDefaultModel();
+        Resource service = model.createResource().
+            addProperty(RDF.type, SD.Service).
+            addProperty(SD.endpoint, model.createResource(getUriInfo().getAbsolutePath().toString()));
+        getSupportedLanguages().forEach(language -> service.addProperty(SD.supportedLanguage, language));
+        getResultFormats().forEach(format -> service.addProperty(SD.resultFormat, format));
+        
+        return model;
+    }
+    
+    /**
+     * Returns the query languages this endpoint supports.
+     * 
+     * @return list of <code>sd:Language</code> resources
+     */
+    public List<Resource> getSupportedLanguages()
+    {
+        return List.of(SD.SPARQL11Query, SD.SPARQL11Update);
+    }
+    
+    /**
+     * Returns the formats this endpoint writes results in: those of the writable result set and RDF graph media types
+     * that have a W3C format IRI.
+     * 
+     * @return list of format resources
+     * @see #FORMATS
+     */
+    public List<Resource> getResultFormats()
+    {
+        return Stream.concat(getWritableMediaTypes(ResultSet.class).stream(), getWritableMediaTypes(Model.class).stream()).
+            flatMap(mediaType -> FORMATS.entrySet().stream().filter(format -> format.getKey().getContentType().getContentTypeStr().equals(mediaType.getType() + "/" + mediaType.getSubtype()))).
+            map(format -> ResourceFactory.createResource(format.getValue())).
+            distinct().
+            toList();
+    }
+    
     /**
      * Returns response builder for the given RDF model.
      * 
@@ -285,6 +365,11 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
     public Request getRequest()
     {
         return request;
+    }
+    
+    public UriInfo getUriInfo()
+    {
+        return uriInfo;
     }
     
     public EndpointAccessor getEndpointAccessor()
