@@ -74,6 +74,8 @@ public class SD
 
     public static final Property supportedLanguage = m_model.createObjectProperty( NS + "supportedLanguage" );
 
+    public static final Property resultFormat = m_model.createObjectProperty( NS + "resultFormat" );
+
     public static final Resource SPARQL10Query = m_model.createIndividual(NS + "SPARQL10Query", Language);
 
     public static final Resource SPARQL11Query = m_model.createIndividual(NS + "SPARQL11Query", Language);

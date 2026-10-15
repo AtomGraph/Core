@@ -50,8 +50,11 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.sparql.vocabulary.FOAF;
+import org.apache.jena.vocabulary.RDF;
+import com.atomgraph.core.vocabulary.SD;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -242,12 +245,21 @@ public class SPARQLEndpointImplTest extends JerseyTest
         assertFalse(remote.ask(QueryFactory.create(ASK_FALSE), java.util.List.of(), java.util.List.of()));
     }
     
+    /** Without a query, GET returns the service description, which names the endpoint it describes */
     @Test
-    public void testMissingGetQuery()
+    public void testServiceDescription()
     {
         try (jakarta.ws.rs.core.Response cr = sc.get(sc.getReadableMediaTypes(Model.class)))
         {
-            assertEquals(BAD_REQUEST.getStatusCode(), cr.getStatusInfo().getStatusCode());
+            assertEquals(OK.getStatusCode(), cr.getStatusInfo().getStatusCode());
+            Model description = cr.readEntity(Model.class);
+            Resource endpointResource = description.createResource(endpoint.getUri().toString());
+            assertTrue(description.contains(null, SD.endpoint, endpointResource));
+            Resource service = description.listSubjectsWithProperty(SD.endpoint, endpointResource).next();
+            assertTrue(service.hasProperty(RDF.type, SD.Service));
+            assertTrue(service.hasProperty(SD.supportedLanguage, SD.SPARQL11Query));
+            assertTrue(service.hasProperty(SD.resultFormat, ResourceFactory.createResource("http://www.w3.org/ns/formats/SPARQL_Results_XML")));
+            assertTrue(service.hasProperty(SD.resultFormat, ResourceFactory.createResource("http://www.w3.org/ns/formats/Turtle")));
         }
     }
     
