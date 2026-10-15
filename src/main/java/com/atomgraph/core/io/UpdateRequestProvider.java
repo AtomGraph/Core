@@ -24,7 +24,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
 import com.atomgraph.core.MediaType;
@@ -54,6 +56,8 @@ public class UpdateRequestProvider implements MessageBodyReader<UpdateRequest>, 
 
     private static final Logger log = LoggerFactory.getLogger(UpdateRequestProvider.class);
 
+    @Context UriInfo uriInfo;
+
     @Override
     public boolean isReadable(Class<?> type, Type type1, Annotation[] antns, jakarta.ws.rs.core.MediaType mt)
     {
@@ -64,9 +68,20 @@ public class UpdateRequestProvider implements MessageBodyReader<UpdateRequest>, 
     public UpdateRequest readFrom(Class<UpdateRequest> type, Type type1, Annotation[] antns, jakarta.ws.rs.core.MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream in) throws IOException, WebApplicationException
     {
         if (log.isTraceEnabled()) log.trace("Reading UpdateRequest with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
+        // relative IRIs resolve against the request URI, as in ModelProvider; with no base, Jena
+        // would resolve them against the server process's working directory
+        String baseURI = null;
+        if (httpHeaders.containsKey(ModelProvider.REQUEST_URI_HEADER)) baseURI = httpHeaders.getFirst(ModelProvider.REQUEST_URI_HEADER);
+        if (getUriInfo() != null) baseURI = getUriInfo().getAbsolutePath().toString();
+
+        return read(in, baseURI);
+    }
+
+    public UpdateRequest read(InputStream in, String baseURI)
+    {
         try
         {
-            return UpdateFactory.read(in);
+            return UpdateFactory.read(in, baseURI);
         }
         catch (QueryParseException ex)
         {
@@ -87,5 +102,10 @@ public class UpdateRequestProvider implements MessageBodyReader<UpdateRequest>, 
         if (log.isTraceEnabled()) log.trace("Writing UpdateRequest with HTTP headers: {} MediaType: {}", httpHeaders, mediaType);
         new OutputStreamWriter(entityStream, StandardCharsets.UTF_8).write(updateRequest.toString());
     }
-    
+
+    public UriInfo getUriInfo()
+    {
+        return uriInfo;
+    }
+
 }
