@@ -31,6 +31,14 @@ import java.util.Date;
 import java.util.Iterator;
 import jakarta.ws.rs.NotAcceptableException;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.time.DateTimeException;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.HttpHeaders;
 import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +58,9 @@ public class Response
     private final Date lastModified;
     private final EntityTag entityTag;
     private final Variant variant;
+
+    /** An entity tag in a list header: optional weakness indicator, then the quoted opaque tag */
+    private static final Pattern ENTITY_TAG = Pattern.compile("(W/)?\"([^\"]*)\"");
 
     /**
      * A predicate to decide if a media type is language-significant.
@@ -328,13 +339,34 @@ public class Response
     
     /**
      * Evaluates request preconditions based on last modified date and/or entity tag.
-     * 
+     *
+     * When the request carries <code>If-Match</code> or <code>If-None-Match</code> and there is an entity tag to
+     * evaluate them against, the preconditions are evaluated in the order RFC 9110 section 13.2.2 prescribes, by
+     * {@link #evaluateEntityTagPreconditions(Date, EntityTag, String, String, String, String)}. Jersey's
+     * <code>evaluatePreconditions(Date, EntityTag)</code> does not: it evaluates <code>If-Unmodified-Since</code>
+     * after a passing <code>If-Match</code>, and <code>If-Modified-Since</code> after a matching
+     * <code>If-None-Match</code>, so a write quoting the current tag failed on an older date it should have ignored,
+     * and a read whose tag matched was answered in full on a date. It also compares <code>If-None-Match</code>
+     * strongly on methods other than GET and HEAD, letting a write through that names the current tag as weak.
+     * Without those headers, or without an entity tag, Jersey's evaluation is used as before.
+     *
      * @param lastModified last modified date
      * @param entityTag entity tag
      * @return response builder or null if the preconditions were met
      */
     protected ResponseBuilder evaluatePreconditions(Date lastModified, EntityTag entityTag)
     {
+        if (entityTag != null && getRequest() instanceof ContainerRequestContext requestContext)
+        {
+            String ifMatch = requestContext.getHeaderString(HttpHeaders.IF_MATCH);
+            String ifNoneMatch = requestContext.getHeaderString(HttpHeaders.IF_NONE_MATCH);
+
+            if (ifMatch != null || ifNoneMatch != null)
+                return evaluateEntityTagPreconditions(lastModified, entityTag, getRequest().getMethod(),
+                    ifMatch, requestContext.getHeaderString(HttpHeaders.IF_UNMODIFIED_SINCE),
+                    ifNoneMatch, requestContext.getHeaderString(HttpHeaders.IF_MODIFIED_SINCE));
+        }
+
         final ResponseBuilder rb;
         
         if (lastModified != null && entityTag != null) rb = getRequest().evaluatePreconditions(lastModified, entityTag);
@@ -350,9 +382,130 @@ public class Response
         
         return rb;
     }
+
+    /**
+     * Evaluates request preconditions in the order of RFC 9110 section 13.2.2, for a selected representation that
+     * exists and has an entity tag.
+     *
+     * <ol>
+     * <li><code>If-Match</code>, compared strongly, fails with <code>412</code>; when it is absent,
+     * <code>If-Unmodified-Since</code> does.</li>
+     * <li><code>If-None-Match</code>, compared weakly whatever the method, fails with <code>304</code> on GET and HEAD and
+     * <code>412</code> otherwise; when it is absent, <code>If-Modified-Since</code> answers <code>304</code> on GET and
+     * HEAD.</li>
+     * </ol>
+     *
+     * A date that does not parse is ignored, as section 13.1.3 and 13.1.4 require, and so is a date when there is no
+     * last modified date to compare it with.
+     *
+     * @param lastModified last modified date, or null
+     * @param entityTag entity tag of the selected representation
+     * @param method request method
+     * @param ifMatch <code>If-Match</code> value, or null
+     * @param ifUnmodifiedSince <code>If-Unmodified-Since</code> value, or null
+     * @param ifNoneMatch <code>If-None-Match</code> value, or null
+     * @param ifModifiedSince <code>If-Modified-Since</code> value, or null
+     * @return response builder or null if the preconditions were met
+     */
+    public static ResponseBuilder evaluateEntityTagPreconditions(Date lastModified, EntityTag entityTag, String method,
+            String ifMatch, String ifUnmodifiedSince, String ifNoneMatch, String ifModifiedSince)
+    {
+        if (entityTag == null) throw new IllegalArgumentException("EntityTag cannot be null");
+        if (method == null) throw new IllegalArgumentException("Method cannot be null");
+
+        boolean isGetOrHead = method.equalsIgnoreCase(HttpMethod.GET) || method.equalsIgnoreCase(HttpMethod.HEAD);
+
+        if (ifMatch != null)
+        {
+            if (!matches(ifMatch, entityTag, true))
+                return jakarta.ws.rs.core.Response.status(jakarta.ws.rs.core.Response.Status.PRECONDITION_FAILED);
+        }
+        else
+        {
+            Date since = parseHttpDate(ifUnmodifiedSince);
+            if (since != null && lastModified != null && toSeconds(lastModified) > toSeconds(since))
+                return jakarta.ws.rs.core.Response.status(jakarta.ws.rs.core.Response.Status.PRECONDITION_FAILED);
+        }
+
+        if (ifNoneMatch != null)
+        {
+            if (matches(ifNoneMatch, entityTag, false))
+            {
+                if (isGetOrHead) return jakarta.ws.rs.core.Response.notModified(entityTag);
+                else return jakarta.ws.rs.core.Response.status(jakarta.ws.rs.core.Response.Status.PRECONDITION_FAILED).tag(entityTag);
+            }
+        }
+        else
+        {
+            Date since = parseHttpDate(ifModifiedSince);
+            if (isGetOrHead && since != null && lastModified != null && toSeconds(lastModified) <= toSeconds(since))
+                return jakarta.ws.rs.core.Response.notModified(entityTag);
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns true if an <code>If-Match</code> or <code>If-None-Match</code> value matches the entity tag of an existing
+     * representation: it is <code>*</code>, or it lists a tag equal to it under the given comparison function (RFC 9110
+     * section 8.8.3.2). The strong function never matches a weak tag; the weak one compares the opaque tags alone.
+     * Repeated headers arrive joined with commas.
+     *
+     * @param header header value
+     * @param entityTag entity tag of the selected representation
+     * @param strong true for the strong comparison function, false for the weak one
+     * @return true if the value matches
+     */
+    public static boolean matches(String header, EntityTag entityTag, boolean strong)
+    {
+        if (header == null) throw new IllegalArgumentException("Header value cannot be null");
+        if (entityTag == null) throw new IllegalArgumentException("EntityTag cannot be null");
+        if (header.strip().equals("*")) return true;
+        if (strong && entityTag.isWeak()) return false;
+
+        Matcher matcher = ENTITY_TAG.matcher(header);
+        while (matcher.find())
+        {
+            boolean weak = matcher.group(1) != null;
+            if (strong && weak) continue;
+            if (matcher.group(2).equals(entityTag.getValue())) return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Parses an HTTP date (RFC 9110 section 5.6.7), returning null if it is absent or does not parse.
+     *
+     * @param value header value, or null
+     * @return date, or null
+     */
+    public static Date parseHttpDate(String value)
+    {
+        if (value == null) return null;
+
+        try
+        {
+            return Date.from(Instant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(value.strip())));
+        }
+        catch (DateTimeException ex)
+        {
+            return null;
+        }
+    }
+
+    private static long toSeconds(Date date)
+    {
+        return date.getTime() / 1000;
+    }
     
     /**
      * Returns generic response builder from last modified date and/or entity tag.
+     *
+     * A <code>304 Not Modified</code> carries the validators and <code>Vary</code> alone (RFC 9110 section 15.4.5): the
+     * variant's <code>Content-Type</code> and <code>Content-Language</code> describe a representation that is not sent,
+     * and the language may not even be the one a response filter computes for the <code>200</code>. Jersey adds
+     * <code>Vary</code> from the variant selection, as it does for the <code>200</code>.
      * 
      * @param lastModified last modified date
      * @param entityTag entity tag
@@ -365,8 +518,7 @@ public class Response
         if (rb != null)
         {
             if (log.isTraceEnabled()) log.trace("Resource not modified, skipping Response generation");
-            return rb.variant(getVariant()). // Jersey doesn't seem to set "Vary" header
-                lastModified(lastModified); // if rb != null, Jersey sets ETag but not Last-Modified
+            return rb.lastModified(lastModified); // if rb != null, Jersey sets ETag but not Last-Modified
         }
         else
         {
