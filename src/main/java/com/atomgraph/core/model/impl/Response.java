@@ -37,7 +37,6 @@ import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import jakarta.ws.rs.HttpMethod;
-import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.HttpHeaders;
 import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
@@ -54,6 +53,11 @@ public class Response
     private static final Logger log = LoggerFactory.getLogger(Response.class);
  
     private final Request request;
+    /**
+     * The request headers. The JAX-RS <code>Request</code> cannot read them, and the preconditions need four of
+     * them, so they are supplied alongside it - as the acceptable languages are, for the same reason.
+     */
+    private final HttpHeaders httpHeaders;
     private final Object entity;
     private final Date lastModified;
     private final EntityTag entityTag;
@@ -77,15 +81,16 @@ public class Response
      */
     private final List<Locale> acceptableLanguages;
     
-    public Response(Request request, Object entity, Date lastModified, EntityTag entityTag, List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings)
+    public Response(Request request, HttpHeaders httpHeaders, Object entity, Date lastModified, EntityTag entityTag, List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings)
     {
-        this(request, entity, lastModified, entityTag, getVariants(mediaTypes, languages, encodings), mediaType -> false);
+        this(request, httpHeaders, entity, lastModified, entityTag, getVariants(mediaTypes, languages, encodings), mediaType -> false);
     }
     
     /**
      * Builds model response from request.
      * 
      * @param request response entity
+     * @param httpHeaders request headers
      * @param entity response dataset
      * @param lastModified last modified date
      * @param mediaTypes supported media type
@@ -94,9 +99,9 @@ public class Response
      * @param entityTag entity tag
      * @param isMediaTypeLangSignificant predicate indicating if language is significant
      */
-    public Response(Request request, Object entity, Date lastModified, EntityTag entityTag, List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings, Predicate<MediaType> isMediaTypeLangSignificant)
+    public Response(Request request, HttpHeaders httpHeaders, Object entity, Date lastModified, EntityTag entityTag, List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings, Predicate<MediaType> isMediaTypeLangSignificant)
     {
-        this(request, entity, lastModified, entityTag, mediaTypes, languages, encodings, isMediaTypeLangSignificant, List.of());
+        this(request, httpHeaders, entity, lastModified, entityTag, mediaTypes, languages, encodings, isMediaTypeLangSignificant, List.of());
     }
 
     /**
@@ -107,6 +112,7 @@ public class Response
      * variant. See the seven-argument variant constructor for why the variant alone is the wrong granularity.
      *
      * @param request response entity
+     * @param httpHeaders request headers
      * @param entity response dataset
      * @param lastModified last modified date
      * @param entityTag entity tag
@@ -116,9 +122,9 @@ public class Response
      * @param isMediaTypeLangSignificant predicate indicating if language is significant
      * @param acceptableLanguages languages the request accepts, in priority order
      */
-    public Response(Request request, Object entity, Date lastModified, EntityTag entityTag, List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings, Predicate<MediaType> isMediaTypeLangSignificant, List<Locale> acceptableLanguages)
+    public Response(Request request, HttpHeaders httpHeaders, Object entity, Date lastModified, EntityTag entityTag, List<MediaType> mediaTypes, List<Locale> languages, List<String> encodings, Predicate<MediaType> isMediaTypeLangSignificant, List<Locale> acceptableLanguages)
     {
-        this(request, entity, lastModified, entityTag,
+        this(request, httpHeaders, entity, lastModified, entityTag,
             selectVariant(request, getVariants(mediaTypes, languages, encodings, isMediaTypeLangSignificant)),
             isMediaTypeLangSignificant, acceptableLanguages);
     }
@@ -127,15 +133,16 @@ public class Response
      * Builds model response from request.
      * 
      * @param request response entity
+     * @param httpHeaders request headers
      * @param entity response dataset
      * @param lastModified last modified date
      * @param entityTag entity tag
      * @param variants media type variants
      * @param isMediaTypeLangSignificant predicate indicating if language is significant
      */
-    public Response(Request request, Object entity, Date lastModified, EntityTag entityTag, List<Variant> variants, Predicate<MediaType> isMediaTypeLangSignificant)
+    public Response(Request request, HttpHeaders httpHeaders, Object entity, Date lastModified, EntityTag entityTag, List<Variant> variants, Predicate<MediaType> isMediaTypeLangSignificant)
     {
-        this(request, entity, lastModified, entityTag, selectVariant(request, variants), isMediaTypeLangSignificant);
+        this(request, httpHeaders, entity, lastModified, entityTag, selectVariant(request, variants), isMediaTypeLangSignificant);
     }
 
     /**
@@ -153,6 +160,7 @@ public class Response
      * language is acceptable.
      *
      * @param request current request
+     * @param httpHeaders request headers
      * @param variants variant list
      * @return selected variant, or null if not even a language-neutral representation is acceptable
      */
@@ -166,9 +174,9 @@ public class Response
         return request.selectVariant(offer);
     }
 
-    public Response(Request request, Object entity, Date lastModified, EntityTag entityTag, Variant variant, Predicate<MediaType> isMediaTypeLangSignificant) throws NotAcceptableException
+    public Response(Request request, HttpHeaders httpHeaders, Object entity, Date lastModified, EntityTag entityTag, Variant variant, Predicate<MediaType> isMediaTypeLangSignificant) throws NotAcceptableException
     {
-        this(request, entity, lastModified, entityTag, variant, isMediaTypeLangSignificant, List.of());
+        this(request, httpHeaders, entity, lastModified, entityTag, variant, isMediaTypeLangSignificant, List.of());
     }
 
     /**
@@ -179,6 +187,7 @@ public class Response
      * representation different from another. Supplying them makes the entity tag distinguish those representations.
      *
      * @param request response entity
+     * @param httpHeaders request headers
      * @param entity response dataset
      * @param lastModified last modified date
      * @param entityTag entity tag
@@ -186,9 +195,10 @@ public class Response
      * @param isMediaTypeLangSignificant predicate indicating if language is significant
      * @param acceptableLanguages languages the request accepts, in priority order
      */
-    public Response(Request request, Object entity, Date lastModified, EntityTag entityTag, Variant variant, Predicate<MediaType> isMediaTypeLangSignificant, List<Locale> acceptableLanguages) throws NotAcceptableException
+    public Response(Request request, HttpHeaders httpHeaders, Object entity, Date lastModified, EntityTag entityTag, Variant variant, Predicate<MediaType> isMediaTypeLangSignificant, List<Locale> acceptableLanguages) throws NotAcceptableException
     {
         if (request == null) throw new IllegalArgumentException("Request cannot be null");
+        if (httpHeaders == null) throw new IllegalArgumentException("HttpHeaders cannot be null");
         if (entity == null) throw new IllegalArgumentException("Object cannot be null");
         if (variant == null)
         {
@@ -197,6 +207,7 @@ public class Response
         }
 
         this.request = request;
+        this.httpHeaders = httpHeaders;
         this.entity = entity;
         this.lastModified = lastModified;
         this.entityTag = entityTag;
@@ -338,49 +349,23 @@ public class Response
     }
     
     /**
-     * Evaluates request preconditions based on last modified date and/or entity tag.
+     * Evaluates the request's preconditions against the given validators, in the order RFC 9110 section 13.2.2
+     * prescribes, by {@link #evaluatePreconditions(Date, EntityTag, String, String, String, String, String)}.
+     * The headers come from the <code>HttpHeaders</code> this response was constructed with and the method from
+     * its <code>Request</code>; Jersey's own <code>Request.evaluatePreconditions</code> is not used, since it
+     * evaluates <code>If-Unmodified-Since</code> after a passing <code>If-Match</code> and
+     * <code>If-Modified-Since</code> after a matching <code>If-None-Match</code>, and compares
+     * <code>If-None-Match</code> strongly on methods other than GET and HEAD.
      *
-     * When the request carries <code>If-Match</code> or <code>If-None-Match</code> and there is an entity tag to
-     * evaluate them against, the preconditions are evaluated in the order RFC 9110 section 13.2.2 prescribes, by
-     * {@link #evaluateEntityTagPreconditions(Date, EntityTag, String, String, String, String)}. Jersey's
-     * <code>evaluatePreconditions(Date, EntityTag)</code> does not: it evaluates <code>If-Unmodified-Since</code>
-     * after a passing <code>If-Match</code>, and <code>If-Modified-Since</code> after a matching
-     * <code>If-None-Match</code>, so a write quoting the current tag failed on an older date it should have ignored,
-     * and a read whose tag matched was answered in full on a date. It also compares <code>If-None-Match</code>
-     * strongly on methods other than GET and HEAD, letting a write through that names the current tag as weak.
-     * Without those headers, or without an entity tag, Jersey's evaluation is used as before.
-     *
-     * @param lastModified last modified date
-     * @param entityTag entity tag
+     * @param lastModified last modified date, or null
+     * @param entityTag entity tag, or null
      * @return response builder or null if the preconditions were met
      */
     protected ResponseBuilder evaluatePreconditions(Date lastModified, EntityTag entityTag)
     {
-        if (entityTag != null && getRequest() instanceof ContainerRequestContext requestContext)
-        {
-            String ifMatch = requestContext.getHeaderString(HttpHeaders.IF_MATCH);
-            String ifNoneMatch = requestContext.getHeaderString(HttpHeaders.IF_NONE_MATCH);
-
-            if (ifMatch != null || ifNoneMatch != null)
-                return evaluateEntityTagPreconditions(lastModified, entityTag, getRequest().getMethod(),
-                    ifMatch, requestContext.getHeaderString(HttpHeaders.IF_UNMODIFIED_SINCE),
-                    ifNoneMatch, requestContext.getHeaderString(HttpHeaders.IF_MODIFIED_SINCE));
-        }
-
-        final ResponseBuilder rb;
-        
-        if (lastModified != null && entityTag != null) rb = getRequest().evaluatePreconditions(lastModified, entityTag);
-        else
-        {
-            if (lastModified != null) rb = getRequest().evaluatePreconditions(lastModified);
-            else
-            {
-                if (entityTag != null) rb = getRequest().evaluatePreconditions(entityTag);
-                else rb = getRequest().evaluatePreconditions();
-            }
-        }
-        
-        return rb;
+        return evaluatePreconditions(lastModified, entityTag, getRequest().getMethod(),
+            getHttpHeaders().getHeaderString(HttpHeaders.IF_MATCH), getHttpHeaders().getHeaderString(HttpHeaders.IF_UNMODIFIED_SINCE),
+            getHttpHeaders().getHeaderString(HttpHeaders.IF_NONE_MATCH), getHttpHeaders().getHeaderString(HttpHeaders.IF_MODIFIED_SINCE));
     }
 
     /**
@@ -396,10 +381,11 @@ public class Response
      * </ol>
      *
      * A date that does not parse is ignored, as section 13.1.3 and 13.1.4 require, and so is a date when there is no
-     * last modified date to compare it with.
+     * last modified date to compare it with. Without an entity tag only <code>*</code> can match, since a
+     * representation exists but has no tag to compare, and a <code>304</code> carries no tag.
      *
      * @param lastModified last modified date, or null
-     * @param entityTag entity tag of the selected representation
+     * @param entityTag entity tag of the selected representation, or null
      * @param method request method
      * @param ifMatch <code>If-Match</code> value, or null
      * @param ifUnmodifiedSince <code>If-Unmodified-Since</code> value, or null
@@ -407,10 +393,9 @@ public class Response
      * @param ifModifiedSince <code>If-Modified-Since</code> value, or null
      * @return response builder or null if the preconditions were met
      */
-    public static ResponseBuilder evaluateEntityTagPreconditions(Date lastModified, EntityTag entityTag, String method,
+    public static ResponseBuilder evaluatePreconditions(Date lastModified, EntityTag entityTag, String method,
             String ifMatch, String ifUnmodifiedSince, String ifNoneMatch, String ifModifiedSince)
     {
-        if (entityTag == null) throw new IllegalArgumentException("EntityTag cannot be null");
         if (method == null) throw new IllegalArgumentException("Method cannot be null");
 
         boolean isGetOrHead = method.equalsIgnoreCase(HttpMethod.GET) || method.equalsIgnoreCase(HttpMethod.HEAD);
@@ -431,7 +416,7 @@ public class Response
         {
             if (matches(ifNoneMatch, entityTag, false))
             {
-                if (isGetOrHead) return jakarta.ws.rs.core.Response.notModified(entityTag);
+                if (isGetOrHead) return notModified(entityTag);
                 else return jakarta.ws.rs.core.Response.status(jakarta.ws.rs.core.Response.Status.PRECONDITION_FAILED).tag(entityTag);
             }
         }
@@ -439,10 +424,17 @@ public class Response
         {
             Date since = parseHttpDate(ifModifiedSince);
             if (isGetOrHead && since != null && lastModified != null && toSeconds(lastModified) <= toSeconds(since))
-                return jakarta.ws.rs.core.Response.notModified(entityTag);
+                return notModified(entityTag);
         }
 
         return null;
+    }
+
+    private static ResponseBuilder notModified(EntityTag entityTag)
+    {
+        if (entityTag != null) return jakarta.ws.rs.core.Response.notModified(entityTag);
+
+        return jakarta.ws.rs.core.Response.notModified();
     }
 
     /**
@@ -452,15 +444,15 @@ public class Response
      * Repeated headers arrive joined with commas.
      *
      * @param header header value
-     * @param entityTag entity tag of the selected representation
+     * @param entityTag entity tag of the selected representation, or null when it has none
      * @param strong true for the strong comparison function, false for the weak one
      * @return true if the value matches
      */
     public static boolean matches(String header, EntityTag entityTag, boolean strong)
     {
         if (header == null) throw new IllegalArgumentException("Header value cannot be null");
-        if (entityTag == null) throw new IllegalArgumentException("EntityTag cannot be null");
         if (header.strip().equals("*")) return true;
+        if (entityTag == null) return false;
         if (strong && entityTag.isWeak()) return false;
 
         Matcher matcher = ENTITY_TAG.matcher(header);
@@ -593,6 +585,11 @@ public class Response
     public Request getRequest()
     {
         return request;
+    }
+
+    public HttpHeaders getHttpHeaders()
+    {
+        return httpHeaders;
     }
     
     public Object getEntity()

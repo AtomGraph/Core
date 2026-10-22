@@ -48,6 +48,7 @@ import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import org.apache.jena.query.QueryFactory;
@@ -89,6 +90,7 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
         Map.entry(Lang.RDFJSON, "http://www.w3.org/ns/formats/RDF_JSON"));
     
     private final Request request;
+    private final HttpHeaders httpHeaders;
     private final UriInfo uriInfo;
     private final EndpointAccessor accessor;
     private final MediaTypes mediaTypes;
@@ -97,24 +99,27 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
      * Constructs SPARQL endpoint from request metadata.
      * 
      * @param request current request
+     * @param httpHeaders request headers
      * @param uriInfo current request URI information
      * @param service SPARQL service
      * @param mediaTypes supported media types
      */
     @Inject
-    public SPARQLEndpointImpl(@Context Request request, @Context UriInfo uriInfo, Service service, MediaTypes mediaTypes)
+    public SPARQLEndpointImpl(@Context Request request, @Context HttpHeaders httpHeaders, @Context UriInfo uriInfo, Service service, MediaTypes mediaTypes)
     {
-        this(request, uriInfo, service.getEndpointAccessor(), mediaTypes);
+        this(request, httpHeaders, uriInfo, service.getEndpointAccessor(), mediaTypes);
     }
     
-    public SPARQLEndpointImpl(Request request, UriInfo uriInfo, EndpointAccessor accessor, MediaTypes mediaTypes)
+    public SPARQLEndpointImpl(Request request, HttpHeaders httpHeaders, UriInfo uriInfo, EndpointAccessor accessor, MediaTypes mediaTypes)
     {
         if (request == null) throw new IllegalArgumentException("Request cannot be null");
+        if (httpHeaders == null) throw new IllegalArgumentException("HttpHeaders cannot be null");
         if (uriInfo == null) throw new IllegalArgumentException("UriInfo cannot be null");
         if (accessor == null) throw new IllegalArgumentException("EndpointAccessor cannot be null");
         if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
 
         this.request = request;
+        this.httpHeaders = httpHeaders;
         this.uriInfo = uriInfo;
         this.accessor = accessor;
         this.mediaTypes = mediaTypes;
@@ -264,7 +269,7 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
      */
     public ResponseBuilder getResponseBuilder(Model model)
     {
-        return new com.atomgraph.core.model.impl.Response(getRequest(),
+        return new com.atomgraph.core.model.impl.Response(getRequest(), getHttpHeaders(),
                 model,
                 null,
                 new EntityTag(Long.toHexString(ModelUtils.hashModel(model))),
@@ -285,7 +290,7 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
         long hash = ResultSetUtils.hashResultSet(resultSet);
         resultSet.reset();
         
-        return new com.atomgraph.core.model.impl.Response(getRequest(),
+        return new com.atomgraph.core.model.impl.Response(getRequest(), getHttpHeaders(),
                 resultSet,
                 null,
                 new EntityTag(Long.toHexString(hash)),
@@ -307,7 +312,7 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
     {
         if (!result.isBoolean()) throw new IllegalArgumentException("Only a boolean SPARQLResult is supported here: a result set goes through getResponseBuilder(ResultSetRewindable), a model through getResponseBuilder(Model)");
 
-        return new com.atomgraph.core.model.impl.Response(getRequest(),
+        return new com.atomgraph.core.model.impl.Response(getRequest(), getHttpHeaders(),
                 result,
                 null,
                 new EntityTag(Long.toHexString(ResultSetUtils.hashBoolean(result.getBooleanResult()))),
@@ -365,6 +370,11 @@ public class SPARQLEndpointImpl implements SPARQLEndpoint
     public Request getRequest()
     {
         return request;
+    }
+
+    public HttpHeaders getHttpHeaders()
+    {
+        return httpHeaders;
     }
     
     public UriInfo getUriInfo()

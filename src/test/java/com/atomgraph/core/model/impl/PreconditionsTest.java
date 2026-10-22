@@ -58,21 +58,27 @@ public class PreconditionsTest extends JerseyTest
     /** A later date */
     public static final String LATER = DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.of(2027, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC));
 
-    @Path("test")
+    /**
+     * Reached through a sub-resource locator, the way the resources of the applications built on Core are. Jersey
+     * then injects the request-scoped <code>Request</code> and <code>HttpHeaders</code> as proxies rather than as
+     * the container request itself, so nothing here may depend on what the <code>Request</code> is underneath.
+     */
     public static class TestResource
     {
 
         private final Request request;
+        private final HttpHeaders httpHeaders;
 
         @Inject
-        public TestResource(@Context Request request)
+        public TestResource(@Context Request request, @Context HttpHeaders httpHeaders)
         {
-            this.request = request; // injected the way the graph store resources take it
+            this.request = request; // injected the way the graph store resources take them
+            this.httpHeaders = httpHeaders;
         }
 
         public Response getInternalResponse()
         {
-            return new Response(request, "entity", LAST_MODIFIED, new EntityTag("abcdef"),
+            return new Response(request, httpHeaders, "entity", LAST_MODIFIED, new EntityTag("abcdef"),
                 List.of(MediaType.TEXT_PLAIN_TYPE), List.of(Locale.ENGLISH, Locale.GERMAN), List.of(), mediaType -> true);
         }
 
@@ -93,29 +99,41 @@ public class PreconditionsTest extends JerseyTest
 
     }
 
+    @Path("root")
+    public static class RootResource
+    {
+
+        @Path("test")
+        public Class<TestResource> getTestResource()
+        {
+            return TestResource.class;
+        }
+
+    }
+
     @Override
     protected Application configure()
     {
-        return new ResourceConfig(TestResource.class);
+        return new ResourceConfig(RootResource.class);
     }
 
     private String currentTag()
     {
-        jakarta.ws.rs.core.Response resp = target("test").request(MediaType.TEXT_PLAIN_TYPE).acceptLanguage(Locale.ENGLISH).get();
+        jakarta.ws.rs.core.Response resp = target("root/test").request(MediaType.TEXT_PLAIN_TYPE).acceptLanguage(Locale.ENGLISH).get();
         assertEquals(200, resp.getStatus());
         return resp.getHeaderString(HttpHeaders.ETAG);
     }
 
     private jakarta.ws.rs.core.Response put(String header, String value, String header2, String value2)
     {
-        return target("test").request().acceptLanguage(Locale.ENGLISH).
+        return target("root/test").request().acceptLanguage(Locale.ENGLISH).
             header(header, value).header(header2, value2).
             put(Entity.text("body"));
     }
 
     private jakarta.ws.rs.core.Response get(String header, String value, String header2, String value2)
     {
-        return target("test").request(MediaType.TEXT_PLAIN_TYPE).acceptLanguage(Locale.ENGLISH).
+        return target("root/test").request(MediaType.TEXT_PLAIN_TYPE).acceptLanguage(Locale.ENGLISH).
             header(header, value).header(header2, value2).
             get();
     }
