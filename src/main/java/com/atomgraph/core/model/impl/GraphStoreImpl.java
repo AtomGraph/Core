@@ -28,6 +28,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Request;
 import jakarta.ws.rs.core.Response;
 import java.net.URI;
@@ -51,25 +52,27 @@ public class GraphStoreImpl extends GraphStoreBase implements GraphStore
      * Constructs Graph Store from request metadata.
      * 
      * @param request request
+     * @param httpHeaders request headers
      * @param service SPARQL service
      * @param mediaTypes supported media types
      */
     @Inject
-    public GraphStoreImpl(@Context Request request, Service service, MediaTypes mediaTypes)
+    public GraphStoreImpl(@Context Request request, @Context HttpHeaders httpHeaders, Service service, MediaTypes mediaTypes)
     {
-        super(request, service.getDatasetAccessor(), mediaTypes);
+        super(request, httpHeaders, service.getDatasetAccessor(), mediaTypes);
     }
 
     /**
      * Constructs Graph Store from request metadata and dataset accessor.
      *
      * @param request request
+     * @param httpHeaders request headers
      * @param accessor dataset accessor
      * @param mediaTypes supported media types
      */
-    public GraphStoreImpl(Request request, DatasetAccessor accessor, MediaTypes mediaTypes)
+    public GraphStoreImpl(Request request, HttpHeaders httpHeaders, DatasetAccessor accessor, MediaTypes mediaTypes)
     {
-        super(request, accessor, mediaTypes);
+        super(request, httpHeaders, accessor, mediaTypes);
     }
     
     /**

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import jakarta.ws.rs.core.*;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import com.atomgraph.core.MediaTypes;
@@ -47,6 +48,7 @@ public abstract class GraphStoreBase
     private static final Logger log = LoggerFactory.getLogger(GraphStoreBase.class);
 
     private final Request request;
+    private final HttpHeaders httpHeaders;
     private final DatasetAccessor accessor;
     private final MediaTypes mediaTypes;
     
@@ -54,29 +56,33 @@ public abstract class GraphStoreBase
      * Constructs Graph Store from request metadata.
      * 
      * @param request request
+     * @param httpHeaders request headers
      * @param service SPARQL service
      * @param mediaTypes supported media types
      */
     @Inject
-    public GraphStoreBase(@Context Request request, Service service, MediaTypes mediaTypes)
+    public GraphStoreBase(@Context Request request, @Context HttpHeaders httpHeaders, Service service, MediaTypes mediaTypes)
     {
-        this(request, service.getDatasetAccessor(), mediaTypes);
+        this(request, httpHeaders, service.getDatasetAccessor(), mediaTypes);
     }
 
     /**
      * Constructs Graph Store from request metadata and dataset accessor.
      *
      * @param request request
+     * @param httpHeaders request headers
      * @param accessor dataset accessor
      * @param mediaTypes supported media types
      */
-    public GraphStoreBase(Request request, DatasetAccessor accessor, MediaTypes mediaTypes)
+    public GraphStoreBase(Request request, HttpHeaders httpHeaders, DatasetAccessor accessor, MediaTypes mediaTypes)
     {
         if (request == null) throw new IllegalArgumentException("Request cannot be null");
+        if (httpHeaders == null) throw new IllegalArgumentException("HttpHeaders cannot be null");
         if (accessor == null) throw new IllegalArgumentException("DatasetAccessor cannot be null");
         if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
         
         this.request = request;
+        this.httpHeaders = httpHeaders;
         this.accessor = accessor;
         this.mediaTypes = mediaTypes;
     }
@@ -231,7 +237,7 @@ public abstract class GraphStoreBase
      */
     public ResponseBuilder evaluatePreconditions(Model model, URI graphUri)
     {
-        return new com.atomgraph.core.model.impl.Response(getRequest(),
+        return new com.atomgraph.core.model.impl.Response(getRequest(), getHttpHeaders(),
                 model,
                 getLastModified(model, graphUri),
                 getEntityTag(model),
@@ -250,7 +256,7 @@ public abstract class GraphStoreBase
      */
     public ResponseBuilder getResponseBuilder(Model model, URI graphUri)
     {
-        return new com.atomgraph.core.model.impl.Response(getRequest(),
+        return new com.atomgraph.core.model.impl.Response(getRequest(), getHttpHeaders(),
                 model,
                 getLastModified(model, graphUri),
                 getEntityTag(model),
@@ -323,6 +329,11 @@ public abstract class GraphStoreBase
     public Request getRequest()
     {
         return request;
+    }
+
+    public HttpHeaders getHttpHeaders()
+    {
+        return httpHeaders;
     }
 
     /**

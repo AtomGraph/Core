@@ -25,6 +25,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Request;
 import org.apache.jena.query.Dataset;
 import org.slf4j.Logger;
@@ -44,6 +45,7 @@ public class QuadStoreImpl implements QuadStore
     private static final Logger log = LoggerFactory.getLogger(QuadStoreImpl.class);
 
     private final Request request;
+    private final HttpHeaders httpHeaders;
     private final DatasetQuadAccessor accessor;
     private final MediaTypes mediaTypes;
     
@@ -51,22 +53,25 @@ public class QuadStoreImpl implements QuadStore
      * Constructs Graph Store from request metadata.
      * 
      * @param request request
+     * @param httpHeaders request headers
      * @param service SPARQL service
      * @param mediaTypes supported media types
      */
     @Inject
-    public QuadStoreImpl(@Context Request request, Service service, MediaTypes mediaTypes)
+    public QuadStoreImpl(@Context Request request, @Context HttpHeaders httpHeaders, Service service, MediaTypes mediaTypes)
     {
-        this(request, service.getDatasetQuadAccessor(), mediaTypes);
+        this(request, httpHeaders, service.getDatasetQuadAccessor(), mediaTypes);
     }
     
-    public QuadStoreImpl(Request request, DatasetQuadAccessor accessor, MediaTypes mediaTypes)
+    public QuadStoreImpl(Request request, HttpHeaders httpHeaders, DatasetQuadAccessor accessor, MediaTypes mediaTypes)
     {
         if (request == null) throw new IllegalArgumentException("Request cannot be null");
+        if (httpHeaders == null) throw new IllegalArgumentException("HttpHeaders cannot be null");
         if (accessor == null) throw new IllegalArgumentException("DatasetQuadAccessor cannot be null");
         if (mediaTypes == null) throw new IllegalArgumentException("MediaTypes cannot be null");
         
         this.request = request;
+        this.httpHeaders = httpHeaders;
         this.accessor = accessor;
         this.mediaTypes = mediaTypes;
     }
@@ -90,7 +95,7 @@ public class QuadStoreImpl implements QuadStore
      */
     public jakarta.ws.rs.core.Response.ResponseBuilder getResponseBuilder(Dataset dataset)
     {
-        return new com.atomgraph.core.model.impl.Response(getRequest(),
+        return new com.atomgraph.core.model.impl.Response(getRequest(), getHttpHeaders(),
                 dataset,
                 null,
                 getEntityTag(dataset),
@@ -193,6 +198,11 @@ public class QuadStoreImpl implements QuadStore
     public Request getRequest()
     {
         return request;
+    }
+
+    public HttpHeaders getHttpHeaders()
+    {
+        return httpHeaders;
     }
     
     public DatasetQuadAccessor getQuadDatasetAccessor()

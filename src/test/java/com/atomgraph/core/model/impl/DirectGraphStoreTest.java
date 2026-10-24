@@ -22,6 +22,7 @@ import java.net.URI;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.EntityTag;
@@ -85,9 +86,9 @@ public class DirectGraphStoreTest extends JerseyTest
     {
 
         @Inject
-        public TestResource(@Context Request request, Service service, MediaTypes mediaTypes, @Context UriInfo uriInfo)
+        public TestResource(@Context Request request, @Context HttpHeaders httpHeaders, Service service, MediaTypes mediaTypes, @Context UriInfo uriInfo)
         {
-            super(request, service, mediaTypes, uriInfo);
+            super(request, httpHeaders, service, mediaTypes, uriInfo);
         }
 
     }
