@@ -25,6 +25,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Request;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
@@ -47,27 +48,29 @@ public class DirectGraphStoreImpl extends GraphStoreBase implements DirectGraphS
      * Constructs Graph Store from request metadata.
      * 
      * @param request request
+     * @param httpHeaders request headers
      * @param service SPARQL service
      * @param mediaTypes supported media types
      * @param uriInfo URI information
      */
     @Inject
-    public DirectGraphStoreImpl(@Context Request request, Service service, MediaTypes mediaTypes, @Context UriInfo uriInfo)
+    public DirectGraphStoreImpl(@Context Request request, @Context HttpHeaders httpHeaders, Service service, MediaTypes mediaTypes, @Context UriInfo uriInfo)
     {
-        this(request, service.getDatasetAccessor(), mediaTypes, uriInfo);
+        this(request, httpHeaders, service.getDatasetAccessor(), mediaTypes, uriInfo);
     }
 
     /**
      * Constructs Graph Store from request metadata and dataset accessor.
      *
      * @param request request
+     * @param httpHeaders request headers
      * @param accessor dataset accessor
      * @param mediaTypes supported media types
      * @param uriInfo URI information
      */
-    public DirectGraphStoreImpl(Request request, DatasetAccessor accessor, MediaTypes mediaTypes, @Context UriInfo uriInfo)
+    public DirectGraphStoreImpl(Request request, HttpHeaders httpHeaders, DatasetAccessor accessor, MediaTypes mediaTypes, @Context UriInfo uriInfo)
     {
-        super(request, accessor, mediaTypes);
+        super(request, httpHeaders, accessor, mediaTypes);
         this.uriInfo = uriInfo;
     }
     

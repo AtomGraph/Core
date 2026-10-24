@@ -88,9 +88,9 @@ public class LocaleEntityTagTest extends JerseyTest
     {
 
         @Inject
-        public TestResource(@Context Request request, Service service, MediaTypes mediaTypes, @Context UriInfo uriInfo)
+        public TestResource(@Context Request request, @Context HttpHeaders httpHeaders, Service service, MediaTypes mediaTypes, @Context UriInfo uriInfo)
         {
-            super(request, service, mediaTypes, uriInfo);
+            super(request, httpHeaders, service, mediaTypes, uriInfo);
         }
 
     }
@@ -100,9 +100,9 @@ public class LocaleEntityTagTest extends JerseyTest
     {
 
         @Inject
-        public LangSpecificTestResource(@Context Request request, Service service, MediaTypes mediaTypes, @Context UriInfo uriInfo)
+        public LangSpecificTestResource(@Context Request request, @Context HttpHeaders httpHeaders, Service service, MediaTypes mediaTypes, @Context UriInfo uriInfo)
         {
-            super(request, service, mediaTypes, uriInfo);
+            super(request, httpHeaders, service, mediaTypes, uriInfo);
         }
         
         @Override
@@ -114,7 +114,7 @@ public class LocaleEntityTagTest extends JerseyTest
         @Override
         public ResponseBuilder getResponseBuilder(Model model, URI graphUri)
         {
-            return new com.atomgraph.core.model.impl.Response(getRequest(),
+            return new com.atomgraph.core.model.impl.Response(getRequest(), getHttpHeaders(),
                     model,
                     getLastModified(model, graphUri),
                     getEntityTag(model),
@@ -199,6 +199,23 @@ public class LocaleEntityTagTest extends JerseyTest
     }
 
     /** The entity tag calculation touches no request state, so a stub keeps the test to the thing under test. */
+    private HttpHeaders getHttpHeadersStub()
+    {
+        return new HttpHeaders()
+        {
+            @Override public List<String> getRequestHeader(String name) { return List.of(); }
+            @Override public String getHeaderString(String name) { return null; }
+            @Override public jakarta.ws.rs.core.MultivaluedMap<String, String> getRequestHeaders() { return new jakarta.ws.rs.core.MultivaluedHashMap<>(); }
+            @Override public List<jakarta.ws.rs.core.MediaType> getAcceptableMediaTypes() { return List.of(); }
+            @Override public List<java.util.Locale> getAcceptableLanguages() { return List.of(); }
+            @Override public jakarta.ws.rs.core.MediaType getMediaType() { return null; }
+            @Override public java.util.Locale getLanguage() { return null; }
+            @Override public java.util.Map<String, jakarta.ws.rs.core.Cookie> getCookies() { return java.util.Map.of(); }
+            @Override public java.util.Date getDate() { return null; }
+            @Override public int getLength() { return -1; }
+        };
+    }
+
     private Request getRequestStub()
     {
         return new Request()
@@ -214,7 +231,7 @@ public class LocaleEntityTagTest extends JerseyTest
 
     private EntityTag tagFor(Variant variant, EntityTag base, java.util.function.Predicate<jakarta.ws.rs.core.MediaType> significant, List<java.util.Locale> acceptable)
     {
-        return new com.atomgraph.core.model.impl.Response(getRequestStub(), "entity", null, base, variant, significant, acceptable).
+        return new com.atomgraph.core.model.impl.Response(getRequestStub(), getHttpHeadersStub(), "entity", null, base, variant, significant, acceptable).
             getVariantEntityTag();
     }
 
