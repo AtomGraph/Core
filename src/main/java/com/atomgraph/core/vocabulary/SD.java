@@ -75,6 +75,8 @@ public class SD
     public static final Property supportedLanguage = m_model.createObjectProperty( NS + "supportedLanguage" );
 
     public static final Property resultFormat = m_model.createObjectProperty( NS + "resultFormat" );
+    /** sd:propertyFeature: a property function the endpoint supports, such as jena-text's text:query */
+    public static final Property propertyFeature = m_model.createObjectProperty( NS + "propertyFeature" );
 
     public static final Resource SPARQL10Query = m_model.createIndividual(NS + "SPARQL10Query", Language);
 
